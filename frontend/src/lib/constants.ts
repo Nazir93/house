@@ -9,6 +9,12 @@ export const HEADER_TAGLINE =
 export const HEADER_PHONE_HINT =
   process.env.NEXT_PUBLIC_HEADER_PHONE_HINT?.trim() || "Ответим за 5 минут";
 
+/** Внешний URL личного кабинета клиента; если задан — `/account` делает редирект. Иначе — страница-заглушка на сайте. */
+export const ACCOUNT_PORTAL_EXTERNAL_URL =
+  process.env.NEXT_PUBLIC_ACCOUNT_PORTAL_URL?.trim() || "";
+
+export const ACCOUNT_PORTAL_PATH = "/account" as const;
+
 /** Ссылка на карточку организации в Яндекс.Картах для блока «рейтинг»; пусто — ведёт на страницу отзывов. */
 export const YANDEX_ORG_URL = process.env.NEXT_PUBLIC_YANDEX_ORG_URL?.trim() || "";
 

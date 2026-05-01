@@ -6,6 +6,7 @@ import {
   Calculator,
   ChevronDown,
   Phone,
+  Search,
   Send,
   Star,
 } from "lucide-react";
@@ -22,6 +23,7 @@ import { NAV_SECTIONS, isNavGroup, type NavSection } from "@/lib/nav-sections";
 import { useModal } from "@/lib/modal-context";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { SiteSearchPanel } from "@/components/layout/site-search-panel";
 
 const CITY_STORAGE = "site-header-city-confirmed";
 
@@ -117,6 +119,7 @@ export function SiteHeaderBar() {
   const contact = useContactConfig();
   const { openModal } = useModal();
   const [openSection, setOpenSection] = useState<string | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [cityTooltipOpen, setCityTooltipOpen] = useState(false);
   const cityWrapRef = useRef<HTMLDivElement>(null);
@@ -159,6 +162,13 @@ export function SiteHeaderBar() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = searchOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [searchOpen]);
+
   const handleEnter = (label: string) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setOpenSection(label);
@@ -179,16 +189,33 @@ export function SiteHeaderBar() {
 
   const ratingHref = YANDEX_ORG_URL || "/reviews";
 
+  function toggleSearch() {
+    setOpenSection(null);
+    setSearchOpen((v) => !v);
+  }
+
   return (
-    <div
-      data-navbar
-      className="site-header-bar sticky top-0 z-40 border-b"
-      style={{
-        backgroundColor: "var(--header-bar-bg)",
-        borderColor: "var(--header-bar-border)",
-        color: "var(--header-bar-text)",
-      }}
-    >
+    <>
+      {searchOpen ? (
+        <div
+          role="presentation"
+          className="fixed inset-0 z-[30] bg-black/45 backdrop-blur-[2px]"
+          onClick={() => setSearchOpen(false)}
+          aria-hidden
+        />
+      ) : null}
+
+      <div className="sticky top-0 z-40">
+        <div className="relative">
+          <div
+            data-navbar
+            className="site-header-bar border-b"
+            style={{
+              backgroundColor: "var(--header-bar-bg)",
+              borderColor: "var(--header-bar-border)",
+              color: "var(--header-bar-text)",
+            }}
+          >
       {/* ——— Desktop ——— */}
       <div className="hidden lg:block">
         <div className="mx-auto max-w-[1440px] px-4 xl:px-8">
@@ -224,6 +251,20 @@ export function SiteHeaderBar() {
                 Рейтинг компании на площадке Яндекс
               </span>
             </a>
+
+            <button
+              type="button"
+              onClick={toggleSearch}
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition hover:bg-black/[0.04] dark:hover:bg-white/10"
+              style={{
+                borderColor: "var(--header-bar-border)",
+                color: "var(--header-bar-text)",
+              }}
+              aria-label={searchOpen ? "Закрыть поиск по сайту" : "Поиск по сайту"}
+              aria-expanded={searchOpen}
+            >
+              <Search className="h-4 w-4" strokeWidth={2} aria-hidden />
+            </button>
 
             <ThemeToggle />
 
@@ -354,7 +395,7 @@ export function SiteHeaderBar() {
         {/* Bottom nav row */}
         <div className="mx-auto max-w-[1440px] px-4 xl:px-8">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-2 py-2.5">
-            <nav className="flex flex-1 flex-wrap items-center gap-x-6 gap-y-1 lg:gap-x-8">
+            <nav className="flex flex-1 flex-wrap items-center gap-x-5 gap-y-1 lg:gap-x-7">
               {orderedNav.map((section) => (
                 <div
                   key={section.label}
@@ -385,19 +426,35 @@ export function SiteHeaderBar() {
               ))}
             </nav>
 
-            {mortgageSection ? (
-              <Link
-                href="/mortgage"
-                className="ml-auto inline-flex shrink-0 items-center rounded-md px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] shadow-sm transition hover:opacity-90 xl:text-[11px]"
+            <div className="ml-auto flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={toggleSearch}
+                className="hidden items-center gap-1.5 rounded-lg border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] transition hover:bg-black/[0.04] dark:hover:bg-white/10 sm:inline-flex"
                 style={{
-                  backgroundColor: "color-mix(in srgb, var(--accent) 14%, transparent)",
+                  borderColor: "var(--header-bar-border)",
                   color: "var(--header-bar-text)",
-                  border: "1px solid color-mix(in srgb, var(--accent) 35%, transparent)",
                 }}
+                aria-expanded={searchOpen}
+                aria-label={searchOpen ? "Закрыть поиск" : "Открыть поиск"}
               >
-                Ипотека / господдержка
-              </Link>
-            ) : null}
+                <Search className="h-3.5 w-3.5 opacity-80" strokeWidth={2} aria-hidden />
+                Поиск
+              </button>
+              {mortgageSection ? (
+                <Link
+                  href="/mortgage"
+                  className="inline-flex shrink-0 items-center rounded-md px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] shadow-sm transition hover:opacity-90 xl:text-[11px]"
+                  style={{
+                    backgroundColor: "color-mix(in srgb, var(--accent) 14%, transparent)",
+                    color: "var(--header-bar-text)",
+                    border: "1px solid color-mix(in srgb, var(--accent) 35%, transparent)",
+                  }}
+                >
+                  Ипотека / господдержка
+                </Link>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>
@@ -421,6 +478,19 @@ export function SiteHeaderBar() {
               {contact.phone}
             </a>
           ) : null}
+          <button
+            type="button"
+            onClick={toggleSearch}
+            className="flex h-10 w-10 items-center justify-center rounded-full border transition active:scale-[0.98]"
+            style={{
+              borderColor: "var(--header-bar-border)",
+              color: "var(--header-bar-text)",
+            }}
+            aria-label={searchOpen ? "Закрыть поиск" : "Поиск по сайту"}
+            aria-expanded={searchOpen}
+          >
+            <Search className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden />
+          </button>
           <ThemeToggle />
           <button
             type="button"
@@ -437,6 +507,11 @@ export function SiteHeaderBar() {
           </button>
         </div>
       </div>
-    </div>
+          </div>
+
+          <SiteSearchPanel open={searchOpen} onClose={() => setSearchOpen(false)} openModal={openModal} />
+        </div>
+      </div>
+    </>
   );
 }
