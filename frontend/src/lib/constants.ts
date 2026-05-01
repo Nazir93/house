@@ -1,4 +1,4 @@
-export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || "Часть души";
+export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || "Часть Души";
 
 /** Слоган под логотипом в шапке (как на лендинге застройщика). */
 export const HEADER_TAGLINE =

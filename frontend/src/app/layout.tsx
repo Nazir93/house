@@ -2,6 +2,7 @@ import "./globals.css";
 
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
+import Script from "next/script";
 
 import { SiteShell } from "@/components/layout/site-shell";
 import { ThemeProvider } from "@/lib/theme-context";
@@ -59,16 +60,19 @@ export default async function RootLayout({
 }) {
   const contactConfig = await loadContactConfig();
   return (
-    <html lang="ru" className={montserrat.variable} data-theme="light">
+    <html lang="ru" className={montserrat.variable} suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
-        <meta name="color-scheme" content="light" />
+        <meta name="color-scheme" content="light dark" />
         <meta name="theme-color" content="#F6F6F4" />
         <meta name="format-detection" content="telephone=no" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <JsonLd />
       </head>
       <body className="font-body antialiased theme-bg theme-text transition-colors duration-500">
+        <Script id="house-theme-init" strategy="beforeInteractive">
+          {`(function(){try{var k="house-theme";var t=localStorage.getItem(k);if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t);return;}if(window.matchMedia("(prefers-color-scheme: dark)").matches)document.documentElement.setAttribute("data-theme","dark");else document.documentElement.setAttribute("data-theme","light");}catch(e){document.documentElement.setAttribute("data-theme","light");}})();`}
+        </Script>
         <ThemeProvider>
           <ContactConfigProvider value={contactConfig}>
             <ModalProvider>

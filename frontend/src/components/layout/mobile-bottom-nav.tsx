@@ -47,9 +47,9 @@ export function MobileBottomNav() {
       className="fixed bottom-0 left-0 right-0 z-50 lg:hidden safe-bottom"
       aria-label="Основные разделы"
       style={{
-        borderTop: "1px solid rgba(43, 47, 45, 0.1)",
-        backgroundColor: "rgba(237, 235, 229, 0.96)",
-        boxShadow: "0 -8px 32px rgba(15, 61, 46, 0.06)",
+        borderTop: "1px solid var(--border)",
+        backgroundColor: "color-mix(in srgb, var(--card-bg) 94%, transparent)",
+        boxShadow: "0 -8px 32px rgba(0, 0, 0, 0.06)",
       }}
     >
       <div className="mx-auto flex max-w-lg items-stretch justify-around px-1 pb-[env(safe-area-inset-bottom,0px)] pt-1">

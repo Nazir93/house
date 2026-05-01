@@ -14,36 +14,10 @@ import { useContactConfig } from "@/lib/contact-config-context";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { NAV_SECTIONS, isNavGroup, type NavSection } from "@/lib/nav-sections";
 import { useModal } from "@/lib/modal-context";
-
-/** Текст и обводки на фоне шапки #0F3D2E (--accent) */
-const HDR = {
-  text: "var(--on-accent)",
-  muted: "var(--on-accent-muted)",
-  border: "var(--header-border)",
-} as const;
+import { BrandLogo } from "@/components/brand/brand-logo";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 const CITY_STORAGE = "site-header-city-confirmed";
-
-function HouseLogoMark({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 40 36"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden
-    >
-      <path
-        d="M20 4L4 16h4v14h8v-8h8v8h8V16h4L20 4z"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-      <rect x="14" y="18" width="5" height="4" rx="0.5" fill="currentColor" opacity="0.85" />
-      <rect x="21" y="18" width="5" height="4" rx="0.5" fill="currentColor" opacity="0.85" />
-    </svg>
-  );
-}
 
 function NavDropdownPanel({
   section,
@@ -198,16 +172,15 @@ export function SiteHeaderBar() {
   };
 
   const ratingHref = YANDEX_ORG_URL || "/reviews";
-  const brandWords = SITE_NAME.split(/\s+/).filter(Boolean);
 
   return (
     <div
       data-navbar
       className="sticky top-0 z-40 border-b shadow-[0_4px_24px_rgba(15,61,46,0.18)]"
       style={{
-        backgroundColor: "var(--accent)",
-        borderColor: HDR.border,
-        color: HDR.text,
+        backgroundColor: "var(--header-bar-bg)",
+        borderColor: "var(--header-bar-border)",
+        color: "var(--header-bar-text)",
       }}
     >
       {/* ——— Desktop ——— */}
@@ -215,23 +188,13 @@ export function SiteHeaderBar() {
         <div className="mx-auto max-w-[1440px] px-4 xl:px-8">
           <div className="flex flex-wrap items-center justify-between gap-y-3 py-3">
             {/* Logo + tagline */}
-            <div className="flex min-w-0 flex-[1_1_280px] items-start gap-3">
-              <Link href="/" className="flex shrink-0 items-center gap-2.5 text-[var(--on-accent)]" aria-label={SITE_NAME}>
-                <HouseLogoMark className="h-9 w-10 shrink-0" />
-                <span
-                  className="font-heading text-[13px] font-bold uppercase leading-[1.1] tracking-[0.06em] sm:text-sm"
-                  style={{ color: HDR.text }}
-                >
-                  {brandWords.map((w) => (
-                    <span key={w} className="block">
-                      {w}
-                    </span>
-                  ))}
-                </span>
+            <div className="flex min-w-0 flex-[1_1_280px] items-center gap-3">
+              <Link href="/" className="flex min-w-0 shrink-0 items-center" aria-label={SITE_NAME}>
+                <BrandLogo height={44} className="max-h-11 w-auto max-w-[min(100%,240px)]" />
               </Link>
               <p
                 className="hidden max-w-[240px] text-[11px] leading-snug xl:block"
-                style={{ color: HDR.muted }}
+                style={{ color: "var(--header-bar-muted)" }}
               >
                 {HEADER_TAGLINE}
               </p>
@@ -250,11 +213,13 @@ export function SiteHeaderBar() {
               </span>
               <span
                 className="max-w-[140px] text-[10px] font-medium leading-tight sm:text-[11px]"
-                style={{ color: HDR.muted }}
+                style={{ color: "var(--header-bar-muted)" }}
               >
                 Рейтинг компании на площадке Яндекс
               </span>
             </a>
+
+            <ThemeToggle />
 
             {/* Primary CTA */}
             <Link
@@ -304,7 +269,7 @@ export function SiteHeaderBar() {
                   type="button"
                   onClick={() => openModal()}
                   className="rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition hover:bg-white/10"
-                  style={{ borderColor: HDR.border, color: HDR.text }}
+                  style={{ borderColor: "var(--header-bar-border)", color: "var(--header-bar-text)" }}
                 >
                   Заказать звонок
                 </button>
@@ -317,14 +282,14 @@ export function SiteHeaderBar() {
                 <a
                   href={`tel:${contact.phoneRaw}`}
                   className="font-heading text-lg font-bold tracking-tight transition hover:opacity-90 xl:text-xl"
-                  style={{ color: HDR.text }}
+                  style={{ color: "var(--header-bar-text)" }}
                 >
                   {contact.phone}
                 </a>
               ) : (
                 <span
-                  className="font-heading text-sm font-semibold tracking-tight text-white/70 xl:text-base"
-                  style={{ color: HDR.muted }}
+                  className="font-heading text-sm font-semibold tracking-tight xl:text-base"
+                  style={{ color: "var(--header-bar-muted)" }}
                 >
                   Телефон уточняется
                 </span>
@@ -332,7 +297,7 @@ export function SiteHeaderBar() {
               <button
                 type="button"
                 className="mt-0.5 text-[11px] underline-offset-2 hover:underline"
-                style={{ color: HDR.muted }}
+                style={{ color: "var(--header-bar-muted)" }}
                 onClick={() => setCityTooltipOpen(true)}
               >
                 {CITY}
@@ -369,7 +334,7 @@ export function SiteHeaderBar() {
           </div>
         </div>
 
-        <div className="h-px w-full" style={{ backgroundColor: HDR.border }} />
+        <div className="h-px w-full" style={{ backgroundColor: "var(--header-bar-border)" }} />
 
         {/* Bottom nav row */}
         <div className="mx-auto max-w-[1440px] px-4 xl:px-8">
@@ -386,7 +351,10 @@ export function SiteHeaderBar() {
                     type="button"
                     className="flex items-center gap-1 py-2 text-left text-[12px] font-semibold uppercase tracking-[0.06em] xl:text-[13px]"
                     style={{
-                      color: openSection === section.label ? HDR.text : HDR.muted,
+                      color:
+                        openSection === section.label
+                          ? "var(--header-bar-text)"
+                          : "var(--header-bar-muted)",
                     }}
                   >
                     {section.label}
@@ -406,7 +374,10 @@ export function SiteHeaderBar() {
               <Link
                 href="/mortgage"
                 className="ml-auto inline-flex shrink-0 items-center rounded-md px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] shadow-sm transition hover:bg-white/20 xl:text-[11px]"
-                style={{ backgroundColor: "rgba(255,255,255,0.12)", color: HDR.text }}
+                style={{
+                  backgroundColor: "rgba(255,255,255,0.12)",
+                  color: "var(--header-bar-text)",
+                }}
               >
                 Ипотека / господдержка
               </Link>
@@ -418,37 +389,35 @@ export function SiteHeaderBar() {
       {/* ——— Mobile ——— */}
       <div
         className="flex items-center justify-between gap-2 border-b px-4 py-2.5 lg:hidden"
-        style={{ borderColor: HDR.border, color: HDR.text }}
+        style={{ borderColor: "var(--header-bar-border)", color: "var(--header-bar-text)" }}
       >
-        <Link href="/" className="flex min-w-0 items-center gap-2 text-[var(--on-accent)]" aria-label={SITE_NAME}>
-          <HouseLogoMark className="h-8 w-9 shrink-0" />
-          <span
-            className="truncate font-heading text-[11px] font-bold uppercase tracking-[0.08em]"
-            style={{ color: HDR.text }}
-          >
-            {SITE_NAME}
-          </span>
+        <Link href="/" className="flex min-w-0 flex-1 items-center" aria-label={SITE_NAME}>
+          <BrandLogo height={36} className="max-h-9 w-auto max-w-[min(100%,200px)]" />
         </Link>
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           {contact.phone.trim() && contact.phoneRaw.trim() ? (
             <a
               href={`tel:${contact.phoneRaw}`}
               className="hidden min-[400px]:flex items-center gap-1 text-[12px] font-semibold tabular-nums"
-              style={{ color: HDR.text }}
+              style={{ color: "var(--header-bar-text)" }}
             >
               <Phone className="h-3.5 w-3.5 shrink-0 opacity-80" />
               {contact.phone}
             </a>
           ) : null}
+          <ThemeToggle />
           <button
             type="button"
             onClick={() => window.dispatchEvent(new Event("open-mobile-menu"))}
             className="flex h-10 w-10 flex-col items-center justify-center gap-[4px]"
             aria-label="Открыть меню"
           >
-            <span className="block h-[2px] w-5" style={{ backgroundColor: HDR.text }} />
-            <span className="block h-[2px] w-5" style={{ backgroundColor: HDR.text }} />
-            <span className="block h-[2px] w-3.5 self-start ml-[3px]" style={{ backgroundColor: HDR.text }} />
+            <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
+            <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
+            <span
+              className="block h-[2px] w-3.5 self-start ml-[3px]"
+              style={{ backgroundColor: "var(--header-bar-text)" }}
+            />
           </button>
         </div>
       </div>

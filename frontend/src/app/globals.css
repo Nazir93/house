@@ -66,6 +66,11 @@
     --accent-rgb: 15 61 46;
     --sale-rgb: 110 42 31;
     --scrollbar-thumb: rgba(43, 47, 45, 0.22);
+    --header-bar-bg: #0f3d2e;
+    --header-bar-text: #f6f6f4;
+    --header-bar-muted: rgba(246, 246, 244, 0.78);
+    --header-bar-border: rgba(255, 255, 255, 0.14);
+    --footer-bar-bg: #0f3d2e;
   }
 
   [data-theme="light"] {
@@ -94,6 +99,44 @@
     --accent-rgb: 15 61 46;
     --sale-rgb: 110 42 31;
     --scrollbar-thumb: rgba(43, 47, 45, 0.22);
+    --header-bar-bg: #0f3d2e;
+    --header-bar-text: #f6f6f4;
+    --header-bar-muted: rgba(246, 246, 244, 0.78);
+    --header-bar-border: rgba(255, 255, 255, 0.14);
+    --footer-bar-bg: #0f3d2e;
+  }
+
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #121816;
+    --bg-secondary: #1a211d;
+    --card-bg: #222a26;
+    --text: #e8ece9;
+    --text-muted: rgba(232, 236, 233, 0.76);
+    --text-subtle: rgba(232, 236, 233, 0.48);
+    --border: rgba(255, 255, 255, 0.12);
+    --accent: #3d8f6e;
+    --accent-hover: #52a882;
+    --accent-contrast: #0a120e;
+    --sale: #c45846;
+    --sale-hover: #d56d5c;
+    --pine: #3d8f6e;
+    --graphite: #e8ece9;
+    --stone: #1a211d;
+    --clay: #222a26;
+    --header-border: rgba(255, 255, 255, 0.1);
+    --on-accent: #0a120e;
+    --on-accent-muted: rgba(10, 18, 14, 0.78);
+    --on-sale: #fdfcfb;
+    --brand-blue: #60a5fa;
+    --accent-rgb: 61 143 110;
+    --sale-rgb: 196 88 70;
+    --scrollbar-thumb: rgba(255, 255, 255, 0.18);
+    --header-bar-bg: #000000;
+    --header-bar-text: #f1f5f3;
+    --header-bar-muted: rgba(241, 245, 243, 0.7);
+    --header-bar-border: rgba(255, 255, 255, 0.14);
+    --footer-bar-bg: #060908;
   }
 
   *,

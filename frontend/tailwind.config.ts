@@ -1,8 +1,8 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
-  /** Без класса `dark` на `<html>` варианты `dark:*` не применяются — только светлая тема. */
-  darkMode: "class",
+  /** Варианты `dark:*` при `[data-theme="dark"]` на `<html>`. */
+  darkMode: ["selector", '[data-theme="dark"]'],
   content: [
     "./src/app/**/*.{ts,tsx}",
     "./src/components/**/*.{ts,tsx}",

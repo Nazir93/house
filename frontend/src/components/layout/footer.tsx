@@ -61,7 +61,7 @@ export function Footer() {
   }
 
   return (
-    <footer className="relative text-white" style={{ backgroundColor: "var(--accent)" }}>
+    <footer className="relative text-white" style={{ backgroundColor: "var(--footer-bar-bg)" }}>
       <div className="container mx-auto max-w-[1200px] px-5 pb-10 pt-12 md:pb-14 md:pt-16 lg:px-6">
         {/* Рассылка */}
         <div className="flex flex-col gap-8 border-b border-white/[0.12] pb-12 md:flex-row md:items-start md:justify-between md:gap-12 md:pb-14">
