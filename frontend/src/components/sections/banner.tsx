@@ -253,7 +253,7 @@ export function BannerSection() {
       ) : (
         <button
           type="button"
-          className={`fixed bottom-24 z-30 hidden h-12 w-8 items-center justify-center rounded-l-lg bg-[var(--accent)] text-white shadow-lg md:flex ${railRight}`}
+          className="fixed bottom-24 right-0 z-30 hidden h-12 w-8 items-center justify-center rounded-l-lg bg-[var(--accent)] text-white shadow-lg md:flex"
           onClick={() => setRailOpen(true)}
           aria-label="Показать быстрые ссылки"
         >
