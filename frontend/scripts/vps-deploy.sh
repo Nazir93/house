@@ -25,8 +25,8 @@ npm run build
 
 echo ""
 if command -v pm2 >/dev/null 2>&1; then
-  echo "==> PM2: перезапуск electro-next"
-  pm2 delete electro-next 2>/dev/null || true
+  echo "==> PM2: перезапуск house-next"
+  pm2 delete house-next 2>/dev/null || true
   pm2 start ecosystem.config.cjs
   pm2 save
   echo ""

@@ -5,7 +5,8 @@ interface LandingServiceSchemaProps {
   serviceDescription: string;
   slug: string;
   priceRange?: string;
-  telephone: [string, string];
+  /** Пустой массив — поле telephone в provider не выводим */
+  telephone: string[];
 }
 
 export function LandingServiceSchema({
@@ -15,6 +16,7 @@ export function LandingServiceSchema({
   priceRange = "от 50 000 ₽",
   telephone,
 }: LandingServiceSchemaProps) {
+  const tel = telephone.filter((t) => t?.trim());
   const schema = {
     "@context": "https://schema.org",
     "@type": "Service",
@@ -23,7 +25,7 @@ export function LandingServiceSchema({
     provider: {
       "@type": "HomeBuilder",
       name: SITE_NAME,
-      telephone,
+      ...(tel.length > 0 ? { telephone: tel } : {}),
       url: SITE_URL,
       areaServed: buildSchemaAreaServed(),
     },

@@ -28,7 +28,7 @@ export interface ProjectListItem {
 
 function serviceTypeToLabel(st: string): string {
   const map: Record<string, string> = {
-    ELECTRICAL: "Электромонтаж",
+    ELECTRICAL: "Электрика",
     ACOUSTICS: "Акустика",
     STRUCTURED_CABLING: "СКС",
     SMART_HOME: "Умный дом",

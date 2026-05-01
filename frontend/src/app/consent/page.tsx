@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SITE_NAME, SITE_URL, COMPANY } from "@/lib/constants";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { loadContactConfig } from "@/lib/load-contact-config";
 
 export const metadata: Metadata = {
@@ -10,6 +10,12 @@ export const metadata: Metadata = {
 
 export default async function ConsentPage() {
   const contact = await loadContactConfig();
+  const co = contact.company;
+  const consentOperator =
+    co.fullName.trim() && co.inn.trim()
+      ? `${co.fullName} (ИНН: ${co.inn}, ОГРНИП: ${co.ogrnip}), адрес: ${co.postalAddress.trim() || "—"}`
+      : "оператор персональных данных (реквизиты — в разделе «Контакты» или в настройках сайта)";
+
   return (
     <section
       className="pt-32 pb-20 min-h-screen"
@@ -42,8 +48,7 @@ export default async function ConsentPage() {
 
           <p>
             Действуя свободно, своей волей и в своём интересе, а также подтверждая свою
-            дееспособность, пользователь даёт своё согласие {COMPANY.fullName} (ИНН: {COMPANY.inn},
-            ОГРНИП: {COMPANY.ogrnip}), адрес: {COMPANY.postalAddress}, далее — «Оператор», на обработку
+            дееспособность, пользователь даёт своё согласие {consentOperator}, далее — «Оператор», на обработку
             своих персональных данных со следующими условиями:
           </p>
 
@@ -91,8 +96,18 @@ export default async function ConsentPage() {
             <p>
               Настоящее Согласие действует бессрочно до момента его отзыва пользователем.
               Отзыв Согласия может быть осуществлён путём направления письменного заявления
-              на электронную почту Оператора:{" "}
-              <a href={`mailto:${contact.email}`} className="underline" style={{ color: "var(--accent)" }}>{contact.email}</a>.
+              на электронную почту Оператора
+              {contact.email.trim() ? (
+                <>
+                  :{" "}
+                  <a href={`mailto:${contact.email}`} className="underline" style={{ color: "var(--accent)" }}>
+                    {contact.email}
+                  </a>
+                </>
+              ) : (
+                <> (адрес указан в разделе «Контакты» на сайте)</>
+              )}
+              .
             </p>
             <p className="mt-3">
               В случае отзыва Согласия Оператор вправе продолжить обработку персональных данных
@@ -134,16 +149,24 @@ export default async function ConsentPage() {
               и даёте согласие на обработку персональных данных.
             </p>
             <div className="text-sm space-y-1" style={{ color: "var(--text-muted)" }}>
-              <p>
-                Телефон:{" "}
-                <a href={`tel:${contact.phone.replace(/\D/g, "")}`} className="underline" style={{ color: "var(--accent)" }}>{contact.phone}</a>
-                {" / "}
-                <a href={`tel:${contact.phone2.replace(/\D/g, "")}`} className="underline" style={{ color: "var(--accent)" }}>{contact.phone2}</a>
-              </p>
-              <p>
-                Email:{" "}
-                <a href={`mailto:${contact.email}`} className="underline" style={{ color: "var(--accent)" }}>{contact.email}</a>
-              </p>
+              {contact.phone.trim() || contact.phone2.trim() ? (
+                <p>
+                  Телефон:{" "}
+                  {contact.phone.trim() ? (
+                    <a href={`tel:${contact.phone.replace(/\D/g, "")}`} className="underline" style={{ color: "var(--accent)" }}>{contact.phone}</a>
+                  ) : null}
+                  {contact.phone.trim() && contact.phone2.trim() ? " / " : null}
+                  {contact.phone2.trim() ? (
+                    <a href={`tel:${contact.phone2.replace(/\D/g, "")}`} className="underline" style={{ color: "var(--accent)" }}>{contact.phone2}</a>
+                  ) : null}
+                </p>
+              ) : null}
+              {contact.email.trim() ? (
+                <p>
+                  Email:{" "}
+                  <a href={`mailto:${contact.email}`} className="underline" style={{ color: "var(--accent)" }}>{contact.email}</a>
+                </p>
+              ) : null}
             </div>
           </div>
 

@@ -11,12 +11,11 @@ import { uploadAdminMedia } from "@/lib/admin-upload";
 import { AdminNativeSelect, AdminSelectOption } from "@/components/admin/admin-native-select";
 
 const CATEGORIES = [
-  "Электромонтаж",
-  "Умный дом",
-  "Безопасность",
-  "Акустика",
-  "Слаботочные системы",
-  "Архитектурная подсветка",
+  "Строительство домов",
+  "Проектирование",
+  "Инженерные системы",
+  "Отделка и ремонт",
+  "Ипотека и финансы",
   "Новости компании",
 ];
 

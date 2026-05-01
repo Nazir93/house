@@ -22,7 +22,7 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  /** Наследие электромонтажа / старой воронки — уводим на актуальные разделы */
+  /** Устаревшие URL старого сайта — редирект на актуальные разделы */
   if (pathname === "/offer" || pathname.startsWith("/offer/")) {
     const url = request.nextUrl.clone();
     url.pathname = "/contacts";

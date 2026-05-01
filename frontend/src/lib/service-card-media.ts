@@ -2,7 +2,7 @@ import type { ServiceItem } from "@/lib/get-services";
 
 /**
  * Запасные изображения для карточек услуг (главная hero, fallback), если в админке не загружено фото/видео.
- * Ключ — полный путь slug из {@link ServiceItem.slug}.
+ * Ключ — полный путь slug; часть ключей — устаревшие URL (редирект на /services).
  */
 const FALLBACK_SIDE_IMAGE_BY_SLUG: Record<string, string> = {
   "/services/acoustics": "/images/hero/hero-01.png",

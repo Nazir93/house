@@ -313,13 +313,22 @@ export function SiteHeaderBar() {
 
             {/* Phone + city */}
             <div ref={cityWrapRef} className="relative flex shrink-0 flex-col items-end text-right">
-              <a
-                href={`tel:${contact.phoneRaw}`}
-                className="font-heading text-lg font-bold tracking-tight transition hover:opacity-90 xl:text-xl"
-                style={{ color: HDR.text }}
-              >
-                {contact.phone}
-              </a>
+              {contact.phone.trim() && contact.phoneRaw.trim() ? (
+                <a
+                  href={`tel:${contact.phoneRaw}`}
+                  className="font-heading text-lg font-bold tracking-tight transition hover:opacity-90 xl:text-xl"
+                  style={{ color: HDR.text }}
+                >
+                  {contact.phone}
+                </a>
+              ) : (
+                <span
+                  className="font-heading text-sm font-semibold tracking-tight text-white/70 xl:text-base"
+                  style={{ color: HDR.muted }}
+                >
+                  Телефон уточняется
+                </span>
+              )}
               <button
                 type="button"
                 className="mt-0.5 text-[11px] underline-offset-2 hover:underline"
@@ -421,14 +430,16 @@ export function SiteHeaderBar() {
           </span>
         </Link>
         <div className="flex items-center gap-2">
-          <a
-            href={`tel:${contact.phoneRaw}`}
-            className="hidden min-[400px]:flex items-center gap-1 text-[12px] font-semibold tabular-nums"
-            style={{ color: HDR.text }}
-          >
-            <Phone className="h-3.5 w-3.5 shrink-0 opacity-80" />
-            {contact.phone}
-          </a>
+          {contact.phone.trim() && contact.phoneRaw.trim() ? (
+            <a
+              href={`tel:${contact.phoneRaw}`}
+              className="hidden min-[400px]:flex items-center gap-1 text-[12px] font-semibold tabular-nums"
+              style={{ color: HDR.text }}
+            >
+              <Phone className="h-3.5 w-3.5 shrink-0 opacity-80" />
+              {contact.phone}
+            </a>
+          ) : null}
           <button
             type="button"
             onClick={() => window.dispatchEvent(new Event("open-mobile-menu"))}

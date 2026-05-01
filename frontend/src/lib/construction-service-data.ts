@@ -264,7 +264,7 @@ export const CONSTRUCTION_SERVICES: Record<ConstructionServiceSlug, Construction
         id: "elec",
         label: "Электроснабжение",
         imageSrc: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=900&q=80",
-        imageAlt: "Электромонтаж",
+        imageAlt: "Электроснабжение частного дома",
         bullets: [
           "Расчёт нагрузок и сборка щита с УЗО/АВ по группам",
           "Прокладка линий с учётом будущей мощности кухни и котельной",

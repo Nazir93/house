@@ -128,22 +128,28 @@ export function Footer() {
           <div className="max-w-md space-y-4">
             <p className="font-heading text-xl font-semibold tracking-wide text-white md:text-2xl">{SITE_NAME}</p>
             <div className="space-y-1 text-[13px] leading-relaxed text-white/78 md:text-[14px]">
-              <p>
-                <a href={`tel:${contact.phoneRaw}`} className="transition hover:text-white">
-                  {contact.phone}
-                </a>
-              </p>
-              <p>
-                <a href={`tel:${contact.phone2Raw}`} className="transition hover:text-white">
-                  {contact.phone2}
-                </a>
-              </p>
-              <p>
-                <a href={`mailto:${contact.email}`} className="transition hover:text-white">
-                  {contact.email}
-                </a>
-              </p>
-              <p className="text-white/65">{contact.address}</p>
+              {contact.phone.trim() && contact.phoneRaw.trim() ? (
+                <p>
+                  <a href={`tel:${contact.phoneRaw}`} className="transition hover:text-white">
+                    {contact.phone}
+                  </a>
+                </p>
+              ) : null}
+              {contact.phone2.trim() && contact.phone2Raw.trim() ? (
+                <p>
+                  <a href={`tel:${contact.phone2Raw}`} className="transition hover:text-white">
+                    {contact.phone2}
+                  </a>
+                </p>
+              ) : null}
+              {contact.email.trim() ? (
+                <p>
+                  <a href={`mailto:${contact.email}`} className="transition hover:text-white">
+                    {contact.email}
+                  </a>
+                </p>
+              ) : null}
+              {contact.address.trim() ? <p className="text-white/65">{contact.address}</p> : null}
               <p className="text-[12px] text-white/55">{contact.workingHours}</p>
             </div>
             <p className="text-[11px] uppercase tracking-[0.14em] text-white/45">

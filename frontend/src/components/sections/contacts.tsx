@@ -2,16 +2,32 @@
 
 import { useState } from "react";
 import { Section, SectionTitle } from "@/components/ui/section";
+import type { LucideIcon } from "lucide-react";
 import {
   Phone, Mail, MapPin, Clock, Send,
   Building2, CreditCard, ChevronDown,
 } from "lucide-react";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
-import { COMPANY, getYandexOfficeMapEmbedUrl } from "@/lib/constants";
+import { getYandexOfficeMapEmbedUrl } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
 
 function RequisitesBlock() {
   const [open, setOpen] = useState(false);
+  const contact = useContactConfig();
+  const c = contact.company;
+  const rows = [
+    { label: "Полное наименование", value: c.fullName },
+    { label: "Сокращённое", value: c.shortName },
+    { label: "ИНН", value: c.inn },
+    { label: "ОГРНИП", value: c.ogrnip },
+    { label: "Юридический адрес", value: c.postalAddress },
+    { label: "Банк", value: c.bank.name },
+    { label: "Расчётный счёт", value: c.bank.account },
+    { label: "Корр. счёт", value: c.bank.corrAccount },
+    { label: "БИК", value: c.bank.bic },
+  ].filter((r) => r.value.trim());
+
+  if (rows.length === 0) return null;
 
   return (
     <div
@@ -47,17 +63,7 @@ function RequisitesBlock() {
           style={{ borderColor: "var(--border)" }}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 pt-4">
-            {[
-              { label: "Полное наименование", value: COMPANY.fullName },
-              { label: "Сокращённое", value: COMPANY.shortName },
-              { label: "ИНН", value: COMPANY.inn },
-              { label: "ОГРНИП", value: COMPANY.ogrnip },
-              { label: "Юридический адрес", value: COMPANY.postalAddress },
-              { label: "Банк", value: COMPANY.bank.name },
-              { label: "Расчётный счёт", value: COMPANY.bank.account },
-              { label: "Корр. счёт", value: COMPANY.bank.corrAccount },
-              { label: "БИК", value: COMPANY.bank.bic },
-            ].map(({ label, value }) => (
+            {rows.map(({ label, value }) => (
               <div key={label} className="py-1">
                 <p
                   className="text-[10px] uppercase tracking-[0.15em] mb-1"
@@ -85,6 +91,39 @@ export function ContactsSection({ embedded }: { embedded?: boolean }) {
   /** Метка на карте — координаты офиса в constants (см. ADDRESS / OFFICE_GEO_*) */
   const mapIframeSrc = getYandexOfficeMapEmbedUrl();
 
+  const phoneText = [contact.phone, contact.phone2].filter((s) => s.trim()).join(" / ");
+  const phoneHref = contact.phoneRaw.trim()
+    ? `tel:${contact.phoneRaw}`
+    : contact.phone2Raw.trim()
+      ? `tel:${contact.phone2Raw}`
+      : undefined;
+
+  const contactRows: {
+    icon: LucideIcon;
+    label: string;
+    value: string;
+    href?: string;
+  }[] = [
+    {
+      icon: Phone,
+      label: "Телефон",
+      value: phoneText || "Укажите в админке → Настройки",
+      ...(phoneHref ? { href: phoneHref } : {}),
+    },
+    {
+      icon: Mail,
+      label: "Email",
+      value: contact.email.trim() || "Укажите в админке → Настройки",
+      ...(contact.email.trim() ? { href: `mailto:${contact.email.trim()}` } : {}),
+    },
+    {
+      icon: MapPin,
+      label: "Адрес",
+      value: contact.address.trim() || "Укажите в админке → Настройки",
+    },
+    { icon: Clock, label: "Режим работы", value: contact.workingHours },
+  ];
+
   return (
     <Section id="contacts" dark className={embedded ? "!pt-4 pb-16 md:!pt-6 md:pb-20" : "!pt-8 md:!pt-12"}>
       {embedded ? (
@@ -99,36 +138,24 @@ export function ContactsSection({ embedded }: { embedded?: boolean }) {
 
       <div className="max-w-3xl w-full">
         {/* Company badge */}
-        <div
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
-          style={{
-            backgroundColor: "rgba(15,61,46,0.08)",
-            border: "1px solid rgba(15,61,46,0.2)",
-          }}
-        >
-          <Building2 size={14} style={{ color: "var(--accent)" }} />
-          <span className="text-xs font-heading" style={{ color: "var(--accent)" }}>
-            {COMPANY.shortName}
-          </span>
-        </div>
+        {contact.company.shortName.trim() ? (
+          <div
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full mb-8"
+            style={{
+              backgroundColor: "rgba(15,61,46,0.08)",
+              border: "1px solid rgba(15,61,46,0.2)",
+            }}
+          >
+            <Building2 size={14} style={{ color: "var(--accent)" }} />
+            <span className="text-xs font-heading" style={{ color: "var(--accent)" }}>
+              {contact.company.shortName}
+            </span>
+          </div>
+        ) : null}
 
         {/* Contact info */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 mb-8">
-          {[
-            {
-              icon: Phone,
-              label: "Телефон",
-              value: `${contact.phone} / ${contact.phone2}`,
-              href: `tel:${contact.phoneRaw}`,
-            },
-            { icon: Mail, label: "Email", value: contact.email, href: `mailto:${contact.email}` },
-            {
-              icon: MapPin,
-              label: "Адрес",
-              value: contact.address,
-            },
-            { icon: Clock, label: "Режим работы", value: contact.workingHours },
-          ].map(({ icon: Icon, label, value, href }) => {
+          {contactRows.map(({ icon: Icon, label, value, href }) => {
             const Wrapper = href ? "a" : "div";
             return (
               <Wrapper

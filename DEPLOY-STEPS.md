@@ -20,7 +20,7 @@
 ---
 
 ## Шаг 3 — Готово
-- [x] Remote добавлен, код отправлен: **https://github.com/Nazir93/electro-garant**
+- [x] Remote добавлен, код отправлен в ваш репозиторий на GitHub (например **https://github.com/Nazir93/house**).
 
 Если спросит логин/пароль — используйте логин GitHub и **Personal Access Token** (не пароль от аккаунта).  
 Токен: GitHub → Settings → Developer settings → Personal access tokens → Generate new token.
@@ -31,7 +31,7 @@
 
 1. Зайдите на **https://vercel.com** и войдите через **GitHub**
 2. **Add New** → **Project**
-3. Выберите репозиторий (electro-garant или как назвали) → **Import**
+3. Выберите нужный репозиторий → **Import**
 4. **Root Directory:** нажмите **Edit** и укажите `frontend`
 5. **Environment Variables** (если нужны): добавьте, например:
    - `NEXT_PUBLIC_CITY` = `Сочи`

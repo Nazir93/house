@@ -56,7 +56,7 @@ export interface PortfolioCase {
   galleryUrls?: string[];
 }
 
-/** Статические кейсы электромонтажа сняты; актуальное портфолио — построенные объекты и каталог типовых домов. */
+/** Статические кейсы не зашиты в код; портфолио и проекты — из БД и каталога домов. */
 export const PORTFOLIO_CASES: PortfolioCase[] = [];
 
 export function getCaseBySlug(slug: string): PortfolioCase | undefined {

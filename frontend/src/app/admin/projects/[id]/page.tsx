@@ -220,13 +220,13 @@ export default function EditProjectPage() {
             <label className="block text-xs font-medium text-white/40 mb-1">Отрасль</label>
             <input type="text" value={form.industry} onChange={(e) => set("industry", e.target.value)}
               className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white focus:outline-none focus:border-[#0F3D2E]/50 transition-colors"
-              placeholder="РЕСТОРАН, HORECA" />
+              placeholder="ЗАГОРОДНЫЙ ДОМ, КОТТЕДЖ" />
           </div>
           <div>
             <label className="block text-xs font-medium text-white/40 mb-1">Тип проекта</label>
             <input type="text" value={form.projectType} onChange={(e) => set("projectType", e.target.value)}
               className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white focus:outline-none focus:border-[#0F3D2E]/50 transition-colors"
-              placeholder="ЭЛЕКТРОМОНТАЖ, АКУСТИКА" />
+              placeholder="КОРОБКА, ОТДЕЛКА ПОД КЛЮЧ" />
           </div>
         </div>
 
@@ -253,7 +253,7 @@ export default function EditProjectPage() {
             onChange={(e) => set("seoDescription", e.target.value)}
             rows={3}
             className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#0F3D2E]/50 transition-colors resize-y min-h-[80px]"
-            placeholder="Например: Электромонтаж ресторана 320 м² в Сочи: щиты ABB, слаботочка, акустика по зонам."
+            placeholder="Например: Дом 180 м² из газобетона: коробка, кровля, инженерия и отделка под ключ."
           />
         </div>
 

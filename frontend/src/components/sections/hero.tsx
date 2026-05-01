@@ -192,14 +192,14 @@ export function HeroSection({ services: propServices }: { services?: ServiceItem
   const mobileTitleBoxRef = useRef<HTMLDivElement>(null);
   const mobileTitleRef = useRef<HTMLHeadingElement>(null);
 
-  const fitDesktopElectromontazh = useCallback(() => {
+  const fitDesktopHeroTitle = useCallback(() => {
     const box = desktopTitleBoxRef.current;
     const title = desktopTitleRef.current;
     if (!box || !title) return;
     fitHeadingOneLine(box, title, 120, 14);
   }, []);
 
-  const fitMobileElectromontazh = useCallback(() => {
+  const fitMobileHeroTitle = useCallback(() => {
     const box = mobileTitleBoxRef.current;
     const title = mobileTitleRef.current;
     if (!box || !title) return;
@@ -213,10 +213,10 @@ export function HeroSection({ services: propServices }: { services?: ServiceItem
       if (raf) cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         raf = 0;
-        fitDesktopElectromontazh();
+        fitDesktopHeroTitle();
       });
     };
-    fitDesktopElectromontazh();
+    fitDesktopHeroTitle();
     const el = desktopTitleBoxRef.current;
     if (!el) return;
     const ro = new ResizeObserver(scheduleFit);
@@ -226,7 +226,7 @@ export function HeroSection({ services: propServices }: { services?: ServiceItem
       ro.disconnect();
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [fitDesktopElectromontazh]);
+  }, [fitDesktopHeroTitle]);
 
   useLayoutEffect(() => {
     let raf = 0;
@@ -234,10 +234,10 @@ export function HeroSection({ services: propServices }: { services?: ServiceItem
       if (raf) cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
         raf = 0;
-        fitMobileElectromontazh();
+        fitMobileHeroTitle();
       });
     };
-    fitMobileElectromontazh();
+    fitMobileHeroTitle();
     const el = mobileTitleBoxRef.current;
     if (!el) return;
     const ro = new ResizeObserver(scheduleFit);
@@ -247,7 +247,7 @@ export function HeroSection({ services: propServices }: { services?: ServiceItem
       ro.disconnect();
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [fitMobileElectromontazh]);
+  }, [fitMobileHeroTitle]);
 
   const handleScroll = useCallback(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -409,14 +409,22 @@ export function HeroSection({ services: propServices }: { services?: ServiceItem
                     transformOrigin: "center bottom",
                   }}
                 >
-                  <div
-                    className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2 text-[11px] sm:text-xs"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    <span className="whitespace-nowrap">{contact.email}</span>
-                    <span style={{ color: "var(--text-subtle)" }}>/</span>
-                    <span className="whitespace-nowrap">{contact.phone2}</span>
-                  </div>
+                  {(contact.email.trim() || contact.phone2.trim()) ? (
+                    <div
+                      className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2 text-[11px] sm:text-xs"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {contact.email.trim() ? (
+                        <span className="whitespace-nowrap">{contact.email}</span>
+                      ) : null}
+                      {contact.email.trim() && contact.phone2.trim() ? (
+                        <span style={{ color: "var(--text-subtle)" }}>/</span>
+                      ) : null}
+                      {contact.phone2.trim() ? (
+                        <span className="whitespace-nowrap">{contact.phone2}</span>
+                      ) : null}
+                    </div>
+                  ) : null}
 
                   <div
                     className="relative flex min-h-[48px] w-full min-w-0 cursor-pointer items-center justify-center overflow-hidden px-6 py-2.5 transition-colors duration-700 sm:px-10 md:py-2.5"
@@ -549,13 +557,15 @@ export function HeroSection({ services: propServices }: { services?: ServiceItem
               </p>
             </Link>
             <div className="mt-8 flex flex-col gap-4">
-              <div
-                className="flex flex-col gap-1.5 text-[10px] sm:text-[11px]"
-                style={{ color: "var(--text-muted)" }}
-              >
-                <span className="break-all">{contact.email}</span>
-                <span>{contact.phone2}</span>
-              </div>
+              {(contact.email.trim() || contact.phone2.trim()) ? (
+                <div
+                  className="flex flex-col gap-1.5 text-[10px] sm:text-[11px]"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  {contact.email.trim() ? <span className="break-all">{contact.email}</span> : null}
+                  {contact.phone2.trim() ? <span>{contact.phone2}</span> : null}
+                </div>
+              ) : null}
               <Link
                 href="/services"
                 className="relative flex min-h-[48px] w-full items-center justify-center overflow-hidden px-6 py-2.5 transition-colors duration-700 active:scale-[0.99]"

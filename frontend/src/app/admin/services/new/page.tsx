@@ -7,7 +7,7 @@ import { ArrowLeft, Save } from "lucide-react";
 import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
 
 const SERVICE_TYPES = [
-  { value: "ELECTRICAL", label: "Электромонтаж" },
+  { value: "ELECTRICAL", label: "Электрика" },
   { value: "ACOUSTICS", label: "Акустика" },
   { value: "STRUCTURED_CABLING", label: "Слаботочные системы" },
   { value: "SMART_HOME", label: "Умный дом" },

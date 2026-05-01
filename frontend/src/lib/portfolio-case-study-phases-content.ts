@@ -294,7 +294,7 @@ const PHASE_TIERS: Record<string, CaseStudyTier1Chip[]> = {
   electrical: [
     {
       id: "el-main",
-      label: "Электромонтаж",
+      label: "Электрика",
       tier2: [
         { id: "el-1", label: "Штробление и закладные" },
         { id: "el-2", label: "Монтаж кабельных трасс" },

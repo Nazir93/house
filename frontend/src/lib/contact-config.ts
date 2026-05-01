@@ -7,7 +7,22 @@ import {
   ADDRESS,
   WORKING_HOURS,
   SOCIAL_LINKS,
+  COMPANY,
 } from "@/lib/constants";
+
+export type CompanyRequisites = {
+  fullName: string;
+  shortName: string;
+  inn: string;
+  ogrnip: string;
+  postalAddress: string;
+  bank: {
+    name: string;
+    account: string;
+    corrAccount: string;
+    bic: string;
+  };
+};
 
 /** Контакты и соцсети для UI (дефолты из кода, при наличии — подмена из БД в loadContactConfig). */
 export type ContactConfig = {
@@ -18,6 +33,7 @@ export type ContactConfig = {
   email: string;
   address: string;
   workingHours: string;
+  company: CompanyRequisites;
   social: {
     telegram: string;
     max: string;
@@ -33,6 +49,14 @@ export function createDefaultContactConfig(): ContactConfig {
     email: EMAIL,
     address: ADDRESS,
     workingHours: WORKING_HOURS,
+    company: {
+      fullName: COMPANY.fullName,
+      shortName: COMPANY.shortName,
+      inn: COMPANY.inn,
+      ogrnip: COMPANY.ogrnip,
+      postalAddress: COMPANY.postalAddress,
+      bank: { ...COMPANY.bank },
+    },
     social: {
       telegram: SOCIAL_LINKS.telegram,
       max: SOCIAL_LINKS.max,

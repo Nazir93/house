@@ -53,15 +53,18 @@ export function buildSchemaAreaServed(): SchemaPlace[] {
   return out;
 }
 
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://dom.ru";
+/** Без env для локальной сборки — подставьте реальный URL на проде (.env). */
+export const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000";
 
-export const PHONE = "8 (928) 455-45-59";
-export const PHONE_RAW = "89284554559";
-export const PHONE2 = "8 (900) 233-66-39";
-export const PHONE2_RAW = "89002336639";
-export const EMAIL = "info@dom.ru";
+/** Дефолты пустые — заполните в админке «Настройки» или через siteSettings в БД. */
+export const PHONE = "";
+export const PHONE_RAW = "";
+export const PHONE2 = "";
+export const PHONE2_RAW = "";
+export const EMAIL = "";
 /** Адрес офиса (для контактов и карты) */
-export const ADDRESS = "г. Санкт-Петербург";
+export const ADDRESS = "";
 export const WORKING_HOURS = "Пн–Пт 9:00–17:00";
 
 /**
@@ -90,22 +93,23 @@ export function getYandexOfficeMapLinkUrl(): string {
   return `https://yandex.ru/maps/?pt=${lon}%2C${lat}&z=17&l=map`;
 }
 
+/** Реквизиты по умолчанию пустые — задаются в админке (ключи company_*, bank_*). */
 export const COMPANY = {
-  fullName: "Индивидуальный предприниматель Чернышева Елена Михайловна",
-  shortName: "ИП Чернышева Е. М.",
-  inn: "232013211085",
-  ogrnip: "314236632900029",
-  postalAddress: "354068, Краснодарский край, г. Сочи, ул. Пасечная 61/2, кв. 48",
+  fullName: "",
+  shortName: "",
+  inn: "",
+  ogrnip: "",
+  postalAddress: "",
   bank: {
-    name: 'АО "Тинькофф Банк"',
-    account: "40802810700003133044",
-    corrAccount: "30101810145250000974",
-    bic: "044525974",
+    name: "",
+    account: "",
+    corrAccount: "",
+    bic: "",
   },
 };
 
 export const SOCIAL_LINKS = {
-  telegram: "https://t.me/dom",
+  telegram: process.env.NEXT_PUBLIC_TELEGRAM_URL?.trim() || "",
   /** Мессенджер Max — ссылка на чат или профиль (задать в .env) */
   max:
     process.env.NEXT_PUBLIC_MAX_CHAT_URL?.trim() ||

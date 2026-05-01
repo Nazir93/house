@@ -3,7 +3,7 @@ import { CITY, SITE_NAME } from "@/lib/constants";
 import { getServiceLandingHeroBannerFields } from "@/lib/service-card-media";
 import { parseServiceLandingDocument, type ServiceLandingDocument } from "@/lib/service-landing-schema";
 
-/** Старые URL услуг электромонтажа / слаботочки — в коде больше не поддерживаются; редирект в middleware. */
+/** Устаревшие slug услуг из прежней версии сайта — редирект в middleware. */
 export const SERVICE_PAGE_SLUGS = [] as const;
 export type ServicePageSlug = (typeof SERVICE_PAGE_SLUGS)[number];
 

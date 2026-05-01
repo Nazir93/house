@@ -15,11 +15,11 @@ export async function ServiceLandingRenderer({
   pagePath,
 }: {
   document: ServiceLandingDocument;
-  /** Путь страницы для H1 из SEO (PageMeta), например `/services/electrical` */
+  /** Путь страницы для H1 из SEO (PageMeta), например `/services/foundation` */
   pagePath: string;
 }) {
   const contact = await loadContactConfig();
-  const telephone: [string, string] = [contact.phoneRaw, contact.phone2Raw];
+  const telephone = [contact.phoneRaw, contact.phone2Raw].filter((t) => t?.trim());
 
   const heroH1ByIndex = new Map<number, string>();
   for (let i = 0; i < document.sections.length; i++) {

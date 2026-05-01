@@ -21,7 +21,8 @@ import { LeadMiniForm } from "@/components/construction/lead-mini-form";
 import { MortgageInlineEstimator } from "@/components/construction/mortgage-inline-estimator";
 import { ProjectDesignCostCalculator } from "@/components/construction/project-design-cost-calculator";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
-import { EMAIL, SITE_URL } from "@/lib/constants";
+import { SITE_URL } from "@/lib/constants";
+import { useContactConfig } from "@/lib/contact-config-context";
 import {
   formatRub,
   getProjectPlans,
@@ -45,6 +46,7 @@ export function HouseProjectDetailContent({
   project: HouseProjectItem;
   similarProjects: HouseProjectItem[];
 }) {
+  const contact = useContactConfig();
   const renders = getProjectRenders(project);
   const plans = getProjectPlans(project);
   const [activeRender, setActiveRender] = useState(0);
@@ -68,10 +70,12 @@ export function HouseProjectDetailContent({
   }, [project.slug, project.title]);
 
   const mailtoProjectHref = useMemo(() => {
+    const email = contact.email.trim();
+    if (!email) return null;
     const subject = `Проект «${project.title}»`;
     const body = `Здравствуйте!\n\nИнтересует проект «${project.title}».\n\nСтраница проекта: ${SITE_URL.replace(/\/$/, "")}/projects/${project.slug}\n`;
-    return `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  }, [project.slug, project.title]);
+    return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }, [contact.email, project.slug, project.title]);
 
   const sortedPlans = useMemo(
     () => [...plans].sort((a, b) => (a.floor ?? 999) - (b.floor ?? 999)),
@@ -242,15 +246,17 @@ export function HouseProjectDetailContent({
                   В Telegram
                   <Share2 size={16} className="ml-auto opacity-90" aria-hidden />
                 </a>
-                <a
-                  href={mailtoProjectHref}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border-2 bg-transparent px-4 py-3.5 text-sm font-semibold transition hover:bg-black/[0.03]"
-                  style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
-                >
-                  <Mail size={18} strokeWidth={2} aria-hidden />
-                  На почту
-                  <Layers2 size={16} className="ml-auto opacity-80" aria-hidden />
-                </a>
+                {mailtoProjectHref ? (
+                  <a
+                    href={mailtoProjectHref}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border-2 bg-transparent px-4 py-3.5 text-sm font-semibold transition hover:bg-black/[0.03]"
+                    style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
+                  >
+                    <Mail size={18} strokeWidth={2} aria-hidden />
+                    На почту
+                    <Layers2 size={16} className="ml-auto opacity-80" aria-hidden />
+                  </a>
+                ) : null}
               </div>
 
               <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">

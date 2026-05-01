@@ -19,19 +19,20 @@ export async function JsonLd() {
   const { reviews, faqs } = await getDbData();
   const contact = await loadContactConfig();
 
+  const tel = [contact.phoneRaw, contact.phone2Raw].filter((t) => t?.trim());
   const organization = {
     "@context": "https://schema.org",
     "@type": "GeneralContractor",
     name: SITE_NAME,
     description: getDefaultSiteGeoDescription(),
     url: SITE_URL,
-    telephone: [contact.phoneRaw, contact.phone2Raw],
-    email: contact.email,
+    ...(tel.length > 0 ? { telephone: tel } : {}),
+    ...(contact.email.trim() ? { email: contact.email.trim() } : {}),
     address: {
       "@type": "PostalAddress",
       addressLocality: CITY,
       addressCountry: "RU",
-      streetAddress: contact.address,
+      ...(contact.address.trim() ? { streetAddress: contact.address.trim() } : {}),
     },
     areaServed: buildSchemaAreaServed(),
     openingHoursSpecification: [OFFICE_OPENING_HOURS_JSON_LD],

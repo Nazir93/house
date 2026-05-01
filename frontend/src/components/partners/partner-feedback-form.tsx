@@ -184,16 +184,24 @@ export function PartnerFeedbackForm({
           </FillButton>
           </div>
 
-          <p className="text-xs" style={{ color: "var(--text-subtle)" }}>
-            Или по телефону:{" "}
-            <a href={`tel:${contact.phoneRaw}`} className="underline" style={{ color: "var(--text-muted)" }}>
-              {contact.phone}
-            </a>
-            {" / "}
-            <a href={`tel:${contact.phone2Raw}`} className="underline" style={{ color: "var(--text-muted)" }}>
-              {contact.phone2}
-            </a>
-          </p>
+          {contact.phone.trim() || contact.phone2.trim() ? (
+            <p className="text-xs" style={{ color: "var(--text-subtle)" }}>
+              Или по телефону:{" "}
+              {contact.phone.trim() && contact.phoneRaw.trim() ? (
+                <a href={`tel:${contact.phoneRaw}`} className="underline" style={{ color: "var(--text-muted)" }}>
+                  {contact.phone}
+                </a>
+              ) : null}
+              {contact.phone.trim() && contact.phoneRaw.trim() && contact.phone2.trim() && contact.phone2Raw.trim()
+                ? " / "
+                : null}
+              {contact.phone2.trim() && contact.phone2Raw.trim() ? (
+                <a href={`tel:${contact.phone2Raw}`} className="underline" style={{ color: "var(--text-muted)" }}>
+                  {contact.phone2}
+                </a>
+              ) : null}
+            </p>
+          ) : null}
         </form>
       </div>
     </Section>

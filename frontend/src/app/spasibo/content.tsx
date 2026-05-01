@@ -73,36 +73,44 @@ export function ThankYouContent() {
           .
         </p>
 
-        <div className="glass rounded-2xl p-6 mb-8">
-          <p className="text-gray-400 text-sm mb-3">
-            Если вопрос срочный — позвоните:
-          </p>
-          <a
-            href={`tel:${contact.phoneRaw}`}
-            className="flex items-center justify-center gap-3 text-brand-accent text-xl font-bold hover:text-white transition-colors"
-          >
-            <Phone size={22} />
-            {contact.phone}
-          </a>
-          <a
-            href={`tel:${contact.phone2Raw}`}
-            className="flex items-center justify-center gap-3 text-brand-accent text-lg font-bold hover:text-white transition-colors mt-2"
-          >
-            <Phone size={20} />
-            {contact.phone2}
-          </a>
-        </div>
+        {contact.phone.trim() || contact.phone2.trim() ? (
+          <div className="glass rounded-2xl p-6 mb-8">
+            <p className="text-gray-400 text-sm mb-3">
+              Если вопрос срочный — позвоните:
+            </p>
+            {contact.phone.trim() && contact.phoneRaw.trim() ? (
+              <a
+                href={`tel:${contact.phoneRaw}`}
+                className="flex items-center justify-center gap-3 text-brand-accent text-xl font-bold hover:text-white transition-colors"
+              >
+                <Phone size={22} />
+                {contact.phone}
+              </a>
+            ) : null}
+            {contact.phone2.trim() && contact.phone2Raw.trim() ? (
+              <a
+                href={`tel:${contact.phone2Raw}`}
+                className={`flex items-center justify-center gap-3 text-brand-accent text-lg font-bold hover:text-white transition-colors ${contact.phone.trim() ? "mt-2" : ""}`}
+              >
+                <Phone size={20} />
+                {contact.phone2}
+              </a>
+            ) : null}
+          </div>
+        ) : null}
 
         <div className="flex flex-col sm:flex-row gap-3 mb-8">
-          <a
-            href={contact.social.telegram}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/10 text-gray-300 hover:bg-blue-500 hover:text-white transition-all text-sm font-medium"
-          >
-            <Send size={18} />
-            Написать в Telegram
-          </a>
+          {contact.social.telegram.trim() ? (
+            <a
+              href={contact.social.telegram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/10 text-gray-300 hover:bg-blue-500 hover:text-white transition-all text-sm font-medium"
+            >
+              <Send size={18} />
+              Написать в Telegram
+            </a>
+          ) : null}
           {contact.social.max && (
             <a
               href={contact.social.max}

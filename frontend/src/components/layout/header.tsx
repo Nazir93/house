@@ -481,13 +481,15 @@ export function Header() {
                 style={{ animation: "menuFadeIn 0.6s ease-out 0.4s both" }}
               >
                 <div className="flex items-center gap-2 sm:gap-5 flex-wrap">
-                  <a
-                    href={`tel:${contact.phone2Raw}`}
-                    className="text-base font-medium tabular-nums transition-colors duration-300 hover:text-[var(--accent)] sm:text-sm md:text-base lg:text-lg"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    {contact.phone2}
-                  </a>
+                  {contact.phone2.trim() && contact.phone2Raw.trim() ? (
+                    <a
+                      href={`tel:${contact.phone2Raw}`}
+                      className="text-base font-medium tabular-nums transition-colors duration-300 hover:text-[var(--accent)] sm:text-sm md:text-base lg:text-lg"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {contact.phone2}
+                    </a>
+                  ) : null}
                 </div>
                 <Link
                   href="/contacts"

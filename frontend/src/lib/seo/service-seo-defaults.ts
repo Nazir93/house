@@ -42,7 +42,7 @@ export function getServicesIndexSeo(): ServicesIndexSeoBundle {
   };
 }
 
-/** Значения для записи PageMeta (путь → поля). Старые лендинги /services/electrical и т.п. не сеем. */
+/** Значения для записи PageMeta (путь → поля). Устаревшие URL услуг не сеем. */
 export function getServicePageMetaSeeds(): Array<{
   path: string;
   title: string;

@@ -16,7 +16,7 @@ type ServiceItem = {
 };
 
 const TYPE_LABELS: Record<string, string> = {
-  ELECTRICAL: "Электромонтаж",
+  ELECTRICAL: "Электрика",
   ACOUSTICS: "Акустика",
   STRUCTURED_CABLING: "СКС",
   SMART_HOME: "Умный дом",

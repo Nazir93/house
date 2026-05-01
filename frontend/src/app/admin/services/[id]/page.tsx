@@ -12,7 +12,7 @@ import { mergeServiceTitleIntoLandingJson } from "@/lib/merge-service-title-into
 import { ServiceLandingTextForm } from "@/components/admin/service-landing-text-form";
 
 const SERVICE_TYPES = [
-  { value: "ELECTRICAL", label: "Электромонтаж" },
+  { value: "ELECTRICAL", label: "Электрика" },
   { value: "ACOUSTICS", label: "Акустика" },
   { value: "STRUCTURED_CABLING", label: "Слаботочные системы" },
   { value: "SMART_HOME", label: "Умный дом" },

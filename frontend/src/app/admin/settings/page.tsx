@@ -21,7 +21,7 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
     title: "Общие",
     fields: [
       { key: "site_name", label: "Название компании", placeholder: "Дом" },
-      { key: "site_description", label: "Описание сайта", placeholder: "Электромонтаж премиум-класса", multiline: true },
+      { key: "site_description", label: "Описание сайта", placeholder: "Строительство загородных домов под ключ", multiline: true },
       { key: "city", label: "Город", placeholder: "Санкт-Петербург" },
     ],
   },
@@ -30,11 +30,11 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
     description:
       "Заполненные поля подставляются на сайт вместо значений по умолчанию из кода (constants / .env). Пустое поле — берётся дефолт.",
     fields: [
-      { key: "phone", label: "Телефон 1 (отображение)", placeholder: "8 (928) 455-45-59" },
-      { key: "phone_raw", label: "Телефон 1 (для ссылки tel:)", placeholder: "89284554559" },
-      { key: "phone2", label: "Телефон 2 (отображение)", placeholder: "8 (900) 233-66-39" },
-      { key: "phone2_raw", label: "Телефон 2 (для ссылки tel:)", placeholder: "89002336639" },
-      { key: "email", label: "Email", placeholder: "info@dom.ru" },
+      { key: "phone", label: "Телефон 1 (отображение)", placeholder: "+7 (999) 123-45-67" },
+      { key: "phone_raw", label: "Телефон 1 (для ссылки tel:)", placeholder: "+79991234567" },
+      { key: "phone2", label: "Телефон 2 (отображение)", placeholder: "+7 (999) 765-43-21" },
+      { key: "phone2_raw", label: "Телефон 2 (для ссылки tel:)", placeholder: "+79997654321" },
+      { key: "email", label: "Email", placeholder: "office@example.com" },
       { key: "address", label: "Адрес офиса", placeholder: "г. Санкт-Петербург, ул. …" },
       { key: "working_hours", label: "Режим работы", placeholder: "Пн–Пт 9:00–17:00" },
     ],

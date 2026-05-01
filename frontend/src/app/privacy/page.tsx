@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { SITE_NAME, SITE_URL, COMPANY } from "@/lib/constants";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { loadContactConfig } from "@/lib/load-contact-config";
 
 export const metadata: Metadata = {
@@ -9,6 +9,13 @@ export const metadata: Metadata = {
 
 export default async function PrivacyPage() {
   const contact = await loadContactConfig();
+  const co = contact.company;
+  const operatorBlock =
+    co.fullName.trim() && co.inn.trim()
+      ? `${co.fullName} (ИНН ${co.inn}, ОГРНИП ${co.ogrnip}), далее — «Оператор»`
+      : "оператор персональных данных — актуальные наименование и реквизиты указываются в разделе «Контакты» или в настройках сайта, далее — «Оператор»";
+  const operatorShort = co.shortName.trim() || SITE_NAME;
+
   return (
     <section
       className="pt-32 pb-20 min-h-screen"
@@ -28,7 +35,7 @@ export default async function PrivacyPage() {
           Политика конфиденциальности
         </h1>
         <p className="text-sm mb-10" style={{ color: "var(--text-muted)" }}>
-          Действует с 1 января 2024 г. &middot; {COMPANY.shortName}
+          Действует с 1 января 2024 г. &middot; {operatorShort}
         </p>
 
         <div className="space-y-8 text-[15px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
@@ -41,8 +48,7 @@ export default async function PrivacyPage() {
               Настоящая политика конфиденциальности (далее — «Политика») определяет порядок
               обработки и защиты персональных данных пользователей сайта{" "}
               <a href={SITE_URL} className="underline" style={{ color: "var(--accent)" }}>{SITE_URL}</a>{" "}
-              (далее — «Сайт»), принадлежащего {COMPANY.fullName} (ИНН {COMPANY.inn},
-              ОГРНИП {COMPANY.ogrnip}), далее — «Оператор».
+              (далее — «Сайт»), принадлежащего {operatorBlock}.
             </p>
             <p className="mt-3">
               Используя Сайт и/или отправляя свои персональные данные через формы обратной связи,
@@ -192,19 +198,33 @@ export default async function PrivacyPage() {
               Контакты оператора
             </h2>
             <div className="space-y-2 text-sm" style={{ color: "var(--text-muted)" }}>
-              <p>{COMPANY.fullName}</p>
-              <p>ИНН: {COMPANY.inn} &middot; ОГРНИП: {COMPANY.ogrnip}</p>
-              <p>Адрес: {COMPANY.postalAddress}</p>
-              <p>
-                Телефон:{" "}
-                <a href={`tel:${contact.phone.replace(/\D/g, "")}`} className="underline" style={{ color: "var(--accent)" }}>{contact.phone}</a>
-                {" / "}
-                <a href={`tel:${contact.phone2.replace(/\D/g, "")}`} className="underline" style={{ color: "var(--accent)" }}>{contact.phone2}</a>
-              </p>
-              <p>
-                Email:{" "}
-                <a href={`mailto:${contact.email}`} className="underline" style={{ color: "var(--accent)" }}>{contact.email}</a>
-              </p>
+              {co.fullName.trim() ? <p>{co.fullName}</p> : null}
+              {co.inn.trim() || co.ogrnip.trim() ? (
+                <p>
+                  {co.inn.trim() ? <>ИНН: {co.inn}</> : null}
+                  {co.inn.trim() && co.ogrnip.trim() ? " · " : null}
+                  {co.ogrnip.trim() ? <>ОГРНИП: {co.ogrnip}</> : null}
+                </p>
+              ) : null}
+              {co.postalAddress.trim() ? <p>Адрес: {co.postalAddress}</p> : null}
+              {contact.phone.trim() || contact.phone2.trim() ? (
+                <p>
+                  Телефон:{" "}
+                  {contact.phone.trim() ? (
+                    <a href={`tel:${contact.phone.replace(/\D/g, "")}`} className="underline" style={{ color: "var(--accent)" }}>{contact.phone}</a>
+                  ) : null}
+                  {contact.phone.trim() && contact.phone2.trim() ? " / " : null}
+                  {contact.phone2.trim() ? (
+                    <a href={`tel:${contact.phone2.replace(/\D/g, "")}`} className="underline" style={{ color: "var(--accent)" }}>{contact.phone2}</a>
+                  ) : null}
+                </p>
+              ) : null}
+              {contact.email.trim() ? (
+                <p>
+                  Email:{" "}
+                  <a href={`mailto:${contact.email}`} className="underline" style={{ color: "var(--accent)" }}>{contact.email}</a>
+                </p>
+              ) : null}
             </div>
           </div>
 

@@ -2,7 +2,7 @@ import type { ServiceType } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { SERVICES } from "@/lib/constants";
 
-/** Записи из старого продукта (электромонтаж и смежные лендинги) не показываем в каталоге на сайте. */
+/** Устаревшие типы услуг из прежней версии каталога не показываем на витрине /services. */
 const LEGACY_SERVICE_TYPES: ServiceType[] = [
   "ELECTRICAL",
   "ACOUSTICS",

@@ -918,9 +918,28 @@ function SuccessScreen({ onClose }: { onClose: () => void }) {
       <p className="text-base md:text-lg mb-4 max-w-md" style={{ color: "var(--text-muted)" }}>
         Мы свяжемся с вами в ближайшее время
       </p>
-      <p className="text-sm mb-10" style={{ color: "var(--text-subtle)" }}>
-        Или позвоните нам: <a href={`tel:${contact.phoneRaw}`} className="underline" style={{ color: "var(--text-muted)" }}>{contact.phone}</a>{" / "}<a href={`tel:${contact.phone2Raw}`} className="underline" style={{ color: "var(--text-muted)" }}>{contact.phone2}</a>
-      </p>
+      {contact.phone.trim() || contact.phone2.trim() ? (
+        <p className="text-sm mb-10" style={{ color: "var(--text-subtle)" }}>
+          Или позвоните нам:{" "}
+          {contact.phone.trim() && contact.phoneRaw.trim() ? (
+            <a href={`tel:${contact.phoneRaw}`} className="underline" style={{ color: "var(--text-muted)" }}>
+              {contact.phone}
+            </a>
+          ) : null}
+          {contact.phone.trim() && contact.phoneRaw.trim() && contact.phone2.trim() && contact.phone2Raw.trim()
+            ? " / "
+            : null}
+          {contact.phone2.trim() && contact.phone2Raw.trim() ? (
+            <a href={`tel:${contact.phone2Raw}`} className="underline" style={{ color: "var(--text-muted)" }}>
+              {contact.phone2}
+            </a>
+          ) : null}
+        </p>
+      ) : (
+        <p className="text-sm mb-10" style={{ color: "var(--text-subtle)" }}>
+          Контактный телефон указан в разделе «Контакты» на сайте.
+        </p>
+      )}
       <button
         onClick={onClose}
         className="text-xs uppercase tracking-[0.15em] underline underline-offset-4 transition-colors"
