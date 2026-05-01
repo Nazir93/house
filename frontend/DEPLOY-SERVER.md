@@ -11,6 +11,22 @@
 
 ---
 
+## Prisma на VPS (важно)
+
+В проекте зафиксирован **Prisma 5.x** (поле `url` в `schema.prisma` — нормально для этой версии).
+
+- Не запускайте `npx prisma …` **до** `npm ci` в каталоге `frontend`: без установленных зависимостей `npx` может скачать **Prisma 7+** и вы получите ошибку **P1012** («`url` is no longer supported»).
+- Всегда работайте из `frontend` после установки зависимостей:
+
+```bash
+cd /var/www/house/frontend && npm ci
+./node_modules/.bin/prisma version   # должно быть 5.x.x
+```
+
+Если уже ставили глобально лишний CLI: `npm uninstall -g prisma` при необходимости. Если запутались с версиями: `rm -rf node_modules && npm ci`.
+
+---
+
 ## Обязательно для сайта и БД
 
 | Переменная | Пример | Зачем |
