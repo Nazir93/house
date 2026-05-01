@@ -1,0 +1,385 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Category {
+  RESTAURANT
+  OFFICE
+  APARTMENT
+  SHOP
+  OTHER
+}
+
+enum ServiceType {
+  ELECTRICAL
+  ACOUSTICS
+  STRUCTURED_CABLING
+  SMART_HOME
+  SECURITY
+  ARCHITECTURAL_LIGHTING
+}
+
+enum LeadStatus {
+  NEW
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+enum ConstructionMediaType {
+  RENDER
+  PLAN
+  BUILD_STAGE
+  VIDEO
+}
+
+enum BuiltObjectMaterial {
+  GAS_BLOCK
+  BRICK
+  CERAMIC_BLOCK
+  FRAME
+  OTHER
+}
+
+model Project {
+  id             String         @id @default(cuid())
+  slug           String         @unique
+  title          String
+  category       Category
+  service        ServiceType
+  area           Int?
+  description    String         @db.Text
+  /// Текст для meta description и карточки портфолио; если пусто — начало HTML-описания
+  seoDescription String?        @db.Text
+  coverImage     String
+  /// Один ролик (совместимость; при заполнении videoUrls дублируется первый элемент)
+  videoUrl       String?
+  /// Несколько видео в карусели баннера (после фото)
+  videoUrls      String[] @default([])
+  location       String?
+  year           String?
+  industry       String?
+  projectType    String?
+  features       String?        @db.Text
+  goals          String?        @db.Text
+  /// Две колонки текста под первой «витриной» на странице кейса
+  leftText1      String?        @db.Text
+  rightText1     String?        @db.Text
+  /// Две колонки текста под второй «витриной»
+  leftText2      String?        @db.Text
+  rightText2     String?        @db.Text
+  /// Подпись на полосе-витрине (если пусто — alt 1-й / 2-й фото галереи)
+  showcaseLabel1 String?
+  showcaseLabel2 String?
+  /// Фон витрины (если пусто — url 1-й / 2-й фото галереи)
+  showcaseImage1 String?
+  showcaseImage2 String?
+  published      Boolean        @default(false)
+  order          Int            @default(0)
+  /// Блок «Портфолио» на главной: до 5 проектов с галочкой, порядок — homeOrder по возрастанию
+  featuredOnHome Boolean        @default(false)
+  homeOrder      Int            @default(0)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  images         ProjectImage[]
+  hotspots       Hotspot[]
+
+  @@index([published, service])
+  @@index([published, category])
+  @@index([published, featuredOnHome, homeOrder])
+}
+
+model ProjectImage {
+  id        String  @id @default(cuid())
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String  @default("")
+  order     Int     @default(0)
+
+  @@index([projectId])
+}
+
+model Hotspot {
+  id          String  @id @default(cuid())
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  imageUrl    String
+  xPercent    Float
+  yPercent    Float
+  label       String
+  description String  @db.Text
+
+  @@index([projectId])
+}
+
+model HouseProject {
+  id                  String                  @id @default(cuid())
+  slug                String                  @unique
+  title               String
+  shortDescription    String                  @db.Text
+  description         String                  @db.Text
+  floors              Int
+  area                Int
+  price               Int
+  rooms               Int
+  bathrooms           Int
+  materials           String[]                @default([])
+  isNew               Boolean                 @default(false)
+  pricePromo          String?
+  mortgageEnabled     Boolean                 @default(true)
+  /// CALCULATOR = встроенный расчёт; LEAD = заявка и ссылка
+  mortgageMode        String                  @default("LEAD")
+  published           Boolean                 @default(false)
+  order               Int                     @default(0)
+  completionJson      Json?
+  constructionJson    Json?
+  anchorsJson         Json?
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+  media               HouseProjectMedia[]
+  builtObjects        BuiltObject[]
+
+  @@index([published, price])
+  @@index([published, area])
+  @@index([published, createdAt])
+}
+
+model HouseProjectMedia {
+  id             String                @id @default(cuid())
+  houseProjectId String
+  houseProject   HouseProject          @relation(fields: [houseProjectId], references: [id], onDelete: Cascade)
+  type           ConstructionMediaType
+  url            String
+  alt            String                @default("")
+  label          String?
+  floor          Int?
+  order          Int                   @default(0)
+
+  @@index([houseProjectId, type, order])
+}
+
+model BuiltObject {
+  id                  String              @id @default(cuid())
+  slug                String              @unique
+  title               String
+  material            BuiltObjectMaterial @default(GAS_BLOCK)
+  area                Int?
+  buildTerm           String?
+  foundation          String?
+  walls               String?
+  roof                String?
+  floors              Int?
+  location            String?
+  latitude            Float?
+  longitude           Float?
+  description         String              @db.Text
+  worksDescription    String?             @db.Text
+  telegramUrl         String?
+  vkUrl               String?
+  houseProjectId      String?
+  houseProject        HouseProject?       @relation(fields: [houseProjectId], references: [id], onDelete: SetNull)
+  published           Boolean             @default(false)
+  order               Int                 @default(0)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  media               BuiltObjectMedia[]
+
+  @@index([published, material])
+  @@index([published, order])
+  @@index([houseProjectId])
+}
+
+model BuiltObjectMedia {
+  id            String                @id @default(cuid())
+  builtObjectId String
+  builtObject   BuiltObject           @relation(fields: [builtObjectId], references: [id], onDelete: Cascade)
+  type          ConstructionMediaType
+  url           String
+  alt           String                @default("")
+  label         String?
+  order         Int                   @default(0)
+
+  @@index([builtObjectId, type, order])
+}
+
+model Lead {
+  id          String     @id @default(cuid())
+  name        String
+  phone       String
+  email       String?
+  service     String?
+  pageUrl     String?
+  source      String?
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmTerm     String?
+  calcData    Json?
+  status      LeadStatus @default(NEW)
+  notes       String?    @db.Text
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([service])
+}
+
+model Partner {
+  id      String  @id @default(cuid())
+  name    String
+  logoUrl String
+  website String?
+  visible Boolean @default(true)
+  order   Int     @default(0)
+}
+
+model TeamMember {
+  id          String  @id @default(cuid())
+  name        String
+  position    String
+  photoUrl    String?
+  description String? @db.Text
+  visible     Boolean @default(true)
+  order       Int     @default(0)
+}
+
+model Review {
+  id          String       @id @default(cuid())
+  authorName  String
+  authorPhoto String?
+  objectName  String?
+  service     ServiceType?
+  rating      Int          @default(5)
+  text        String       @db.Text
+  videoUrl    String?
+  visible     Boolean      @default(true)
+  order       Int          @default(0)
+  createdAt   DateTime     @default(now())
+}
+
+model Faq {
+  id       String       @id @default(cuid())
+  question String
+  answer   String       @db.Text
+  service  ServiceType?
+  visible  Boolean      @default(true)
+  order    Int          @default(0)
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String   @default("Администратор")
+  createdAt DateTime @default(now())
+}
+
+model Post {
+  id         String   @id @default(cuid())
+  slug       String   @unique
+  title      String
+  excerpt    String   @db.Text
+  content    String   @db.Text
+  category   String
+  coverImage String?
+  /// Одно видео (совместимость, дублирует первый элемент coverVideos)
+  coverVideo  String?
+  /// Несколько видео в карусели баннера (после обложки)
+  coverVideos String[] @default([])
+  /// Галерея фото (после обложки, перед видео)
+  galleryUrls String[] @default([])
+  published  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([published, createdAt])
+}
+
+model Service {
+  id                 String      @id @default(cuid())
+  slug               String      @unique
+  title              String
+  shortDescription   String      @db.Text
+  serviceType        ServiceType
+  icon               String      @default("zap")
+  coverImage         String?
+  videoUrl           String?
+  /// Баннер под заголовком H1: широкий экран (отображается от md и выше).
+  bannerImageDesktop String?
+  /// Баннер для узких экранов (мобильные). Если пусто — на мобиле показывается desktop.
+  bannerImageMobile  String?
+  /// Блоки лендинга услуги (hero, тексты, FAQ и т.д.). null = шаблон из кода.
+  landingJson        Json?
+  published          Boolean     @default(true)
+  order              Int         @default(0)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  @@index([published, order])
+}
+
+model Redirect {
+  id        String   @id @default(cuid())
+  fromPath  String   @unique
+  toPath    String
+  permanent Boolean  @default(true)
+  hits      Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([fromPath])
+}
+
+model ErrorLog {
+  id        String   @id @default(cuid())
+  path      String
+  referer   String   @default("")
+  userAgent String?
+  count     Int      @default(1)
+  lastSeen  DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@unique([path, referer])
+  @@index([lastSeen])
+}
+
+model PageMeta {
+  id            String  @id @default(cuid())
+  path          String  @unique
+  title         String?
+  description   String? @db.Text
+  keywords      String?
+  ogTitle       String?
+  ogDescription String? @db.Text
+  ogImage       String?
+  h1            String?
+  /// Доп. HTML под мета-описанием (напр. страница «Услуги»): теги как в блоге, можно картинки и style
+  bodyHtml      String? @db.Text
+  noindex       Boolean @default(false)
+
+  @@index([path])
+}
+
+model SiteSettings {
+  key   String @id
+  value String @db.Text
+}
+
+model ThankYouToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  leadName  String?
+  source    String?
+  used      Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([expiresAt])
+}

@@ -1,0 +1,115 @@
+import { prisma } from "@/lib/db";
+import type { ServiceType } from "@prisma/client";
+import { SITE_NAME } from "@/lib/constants";
+import { resolveServiceLandingDocument, stripShowcaseSections } from "@/lib/service-landing-defaults";
+import type { ServiceLandingDocument } from "@/lib/service-landing-schema";
+import { getServiceLandingHeroBannerFields } from "@/lib/service-card-media";
+
+function mergeHeroBannersFromDb(
+  document: ServiceLandingDocument,
+  bannerImageDesktop: string | null | undefined,
+  bannerImageMobile: string | null | undefined
+): ServiceLandingDocument {
+  const d = bannerImageDesktop?.trim() || undefined;
+  const m = bannerImageMobile?.trim() || undefined;
+  if (!d && !m) return document;
+  return {
+    sections: document.sections.map((section) => {
+      if (section.type !== "hero") return section;
+      return {
+        ...section,
+        bannerImageDesktop: section.bannerImageDesktop ?? d,
+        bannerImageMobile: section.bannerImageMobile ?? m,
+      };
+    }),
+  };
+}
+
+/** Если в hero нет баннера (старый JSON из админки) — те же картинки, что на главной в карточке услуги. */
+function fillMissingHeroBannersFromSiteAssets(slug: string, document: ServiceLandingDocument): ServiceLandingDocument {
+  const fallback = getServiceLandingHeroBannerFields(`/services/${slug}`);
+  if (!fallback) return document;
+  return {
+    sections: document.sections.map((section) => {
+      if (section.type !== "hero") return section;
+      const has =
+        Boolean(section.bannerImageDesktop?.trim()) || Boolean(section.bannerImageMobile?.trim());
+      if (has) return section;
+      return { ...section, ...fallback };
+    }),
+  };
+}
+
+export type ServiceLandingPageData = {
+  serviceType: ServiceType;
+  published: boolean;
+  document: ServiceLandingDocument;
+};
+
+type ServiceRowPick = {
+  published: boolean;
+  landingJson: unknown;
+  bannerImageDesktop: string | null;
+  bannerImageMobile: string | null;
+  serviceType: ServiceType;
+};
+
+async function loadServiceRowForSlug(slug: string): Promise<ServiceRowPick | null> {
+  try {
+    const bySlug = await prisma.service.findUnique({
+      where: { slug },
+      select: {
+        published: true,
+        landingJson: true,
+        bannerImageDesktop: true,
+        bannerImageMobile: true,
+        serviceType: true,
+      },
+    });
+    if (bySlug) return bySlug;
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+/**
+ * Значения по умолчанию для {@link getPageMeta}: из строки услуги в БД или из шаблона кода.
+ * Перекрываются записями в «SEO» (PageMeta) по пути `/services/{slug}`.
+ */
+export async function getServiceMetadataDefaults(slug: string): Promise<{
+  title: string;
+  description: string;
+  keywords?: string[];
+} | null> {
+  try {
+    const s = await prisma.service.findUnique({
+      where: { slug },
+      select: { title: true, shortDescription: true },
+    });
+    if (s) {
+      const description = s.shortDescription.replace(/\s+/g, " ").trim();
+      return {
+        title: `${s.title} | ${SITE_NAME}`,
+        description: description.length > 200 ? `${description.slice(0, 197)}…` : description,
+        keywords: [s.title, SITE_NAME],
+      };
+    }
+  } catch {
+    // БД недоступна
+  }
+
+  return null;
+}
+
+export async function getServiceLandingPageData(slug: string): Promise<ServiceLandingPageData | null> {
+  const row = await loadServiceRowForSlug(slug);
+  if (!row) return null;
+
+  let document = resolveServiceLandingDocument(row.landingJson, row.serviceType);
+  document = mergeHeroBannersFromDb(document, row.bannerImageDesktop, row.bannerImageMobile);
+  document = fillMissingHeroBannersFromSiteAssets(slug, document);
+  document = stripShowcaseSections(document);
+  return { serviceType: row.serviceType, published: row.published, document };
+}

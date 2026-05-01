@@ -1,0 +1,36 @@
+query,intent,target_url,cluster_layer,notes
+"электромонтаж Сочи",commercial,/services/electrical,HF,"Проверить частоту в Яндекс Вордстат; главный для направления электрика"
+"электромонтажные работы Сочи",commercial,/services/electrical,HF,
+"электрик Сочи",commercial,/services/electrical,HF,"Часто информационный — в тексте подчеркнуть под ключ и СРО"
+"электромонтаж ресторан Сочи",commercial,/services/electrical,MF,"Сильный коммерческий интент для вашего УТП"
+"проект электроснабжения Сочи",commercial,/services/electrical,MF,
+"монтаж электропроводки офис",commercial,/services/electrical,MF,
+"щитовое оборудование монтаж Сочи",commercial,/services/electrical,LF,
+"коммерческая акустика Сочи",commercial,/services/acoustics,HF,
+"озвучка ресторана Сочи",commercial,/services/acoustics,MF,
+"мультизональный звук ресторан",commercial,/services/acoustics,MF,
+"фоновая музыка для магазина монтаж",commercial,/services/acoustics,LF,
+"Bose JBL установка ресторан",commercial,/services/acoustics,LF,"Бренды — в контенте как примеры"
+"СКС Сочи",commercial,/services/structured-cabling,HF,
+"слаботочные системы Сочи",commercial,/services/structured-cabling,HF,
+"монтаж СКС офис",commercial,/services/structured-cabling,MF,
+"структурированные кабельные сети проект",commercial,/services/structured-cabling,MF,
+"Cat 6A монтаж",commercial,/services/structured-cabling,LF,
+"серверная монтаж ЛВС",commercial,/services/structured-cabling,LF,
+"умный дом Сочи",commercial,/services/smart-home,HF,
+"монтаж умного дома Сочи",commercial,/services/smart-home,HF,
+"KNX монтаж Сочи",commercial,/services/smart-home,MF,
+"автоматизация освещения дом",commercial,/services/smart-home,MF,
+"Z-Wave умный дом",commercial,/services/smart-home,LF,
+"видеонаблюдение Сочи",commercial,/services/security,HF,
+"установка камер Сочи",commercial,/services/security,HF,
+"IP видеонаблюдение монтаж",commercial,/services/security,MF,
+"СКУД установка офис",commercial,/services/security,MF,
+"Hikvision Dahua монтаж",commercial,/services/security,LF,
+"архитектурная подсветка Сочи",commercial,/services/architectural-lighting,HF,
+"подсветка фасада Сочи",commercial,/services/architectural-lighting,MF,
+"ландшафтная подсветка LED",commercial,/services/architectural-lighting,MF,
+"DMX архитектурная подсветка",commercial,/services/architectural-lighting,LF,
+"электромонтаж Краснодарский край",commercial,/services,MF,"Вариант A: регион в тексте /services и на главной, не дублировать в каждом title"
+"инженерные системы под ключ Сочи",commercial,/services,HF,"Обзорная страница — без пересечения с длинными ключами лендингов"
+"услуги электромонтаж Сочи",commercial,/services,HF,

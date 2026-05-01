@@ -1,0 +1,739 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowRight, LayoutGrid, LayoutList, Search, SlidersHorizontal } from "lucide-react";
+import { CompareButton } from "@/components/construction/compare-button";
+import { formatRub, getProjectRenders, type HouseProjectItem } from "@/lib/construction-shared";
+import {
+  buildProjectsSearchParams,
+  MATERIAL_OPTIONS,
+  parseFloorsParam,
+  parseMaterialParam,
+  parseSortParam,
+  projectMatchesAreaPrice,
+  projectMatchesFloors,
+  projectMatchesMaterial,
+  projectMatchesQuery,
+  getPublishedProjectBounds,
+  type FloorsFilterId,
+  type MaterialFilterId,
+  type ProjectsSortKey,
+} from "@/lib/project-filters";
+
+const PAGE_SIZE = 6;
+
+function parseNumParam(v: string | null, fallback: number): number {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+const panelClass =
+  "rounded-2xl border px-4 py-4 md:px-5 md:py-5";
+const panelStyle = {
+  borderColor: "rgba(43, 47, 45, 0.09)",
+  backgroundColor: "rgba(237, 235, 229, 0.55)",
+} as const;
+
+export function ProjectsCatalogContent({ projects }: { projects: HouseProjectItem[] }) {
+  const router = useRouter();
+  const sp = useSearchParams();
+  const bounds = useMemo(() => getPublishedProjectBounds(projects), [projects]);
+
+  const areaMin = parseNumParam(sp.get("areaMin"), bounds.minArea);
+  const areaMax = parseNumParam(sp.get("areaMax"), bounds.maxArea);
+  const priceMinRub = parseNumParam(sp.get("priceMin"), bounds.minPriceRub);
+  const priceMaxRub = parseNumParam(sp.get("priceMax"), bounds.maxPriceRub);
+  const material = parseMaterialParam(sp.get("material"));
+  const floors = parseFloorsParam(sp.get("floors"));
+  const sort = parseSortParam(sp.get("sort"));
+  const q = sp.get("q")?.trim() ?? "";
+
+  const [page, setPage] = useState(1);
+  const [queryInput, setQueryInput] = useState(q);
+  const [view, setView] = useState<"grid" | "list">("grid");
+
+  useEffect(() => {
+    setQueryInput(q);
+  }, [q]);
+
+  const hasCustomFilters =
+    sp.get("areaMin") != null ||
+    sp.get("areaMax") != null ||
+    sp.get("priceMin") != null ||
+    sp.get("priceMax") != null ||
+    sp.get("material") != null ||
+    sp.get("floors") != null ||
+    sp.get("q") != null ||
+    sp.get("sort") != null;
+
+  const pushFilters = useCallback(
+    (next: {
+      areaMin: number;
+      areaMax: number;
+      priceMinRub: number;
+      priceMaxRub: number;
+      material: MaterialFilterId;
+      floors: FloorsFilterId;
+      q: string;
+      sort: ProjectsSortKey;
+    }) => {
+      const qs = buildProjectsSearchParams({
+        ...next,
+        priceMinRub: next.priceMinRub,
+        priceMaxRub: next.priceMaxRub,
+        sort: next.sort,
+      });
+      router.push(`/projects?${qs}`);
+      setPage(1);
+    },
+    [router]
+  );
+
+  const filtered = useMemo(() => {
+    const result = projects.filter((project) => {
+      if (!project.published) return false;
+      if (!projectMatchesMaterial(project, material)) return false;
+      if (!projectMatchesFloors(project, floors)) return false;
+      if (!projectMatchesAreaPrice(project, areaMin, areaMax, priceMinRub, priceMaxRub)) return false;
+      if (!projectMatchesQuery(project, q)) return false;
+      return true;
+    });
+    return [...result].sort((a, b) => {
+      if (sort === "area") return a.area - b.area;
+      if (sort === "new") return Number(b.isNew) - Number(a.isNew);
+      return a.price - b.price;
+    });
+  }, [areaMax, areaMin, floors, material, priceMaxRub, priceMinRub, projects, q, sort]);
+
+  const visible = filtered.slice(0, page * PAGE_SIZE);
+
+  function chip(active: boolean) {
+    return {
+      backgroundColor: active ? "var(--accent)" : "transparent",
+      borderColor: active ? "var(--accent)" : "var(--border)",
+      color: active ? "var(--accent-contrast)" : "var(--text)",
+    };
+  }
+
+  function clearFilters() {
+    router.push("/projects");
+    setPage(1);
+  }
+
+  const filtersRef = useRef({
+    areaMin,
+    areaMax,
+    priceMinRub,
+    priceMaxRub,
+    material,
+    floors,
+    sort,
+  });
+  filtersRef.current = { areaMin, areaMax, priceMinRub, priceMaxRub, material, floors, sort };
+
+  /** Поиск по строке с задержкой; актуальные фильтры берём из ref */
+  useEffect(() => {
+    const t = setTimeout(() => {
+      if (queryInput.trim() === q) return;
+      const f = filtersRef.current;
+      pushFilters({ ...f, q: queryInput.trim() });
+    }, 450);
+    return () => clearTimeout(t);
+  }, [queryInput, q, pushFilters]);
+
+  const applyRange = (next: {
+    areaMin: number;
+    areaMax: number;
+    priceMinRub: number;
+    priceMaxRub: number;
+  }) => {
+    const aLo = Math.min(next.areaMin, next.areaMax);
+    const aHi = Math.max(next.areaMin, next.areaMax);
+    const pLo = Math.min(next.priceMinRub, next.priceMaxRub);
+    const pHi = Math.max(next.priceMinRub, next.priceMaxRub);
+    pushFilters({
+      areaMin: aLo,
+      areaMax: aHi,
+      priceMinRub: pLo,
+      priceMaxRub: pHi,
+      material,
+      floors,
+      q,
+      sort,
+    });
+  };
+
+  const floorsBtn = (id: FloorsFilterId) => {
+    const active = floors === id;
+    const label =
+      id === "all" ? "Все" : id === "1.5" ? "1½" : id === "1" ? "1" : id === "2" ? "2" : id;
+    return (
+      <button
+        key={id}
+        type="button"
+        onClick={() =>
+          pushFilters({
+            areaMin,
+            areaMax,
+            priceMinRub,
+            priceMaxRub,
+            material,
+            floors: id,
+            q,
+            sort,
+          })
+        }
+        className={`flex min-h-11 items-center justify-center rounded-full border px-3 text-sm font-semibold transition-colors ${id === "all" ? "min-w-[3.25rem]" : "h-11 w-11 p-0"}`}
+        style={chip(active)}
+        aria-pressed={active}
+      >
+        {label}
+      </button>
+    );
+  };
+
+  return (
+    <section className="pt-28 pb-20 md:pt-32 md:pb-28" style={{ backgroundColor: "var(--bg)" }}>
+      <div className="container mx-auto max-w-[1400px] px-5">
+        <div className="grid gap-10 lg:grid-cols-[minmax(260px,320px)_1fr] lg:items-start lg:gap-12">
+          {/* ——— Сайдбар фильтров (как на референсе) ——— */}
+          <aside className="space-y-4 lg:sticky lg:top-28">
+            <div className="flex items-center justify-between lg:hidden">
+              <span className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--text)" }}>
+                <SlidersHorizontal size={18} /> Фильтры
+              </span>
+              {hasCustomFilters ? (
+                <button type="button" onClick={clearFilters} className="text-sm font-medium underline-offset-4 hover:underline" style={{ color: "var(--text-muted)" }}>
+                  Сбросить
+                </button>
+              ) : null}
+            </div>
+
+            <div className={panelClass} style={panelStyle}>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-subtle)" }}>
+                Технология / материал
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {MATERIAL_OPTIONS.map((o) => {
+                  const active = material === o.id;
+                  return (
+                    <button
+                      key={o.id}
+                      type="button"
+                      onClick={() =>
+                        pushFilters({
+                          areaMin,
+                          areaMax,
+                          priceMinRub,
+                          priceMaxRub,
+                          material: o.id,
+                          floors,
+                          q,
+                          sort,
+                        })
+                      }
+                      className="rounded-full border px-3 py-2 text-left text-[13px] font-medium leading-snug transition-colors"
+                      style={chip(active)}
+                    >
+                      {o.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className={panelClass} style={panelStyle}>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-subtle)" }}>
+                Этажность
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {floorsBtn("all")}
+                {floorsBtn("1")}
+                {floorsBtn("1.5")}
+                {floorsBtn("2")}
+              </div>
+            </div>
+
+            <div className={panelClass} style={panelStyle}>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-subtle)" }}>
+                Площадь, м²
+              </p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <label className="space-y-1">
+                  <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                    от
+                  </span>
+                  <input
+                    type="number"
+                    min={bounds.minArea}
+                    max={bounds.maxArea}
+                    value={areaMin}
+                    onChange={(e) => {
+                      const v = Number(e.target.value);
+                      if (!Number.isFinite(v)) return;
+                      applyRange({
+                        areaMin: Math.min(Math.max(v, bounds.minArea), areaMax),
+                        areaMax,
+                        priceMinRub,
+                        priceMaxRub,
+                      });
+                    }}
+                    className="w-full rounded-xl border px-3 py-2 text-sm"
+                    style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)", color: "var(--text)" }}
+                  />
+                </label>
+                <label className="space-y-1">
+                  <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                    до
+                  </span>
+                  <input
+                    type="number"
+                    min={bounds.minArea}
+                    max={bounds.maxArea}
+                    value={areaMax}
+                    onChange={(e) => {
+                      const v = Number(e.target.value);
+                      if (!Number.isFinite(v)) return;
+                      applyRange({
+                        areaMin,
+                        areaMax: Math.max(Math.min(v, bounds.maxArea), areaMin),
+                        priceMinRub,
+                        priceMaxRub,
+                      });
+                    }}
+                    className="w-full rounded-xl border px-3 py-2 text-sm"
+                    style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)", color: "var(--text)" }}
+                  />
+                </label>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {[
+                  { label: "до 150 м²", aMin: bounds.minArea, aMax: Math.min(150, bounds.maxArea) },
+                  { label: "150–220 м²", aMin: Math.max(bounds.minArea, 150), aMax: Math.min(220, bounds.maxArea) },
+                  { label: "от 220 м²", aMin: Math.max(bounds.minArea, 220), aMax: bounds.maxArea },
+                ].map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() =>
+                      applyRange({
+                        areaMin: preset.aMin,
+                        areaMax: Math.max(preset.aMax, preset.aMin),
+                        priceMinRub,
+                        priceMaxRub,
+                      })
+                    }
+                    className="rounded-full border px-3 py-1.5 text-[12px] font-medium"
+                    style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={panelClass} style={panelStyle}>
+              <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-subtle)" }}>
+                Стоимость, ₽
+              </p>
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <label className="space-y-1">
+                  <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                    от (млн)
+                  </span>
+                  <input
+                    type="number"
+                    step={0.5}
+                    min={bounds.minPriceRub / 1_000_000}
+                    max={bounds.maxPriceRub / 1_000_000}
+                    value={priceMinRub / 1_000_000}
+                    onChange={(e) => {
+                      const v = Number(e.target.value.replace(",", ".")) * 1_000_000;
+                      if (!Number.isFinite(v)) return;
+                      applyRange({
+                        areaMin,
+                        areaMax,
+                        priceMinRub: Math.min(Math.max(v, bounds.minPriceRub), priceMaxRub),
+                        priceMaxRub,
+                      });
+                    }}
+                    className="w-full rounded-xl border px-3 py-2 text-sm"
+                    style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)", color: "var(--text)" }}
+                  />
+                </label>
+                <label className="space-y-1">
+                  <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                    до (млн)
+                  </span>
+                  <input
+                    type="number"
+                    step={0.5}
+                    min={bounds.minPriceRub / 1_000_000}
+                    max={bounds.maxPriceRub / 1_000_000}
+                    value={priceMaxRub / 1_000_000}
+                    onChange={(e) => {
+                      const v = Number(e.target.value.replace(",", ".")) * 1_000_000;
+                      if (!Number.isFinite(v)) return;
+                      applyRange({
+                        areaMin,
+                        areaMax,
+                        priceMinRub,
+                        priceMaxRub: Math.max(Math.min(v, bounds.maxPriceRub), priceMinRub),
+                      });
+                    }}
+                    className="w-full rounded-xl border px-3 py-2 text-sm"
+                    style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)", color: "var(--text)" }}
+                  />
+                </label>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {[
+                  { label: "до 10 млн", pMin: bounds.minPriceRub, pMax: Math.min(10_000_000, bounds.maxPriceRub) },
+                  {
+                    label: "10–15 млн",
+                    pMin: Math.max(bounds.minPriceRub, 10_000_000),
+                    pMax: Math.min(15_000_000, bounds.maxPriceRub),
+                  },
+                  { label: "от 15 млн", pMin: Math.max(bounds.minPriceRub, 15_000_000), pMax: bounds.maxPriceRub },
+                ].map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() =>
+                      applyRange({
+                        areaMin,
+                        areaMax,
+                        priceMinRub: preset.pMin,
+                        priceMaxRub: preset.pMax,
+                      })
+                    }
+                    className="rounded-full border px-3 py-1.5 text-[12px] font-medium"
+                    style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="hidden items-center justify-between lg:flex">
+              {hasCustomFilters ? (
+                <button type="button" onClick={clearFilters} className="text-sm font-medium underline-offset-4 hover:underline" style={{ color: "var(--text-muted)" }}>
+                  Сбросить фильтры
+                </button>
+              ) : (
+                <span />
+              )}
+            </div>
+          </aside>
+
+          {/* ——— Основная колонка ——— */}
+          <div className="min-w-0">
+            <nav className="text-[12px] tracking-[0.02em] sm:text-[13px]" style={{ color: "var(--text-muted)" }} aria-label="Навигация по разделу">
+              <Link href="/" className="transition-colors hover:text-[var(--accent)]">
+                Главная
+              </Link>
+              <span className="mx-1.5 text-[var(--text-subtle)] sm:mx-2" aria-hidden>
+                {' › '}
+              </span>
+              <span style={{ color: "var(--text)" }}>Проекты домов</span>
+            </nav>
+
+            <h1 className="mt-4 font-heading text-[1.75rem] font-bold leading-tight tracking-tight md:text-4xl lg:text-[2.5rem]" style={{ color: "var(--text)" }}>
+              Проекты домов
+            </h1>
+            <p className="mt-4 max-w-2xl text-[15px] leading-relaxed md:text-base" style={{ color: "var(--text-muted)" }}>
+              Подбор по материалу, этажности, площади и бюджету. Сравнение карточек и расширенный конструктор на главной.
+            </p>
+
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <div className="relative min-w-0 flex-1 sm:max-w-md">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" style={{ color: "var(--text-muted)" }} aria-hidden />
+                <input
+                  type="search"
+                  placeholder="Например, название или артикул проекта"
+                  value={queryInput}
+                  onChange={(e) => setQueryInput(e.target.value)}
+                  className="h-12 w-full rounded-full border py-2 pl-10 pr-4 text-sm outline-none ring-[var(--accent)] focus-visible:ring-2"
+                  style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)", color: "var(--text)" }}
+                  aria-label="Поиск по каталогу"
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <label className="flex items-center gap-2 text-sm">
+                  <span className="sr-only">Сортировка</span>
+                  <select
+                    value={sort}
+                    onChange={(e) =>
+                      pushFilters({
+                        areaMin,
+                        areaMax,
+                        priceMinRub,
+                        priceMaxRub,
+                        material,
+                        floors,
+                        q,
+                        sort: e.target.value as ProjectsSortKey,
+                      })
+                    }
+                    className="h-12 min-w-[11rem] rounded-full border px-4 text-sm font-medium"
+                    style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)", color: "var(--text)" }}
+                  >
+                    <option value="price">По цене</option>
+                    <option value="area">По площади</option>
+                    <option value="new">Сначала новинки</option>
+                  </select>
+                </label>
+                <div
+                  className="flex rounded-full border p-1"
+                  role="group"
+                  aria-label="Вид списка"
+                  style={{ borderColor: "var(--border)", backgroundColor: "rgba(237, 235, 229, 0.5)" }}
+                >
+                  <button
+                    type="button"
+                    aria-pressed={view === "grid"}
+                    onClick={() => setView("grid")}
+                    className="flex h-10 w-10 items-center justify-center rounded-full transition-colors"
+                    style={{
+                      backgroundColor: view === "grid" ? "var(--accent)" : "transparent",
+                      color: view === "grid" ? "var(--accent-contrast)" : "var(--text-muted)",
+                    }}
+                  >
+                    <LayoutGrid size={18} />
+                  </button>
+                  <button
+                    type="button"
+                    aria-pressed={view === "list"}
+                    onClick={() => setView("list")}
+                    className="flex h-10 w-10 items-center justify-center rounded-full transition-colors"
+                    style={{
+                      backgroundColor: view === "list" ? "var(--accent)" : "transparent",
+                      color: view === "list" ? "var(--accent-contrast)" : "var(--text-muted)",
+                    }}
+                  >
+                    <LayoutList size={18} />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Быстрые пресеты */}
+            <div className="mt-5 flex flex-wrap gap-2">
+              {[
+                {
+                  label: "Одноэтажные",
+                  fn: () =>
+                    pushFilters({
+                      areaMin,
+                      areaMax,
+                      priceMinRub,
+                      priceMaxRub,
+                      material,
+                      floors: "1",
+                      q,
+                      sort,
+                    }),
+                },
+                {
+                  label: "Двухэтажные",
+                  fn: () =>
+                    pushFilters({
+                      areaMin,
+                      areaMax,
+                      priceMinRub,
+                      priceMaxRub,
+                      material,
+                      floors: "2",
+                      q,
+                      sort,
+                    }),
+                },
+                {
+                  label: "Газобетон",
+                  fn: () =>
+                    pushFilters({
+                      areaMin,
+                      areaMax,
+                      priceMinRub,
+                      priceMaxRub,
+                      material: "gazobeton",
+                      floors,
+                      q,
+                      sort,
+                    }),
+                },
+              ].map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  onClick={preset.fn}
+                  className="rounded-full border px-4 py-2 text-[13px] font-medium transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                  style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Карточки */}
+            <div className={view === "grid" ? "mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-3" : "mt-10 grid gap-5"}>
+              {visible.map((project) => {
+                const cover = getProjectRenders(project)[0];
+                const matLabel = project.materials[0] || "на выбор";
+
+                if (view === "grid") {
+                  return (
+                    <article key={project.id} className="group relative overflow-hidden rounded-[1.25rem] border" style={{ borderColor: "var(--border)" }}>
+                      <Link href={`/projects/${project.slug}`} className="relative block aspect-[4/3] overflow-hidden bg-[var(--stone)]">
+                        {cover ? (
+                          <img
+                            src={cover.url}
+                            alt={cover.alt || project.title}
+                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                          />
+                        ) : null}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" aria-hidden />
+                        <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+                          <span className="rounded-full bg-black/50 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
+                            {project.floors} {project.floors === 1 ? "этаж" : "этажа"}
+                          </span>
+                          <span className="max-w-[11rem] truncate rounded-full bg-black/45 px-3 py-1 text-[11px] font-medium text-white/95 backdrop-blur-sm">{matLabel}</span>
+                        </div>
+                        <div className="absolute right-3 top-3 [&_button]:border-white/45 [&_button]:bg-black/45 [&_button]:text-white [&_button]:backdrop-blur-sm [&_button:hover]:bg-black/60">
+                          <CompareButton projectId={project.id} />
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
+                          <p className="font-heading text-lg font-bold text-white drop-shadow md:text-xl">{project.title}</p>
+                          <div className="mt-2 flex flex-wrap items-end justify-between gap-2">
+                            <div className="flex flex-wrap gap-3 text-[12px] text-white/90">
+                              <span>{project.area} м²</span>
+                              <span>·</span>
+                              <span>
+                                {project.rooms} комн.
+                              </span>
+                              <span>·</span>
+                              <span>
+                                {project.bathrooms} с/у
+                              </span>
+                            </div>
+                            <p className="text-lg font-bold tabular-nums text-white md:text-xl">{formatRub(project.price)}</p>
+                          </div>
+                        </div>
+                      </Link>
+                    </article>
+                  );
+                }
+
+                return (
+                  <article
+                    key={project.id}
+                    className="group grid overflow-hidden rounded-[28px] border md:grid-cols-[minmax(260px,420px)_1fr]"
+                    style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)" }}
+                  >
+                    <Link href={`/projects/${project.slug}`} className="relative min-h-[260px] overflow-hidden bg-[var(--stone)]">
+                      {cover ? (
+                        <img
+                          src={cover.url}
+                          alt={cover.alt || project.title}
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
+                      ) : null}
+                      <div className="absolute left-4 top-4 flex gap-2">
+                        {project.isNew ? (
+                          <span className="rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ backgroundColor: "var(--accent)" }}>
+                            Новый проект
+                          </span>
+                        ) : null}
+                        {project.pricePromo ? (
+                          <span className="rounded-full px-3 py-1 text-xs font-semibold text-white" style={{ backgroundColor: "var(--sale)" }}>
+                            {project.pricePromo}
+                          </span>
+                        ) : null}
+                      </div>
+                    </Link>
+                    <div className="flex flex-col gap-6 p-5 md:p-8">
+                      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                        <div>
+                          <Link
+                            href={`/projects/${project.slug}`}
+                            className="font-heading text-3xl transition-colors group-hover:text-[var(--accent)]"
+                            style={{ color: "var(--text)" }}
+                          >
+                            {project.title}
+                          </Link>
+                          <p className="mt-3 max-w-2xl text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                            {project.shortDescription}
+                          </p>
+                        </div>
+                        <div className="text-left md:text-right">
+                          <p className="text-xs uppercase tracking-[0.12em]" style={{ color: "var(--text-subtle)" }}>
+                            Стоимость
+                          </p>
+                          <p className="mt-1 text-2xl font-semibold" style={{ color: "var(--sale)" }}>
+                            {formatRub(project.price)}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+                        {[
+                          ["Этажность", `${project.floors}`],
+                          ["Площадь", `${project.area} м²`],
+                          ["Комнаты", `${project.rooms}`],
+                          ["Санузлы", `${project.bathrooms}`],
+                          ["Материалы", matLabel],
+                        ].map(([label, value]) => (
+                          <div key={label} className="rounded-2xl bg-[var(--bg)] p-3">
+                            <p className="text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--text-subtle)" }}>
+                              {label}
+                            </p>
+                            <p className="mt-1 text-sm font-semibold" style={{ color: "var(--text)" }}>
+                              {value}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <Link
+                          href={`/projects/${project.slug}`}
+                          className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white"
+                          style={{ backgroundColor: "var(--accent)" }}
+                        >
+                          Смотреть проект <ArrowRight size={16} />
+                        </Link>
+                        <CompareButton projectId={project.id} />
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            {filtered.length === 0 ? (
+              <p className="mt-10 text-center text-base" style={{ color: "var(--text-muted)" }}>
+                Нет проектов по выбранным условиям. Измените фильтры или{" "}
+                <Link href="/#projects-constructor" className="font-medium underline-offset-4 hover:underline" style={{ color: "var(--accent)" }}>
+                  задайте параметры на главной
+                </Link>
+                .
+              </p>
+            ) : null}
+
+            {visible.length < filtered.length ? (
+              <button
+                type="button"
+                onClick={() => setPage((value) => value + 1)}
+                className="mt-10 w-full rounded-[24px] border px-6 py-5 text-lg font-semibold transition-colors hover:bg-[var(--accent)] hover:text-[var(--accent-contrast)]"
+                style={{ borderColor: "var(--border)", color: "var(--text)" }}
+              >
+                Показать ещё {Math.min(PAGE_SIZE, filtered.length - visible.length)} проектов
+              </button>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

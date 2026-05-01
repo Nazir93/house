@@ -1,0 +1,20 @@
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/db";
+import { HouseProjectForm } from "@/components/admin/house-project-form";
+
+export const dynamic = "force-dynamic";
+
+export default async function EditHouseProjectPage({ params }: { params: { id: string } }) {
+  let project: any = null;
+  try {
+    project = await (prisma as any).houseProject.findUnique({
+      where: { id: params.id },
+      include: { media: { orderBy: [{ type: "asc" }, { order: "asc" }] } },
+    });
+  } catch {
+    project = null;
+  }
+
+  if (!project) notFound();
+  return <HouseProjectForm initial={project} />;
+}

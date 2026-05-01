@@ -1,0 +1,429 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: auto; /* Lenis handles smooth scroll */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Иначе в Chrome сверху видна тонкая белая полоска (дефолтный фон html под body) */
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    background-color: #F6F6F4;
+    background-color: var(--bg);
+  }
+
+  /* Smooth image loading */
+  img {
+    transition: opacity 0.3s ease;
+  }
+
+  /* Smooth focus outlines */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 4px;
+    transition: outline-offset 0.15s ease;
+  }
+
+  /*
+   * Бренд-палитра (фиксированные значения)
+   * #F6F6F4 — основной фон, текстовые секции, описания (не заливать этим весь «полный» экран акцента).
+   * #0F3D2E — шапка/подвал, смысловые блоки, primary-кнопки, активное меню; не для длинных текстов и не на весь экран страницы.
+   * #2B2F2D — основной текст, подзаголовки, иконки, цифры.
+   * #E9E7E3 — «О компании», преимущества, отзывы, FAQ.
+   * #D7D2CB — карточки проектов, формы, подложки характеристик.
+   * #6E2A1F — только срочный CTA («Оставить заявку»), акции/фикс. цена/дедлайн; не навигация и не массово.
+   */
+  :root {
+    color-scheme: light;
+    --bg: #f6f6f4;
+    --bg-secondary: #e9e7e3;
+    --card-bg: #d7d2cb;
+    --text: #2b2f2d;
+    --text-muted: rgba(43, 47, 45, 0.72);
+    --text-subtle: rgba(43, 47, 45, 0.45);
+    --border: rgba(43, 47, 45, 0.14);
+    --accent: #0f3d2e;
+    --accent-hover: #174d3b;
+    --accent-contrast: #f6f6f4;
+    --sale: #6e2a1f;
+    --sale-hover: #5c2419;
+    --pine: #0f3d2e;
+    --graphite: #2b2f2d;
+    --stone: #e9e7e3;
+    --clay: #d7d2cb;
+    --header-border: rgba(255, 255, 255, 0.14);
+    --on-accent: #f6f6f4;
+    --on-accent-muted: rgba(246, 246, 244, 0.78);
+    --on-sale: #f6f6f4;
+    --brand-blue: #2563eb;
+    --accent-rgb: 15 61 46;
+    --sale-rgb: 110 42 31;
+    --scrollbar-thumb: rgba(43, 47, 45, 0.22);
+  }
+
+  [data-theme="light"] {
+    color-scheme: light;
+    --bg: #f6f6f4;
+    --bg-secondary: #e9e7e3;
+    --card-bg: #d7d2cb;
+    --text: #2b2f2d;
+    --text-muted: rgba(43, 47, 45, 0.72);
+    --text-subtle: rgba(43, 47, 45, 0.45);
+    --border: rgba(43, 47, 45, 0.14);
+    --accent: #0f3d2e;
+    --accent-hover: #174d3b;
+    --accent-contrast: #f6f6f4;
+    --sale: #6e2a1f;
+    --sale-hover: #5c2419;
+    --pine: #0f3d2e;
+    --graphite: #2b2f2d;
+    --stone: #e9e7e3;
+    --clay: #d7d2cb;
+    --header-border: rgba(255, 255, 255, 0.14);
+    --on-accent: #f6f6f4;
+    --on-accent-muted: rgba(246, 246, 244, 0.78);
+    --on-sale: #f6f6f4;
+    --brand-blue: #2563eb;
+    --accent-rgb: 15 61 46;
+    --sale-rgb: 110 42 31;
+    --scrollbar-thumb: rgba(43, 47, 45, 0.22);
+  }
+
+  *,
+  *::before,
+  *::after {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100%;
+    min-height: 100dvh;
+    background-color: var(--bg);
+    color: var(--text);
+    transition: background-color 0.5s ease, color 0.5s ease;
+    overflow-x: hidden;
+    overscroll-behavior-x: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  a, button {
+    touch-action: manipulation;
+  }
+
+  img,
+  video,
+  svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Не трогаем checkbox/radio — иначе пропадает нативная отрисовка и «мёртвая» галочка в формах */
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select,
+  button {
+    font-family: inherit;
+    font-size: inherit;
+    border-radius: 0;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 1.125rem;
+    height: 1.125rem;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: var(--bg);
+    color: var(--text);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+  }
+
+  option {
+    background-color: var(--card-bg);
+    color: var(--text);
+  }
+
+  /* Автозаполнение браузера — не белое/голубое на тёмном фоне */
+  .funnel-text-input:-webkit-autofill,
+  .funnel-text-input:-webkit-autofill:hover,
+  .funnel-text-input:-webkit-autofill:focus,
+  .funnel-text-input:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--text) !important;
+    caret-color: var(--text);
+    box-shadow: 0 0 0 1000px var(--bg-secondary) inset !important;
+    transition: background-color 50000s ease-in-out 0s;
+  }
+
+  [data-theme="light"] .funnel-text-input:-webkit-autofill,
+  [data-theme="light"] .funnel-text-input:-webkit-autofill:hover,
+  [data-theme="light"] .funnel-text-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text) !important;
+    box-shadow: 0 0 0 1000px var(--bg-secondary) inset !important;
+  }
+
+  textarea.funnel-text-input:-webkit-autofill,
+  textarea.funnel-text-input:-webkit-autofill:hover,
+  textarea.funnel-text-input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--text) !important;
+    box-shadow: 0 0 0 1000px var(--bg-secondary) inset !important;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 9999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--scrollbar-thumb) 85%, var(--text));
+  }
+
+  @supports (scrollbar-width: thin) {
+    html {
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-thumb) transparent;
+    }
+  }
+
+  /* Прокрутка без видимых полос (полноэкранное меню и т.п.) */
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer components {
+  .font-heading {
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    font-weight: 700;
+  }
+
+  .logo-text {
+    font-family: var(--font-main), sans-serif;
+    text-transform: uppercase;
+    transform: scaleX(0.65);
+    transform-origin: left center;
+    display: inline-block;
+    line-height: 1;
+  }
+
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+  }
+
+  .theme-bg {
+    background-color: var(--bg);
+  }
+
+  .theme-bg-secondary {
+    background-color: var(--bg-secondary);
+  }
+
+  .theme-text {
+    color: var(--text);
+  }
+
+  .theme-text-muted {
+    color: var(--text-muted);
+  }
+
+  .theme-text-subtle {
+    color: var(--text-subtle);
+  }
+
+  .theme-border {
+    border-color: var(--border);
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /**
+   * iOS Safari: при font-size < 16px на input зумит при фокусе.
+   * Компактные поля на мобильных — 16px, на sm+ можно меньше из макета.
+   */
+  @media screen and (max-width: 639.98px) {
+    .funnel-text-input,
+    input.funnel-text-input,
+    textarea.funnel-text-input {
+      font-size: 16px;
+    }
+  }
+
+  /* Contact modal: restore left border on stacked fields (mobile) */
+  @media (max-width: 639px) {
+    .border-phone-field {
+      border-left: 1px solid var(--border) !important;
+    }
+  }
+
+  /* Prevent text overflow on narrow screens */
+  @media (max-width: 380px) {
+    .container {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+  }
+
+}
+
+/* Electric circuit grid animation */
+@keyframes electric-snake-flow {
+  0% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: calc(var(--path-len) * -1px);
+    opacity: 0;
+  }
+}
+
+.electric-snake {
+  animation: electric-snake-flow 3.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .electric-snake {
+    animation: none;
+  }
+}
+
+/* Price banner pulse */
+.price-pulse-border {
+  animation: price-border-shift 6s ease-in-out infinite;
+}
+
+.price-pulse-glow {
+  animation: price-glow 4s ease-in-out infinite;
+}
+
+.price-pulse-dot {
+  animation: price-dot 2.5s ease-in-out infinite;
+}
+
+@keyframes price-border-shift {
+  0%, 100% { background-position: 0% 50%; opacity: 0.5; }
+  50% { background-position: 100% 50%; opacity: 1; }
+}
+
+@keyframes price-glow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+@keyframes price-dot {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.5); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes priceShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.5s ease-out both;
+}
+
+@keyframes menuFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .price-pulse-border,
+  .price-pulse-glow,
+  .price-pulse-dot {
+    animation: none;
+  }
+  .menu-stagger {
+    animation: none !important;
+  }
+}

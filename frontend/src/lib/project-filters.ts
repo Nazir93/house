@@ -1,0 +1,121 @@
+import type { HouseProjectItem } from "@/lib/construction-data";
+
+export type MaterialFilterId = "all" | "gazobeton" | "keramoblok" | "kirpich";
+export type FloorsFilterId = "all" | "1" | "1.5" | "2";
+
+/** Сортировка каталога проектов (query `sort`). */
+export type ProjectsSortKey = "price" | "area" | "new";
+
+export function parseSortParam(v: string | null): ProjectsSortKey {
+  if (v === "area" || v === "new") return v;
+  return "price";
+}
+
+export const MATERIAL_OPTIONS: { id: MaterialFilterId; label: string }[] = [
+  { id: "all", label: "Любой материал" },
+  { id: "gazobeton", label: "Газобетон" },
+  { id: "keramoblok", label: "Керамоблок" },
+  { id: "kirpich", label: "Кирпич" },
+];
+
+export const FLOORS_OPTIONS: { id: FloorsFilterId; label: string }[] = [
+  { id: "all", label: "Любая этажность" },
+  { id: "1", label: "1 этаж" },
+  { id: "1.5", label: "1,5 этажа" },
+  { id: "2", label: "2 этажа" },
+];
+
+export function parseMaterialParam(v: string | null): MaterialFilterId {
+  if (v === "gazobeton" || v === "keramoblok" || v === "kirpich") return v;
+  return "all";
+}
+
+export function parseFloorsParam(v: string | null): FloorsFilterId {
+  if (v === "1" || v === "1.5" || v === "2") return v;
+  return "all";
+}
+
+export function projectMatchesMaterial(p: HouseProjectItem, m: MaterialFilterId): boolean {
+  if (m === "all") return true;
+  const mats = p.materials.map((x) => x.toLowerCase());
+  if (m === "gazobeton") return mats.some((s) => s.includes("газобетон"));
+  if (m === "keramoblok") return mats.some((s) => s.includes("керам"));
+  if (m === "kirpich") return mats.some((s) => s.includes("кирпич"));
+  return true;
+}
+
+/** Полтора этажа: в БД целое число — используем текст проекта и компактные двухэтажные коробки как приближение. */
+export function projectMatchesFloors(p: HouseProjectItem, f: FloorsFilterId): boolean {
+  if (f === "all") return true;
+  if (f === "1") return p.floors === 1;
+  if (f === "2") return p.floors === 2;
+  if (f === "1.5") {
+    const text = `${p.title} ${p.shortDescription}`.toLowerCase();
+    if (/полутор|1[\s,.]?5|мансард|мезонин/.test(text)) return true;
+    return p.floors === 2 && p.area <= 140;
+  }
+  return true;
+}
+
+export function projectMatchesAreaPrice(
+  p: HouseProjectItem,
+  areaMin: number,
+  areaMax: number,
+  priceMinRub: number,
+  priceMaxRub: number,
+): boolean {
+  return p.area >= areaMin && p.area <= areaMax && p.price >= priceMinRub && p.price <= priceMaxRub;
+}
+
+export function projectMatchesQuery(p: HouseProjectItem, q: string): boolean {
+  const s = q.trim().toLowerCase();
+  if (!s) return true;
+  return (
+    p.title.toLowerCase().includes(s) ||
+    p.slug.toLowerCase().includes(s) ||
+    p.shortDescription.toLowerCase().includes(s)
+  );
+}
+
+export function getPublishedProjectBounds(projects: HouseProjectItem[]) {
+  const list = projects.filter((p) => p.published);
+  if (list.length === 0) {
+    return {
+      minArea: 50,
+      maxArea: 350,
+      minPriceRub: 4_000_000,
+      maxPriceRub: 25_000_000,
+    };
+  }
+  const areas = list.map((x) => x.area);
+  const prices = list.map((x) => x.price);
+  return {
+    minArea: Math.min(...areas),
+    maxArea: Math.max(...areas),
+    minPriceRub: Math.min(...prices),
+    maxPriceRub: Math.max(...prices),
+  };
+}
+
+export function buildProjectsSearchParams(opts: {
+  areaMin: number;
+  areaMax: number;
+  priceMinRub: number;
+  priceMaxRub: number;
+  material: MaterialFilterId;
+  floors: FloorsFilterId;
+  q: string;
+  sort?: ProjectsSortKey;
+}): string {
+  const p = new URLSearchParams();
+  p.set("areaMin", String(opts.areaMin));
+  p.set("areaMax", String(opts.areaMax));
+  p.set("priceMin", String(opts.priceMinRub));
+  p.set("priceMax", String(opts.priceMaxRub));
+  if (opts.material !== "all") p.set("material", opts.material);
+  if (opts.floors !== "all") p.set("floors", opts.floors);
+  if (opts.q.trim()) p.set("q", opts.q.trim());
+  const sort = opts.sort ?? "price";
+  if (sort !== "price") p.set("sort", sort);
+  return p.toString();
+}

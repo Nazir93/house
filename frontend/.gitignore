@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+.env
+.env.local
+.env.production
+*.tsbuildinfo
+next-env.d.ts
+
+# Загруженные из админки файлы (хранятся на сервере)
+public/uploads/*
+!public/uploads/.gitkeep

@@ -1,0 +1,24 @@
+/** Заглушка: страница прайса электромонтажа удалена; тип оставлен для совместимости со старыми заявками в админке. */
+
+export type EstimateLine = {
+  id: number;
+  sectionTitle: string;
+  name: string;
+  unit: string;
+  qty: number;
+  pricePerUnit: number;
+  lineTotal: number;
+};
+
+export type PriceEstimatePayload = {
+  lines: EstimateLine[];
+  total: number;
+  withVat: boolean;
+  positionCount: number;
+};
+
+export function buildEstimateLines(): EstimateLine[] {
+  return [];
+}
+
+export function downloadEstimateCsv(): void {}
