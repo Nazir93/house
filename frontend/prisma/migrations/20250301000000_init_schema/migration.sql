@@ -1,4 +1,4 @@
-﻿-- CreateEnum
+-- CreateEnum
 CREATE TYPE "Category" AS ENUM ('RESTAURANT', 'OFFICE', 'APARTMENT', 'SHOP', 'OTHER');
 
 -- CreateEnum
@@ -238,7 +238,7 @@ CREATE TABLE "AdminUser" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "name" TEXT NOT NULL DEFAULT '╨Р╨┤╨╝╨╕╨╜╨╕╤Б╤В╤А╨░╤В╨╛╤А',
+    "name" TEXT NOT NULL DEFAULT 'Администратор',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "AdminUser_pkey" PRIMARY KEY ("id")
