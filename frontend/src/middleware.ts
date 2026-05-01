@@ -2,10 +2,14 @@ import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  // За nginx без редиректа с :80 на HTTPS запросы приходят с x-forwarded-proto: http
+  // Редирект HTTP→HTTPS только за reverse proxy (nginx и т.д.).
+  // Прямой доступ к Node на :3000 без X-Forwarded-* не трогаем — иначе Location может стать https://0.0.0.0:3000/.
   if (process.env.NODE_ENV === "production") {
     const proto = request.headers.get("x-forwarded-proto");
-    if (proto === "http") {
+    const behindProxy =
+      Boolean(request.headers.get("x-forwarded-for")) ||
+      Boolean(request.headers.get("x-real-ip"));
+    if (proto === "http" && behindProxy) {
       const url = request.nextUrl.clone();
       url.protocol = "https:";
       return NextResponse.redirect(url, 301);
