@@ -86,6 +86,8 @@ NEXTAUTH_URL=https://dom.ru
 
 ## Nginx
 
+Пока нет домена и TLS, для доступа по **`http://ВАШ_IP`** без порта используйте [`nginx/vps-site-http-ip.conf`](../nginx/vps-site-http-ip.conf): прокси на `127.0.0.1:3000`. На сервере отключите дефолтный сайт (`rm /etc/nginx/sites-enabled/default`), положите конфиг в `sites-available/house`, сделайте symlink в `sites-enabled`, затем `nginx -t` и `systemctl reload nginx`. В `.env` выставьте **`NEXT_PUBLIC_SITE_URL`** и **`NEXTAUTH_URL`** как `http://ВАШ_IP` (без `:3000`).
+
 В прокси на Next.js должны передаваться заголовки (как в [`nginx/vps-site.conf`](../nginx/vps-site.conf)):
 
 - `Host`
