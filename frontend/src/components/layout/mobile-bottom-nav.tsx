@@ -27,7 +27,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     href: "/portfolio",
-    label: "Портфолио",
+    label: "Наши проекты",
     Icon: Images,
     isActive: (p) => p.startsWith("/portfolio"),
   },

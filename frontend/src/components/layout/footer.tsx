@@ -39,7 +39,7 @@ const FOOTER_COLUMNS: { title: string; links: { href: string; label: string }[] 
     links: [
       { href: "/projects", label: "Каталог типовых домов" },
       { href: "/individual-design", label: "Индивидуальный проект" },
-      { href: "/portfolio", label: "Портфолио" },
+      { href: "/portfolio", label: "Наши проекты" },
       { href: "/mortgage", label: "Ипотека на дом" },
     ],
   },

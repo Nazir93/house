@@ -7,8 +7,8 @@ export const revalidate = 60;
 
 export async function generateMetadata() {
   return getPageMeta({
-    title: `Портфолио — реализованные проекты | ${SITE_NAME}`,
-    description: `Портфолио ${SITE_NAME}: этапы строительства и галерея по объектам, карта реализованных домов.`,
+    title: `Наши проекты — построенные дома | ${SITE_NAME}`,
+    description: `Наши проекты ${SITE_NAME}: реализованные объекты, этапы строительства, карта и экскурсии.`,
     path: "/portfolio",
     keywords: ["построенные дома", "портфолио строительства", "карта объектов", SITE_NAME],
   });

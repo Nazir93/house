@@ -139,7 +139,7 @@ export function PortfolioPageContent({
           className="inline-block text-[10px] sm:text-xs uppercase tracking-[0.12em] px-3 py-1.5 rounded-full mb-4 sm:mb-5"
           style={{ border: "1px solid var(--border)", color: "var(--text-muted)" }}
         >
-          Портфолио
+          Наши проекты
         </span>
         <h1
           className="font-heading text-xl sm:text-2xl md:text-[1.75rem] leading-[1.2] tracking-tight mb-5 sm:mb-6 max-w-3xl break-words"

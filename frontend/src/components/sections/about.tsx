@@ -56,7 +56,7 @@ const SLIDES: Slide[] = [
     highlight: "Типовые проекты и портфолио построенных домов",
     description:
       "Смотрите площади, планировки и реальные фото объектов. Можно сопоставить несколько проектов и выбрать оптимальный под бюджет.",
-    action: { type: "link", href: "/portfolio", label: "Портфолио" },
+    action: { type: "link", href: "/portfolio", label: "Наши проекты" },
   },
   {
     number: "06",

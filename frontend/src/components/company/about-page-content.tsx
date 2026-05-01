@@ -259,7 +259,7 @@ export function AboutPageContent() {
               className="inline-flex rounded-full border px-6 py-3 text-sm font-semibold transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
               style={{ borderColor: "var(--border)", color: "var(--text)" }}
             >
-              Портфолио
+              Наши проекты
             </Link>
             <Link
               href="/contacts"

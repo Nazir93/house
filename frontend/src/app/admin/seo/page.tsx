@@ -44,7 +44,7 @@ const KNOWN_PAGES = [
   { path: "/services/roofing", label: "Услуга: кровля" },
   { path: "/services/engineering", label: "Услуга: инженерные сети" },
   { path: "/services/finishing", label: "Услуга: отделка" },
-  { path: "/portfolio", label: "Портфолио" },
+  { path: "/portfolio", label: "Наши проекты" },
   { path: "/blog", label: "Блог" },
   { path: "/contacts", label: "Контакты" },
   { path: "/partners/partner", label: "Партнёры — подряд" },

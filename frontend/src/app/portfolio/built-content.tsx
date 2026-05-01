@@ -87,14 +87,14 @@ export function BuiltPortfolioContent({
             <span className="mx-1.5 text-[var(--text-subtle)] sm:mx-2" aria-hidden>
               {" > "}
             </span>
-            <span className="text-[var(--text)]">Портфолио</span>
+            <span className="text-[var(--text)]">Наши проекты</span>
           </nav>
 
           <div className="mt-5 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0 max-w-3xl">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">Реализованные объекты</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">Построенные дома</p>
               <h1 className="mt-2 font-heading text-3xl font-bold tracking-tight md:text-4xl lg:text-[2.65rem] lg:leading-[1.08]">
-                Наши работы
+                Наши проекты
               </h1>
               <p className="mt-3 text-[13px] leading-relaxed text-[var(--text-muted)] sm:text-sm md:text-[15px]">
                 Фильтр по материалу и региону. На карте видно географию строительства — от Ленинградской области до Москвы и области.

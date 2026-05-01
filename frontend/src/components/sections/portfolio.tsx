@@ -308,7 +308,7 @@ export function PortfolioSection({ projects: propProjects }: { projects?: Projec
     >
       <div className="container mx-auto">
         <h2 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-8 sm:mb-12" style={{ color: "var(--text)" }}>
-          Портфолио
+          Наши проекты
         </h2>
 
         <div className="border-t" style={{ borderColor: "var(--border)" }}>

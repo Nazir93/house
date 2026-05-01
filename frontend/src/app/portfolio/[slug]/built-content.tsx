@@ -61,7 +61,7 @@ export function BuiltObjectDetailContent({ object }: { object: BuiltObjectItem }
               {' > '}
             </span>
             <Link href="/portfolio" className="transition-colors hover:text-[var(--accent)]">
-              Портфолио
+              Наши проекты
             </Link>
           </nav>
 

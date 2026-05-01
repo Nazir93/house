@@ -3,7 +3,11 @@ export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || "Часть Душ
 /** Слоган под логотипом в шапке (как на лендинге застройщика). */
 export const HEADER_TAGLINE =
   process.env.NEXT_PUBLIC_HEADER_TAGLINE?.trim() ||
-  "Строительство коттеджей из кирпича и газобетона";
+  "Строительство домов под ключ";
+
+/** Подпись под телефоном в шапке (десктоп). */
+export const HEADER_PHONE_HINT =
+  process.env.NEXT_PUBLIC_HEADER_PHONE_HINT?.trim() || "Ответим за 5 минут";
 
 /** Ссылка на карточку организации в Яндекс.Картах для блока «рейтинг»; пусто — ведёт на страницу отзывов. */
 export const YANDEX_ORG_URL = process.env.NEXT_PUBLIC_YANDEX_ORG_URL?.trim() || "";

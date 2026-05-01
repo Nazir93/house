@@ -16,18 +16,18 @@ export function isNavGroup(item: NavItem): item is NavGroup {
 
 export const NAV_SECTIONS: NavSection[] = [
   {
-    label: "Наши проекты",
+    label: "Проекты",
     items: [
-      { href: "/projects", label: "Каталог проектов" },
+      { href: "/projects", label: "Каталог типовых проектов" },
       { href: "/projects/compare", label: "Сравнение проектов" },
       { href: "/individual-design", label: "Индивидуальное проектирование" },
     ],
   },
   {
-    label: "Портфолио",
+    label: "Наши проекты",
     items: [
-      { href: "/portfolio", label: "Наши работы" },
-      { href: "/portfolio?view=map#portfolio-map", label: "Карта построенных объектов" },
+      { href: "/portfolio", label: "Реализованные объекты" },
+      { href: "/portfolio?view=map#portfolio-map", label: "Карта объектов" },
       { href: "/contacts", label: "Экскурсия на объекты" },
     ],
   },
