@@ -80,6 +80,10 @@ NEXTAUTH_URL=https://dom.ru
 
 Перезапустить приложение, в браузере очистить cookie для сайта или войти в инкогнито.
 
+## Редирект HTTP→HTTPS
+
+По умолчанию Next.js **не** делает редирект на HTTPS в `middleware` (иначе при доступе напрямую на `:3000` возможны ошибочные `Location`). Редирект с порта **80** на **443** настройте в **nginx** (см. `nginx/vps-site.conf`). Если нужен редирект именно из Node за прокси: в `.env` задайте **`MIDDLEWARE_HTTPS_REDIRECT=true`** и корректные **`X-Forwarded-Proto`** / **`X-Forwarded-For`**.
+
 ## Nginx
 
 В прокси на Next.js должны передаваться заголовки (как в [`nginx/vps-site.conf`](../nginx/vps-site.conf)):

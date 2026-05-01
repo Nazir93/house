@@ -2,9 +2,13 @@ import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  // Редирект HTTP→HTTPS только за reverse proxy (nginx и т.д.).
-  // Прямой доступ к Node на :3000 без X-Forwarded-* не трогаем — иначе Location может стать https://0.0.0.0:3000/.
-  if (process.env.NODE_ENV === "production") {
+  // Редирект HTTP→HTTPS из Node по умолчанию ВЫКЛЮЧЕН: у многих VPS на :3000 всё равно пробрасывают
+  // X-Forwarded-* → получался битый Location (например https://0.0.0.0:3000/). На проде редирект на HTTPS
+  // делайте в nginx. Явно включить: MIDDLEWARE_HTTPS_REDIRECT=true в .env (и корректные proxy-заголовки).
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.MIDDLEWARE_HTTPS_REDIRECT === "true"
+  ) {
     const proto = request.headers.get("x-forwarded-proto");
     const behindProxy =
       Boolean(request.headers.get("x-forwarded-for")) ||
