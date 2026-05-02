@@ -1,16 +1,14 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import {
-  Bookmark,
-  Calculator,
-  Heart,
+  ArrowRight,
   Home,
   LayoutGrid,
   MapPinned,
   Percent,
   ShieldCheck,
-  X,
 } from "lucide-react";
 import { useCallback, useState } from "react";
 
@@ -163,60 +161,146 @@ const BADGES = [
   },
 ] as const;
 
-const QUICK_LINKS = [
-  { href: "/contacts", icon: Home, label: "Проект на просчёт" },
-  { href: "/mortgage", icon: Calculator, label: "Калькулятор ипотеки" },
-  { href: "/projects/compare", icon: Heart, label: "Избранное" },
-  { href: "/contacts", icon: Bookmark, label: "В закладки" },
+const HERO_SLIDES = [
+  {
+    image: "/images/banner/hero-01.webp",
+    label: "Дом в лесу",
+    title: "Дом под ключ",
+    caption: "Проект, стройка, инженерия и отделка в одной системе.",
+  },
+  {
+    image: "/images/banner/hero-cutaway.webp",
+    label: "Внутри дома",
+    title: "Продумано до деталей",
+    caption: "Планировки, сценарии жизни и прозрачная смета до старта работ.",
+  },
 ] as const;
 
 export function BannerSection() {
-  const [railOpen, setRailOpen] = useState(true);
+  const [activeSlide, setActiveSlide] = useState(0);
+  const slide = HERO_SLIDES[activeSlide] ?? HERO_SLIDES[0];
 
   return (
-    <section className="relative isolate min-h-[min(100dvh,920px)] w-full overflow-hidden bg-[#0a1814]">
-      <div className="absolute inset-0" aria-hidden>
-        <div className="absolute inset-0 bg-gradient-to-br from-[#070f0c] via-[#0f3d2e] to-[#152822]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/15" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/30" />
+    <section className="relative isolate min-h-[min(100svh,940px)] w-full overflow-hidden bg-[#07110e]">
+      <div className="absolute inset-0 bg-[#07110e]" aria-hidden>
+        {HERO_SLIDES.map((item, idx) => (
+          <Image
+            key={item.image}
+            src={item.image}
+            alt=""
+            fill
+            priority={idx === 0}
+            sizes="100vw"
+            className={`object-cover transition-[opacity,transform,filter] duration-[1200ms] ease-out ${
+              idx === activeSlide
+                ? "scale-100 opacity-100 blur-0"
+                : "scale-[1.035] opacity-0 blur-[2px]"
+            }`}
+          />
+        ))}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/82 via-black/52 to-black/16" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/10 to-black/42" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(246,246,244,0.16),transparent_32%),radial-gradient(circle_at_78%_72%,rgba(15,61,46,0.32),transparent_36%)]" />
       </div>
 
-      <div className="relative z-10 mx-auto flex min-h-[min(100dvh,920px)] max-w-[1400px] flex-col px-4 pb-10 pt-28 md:px-8 md:pb-12 md:pt-32 lg:px-12 lg:pt-36">
-        <div className="grid flex-1 gap-10 lg:grid-cols-[1fr_minmax(280px,400px)] lg:items-start lg:gap-12">
-          <div className="max-w-xl space-y-4 pt-2">
-            <h1 className="text-balance text-3xl font-bold uppercase tracking-tight text-white drop-shadow-md md:text-4xl lg:text-[2.75rem] lg:leading-[1.12]">
-              Доведём от мечты до дома!
-            </h1>
-            <div className="space-y-1 text-balance text-xl font-semibold uppercase tracking-wide text-white/95 md:text-2xl">
-              <p>Качественные дома</p>
-              <p>Под ключ</p>
+      <div className="relative z-10 mx-auto flex min-h-[min(100svh,940px)] max-w-[1440px] flex-col px-4 pb-8 pt-28 md:px-8 md:pb-10 md:pt-32 lg:px-12 lg:pt-36">
+        <div className="grid flex-1 gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(300px,410px)] lg:items-center lg:gap-14">
+          <div className="max-w-3xl pt-2">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/[0.08] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-white/82 backdrop-blur-xl">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300 shadow-[0_0_18px_rgba(110,231,183,0.9)]" />
+              Проектирование и строительство домов
             </div>
-            <div className="pt-3 md:pt-4">
+            <h1 className="max-w-4xl text-balance font-heading text-[clamp(2.35rem,7vw,6.7rem)] font-bold uppercase leading-[0.88] tracking-[-0.055em] text-white drop-shadow-[0_18px_60px_rgba(0,0,0,0.45)]">
+              Строим дома,
+              <span className="block text-white/76">в которые хочется</span>
+              <span className="block text-[var(--accent)]">возвращаться</span>
+            </h1>
+            <p className="mt-6 max-w-2xl text-balance text-base leading-relaxed text-white/78 md:text-lg">
+              От идеи и выбора проекта до коробки, инженерии и отделки под ключ. Работаем с прозрачной сметой, понятными этапами и личным сопровождением.
+            </p>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Link
                 href="/projects"
-                className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-xl bg-[var(--accent)] px-7 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-[var(--accent-contrast)] shadow-lg shadow-black/20 transition hover:bg-[var(--accent-hover)] focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 md:px-9 md:text-base"
+                className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold uppercase tracking-[0.12em] text-[#0f3d2e] shadow-[0_18px_50px_rgba(0,0,0,0.28)] transition hover:-translate-y-0.5 hover:bg-white/95 md:px-8"
               >
                 <LayoutGrid className="h-5 w-5 shrink-0" aria-hidden />
                 Смотреть проекты
               </Link>
-              <p className="mt-3 max-w-sm text-sm leading-relaxed text-white/70">
-                Каталог типовых решений: фильтры по этажности, площади, цене и планировке.
-              </p>
+              <Link
+                href="/contacts"
+                className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl border border-white/28 bg-white/[0.08] px-6 py-3 text-sm font-bold uppercase tracking-[0.12em] text-white shadow-[0_18px_50px_rgba(0,0,0,0.18)] backdrop-blur-xl transition hover:-translate-y-0.5 hover:bg-white/[0.14] md:px-8"
+              >
+                Рассчитать стоимость
+                <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+              </Link>
+            </div>
+
+            <div className="mt-9 grid max-w-2xl grid-cols-3 gap-2 rounded-3xl border border-white/14 bg-black/24 p-2 backdrop-blur-xl sm:gap-3 sm:p-3">
+              {[
+                ["01", "Фиксируем смету"],
+                ["02", "Проект + стройка"],
+                ["03", "Гарантия по договору"],
+              ].map(([num, text]) => (
+                <div key={num} className="rounded-2xl bg-white/[0.08] px-3 py-3">
+                  <p className="text-[10px] font-bold text-white/42">{num}</p>
+                  <p className="mt-1 text-xs font-semibold leading-snug text-white sm:text-sm">{text}</p>
+                </div>
+              ))}
             </div>
           </div>
 
           <div className="w-full max-w-md justify-self-end lg:max-w-none">
+            <div className="mb-4 overflow-hidden rounded-[1.75rem] border border-white/18 bg-white/[0.08] p-2 shadow-2xl shadow-black/25 backdrop-blur-xl">
+              <div className="relative aspect-[16/10] overflow-hidden rounded-[1.35rem] bg-black/30">
+                <Image
+                  src={slide.image}
+                  alt={slide.label}
+                  fill
+                  sizes="(max-width: 1024px) 90vw, 410px"
+                  className="object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/74 via-transparent to-black/10" />
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/55">{slide.label}</p>
+                  <p className="mt-1 font-heading text-xl font-bold text-white">{slide.title}</p>
+                  <p className="mt-1 text-xs leading-relaxed text-white/72">{slide.caption}</p>
+                </div>
+              </div>
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                {HERO_SLIDES.map((item, idx) => (
+                  <button
+                    key={item.image}
+                    type="button"
+                    onClick={() => setActiveSlide(idx)}
+                    className={`relative h-20 overflow-hidden rounded-2xl border text-left transition ${
+                      idx === activeSlide
+                        ? "border-white/80 opacity-100"
+                        : "border-white/12 opacity-64 hover:opacity-90"
+                    }`}
+                    aria-label={`Показать слайд: ${item.label}`}
+                  >
+                    <Image src={item.image} alt="" fill sizes="160px" className="object-cover" />
+                    <span className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                    <span className="absolute bottom-2 left-2 right-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-white">
+                      {String(idx + 1).padStart(2, "0")} · {item.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <BannerLeadForm />
           </div>
         </div>
 
-        <div className="mt-auto grid gap-3 pt-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
+        <div className="mt-auto grid gap-3 pt-7 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
           {BADGES.map(({ icon: Icon, text }) => (
             <div
               key={text}
-              className="flex items-center gap-3 rounded-xl border border-white/15 bg-black/40 px-4 py-3 backdrop-blur-md"
+              className="flex items-center gap-3 rounded-2xl border border-white/14 bg-black/30 px-4 py-3 shadow-lg shadow-black/10 backdrop-blur-xl"
             >
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white/10">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10">
                 <Icon className="h-5 w-5 text-white" aria-hidden />
               </span>
               <p className="text-sm font-medium leading-snug text-white">{text}</p>
@@ -225,41 +309,7 @@ export function BannerSection() {
         </div>
       </div>
 
-      {railOpen ? (
-        <div
-          className="pointer-events-none fixed bottom-24 right-0 top-1/2 z-30 hidden -translate-y-1/2 md:block"
-        >
-          <div className="pointer-events-auto flex flex-col overflow-hidden rounded-l-xl border border-[var(--accent)]/80 bg-[var(--accent)] shadow-xl">
-            <button
-              type="button"
-              className="flex h-9 w-full items-center justify-center border-b border-white/15 text-white/90 hover:bg-white/10"
-              onClick={() => setRailOpen(false)}
-              aria-label="Скрыть панель"
-            >
-              <X className="h-4 w-4" />
-            </button>
-            {QUICK_LINKS.map(({ href, icon: Icon, label }) => (
-              <Link
-                key={href + label}
-                href={href}
-                className="flex w-[88px] flex-col items-center gap-1 border-b border-white/10 px-2 py-3 text-center text-[10px] font-medium leading-tight text-white transition hover:bg-white/10 last:border-b-0"
-              >
-                <Icon className="h-5 w-5 shrink-0" aria-hidden />
-                <span>{label}</span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <button
-          type="button"
-          className="fixed bottom-24 right-0 z-30 hidden h-12 w-8 items-center justify-center rounded-l-lg bg-[var(--accent)] text-white shadow-lg md:flex"
-          onClick={() => setRailOpen(true)}
-          aria-label="Показать быстрые ссылки"
-        >
-          <Heart className="h-4 w-4" />
-        </button>
-      )}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[var(--bg)] to-transparent" aria-hidden />
     </section>
   );
 }
