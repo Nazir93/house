@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -43,9 +44,18 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<SiteTheme>(readThemeFromDom);
+  /** До клиента совпадает с SSR («light»); после mount подтягивается DOM/localStorage из inline-скрипта. */
+  const [theme, setThemeState] = useState<SiteTheme>("light");
+  const hydratedRef = useRef(false);
 
   useEffect(() => {
+    if (!hydratedRef.current) {
+      hydratedRef.current = true;
+      const t = readThemeFromDom();
+      setThemeState(t);
+      applyDomTheme(t);
+      return;
+    }
     applyDomTheme(theme);
   }, [theme]);
 

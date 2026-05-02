@@ -13,15 +13,15 @@ const config: Config = {
       colors: {
         brand: {
           DEFAULT: "#0F3D2E",
-          dark: "#2B2F2D",
+          dark: "#1A1E1D",
           accent: "#0F3D2E",
           "accent-hover": "#174D3B",
           light: "#F6F6F4",
           gray: "#E9E7E3",
           muted: "#D7D2CB",
-          border: "rgba(43,47,45,0.14)",
+          border: "rgba(26,30,29,0.2)",
           sale: "#6E2A1F",
-          graphite: "#2B2F2D",
+          graphite: "#1A1E1D",
           stone: "#E9E7E3",
           clay: "#D7D2CB",
         },

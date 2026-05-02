@@ -10,6 +10,8 @@
     -webkit-text-size-adjust: 100%;
     -ms-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    caret-color: var(--caret);
+    cursor: var(--cursor-svg);
     /* Иначе в Chrome сверху видна тонкая белая полоска (дефолтный фон html под body) */
     margin: 0;
     padding: 0;
@@ -35,7 +37,7 @@
    * Бренд-палитра (фиксированные значения)
    * #F6F6F4 — основной фон, текстовые секции, описания (не заливать этим весь «полный» экран акцента).
    * #0F3D2E — шапка/подвал, смысловые блоки, primary-кнопки, активное меню; не для длинных текстов и не на весь экран страницы.
-   * #2B2F2D — основной текст, подзаголовки, иконки, цифры.
+   * #1A1E1D — основной текст на светлом фоне (чуть темнее прежнего #2b2f2d для контраста).
    * #E9E7E3 — «О компании», преимущества, отзывы, FAQ.
    * #D7D2CB — карточки проектов, формы, подложки характеристик.
    * #6E2A1F — только срочный CTA («Оставить заявку»), акции/фикс. цена/дедлайн; не навигация и не массово.
@@ -45,17 +47,18 @@
     --bg: #f6f6f4;
     --bg-secondary: #e9e7e3;
     --card-bg: #d7d2cb;
-    --text: #2b2f2d;
-    --text-muted: rgba(43, 47, 45, 0.72);
-    --text-subtle: rgba(43, 47, 45, 0.45);
-    --border: rgba(43, 47, 45, 0.14);
+    /* Выше контраст на светлом фоне: текст не «растворяется» в #f6f6f4 и карточках */
+    --text: #1a1e1d;
+    --text-muted: rgba(26, 30, 29, 0.86);
+    --text-subtle: rgba(26, 30, 29, 0.58);
+    --border: rgba(26, 30, 29, 0.2);
     --accent: #0f3d2e;
     --accent-hover: #174d3b;
     --accent-contrast: #f6f6f4;
     --sale: #6e2a1f;
     --sale-hover: #5c2419;
     --pine: #0f3d2e;
-    --graphite: #2b2f2d;
+    --graphite: #1a1e1d;
     --stone: #e9e7e3;
     --clay: #d7d2cb;
     --header-border: rgba(255, 255, 255, 0.14);
@@ -65,24 +68,42 @@
     --brand-blue: #2563eb;
     --accent-rgb: 15 61 46;
     --sale-rgb: 110 42 31;
-    --scrollbar-thumb: rgba(43, 47, 45, 0.22);
-    --header-bar-bg: rgba(246, 246, 244, 0.94);
-    --header-bar-text: #2b2f2d;
-    --header-bar-muted: rgba(43, 47, 45, 0.62);
-    --header-bar-border: rgba(43, 47, 45, 0.12);
+    --scrollbar-thumb: rgba(26, 30, 29, 0.3);
+    --header-bar-bg: var(--bg);
+    --header-bar-text: #1a1e1d;
+    --header-bar-muted: rgba(26, 30, 29, 0.74);
+    --header-bar-border: rgba(26, 30, 29, 0.18);
     --footer-bar-bg: #0f3d2e;
+    --site-header-banner-overlap: 3.5rem;
+    /** Нижний край липкой шапки (высота ряда + рамка) — без щели между шапкой и полноэкранными слоями */
+    --site-header-sticky-offset: 3rem;
+    /* Каретка и базовый указатель: светлый фон — зелёный */
+    --caret: #0f3d2e;
+    --cursor-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='4.5' fill='%230f3d2e'/%3E%3Ccircle cx='10' cy='10' r='6.5' stroke='%230f3d2e' stroke-opacity='0.35' fill='none'/%3E%3C/svg%3E")
+      10 10,
+      auto;
   }
 
-  [data-theme="light"] .site-header-bar {
-    box-shadow:
-      0 1px 0 rgba(15, 61, 46, 0.08),
-      0 12px 32px rgba(15, 61, 46, 0.07);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+  @media (min-width: 1024px) {
+    :root {
+      --site-header-sticky-offset: 3.3125rem;
+    }
   }
 
-  [data-theme="dark"] .site-header-bar {
+  [data-theme="light"] .site-header-bar:not(.site-header-bar--glass) {
+    box-shadow: 0 1px 0 rgba(15, 61, 46, 0.06);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  [data-theme="dark"] .site-header-bar:not(.site-header-bar--glass) {
     box-shadow: 0 4px 28px rgba(0, 0, 0, 0.4);
+  }
+
+  .site-header-bar.site-header-bar--glass {
+    box-shadow: none !important;
+    backdrop-filter: blur(16px) saturate(1.12);
+    -webkit-backdrop-filter: blur(16px) saturate(1.12);
   }
 
   [data-theme="light"] {
@@ -90,17 +111,17 @@
     --bg: #f6f6f4;
     --bg-secondary: #e9e7e3;
     --card-bg: #d7d2cb;
-    --text: #2b2f2d;
-    --text-muted: rgba(43, 47, 45, 0.72);
-    --text-subtle: rgba(43, 47, 45, 0.45);
-    --border: rgba(43, 47, 45, 0.14);
+    --text: #1a1e1d;
+    --text-muted: rgba(26, 30, 29, 0.86);
+    --text-subtle: rgba(26, 30, 29, 0.58);
+    --border: rgba(26, 30, 29, 0.2);
     --accent: #0f3d2e;
     --accent-hover: #174d3b;
     --accent-contrast: #f6f6f4;
     --sale: #6e2a1f;
     --sale-hover: #5c2419;
     --pine: #0f3d2e;
-    --graphite: #2b2f2d;
+    --graphite: #1a1e1d;
     --stone: #e9e7e3;
     --clay: #d7d2cb;
     --header-border: rgba(255, 255, 255, 0.14);
@@ -110,12 +131,16 @@
     --brand-blue: #2563eb;
     --accent-rgb: 15 61 46;
     --sale-rgb: 110 42 31;
-    --scrollbar-thumb: rgba(43, 47, 45, 0.22);
-    --header-bar-bg: rgba(246, 246, 244, 0.94);
-    --header-bar-text: #2b2f2d;
-    --header-bar-muted: rgba(43, 47, 45, 0.62);
-    --header-bar-border: rgba(43, 47, 45, 0.12);
+    --scrollbar-thumb: rgba(26, 30, 29, 0.3);
+    --header-bar-bg: var(--bg);
+    --header-bar-text: #1a1e1d;
+    --header-bar-muted: rgba(26, 30, 29, 0.74);
+    --header-bar-border: rgba(26, 30, 29, 0.18);
     --footer-bar-bg: #0f3d2e;
+    --caret: #0f3d2e;
+    --cursor-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='4.5' fill='%230f3d2e'/%3E%3Ccircle cx='10' cy='10' r='6.5' stroke='%230f3d2e' stroke-opacity='0.35' fill='none'/%3E%3C/svg%3E")
+      10 10,
+      auto;
   }
 
   [data-theme="dark"] {
@@ -144,11 +169,15 @@
     --accent-rgb: 61 143 110;
     --sale-rgb: 196 88 70;
     --scrollbar-thumb: rgba(255, 255, 255, 0.18);
-    --header-bar-bg: #000000;
+    --header-bar-bg: var(--bg);
     --header-bar-text: #f1f5f3;
     --header-bar-muted: rgba(241, 245, 243, 0.7);
-    --header-bar-border: rgba(255, 255, 255, 0.14);
+    --header-bar-border: rgba(255, 255, 255, 0.12);
     --footer-bar-bg: #060908;
+    --caret: #f1f5f3;
+    --cursor-svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='4.5' fill='%23f1f5f3'/%3E%3Ccircle cx='10' cy='10' r='6.5' stroke='%23ffffff' stroke-opacity='0.35' fill='none'/%3E%3C/svg%3E")
+      10 10,
+      auto;
   }
 
   *,
@@ -288,15 +317,6 @@
     text-transform: uppercase;
     letter-spacing: 0.03em;
     font-weight: 700;
-  }
-
-  .logo-text {
-    font-family: var(--font-main), sans-serif;
-    text-transform: uppercase;
-    transform: scaleX(0.65);
-    transform-origin: left center;
-    display: inline-block;
-    line-height: 1;
   }
 
   .container {
