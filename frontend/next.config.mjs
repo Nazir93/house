@@ -5,6 +5,9 @@ const nextConfig = {
   },
   images: {
     formats: ["image/avif", "image/webp"],
+    /** Шире диапазон — меньше апскейла крупных PNG на мониторах 2K+ (герой 100vw). */
+    deviceSizes: [640, 750, 828, 1080, 1200, 1440, 1920, 2048, 2560, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
       {
         protocol: "https",

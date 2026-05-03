@@ -1,14 +1,11 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { ChevronDown, Send } from "lucide-react";
-import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
-import { SERVICE_REGIONS, SITE_NAME } from "@/lib/constants";
-import { useContactConfig } from "@/lib/contact-config-context";
+import { SERVICE_REGIONS } from "@/lib/constants";
+import { TrustLeadCardBody, TrustLeadCardShell } from "@/components/sections/trust-lead-card";
 
 const FAQ_ITEMS: { id: string; q: string; a: string }[] = [
   {
@@ -81,27 +78,6 @@ const STAGE_SERVICES: { id: string; title: string; description: string; image: s
     image: "/images/banner/banner-hero-01.png",
   },
 ];
-
-function isCompleteRuMobilePhone(formatted: string): boolean {
-  let d = formatted.replace(/\D/g, "");
-  if (d.startsWith("8")) d = "7" + d.slice(1);
-  return d.length === 11 && d.startsWith("7");
-}
-
-function formatRuPhoneInput(raw: string): string {
-  const digits = raw.replace(/\D/g, "");
-  let d = digits;
-  if (d.startsWith("8")) d = "7" + d.slice(1);
-  if (!d.startsWith("7") && d.length > 0) d = "7" + d.replace(/^7+/, "");
-  d = d.slice(0, 11);
-  const rest = d.slice(1);
-  let out = "+7";
-  if (rest.length >= 1) out += " (" + rest.slice(0, 3);
-  if (rest.length >= 3) out += ") " + rest.slice(3, 6);
-  if (rest.length >= 6) out += " - " + rest.slice(6, 8);
-  if (rest.length >= 8) out += " - " + rest.slice(8, 10);
-  return out;
-}
 
 export function CaseStudyFaqSection({ sectionClassName }: { sectionClassName?: string }) {
   const [openId, setOpenId] = useState<string | null>(null);
@@ -241,172 +217,17 @@ export function ConstructionServicesStagesSection({ sectionClassName }: { sectio
 
 export function CaseStudyLeadCtaSection({
   sectionClassName,
-  leadSource = "portfolio-case-cta",
+  leadSource: _leadSource = "portfolio-case-cta",
 }: {
   sectionClassName?: string;
-  /** Источник заявки в CRM / аналитике */
+  /** Зарезервировано под аналитику / бывший источник заявки */
   leadSource?: string;
 } = {}) {
-  const contact = useContactConfig();
-  const getCaptchaToken = useSmartCaptchaToken();
-  const [phone, setPhone] = useState("");
-  const [consent, setConsent] = useState(false);
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const submit = useCallback(async () => {
-    setErrorMessage(null);
-    if (!consent) {
-      setErrorMessage("Нужно согласие на обработку персональных данных.");
-      return;
-    }
-    if (!isCompleteRuMobilePhone(phone)) {
-      setErrorMessage("Введите номер телефона полностью.");
-      return;
-    }
-    setStatus("loading");
-    try {
-      const recaptchaToken = await getCaptchaToken();
-      const params = typeof window !== "undefined" ? new URLSearchParams(window.location.search) : null;
-      const res = await fetch("/api/leads", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: "Клиент",
-          phone,
-          message:
-            leadSource === "home-landing-cta"
-              ? `Заявка с главной страницы (${SITE_NAME}): перезвонить`
-              : `Заявка со страницы кейса (${SITE_NAME}): перезвонить`,
-          source: leadSource,
-          pageUrl: typeof window !== "undefined" ? window.location.href : "",
-          utmSource: params?.get("utm_source") ?? undefined,
-          utmMedium: params?.get("utm_medium") ?? undefined,
-          utmCampaign: params?.get("utm_campaign") ?? undefined,
-          recaptchaToken: recaptchaToken || undefined,
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setErrorMessage(typeof data.error === "string" ? data.error : "Не удалось отправить. Попробуйте позже.");
-        setStatus("idle");
-        return;
-      }
-      setStatus("success");
-      setPhone("");
-      setConsent(false);
-    } catch {
-      setErrorMessage("Ошибка сети. Попробуйте позже или напишите в мессенджер.");
-      setStatus("idle");
-    }
-  }, [consent, getCaptchaToken, leadSource, phone]);
-
   return (
-    <section className={sectionClassName ?? "mt-16 md:mt-20"} aria-labelledby="case-cta-heading">
-      <div className="grid gap-3 lg:grid-cols-2 lg:gap-5 lg:items-stretch">
-        <div
-          className="flex flex-col rounded-[1.5rem] border px-5 py-6 md:rounded-[1.75rem] md:px-7 md:py-8"
-          style={{
-            borderColor: "rgba(43, 47, 45, 0.08)",
-            backgroundColor: "var(--bg)",
-            boxShadow: "0 24px 48px rgba(43, 47, 45, 0.06)",
-          }}
-        >
-          <h2 id="case-cta-heading" className="w-full max-w-none text-balance font-heading text-lg font-bold leading-snug text-[var(--text)] md:text-xl">
-            Начните строить будущее уже сегодня
-          </h2>
-          <p className="mt-3 text-[13px] leading-relaxed text-[var(--text-muted)] md:text-sm">
-            Оставьте заявку — мы быстро перезвоним, чтобы ответить на вопросы по проекту, материалам и смете.
-          </p>
-          <label className="mt-6 block text-[13px] font-medium text-[var(--text)]">
-            Телефон
-            <div
-              className={cn(
-                "mt-2.5 overflow-hidden rounded-full transition-shadow duration-200",
-                "bg-white shadow-[inset_0_0_0_1px_rgba(26,30,29,0.12)]",
-                "hover:shadow-[inset_0_0_0_1px_rgba(15,61,46,0.22)]",
-                "focus-within:shadow-[inset_0_0_0_2px_var(--accent),0_4px_18px_rgba(15,61,46,0.08)]",
-                "dark:bg-[var(--bg-secondary)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.14)] dark:focus-within:shadow-[inset_0_0_0_2px_var(--accent),0_4px_22px_rgba(0,0,0,0.25)]",
-              )}
-            >
-              <input
-                type="tel"
-                autoComplete="tel"
-                placeholder="+7 (___) ___ - __ - __"
-                value={phone}
-                onChange={(e) => setPhone(formatRuPhoneInput(e.target.value))}
-                className={cn(
-                  "min-h-[52px] w-full appearance-none rounded-full border-0 bg-transparent px-5 py-3.5 text-[16px] outline-none sm:text-[15px]",
-                  "text-[var(--text)] placeholder:text-[var(--text-muted)]",
-                  "focus:outline-none focus:ring-0 focus-visible:outline-none",
-                )}
-              />
-            </div>
-          </label>
-          <label className="mt-4 flex cursor-pointer items-start gap-3 text-[12px] leading-snug text-[var(--text-muted)]">
-            <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--border)] accent-[var(--accent)]" />
-            <span>
-              Я согласен на{" "}
-              <Link href="/privacy" className="underline underline-offset-2 hover:text-[var(--accent)]">
-                обработку персональных данных
-              </Link>
-            </span>
-          </label>
-          {errorMessage ? <p className="mt-3 text-[13px] text-red-700">{errorMessage}</p> : null}
-          {status === "success" ? (
-            <p className="mt-3 text-[13px] font-medium text-[var(--accent)]">Заявка отправлена. Мы свяжемся с вами.</p>
-          ) : null}
-          <button
-            type="button"
-            onClick={submit}
-            disabled={status === "loading" || status === "success"}
-            className="mt-6 min-h-[52px] w-full rounded-full px-8 py-3 text-[15px] font-semibold text-[var(--accent-contrast)] shadow-[0_10px_28px_rgba(15,61,46,0.22)] transition-[opacity,transform,box-shadow] hover:shadow-[0_12px_32px_rgba(15,61,46,0.26)] active:scale-[0.99] disabled:opacity-60 disabled:active:scale-100 dark:shadow-[0_10px_28px_rgba(0,0,0,0.35)]"
-            style={{ backgroundColor: "var(--accent)" }}
-          >
-            {status === "loading" ? "Отправка…" : "Позвоните мне"}
-          </button>
-        </div>
-
-        <div className="relative flex min-h-[240px] flex-col justify-end overflow-hidden rounded-[1.15rem] md:min-h-[280px] md:rounded-[1.35rem] lg:min-h-0">
-          <div
-            className="absolute inset-0 bg-[length:cover] bg-center"
-            style={{
-              backgroundImage:
-                "linear-gradient(135deg, rgba(18,42,34,0.97) 0%, rgba(15,61,46,0.88) 45%, rgba(10,38,30,0.95) 100%), radial-gradient(ellipse 90% 70% at 80% 20%, rgba(255,255,255,0.07) 0%, transparent 55%)",
-            }}
-            aria-hidden
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/28 to-transparent" aria-hidden />
-          <div className="relative z-[1] p-5 md:p-6">
-            <p className="font-heading text-base font-semibold text-white md:text-lg">Или напишите в любом мессенджере</p>
-            <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-white/85 md:text-sm">Быстрые ответы на вопросы и связь с менеджером</p>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              {contact.social.telegram ? (
-                <a
-                  href={contact.social.telegram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[var(--text)] shadow-sm transition hover:bg-white/95"
-                >
-                  <Send size={18} className="text-[#229ED9]" aria-hidden />
-                  Чат в Telegram
-                </a>
-              ) : null}
-              {contact.social.max ? (
-                <a
-                  href={contact.social.max}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-[var(--text)] shadow-sm transition hover:bg-white/95"
-                >
-                  <MaxMessengerIcon className="h-[18px] w-[18px] shrink-0 text-[var(--accent)]" aria-hidden />
-                  Чат в Max
-                </a>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      </div>
+    <section className={sectionClassName ?? "mt-16 md:mt-20"} aria-labelledby="trust-us-heading">
+      <TrustLeadCardShell>
+        <TrustLeadCardBody variant="standalone" />
+      </TrustLeadCardShell>
     </section>
   );
 }

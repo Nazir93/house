@@ -73,6 +73,7 @@ export interface BuiltObjectItem {
   houseProjectSlug?: string | null;
   published: boolean;
   order: number;
+  year?: string | null;
   media: ConstructionMedia[];
 }
 
@@ -233,6 +234,7 @@ export const FALLBACK_BUILT_OBJECTS: BuiltObjectItem[] = [
     houseProjectSlug: "aurora",
     published: true,
     order: 1,
+    year: "2024",
     telegramUrl: "https://t.me/",
     vkUrl: "https://vk.com/",
     media: [
@@ -259,6 +261,7 @@ export const FALLBACK_BUILT_OBJECTS: BuiltObjectItem[] = [
     houseProjectSlug: "duet",
     published: true,
     order: 2,
+    year: "2023",
     media: [
       { id: "smerdovitsy-cover", type: "RENDER", url: "/images/portfolio/built-placeholder-2.jpg", alt: "Дом в п. Приветнинское", order: 0 },
     ],
@@ -328,6 +331,7 @@ function mapBuiltObject(row: any): BuiltObjectItem {
     houseProjectSlug: row.houseProject?.slug ?? null,
     published: row.published,
     order: row.order,
+    year: row.createdAt ? String(new Date(row.createdAt).getFullYear()) : null,
     media: row.media ?? [],
   };
 }
@@ -452,6 +456,14 @@ const getBuiltObjectsCached = unstable_cache(
 
 export async function getBuiltObjects(): Promise<BuiltObjectItem[]> {
   return getBuiltObjectsCached();
+}
+
+const HOME_BUILT_PORTFOLIO_MAX = 5;
+
+/** Построенные объекты для блока на главной (тот же каталог, что и /portfolio). */
+export async function getHomeBuiltPortfolio(): Promise<BuiltObjectItem[]> {
+  const list = await getBuiltObjects();
+  return list.slice(0, HOME_BUILT_PORTFOLIO_MAX);
 }
 
 const getBuiltObjectBySlugCached = unstable_cache(

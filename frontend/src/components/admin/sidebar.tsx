@@ -15,6 +15,7 @@ import {
   Globe,
   Home,
   MapPinned,
+  UserRound,
 } from "lucide-react";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
@@ -35,6 +36,7 @@ const NAV_ITEMS = [
   { href: "/admin/leads", label: "Заявки", icon: Inbox, leadsSubmenu: true as const },
   { href: "/admin/house-projects", label: "Проекты домов", icon: Home },
   { href: "/admin/built-objects", label: "Построенные дома", icon: MapPinned },
+  { href: "/admin/client-projects", label: "Клиенты (кабинет)", icon: UserRound },
   { href: "/admin/posts", label: "Новости", icon: FileText },
   { href: "/admin/services", label: "Услуги", icon: Briefcase },
   { href: "/admin/seo", label: "SEO", icon: Globe },

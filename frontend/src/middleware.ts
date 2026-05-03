@@ -61,11 +61,16 @@ export async function middleware(request: NextRequest) {
   }
 
   const isAdminRoute = pathname.startsWith("/admin");
-  const isLoginPage = pathname === "/admin/login";
+  const isAdminLoginPage = pathname === "/admin/login";
   const isApiAuth = pathname.startsWith("/api/auth");
   const isAdminApi = pathname.startsWith("/api/admin");
+  const isAccountRoute = pathname.startsWith("/account");
+  const isAccountLoginPage = pathname === "/account/login";
+  const isClientApi = pathname.startsWith("/api/client");
 
-  if (!isAdminRoute && !isAdminApi) return NextResponse.next();
+  const skipToken =
+    !isAdminRoute && !isAdminApi && !isAccountRoute && !isClientApi;
+  if (skipToken) return NextResponse.next();
   if (isApiAuth) return NextResponse.next();
 
   // Должно совпадать с именем cookie (__Secure-…), которое выставляет NextAuth при HTTPS
@@ -79,18 +84,61 @@ export async function middleware(request: NextRequest) {
     secureCookie: isHttps,
   });
 
-  if (isAdminRoute && !isLoginPage && !token) {
-    const loginUrl = new URL("/admin/login", request.url);
-    loginUrl.searchParams.set("callbackUrl", pathname);
-    return NextResponse.redirect(loginUrl);
+  const role = token?.role as string | undefined;
+
+  if (isAdminRoute && !isAdminLoginPage) {
+    if (role === "client") {
+      return NextResponse.redirect(new URL("/account/dashboard", request.url));
+    }
+    if (!token || role !== "admin") {
+      const loginUrl = new URL("/admin/login", request.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    return NextResponse.next();
   }
 
-  if (isLoginPage && token) {
-    return NextResponse.redirect(new URL("/admin", request.url));
+  if (isAdminLoginPage) {
+    if (token && role === "admin") {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
+    if (token && role === "client") {
+      return NextResponse.redirect(new URL("/account/dashboard", request.url));
+    }
+    return NextResponse.next();
   }
 
-  if (isAdminApi && !token) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (isAdminApi) {
+    if (!token || role !== "admin") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return NextResponse.next();
+  }
+
+  if (isAccountLoginPage) {
+    if (token && role === "client") {
+      return NextResponse.redirect(new URL("/account/dashboard", request.url));
+    }
+    return NextResponse.next();
+  }
+
+  if (isAccountRoute) {
+    if (role === "admin") {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    }
+    if (!token || role !== "client") {
+      const loginUrl = new URL("/account/login", request.url);
+      loginUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    return NextResponse.next();
+  }
+
+  if (isClientApi) {
+    if (!token || role !== "client") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return NextResponse.next();
   }
 
   return NextResponse.next();
@@ -98,9 +146,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-      Редирект HTTP→HTTPS для всего сайта; защита админки — только для /admin и /api/admin
-    */
     "/((?!_next/static|_next/image|favicon.ico|icon.png|apple-icon.png|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)",
   ],
 };

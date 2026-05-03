@@ -430,9 +430,9 @@
 /* Герой: в альбомной ориентации на телефоне не перегружать экран высокой каруселью */
 @media (orientation: landscape) and (max-height: 520px) {
   .hero-carousel-media {
-    height: min(42vh, 240px) !important;
-    min-height: 180px !important;
-    max-height: 260px !important;
+    height: min(38vh, 200px) !important;
+    min-height: 160px !important;
+    max-height: 220px !important;
   }
 }
 

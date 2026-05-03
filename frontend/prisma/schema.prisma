@@ -119,31 +119,32 @@ model Hotspot {
 }
 
 model HouseProject {
-  id                  String                  @id @default(cuid())
-  slug                String                  @unique
+  id                  String                     @id @default(cuid())
+  slug                String                     @unique
   title               String
-  shortDescription    String                  @db.Text
-  description         String                  @db.Text
+  shortDescription    String                     @db.Text
+  description         String                     @db.Text
   floors              Int
   area                Int
   price               Int
   rooms               Int
   bathrooms           Int
-  materials           String[]                @default([])
-  isNew               Boolean                 @default(false)
+  materials           String[]                   @default([])
+  isNew               Boolean                    @default(false)
   pricePromo          String?
-  mortgageEnabled     Boolean                 @default(true)
+  mortgageEnabled     Boolean                    @default(true)
   /// CALCULATOR = встроенный расчёт; LEAD = заявка и ссылка
-  mortgageMode        String                  @default("LEAD")
-  published           Boolean                 @default(false)
-  order               Int                     @default(0)
+  mortgageMode        String                     @default("LEAD")
+  published           Boolean                    @default(false)
+  order               Int                        @default(0)
   completionJson      Json?
   constructionJson    Json?
   anchorsJson         Json?
-  createdAt           DateTime                @default(now())
-  updatedAt           DateTime                @updatedAt
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @updatedAt
   media               HouseProjectMedia[]
   builtObjects        BuiltObject[]
+  clientBuildProjects ClientConstructionProject[]
 
   @@index([published, price])
   @@index([published, area])
@@ -382,4 +383,134 @@ model ThankYouToken {
 
   @@index([token])
   @@index([expiresAt])
+}
+
+/// Статус этапа в личном кабинете клиента (стройка)
+enum ClientStageStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  DONE
+}
+
+enum ClientPaymentStatus {
+  NOT_ISSUED
+  EXPECTED
+  PAID
+}
+
+enum ClientSupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  CLOSED
+}
+
+enum ClientTicketAuthorType {
+  CLIENT
+  STAFF
+}
+
+/// Объект договора: один номер договора + пароль = доступ в кабинет
+model ClientConstructionProject {
+  id                String               @id @default(cuid())
+  contractNumber    String               @unique
+  passwordHash      String
+  clientName        String?
+  clientEmail       String?
+  title             String
+  area              Int?
+  wallMaterial      String?
+  startDate         DateTime?
+  plannedEndDate    DateTime?
+  coverImageUrl     String?
+  /// 0–100; может дублировать расчёт по этапам
+  overallProgress   Int                  @default(0)
+  currentStageLabel String?
+  foremanName       String?
+  cameraStreamUrl   String?
+  houseProjectId    String?
+  houseProject      HouseProject?        @relation(fields: [houseProjectId], references: [id], onDelete: SetNull)
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  stages            ClientProjectStage[]
+  payments          ClientPayment[]
+  documents         ClientDocument[]
+  photoReports      ClientPhotoReport[]
+  tickets           ClientSupportTicket[]
+
+  @@index([houseProjectId])
+}
+
+model ClientProjectStage {
+  id        String            @id @default(cuid())
+  projectId String
+  project   ClientConstructionProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  order     Int               @default(0)
+  title     String
+  iconKey   String            @default("circle")
+  status    ClientStageStatus @default(NOT_STARTED)
+
+  @@index([projectId, order])
+}
+
+/// Суммы в копейках (целое число)
+model ClientPayment {
+  id          String              @id @default(cuid())
+  projectId   String
+  project     ClientConstructionProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  label       String
+  amountKopeks Int
+  dueDate     DateTime?
+  status      ClientPaymentStatus @default(EXPECTED)
+  paidAt      DateTime?
+  order       Int                 @default(0)
+
+  @@index([projectId, order])
+  @@index([projectId, dueDate])
+}
+
+model ClientDocument {
+  id         String   @id @default(cuid())
+  projectId  String
+  project    ClientConstructionProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  filename   String
+  url        String
+  uploadedAt DateTime @default(now())
+
+  @@index([projectId, uploadedAt])
+}
+
+model ClientPhotoReport {
+  id        String   @id @default(cuid())
+  projectId String
+  project   ClientConstructionProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  url       String
+  caption   String?  @default("")
+  shotAt    DateTime?
+  order     Int      @default(0)
+
+  @@index([projectId, order])
+}
+
+model ClientSupportTicket {
+  id        String                    @id @default(cuid())
+  projectId String
+  project   ClientConstructionProject   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  subject   String
+  status    ClientSupportTicketStatus   @default(OPEN)
+  createdAt DateTime                  @default(now())
+  updatedAt DateTime                  @updatedAt
+  messages  ClientTicketMessage[]
+
+  @@index([projectId, updatedAt])
+}
+
+model ClientTicketMessage {
+  id         String                 @id @default(cuid())
+  ticketId   String
+  ticket     ClientSupportTicket    @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  authorType ClientTicketAuthorType
+  body       String                 @db.Text
+  createdAt  DateTime               @default(now())
+
+  @@index([ticketId, createdAt])
 }

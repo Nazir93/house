@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { ArrowRight, ArrowDown } from "lucide-react";
+import { ArrowDown } from "lucide-react";
 import type { ProjectListItem } from "@/lib/get-projects";
+import { PortfolioProjectListCard } from "@/components/portfolio/portfolio-project-list-card";
 import { formatArticleBody, PAGE_INTRO_PROSE_CLASS } from "@/lib/html-content";
 
 function LoadMoreButton({ onClick }: { onClick: () => void }) {
@@ -37,81 +36,6 @@ function LoadMoreButton({ onClick }: { onClick: () => void }) {
         style={{ color: hovered ? "var(--bg)" : "var(--text)" }}
       />
     </button>
-  );
-}
-
-function ProjectCard({ project }: { project: ProjectListItem }) {
-  return (
-    <Link
-      href={`/portfolio/${project.slug}`}
-      className="group rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer hover:shadow-lg block"
-      style={{ border: "1px solid var(--border)" }}
-    >
-      <div className="flex items-center gap-5 md:gap-8 p-4 md:p-6">
-        <div
-          className="shrink-0 w-28 h-20 md:w-40 md:h-28 rounded-xl overflow-hidden flex items-center justify-center relative"
-          style={{ backgroundColor: "var(--bg-secondary)" }}
-        >
-          {project.coverImage ? (
-            <Image
-              src={project.coverImage}
-              alt={project.title}
-              fill
-              className="object-cover"
-              sizes="160px"
-              unoptimized={project.coverImage.startsWith("/uploads/")}
-            />
-          ) : (
-            <span className="text-[10px] uppercase tracking-wider" style={{ color: "var(--text-subtle)" }}>
-              Фото
-            </span>
-          )}
-        </div>
-
-        {/* Info */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-baseline gap-3 mb-3 md:mb-4 flex-wrap">
-            <h3
-              className="font-heading text-xl md:text-2xl lg:text-3xl tracking-tight transition-colors duration-200 group-hover:text-[var(--accent)]"
-              style={{ color: "var(--text)" }}
-            >
-              {project.title}
-            </h3>
-            <span className="text-sm shrink-0" style={{ color: "var(--text-muted)" }}>
-              ({project.year})
-            </span>
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-10">
-            <div>
-              <span className="text-[10px] uppercase tracking-[0.1em] block mb-0.5 font-medium" style={{ color: "var(--text-muted)" }}>
-                Отрасль
-              </span>
-              <span className="text-xs uppercase tracking-[0.05em]" style={{ color: "var(--text-muted)" }}>
-                {project.industry}
-              </span>
-            </div>
-            <div>
-              <span className="text-[10px] uppercase tracking-[0.1em] block mb-0.5 font-medium" style={{ color: "var(--text-muted)" }}>
-                Тип проекта
-              </span>
-              <span className="text-xs uppercase tracking-[0.05em]" style={{ color: "var(--text-muted)" }}>
-                {project.type}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Arrow */}
-        <div className="shrink-0">
-          <ArrowRight
-            size={28}
-            className="transition-transform duration-300 group-hover:translate-x-1"
-            style={{ color: "var(--text)" }}
-          />
-        </div>
-      </div>
-    </Link>
   );
 }
 
@@ -165,7 +89,7 @@ export function PortfolioPageContent({
         {/* Cards */}
         <div className="flex flex-col gap-4">
           {visibleProjects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
+            <PortfolioProjectListCard key={project.id} project={project} />
           ))}
         </div>
 

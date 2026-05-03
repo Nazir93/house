@@ -1,5 +1,23 @@
 # Что задать на VPS (production)
 
+## Закреплённая команда деплоя
+
+Выполнять **на сервере** по SSH. Каталог проекта: **`/var/www/house`**. Перезапуск PM2: **`house-next`**.
+
+```bash
+cd /var/www/house && git pull origin main && cd frontend && npx prisma generate && npx prisma migrate deploy && npm run build && pm2 restart house-next
+```
+
+Тот же сценарий одним скриптом из корня репозитория на сервере:
+
+```bash
+cd /var/www/house && bash scripts/deploy-vps.sh
+```
+
+Если менялись зависимости (`package.json` / `package-lock.json`), перед Prisma выполните **`npm ci`** в `frontend` — см. раздел **«После обновления кода из Git»** ниже.
+
+---
+
 Файл **`.env.local`** в репозитории не используется на сервере (он в `.gitignore`). На машине, где запущен Next.js, переменные задают так:
 
 - отдельный файл `.env` / `.env.production` в каталоге `frontend` (если процесс его подхватывает);
@@ -32,9 +50,30 @@ cd /var/www/house/frontend && npm ci
 | Переменная | Пример | Зачем |
 |------------|--------|--------|
 | `DATABASE_URL` | `postgresql://user:pass@127.0.0.1:5432/house?schema=public` | Подключение к PostgreSQL (имя БД задаёте при создании в Postgres) |
-| `NODE_ENV` | `production` | Режим production (редиректы, cookie) |
+| `NODE_ENV` | `production` | Режим production (редиректы, cookie). Обычно задаётся в PM2 / systemd, не обязательно дублировать в `.env` |
 
-## Публичный адрес сайта
+### Быстрая проверка с SSH (после настройки `.env` в `frontend`)
+
+```bash
+cd /var/www/house/frontend && npm run env:check && npm run db:verify
+```
+
+- **`env:check`** — обязательные ключи для админки и NextAuth (`ADMIN_SECRET`, `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, …).
+- **`db:verify`** — пинг PostgreSQL и счётчики; строка **ClientConstructionProject** показывает, применены ли миграции личного кабинета (если «таблиц нет» → выполните `npx prisma migrate deploy`).
+
+---
+
+## Личный кабинет `/account` (клиент по договору)
+
+| Что нужно | Действие |
+|-----------|----------|
+| Таблицы `ClientConstructionProject` и связанные | Входит в миграции Prisma (`prisma/migrations/..._client_portal`). На сервере: **`npx prisma migrate deploy`** из каталога `frontend` после `npm ci`. |
+| Учётка клиента | В админке: **«Клиенты (кабинет)»** → `/admin/client-projects` → создать объект, задать **номер договора** и **пароль** (они же для входа на `/account/login`). |
+| Переменные | Те же, что для сайта: `DATABASE_URL`, `NEXTAUTH_*`, `ADMIN_*`. Отдельный секрет для кабинета не требуется — пароль клиента хранится в БД (хэш). |
+| Внешний портал | Если задан **`NEXT_PUBLIC_ACCOUNT_PORTAL_URL`**, раздел `/account` может редиректить наружу — для встроенного кабинета оставьте пустым (см. `.env.example`). |
+
+---
+
 
 | Переменная | Пример |
 |------------|--------|

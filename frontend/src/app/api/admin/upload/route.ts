@@ -4,6 +4,7 @@ import path from "path";
 import sharp from "sharp";
 
 const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "webp", "gif", "avif", "svg"]);
+const DOCUMENT_EXT = new Set(["pdf", "xlsx", "xls", "doc", "docx", "txt", "csv", "zip", "rar"]);
 const VIDEO_EXT = new Set(["mp4", "webm", "mov", "mkv", "m4v", "avi", "ogv"]);
 
 /** Если в имени нет расширения или оно не из списка — определяем по MIME (важно для телефонов / «Без названия»). */
@@ -29,7 +30,21 @@ const MIME_TO_IMAGE_EXT: Record<string, string> = {
   "image/svg+xml": "svg",
 };
 
-function resolveExtAndKind(file: File): { ext: string; kind: "image" | "video" } | { error: string } {
+const MIME_TO_DOC_EXT: Record<string, string> = {
+  "application/pdf": "pdf",
+  "application/msword": "doc",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+  "application/vnd.ms-excel": "xls",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": "xlsx",
+  "text/plain": "txt",
+  "text/csv": "csv",
+  "application/zip": "zip",
+  "application/x-zip-compressed": "zip",
+};
+
+function resolveExtAndKind(
+  file: File
+): { ext: string; kind: "image" | "video" | "document" } | { error: string } {
   const rawName = file.name?.trim() || "";
   const fromName = rawName.includes(".") ? (rawName.split(".").pop()?.toLowerCase() ?? "") : "";
   const mime = (file.type || "").toLowerCase().split(";")[0]?.trim() ?? "";
@@ -39,6 +54,9 @@ function resolveExtAndKind(file: File): { ext: string; kind: "image" | "video" }
   }
   if (fromName && VIDEO_EXT.has(fromName)) {
     return { ext: fromName, kind: "video" };
+  }
+  if (fromName && DOCUMENT_EXT.has(fromName)) {
+    return { ext: fromName, kind: "document" };
   }
 
   if (mime.startsWith("video/")) {
@@ -60,18 +78,24 @@ function resolveExtAndKind(file: File): { ext: string; kind: "image" | "video" }
     }
   }
 
+  const docFromMime = MIME_TO_DOC_EXT[mime];
+  if (docFromMime && DOCUMENT_EXT.has(docFromMime)) {
+    return { ext: docFromMime, kind: "document" };
+  }
+
   if (!fromName && !mime) {
     return { error: "Нет расширения в имени файла и не передан MIME-тип. Переименуйте файл (например, video.mp4)." };
   }
 
   return {
-    error: `Формат не поддерживается (расширение «${fromName || "—"}», MIME «${mime || "—"}»). Для видео: mp4, webm, mov, mkv, m4v, avi.`,
+    error: `Формат не поддерживается (расширение «${fromName || "—"}», MIME «${mime || "—"}»). Документы: pdf, xlsx, docx… Видео: mp4, webm, mov…`,
   };
 }
 
 /** Лимиты для self-hosted Node (при необходимости увеличьте в nginx / прокси) */
 const MAX_IMAGE_BYTES = 30 * 1024 * 1024;
 const MAX_VIDEO_BYTES = 250 * 1024 * 1024;
+const MAX_DOCUMENT_BYTES = 40 * 1024 * 1024;
 
 export const maxDuration = 300;
 export const runtime = "nodejs";
@@ -98,12 +122,16 @@ export async function POST(request: NextRequest) {
     const { ext, kind } = resolved;
     const isImageType = kind === "image";
     const isVideoType = kind === "video";
+    const isDocumentType = kind === "document";
 
     if (isImageType && buffer.length > MAX_IMAGE_BYTES) {
       return NextResponse.json({ error: `Изображение слишком большое (макс. ${MAX_IMAGE_BYTES / 1024 / 1024} МБ)` }, { status: 400 });
     }
     if (isVideoType && buffer.length > MAX_VIDEO_BYTES) {
       return NextResponse.json({ error: `Видео слишком большое (макс. ${MAX_VIDEO_BYTES / 1024 / 1024} МБ)` }, { status: 400 });
+    }
+    if (isDocumentType && buffer.length > MAX_DOCUMENT_BYTES) {
+      return NextResponse.json({ error: `Файл слишком большой (макс. ${MAX_DOCUMENT_BYTES / 1024 / 1024} МБ)` }, { status: 400 });
     }
 
     let baseStem = (file.name || "upload")

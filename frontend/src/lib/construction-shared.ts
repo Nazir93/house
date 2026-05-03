@@ -71,6 +71,8 @@ export interface BuiltObjectItem {
   houseProjectSlug?: string | null;
   published: boolean;
   order: number;
+  /** Год в строке списка (из даты карточки в БД) */
+  year?: string | null;
   media: ConstructionMedia[];
 }
 

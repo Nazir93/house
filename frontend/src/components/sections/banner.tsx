@@ -120,10 +120,12 @@ export function BannerSection() {
           alt=""
           fill
           priority={theme === "dark"}
+          fetchPriority={theme === "dark" ? "high" : "low"}
+          loading={theme === "dark" ? "eager" : "lazy"}
           sizes="100vw"
-          quality={96}
+          quality={100}
           className={cn(
-            "object-cover transition-opacity duration-700 ease-out",
+            "object-cover object-center transition-opacity duration-700 ease-out",
             theme === "dark" ? "opacity-100" : "opacity-0",
           )}
         />
@@ -132,10 +134,12 @@ export function BannerSection() {
           alt=""
           fill
           priority={theme === "light"}
+          fetchPriority={theme === "light" ? "high" : "low"}
+          loading={theme === "light" ? "eager" : "lazy"}
           sizes="100vw"
-          quality={96}
+          quality={100}
           className={cn(
-            "object-cover transition-opacity duration-700 ease-out",
+            "object-cover object-center transition-opacity duration-700 ease-out",
             theme === "light" ? "opacity-100" : "opacity-0",
           )}
         />
@@ -165,9 +169,9 @@ export function BannerSection() {
         />
       </div>
 
-      <div className="section-inline-pad relative z-10 mx-auto flex min-h-[min(100svh,720px)] max-w-[1320px] flex-col pointer-events-none pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[calc(4.5rem+var(--site-header-banner-overlap)+env(safe-area-inset-top,0px))] sm:min-h-[min(100svh,700px)] md:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] md:pt-[calc(5.25rem+var(--site-header-banner-overlap)+env(safe-area-inset-top,0px))] lg:pt-[calc(5.75rem+var(--site-header-banner-overlap)+env(safe-area-inset-top,0px))]">
-        <div className="pointer-events-auto grid flex-1 gap-4 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(300px,620px)] min-[1100px]:items-start min-[1100px]:gap-6">
-          <div className="max-w-3xl pt-0">
+      <div className="section-inline-pad relative z-10 flex w-full min-h-[min(100svh,720px)] flex-col pointer-events-none pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[calc(4.5rem+var(--site-header-banner-overlap)+env(safe-area-inset-top,0px))] sm:min-h-[min(100svh,700px)] md:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] md:pt-[calc(5.25rem+var(--site-header-banner-overlap)+env(safe-area-inset-top,0px))] lg:pt-[calc(5.75rem+var(--site-header-banner-overlap)+env(safe-area-inset-top,0px))]">
+        <div className="pointer-events-auto grid w-full flex-1 gap-4 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(260px,min(520px,40vw))] min-[1100px]:items-stretch min-[1100px]:gap-6 xl:gap-8">
+          <div className="max-w-3xl justify-self-start self-start pt-0 min-[1100px]:pr-4">
             <div
               className={cn(
                 "max-w-4xl rounded-2xl bg-black/42 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_12px_48px_rgba(0,0,0,0.55)] backdrop-blur-sm sm:rounded-[1.35rem] sm:px-5 sm:py-4",
@@ -241,7 +245,7 @@ export function BannerSection() {
             </div>
           </div>
 
-          <div className="w-full min-w-0 justify-self-stretch min-[1100px]:mt-6 min-[1100px]:max-w-none min-[1100px]:justify-self-end xl:mt-8">
+          <div className="w-full min-w-0 min-[1100px]:w-full min-[1100px]:max-w-[min(520px,40vw)] min-[1100px]:justify-self-end min-[1100px]:self-end">
             <div
               role="region"
               aria-roledescription="карусель"
@@ -262,14 +266,14 @@ export function BannerSection() {
                 edgeGlass,
               )}
             >
-              <div className="flex flex-col gap-4 p-3.5 sm:gap-5 sm:p-5 md:pr-7 lg:pr-8">
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-5 lg:gap-6">
-                  <div className="flex min-w-0 flex-1 flex-col justify-between md:max-w-[300px] md:basis-[48%] md:min-w-0 md:flex-none md:pr-2 lg:pr-3">
+              <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-4 md:pr-5 lg:pr-6">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4 lg:gap-5">
+                  <div className="flex min-w-0 flex-1 flex-col justify-between md:max-w-[240px] md:basis-[46%] md:min-w-0 md:flex-none md:pr-1.5 lg:pr-2">
                     <div>
                       <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-white/45">
                         {String(activeSlide + 1).padStart(2, "0")} · {slide.label}
                       </p>
-                      <h2 className="mt-1 font-heading text-[0.95rem] font-bold leading-[1.2] tracking-tight text-white sm:text-[1rem] md:text-[1.08rem]">
+                      <h2 className="mt-1 font-heading text-[0.9rem] font-bold leading-[1.2] tracking-tight text-white sm:text-[0.95rem] md:text-[1rem]">
                         {slide.title}
                       </h2>
                       <p className="mt-1 text-[12px] leading-snug text-white/[0.62]">
@@ -290,8 +294,8 @@ export function BannerSection() {
                   </div>
                   <div
                     className={cn(
-                      "hero-carousel-media relative h-[min(52vw,320px)] w-full min-h-[220px] min-w-0 shrink-0 overflow-hidden rounded-xl bg-black/35 sm:h-[300px] sm:min-h-[260px]",
-                      "md:h-[236px] md:min-h-[236px] md:max-h-[236px] md:min-w-[52%] md:flex-1",
+                      "hero-carousel-media relative h-[min(48vw,280px)] w-full min-h-[200px] min-w-0 shrink-0 overflow-hidden rounded-xl bg-black/35 sm:h-[260px] sm:min-h-[230px]",
+                      "md:h-[200px] md:min-h-[200px] md:max-h-[200px] md:min-w-[54%] md:flex-1",
                       "border border-white/[0.05]",
                     )}
                   >
@@ -300,9 +304,10 @@ export function BannerSection() {
                       src={slide.image}
                       alt={slide.label}
                       fill
-                      quality={96}
-                      sizes="(max-width: 1024px) 100vw, 680px"
+                      quality={100}
+                      sizes="(max-width: 1023px) 96vw, 380px"
                       priority={activeSlide === 0}
+                      fetchPriority={activeSlide === 0 ? "high" : "low"}
                       className="object-cover object-center"
                     />
                   </div>
@@ -311,7 +316,7 @@ export function BannerSection() {
             </div>
 
             <nav
-              className="pointer-events-auto mt-3 flex justify-center sm:mt-4"
+              className="pointer-events-auto mt-3 flex justify-center min-[1100px]:justify-end sm:mt-4"
               aria-label="Группы слайдов"
             >
               <div

@@ -19,8 +19,9 @@ import { HouseRevealIntro } from "./house-reveal-intro";
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
+  const isAccount = pathname.startsWith("/account");
 
-  if (isAdmin) {
+  if (isAdmin || isAccount) {
     return <>{children}</>;
   }
 

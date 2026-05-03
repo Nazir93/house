@@ -1,0 +1,85 @@
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+
+export async function GET() {
+  const session = await getServerSession(authOptions);
+  const projectId = session?.user?.role === "client" ? session.user.clientProjectId : undefined;
+  if (!projectId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const [project, documentsTotal, photoReportsTotal] = await Promise.all([
+      prisma.clientConstructionProject.findUnique({
+        where: { id: projectId },
+        include: {
+          stages: { orderBy: { order: "asc" } },
+          payments: { orderBy: [{ order: "asc" }, { dueDate: "asc" }] },
+          documents: { orderBy: { uploadedAt: "desc" }, take: 8 },
+          photoReports: { orderBy: [{ order: "asc" }, { shotAt: "desc" }], take: 6 },
+          tickets: {
+            orderBy: { updatedAt: "desc" },
+            take: 10,
+            include: { messages: { orderBy: { createdAt: "desc" }, take: 1 } },
+          },
+        },
+      }),
+      prisma.clientDocument.count({ where: { projectId } }),
+      prisma.clientPhotoReport.count({ where: { projectId } }),
+    ]);
+
+    if (!project) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    const paymentsOpen = project.payments.filter(
+      (p) => p.status === "EXPECTED" || p.status === "NOT_ISSUED"
+    );
+    const upcoming = paymentsOpen
+      .filter((p) => p.dueDate)
+      .sort((a, b) => (a.dueDate!.getTime() - b.dueDate!.getTime()))[0]
+      ?? paymentsOpen[0]
+      ?? null;
+
+    const photoPreview = project.photoReports;
+    const docPreview = project.documents.slice(0, 5);
+
+    return NextResponse.json({
+      project: {
+        id: project.id,
+        contractNumber: project.contractNumber,
+        clientName: project.clientName,
+        title: project.title,
+        area: project.area,
+        wallMaterial: project.wallMaterial,
+        startDate: project.startDate?.toISOString() ?? null,
+        plannedEndDate: project.plannedEndDate?.toISOString() ?? null,
+        coverImageUrl: project.coverImageUrl,
+        overallProgress: project.overallProgress,
+        currentStageLabel: project.currentStageLabel,
+        foremanName: project.foremanName,
+        cameraStreamUrl: project.cameraStreamUrl,
+        stages: project.stages,
+        payments: project.payments,
+        upcomingPayment: upcoming,
+        documents: docPreview,
+        documentsTotal,
+        photoReports: photoPreview,
+        photoReportsTotal,
+        tickets: project.tickets.map((t) => ({
+          id: t.id,
+          subject: t.subject,
+          status: t.status,
+          createdAt: t.createdAt.toISOString(),
+          updatedAt: t.updatedAt.toISOString(),
+          lastMessagePreview: t.messages[0]?.body?.slice(0, 120) ?? null,
+        })),
+      },
+    });
+  } catch (e) {
+    console.error("[client/dashboard]", e);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
+  }
+}

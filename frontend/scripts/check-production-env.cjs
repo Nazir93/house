@@ -1,0 +1,86 @@
+/**
+ * Чек-лист переменных для админки, NextAuth и личного кабинета.
+ * Локально и на сервере: из каталога frontend выполните npm run env:check
+ * (подхватит .env и .env.local). На VPS при переменных только в PM2: export … затем node scripts/…
+ */
+const { loadEnvFiles } = require("./load-env-files.cjs");
+
+loadEnvFiles();
+
+const required = [
+  "DATABASE_URL",
+  "NEXTAUTH_SECRET",
+  "ADMIN_SECRET",
+  "NEXTAUTH_URL",
+  "NEXT_PUBLIC_SITE_URL",
+];
+
+function normUrl(u) {
+  if (!u || typeof u !== "string") return "";
+  try {
+    return new URL(u.trim()).origin;
+  } catch {
+    return "";
+  }
+}
+
+let failed = false;
+
+console.log("");
+console.log("  Проверка переменных окружения (production-ready)");
+console.log("");
+
+for (const key of required) {
+  const v = process.env[key];
+  if (!v || !String(v).trim()) {
+    console.error(`  ✗ ${key} — не задано (обязательно)`);
+    failed = true;
+  } else {
+    const show =
+      key === "DATABASE_URL"
+        ? String(v).replace(/:\/\/([^:]+):[^@]+@/, "://$1:***@")
+        : key.includes("SECRET")
+          ? "(скрыто)"
+          : v;
+    console.log(`  ✓ ${key} = ${show}`);
+  }
+}
+
+const adminEmail = process.env.ADMIN_EMAIL?.trim();
+if (!adminEmail) {
+  console.log("  · ADMIN_EMAIL — не задано, вход в админку: admin@dom.ru (см. lib/auth.ts)");
+} else {
+  console.log(`  ✓ ADMIN_EMAIL = ${adminEmail}`);
+}
+
+const site = normUrl(process.env.NEXT_PUBLIC_SITE_URL);
+const auth = normUrl(process.env.NEXTAUTH_URL);
+if (site && auth && site !== auth) {
+  console.log("");
+  console.warn(
+    "  ⚠ NEXT_PUBLIC_SITE_URL и NEXTAUTH_URL имеют разный origin — вход по домену может ломаться.",
+  );
+  console.warn(`    SITE: ${site}`);
+  console.warn(`    AUTH: ${auth}`);
+}
+
+if (process.env.NODE_ENV === "production") {
+  console.log("  ✓ NODE_ENV=production");
+} else {
+  console.log(
+    "  · NODE_ENV — для сервера задайте production (сейчас: " +
+      (process.env.NODE_ENV || "(не задано)") +
+      ")",
+  );
+}
+
+console.log("");
+
+if (failed) {
+  console.error("  Исправьте .env / .env.local на сервере и перезапустите процесс Node.");
+  console.error("");
+  process.exit(1);
+}
+
+console.log("  Все обязательные ключи на месте. Далее: npm run db:verify и prisma migrate deploy.");
+console.log("");
