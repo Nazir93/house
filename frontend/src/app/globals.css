@@ -319,22 +319,46 @@
     font-weight: 700;
   }
 
+  /* Учитываем safe-area (notch, скругления экрана) — без обрезания контента на мобильных */
   .container {
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
   }
 
   @media (min-width: 640px) {
     .container {
-      padding-left: 24px;
-      padding-right: 24px;
+      padding-left: max(1.5rem, env(safe-area-inset-left, 0px));
+      padding-right: max(1.5rem, env(safe-area-inset-right, 0px));
     }
   }
 
   @media (min-width: 1024px) {
     .container {
-      padding-left: 40px;
-      padding-right: 40px;
+      padding-left: max(2.5rem, env(safe-area-inset-left, 0px));
+      padding-right: max(2.5rem, env(safe-area-inset-right, 0px));
+    }
+  }
+
+  /**
+   * Горизонтальные поля полноширинных секций без класса container
+   * (баннер, материалы) — те же шаги, что и у hero: 16 → 28 → 40 px + safe-area.
+   */
+  .section-inline-pad {
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+  }
+
+  @media (min-width: 768px) {
+    .section-inline-pad {
+      padding-left: max(1.75rem, env(safe-area-inset-left, 0px));
+      padding-right: max(1.75rem, env(safe-area-inset-right, 0px));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .section-inline-pad {
+      padding-left: max(2.5rem, env(safe-area-inset-left, 0px));
+      padding-right: max(2.5rem, env(safe-area-inset-right, 0px));
     }
   }
 
@@ -393,14 +417,23 @@
     }
   }
 
-  /* Prevent text overflow on narrow screens */
+  /* Очень узкие экраны: не меньше safe-area */
   @media (max-width: 380px) {
     .container {
-      padding-left: 12px;
-      padding-right: 12px;
+      padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+      padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
     }
   }
 
+}
+
+/* Герой: в альбомной ориентации на телефоне не перегружать экран высокой каруселью */
+@media (orientation: landscape) and (max-height: 520px) {
+  .hero-carousel-media {
+    height: min(42vh, 240px) !important;
+    min-height: 180px !important;
+    max-height: 260px !important;
+  }
 }
 
 /* Electric circuit grid animation */
@@ -502,3 +535,4 @@
     animation: none !important;
   }
 }
+

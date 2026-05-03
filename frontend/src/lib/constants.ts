@@ -1,4 +1,4 @@
-export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || "Часть Души";
+export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || "Часть души";
 
 /** Слоган под логотипом в шапке (как на лендинге застройщика). */
 export const HEADER_TAGLINE =
@@ -33,12 +33,12 @@ export const SERVICE_REGIONS =
 
 /** Подзаголовок hero и похожие блоки: офис + регионы без перегруза title. */
 export function getHeroGeoSubtitle(): string {
-  return `Проектирование и строительство загородных домов под ключ. Офис в ${CITY}, работаем в: ${SERVICE_REGIONS}.`;
+  return `Проектируем и строим загородные дома: на чертежах — от подвала до кровли только качественные и понятные решения. Офис в ${CITY}, работаем в: ${SERVICE_REGIONS}.`;
 }
 
 /** Доп. фраза для meta description на главной и в layout. */
 export function getDefaultSiteGeoDescription(): string {
-  return `Проектирование и строительство домов под ключ. Офис в ${CITY}, проекты в ${SERVICE_REGIONS}. Типовые проекты, портфолио построенных объектов, ипотека и индивидуальное проектирование.`;
+  return `Строительство домов под ключ: качественные и понятные чертежи, прозрачная смета. Офис в ${CITY}, работаем в ${SERVICE_REGIONS}. Типовые и индивидуальные проекты, портфолио, ипотека.`;
 }
 
 type SchemaPlace = { "@type": "City" | "AdministrativeArea"; name: string };

@@ -20,7 +20,7 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
   {
     title: "Общие",
     fields: [
-      { key: "site_name", label: "Название компании", placeholder: "Дом" },
+      { key: "site_name", label: "Название компании", placeholder: "Часть души" },
       { key: "site_description", label: "Описание сайта", placeholder: "Строительство загородных домов под ключ", multiline: true },
       { key: "city", label: "Город", placeholder: "Санкт-Петербург" },
     ],

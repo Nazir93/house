@@ -110,7 +110,7 @@ export default function NewProjectPage() {
             value={form.title}
             onChange={(e) => set("title", e.target.value)}
             className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#0F3D2E]/50 transition-colors"
-            placeholder="Ресторан «Олива»"
+            placeholder="Например: коттедж 180 м², посёлок …"
           />
         </div>
 

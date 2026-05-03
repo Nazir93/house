@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown, Send } from "lucide-react";
 import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
+import { cn } from "@/lib/utils";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { SERVICE_REGIONS, SITE_NAME } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
@@ -51,24 +53,32 @@ const FAQ_ITEMS: { id: string; q: string; a: string }[] = [
   },
 ];
 
-const STAGE_SERVICES: { title: string; description: string }[] = [
+const STAGE_SERVICES: { id: string; title: string; description: string; image: string }[] = [
   {
+    id: "site-check",
     title: "Комплексная проверка участка",
     description: "Геодезия, геология и юридическая проверка",
+    image: "/images/banner/banner-hero-03.png",
   },
   {
+    id: "utilities",
     title: "Наружные сети и участок",
     description:
       "Дренаж, отмостка, ливневая канализация, скважины, очистные сооружения, газгольдеры, проведение воды и электричества, теплотрасса, сбросной колодец",
+    image: "/images/banner/banner-hero-05.png",
   },
   {
+    id: "facade",
     title: "Отделка фасадов",
     description: "Покраска деревянных домов, отделка фасадов каменных домов",
+    image: "/images/banner/banner-hero-06.png",
   },
   {
+    id: "interior",
     title: "Внутренняя отделка и внутренние инженерные коммуникации",
     description:
       "Перегородки, скрытые работы, монтаж отопления, вентиляции, водоснабжения и канализации, электрика, кондиционирование, отопительные приборы, отделка полов по лагам, тёплые полы, стяжка, котельная, отделка стен и потолка, внутренняя покраска.",
+    image: "/images/banner/banner-hero-01.png",
   },
 ];
 
@@ -98,38 +108,67 @@ export function CaseStudyFaqSection({ sectionClassName }: { sectionClassName?: s
 
   return (
     <section className={sectionClassName ?? "mt-16 md:mt-20"} aria-labelledby="case-faq-heading">
-      <h2
-        id="case-faq-heading"
-        className="text-center font-heading text-2xl font-bold tracking-tight text-[var(--text)] md:text-[1.65rem] lg:text-[1.85rem]"
-      >
-        Частые вопросы и ответы
-      </h2>
-      <div className="mt-8 grid gap-3 md:grid-cols-2 md:gap-4 lg:mt-10">
+      <div className="mb-8 w-full min-w-0 md:mb-9">
+        <div className="w-full min-w-0">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]">Вопросы клиентов</p>
+          <h2
+            id="case-faq-heading"
+            className="mt-2.5 w-full max-w-none text-balance font-heading text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl md:text-[2.2rem] md:leading-[1.1]"
+          >
+            Частые вопросы и ответы
+          </h2>
+          <p className="mt-3 max-w-3xl text-[13px] leading-relaxed text-[var(--text-muted)] sm:text-sm">
+            Сроки, смета, ипотека и доработки типового проекта — кратко и по делу.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-0 sm:gap-x-10 md:grid-cols-2 md:gap-x-12">
         {FAQ_ITEMS.map((item) => {
           const open = openId === item.id;
+          const panelId = `case-faq-panel-${item.id}`;
           return (
             <div
               key={item.id}
-              className="rounded-[1rem] border bg-[var(--bg)] px-4 py-3 shadow-[0_1px_0_rgba(255,255,255,0.75)_inset] md:rounded-[1.1rem] md:px-5 md:py-4"
-              style={{ borderColor: "rgba(43, 47, 45, 0.08)" }}
+              className="border-b border-[var(--border)] py-4 md:py-5"
             >
               <button
                 type="button"
+                id={`case-faq-trigger-${item.id}`}
                 onClick={() => setOpenId(open ? null : item.id)}
-                className="flex w-full items-start justify-between gap-3 text-left"
+                className="group flex w-full items-start gap-3 py-1 text-left outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[var(--accent)]/25 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] md:gap-4"
                 aria-expanded={open}
+                aria-controls={panelId}
               >
-                <span className="text-[13px] font-medium leading-snug text-[var(--text)] sm:text-sm">{item.q}</span>
+                <span className="min-w-0 flex-1 font-heading text-[15px] font-semibold leading-snug tracking-tight text-[var(--text)] sm:text-base">
+                  {item.q}
+                </span>
                 <ChevronDown
-                  className={`mt-0.5 h-5 w-5 shrink-0 text-[var(--text-muted)] transition-transform duration-300 ${open ? "rotate-180" : ""}`}
+                  className={cn(
+                    "mt-0.5 h-5 w-5 shrink-0 text-[var(--text-muted)] transition-transform duration-300 ease-out group-hover:text-[var(--text)]",
+                    open && "rotate-180 text-[var(--accent)]",
+                  )}
                   strokeWidth={2}
+                  aria-hidden
                 />
               </button>
-              {open ? (
-                <p className="mt-3 border-t border-[var(--border)] pt-3 text-[13px] leading-relaxed text-[var(--text-muted)] sm:text-sm">
-                  {item.a}
-                </p>
-              ) : null}
+              <div
+                id={panelId}
+                role="region"
+                aria-labelledby={`case-faq-trigger-${item.id}`}
+                className={cn(
+                  "grid transition-[grid-template-rows] duration-300 ease-out motion-reduce:transition-none",
+                  open ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+                )}
+              >
+                <div className="min-h-0 overflow-hidden">
+                  <div className="pt-3 pr-8 md:pr-10">
+                    <p className="text-[14px] leading-relaxed text-[var(--text-muted)] sm:text-[15px] md:leading-[1.65]">
+                      {item.a}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           );
         })}
@@ -139,33 +178,63 @@ export function CaseStudyFaqSection({ sectionClassName }: { sectionClassName?: s
 }
 
 export function ConstructionServicesStagesSection({ sectionClassName }: { sectionClassName?: string }) {
+  const [previewId, setPreviewId] = useState(STAGE_SERVICES[0].id);
+  const activeStage = STAGE_SERVICES.find((s) => s.id === previewId) ?? STAGE_SERVICES[0];
+
   return (
     <section className={sectionClassName ?? "mt-16 md:mt-20"} aria-labelledby="case-stages-heading">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-8">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
         <h2
           id="case-stages-heading"
-          className="max-w-xl font-heading text-2xl font-bold leading-tight tracking-tight text-[var(--text)] md:text-[1.65rem] lg:text-[1.85rem]"
+          className="w-full min-w-0 max-w-none flex-1 text-balance font-heading text-xl font-bold leading-tight tracking-tight text-[var(--text)] md:text-[1.45rem] lg:text-[1.6rem]"
         >
           Строительные услуги по этапам
         </h2>
-        <p className="max-w-md text-[13px] leading-relaxed text-[var(--text-muted)] lg:pb-1 lg:text-right lg:text-sm">
+        <p className="w-full min-w-0 shrink-0 max-w-md text-[12px] leading-relaxed text-[var(--text-muted)] lg:pb-0.5 lg:text-right lg:text-[13px]">
           Строительство загородных домов под ключ. Работаем в: {SERVICE_REGIONS}.
         </p>
       </div>
-      <ul className="mt-8 flex flex-col gap-3 md:mt-10 md:gap-4">
-        {STAGE_SERVICES.map((row) => (
-          <li
-            key={row.title}
-            className="flex flex-col gap-3 rounded-[1rem] border bg-[var(--bg)] px-5 py-4 md:flex-row md:items-start md:gap-10 md:rounded-[1.15rem] md:px-7 md:py-5"
-            style={{ borderColor: "rgba(43, 47, 45, 0.08)" }}
-          >
-            <span className="font-heading text-[15px] font-semibold text-[var(--text)] md:w-[min(38%,280px)] md:shrink-0 md:text-base">
-              {row.title}
-            </span>
-            <span className="text-[13px] leading-relaxed text-[var(--text-muted)] md:flex-1 md:text-[14px]">{row.description}</span>
-          </li>
-        ))}
-      </ul>
+
+      <div className="mt-6 md:mt-8 lg:grid lg:grid-cols-[minmax(0,1fr)_min(340px,40%)] lg:items-start lg:gap-8 xl:gap-11">
+        <ul className="flex min-w-0 flex-col border-t border-[var(--border)]">
+          {STAGE_SERVICES.map((row) => {
+            const active = row.id === previewId;
+            return (
+              <li key={row.id}>
+                <button
+                  type="button"
+                  onMouseEnter={() => setPreviewId(row.id)}
+                  onFocus={() => setPreviewId(row.id)}
+                  onClick={() => setPreviewId(row.id)}
+                  className={cn(
+                    "flex w-full flex-col gap-2.5 border-b border-[var(--border)] py-4 text-left outline-none transition-colors duration-200 md:flex-row md:items-start md:gap-8 md:py-5 lg:gap-10",
+                    "hover:bg-black/[0.03] focus-visible:ring-2 focus-visible:ring-[var(--accent)]/25 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] dark:hover:bg-white/[0.04]",
+                    active && "bg-[var(--accent)]/[0.08] dark:bg-[var(--accent)]/[0.12]",
+                  )}
+                >
+                  <span className="font-heading text-[14px] font-semibold text-[var(--text)] md:w-[min(38%,260px)] md:shrink-0 md:text-[15px]">
+                    {row.title}
+                  </span>
+                  <span className="text-[13px] leading-relaxed text-[var(--text-muted)] md:flex-1 md:text-[14px]">{row.description}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+
+        <div className="relative mt-8 aspect-[16/10] w-full overflow-hidden rounded-2xl lg:mt-0 lg:aspect-[3/4] lg:sticky lg:top-[calc(var(--site-header-sticky-offset)+1rem)] lg:self-start">
+          <Image
+            key={activeStage.id}
+            src={activeStage.image}
+            alt={activeStage.title}
+            fill
+            sizes="(max-width: 1024px) 100vw, 380px"
+            quality={90}
+            className="object-cover object-center transition-opacity duration-500 ease-out"
+            priority={false}
+          />
+        </div>
+      </div>
     </section>
   );
 }
@@ -234,16 +303,16 @@ export function CaseStudyLeadCtaSection({
 
   return (
     <section className={sectionClassName ?? "mt-16 md:mt-20"} aria-labelledby="case-cta-heading">
-      <div className="grid gap-4 lg:grid-cols-2 lg:gap-6 lg:items-stretch">
+      <div className="grid gap-3 lg:grid-cols-2 lg:gap-5 lg:items-stretch">
         <div
-          className="flex flex-col rounded-[1.25rem] border px-6 py-7 md:rounded-[1.5rem] md:px-8 md:py-8"
+          className="flex flex-col rounded-[1.5rem] border px-5 py-6 md:rounded-[1.75rem] md:px-7 md:py-8"
           style={{
             borderColor: "rgba(43, 47, 45, 0.08)",
             backgroundColor: "var(--bg)",
             boxShadow: "0 24px 48px rgba(43, 47, 45, 0.06)",
           }}
         >
-          <h2 id="case-cta-heading" className="font-heading text-xl font-bold leading-snug text-[var(--text)] md:text-2xl">
+          <h2 id="case-cta-heading" className="w-full max-w-none text-balance font-heading text-lg font-bold leading-snug text-[var(--text)] md:text-xl">
             Начните строить будущее уже сегодня
           </h2>
           <p className="mt-3 text-[13px] leading-relaxed text-[var(--text-muted)] md:text-sm">
@@ -251,15 +320,28 @@ export function CaseStudyLeadCtaSection({
           </p>
           <label className="mt-6 block text-[13px] font-medium text-[var(--text)]">
             Телефон
-            <input
-              type="tel"
-              autoComplete="tel"
-              placeholder="+7 (___) ___ - __ - __"
-              value={phone}
-              onChange={(e) => setPhone(formatRuPhoneInput(e.target.value))}
-              className="mt-2 w-full rounded-xl border px-4 py-3 text-[15px] outline-none transition-shadow focus:ring-2 focus:ring-[var(--accent)]/25"
-              style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-secondary)" }}
-            />
+            <div
+              className={cn(
+                "mt-2.5 overflow-hidden rounded-full transition-shadow duration-200",
+                "bg-white shadow-[inset_0_0_0_1px_rgba(26,30,29,0.12)]",
+                "hover:shadow-[inset_0_0_0_1px_rgba(15,61,46,0.22)]",
+                "focus-within:shadow-[inset_0_0_0_2px_var(--accent),0_4px_18px_rgba(15,61,46,0.08)]",
+                "dark:bg-[var(--bg-secondary)] dark:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.14)] dark:focus-within:shadow-[inset_0_0_0_2px_var(--accent),0_4px_22px_rgba(0,0,0,0.25)]",
+              )}
+            >
+              <input
+                type="tel"
+                autoComplete="tel"
+                placeholder="+7 (___) ___ - __ - __"
+                value={phone}
+                onChange={(e) => setPhone(formatRuPhoneInput(e.target.value))}
+                className={cn(
+                  "min-h-[52px] w-full appearance-none rounded-full border-0 bg-transparent px-5 py-3.5 text-[16px] outline-none sm:text-[15px]",
+                  "text-[var(--text)] placeholder:text-[var(--text-muted)]",
+                  "focus:outline-none focus:ring-0 focus-visible:outline-none",
+                )}
+              />
+            </div>
           </label>
           <label className="mt-4 flex cursor-pointer items-start gap-3 text-[12px] leading-snug text-[var(--text-muted)]">
             <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--border)] accent-[var(--accent)]" />
@@ -278,14 +360,14 @@ export function CaseStudyLeadCtaSection({
             type="button"
             onClick={submit}
             disabled={status === "loading" || status === "success"}
-            className="mt-6 w-full rounded-xl px-5 py-3.5 text-[15px] font-semibold text-white transition-opacity hover:opacity-[0.94] disabled:opacity-60"
+            className="mt-6 min-h-[52px] w-full rounded-full px-8 py-3 text-[15px] font-semibold text-[var(--accent-contrast)] shadow-[0_10px_28px_rgba(15,61,46,0.22)] transition-[opacity,transform,box-shadow] hover:shadow-[0_12px_32px_rgba(15,61,46,0.26)] active:scale-[0.99] disabled:opacity-60 disabled:active:scale-100 dark:shadow-[0_10px_28px_rgba(0,0,0,0.35)]"
             style={{ backgroundColor: "var(--accent)" }}
           >
             {status === "loading" ? "Отправка…" : "Позвоните мне"}
           </button>
         </div>
 
-        <div className="relative flex min-h-[280px] flex-col justify-end overflow-hidden rounded-[1.25rem] md:min-h-[320px] md:rounded-[1.5rem] lg:min-h-0">
+        <div className="relative flex min-h-[240px] flex-col justify-end overflow-hidden rounded-[1.15rem] md:min-h-[280px] md:rounded-[1.35rem] lg:min-h-0">
           <div
             className="absolute inset-0 bg-[length:cover] bg-center"
             style={{
@@ -295,8 +377,8 @@ export function CaseStudyLeadCtaSection({
             aria-hidden
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/28 to-transparent" aria-hidden />
-          <div className="relative z-[1] p-6 md:p-8">
-            <p className="font-heading text-lg font-semibold text-white md:text-xl">Или напишите в любом мессенджере</p>
+          <div className="relative z-[1] p-5 md:p-6">
+            <p className="font-heading text-base font-semibold text-white md:text-lg">Или напишите в любом мессенджере</p>
             <p className="mt-2 max-w-sm text-[13px] leading-relaxed text-white/85 md:text-sm">Быстрые ответы на вопросы и связь с менеджером</p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               {contact.social.telegram ? (

@@ -2,10 +2,9 @@ import { SITE_NAME, CITY, getDefaultSiteGeoDescription } from "@/lib/constants";
 import { getPageMeta } from "@/lib/get-page-meta";
 import { getHouseProjects } from "@/lib/construction-data";
 import { BannerSection } from "@/components/sections/banner";
-import { ViewAllServices } from "@/components/layout/view-all-services";
 import { ProjectsConstructorSection } from "@/components/sections/projects-constructor-section";
 import { FeaturedHouseProjectsSection } from "@/components/sections/featured-house-projects";
-import { PartnersSection } from "@/components/sections/partners";
+import { ClientsChooseVideoSection } from "@/components/sections/clients-choose-video-section";
 import {
   CaseStudyFaqSection,
   CaseStudyLeadCtaSection,
@@ -29,15 +28,14 @@ export default async function HomePage() {
   return (
     <>
       <BannerSection />
-      <ProjectsConstructorSection projects={houseProjects} />
-      <ViewAllServices />
+      <ProjectsConstructorSection />
       <FeaturedHouseProjectsSection projects={houseProjects} />
-      <PartnersSection />
+      <ClientsChooseVideoSection />
       <div className="border-t border-[var(--border)]" style={{ backgroundColor: "var(--bg)" }}>
-        <div className="container mx-auto max-w-[1200px] px-5 pb-20 pt-12 md:pb-24 md:pt-16">
+        <div className="container mx-auto max-w-[1100px] pb-14 pt-9 md:pb-16 md:pt-12">
           <CaseStudyFaqSection sectionClassName="mt-0" />
-          <ConstructionServicesStagesSection sectionClassName="mt-12 md:mt-14" />
-          <CaseStudyLeadCtaSection sectionClassName="mt-12 md:mt-16" leadSource="home-landing-cta" />
+          <ConstructionServicesStagesSection sectionClassName="mt-9 md:mt-10" />
+          <CaseStudyLeadCtaSection sectionClassName="mt-9 md:mt-11" leadSource="home-landing-cta" />
         </div>
       </div>
     </>

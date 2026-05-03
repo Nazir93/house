@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowRight, Send } from "lucide-react";
+import { Send } from "lucide-react";
+import { FooterBlueprintBackdrop } from "@/components/layout/footer-blueprint-backdrop";
 import { SITE_NAME } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
@@ -48,72 +48,33 @@ const FOOTER_COLUMNS: { title: string; links: { href: string; label: string }[] 
 export function Footer() {
   const contact = useContactConfig();
   const currentYear = new Date().getFullYear();
-  const [newsEmail, setNewsEmail] = useState("");
-  const [newsConsent, setNewsConsent] = useState(false);
-  const [newsStatus, setNewsStatus] = useState<"idle" | "done">("idle");
-
-  function newsletterSubmit(e: FormEvent) {
-    e.preventDefault();
-    if (!newsConsent || !newsEmail.trim().includes("@")) return;
-    setNewsStatus("done");
-    setNewsEmail("");
-    setNewsConsent(false);
-  }
 
   return (
-    <footer className="relative text-white" style={{ backgroundColor: "var(--footer-bar-bg)" }}>
-      <div className="container mx-auto max-w-[1200px] px-5 pb-10 pt-12 md:pb-14 md:pt-16 lg:px-6">
-        {/* Рассылка */}
-        <div className="flex flex-col gap-8 border-b border-white/[0.12] pb-12 md:flex-row md:items-start md:justify-between md:gap-12 md:pb-14">
-          <p className="max-w-md text-[14px] leading-relaxed text-white/[0.82] md:text-[15px]">
-            Раз в неделю — полезные письма о строительстве: этапы работ, обзор проектов и акции.
-          </p>
-          <div className="w-full max-w-xl md:min-w-[320px]">
-            {newsStatus === "done" ? (
-              <p className="text-sm font-medium text-white/90">Спасибо! Проверьте почту для подтверждения.</p>
-            ) : (
-              <form onSubmit={newsletterSubmit} className="space-y-3">
-                <div className="relative flex items-center">
-                  <input
-                    type="email"
-                    name="email"
-                    autoComplete="email"
-                    placeholder="Введите email"
-                    value={newsEmail}
-                    onChange={(e) => setNewsEmail(e.target.value)}
-                    className="w-full rounded-full border border-white/10 bg-white py-3 pl-5 pr-[3.25rem] text-[14px] text-[var(--text)] outline-none ring-offset-2 ring-offset-[var(--accent)] placeholder:text-neutral-400 focus:ring-2 focus:ring-white/35"
-                  />
-                  <button
-                    type="submit"
-                    className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-white text-[var(--accent)] shadow-sm transition hover:bg-white/95"
-                    aria-label="Подписаться"
-                  >
-                    <ArrowRight size={18} strokeWidth={2} />
-                  </button>
-                </div>
-                <label className="flex cursor-pointer items-start gap-2.5 text-[11px] leading-snug text-white/65">
-                  <input
-                    type="checkbox"
-                    checked={newsConsent}
-                    onChange={(e) => setNewsConsent(e.target.checked)}
-                    className="mt-0.5 h-3.5 w-3.5 shrink-0 rounded border-white/40 bg-white/10 accent-white"
-                  />
-                  <span>Я согласен на обработку персональных данных</span>
-                </label>
-              </form>
-            )}
-          </div>
-        </div>
+    <footer className="relative overflow-hidden text-white" style={{ backgroundColor: "var(--footer-bar-bg)" }}>
+      <FooterBlueprintBackdrop />
+      {/* Плотнее «вуаль» над чертежами — текст не смешивается с линиями */}
+      <div
+        className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(0,0,0,0.52)_0%,rgba(0,0,0,0.38)_42%,rgba(0,0,0,0.5)_100%)]"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_90%_70%_at_50%_40%,rgba(15,61,46,0.35),transparent_62%)]"
+        aria-hidden
+      />
 
-        {/* Колонки */}
-        <div className="grid grid-cols-2 gap-x-6 gap-y-10 pt-12 md:grid-cols-4 md:gap-8 lg:pt-14">
+      <div className="relative z-10 mx-auto max-w-[1100px] px-5 pb-6 pt-8 safe-bottom md:px-6 md:pb-7 md:pt-9 lg:px-7">
+        {/* Навигация */}
+        <div className="grid grid-cols-2 gap-x-5 gap-y-7 sm:grid-cols-2 md:grid-cols-4 md:gap-x-7">
           {FOOTER_COLUMNS.map((col) => (
             <div key={col.title}>
-              <p className="font-heading text-[11px] uppercase tracking-[0.2em] text-white/55">{col.title}</p>
-              <ul className="mt-4 space-y-2.5">
+              <p className="font-heading text-[10px] uppercase tracking-[0.2em] text-white/70">{col.title}</p>
+              <ul className="mt-3 space-y-2">
                 {col.links.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-[13px] leading-snug text-white/78 transition hover:text-white md:text-[14px]">
+                    <Link
+                      href={link.href}
+                      className="inline-block text-[13px] leading-snug text-white/[0.92] transition duration-200 hover:text-white md:text-[13.5px]"
+                    >
                       {link.label}
                     </Link>
                   </li>
@@ -123,50 +84,41 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Низ: бренд и контакты */}
-        <div className="mt-12 flex flex-col gap-10 border-t border-white/[0.12] pt-10 md:mt-14 md:flex-row md:items-start md:justify-between md:gap-8 md:pt-12">
-          <div className="max-w-md space-y-4">
-            <p className="font-heading text-xl font-semibold tracking-wide text-white md:text-2xl">{SITE_NAME}</p>
-            <div className="space-y-1 text-[13px] leading-relaxed text-white/78 md:text-[14px]">
+        {/* Контакты и соцсети */}
+        <div className="mt-7 flex flex-col gap-5 border-t border-white/[0.08] pt-7 md:mt-8 md:flex-row md:items-center md:justify-between md:gap-7 md:pt-7">
+          <div className="min-w-0 space-y-3 md:flex md:max-w-[70%] md:flex-wrap md:items-baseline md:gap-x-8 md:gap-y-2 md:space-y-0">
+            <p className="font-heading text-base font-semibold tracking-tight text-white md:text-lg">{SITE_NAME}</p>
+            <div className="flex flex-col gap-1.5 text-[13px] leading-snug text-white/[0.88] sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-1 md:text-[14px]">
               {contact.phone.trim() && contact.phoneRaw.trim() ? (
-                <p>
-                  <a href={`tel:${contact.phoneRaw}`} className="transition hover:text-white">
-                    {contact.phone}
-                  </a>
-                </p>
+                <a href={`tel:${contact.phoneRaw}`} className="w-fit transition hover:text-white">
+                  {contact.phone}
+                </a>
               ) : null}
               {contact.phone2.trim() && contact.phone2Raw.trim() ? (
-                <p>
-                  <a href={`tel:${contact.phone2Raw}`} className="transition hover:text-white">
-                    {contact.phone2}
-                  </a>
-                </p>
+                <a href={`tel:${contact.phone2Raw}`} className="w-fit transition hover:text-white">
+                  {contact.phone2}
+                </a>
               ) : null}
               {contact.email.trim() ? (
-                <p>
-                  <a href={`mailto:${contact.email}`} className="transition hover:text-white">
-                    {contact.email}
-                  </a>
-                </p>
+                <a href={`mailto:${contact.email}`} className="w-fit transition hover:text-white">
+                  {contact.email}
+                </a>
               ) : null}
-              {contact.address.trim() ? <p className="text-white/65">{contact.address}</p> : null}
-              <p className="text-[12px] text-white/55">{contact.workingHours}</p>
+              {contact.address.trim() ? <span className="text-white/72 sm:w-full sm:basis-full">{contact.address}</span> : null}
+              <span className="text-[12px] text-white/62 sm:w-full sm:basis-full">{contact.workingHours}</span>
             </div>
-            <p className="text-[11px] uppercase tracking-[0.14em] text-white/45">
-              © {currentYear} {SITE_NAME}
-            </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 md:justify-end">
+          <div className="flex shrink-0 items-center gap-2.5 md:justify-end">
             {contact.social.telegram ? (
               <a
                 href={contact.social.telegram}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white transition hover:bg-white/12"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-black/25 text-white shadow-[0_2px_12px_rgba(0,0,0,0.25)] ring-1 ring-white/15 transition hover:bg-black/35 hover:ring-white/25"
                 aria-label="Telegram"
               >
-                <Send size={18} strokeWidth={2} />
+                <Send size={17} strokeWidth={2} />
               </a>
             ) : null}
             {contact.social.max ? (
@@ -174,30 +126,30 @@ export function Footer() {
                 href={contact.social.max}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white transition hover:bg-white/12"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-black/25 text-white shadow-[0_2px_12px_rgba(0,0,0,0.25)] ring-1 ring-white/15 transition hover:bg-black/35 hover:ring-white/25"
                 aria-label="Max"
               >
-                <MaxMessengerIcon className="h-[18px] w-[18px]" aria-hidden />
+                <MaxMessengerIcon className="h-[17px] w-[17px]" aria-hidden />
               </a>
             ) : null}
           </div>
         </div>
-      </div>
 
-      {/* Подпись студии */}
-      <div className="border-t border-white/[0.08] bg-black/[0.12]">
-        <div className="container mx-auto max-w-[1200px] px-5 py-5 safe-bottom lg:px-6">
-          <p className="mx-auto max-w-3xl text-center text-[10px] leading-relaxed tracking-wide text-white/45 sm:text-[11px]">
-            Визуальная концепция, интерфейс и техническая реализация этого сайта выполнены{" "}
+        {/* Юридическая строка — без отдельной «пятки» */}
+        <div className="mt-5 flex flex-col gap-2 border-t border-white/[0.12] pt-4 text-[10px] leading-snug text-white/58 md:flex-row md:flex-wrap md:items-center md:justify-between md:gap-x-6 md:pt-4 md:text-[11px]">
+          <p>
+            © {currentYear} {SITE_NAME}
+          </p>
+          <p className="max-w-xl md:text-right">
+            Визуальная концепция и реализация сайта —{" "}
             <a
               href="https://www.code1618.ru"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-heading font-semibold text-white/65 underline-offset-2 transition hover:text-white"
+              className="font-heading font-semibold text-white/72 underline-offset-2 transition hover:text-white"
             >
-              студией CODE1618
+              студия CODE1618
             </a>
-            .
           </p>
         </div>
       </div>

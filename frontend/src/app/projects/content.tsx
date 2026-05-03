@@ -715,7 +715,7 @@ export function ProjectsCatalogContent({ projects }: { projects: HouseProjectIte
               <p className="mt-10 text-center text-base" style={{ color: "var(--text-muted)" }}>
                 Нет проектов по выбранным условиям. Измените фильтры или{" "}
                 <Link href="/#projects-constructor" className="font-medium underline-offset-4 hover:underline" style={{ color: "var(--accent)" }}>
-                  задайте параметры на главной
+                  посмотрите подбор по материалам на главной
                 </Link>
                 .
               </p>

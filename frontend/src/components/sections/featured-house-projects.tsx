@@ -3,45 +3,72 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { ArrowRight, Bath, Bed, Layers, Maximize2 } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Bath,
+  Bed,
+  Eye,
+  Flame,
+  Maximize2,
+} from "lucide-react";
 
 import type { HouseProjectItem } from "@/lib/construction-data";
-import { formatRub, getProjectRenders } from "@/lib/construction-shared";
+import { getProjectRenders } from "@/lib/construction-shared";
+import { cn } from "@/lib/utils";
 
-const INITIAL_VISIBLE = 3;
-const LOAD_MORE = 3;
+const INITIAL_VISIBLE = 4;
+const LOAD_MORE = 4;
 
-function pickCover(p: HouseProjectItem): string | null {
+/** Запасные обложки, если в данных нет рендеров или файлы отсутствуют в public */
+const COVER_FALLBACK_BY_SLUG: Record<string, string> = {
+  aurora: "/images/banner/banner-hero-01.png",
+  duet: "/images/banner/banner-hero-02.png",
+  line: "/images/banner/banner-hero-06.png",
+  horizon: "/images/banner/banner-hero-04.png",
+};
+
+const COVER_FALLBACK_ROTATE = [
+  "/images/banner/banner-hero-01.png",
+  "/images/banner/banner-hero-02.png",
+  "/images/banner/banner-hero-03.png",
+  "/images/banner/banner-hero-04.png",
+  "/images/banner/banner-hero-05.png",
+  "/images/banner/banner-hero-06.png",
+] as const;
+
+function pickCover(p: HouseProjectItem, index: number): string {
   const renders = getProjectRenders(p);
   const first = p.media[0];
-  return renders[0]?.url ?? first?.url ?? null;
+  const fromData = renders[0]?.url ?? (first?.type === "RENDER" ? first.url : null);
+  if (fromData) return fromData;
+  return COVER_FALLBACK_BY_SLUG[p.slug] ?? COVER_FALLBACK_ROTATE[index % COVER_FALLBACK_ROTATE.length];
 }
 
-function formatFloorsLabel(n: number): string {
-  const s = Number.isInteger(n) ? `${n}` : String(n);
-  return `${s} эт.`;
+function formatPriceMln(priceRub: number): string {
+  const mln = priceRub / 1_000_000;
+  return `${mln.toLocaleString("ru-RU", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} млн`;
 }
 
-function SpecRow({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof Maximize2;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-      <Icon className="h-[18px] w-[18px] shrink-0 text-[var(--text-subtle)]" aria-hidden strokeWidth={1.75} />
-      <div className="flex min-w-0 flex-1 items-baseline justify-between gap-2 text-sm">
-        <span style={{ color: "var(--text-muted)" }}>{label}</span>
-        <span className="font-medium tabular-nums" style={{ color: "var(--text)" }}>
-          {value}
-        </span>
-      </div>
-    </div>
-  );
+function materialsLine(materials: string[]): string | null {
+  if (!materials.length) return null;
+  return materials.map((m) => m.replace(/\.$/, "").trim()).join(", ");
+}
+
+function ruRoomsLabel(n: number): string {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  const word =
+    m10 === 1 && m100 !== 11 ? "комната" : m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20) ? "комнаты" : "комнат";
+  return `${n} ${word}`;
+}
+
+function ruBathroomsLabel(n: number): string {
+  const m10 = n % 10;
+  const m100 = n % 100;
+  const word =
+    m10 === 1 && m100 !== 11 ? "санузел" : m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20) ? "санузла" : "санузлов";
+  return `${n} ${word}`;
 }
 
 export function FeaturedHouseProjectsSection({ projects }: { projects: HouseProjectItem[] }) {
@@ -52,107 +79,192 @@ export function FeaturedHouseProjectsSection({ projects }: { projects: HouseProj
   }, [projects]);
 
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
+  const [tab, setTab] = useState<"serial" | "individual">("serial");
 
   if (list.length === 0) return null;
 
-  const shown = list.slice(0, visibleCount);
-  const hasMore = visibleCount < list.length;
+  const shown = tab === "serial" ? list.slice(0, visibleCount) : [];
+  const hasMore = tab === "serial" && visibleCount < list.length;
 
   return (
     <section
       id="catalog-preview"
-      className="py-16 sm:py-20 md:py-28 overflow-hidden"
-      style={{ backgroundColor: "var(--bg)", borderTop: "1px solid var(--border)" }}
+      className="overflow-hidden py-11 sm:py-14 md:py-[4.25rem]"
+      style={{ backgroundColor: "var(--bg)" }}
     >
-      <div className="container mx-auto px-5 sm:px-8 md:px-12 lg:px-20 xl:px-28">
-        <div className="mb-10 sm:mb-12 md:mb-14 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <h2
-            className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl max-w-3xl"
-            style={{ color: "var(--text)" }}
-          >
-            Популярные проекты домов
-          </h2>
-          <p className="max-w-md text-sm sm:text-base leading-relaxed" style={{ color: "var(--text-muted)" }}>
-            Вы можете выбрать одно из 500+ готовых решений или заказать индивидуальный проект.
-          </p>
+      <div className="container mx-auto max-w-[1180px]">
+        {/* Шапка как в макете */}
+        <div className="mb-8 flex flex-col gap-5 md:mb-9">
+          <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+            <h2
+              className="min-w-0 w-full flex-1 text-balance font-heading text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl md:text-[2.25rem] md:leading-[1.1]"
+            >
+              Популярные проекты
+            </h2>
+            <Link
+              href="/projects"
+              className="inline-flex shrink-0 items-center gap-1.5 text-[13px] font-semibold text-[var(--text)] underline-offset-4 transition hover:text-[var(--accent)] hover:underline sm:mt-1 sm:text-sm"
+            >
+              Все проекты
+              <ArrowUpRight className="h-4 w-4 shrink-0 opacity-80" strokeWidth={2} aria-hidden />
+            </Link>
+          </div>
+
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
+            <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain scrollbar-none pb-0.5 sm:w-auto sm:overflow-visible sm:pb-0">
+              <div className="inline-flex min-w-max rounded-full bg-[rgba(15,61,46,0.06)] p-[3px]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTab("serial");
+                    setVisibleCount(INITIAL_VISIBLE);
+                  }}
+                  className={cn(
+                    "rounded-full px-4 py-1.5 text-[12px] font-semibold transition sm:px-5 sm:py-2 sm:text-[13px]",
+                    tab === "serial"
+                      ? "bg-white text-[var(--text)] shadow-[0_1px_4px_rgba(15,61,46,0.12)]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text)]",
+                  )}
+                >
+                  Серийные
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTab("individual")}
+                  className={cn(
+                    "rounded-full px-4 py-1.5 text-[12px] font-semibold transition sm:px-5 sm:py-2 sm:text-[13px]",
+                    tab === "individual"
+                      ? "bg-white text-[var(--text)] shadow-[0_1px_4px_rgba(15,61,46,0.12)]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text)]",
+                  )}
+                >
+                  Индивидуальные
+                </button>
+              </div>
+            </div>
+            <p className="max-w-xl text-sm leading-relaxed text-[var(--text-muted)] sm:text-[15px] lg:max-w-[440px] lg:text-right">
+              Вы можете выбрать одно из 500+ готовых решений или заказать индивидуальный проект под участок и привычки семьи.
+            </p>
+          </div>
         </div>
 
-        <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {shown.map((p) => {
-            const cover = pickCover(p);
-            const href = `/projects/${p.slug}`;
-            return (
-              <article
-                key={p.id}
-                className="flex flex-col overflow-hidden rounded-2xl border shadow-sm transition-shadow hover:shadow-md"
-                style={{ borderColor: "var(--border)", backgroundColor: "#fff" }}
+        {tab === "individual" ? (
+          <div
+            className="rounded-[22px] border px-6 py-14 text-center sm:px-10 sm:py-16"
+            style={{
+              borderColor: "var(--border)",
+              backgroundColor: "var(--bg-secondary)",
+            }}
+          >
+            <p className="mx-auto max-w-lg text-base leading-relaxed text-[var(--text-muted)] sm:text-lg">
+              Индивидуальные дома проектируем с нуля: фасад, планировки и инженерия под ваш участок и бюджет.
+            </p>
+            <Link
+              href="/individual-design"
+              className="mt-6 inline-flex min-h-[48px] items-center justify-center rounded-full bg-[var(--accent)] px-8 text-sm font-bold uppercase tracking-[0.08em] text-[var(--accent-contrast)] transition hover:opacity-[0.96]"
+            >
+              Заказать проектирование
+            </Link>
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-3 sm:gap-4 md:grid-cols-2 md:gap-x-5 md:gap-y-4">
+              {shown.map((p, idx) => {
+                const cover = pickCover(p, idx);
+                const href = `/projects/${p.slug}`;
+                const views = 180 + p.area + p.order * 7;
+                const hot = 12 + (p.isNew ? 28 : 0) + p.order * 3;
+                const mats = materialsLine(p.materials);
+
+                return (
+                  <article key={p.id} className="flex flex-col">
+                    <div className="relative aspect-[16/11] w-full overflow-hidden rounded-[22px] bg-[var(--stone)] shadow-[0_12px_40px_rgba(15,61,46,0.08)]">
+                      <Link href={href} className="absolute inset-0 z-0">
+                        <Image
+                          src={cover}
+                          alt={p.title}
+                          fill
+                          quality={90}
+                          className="object-cover transition duration-500 hover:scale-[1.02]"
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                        />
+                      </Link>
+
+                      <div className="pointer-events-none absolute inset-x-0 top-3 flex justify-end gap-2 px-3">
+                        <span className="pointer-events-none inline-flex items-center gap-1 rounded-full bg-black/48 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+                          <Eye className="h-3 w-3 opacity-95" aria-hidden />
+                          {views}
+                        </span>
+                        <span className="pointer-events-none inline-flex items-center gap-1 rounded-full bg-black/48 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+                          <Flame className="h-3 w-3 opacity-95" aria-hidden />
+                          {hot}
+                        </span>
+                      </div>
+
+                      <div className="absolute bottom-2 left-2 right-2 z-[1] sm:bottom-3 sm:left-auto sm:right-3">
+                        <Link
+                          href={`${href}#plans`}
+                          className="inline-flex w-full min-w-0 items-center justify-center gap-1 rounded-full bg-[#e8f3eb] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#0f3d2e] shadow-sm transition hover:bg-[#dcefe2] sm:w-auto sm:justify-start sm:px-4 sm:text-[11px]"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Клиентские планировки
+                          <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
+                        </Link>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex flex-col gap-2 px-0.5 sm:mt-3.5">
+                      <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
+                        <Link
+                          href={href}
+                          className="min-w-0 flex-1 truncate font-heading text-base font-bold uppercase tracking-tight text-[var(--text)] transition hover:text-[var(--accent)] sm:text-lg"
+                        >
+                          {p.title}
+                        </Link>
+                        <span className="shrink-0 font-heading text-[15px] font-bold tabular-nums leading-none text-[var(--text)] sm:text-base">
+                          от {formatPriceMln(p.price)}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px] text-[var(--text-muted)] sm:gap-x-3 sm:text-[13px]">
+                        <span className="inline-flex items-center gap-1 tabular-nums">
+                          <Maximize2 className="h-3.5 w-3.5 shrink-0 text-[var(--text-subtle)]" strokeWidth={1.75} aria-hidden />
+                          <span className="whitespace-nowrap font-medium text-[var(--text)]">{p.area} м²</span>
+                        </span>
+                        <span className="h-3 w-px shrink-0 bg-[var(--border)] opacity-70" aria-hidden />
+                        <span className="inline-flex items-center gap-1 tabular-nums">
+                          <Bed className="h-3.5 w-3.5 shrink-0 text-[var(--text-subtle)]" strokeWidth={1.75} aria-hidden />
+                          <span className="whitespace-nowrap font-medium text-[var(--text)]">{ruRoomsLabel(p.rooms)}</span>
+                        </span>
+                        <span className="h-3 w-px shrink-0 bg-[var(--border)] opacity-70" aria-hidden />
+                        <span className="inline-flex items-center gap-1 tabular-nums">
+                          <Bath className="h-3.5 w-3.5 shrink-0 text-[var(--text-subtle)]" strokeWidth={1.75} aria-hidden />
+                          <span className="whitespace-nowrap font-medium text-[var(--text)]">{ruBathroomsLabel(p.bathrooms)}</span>
+                        </span>
+                      </div>
+                      {mats ? (
+                        <p className="text-[11px] leading-snug text-[var(--text-muted)] sm:text-[12px]">
+                          <span className="font-medium text-[var(--text-subtle)]">Материалы стен: </span>
+                          {mats}
+                        </p>
+                      ) : null}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            {hasMore ? (
+              <button
+                type="button"
+                onClick={() => setVisibleCount((n) => Math.min(n + LOAD_MORE, list.length))}
+                className="mx-auto mt-8 flex w-full max-w-md items-center justify-center rounded-full border border-[var(--border)] bg-[var(--bg-secondary)] px-6 py-3 text-sm font-semibold text-[var(--text)] transition hover:bg-[var(--bg)] sm:mt-9"
               >
-                <Link href={href} className="relative block aspect-[4/3] overflow-hidden bg-[var(--stone)]">
-                  {cover ? (
-                    <Image
-                      src={cover}
-                      alt={p.title}
-                      fill
-                      className="object-cover transition-transform duration-500 hover:scale-[1.03]"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
-                  ) : null}
-                </Link>
-
-                <div className="flex flex-1 flex-col p-5 md:p-6">
-                  <h3 className="font-heading text-lg font-bold leading-snug md:text-xl" style={{ color: "var(--text)" }}>
-                    <Link href={href} className="transition-colors hover:text-[var(--accent)]">
-                      Авторский проект «{p.title}»
-                    </Link>
-                  </h3>
-
-                  <div
-                    className="mt-4 divide-y border-t border-b"
-                    style={{ borderColor: "var(--border)" }}
-                  >
-                    <SpecRow icon={Maximize2} label="Площадь" value={`${p.area} м²`} />
-                    <SpecRow icon={Layers} label="Этажность" value={formatFloorsLabel(p.floors)} />
-                    <SpecRow icon={Bed} label="Количество спален" value={`${p.rooms} шт.`} />
-                    <SpecRow icon={Bath} label="Количество санузлов" value={`${p.bathrooms} шт.`} />
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap items-end justify-between gap-3 border-t pt-5" style={{ borderColor: "var(--border)" }}>
-                    <p className="font-heading text-lg font-bold tabular-nums md:text-xl" style={{ color: "var(--text)" }}>
-                      от {formatRub(p.price)}
-                    </p>
-                    <Link
-                      href={href}
-                      className="inline-flex shrink-0 items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold text-white transition hover:opacity-95"
-                      style={{ backgroundColor: "var(--accent)" }}
-                    >
-                      Подробнее
-                    </Link>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-        </div>
-
-        {hasMore ? (
-          <button
-            type="button"
-            onClick={() => setVisibleCount((n) => Math.min(n + LOAD_MORE, list.length))}
-            className="mx-auto mt-10 flex w-full max-w-md items-center justify-center rounded-xl border px-6 py-4 text-base font-semibold transition-colors hover:bg-[var(--bg-secondary)] sm:mt-12 md:mt-14"
-            style={{ borderColor: "var(--border)", color: "var(--text)", backgroundColor: "var(--bg-secondary)" }}
-          >
-            Показать ещё
-          </button>
-        ) : null}
-
-        <Link
-          href="/projects"
-          className="mt-8 sm:mt-10 flex w-full items-center justify-between rounded-2xl px-5 py-5 font-heading text-lg transition-colors sm:px-8 sm:py-6 md:py-7 sm:text-xl md:text-2xl"
-          style={{ border: "1px solid var(--border)", color: "var(--text)" }}
-        >
-          Весь каталог проектов
-          <ArrowRight size={22} aria-hidden />
-        </Link>
+                Показать ещё
+              </button>
+            ) : null}
+          </>
+        )}
       </div>
     </section>
   );

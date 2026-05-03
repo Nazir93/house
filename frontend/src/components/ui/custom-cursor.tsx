@@ -12,8 +12,6 @@ function isHoverTarget(el: Element | null): boolean {
 
 export function CustomCursor() {
   const blobRef = useRef<HTMLDivElement>(null);
-  const pos = useRef({ x: -100, y: -100 });
-  const target = useRef({ x: -100, y: -100 });
   const hoveringRef = useRef(false);
   const [visible, setVisible] = useState(false);
   const [hovering, setHovering] = useState(false);
@@ -22,11 +20,19 @@ export function CustomCursor() {
     if (isLowPerfDevice()) return;
     const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
     if (isTouchDevice) return;
+    try {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    } catch {
+      /* ignore */
+    }
 
     setVisible(true);
 
     const handleMouseMove = (e: MouseEvent) => {
-      target.current = { x: e.clientX, y: e.clientY };
+      const node = blobRef.current;
+      if (node) {
+        node.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
+      }
 
       const isHover = isHoverTarget(e.target as Element);
       if (isHover !== hoveringRef.current) {
@@ -42,25 +48,10 @@ export function CustomCursor() {
     document.addEventListener("mouseenter", handleMouseEnter);
     document.addEventListener("mouseleave", handleMouseLeave);
 
-    let animationId: number;
-    const animate = () => {
-      pos.current.x += (target.current.x - pos.current.x) * 0.25;
-      pos.current.y += (target.current.y - pos.current.y) * 0.25;
-
-      if (blobRef.current) {
-        blobRef.current.style.transform =
-          `translate(${pos.current.x}px, ${pos.current.y}px) translate(-50%, -50%)`;
-      }
-
-      animationId = requestAnimationFrame(animate);
-    };
-    animationId = requestAnimationFrame(animate);
-
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseenter", handleMouseEnter);
       document.removeEventListener("mouseleave", handleMouseLeave);
-      cancelAnimationFrame(animationId);
     };
   }, []);
 
@@ -80,10 +71,10 @@ export function CustomCursor() {
           height: `${size}px`,
           opacity: 1,
           transition: "width 0.2s ease, height 0.2s ease",
-          willChange: "transform",
+          transform: "translate3d(-100px, -100px, 0)",
         }}
       >
-        <svg viewBox="0 0 56 56" fill="none" className="w-full h-full" aria-hidden>
+        <svg viewBox="0 0 56 56" fill="none" className="h-full w-full" aria-hidden>
           <circle
             cx="28"
             cy="28"

@@ -3,107 +3,16 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
-import { Calculator, ChevronDown, Search, UserRound } from "lucide-react";
+import { ChevronDown, Percent, Search, UserRound } from "lucide-react";
 import { SITE_NAME, HEADER_TAGLINE, ACCOUNT_PORTAL_PATH } from "@/lib/constants";
-import { NAV_SECTIONS, isNavGroup, type NavSection } from "@/lib/nav-sections";
+import { NAV_SECTIONS, type NavSection } from "@/lib/nav-sections";
+import { NavDropdownPanel } from "@/components/layout/nav-dropdown-panel";
 import { useModal } from "@/lib/modal-context";
 import { useTheme } from "@/lib/theme-context";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { SiteSearchPanel } from "@/components/layout/site-search-panel";
 import { cn } from "@/lib/utils";
-
-function NavDropdownPanel({
-  section,
-  open,
-  onClose,
-  openModal,
-}: {
-  section: NavSection;
-  open: boolean;
-  onClose: () => void;
-  openModal: () => void;
-}) {
-  if (!open) return null;
-  return (
-    <div className="absolute left-0 top-full z-50 pt-2 lg:left-1/2 lg:-translate-x-1/2">
-      <div
-        className="min-w-[260px] py-2 shadow-lg"
-        style={{
-          backgroundColor: "var(--card-bg)",
-          border: "1px solid var(--border)",
-          borderRadius: "12px",
-        }}
-      >
-        {section.items.map((item) =>
-          isNavGroup(item) ? (
-            <div
-              key={item.label}
-              className="border-t py-1 first:border-0"
-              style={{ borderColor: "var(--border)" }}
-            >
-              <div
-                className="px-5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em]"
-                style={{ color: "var(--text-subtle)" }}
-              >
-                {item.label}
-              </div>
-              {item.children.map((child) =>
-                "action" in child && child.action === "openModal" ? (
-                  <button
-                    key={child.label}
-                    type="button"
-                    onClick={() => {
-                      onClose();
-                      openModal();
-                    }}
-                    className="w-full px-5 py-2 text-left text-xs uppercase tracking-[0.08em] transition-colors duration-200 hover:bg-black/[0.04]"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    {child.label}
-                  </button>
-                ) : "href" in child ? (
-                  <Link
-                    key={child.href}
-                    href={child.href}
-                    onClick={onClose}
-                    className="block px-5 py-2 text-xs uppercase tracking-[0.08em] transition-colors duration-200 hover:bg-black/[0.04]"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    {child.label}
-                  </Link>
-                ) : null
-              )}
-            </div>
-          ) : "action" in item && item.action === "openModal" ? (
-            <button
-              key={item.label}
-              type="button"
-              onClick={() => {
-                onClose();
-                openModal();
-              }}
-              className="w-full px-5 py-2.5 text-left text-xs uppercase tracking-[0.08em] transition-colors duration-200 hover:bg-black/[0.04]"
-              style={{ color: "var(--text-muted)" }}
-            >
-              {item.label}
-            </button>
-          ) : "href" in item ? (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onClose}
-              className="block px-5 py-2.5 text-xs uppercase tracking-[0.08em] transition-colors duration-200 hover:bg-black/[0.04]"
-              style={{ color: "var(--text-muted)" }}
-            >
-              {item.label}
-            </Link>
-          ) : null
-        )}
-      </div>
-    </div>
-  );
-}
 
 export function SiteHeaderBar() {
   const pathname = usePathname();
@@ -222,7 +131,7 @@ export function SiteHeaderBar() {
           >
       {/* ——— Desktop ——— */}
       <div className="hidden lg:block">
-        <div className="mx-auto grid max-w-[1440px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3 py-1 pl-4 pr-3 xl:gap-x-6 xl:pl-8 xl:pr-5">
+        <div className="mx-auto grid max-w-[1440px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3 overflow-visible py-1 pl-4 pr-3 xl:gap-x-6 xl:pl-8 xl:pr-5">
           <div className="flex min-w-0 items-center gap-2 xl:gap-3">
             <Link
               href="/"
@@ -232,7 +141,7 @@ export function SiteHeaderBar() {
               <BrandLogo height={44} className="min-w-0" brightOnBackdrop={heroGlassLightInk} />
             </Link>
             <p
-              className="hidden max-w-[200px] text-[9px] font-medium uppercase leading-snug tracking-[0.12em] min-[1100px]:block xl:max-w-[240px]"
+              className="hidden max-w-[220px] text-[9px] font-medium uppercase leading-snug tracking-[0.11em] min-[1100px]:block xl:max-w-[280px] xl:tracking-[0.12em]"
               style={{ color: "var(--header-bar-muted)" }}
             >
               {HEADER_TAGLINE}
@@ -240,13 +149,13 @@ export function SiteHeaderBar() {
           </div>
 
           <nav
-            className="flex max-w-[min(72vw,720px)] flex-wrap justify-center gap-x-3 gap-y-1 xl:max-w-none xl:gap-x-5"
+            className="flex max-w-[min(72vw,720px)] flex-wrap justify-center gap-x-3 gap-y-1 overflow-visible xl:max-w-none xl:gap-x-5"
             aria-label="Основное меню"
           >
             {orderedNav.map((section) => (
               <div
                 key={section.label}
-                className="relative"
+                className="relative overflow-visible"
                 onMouseEnter={() => handleEnter(section.label)}
                 onMouseLeave={handleLeave}
               >
@@ -264,7 +173,7 @@ export function SiteHeaderBar() {
                   <ChevronDown className="h-3 w-3 opacity-70 xl:h-3.5 xl:w-3.5" strokeWidth={2} />
                 </button>
                 <NavDropdownPanel
-                  section={section}
+                  sectionLabel={section.label}
                   open={openSection === section.label}
                   onClose={() => setOpenSection(null)}
                   openModal={openModal}
@@ -291,7 +200,7 @@ export function SiteHeaderBar() {
             <ThemeToggle />
 
             <Link
-              href="/contacts"
+              href="/mortgage"
               className={cn(
                 "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 xl:gap-1.5 xl:px-3.5 xl:py-1.5 xl:text-[10px]",
                 heroGlassLightInk &&
@@ -308,8 +217,8 @@ export function SiteHeaderBar() {
                   "border border-white/14 bg-white/[0.07] text-[#f1f5f3] shadow-none hover:border-white/22 hover:bg-white/[0.11] focus-visible:outline-[var(--accent)]",
               )}
             >
-              <Calculator className="h-3 w-3 shrink-0 opacity-95" strokeWidth={2} aria-hidden />
-              Рассчитать стоимость
+              <Percent className="h-3 w-3 shrink-0 opacity-95" strokeWidth={2} aria-hidden />
+              Ипотека и финансы
             </Link>
 
             <Link

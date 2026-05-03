@@ -151,7 +151,7 @@ export default function AdminReviewsPage() {
             <div>
               <label className="block text-xs text-white/40 mb-1">Объект</label>
               <input type="text" value={form.objectName} onChange={(e) => set("objectName", e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-white/[0.05] border border-white/[0.08] text-sm text-white focus:outline-none focus:border-[#0F3D2E]/50 transition-colors" placeholder="Ресторан «Олива»" />
+                className="w-full px-3 py-2 rounded-lg bg-white/[0.05] border border-white/[0.08] text-sm text-white focus:outline-none focus:border-[#0F3D2E]/50 transition-colors" placeholder="Объект или заказчик …" />
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
