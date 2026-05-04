@@ -13,6 +13,7 @@ import {
 import { useState } from "react";
 
 import { useTheme } from "@/lib/theme-context";
+import { useModal } from "@/lib/modal-context";
 import { cn } from "@/lib/utils";
 
 /** Полноэкранный фон главного баннера: тёмная тема — «ночной» кадр, светлая — дневной */
@@ -98,6 +99,7 @@ const edgeGlassStrong = "border border-white/[0.1]";
 
 export function BannerSection() {
   const { theme } = useTheme();
+  const { openModalToEstimate } = useModal();
   const [activeSlide, setActiveSlide] = useState(0);
   const slide = HERO_SLIDES[activeSlide] ?? HERO_SLIDES[0];
 
@@ -123,7 +125,7 @@ export function BannerSection() {
           fetchPriority={theme === "dark" ? "high" : "low"}
           loading={theme === "dark" ? "eager" : "lazy"}
           sizes="100vw"
-          quality={100}
+          quality={82}
           className={cn(
             "object-cover object-center transition-opacity duration-700 ease-out",
             theme === "dark" ? "opacity-100" : "opacity-0",
@@ -137,7 +139,7 @@ export function BannerSection() {
           fetchPriority={theme === "light" ? "high" : "low"}
           loading={theme === "light" ? "eager" : "lazy"}
           sizes="100vw"
-          quality={100}
+          quality={82}
           className={cn(
             "object-cover object-center transition-opacity duration-700 ease-out",
             theme === "light" ? "opacity-100" : "opacity-0",
@@ -206,8 +208,10 @@ export function BannerSection() {
                 <LayoutGrid className="h-4 w-4 shrink-0" aria-hidden />
                 Смотреть проекты
               </Link>
-              <Link
-                href="/contacts"
+              <button
+                type="button"
+                onClick={() => openModalToEstimate()}
+                aria-label="Открыть ориентировочный расчёт стоимости строительства"
                 className={cn(
                   "inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-black/55 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-white shadow-[0_12px_36px_rgba(0,0,0,0.25)] backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-black/70 md:px-5",
                   edgeGlassStrong,
@@ -216,7 +220,7 @@ export function BannerSection() {
               >
                 <Calculator className="h-4 w-4 shrink-0" aria-hidden />
                 Рассчитать стоимость
-              </Link>
+              </button>
             </div>
 
             <div
@@ -304,7 +308,7 @@ export function BannerSection() {
                       src={slide.image}
                       alt={slide.label}
                       fill
-                      quality={100}
+                      quality={85}
                       sizes="(max-width: 1023px) 96vw, 380px"
                       priority={activeSlide === 0}
                       fetchPriority={activeSlide === 0 ? "high" : "low"}

@@ -112,7 +112,7 @@ export function FeaturedHouseProjectsSection({ projects }: { projects: HouseProj
 
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
             <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain scrollbar-none pb-0.5 sm:w-auto sm:overflow-visible sm:pb-0">
-              <div className="inline-flex min-w-max rounded-full bg-[rgba(15,61,46,0.06)] p-[3px]">
+              <div className="inline-flex min-w-max rounded-full bg-[var(--bg-secondary)] p-[3px] ring-1 ring-[var(--border)] ring-inset">
                 <button
                   type="button"
                   onClick={() => {
@@ -122,7 +122,7 @@ export function FeaturedHouseProjectsSection({ projects }: { projects: HouseProj
                   className={cn(
                     "rounded-full px-4 py-1.5 text-[12px] font-semibold transition sm:px-5 sm:py-2 sm:text-[13px]",
                     tab === "serial"
-                      ? "bg-white text-[var(--text)] shadow-[0_1px_4px_rgba(15,61,46,0.12)]"
+                      ? "bg-white text-[var(--text)] shadow-[0_1px_4px_rgba(15,61,46,0.12)] dark:bg-[var(--card-bg)] dark:text-[var(--text)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
                       : "text-[var(--text-muted)] hover:text-[var(--text)]",
                   )}
                 >
@@ -134,7 +134,7 @@ export function FeaturedHouseProjectsSection({ projects }: { projects: HouseProj
                   className={cn(
                     "rounded-full px-4 py-1.5 text-[12px] font-semibold transition sm:px-5 sm:py-2 sm:text-[13px]",
                     tab === "individual"
-                      ? "bg-white text-[var(--text)] shadow-[0_1px_4px_rgba(15,61,46,0.12)]"
+                      ? "bg-white text-[var(--text)] shadow-[0_1px_4px_rgba(15,61,46,0.12)] dark:bg-[var(--card-bg)] dark:text-[var(--text)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
                       : "text-[var(--text-muted)] hover:text-[var(--text)]",
                   )}
                 >

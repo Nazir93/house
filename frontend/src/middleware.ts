@@ -73,15 +73,14 @@ export async function middleware(request: NextRequest) {
   if (skipToken) return NextResponse.next();
   if (isApiAuth) return NextResponse.next();
 
-  // Должно совпадать с именем cookie (__Secure-…), которое выставляет NextAuth при HTTPS
-  const isHttps =
-    request.headers.get("x-forwarded-proto") === "https" ||
-    request.nextUrl.protocol === "https:";
-
+  /**
+   * Не задаём secureCookie явно: getToken сам берёт признак из NEXTAUTH_URL.startsWith('https://')
+   * (как и выдача cookie в NextAuth). Если передать только x-forwarded-proto, без заголовка
+   * от nginx приложение будет искать не то имя cookie — вход «не открывает» админку.
+   */
   const token = await getToken({
     req: request,
-    secret: process.env.NEXTAUTH_SECRET,
-    secureCookie: isHttps,
+    secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
   });
 
   const role = token?.role as string | undefined;

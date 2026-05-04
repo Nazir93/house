@@ -307,6 +307,43 @@ export function formatLeadMessage(lead: {
     }
   }
 
+  if (
+    rawCalc &&
+    typeof rawCalc === "object" &&
+    "kind" in rawCalc &&
+    (rawCalc as { kind?: string }).kind === "house-construction-quote"
+  ) {
+    const h = rawCalc as {
+      kind: string;
+      objectType?: string | null;
+      area?: string | null;
+      catalogFloorLabel?: string;
+      roofLabel?: string;
+      wallMaterialLabel?: string;
+      engineering?: Partial<Record<string, boolean>>;
+      facadeFinish?: string;
+      estimate?: number | null;
+      quote?: { grandTotalRub?: number | null };
+    };
+    lines.push(``, `<b>Калькулятор строительства (прайс)</b>`);
+    if (h.objectType?.trim()) lines.push(`<b>Объект:</b> ${escapeHtml(h.objectType.trim())}`);
+    if (h.catalogFloorLabel) lines.push(`<b>Этажность:</b> ${escapeHtml(h.catalogFloorLabel)}`);
+    if (h.roofLabel) lines.push(`<b>Кровля:</b> ${escapeHtml(h.roofLabel)}`);
+    if (h.wallMaterialLabel) lines.push(`<b>Стены:</b> ${escapeHtml(h.wallMaterialLabel)}`);
+    if (h.area?.trim()) lines.push(`<b>Площадь:</b> ${escapeHtml(h.area.trim())} м²`);
+    if (h.engineering) {
+      const keys = Object.entries(h.engineering)
+        .filter(([, v]) => v === true)
+        .map(([k]) => k);
+      if (keys.length) lines.push(`<b>Инженерия (ключи):</b> ${escapeHtml(keys.join(", "))}`);
+    }
+    if (h.facadeFinish && h.facadeFinish !== "none") lines.push(`<b>Фасад:</b> ${escapeHtml(h.facadeFinish)}`);
+    const g = h.quote?.grandTotalRub ?? h.estimate;
+    if (typeof g === "number" && Number.isFinite(g)) {
+      lines.push(`<b>Ориентировочно:</b> ${g.toLocaleString("ru-RU")} ₽`);
+    }
+  }
+
   if (lead.source === "calculator" && rawCalc && typeof rawCalc === "object" && !("kind" in rawCalc)) {
     const c = rawCalc as Record<string, unknown>;
     const workMode = typeof c.workMode === "string" ? c.workMode : "";

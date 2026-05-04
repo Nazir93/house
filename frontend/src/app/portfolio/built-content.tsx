@@ -6,6 +6,7 @@ import { useMemo, useRef, useState } from "react";
 import { LayoutGrid, MapPinned } from "lucide-react";
 import { PortfolioExcursionFab } from "@/components/portfolio/portfolio-excursion-fab";
 import { builtObjectMaterialLabel, getBuiltObjectCover, type BuiltObjectItem } from "@/lib/construction-shared";
+import { cn } from "@/lib/utils";
 
 const PortfolioBuiltMap = dynamic(
   () => import("@/components/portfolio/portfolio-built-map").then((m) => m.PortfolioBuiltMap),
@@ -24,12 +25,33 @@ const PortfolioBuiltMap = dynamic(
 
 type ViewMode = "grid" | "map";
 type RegionFilter = "all" | "lo" | "mo";
+type FloorFilter = "all" | "1" | "2plus";
+type AreaFilter = "all" | "lte150" | "mid" | "gt250";
 
 function regionBucket(o: BuiltObjectItem): "lo" | "mo" | "other" {
   const l = (o.location || "").toLowerCase();
   if (/моск|подмоск|м\. о\.|московск/.test(l)) return "mo";
   if (/ленинград|санкт|спб|петербург|псков|карел/.test(l)) return "lo";
   return "other";
+}
+
+/** Чипы: без фиксированных «светлых» rgba — в dark текст и фон снова контрастны. */
+function chipBaseClass(on: boolean) {
+  return cn(
+    "rounded-full px-4 py-2 text-[13px] font-medium transition-colors sm:text-sm border",
+    on
+      ? "border-[var(--accent)] bg-[var(--accent)] text-white shadow-none"
+      : "border-[var(--border)] bg-[var(--bg-secondary)] text-[var(--text)] shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] dark:bg-[var(--card-bg)] dark:shadow-none"
+  );
+}
+
+function chipMutedClass(on: boolean) {
+  return cn(
+    "rounded-full px-4 py-2 text-[13px] font-medium transition-colors sm:text-sm border",
+    on
+      ? "border-[var(--accent)] bg-[rgba(15,61,46,0.14)] text-[var(--accent)] dark:bg-[rgba(61,143,110,0.22)]"
+      : "border-[var(--border)] bg-[var(--bg-secondary)] text-[var(--text)] shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] dark:bg-[var(--card-bg)] dark:shadow-none"
+  );
 }
 
 export function BuiltPortfolioContent({
@@ -41,6 +63,8 @@ export function BuiltPortfolioContent({
 }) {
   const [material, setMaterial] = useState("Все");
   const [region, setRegion] = useState<RegionFilter>("all");
+  const [floorFilter, setFloorFilter] = useState<FloorFilter>("all");
+  const [areaFilter, setAreaFilter] = useState<AreaFilter>("all");
   const [view, setView] = useState<ViewMode>(initialView);
   const explorerRef = useRef<HTMLDivElement>(null);
 
@@ -49,17 +73,35 @@ export function BuiltPortfolioContent({
     [objects]
   );
 
+  const hasFloorData = useMemo(() => objects.some((o) => o.floors != null), [objects]);
+  const hasAreaData = useMemo(() => objects.some((o) => o.area != null), [objects]);
+
   const filtered = useMemo(() => {
     let list = material === "Все" ? objects : objects.filter((o) => o.material === material);
     if (region === "lo") list = list.filter((o) => regionBucket(o) === "lo");
     if (region === "mo") list = list.filter((o) => regionBucket(o) === "mo");
+    if (floorFilter === "1") list = list.filter((o) => o.floors === 1);
+    if (floorFilter === "2plus") list = list.filter((o) => o.floors != null && o.floors >= 2);
+    if (areaFilter === "lte150") list = list.filter((o) => o.area != null && o.area <= 150);
+    if (areaFilter === "mid") list = list.filter((o) => o.area != null && o.area > 150 && o.area <= 250);
+    if (areaFilter === "gt250") list = list.filter((o) => o.area != null && o.area > 250);
     return list;
-  }, [material, objects, region]);
+  }, [areaFilter, floorFilter, material, objects, region]);
 
   function chipLabel(m: string) {
-    if (m === "Все") return "Все материалы";
+    if (m === "Все") return "Все";
     return builtObjectMaterialLabel(m);
   }
+
+  function resetAllFilters() {
+    setMaterial("Все");
+    setRegion("all");
+    setFloorFilter("all");
+    setAreaFilter("all");
+  }
+
+  const filtersAreDefault =
+    material === "Все" && region === "all" && floorFilter === "all" && areaFilter === "all";
 
   function scrollToExplorer() {
     requestAnimationFrame(() => {
@@ -93,84 +135,115 @@ export function BuiltPortfolioContent({
           <div className="mt-5 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0 max-w-3xl">
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">Построенные дома</p>
-              <h1 className="mt-2 font-heading text-3xl font-bold tracking-tight md:text-4xl lg:text-[2.65rem] lg:leading-[1.08]">
-                Наши проекты
+              <h1 className="mt-2 font-heading text-3xl font-bold tracking-tight text-[var(--accent)] md:text-[2.75rem] md:leading-[1.06] lg:text-[3.15rem] dark:text-[var(--text)]">
+                Портфолио
               </h1>
               <p className="mt-3 text-[13px] leading-relaxed text-[var(--text-muted)] sm:text-sm md:text-[15px]">
-                Фильтр по материалу и региону. На карте видно географию строительства — от Ленинградской области до Москвы и области.
-                Запишитесь на экскурсию по действующим площадкам — круглая кнопка справа внизу.
+                Фильтр по материалу, этажности и площади. На карте — география объектов. Запишитесь на экскурсию — круглая кнопка справа внизу.
               </p>
             </div>
           </div>
 
-          <div ref={explorerRef} id="portfolio-explorer" className="mt-8 scroll-mt-24 space-y-6 md:scroll-mt-28">
-            <div className="flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-              <div className="flex flex-wrap gap-2" role="group" aria-label="Режим просмотра">
+          <div ref={explorerRef} id="portfolio-explorer" className="mt-8 scroll-mt-24 space-y-8 md:scroll-mt-28">
+            <div className="flex w-full flex-wrap items-center gap-2 border-b border-[var(--border)] pb-6">
+              {view === "map" ? (
                 <button
                   type="button"
                   onClick={() => setView("grid")}
-                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-semibold transition-colors sm:text-sm ${
-                    view === "grid" ? "text-white" : ""
-                  }`}
-                  style={{
-                    backgroundColor: view === "grid" ? "var(--accent)" : "rgba(232, 230, 225, 0.95)",
-                    color: view === "grid" ? "#fff" : "var(--text)",
-                    border: `1px solid ${view === "grid" ? "var(--accent)" : "rgba(43, 47, 45, 0.06)"}`,
-                  }}
+                  className={cn("inline-flex items-center gap-2 font-semibold", chipBaseClass(true))}
                 >
                   <LayoutGrid size={17} strokeWidth={2} aria-hidden />
-                  Сетка
+                  К сетке
                 </button>
-                <button
-                  type="button"
-                  onClick={() => showMapView()}
-                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-semibold transition-colors sm:text-sm ${
-                    view === "map" ? "text-white" : ""
-                  }`}
-                  style={{
-                    backgroundColor: view === "map" ? "var(--accent)" : "rgba(232, 230, 225, 0.95)",
-                    color: view === "map" ? "#fff" : "var(--text)",
-                    border: `1px solid ${view === "map" ? "var(--accent)" : "rgba(43, 47, 45, 0.06)"}`,
-                  }}
-                >
-                  <MapPinned size={17} strokeWidth={2} aria-hidden />
-                  Карта ({mappedCount})
-                </button>
-              </div>
+              ) : null}
+
               <button
                 type="button"
-                onClick={() => showMapView()}
-                className="inline-flex w-fit items-center gap-2 self-start rounded-full border px-5 py-3 text-sm font-semibold transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] sm:self-center"
-                style={{ borderColor: "var(--border)", backgroundColor: "rgba(237, 235, 229, 0.65)" }}
+                onClick={resetAllFilters}
+                className={chipBaseClass(filtersAreDefault)}
+                aria-pressed={filtersAreDefault}
               >
-                <MapPinned size={18} strokeWidth={2} className="text-[var(--accent)]" aria-hidden />
-                Объекты на карте
+                Все
               </button>
-            </div>
 
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Материал стен">
+              <span className="hidden h-4 w-px bg-[var(--border)] sm:block" aria-hidden />
+
+              <span className="w-full text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)] sm:hidden">
+                Материал
+              </span>
               {materials.map((item) => {
+                if (item === "Все") return null;
                 const on = material === item;
                 return (
                   <button
                     key={item}
                     type="button"
                     onClick={() => setMaterial(item)}
-                    className="rounded-full px-4 py-2 text-[13px] font-medium transition-colors sm:text-sm"
-                    style={{
-                      backgroundColor: on ? "var(--accent)" : "rgba(232, 230, 225, 0.95)",
-                      color: on ? "#fff" : "var(--text)",
-                      border: `1px solid ${on ? "var(--accent)" : "rgba(43, 47, 45, 0.06)"}`,
-                      boxShadow: on ? "none" : "0 1px 0 rgba(255,255,255,0.9) inset",
-                    }}
+                    className={chipBaseClass(on)}
                   >
                     {chipLabel(item)}
                   </button>
                 );
               })}
-            </div>
 
-            <div className="flex flex-wrap gap-2" role="group" aria-label="Регион">
+              {hasFloorData ? (
+                <>
+                  <span className="w-full text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)] sm:ml-1 sm:w-auto">
+                    Этажность
+                  </span>
+                  {(
+                    [
+                      { id: "all" as const, label: "Любая" },
+                      { id: "1" as const, label: "1 этаж" },
+                      { id: "2plus" as const, label: "2+ этажа" },
+                    ] as const
+                  ).map(({ id, label }) => {
+                    const on = floorFilter === id;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => setFloorFilter(id)}
+                        className={chipMutedClass(on)}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </>
+              ) : null}
+
+              {hasAreaData ? (
+                <>
+                  <span className="w-full text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)] sm:ml-1 sm:w-auto">
+                    Площадь
+                  </span>
+                  {(
+                    [
+                      { id: "all" as const, label: "Любая" },
+                      { id: "lte150" as const, label: "до 150 м²" },
+                      { id: "mid" as const, label: "150–250 м²" },
+                      { id: "gt250" as const, label: "свыше 250 м²" },
+                    ] as const
+                  ).map(({ id, label }) => {
+                    const on = areaFilter === id;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => setAreaFilter(id)}
+                        className={chipMutedClass(on)}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </>
+              ) : null}
+
+              <span className="w-full text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)] sm:ml-1 sm:w-auto">
+                Регион
+              </span>
               {(
                 [
                   { id: "all" as const, label: "Все регионы" },
@@ -184,17 +257,24 @@ export function BuiltPortfolioContent({
                     key={id}
                     type="button"
                     onClick={() => setRegion(id)}
-                    className="rounded-full px-4 py-2 text-[13px] font-medium transition-colors sm:text-sm"
-                    style={{
-                      backgroundColor: on ? "rgba(15, 61, 46, 0.14)" : "rgba(232, 230, 225, 0.95)",
-                      color: on ? "var(--accent)" : "var(--text)",
-                      border: `1px solid ${on ? "var(--accent)" : "rgba(43, 47, 45, 0.06)"}`,
-                    }}
+                    className={chipMutedClass(on)}
                   >
                     {label}
                   </button>
                 );
               })}
+
+              {view === "grid" ? (
+                <button
+                  type="button"
+                  onClick={() => showMapView()}
+                  className="ml-auto inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-2 text-[13px] font-semibold text-[var(--text)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] dark:bg-[var(--card-bg)] sm:text-sm"
+                >
+                  <MapPinned size={17} strokeWidth={2} className="shrink-0 text-[var(--accent)]" aria-hidden />
+                  Показать на карте
+                  <span className="text-[11px] font-normal text-[var(--text-muted)]">({mappedCount})</span>
+                </button>
+              ) : null}
             </div>
 
             {objects.length === 0 ? (
@@ -202,18 +282,19 @@ export function BuiltPortfolioContent({
             ) : filtered.length === 0 ? (
               <p className="py-16 text-center text-sm text-[var(--text-muted)]">Нет объектов с выбранными фильтрами.</p>
             ) : view === "grid" ? (
-              <ul className="grid list-none grid-cols-2 gap-x-4 gap-y-10 lg:grid-cols-4 lg:gap-x-5 lg:gap-y-12">
+              <ul className="grid list-none grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
                 {filtered.map((object) => {
                   const cover = getBuiltObjectCover(object);
                   return (
                     <li key={object.id}>
                       <Link href={`/portfolio/${object.slug}`} className="group block">
-                        <div className="relative aspect-[4/3] overflow-hidden bg-[var(--stone)]">
+                        <div className="relative aspect-[4/3] overflow-hidden rounded-sm bg-[var(--stone)] ring-1 ring-[var(--border)] transition-shadow duration-300 group-hover:ring-[var(--accent)]/40">
                           {cover ? (
+                            // Изображение по умолчанию в «ч/б»; при hover — полный цвет
                             <img
                               src={cover.url}
                               alt={cover.alt || object.title}
-                              className="h-full w-full object-cover transition-[filter,transform] duration-500 ease-out grayscale contrast-[0.9] brightness-[1.05] group-hover:scale-[1.02] group-hover:grayscale-0 group-hover:contrast-100 group-hover:brightness-100"
+                              className="h-full w-full object-cover transition-[filter,transform] duration-700 ease-out [filter:grayscale(1)_brightness(0.88)_contrast(1.05)] group-hover:scale-[1.03] group-hover:[filter:grayscale(0)_brightness(1)_contrast(1)]"
                               loading="lazy"
                             />
                           ) : (

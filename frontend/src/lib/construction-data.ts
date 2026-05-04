@@ -238,8 +238,15 @@ export const FALLBACK_BUILT_OBJECTS: BuiltObjectItem[] = [
     telegramUrl: "https://t.me/",
     vkUrl: "https://vk.com/",
     media: [
-      { id: "vyritsa-cover", type: "RENDER", url: "/images/portfolio/built-placeholder-1.jpg", alt: "Дом в Вырице", order: 0 },
-      { id: "vyritsa-stage-1", type: "BUILD_STAGE", url: "/images/portfolio/stage-placeholder-1.jpg", alt: "Фундамент", label: "Фундамент", order: 0 },
+      { id: "vyritsa-cover", type: "RENDER", url: "/images/portfolio/demo-house-01.svg", alt: "Дом в Вырице", order: 0 },
+      {
+        id: "vyritsa-stage-1",
+        type: "BUILD_STAGE",
+        url: "/images/portfolio/demo-house-02.svg",
+        alt: "Фундамент",
+        label: "Фундамент",
+        order: 1,
+      },
     ],
   },
   {
@@ -263,8 +270,76 @@ export const FALLBACK_BUILT_OBJECTS: BuiltObjectItem[] = [
     order: 2,
     year: "2023",
     media: [
-      { id: "smerdovitsy-cover", type: "RENDER", url: "/images/portfolio/built-placeholder-2.jpg", alt: "Дом в п. Приветнинское", order: 0 },
+      { id: "smerdovitsy-cover", type: "RENDER", url: "/images/portfolio/demo-house-02.svg", alt: "Дом в п. Приветнинское", order: 0 },
     ],
+  },
+  {
+    id: "built-toksovo",
+    slug: "dom-v-toksovo",
+    title: "Дом в д. Токсово",
+    material: "Газобетон",
+    area: 145,
+    buildTerm: "8 месяцев",
+    floors: 2,
+    location: "Ленинградская область, д. Токсово",
+    latitude: 60.255,
+    longitude: 30.527,
+    description: "Демо-объект для просмотра сетки портфолио.",
+    published: true,
+    order: 3,
+    year: "2024",
+    media: [{ id: "toksovo-cover", type: "RENDER", url: "/images/portfolio/demo-house-03.svg", alt: "Токсово", order: 0 }],
+  },
+  {
+    id: "built-ramenskoe",
+    slug: "dom-v-ramenskom",
+    title: "Дом в Раменском",
+    material: "Кирпич",
+    area: 178,
+    buildTerm: "10 месяцев",
+    floors: 1,
+    location: "Московская область, Раменское",
+    latitude: 55.567,
+    longitude: 38.23,
+    description: "Демо-объект в регионе «Москва и область».",
+    published: true,
+    order: 4,
+    year: "2023",
+    media: [{ id: "ramenskoe-cover", type: "RENDER", url: "/images/portfolio/demo-house-04.svg", alt: "Раменское", order: 0 }],
+  },
+  {
+    id: "built-krasnogorsk",
+    slug: "dom-v-krasnogorske",
+    title: "Дом в Красногорске",
+    material: "Каркас",
+    area: 98,
+    buildTerm: "6 месяцев",
+    floors: 1,
+    location: "Московская область, Красногорск",
+    latitude: 55.831,
+    longitude: 37.329,
+    description: "Компактный каркасный дом — демо для фильтров.",
+    published: true,
+    order: 5,
+    year: "2024",
+    media: [{ id: "krasnogorsk-cover", type: "RENDER", url: "/images/portfolio/demo-house-05.svg", alt: "Красногорск", order: 0 }],
+  },
+  {
+    id: "built-vyborg",
+    slug: "dom-v-vyborg",
+    title: "Дом в г. Выборг",
+    material: "Керамический блок",
+    area: 212,
+    buildTerm: "11 месяцев",
+    floors: 2,
+    location: "Ленинградская область, Выборг",
+    latitude: 60.713,
+    longitude: 28.753,
+    description: "Демо-объект Северо-Запад, два этажа.",
+    published: true,
+    order: 6,
+    year: "2022",
+    media: [{ id: "vyborg-cover", type: "RENDER", url: "/images/portfolio/demo-house-06.svg", alt: "Выборг", order: 0 }],
   },
 ];
 
@@ -363,6 +438,29 @@ export function getBuiltObjectCover(object: BuiltObjectItem) {
   return object.media.find((item) => item.type === "RENDER") ?? object.media[0] ?? null;
 }
 
+/** Локальные SVG в public — для превью сетки без загрузки из сети. */
+const DEMO_PORTFOLIO_COVERS = [
+  "/images/portfolio/demo-house-01.svg",
+  "/images/portfolio/demo-house-02.svg",
+  "/images/portfolio/demo-house-03.svg",
+  "/images/portfolio/demo-house-04.svg",
+  "/images/portfolio/demo-house-05.svg",
+  "/images/portfolio/demo-house-06.svg",
+] as const;
+
+/** В development подставляем обложку, если в БД нет RENDER — удобно смотреть /portfolio локально. */
+function attachDevPortfolioCovers(objects: BuiltObjectItem[]): BuiltObjectItem[] {
+  if (process.env.NODE_ENV !== "development") return objects;
+  return objects.map((o, i) => {
+    if (getBuiltObjectCover(o)) return o;
+    const url = DEMO_PORTFOLIO_COVERS[i % DEMO_PORTFOLIO_COVERS.length];
+    return {
+      ...o,
+      media: [{ id: `dev-cover-${o.id}`, type: "RENDER", url, alt: o.title, order: 0 }, ...(o.media ?? [])],
+    };
+  });
+}
+
 export function getBuiltObjectStages(object: BuiltObjectItem) {
   return mediaOf(object.media, "BUILD_STAGE");
 }
@@ -455,7 +553,8 @@ const getBuiltObjectsCached = unstable_cache(
 );
 
 export async function getBuiltObjects(): Promise<BuiltObjectItem[]> {
-  return getBuiltObjectsCached();
+  const list = await getBuiltObjectsCached();
+  return attachDevPortfolioCovers(list);
 }
 
 const HOME_BUILT_PORTFOLIO_MAX = 5;

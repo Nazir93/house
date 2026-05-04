@@ -4,6 +4,8 @@ const nextConfig = {
     optimizePackageImports: ["lucide-react", "framer-motion"],
   },
   images: {
+    /** Кэш оптимизированных картинок на CDN/edge — повторный визит быстрее (сек.). */
+    minimumCacheTTL: 60 * 60 * 24 * 7,
     formats: ["image/avif", "image/webp"],
     /** Шире диапазон — меньше апскейла крупных PNG на мониторах 2K+ (герой 100vw). */
     deviceSizes: [640, 750, 828, 1080, 1200, 1440, 1920, 2048, 2560, 3840],

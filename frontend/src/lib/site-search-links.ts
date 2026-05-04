@@ -32,6 +32,7 @@ export function getSiteSearchLinks(): SiteSearchLink[] {
     { section: "Разделы", label: "Главная", href: "/" },
     { section: "Разделы", label: "Блог", href: "/blog" },
     { section: "Финансы", label: "Ипотека на дом", href: "/mortgage" },
+    { section: "Финансы", label: "Калькулятор стоимости дома", href: "/calculator" },
     { section: "Партнёрам", label: "Поставщикам", href: "/partners/supplier" },
     { section: "Партнёрам", label: "Партнёрская программа", href: "/partners/partner" },
     { section: "Технологии", label: "Материалы стен", href: "/technology/materials" },

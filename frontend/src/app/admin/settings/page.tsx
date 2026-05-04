@@ -2,12 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { Save, AlertCircle } from "lucide-react";
+import { DEFAULT_HOUSE_CONSTRUCTION_CONFIG, formatCalculatorConfigJson } from "@/lib/house-construction-calculator";
+import { HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY } from "@/lib/house-construction-calculator-config";
 
 type SettingsField = {
   key: string;
   label: string;
   placeholder?: string;
   multiline?: boolean;
+  rows?: number;
+  mono?: boolean;
 };
 
 type SettingsGroup = {
@@ -78,6 +82,21 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
       { key: "telegram_chat_id", label: "Chat ID", placeholder: "-100123456789 или личный id" },
     ],
   },
+  {
+    title: "Калькулятор строительства",
+    description:
+      `JSON переопределяет прайс калькулятора на сайте и блок «от … ₽/м²» на главной. Ключ в БД: ${HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY}. Пустое поле — встроенный прайс из кода. После сохранения кэш сбрасывается.`,
+    fields: [
+      {
+        key: HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY,
+        label: "JSON прайса (объект baseRubPerM2, smallArea, engineering, facadeRubPerM2)",
+        multiline: true,
+        rows: 20,
+        mono: true,
+        placeholder: "{}",
+      },
+    ],
+  },
 ];
 
 export default function AdminSettingsPage() {
@@ -107,6 +126,16 @@ export default function AdminSettingsPage() {
   }
 
   async function handleSave() {
+    const rawCalc = settings[HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY]?.trim();
+    if (rawCalc) {
+      try {
+        JSON.parse(rawCalc);
+      } catch {
+        setError("Некорректный JSON в блоке «Калькулятор строительства». Исправьте или очистите поле.");
+        return;
+      }
+    }
+
     setSaving(true);
     setError("");
     setSaved(false);
@@ -165,6 +194,26 @@ export default function AdminSettingsPage() {
           {group.description && (
             <p className="text-xs text-white/35 leading-relaxed -mt-1">{group.description}</p>
           )}
+          {group.title === "Калькулятор строительства" && (
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  updateField(HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY, formatCalculatorConfigJson(DEFAULT_HOUSE_CONSTRUCTION_CONFIG))
+                }
+                className="rounded-lg border border-white/15 bg-white/[0.06] px-3 py-1.5 text-xs text-white/80 hover:bg-white/[0.1]"
+              >
+                Подставить полный прайс по умолчанию
+              </button>
+              <button
+                type="button"
+                onClick={() => updateField(HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY, "")}
+                className="rounded-lg border border-white/15 px-3 py-1.5 text-xs text-white/50 hover:text-white/80"
+              >
+                Очистить (как в коде)
+              </button>
+            </div>
+          )}
           <div className="space-y-3">
             {group.fields.map((field) => (
               <div key={field.key}>
@@ -173,8 +222,8 @@ export default function AdminSettingsPage() {
                   <textarea
                     value={settings[field.key] || ""}
                     onChange={(e) => updateField(field.key, e.target.value)}
-                    rows={2}
-                    className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white placeholder:text-white/20 resize-none focus:outline-none focus:border-[#0F3D2E]/50 transition-colors"
+                    rows={field.rows ?? 2}
+                    className={`w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white placeholder:text-white/20 resize-y focus:outline-none focus:border-[#0F3D2E]/50 transition-colors ${field.mono ? "font-mono text-[12px] leading-relaxed" : ""}`}
                     placeholder={field.placeholder}
                   />
                 ) : (

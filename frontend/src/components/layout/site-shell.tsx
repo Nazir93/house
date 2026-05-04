@@ -14,7 +14,6 @@ import { ContactModal } from "../ui/contact-modal";
 import { CookieBanner } from "../ui/cookie-banner";
 import { SmartCaptchaGate } from "../smartcaptcha-provider";
 import { FloatingCallButton } from "./floating-call-button";
-import { HouseRevealIntro } from "./house-reveal-intro";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -28,7 +27,6 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   return (
     <SmartCaptchaGate>
     <>
-      <HouseRevealIntro />
       <SmoothScroll />
       <RouteScrollReset />
       <CustomCursor />

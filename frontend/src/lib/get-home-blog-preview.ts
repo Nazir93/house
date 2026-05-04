@@ -7,7 +7,8 @@ export type HomeBlogPreviewItem = {
   excerpt: string;
 };
 
-const FALLBACK_PREVIEW: HomeBlogPreviewItem[] = [
+/** Статические карточки, если БД недоступна или нет опубликованных записей (главная не «пропадает»). */
+export const HOME_BLOG_PREVIEW_FALLBACK: HomeBlogPreviewItem[] = [
   {
     id: "fallback-1",
     slug: null,
@@ -33,11 +34,14 @@ const FALLBACK_PREVIEW: HomeBlogPreviewItem[] = [
 
 /** Последние опубликованные записи для главной (или статический превью без слага). */
 export async function getHomeBlogPreview(take: number): Promise<HomeBlogPreviewItem[]> {
+  const limit =
+    typeof take === "number" && Number.isFinite(take) ? Math.min(Math.max(1, Math.floor(take)), 12) : 3;
+
   try {
     const posts = await prisma.post.findMany({
       where: { published: true },
       orderBy: { createdAt: "desc" },
-      take,
+      take: limit,
       select: { id: true, slug: true, title: true, excerpt: true },
     });
 
@@ -53,5 +57,6 @@ export async function getHomeBlogPreview(take: number): Promise<HomeBlogPreviewI
     // DB unavailable
   }
 
-  return FALLBACK_PREVIEW.slice(0, take);
+  const fallback = HOME_BLOG_PREVIEW_FALLBACK.slice(0, limit);
+  return fallback.length > 0 ? fallback : HOME_BLOG_PREVIEW_FALLBACK.slice(0, 3);
 }

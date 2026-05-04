@@ -314,9 +314,31 @@
 
 @layer components {
   .font-heading {
+    font-family: Montserrat, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     text-transform: uppercase;
     letter-spacing: 0.03em;
     font-weight: 700;
+  }
+
+  /** Карусель на экранах входа (админ / ЛК): полоса таймера слева направо */
+  @keyframes login-showcase-progress {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  .login-showcase-progress-fill {
+    transform-origin: left center;
+    animation-name: login-showcase-progress;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+    max-width: 100%;
+    /** Десктоп: слой композиции, меньше подвисаний при тяжёлом фоне карусели */
+    backface-visibility: hidden;
+    transform: translateZ(0);
   }
 
   /* Учитываем safe-area (notch, скругления экрана) — без обрезания контента на мобильных */

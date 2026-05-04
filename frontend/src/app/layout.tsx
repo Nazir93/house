@@ -1,10 +1,13 @@
+import "@fontsource/montserrat/400.css";
+import "@fontsource/montserrat/500.css";
+import "@fontsource/montserrat/700.css";
 import "./globals.css";
 
 import type { Metadata } from "next";
-import { Montserrat } from "next/font/google";
 import Script from "next/script";
 
 import { SiteShell } from "@/components/layout/site-shell";
+import { SessionProvider } from "@/components/admin/session-provider";
 import { ThemeProvider } from "@/lib/theme-context";
 import { ModalProvider } from "@/lib/modal-context";
 import { SITE_NAME, CITY, SITE_URL, getDefaultSiteGeoDescription } from "@/lib/constants";
@@ -12,14 +15,6 @@ import { AnalyticsScripts } from "@/components/seo/analytics";
 import { JsonLd } from "@/components/seo/json-ld";
 import { ContactConfigProvider } from "@/lib/contact-config-context";
 import { loadContactConfig } from "@/lib/load-contact-config";
-
-/** Self-hosted файлы в /public/fonts остаются резервом; в dev/production Next подтягивает subset при сборке. */
-const montserrat = Montserrat({
-  subsets: ["latin", "cyrillic", "cyrillic-ext"],
-  weight: ["400", "500", "700"],
-  variable: "--font-main",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -60,7 +55,7 @@ export default async function RootLayout({
 }) {
   const contactConfig = await loadContactConfig();
   return (
-    <html lang="ru" className={montserrat.variable} suppressHydrationWarning>
+    <html lang="ru" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
         <meta name="color-scheme" content="light dark" />
@@ -74,11 +69,13 @@ export default async function RootLayout({
           {`(function(){try{var k="house-theme";var t=localStorage.getItem(k);if(t==="dark"||t==="light"){document.documentElement.setAttribute("data-theme",t);return;}if(window.matchMedia("(prefers-color-scheme: dark)").matches)document.documentElement.setAttribute("data-theme","dark");else document.documentElement.setAttribute("data-theme","light");}catch(e){document.documentElement.setAttribute("data-theme","light");}})();`}
         </Script>
         <ThemeProvider>
-          <ContactConfigProvider value={contactConfig}>
-            <ModalProvider>
-              <SiteShell>{children}</SiteShell>
-            </ModalProvider>
-          </ContactConfigProvider>
+          <SessionProvider>
+            <ContactConfigProvider value={contactConfig}>
+              <ModalProvider>
+                <SiteShell>{children}</SiteShell>
+              </ModalProvider>
+            </ContactConfigProvider>
+          </SessionProvider>
         </ThemeProvider>
         <AnalyticsScripts />
       </body>

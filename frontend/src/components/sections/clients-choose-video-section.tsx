@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -16,10 +16,11 @@ const POINTS: { lines: [string] | [string, string] }[] = [
 
 export function ClientsChooseVideoSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoBroken, setVideoBroken] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || videoBroken) return;
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const sync = () => {
       if (mq.matches) video.pause();
@@ -28,7 +29,7 @@ export function ClientsChooseVideoSection() {
     sync();
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
-  }, []);
+  }, [videoBroken]);
 
   return (
     <section
@@ -106,17 +107,25 @@ export function ClientsChooseVideoSection() {
               "max-lg:landscape:aspect-auto max-lg:landscape:max-h-none max-lg:landscape:min-h-[min(32vh,200px)] max-lg:landscape:rounded-none max-lg:landscape:sm:rounded-b-xl",
             )}
           >
-            <video
-              ref={videoRef}
-              className="absolute inset-0 h-full w-full object-cover object-center"
-              src={VIDEO_SRC}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
-              aria-hidden
-            />
+            {!videoBroken ? (
+              <video
+                ref={videoRef}
+                className="absolute inset-0 h-full w-full object-cover object-center"
+                src={VIDEO_SRC}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="auto"
+                aria-hidden
+                onError={() => setVideoBroken(true)}
+              />
+            ) : (
+              <div
+                className="absolute inset-0 bg-gradient-to-br from-[#0f3d2e] via-[#1a4d3b] to-[#0a3026]"
+                aria-hidden
+              />
+            )}
 
             <div
               className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-black/25 lg:from-black/28 lg:via-transparent lg:to-black/12"

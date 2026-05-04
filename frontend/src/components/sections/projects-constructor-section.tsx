@@ -1,11 +1,13 @@
 "use client";
 
+import { useMemo, useId } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, LayoutGrid } from "lucide-react";
-import { useId } from "react";
 
 import type { MaterialFilterId } from "@/lib/project-filters";
+import { minCatalogRubPerM2ByMaterial } from "@/lib/house-construction-calculator";
+import { useHouseConstructionCalculatorConfig } from "@/lib/use-house-construction-calculator-config";
 import { useTheme } from "@/lib/theme-context";
 import { cn } from "@/lib/utils";
 
@@ -97,39 +99,45 @@ function MaterialsBlueprintBackdrop({ isDark }: { isDark: boolean }) {
   );
 }
 
-const MATERIAL_CARDS: {
-  id: Exclude<MaterialFilterId, "all">;
-  title: string;
-  pricePerM2: string;
-  image: string;
-  labelShort: string;
-}[] = [
-  {
-    id: "gazobeton",
-    title: "Дома из газобетона",
-    pricePerM2: "от 48 300 ₽ / м²",
-    image: "/images/banner/banner-hero-02.png",
-    labelShort: "Газобетон",
-  },
-  {
-    id: "keramoblok",
-    title: "Дома из керамоблока",
-    pricePerM2: "от 50 400 ₽ / м²",
-    image: "/images/banner/banner-hero-04.png",
-    labelShort: "Керамоблок",
-  },
-  {
-    id: "kirpich",
-    title: "Дома из кирпича",
-    pricePerM2: "от 52 600 ₽ / м²",
-    image: "/images/banner/banner-hero-06.png",
-    labelShort: "Кирпич",
-  },
-];
+function formatPricePerM2(n: number) {
+  return `от ${n.toLocaleString("ru-RU")} ₽ / м²`;
+}
 
 export function ProjectsConstructorSection() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
+  const { config } = useHouseConstructionCalculatorConfig();
+  const mins = useMemo(() => minCatalogRubPerM2ByMaterial(config), [config]);
+
+  const materialCards: {
+    id: Exclude<MaterialFilterId, "all">;
+    title: string;
+    pricePerM2: string;
+    image: string;
+    labelShort: string;
+  }[] = [
+    {
+      id: "gazobeton",
+      title: "Дома из газобетона",
+      pricePerM2: formatPricePerM2(mins.gas),
+      image: "/images/banner/banner-hero-02.png",
+      labelShort: "Газобетон",
+    },
+    {
+      id: "keramoblok",
+      title: "Дома из керамоблока",
+      pricePerM2: formatPricePerM2(mins.ceramic),
+      image: "/images/banner/banner-hero-04.png",
+      labelShort: "Керамоблок",
+    },
+    {
+      id: "kirpich",
+      title: "Дома из кирпича",
+      pricePerM2: formatPricePerM2(mins.brick),
+      image: "/images/banner/banner-hero-06.png",
+      labelShort: "Кирпич",
+    },
+  ];
 
   return (
     <section
@@ -160,13 +168,15 @@ export function ProjectsConstructorSection() {
                 Из чего строим и стартовая цена за м²
               </h2>
             </div>
-            <Link
-              href="/services"
-              className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-[var(--text)] underline-offset-4 transition hover:text-[var(--accent)] hover:underline sm:mt-1 sm:text-[15px]"
-            >
-              Смотреть все услуги
-              <ArrowUpRight className="h-4 w-4 shrink-0 opacity-80" strokeWidth={2} aria-hidden />
-            </Link>
+            <div className="flex flex-col gap-3 sm:mt-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-x-5 sm:gap-y-2">
+              <Link
+                href="/services"
+                className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-[var(--text)] underline-offset-4 transition hover:text-[var(--accent)] hover:underline sm:text-[15px]"
+              >
+                Смотреть все услуги
+                <ArrowUpRight className="h-4 w-4 shrink-0 opacity-80" strokeWidth={2} aria-hidden />
+              </Link>
+            </div>
           </div>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--text)]/88 dark:text-[var(--text-muted)] md:text-[15px]">
             Ориентир по стоимости работ за квадратный метр для стен из разных материалов.
@@ -175,7 +185,7 @@ export function ProjectsConstructorSection() {
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-5">
-          {MATERIAL_CARDS.map((card, i) => (
+          {materialCards.map((card, i) => (
             <article
               key={card.id}
               className={cn(

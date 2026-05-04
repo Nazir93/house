@@ -1,9 +1,9 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import type { HomeBlogPreviewItem } from "@/lib/get-home-blog-preview";
+import { HOME_BLOG_PREVIEW_FALLBACK, type HomeBlogPreviewItem } from "@/lib/get-home-blog-preview";
 import { cn } from "@/lib/utils";
 
 /**
@@ -17,28 +17,17 @@ const CARD_CLIP = [
 ] as const;
 
 function NewsCard({ post, href, index }: { post: HomeBlogPreviewItem; href: string; index: number }) {
-  const cardRef = useRef<HTMLAnchorElement>(null);
-  const [visible, setVisible] = useState(false);
+  /** По-монтовому вход (без IntersectionObserver), чтобы блок не был «прозрачным» после скролла. */
+  const [entered, setEntered] = useState(false);
   const clip = CARD_CLIP[Math.min(index, 2)];
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.12 },
-    );
-    const el = cardRef.current;
-    if (el) observer.observe(el);
-    return () => observer.disconnect();
+    const id = requestAnimationFrame(() => setEntered(true));
+    return () => cancelAnimationFrame(id);
   }, []);
 
   return (
     <Link
-      ref={cardRef}
       href={href}
       className={cn(
         "group relative block min-h-[240px] transition-[opacity,transform,filter] duration-700 ease-out sm:min-h-[260px] md:min-h-[280px]",
@@ -46,8 +35,8 @@ function NewsCard({ post, href, index }: { post: HomeBlogPreviewItem; href: stri
         "hover:-translate-y-1 hover:[filter:drop-shadow(0_16px_38px_rgba(15,61,46,0.16))] dark:hover:[filter:drop-shadow(0_16px_36px_rgba(0,0,0,0.45))]",
       )}
       style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(24px)",
+        opacity: entered ? 1 : 0,
+        transform: entered ? "translateY(0)" : "translateY(24px)",
         transitionDelay: `${(index % 3) * 80}ms`,
       }}
     >
@@ -87,9 +76,8 @@ function NewsCard({ post, href, index }: { post: HomeBlogPreviewItem; href: stri
 }
 
 export function HomeNewsFeed({ posts }: { posts: HomeBlogPreviewItem[] }) {
-  if (posts.length === 0) return null;
-
-  const items = posts.slice(0, 3);
+  const safe = posts?.length ? posts : HOME_BLOG_PREVIEW_FALLBACK;
+  const items = safe.slice(0, 3);
 
   return (
     <section

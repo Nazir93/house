@@ -27,8 +27,24 @@ const config: Config = {
         },
       },
       fontFamily: {
-        heading: ["var(--font-main)", "sans-serif"],
-        body: ["var(--font-main)", "sans-serif"],
+        heading: [
+          "Montserrat",
+          "ui-sans-serif",
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "sans-serif",
+        ],
+        body: [
+          "Montserrat",
+          "ui-sans-serif",
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "sans-serif",
+        ],
       },
       container: {
         center: true,
