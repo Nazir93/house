@@ -154,6 +154,7 @@ cd /var/www/house/frontend && npm run env:check && npm run db:verify
 | `ADMIN_SECRET` | длинная случайная строка | Пароль администратора |
 | `NEXTAUTH_SECRET` | длинная случайная строка | Подпись сессий; не меняйте без сброса всех сессий |
 | **`NEXTAUTH_URL`** | **`https://dom.ru`** | **Должен совпадать с URL в браузере** |
+| **`AUTH_TRUST_HOST`** | `true` | За **nginx** с HTTPS: иначе возможны CSRF и редирект на `/api/auth/signin?csrf=true`. В `location /`: `proxy_set_header Host $host;`, `proxy_set_header X-Forwarded-Proto $scheme;`, желательно `X-Forwarded-Host $host;`. |
 
 ### Ошибка «раньше заходил по IP, по домену не пускает»
 
