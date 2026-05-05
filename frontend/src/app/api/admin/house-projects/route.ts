@@ -72,6 +72,8 @@ export async function POST(request: NextRequest) {
         completionJson: jsonOrNull(body.completionJson),
         constructionJson: jsonOrNull(body.constructionJson),
         anchorsJson: jsonOrNull(body.anchorsJson),
+        heroPricingJson: body.heroPricingJson !== undefined ? jsonOrNull(body.heroPricingJson) : null,
+        calculatorJson: body.calculatorJson !== undefined ? jsonOrNull(body.calculatorJson) : null,
         media: {
           create: [
             ...renders.filter(Boolean).map((url: string, index: number) => ({

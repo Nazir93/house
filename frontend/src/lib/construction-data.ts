@@ -1,5 +1,14 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
+import { AURORA_PROJECT_CALCULATOR_UI } from "@/lib/project-calculator-aurora-defaults";
+import type { ProjectCalculatorUi } from "@/lib/project-calculator-types";
+import {
+  computePartOfSoulShellTotalRub,
+  inferPartOfSoulFloors,
+  tierIdToWallMaterial,
+  type PartOfSoulPricingFloors,
+  type PartOfSoulRoofPitch,
+} from "@/lib/part-of-soul-pricing";
 
 export type ConstructionMediaType = "RENDER" | "PLAN" | "BUILD_STAGE" | "VIDEO";
 
@@ -23,6 +32,19 @@ export interface ConstructionStep {
   title: string;
   term: string;
   description: string;
+}
+
+export interface HeroPricingTier {
+  id: string;
+  label: string;
+  price: number;
+}
+
+/** Распознанные из heroPricingJson данные (без расчётных fallback-уровней). */
+export interface HeroPricingConfig {
+  tiers: HeroPricingTier[];
+  warrantyYears?: number;
+  productionMonthsMin?: number;
 }
 
 export interface HouseProjectItem {
@@ -50,6 +72,8 @@ export interface HouseProjectItem {
   constructionSchedule: ConstructionStep[];
   anchors: { id: string; label: string }[];
   builtObjectSlug?: string | null;
+  heroPricing?: HeroPricingConfig | null;
+  calculatorUi?: ProjectCalculatorUi | null;
 }
 
 export interface BuiltObjectItem {
@@ -78,7 +102,7 @@ export interface BuiltObjectItem {
 }
 
 const defaultAnchors = [
-  { id: "plans", label: "Планировка" },
+  { id: "plans", label: "Планировки и фасады" },
   { id: "completion", label: "Комплектация" },
   { id: "schedule", label: "График строительства" },
   { id: "mortgage", label: "Ипотека" },
@@ -355,6 +379,115 @@ function mediaOf(media: ConstructionMedia[], type: ConstructionMediaType) {
   return media.filter((item) => item.type === type).sort((a, b) => a.order - b.order);
 }
 
+export function normalizeHeroPricing(raw: unknown): HeroPricingConfig | null {
+  if (raw == null || typeof raw !== "object") return null;
+  const o = raw as Record<string, unknown>;
+  const arr = Array.isArray(o.tiers) ? o.tiers : [];
+  const tiers: HeroPricingTier[] = [];
+  arr.forEach((item, index) => {
+    if (!item || typeof item !== "object") return;
+    const t = item as Record<string, unknown>;
+    const label = String(t.label ?? "").trim();
+    const price = Math.round(Number(t.price));
+    if (!label || !Number.isFinite(price) || price <= 0) return;
+    const idRaw = String(t.id ?? "").trim();
+    tiers.push({
+      id: idRaw || `tier-${index}`,
+      label,
+      price,
+    });
+  });
+  if (!tiers.length) return null;
+  const wy = Number(o.warrantyYears);
+  const pm = Number(o.productionMonthsMin);
+  return {
+    tiers,
+    ...(Number.isFinite(wy) && wy > 0 ? { warrantyYears: Math.round(wy) } : {}),
+    ...(Number.isFinite(pm) && pm > 0 ? { productionMonthsMin: Math.round(pm) } : {}),
+  };
+}
+
+/** Уровни цен для блока авторского проекта и синхронизации с «Комплектацией». */
+export function resolveProjectHeroPricing(project: HouseProjectItem): {
+  tiers: HeroPricingTier[];
+  warrantyYears: number;
+  productionMonthsMin: number;
+} {
+  const fallbackWarranty = 5;
+  const fallbackMonths = 5;
+  const fromDb = project.heroPricing?.tiers?.length ? project.heroPricing.tiers : null;
+  const tiers: HeroPricingTier[] =
+    fromDb ??
+    [
+      { id: "gas", label: "Газоблок", price: Math.round(project.price) },
+      { id: "ceramic", label: "Керамоблок", price: Math.round(project.price * 1.034) },
+      { id: "brick", label: "Кирпич", price: Math.round(project.price * 1.086) },
+    ];
+  return {
+    tiers,
+    warrantyYears: project.heroPricing?.warrantyYears ?? fallbackWarranty,
+    productionMonthsMin: project.heroPricing?.productionMonthsMin ?? fallbackMonths,
+  };
+}
+
+/** Цены в герое при формульном калькуляторе PDF (синхрон с блоком «Комплектация»). */
+export function derivePartOfSoulHeroTiers(
+  areaSqm: number,
+  pf: PartOfSoulPricingFloors,
+  roof: PartOfSoulRoofPitch,
+  tiers: HeroPricingTier[],
+  smallHouseThresholdSqm: number,
+  shellSurchargeUnderThreshold: number
+): HeroPricingTier[] {
+  return tiers.map((t) => {
+    const wall = tierIdToWallMaterial(t.id, t.label);
+    const computed = computePartOfSoulShellTotalRub({
+      areaSqm,
+      pf,
+      roof,
+      wall,
+      smallThresholdSqm: smallHouseThresholdSqm,
+      shellSurchargeIfSmall: shellSurchargeUnderThreshold,
+    });
+    return { ...t, price: computed ?? t.price };
+  });
+}
+
+const MINIMAL_CALCULATOR_UI: ProjectCalculatorUi = {
+  transportBands: [
+    { id: "unk", label: "Неизвестно (индивид. расчёт в смете)", surcharge: 0 },
+    { id: "30", label: "до 30 км", surcharge: 0 },
+    { id: "40", label: "до 40 км", surcharge: 0 },
+    { id: "50", label: "до 50 км", surcharge: 0 },
+    { id: "100", label: "до 100 км", surcharge: 0 },
+  ],
+};
+
+function mergeCalculatorUi(base: ProjectCalculatorUi, over: Partial<ProjectCalculatorUi>): ProjectCalculatorUi {
+  return {
+    ...base,
+    consultation: over.consultation !== undefined ? over.consultation : base.consultation,
+    partOfSoul: over.partOfSoul !== undefined ? over.partOfSoul : base.partOfSoul,
+    stages: over.stages !== undefined ? over.stages : base.stages,
+    stagesByTier: over.stagesByTier !== undefined ? over.stagesByTier : base.stagesByTier,
+    addons: over.addons !== undefined ? over.addons : base.addons,
+    transportBands: over.transportBands?.length ? over.transportBands : base.transportBands,
+  };
+}
+
+export function normalizeCalculatorJson(raw: unknown): ProjectCalculatorUi | null {
+  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) return null;
+  return raw as ProjectCalculatorUi;
+}
+
+/** Калькулятор для карточки: из БД поверх пресета или минимума; для «Аврора» — полный набор по PDF. */
+export function getEffectiveCalculatorUi(project: HouseProjectItem): ProjectCalculatorUi {
+  const db = project.calculatorUi;
+  if (project.slug === "aurora") return mergeCalculatorUi(AURORA_PROJECT_CALCULATOR_UI, db ?? {});
+  if (db) return mergeCalculatorUi(MINIMAL_CALCULATOR_UI, db);
+  return MINIMAL_CALCULATOR_UI;
+}
+
 function mapHouseProject(row: any): HouseProjectItem {
   return {
     id: row.id,
@@ -381,6 +514,8 @@ function mapHouseProject(row: any): HouseProjectItem {
     constructionSchedule: normalizeArray<ConstructionStep>(row.constructionJson, defaultSchedule),
     anchors: normalizeArray<{ id: string; label: string }>(row.anchorsJson, defaultAnchors),
     builtObjectSlug: row.builtObjects?.[0]?.slug ?? null,
+    heroPricing: normalizeHeroPricing(row.heroPricingJson),
+    calculatorUi: normalizeCalculatorJson(row.calculatorJson),
   };
 }
 

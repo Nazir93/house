@@ -48,6 +48,13 @@ export interface HouseProjectItem {
   constructionSchedule: ConstructionStep[];
   anchors: { id: string; label: string }[];
   builtObjectSlug?: string | null;
+  heroPricing?: {
+    tiers: { id: string; label: string; price: number }[];
+    warrantyYears?: number;
+    productionMonthsMin?: number;
+  } | null;
+  /** Сырой JSON калькулятора в БД сериализуется в construction-data как calculatorUi. */
+  calculatorUi?: import("@/lib/project-calculator-types").ProjectCalculatorUi | null;
 }
 
 export interface BuiltObjectItem {

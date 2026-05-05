@@ -31,6 +31,8 @@ interface HouseProjectFormState {
   completionJson: string;
   constructionJson: string;
   anchorsJson: string;
+  heroPricingJson: string;
+  calculatorJson: string;
   renders: string[];
   plans: PlanInput[];
 }
@@ -56,7 +58,7 @@ const defaultSchedule = JSON.stringify(
 
 const defaultAnchors = JSON.stringify(
   [
-    { id: "plans", label: "Планировка" },
+    { id: "plans", label: "Планировки и фасады" },
     { id: "completion", label: "Комплектация" },
     { id: "schedule", label: "График строительства" },
     { id: "mortgage", label: "Ипотека" },
@@ -88,6 +90,8 @@ export function mapHouseProjectToForm(data?: any): HouseProjectFormState {
     completionJson: JSON.stringify(data?.completionJson ?? JSON.parse(defaultCompletion), null, 2),
     constructionJson: JSON.stringify(data?.constructionJson ?? JSON.parse(defaultSchedule), null, 2),
     anchorsJson: JSON.stringify(data?.anchorsJson ?? JSON.parse(defaultAnchors), null, 2),
+    heroPricingJson: JSON.stringify(data?.heroPricingJson ?? {}, null, 2),
+    calculatorJson: JSON.stringify(data?.calculatorJson ?? {}, null, 2),
     renders: media.filter((item: any) => item.type === "RENDER").map((item: any) => item.url),
     plans: media
       .filter((item: any) => item.type === "PLAN")
@@ -112,8 +116,13 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
   const [error, setError] = useState("");
 
   const jsonValid = useMemo(
-    () => isValidJson(form.completionJson) && isValidJson(form.constructionJson) && isValidJson(form.anchorsJson),
-    [form.anchorsJson, form.completionJson, form.constructionJson]
+    () =>
+      isValidJson(form.completionJson) &&
+      isValidJson(form.constructionJson) &&
+      isValidJson(form.anchorsJson) &&
+      isValidJson(form.heroPricingJson) &&
+      isValidJson(form.calculatorJson),
+    [form.anchorsJson, form.calculatorJson, form.completionJson, form.constructionJson, form.heroPricingJson]
   );
 
   function set<K extends keyof HouseProjectFormState>(field: K, value: HouseProjectFormState[K]) {
@@ -144,6 +153,22 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
       completionJson: JSON.parse(form.completionJson),
       constructionJson: JSON.parse(form.constructionJson),
       anchorsJson: JSON.parse(form.anchorsJson),
+      heroPricingJson: (() => {
+        const v = JSON.parse(form.heroPricingJson) as Record<string, unknown>;
+        if (!v || typeof v !== "object") return null;
+        if (Array.isArray(v.tiers) && v.tiers.length === 0) return null;
+        return v;
+      })(),
+      calculatorJson: (() => {
+        try {
+          const v = JSON.parse(form.calculatorJson) as Record<string, unknown>;
+          if (!v || typeof v !== "object" || Array.isArray(v)) return null;
+          if (Object.keys(v).length === 0) return null;
+          return v;
+        } catch {
+          return null;
+        }
+      })(),
     };
     const endpoint = form.id ? `/api/admin/house-projects/${form.id}` : "/api/admin/house-projects";
     const method = form.id ? "PUT" : "POST";
@@ -292,6 +317,18 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
       </AdminFormSection>
 
       <AdminFormSection title="Структурные блоки" subtitle="JSON позволяет добавлять пункты комплектации, сроки графика и кнопки sticky-навигации без изменения кода.">
+        <label className="space-y-1">
+          <span className="block text-xs font-medium text-white/40">
+            Герой карточки: цены по материалу (heroPricingJson). Пустой tiers — на сайте считаются от поля «Цена, ₽»
+          </span>
+          <textarea value={form.heroPricingJson} onChange={(e) => set("heroPricingJson", e.target.value)} rows={10} className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" spellCheck={false} />
+        </label>
+        <label className="space-y-1">
+          <span className="block text-xs font-medium text-white/40">
+            Калькулятор комплектации (calculatorJson из PDF): этапы, опции, транспорт. Пустой объект — для «Аврора» кодовый пресет, для других — только транспортная сетка.
+          </span>
+          <textarea value={form.calculatorJson} onChange={(e) => set("calculatorJson", e.target.value)} rows={12} className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" spellCheck={false} />
+        </label>
         <label className="space-y-1">
           <span className="block text-xs font-medium text-white/40">Комплектация JSON</span>
           <textarea value={form.completionJson} onChange={(e) => set("completionJson", e.target.value)} rows={8} className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />

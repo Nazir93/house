@@ -97,6 +97,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
         ...(body.completionJson !== undefined && { completionJson: jsonOrNull(body.completionJson) }),
         ...(body.constructionJson !== undefined && { constructionJson: jsonOrNull(body.constructionJson) }),
         ...(body.anchorsJson !== undefined && { anchorsJson: jsonOrNull(body.anchorsJson) }),
+        ...(body.heroPricingJson !== undefined && { heroPricingJson: jsonOrNull(body.heroPricingJson) }),
+        ...(body.calculatorJson !== undefined && { calculatorJson: jsonOrNull(body.calculatorJson) }),
         ...(mediaPatch && { media: mediaPatch }),
       },
     });

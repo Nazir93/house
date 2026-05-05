@@ -139,6 +139,10 @@ model HouseProject {
   order               Int                        @default(0)
   completionJson      Json?
   constructionJson    Json?
+  /// Герой карточки проекта (уровни цен по материалу, гарантия, срок).
+  heroPricingJson     Json?
+  /// Калькулятор комплектации: этапы по PDF, опции, транспорт и виджет консультации.
+  calculatorJson      Json?
   anchorsJson         Json?
   createdAt           DateTime                   @default(now())
   updatedAt           DateTime                   @updatedAt

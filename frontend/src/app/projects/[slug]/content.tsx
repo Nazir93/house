@@ -1,43 +1,37 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
   Bath,
   Bed,
+  Building2,
   ChevronLeft,
   ChevronRight,
   Home,
   Layers2,
   Mail,
+  Maximize2,
   Send,
   Share2,
 } from "lucide-react";
+import {
+  derivePartOfSoulHeroTiers,
+  formatRub,
+  getEffectiveCalculatorUi,
+  getProjectPlans,
+  getProjectRenders,
+  resolveProjectHeroPricing,
+  type HouseProjectItem,
+} from "@/lib/construction-data";
 import { CompareButton } from "@/components/construction/compare-button";
-import { ConstructionScheduleGantt } from "@/components/construction/construction-schedule-gantt";
-import { HouseCompletionConfigurator } from "@/components/construction/house-completion-configurator";
-import { LeadMiniForm } from "@/components/construction/lead-mini-form";
-import { MortgageInlineEstimator } from "@/components/construction/mortgage-inline-estimator";
-import { ProjectDesignCostCalculator } from "@/components/construction/project-design-cost-calculator";
+import { HouseProjectCompletionSection } from "@/components/construction/house-project-completion-section";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { SITE_URL } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
-import {
-  formatRub,
-  getProjectPlans,
-  getProjectRenders,
-  type HouseProjectItem,
-} from "@/lib/construction-shared";
-
-function pluralRu(n: number, one: string, few: string, many: string): string {
-  const mod10 = n % 10;
-  const mod100 = n % 100;
-  if (mod100 >= 11 && mod100 <= 14) return `${n} ${many}`;
-  if (mod10 === 1) return `${n} ${one}`;
-  if (mod10 >= 2 && mod10 <= 4) return `${n} ${few}`;
-  return `${n} ${many}`;
-}
+import { useModal } from "@/lib/modal-context";
+import { inferPartOfSoulFloors, partOfSoulRoofOptions, type PartOfSoulRoofPitch } from "@/lib/part-of-soul-pricing";
 
 export function HouseProjectDetailContent({
   project,
@@ -47,8 +41,44 @@ export function HouseProjectDetailContent({
   similarProjects: HouseProjectItem[];
 }) {
   const contact = useContactConfig();
+  const { openModalToEstimate } = useModal();
   const renders = getProjectRenders(project);
   const plans = getProjectPlans(project);
+  const calculatorUi = useMemo(() => getEffectiveCalculatorUi(project), [project]);
+  const posCfg = calculatorUi.partOfSoul;
+  const pricingFloors = useMemo(
+    () => inferPartOfSoulFloors(project.floors, posCfg?.pricingFloors),
+    [project.floors, posCfg?.pricingFloors]
+  );
+  const roofChoices = useMemo(
+    () => (posCfg?.enabled ? partOfSoulRoofOptions(pricingFloors) : []),
+    [posCfg?.enabled, pricingFloors]
+  );
+  const [roofPitch, setRoofPitch] = useState<PartOfSoulRoofPitch>("dual");
+
+  useEffect(() => {
+    if (!posCfg?.enabled || roofChoices.length === 0) return;
+    const preferred = posCfg.defaultRoof && roofChoices.includes(posCfg.defaultRoof) ? posCfg.defaultRoof : roofChoices[0];
+    if (!roofChoices.includes(roofPitch)) setRoofPitch(preferred ?? "dual");
+  }, [posCfg?.defaultRoof, posCfg?.enabled, roofChoices, roofPitch]);
+
+  const heroResolved = useMemo(() => resolveProjectHeroPricing(project), [project]);
+  const effectiveHeroTiers = useMemo(() => {
+    if (!posCfg?.enabled || typeof posCfg.smallHouseThresholdSqm !== "number") return heroResolved.tiers;
+    return derivePartOfSoulHeroTiers(
+      project.area,
+      pricingFloors,
+      roofPitch,
+      heroResolved.tiers,
+      posCfg.smallHouseThresholdSqm,
+      typeof posCfg.shellSurchargeUnderThreshold === "number" ? posCfg.shellSurchargeUnderThreshold : 0.15
+    );
+  }, [heroResolved.tiers, posCfg, pricingFloors, project.area, roofPitch]);
+  const [materialTierIndex, setMaterialTierIndex] = useState(0);
+
+  useEffect(() => {
+    setMaterialTierIndex((idx) => Math.min(idx, Math.max(0, effectiveHeroTiers.length - 1)));
+  }, [effectiveHeroTiers.length]);
   const [activeRender, setActiveRender] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -83,14 +113,20 @@ export function HouseProjectDetailContent({
   );
 
   const visibleAnchors = useMemo(
-    () => project.anchors.filter((a) => project.mortgageEnabled || a.id !== "mortgage"),
-    [project.anchors, project.mortgageEnabled]
+    () => project.anchors.filter((a) => a.id !== "schedule" && a.id !== "mortgage"),
+    [project.anchors]
   );
 
   function planSlideIndex(planId: string) {
     const idx = plans.findIndex((p) => p.id === planId);
     return idx >= 0 ? renders.length + idx : renders.length;
   }
+
+  function scrollToCompletion() {
+    document.getElementById("completion")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  const accentColor = "var(--accent)";
 
   return (
     <>
@@ -124,7 +160,9 @@ export function HouseProjectDetailContent({
               <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold text-white">Новый проект</span>
             ) : null}
           </div>
-          <h1 className="mt-3 font-heading text-4xl leading-tight md:text-5xl lg:text-6xl">{project.title}</h1>
+          <h1 className="mt-3 font-heading text-4xl leading-tight md:text-5xl lg:text-6xl" style={{ color: "var(--graphite)" }}>
+            {project.title}
+          </h1>
           <p className="mt-4 max-w-3xl text-lg" style={{ color: "var(--text-muted)" }}>
             {project.shortDescription}
           </p>
@@ -142,7 +180,7 @@ export function HouseProjectDetailContent({
             </p>
           ) : null}
 
-          <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+          <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,400px)] lg:items-start">
             <div className="relative min-h-0 overflow-hidden rounded-[32px] bg-[var(--stone)] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
               {active ? (
                 <button type="button" onClick={() => openMedia(activeRender)} className="relative block min-h-[320px] w-full cursor-zoom-in sm:min-h-[380px] lg:min-h-[420px]">
@@ -202,115 +240,172 @@ export function HouseProjectDetailContent({
               ) : null}
             </div>
 
-            <aside className="rounded-[28px] border p-5 md:p-6" style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-secondary)" }}>
-              <p className="font-heading text-4xl font-bold leading-none tracking-tight md:text-[2.75rem]">
-                {project.area} м²
+            <aside
+              className="rounded-[28px] border bg-[var(--bg)] p-5 shadow-sm md:p-6 dark:bg-[var(--bg-secondary)]"
+              style={{ borderColor: "var(--border)" }}
+            >
+              <p className="text-sm font-semibold" style={{ color: accentColor }}>
+                Характеристики
               </p>
-              <p className="mt-4 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                Материал стен:{" "}
-                <Link href="/technology/materials" className="font-semibold text-[var(--accent)] underline-offset-2 hover:underline">
-                  {project.materials.join(", ") || "на выбор"}
-                </Link>
-              </p>
-              <div className="mt-5 flex flex-wrap gap-6 text-sm font-semibold">
-                <span className="inline-flex items-center gap-2">
-                  <Bed size={20} className="text-[var(--accent)]" aria-hidden />
-                  {pluralRu(project.rooms, "комната", "комнаты", "комнат")}
-                </span>
-                <span className="inline-flex items-center gap-2">
-                  <Bath size={20} className="text-[var(--accent)]" aria-hidden />
-                  {pluralRu(project.bathrooms, "санузел", "санузла", "санузлов")}
-                </span>
-              </div>
-
-              <div className="mt-6 rounded-2xl p-5 text-white" style={{ backgroundColor: "var(--accent)" }}>
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <p className="text-sm uppercase tracking-[0.14em] text-white/70">Стоимость проекта</p>
-                  {project.pricePromo ? (
-                    <span className="shrink-0 rounded-md bg-[var(--sale)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">Акция</span>
-                  ) : null}
-                </div>
-                <p className="mt-2 text-3xl font-semibold tabular-nums">{formatRub(project.price)}</p>
-                {project.pricePromo ? <p className="mt-3 text-sm leading-snug text-white/90">{project.pricePromo}</p> : null}
-              </div>
-
-              <div className="mt-5 flex flex-col gap-2.5">
-                <a
-                  href={telegramShareUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl px-4 py-3.5 text-sm font-semibold text-white transition hover:opacity-[0.96]"
-                  style={{ backgroundColor: "var(--accent)" }}
-                >
-                  <Send size={18} strokeWidth={2} aria-hidden />
-                  В Telegram
-                  <Share2 size={16} className="ml-auto opacity-90" aria-hidden />
-                </a>
-                {mailtoProjectHref ? (
-                  <a
-                    href={mailtoProjectHref}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border-2 bg-transparent px-4 py-3.5 text-sm font-semibold transition hover:bg-black/[0.03]"
-                    style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
-                  >
-                    <Mail size={18} strokeWidth={2} aria-hidden />
-                    На почту
-                    <Layers2 size={16} className="ml-auto opacity-80" aria-hidden />
-                  </a>
-                ) : null}
-              </div>
-
-              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-                <CompareButton projectId={project.id} className="w-full justify-center sm:w-auto sm:min-w-[10rem]" />
-                <Link
-                  href="/individual-design"
-                  className="inline-flex w-full justify-center rounded-full border px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.12em] sm:w-auto"
-                  style={{ borderColor: "var(--border)", color: "var(--text)" }}
-                >
-                  Создать свой проект
-                </Link>
-              </div>
-
-              <h2 className="mt-8 font-heading text-xl md:text-2xl">Технические характеристики</h2>
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 grid grid-cols-2 gap-3">
                 {[
-                  [
-                    "Площадь дома",
-                    `${project.area} м²`,
-                    "/technology/house-area" as const,
-                  ],
-                  ["Этажность", String(project.floors), null],
-                  ["Жилые комнаты", String(project.rooms), null],
-                  ["Санузлы", String(project.bathrooms), null],
-                  [
-                    "Материалы",
-                    project.materials.join(", ") || "на выбор",
-                    "/technology/materials" as const,
-                  ],
-                ].map(([label, value, href]) => (
-                  <div key={label} className="flex justify-between gap-4 border-b pb-3 text-sm last:border-0" style={{ borderColor: "var(--border)" }}>
-                    <span style={{ color: "var(--text-muted)" }}>
-                      {href ? (
-                        <Link href={href} className="font-medium text-[var(--accent)] underline-offset-2 hover:underline">
-                          {label}
-                        </Link>
-                      ) : (
-                        label
-                      )}
+                  {
+                    label: "Площадь",
+                    value: `${project.area} м²`,
+                    Icon: Maximize2,
+                  },
+                  {
+                    label: "Этажность",
+                    value: `${project.floors} эт.`,
+                    Icon: Building2,
+                  },
+                  {
+                    label: "Количество спален",
+                    value: `${project.rooms} шт.`,
+                    Icon: Bed,
+                  },
+                  {
+                    label: "Количество санузлов",
+                    value: `${project.bathrooms} шт.`,
+                    Icon: Bath,
+                  },
+                ].map(({ label, value, Icon }) => (
+                  <div key={label} className="flex gap-3 rounded-2xl border p-3 sm:p-4" style={{ borderColor: "var(--border)" }}>
+                    <span
+                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.06]"
+                      style={{ color: accentColor }}
+                    >
+                      <Icon className="h-5 w-5" strokeWidth={1.85} aria-hidden />
                     </span>
-                    <span className="text-right font-semibold">{value}</span>
+                    <div className="min-w-0">
+                      <p className="text-[11px] font-medium leading-snug sm:text-xs" style={{ color: "var(--text-muted)" }}>
+                        {label}
+                      </p>
+                      <p className="truncate text-sm font-bold tabular-nums sm:text-base">{value}</p>
+                    </div>
                   </div>
                 ))}
               </div>
-              <Link href="/technology/house-area" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[var(--accent)]">
+
+              <div className="mt-5 flex flex-col gap-2">
+                <div className="rounded-xl px-4 py-3 text-center text-sm font-semibold text-white" style={{ backgroundColor: accentColor }}>
+                  Гарантия {heroResolved.warrantyYears} лет
+                </div>
+                <div className="rounded-xl px-4 py-3 text-center text-sm font-semibold text-white" style={{ backgroundColor: accentColor }}>
+                  Срок изготовления от {heroResolved.productionMonthsMin} мес.
+                </div>
+              </div>
+
+              <p className="mt-8 text-sm font-semibold" style={{ color: accentColor }}>
+                Цена строительства
+              </p>
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                {effectiveHeroTiers.map((t, i) => {
+                  const activeTier = i === materialTierIndex;
+                  return (
+                    <button
+                      key={t.id}
+                      type="button"
+                      aria-pressed={activeTier}
+                      aria-label={`${t.label}, ${formatRub(t.price)}`}
+                      onClick={() => setMaterialTierIndex(i)}
+                      className={`flex flex-col rounded-2xl border-2 px-3 py-4 text-center transition ${
+                        activeTier ? "text-white shadow-sm" : "bg-[var(--bg-secondary)] hover:opacity-95 dark:bg-[var(--bg)]"
+                      }`}
+                      style={
+                        activeTier
+                          ? { borderColor: accentColor, backgroundColor: accentColor }
+                          : { borderColor: "var(--border)" }
+                      }
+                    >
+                      <span className="mx-auto flex h-10 w-12 items-center justify-center rounded-lg bg-white/20">
+                        <span className="block h-7 w-10 rounded-sm bg-white/90 shadow-inner" aria-hidden />
+                      </span>
+                      <span className="mt-2 text-xs font-bold leading-tight sm:text-[13px]">{t.label}</span>
+                      <span className={`mt-2 text-[11px] font-semibold tabular-nums leading-tight sm:text-xs ${activeTier ? "text-white/95" : ""}`}>
+                        {formatRub(t.price)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              {project.pricePromo ? <p className="mt-4 text-sm font-medium leading-snug text-[var(--accent)]">{project.pricePromo}</p> : null}
+
+              <button
+                type="button"
+                onClick={scrollToCompletion}
+                className="mt-5 w-full rounded-2xl px-4 py-4 text-center text-sm font-bold uppercase tracking-[0.1em] text-white shadow-sm transition hover:opacity-[0.94]"
+                style={{ backgroundColor: accentColor }}
+              >
+                Получить смету
+              </button>
+              <button
+                type="button"
+                onClick={openModalToEstimate}
+                className="mt-2 w-full rounded-2xl border-2 py-3 text-center text-xs font-semibold transition hover:bg-black/[0.03] dark:hover:bg-white/[0.06]"
+                style={{ borderColor: accentColor, color: accentColor }}
+              >
+                Ориентировочный расчёт в один клик
+              </button>
+
+              <div className="mt-5 text-sm" style={{ color: "var(--text-muted)" }}>
+                <p>
+                  Материал стен (по желанию):{" "}
+                  <Link href="/technology/materials" className="font-semibold text-[var(--accent)] underline-offset-2 hover:underline">
+                    {project.materials.join(", ") || "на выбор"}
+                  </Link>
+                </p>
+              </div>
+            </aside>
+          </div>
+
+          <div
+            className="mt-10 flex flex-col gap-4 border-t pt-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
+            style={{ borderColor: "var(--border)" }}
+          >
+            <div className="flex flex-wrap gap-2">
+              <a
+                href={telegramShareUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white transition hover:opacity-[0.96] min-[480px]:flex-none"
+                style={{ backgroundColor: "var(--accent)" }}
+              >
+                <Send size={18} strokeWidth={2} aria-hidden />
+                В Telegram
+                <Share2 size={16} className="opacity-90" aria-hidden />
+              </a>
+              {mailtoProjectHref ? (
+                <a
+                  href={mailtoProjectHref}
+                  className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-2xl border-2 px-4 py-3 text-sm font-semibold transition hover:bg-black/[0.03] min-[480px]:flex-none dark:hover:bg-white/[0.06]"
+                  style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
+                >
+                  <Mail size={18} strokeWidth={2} aria-hidden />
+                  На почту
+                  <Layers2 size={16} className="opacity-80" aria-hidden />
+                </a>
+              ) : null}
+            </div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+              <CompareButton projectId={project.id} className="w-full justify-center sm:w-auto sm:min-w-[10rem]" />
+              <Link
+                href="/individual-design"
+                className="inline-flex w-full justify-center rounded-full border px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.12em] sm:w-auto"
+                style={{ borderColor: "var(--border)", color: "var(--text)" }}
+              >
+                Создать свой проект
+              </Link>
+              <Link href="/technology/house-area" className="inline-flex items-center justify-center gap-2 text-sm font-semibold text-[var(--accent)] sm:justify-start">
                 Как считается площадь дома <ArrowRight size={15} />
               </Link>
-            </aside>
+            </div>
           </div>
         </section>
 
         <nav
-          className="sticky top-[5.5rem] z-[35] border-y backdrop-blur md:top-24"
-          style={{ borderColor: "var(--border)", backgroundColor: "color-mix(in srgb, var(--bg) 92%, transparent)" }}
+          className="border-y bg-[var(--bg)]"
+          style={{ borderColor: "var(--border)" }}
           aria-label="Разделы проекта"
         >
           <div className="container mx-auto flex gap-2 overflow-x-auto px-5 py-3">
@@ -328,51 +423,74 @@ export function HouseProjectDetailContent({
         </nav>
 
         <section id="plans" className="scroll-mt-[8.5rem] md:scroll-mt-[9rem]">
-          <div className="container mx-auto grid gap-10 px-5 py-14 lg:grid-cols-[minmax(0,1fr)_minmax(300px,420px)] lg:items-start lg:gap-12">
-            <div className="min-w-0">
-              <h2 className="font-heading text-3xl md:text-4xl">Планировки</h2>
-              <p className="mt-3 max-w-2xl text-sm md:text-base" style={{ color: "var(--text-muted)" }}>
-                Нажмите на схему для просмотра в полном размере.
-                {sortedPlans.length >= 2
-                  ? " На большом экране планы нескольких этажей показываются рядом, без вертикальной прокрутки между ними."
-                  : null}
-              </p>
-              {sortedPlans.length === 0 ? (
-                <p className="mt-8 text-sm" style={{ color: "var(--text-muted)" }}>
-                  Планировки появятся после загрузки в карточке проекта.
+          <div className="container mx-auto px-5 py-14">
+            <h2 className="font-heading text-3xl text-[#1d3557] md:text-4xl dark:text-[var(--text)]">Планировки и фасады</h2>
+            <p className="mt-3 max-w-3xl text-sm md:text-base" style={{ color: "var(--text-muted)" }}>
+              План этажа и виды дома снаружи. Нажмите изображение, чтобы открыть полноразмерный просмотр.
+              {sortedPlans.length >= 2 ? " На широком экране несколько планов показываются рядом." : ""}
+            </p>
+            <div className="mt-10 grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-14">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-muted)" }}>
+                  Планировки
                 </p>
-              ) : (
-                <div className={`mt-8 grid gap-4 ${sortedPlans.length >= 2 ? "lg:grid-cols-2 lg:gap-5" : ""}`}>
-                  {sortedPlans.map((plan) => (
-                    <button
-                      key={plan.id}
-                      type="button"
-                      onClick={() => openMedia(planSlideIndex(plan.id))}
-                      className="group overflow-hidden rounded-[24px] border bg-[var(--bg)] text-left shadow-sm transition hover:border-[var(--accent)]"
-                      style={{ borderColor: "var(--border)" }}
-                    >
-                      <div className="relative flex max-h-[min(70vh,560px)] min-h-[240px] items-center justify-center bg-[var(--stone)] p-3 lg:min-h-[280px]">
+                {sortedPlans.length === 0 ? (
+                  <p className="mt-4 text-sm" style={{ color: "var(--text-muted)" }}>
+                    Планировки появятся после загрузки в карточке проекта.
+                  </p>
+                ) : (
+                  <div className={`mt-4 grid gap-4 ${sortedPlans.length >= 2 ? "sm:grid-cols-2" : ""}`}>
+                    {sortedPlans.map((plan) => (
+                      <button
+                        key={plan.id}
+                        type="button"
+                        onClick={() => openMedia(planSlideIndex(plan.id))}
+                        className="group overflow-hidden rounded-[24px] border bg-[var(--bg)] text-left shadow-sm transition hover:border-[#778da9]"
+                        style={{ borderColor: "var(--border)" }}
+                      >
+                        <div className="relative flex max-h-[min(70vh,560px)] min-h-[220px] items-center justify-center bg-[var(--stone)] p-3 sm:min-h-[260px]">
+                          <img
+                            src={plan.url}
+                            alt={plan.alt || plan.label || project.title}
+                            className="max-h-[min(68vh,520px)] w-full object-contain transition duration-300 group-hover:scale-[1.02]"
+                          />
+                        </div>
+                        <div className="border-t p-4 font-semibold" style={{ borderColor: "var(--border)" }}>
+                          {plan.label || (plan.floor != null ? `${plan.floor} этаж` : "Планировка")}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-muted)" }}>
+                  Фасады
+                </p>
+                {renders.length === 0 ? (
+                  <p className="mt-4 text-sm" style={{ color: "var(--text-muted)" }}>
+                    Визуализации появятся после загрузки рендеров в карточке проекта.
+                  </p>
+                ) : (
+                  <div className="mt-4 grid grid-cols-2 gap-4">
+                    {renders.map((r, i) => (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => openMedia(i)}
+                        className="group overflow-hidden rounded-2xl border bg-[var(--stone)] shadow-sm transition hover:border-[#778da9]"
+                        style={{ borderColor: "var(--border)" }}
+                      >
                         <img
-                          src={plan.url}
-                          alt={plan.alt || plan.label || project.title}
-                          className="max-h-[min(68vh,520px)] w-full object-contain transition duration-300 group-hover:scale-[1.02]"
+                          src={r.url}
+                          alt={r.alt || `${project.title}, фасад ${i + 1}`}
+                          className="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-[1.02]"
                         />
-                      </div>
-                      <div className="border-t p-4 font-semibold" style={{ borderColor: "var(--border)" }}>
-                        {plan.label || (plan.floor != null ? `${plan.floor} этаж` : "Планировка")}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="min-w-0 lg:sticky lg:top-[8rem] lg:self-start">
-              <ProjectDesignCostCalculator
-                source="house-project-design"
-                defaultArea={project.area}
-                projectSlug={project.slug}
-                projectTitle={project.title}
-              />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </section>
@@ -381,63 +499,27 @@ export function HouseProjectDetailContent({
           <div className="container mx-auto px-5">
             <h2 className="font-heading text-3xl md:text-4xl">Комплектация</h2>
             <div className="mt-8">
-              <HouseCompletionConfigurator materials={project.materials} basePrice={project.price} completion={project.completion} />
+              <HouseProjectCompletionSection
+                project={project}
+                calculatorUi={calculatorUi}
+                heroTiers={effectiveHeroTiers}
+                tierIndex={materialTierIndex}
+                onTierIndexChange={setMaterialTierIndex}
+                coverImageUrl={renders[0]?.url}
+                partOfSoulContext={
+                  posCfg?.enabled
+                    ? {
+                        pricingFloors,
+                        roofPitch,
+                        roofChoices,
+                        setRoofPitch,
+                      }
+                    : undefined
+                }
+              />
             </div>
           </div>
         </section>
-
-        <section id="schedule" className="scroll-mt-[8.5rem] md:scroll-mt-[9rem] container mx-auto px-5 py-16">
-          <h2 className="font-heading text-3xl md:text-4xl">График строительства</h2>
-          <div className="mt-8">
-            <ConstructionScheduleGantt steps={project.constructionSchedule} />
-          </div>
-        </section>
-
-        {project.mortgageEnabled ? (
-          <section id="mortgage" className="scroll-mt-[8.5rem] md:scroll-mt-[9rem] py-16" style={{ backgroundColor: "var(--accent)", color: "white" }}>
-            <div className="container mx-auto px-5">
-              <h2 className="font-heading text-3xl md:text-4xl">Ипотека</h2>
-              {project.mortgageMode === "CALCULATOR" ? (
-                <>
-                  <p className="mt-4 max-w-2xl text-white/80">
-                    Предварительный расчёт платежа по цене проекта. Оставьте контакты — пришлём варианты программ и подскажем по документам.
-                  </p>
-                  <div className="mt-8">
-                    <MortgageInlineEstimator
-                      variant="embed-dark"
-                      defaultPrice={project.price}
-                      defaultInitial={Math.round(project.price * 0.22)}
-                      projectSlug={project.slug}
-                      projectTitle={project.title}
-                    />
-                  </div>
-                </>
-              ) : (
-                <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_minmax(280px,360px)] lg:items-start">
-                  <div>
-                    <p className="max-w-2xl text-white/80">
-                      Оставьте заявку — подготовим расчёт по выбранному проекту с учётом цены, взноса и срока. Полный калькулятор на отдельной странице.
-                    </p>
-                    <Link
-                      href={`/mortgage?project=${encodeURIComponent(project.slug)}`}
-                      className="mt-6 inline-flex rounded-full bg-white px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] transition hover:bg-white/95"
-                      style={{ color: "var(--accent)" }}
-                    >
-                      Открыть калькулятор
-                    </Link>
-                  </div>
-                  <LeadMiniForm
-                    source="house-project-mortgage"
-                    service={`Ипотека: ${project.title}`}
-                    variant="dark"
-                    submitLabel="Заявка на расчёт"
-                    calcData={{ kind: "house-project", slug: project.slug, title: project.title, price: project.price }}
-                  />
-                </div>
-              )}
-            </div>
-          </section>
-        ) : null}
 
         <section className="container mx-auto px-5 py-16">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
