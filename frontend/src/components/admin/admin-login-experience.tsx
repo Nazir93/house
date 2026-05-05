@@ -73,9 +73,32 @@ function AdminLoginForm() {
     if (result?.error) {
       setError("Неверный email или пароль");
       setLoading(false);
-    } else if (result?.url) {
-      window.location.href = result.url;
+      return;
     }
+
+    /** Только реальный успех: иначе NextAuth может дать URL на другой хост (/api/auth/signin?csrf) при ошибочном NEXTAUTH_URL. */
+    if (result?.ok) {
+      const fallback = callbackUrl.startsWith("/") ? callbackUrl : "/admin";
+      let target = fallback;
+      if (result.url) {
+        try {
+          const u = new URL(result.url);
+          const here = window.location.origin;
+          const bad =
+            u.origin !== here || u.pathname.includes("/api/auth/signin");
+          if (!bad) target = result.url;
+        } catch {
+          /* оставить fallback */
+        }
+      }
+      window.location.href = target;
+      return;
+    }
+
+    setError(
+      "Вход заблокирован (CSRF / настройки хоста). На сервере выставьте NEXTAUTH_URL и NEXT_PUBLIC_SITE_URL на этот же адрес, что в браузере — без чужих доменов.",
+    );
+    setLoading(false);
   }
 
   return (
