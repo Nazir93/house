@@ -47,6 +47,7 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
     title: "Соцсети",
     fields: [
       { key: "social_telegram", label: "Telegram", placeholder: "https://t.me/..." },
+      { key: "social_vk", label: "ВКонтакте", placeholder: "https://vk.ru/..." },
       { key: "social_max", label: "Max", placeholder: "https://max.ru/..." },
     ],
   },

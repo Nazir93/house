@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Phone, ArrowRight, Send } from "lucide-react";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
+import { VkIcon } from "@/components/icons/vk-icon";
 import { SITE_NAME } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { isWorkingHours } from "@/lib/utils";
@@ -109,6 +110,17 @@ export function ThankYouContent() {
             >
               <Send size={18} />
               Написать в Telegram
+            </a>
+          ) : null}
+          {contact.social.vk?.trim() ? (
+            <a
+              href={contact.social.vk}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/10 text-gray-300 hover:bg-[#0077ff] hover:text-white transition-all text-sm font-medium"
+            >
+              <VkIcon className="h-[18px] w-[18px]" />
+              ВКонтакте
             </a>
           ) : null}
           {contact.social.max && (

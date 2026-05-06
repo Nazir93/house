@@ -20,6 +20,7 @@ export async function JsonLd() {
   const contact = await loadContactConfig();
 
   const tel = [contact.phoneRaw, contact.phone2Raw].filter((t) => t?.trim());
+  const sameAs = [contact.social.telegram, contact.social.vk, contact.social.max].filter((u) => u?.trim());
   const organization = {
     "@context": "https://schema.org",
     "@type": "GeneralContractor",
@@ -35,6 +36,7 @@ export async function JsonLd() {
       ...(contact.address.trim() ? { streetAddress: contact.address.trim() } : {}),
     },
     areaServed: buildSchemaAreaServed(),
+    ...(sameAs.length > 0 ? { sameAs } : {}),
     openingHoursSpecification: [OFFICE_OPENING_HOURS_JSON_LD],
     hasOfferCatalog: {
       "@type": "OfferCatalog",

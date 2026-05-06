@@ -11,6 +11,7 @@ const KEYS = [
   "address",
   "working_hours",
   "social_telegram",
+  "social_vk",
   "social_max",
   "company_full_name",
   "company_short_name",
@@ -39,6 +40,7 @@ const loadContactConfigCached = unstable_cache(
       if (m.address?.trim()) d.address = m.address.trim();
       if (m.working_hours?.trim()) d.workingHours = m.working_hours.trim();
       if (m.social_telegram?.trim()) d.social.telegram = m.social_telegram.trim();
+      if (m.social_vk?.trim()) d.social.vk = m.social_vk.trim();
       if (m.social_max?.trim()) d.social.max = m.social_max.trim();
       if (m.company_full_name?.trim()) d.company.fullName = m.company_full_name.trim();
       if (m.company_short_name?.trim()) d.company.shortName = m.company_short_name.trim();

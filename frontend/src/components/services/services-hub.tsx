@@ -1,0 +1,250 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { Fragment, useMemo, useState } from "react";
+import { ArrowRight, ChevronRight } from "lucide-react";
+
+import type { ServiceItem } from "@/lib/get-services";
+import { SERVICES_PROCESS_STEPS, getServiceHubCopy, slugSegmentFromServiceHref } from "@/lib/services-hub-data";
+import { cn } from "@/lib/utils";
+
+type HubRow = {
+  service: ServiceItem;
+  segment: string;
+  index: number;
+};
+
+export function ServicesHub({
+  services,
+  pageH1,
+  introText,
+}: {
+  services: ServiceItem[];
+  pageH1: string;
+  introText: string;
+}) {
+  const rows: HubRow[] = useMemo(
+    () =>
+      services.map((service, index) => ({
+        service,
+        segment: slugSegmentFromServiceHref(service.slug),
+        index,
+      })),
+    [services],
+  );
+
+  const [active, setActive] = useState(0);
+  if (rows.length === 0) {
+    return (
+      <div className="container mx-auto max-w-[900px] px-4 py-20 text-center text-[var(--text-muted)]">
+        <h1 className="font-heading text-xl font-semibold text-[var(--text)]">{pageH1}</h1>
+        <p className="mt-3 text-sm">Список услуг пока недоступен. Зайдите позже или свяжитесь с нами.</p>
+        <Link href="/contacts" className="mt-6 inline-block text-sm font-semibold text-[var(--accent)]">
+          Контакты
+        </Link>
+      </div>
+    );
+  }
+
+  const total = rows.length;
+  const current = rows[Math.min(active, rows.length - 1)];
+  const hub = current ? getServiceHubCopy(current.segment) : null;
+  const href = current?.service.slug.startsWith("/")
+    ? current.service.slug
+    : `/services/${current?.service.slug}`;
+
+  const cardTitle = hub?.navTitle ?? current?.service.title ?? "Услуга";
+  const cardDescription = hub?.cardDescription ?? current?.service.shortDescription ?? "";
+  const sectionParagraphs = hub?.sectionParagraphs ?? [];
+  const features = hub?.features ?? [];
+  const ctaLabel = hub?.ctaLabel ?? "Подробнее об услуге";
+  const centerSrc = hub?.centerImageSrc;
+
+  return (
+    <div className="pb-16 md:pb-20">
+      <div className="container mx-auto max-w-[1380px] px-4 pt-8 sm:px-6 md:pt-10 lg:px-10">
+        <h1 className="font-heading text-[clamp(1.35rem,2.4vw,2rem)] font-semibold tracking-tight text-[var(--text)]">
+          {pageH1}
+        </h1>
+      </div>
+
+      <div className="container mx-auto max-w-[1380px] px-4 sm:px-6 lg:px-10">
+        <div className="mt-10">
+          <h2 className="font-heading text-[clamp(1.35rem,2.2vw,1.85rem)] font-semibold leading-[1.15] tracking-tight text-[var(--text)]">
+            Услуги как система дома
+          </h2>
+          <p className="mt-4 max-w-3xl text-[14px] leading-relaxed text-[var(--text-muted)] sm:text-[15px]">
+            {introText}
+          </p>
+          <Link
+            href="/portfolio"
+            className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)]"
+          >
+            Посмотреть все проекты
+            <ArrowRight className="h-4 w-4" aria-hidden />
+          </Link>
+
+          {/* Все направления — одна линия (на узком экране горизонтальный скролл) */}
+          <nav className="mt-8" aria-label="Направления услуг">
+            <div className="relative border-b border-[var(--border)]">
+              <div className="-mx-4 flex snap-x snap-mandatory flex-nowrap gap-2 overflow-x-auto px-4 pb-px [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:justify-start sm:gap-2 sm:px-0 md:gap-2.5 [&::-webkit-scrollbar]:hidden">
+                {rows.map(({ service, segment }, idx) => {
+                  const on = idx === active;
+                  const label = getServiceHubCopy(segment)?.navTitle ?? service.title;
+                  return (
+                    <button
+                      key={service.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={on}
+                      id={`services-hub-tab-${idx}`}
+                      onClick={() => setActive(idx)}
+                      className={cn(
+                        "snap-start whitespace-nowrap rounded-t-xl border border-b-0 px-3.5 py-2.5 text-center text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors sm:px-4 sm:py-3 sm:text-[12px] md:text-[13px]",
+                        "outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]",
+                        on
+                          ? "relative z-[1] border-[var(--border)] bg-[var(--bg)] text-[var(--text)] shadow-[0_-2px_0_0_var(--bg)]"
+                          : "border-transparent bg-transparent text-[var(--text-subtle)] hover:bg-black/[0.03] hover:text-[var(--text)]",
+                      )}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </nav>
+
+          {/* Слева изображение, справа заголовок и весь текст раздела; ниже — акценты и кнопка */}
+          <div
+            className="mt-0 border border-t-0 border-[var(--border)] bg-[var(--bg)] p-5 sm:p-6 md:p-8 lg:p-10"
+            role="tabpanel"
+            aria-labelledby={`services-hub-heading-${active}`}
+          >
+            <div className="grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-10 xl:gap-12">
+              <div
+                className={cn(
+                  "relative w-full overflow-hidden rounded-[22px] border border-[var(--border)] bg-white shadow-[0_20px_56px_rgba(0,0,0,0.06)]",
+                  "aspect-[1024/682] min-h-[220px] sm:min-h-[280px] lg:min-h-[300px]",
+                )}
+              >
+                {centerSrc ? (
+                  <Image
+                    key={centerSrc}
+                    src={centerSrc}
+                    alt={`Иллюстрация: ${cardTitle}`}
+                    fill
+                    className="object-cover object-center transition-opacity duration-300"
+                    sizes="(max-width: 1023px) 100vw, 50vw"
+                    priority={active === 0}
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[var(--card-bg)] px-6 text-center">
+                    <div
+                      className="h-px w-24 bg-[var(--border)]"
+                      style={{
+                        backgroundImage:
+                          "repeating-linear-gradient(90deg, var(--border) 0, var(--border) 6px, transparent 6px, transparent 12px)",
+                      }}
+                    />
+                    <p className="max-w-[220px] font-heading text-sm font-semibold text-[var(--text-muted)]">
+                      Визуал раздела
+                    </p>
+                    <p className="max-w-xs text-xs leading-relaxed text-[var(--text-subtle)]">
+                      Укажите изображение в данных раздела или добавьте файл в{" "}
+                      <code className="rounded bg-[var(--bg-secondary)] px-1 py-0.5 text-[11px]">public</code>.
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              <div className="min-w-0 lg:pt-1">
+                <header>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-subtle)]">
+                    {String(active + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+                  </p>
+                  <h3
+                    id={`services-hub-heading-${active}`}
+                    className="mt-3 font-heading text-[clamp(1.35rem,2.5vw,1.85rem)] font-semibold leading-[1.12] tracking-tight text-[var(--text)] lg:mt-4"
+                  >
+                    {cardTitle}
+                  </h3>
+                </header>
+
+                <p className="mt-5 text-[15px] font-medium leading-relaxed text-[var(--text)] md:text-[16px]">{cardDescription}</p>
+
+                {sectionParagraphs.length > 0 ? (
+                  <div className="mt-5 space-y-4 text-[14px] leading-[1.65] text-[var(--text-muted)] md:text-[15px]">
+                    {sectionParagraphs.map((para, i) => (
+                      <p key={`${active}-${i}`}>{para}</p>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="mt-10 border-t border-[var(--border)] pt-10">
+              {features.length > 0 ? (
+                <ul className="max-w-2xl space-y-4">
+                  {features.map(({ Icon, label }) => (
+                    <li key={label} className="flex gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--bg-secondary)] text-[var(--accent)]">
+                        <Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+                      </span>
+                      <span className="pt-1 text-[13px] leading-snug text-[var(--text)] md:text-[14px]">{label}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+
+              <Link
+                href={href}
+                className={cn(
+                  "inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-5 py-3.5 text-sm font-semibold text-[var(--on-accent)] transition-colors hover:bg-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] sm:w-auto sm:min-w-[240px]",
+                  features.length > 0 ? "mt-8" : "",
+                )}
+              >
+                {ctaLabel}
+                <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Как мы строим */}
+      <div className="border-t border-[var(--border)] bg-[var(--bg-secondary)] py-14 md:py-16">
+        <div className="container mx-auto max-w-[1380px] px-4 sm:px-6 lg:px-10">
+          <h2 className="text-center font-heading text-[clamp(1.25rem,2vw,1.65rem)] font-semibold text-[var(--text)]">
+            Как мы строим
+          </h2>
+          <div className="mt-10 overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] lg:overflow-visible">
+            <ol className="flex min-w-[min(100%,920px)] flex-row flex-nowrap items-start gap-2 lg:mx-auto lg:max-w-5xl lg:justify-between lg:gap-1">
+              {SERVICES_PROCESS_STEPS.map((step, i) => (
+                <Fragment key={step.title}>
+                  <li className="flex w-[120px] shrink-0 flex-col items-center text-center sm:w-[140px] lg:w-auto lg:min-w-0 lg:flex-1">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--bg)] text-[var(--accent)] shadow-sm">
+                      <step.Icon className="h-5 w-5" strokeWidth={1.6} aria-hidden />
+                    </span>
+                    <span className="mt-3 px-0.5 font-heading text-[11px] font-semibold leading-tight text-[var(--text)] sm:text-[12px] md:text-[13px]">
+                      {step.title}
+                    </span>
+                    <span className="mt-1 max-w-[120px] text-[10px] leading-relaxed text-[var(--text-muted)] sm:max-w-[140px] sm:text-[11px]">
+                      {step.description}
+                    </span>
+                  </li>
+                  {i < SERVICES_PROCESS_STEPS.length - 1 ? (
+                    <li className="hidden shrink-0 list-none items-center self-center pt-2 lg:flex" aria-hidden>
+                      <ChevronRight className="h-4 w-4 text-[var(--text-subtle)]" />
+                    </li>
+                  ) : null}
+                </Fragment>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

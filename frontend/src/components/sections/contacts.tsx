@@ -8,6 +8,7 @@ import {
   Building2, CreditCard, ChevronDown,
 } from "lucide-react";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
+import { VkIcon } from "@/components/icons/vk-icon";
 import { getYandexOfficeMapEmbedUrl } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
 
@@ -217,6 +218,7 @@ export function ContactsSection({ embedded }: { embedded?: boolean }) {
         <div className="flex gap-3 flex-wrap">
           {[
             { href: contact.social.telegram, label: "Telegram" as const, icon: <Send size={14} /> },
+            { href: contact.social.vk, label: "ВКонтакте" as const, icon: <VkIcon className="h-3.5 w-3.5" /> },
             { href: contact.social.max, label: "Max" as const, icon: <MaxMessengerIcon className="h-3.5 w-3.5" /> },
           ]
             .filter((x) => x.href)

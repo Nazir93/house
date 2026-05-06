@@ -36,6 +36,7 @@ export type ContactConfig = {
   company: CompanyRequisites;
   social: {
     telegram: string;
+    vk: string;
     max: string;
   };
 };
@@ -59,6 +60,7 @@ export function createDefaultContactConfig(): ContactConfig {
     },
     social: {
       telegram: SOCIAL_LINKS.telegram,
+      vk: SOCIAL_LINKS.vk,
       max: SOCIAL_LINKS.max,
     },
   };

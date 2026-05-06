@@ -67,25 +67,25 @@ export function buildSchemaAreaServed(): SchemaPlace[] {
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000";
 
-/** Дефолты пустые — заполните в админке «Настройки» или через siteSettings в БД. */
-export const PHONE = "";
-export const PHONE_RAW = "";
-export const PHONE2 = "";
-export const PHONE2_RAW = "";
+/** Дефолты; при наличии записей в админке «Настройки» подставятся из БД. */
+export const PHONE = "+7 (812) 989-99-01";
+export const PHONE_RAW = "+78129899901";
+export const PHONE2 = "+7 (911) 600-00-99";
+export const PHONE2_RAW = "+79116000099";
 export const EMAIL = "";
-/** Адрес офиса (для контактов и карты) */
-export const ADDRESS = "";
+/** Адрес офиса (контакты, подвал, schema.org; при записи в админке подменяется из БД) */
+export const ADDRESS = "г. Санкт-Петербург, ул. Ординарная, д. 18";
 export const WORKING_HOURS = "Пн–Пт 9:00–17:00";
 
 /**
- * Координаты офиса (WGS84): долгота, широта.
- * Центр Санкт-Петербурга по умолчанию; уточните под фактический офис или задайте NEXT_PUBLIC_OFFICE_GEO_LON / LAT.
+ * Координаты офиса (WGS84): долгота, широта — метка на Яндекс.Картах (виджет и ссылка).
+ * Переопределение: NEXT_PUBLIC_OFFICE_GEO_LON / NEXT_PUBLIC_OFFICE_GEO_LAT.
  */
 export const OFFICE_GEO_LON = Number(
-  process.env.NEXT_PUBLIC_OFFICE_GEO_LON?.trim() || "30.31413"
+  process.env.NEXT_PUBLIC_OFFICE_GEO_LON?.trim() || "30.3046"
 );
 export const OFFICE_GEO_LAT = Number(
-  process.env.NEXT_PUBLIC_OFFICE_GEO_LAT?.trim() || "59.93863"
+  process.env.NEXT_PUBLIC_OFFICE_GEO_LAT?.trim() || "59.9669"
 );
 
 /** Встроенный виджет: центр + красная метка pm2rdm на здании */
@@ -119,11 +119,13 @@ export const COMPANY = {
 };
 
 export const SOCIAL_LINKS = {
-  telegram: process.env.NEXT_PUBLIC_TELEGRAM_URL?.trim() || "",
-  /** Мессенджер Max — ссылка на чат или профиль (задать в .env) */
+  telegram:
+    process.env.NEXT_PUBLIC_TELEGRAM_URL?.trim() || "https://t.me/sk_chastdushi",
+  vk: process.env.NEXT_PUBLIC_VK_URL?.trim() || "https://vk.ru/sk_chastdushi",
+  /** Мессенджер Max — ссылка на канал / профиль */
   max:
     process.env.NEXT_PUBLIC_MAX_CHAT_URL?.trim() ||
-    "https://max.ru/u/f9LHodD0cOICVt6F_SbXekYin0iKseqgg53Vo-E4sCJ1sXjkB0Bs18LxWUg",
+    "https://max.ru/id5300018030_biz",
 };
 
 export const SERVICES = [

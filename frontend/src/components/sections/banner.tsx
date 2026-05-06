@@ -14,6 +14,7 @@ import { useState } from "react";
 
 import { useTheme } from "@/lib/theme-context";
 import { useModal } from "@/lib/modal-context";
+import { HOME_HERO_BANNER_ID } from "@/lib/site-anchors";
 import { cn } from "@/lib/utils";
 
 /** Полноэкранный фон главного баннера: тёмная тема — «ночной» кадр, светлая — дневной */
@@ -105,6 +106,7 @@ export function BannerSection() {
 
   return (
     <section
+      id={HOME_HERO_BANNER_ID}
       className={cn(
         "relative isolate -mt-[var(--site-header-banner-overlap)] min-h-[min(100svh,700px)] w-full overflow-hidden transition-colors duration-500",
         theme === "dark" ? "bg-[#07110e]" : "bg-[#dfe8e3]",

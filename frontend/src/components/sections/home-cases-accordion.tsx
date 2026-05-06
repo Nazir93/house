@@ -100,7 +100,7 @@ function CaseRow({
             </div>
             <div
               className={cn(
-                "relative mx-auto w-full max-w-full overflow-hidden bg-[var(--bg-secondary)] md:mx-0",
+                "relative mx-auto w-full max-w-full overflow-hidden rounded-[22px] border border-[var(--border)] bg-[var(--bg-secondary)] shadow-[0_12px_40px_rgba(15,61,46,0.06)] md:mx-0",
                 "aspect-[16/10] md:aspect-[16/9]",
               )}
             >

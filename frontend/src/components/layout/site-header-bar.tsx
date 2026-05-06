@@ -248,11 +248,11 @@ export function SiteHeaderBar() {
         >
           <BrandLogo height={38} className="min-w-0" brightOnBackdrop={heroGlassLightInk} />
         </Link>
-        <div className="flex shrink-0 items-center gap-1">
+        <div className="flex min-w-0 shrink-0 items-center justify-end gap-1 sm:gap-1.5">
           <button
             type="button"
             onClick={toggleSearch}
-            className="flex h-8 w-8 items-center justify-center rounded-full border transition active:scale-[0.98]"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98]"
             style={{
               borderColor: "var(--header-bar-border)",
               color: "var(--header-bar-text)",
@@ -263,22 +263,9 @@ export function SiteHeaderBar() {
             <Search className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
           </button>
           <ThemeToggle />
-          <button
-            type="button"
-            onClick={() => window.dispatchEvent(new Event("open-mobile-menu"))}
-            className="flex h-8 w-8 flex-col items-center justify-center gap-[3px]"
-            aria-label="Открыть меню"
-          >
-            <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
-            <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
-            <span
-              className="block h-[2px] w-3.5 self-start ml-[3px]"
-              style={{ backgroundColor: "var(--header-bar-text)" }}
-            />
-          </button>
           <Link
             href={ACCOUNT_PORTAL_PATH}
-            className="-mr-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98]"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98]"
             style={{
               borderColor: "var(--header-bar-border)",
               color: "var(--header-bar-text)",
@@ -287,6 +274,16 @@ export function SiteHeaderBar() {
           >
             <UserRound className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
           </Link>
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new Event("open-mobile-menu"))}
+            className="flex h-8 w-8 shrink-0 flex-col items-center justify-center gap-[3px] pl-0.5 sm:pl-1"
+            aria-label="Открыть меню"
+          >
+            <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
+            <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
+            <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
+          </button>
         </div>
       </div>
           </div>

@@ -6,6 +6,7 @@ import { FooterBlueprintBackdrop } from "@/components/layout/footer-blueprint-ba
 import { SITE_NAME } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
+import { VkIcon } from "@/components/icons/vk-icon";
 
 const FOOTER_COLUMNS: { title: string; links: { href: string; label: string }[] }[] = [
   {
@@ -119,6 +120,17 @@ export function Footer() {
                 aria-label="Telegram"
               >
                 <Send size={17} strokeWidth={2} />
+              </a>
+            ) : null}
+            {contact.social.vk ? (
+              <a
+                href={contact.social.vk}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-black/25 text-white shadow-[0_2px_12px_rgba(0,0,0,0.25)] ring-1 ring-white/15 transition hover:bg-black/35 hover:ring-white/25"
+                aria-label="ВКонтакте"
+              >
+                <VkIcon className="h-[17px] w-[17px]" />
               </a>
             ) : null}
             {contact.social.max ? (

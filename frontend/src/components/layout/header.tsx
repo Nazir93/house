@@ -7,6 +7,7 @@ import { SiteHeaderBar } from "./site-header-bar";
 import { SITE_NAME } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
+import { VkIcon } from "@/components/icons/vk-icon";
 import { NAV_SECTIONS, isNavGroup, type NavSection } from "@/lib/nav-sections";
 import { useModal } from "@/lib/modal-context";
 
@@ -527,6 +528,19 @@ export function Header() {
                       className="shrink-0 text-[var(--text-muted)] transition-colors duration-300 group-hover:text-[var(--accent)]"
                       aria-hidden
                     />
+                  </a>
+                )}
+                {contact.social.vk && (
+                  <a
+                    href={contact.social.vk}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-300 hover:scale-110 hover:border-[var(--accent)]"
+                    style={{ borderColor: "var(--border)" }}
+                    aria-label="ВКонтакте"
+                    title="ВКонтакте"
+                  >
+                    <VkIcon className="h-4 w-4 text-[var(--text-muted)] opacity-[0.92] transition-colors duration-300 group-hover:text-[var(--accent)] group-hover:opacity-100" aria-hidden />
                   </a>
                 )}
                 {contact.social.max && (
