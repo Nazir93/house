@@ -21,9 +21,22 @@ function resolveSecureCookie(req: NextRequest): boolean {
   return (process.env.NEXTAUTH_URL ?? "").startsWith("https://");
 }
 
+/**
+ * Секрет для middleware: читаем через Reflect/get по строкам ключей — так надёжнее для runtime
+ * (PM2 / `.env` при `next start`), чем статический `process.env.NEXTAUTH_SECRET` в некоторых сборках.
+ */
+function getEdgeAuthSecret(): string | undefined {
+  const env = process.env;
+  for (const key of ["NEXTAUTH_SECRET", "AUTH_SECRET"] as const) {
+    const v = Reflect.get(env, key);
+    if (typeof v === "string" && v.trim()) return v.trim();
+  }
+  return undefined;
+}
+
 /** Сначала по ожидаемому флагу secure, затем с противоположным — смесь nginx / NEXTAUTH_URL не теряет сессию. */
 async function getJwt(req: NextRequest) {
-  const secret = process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET;
+  const secret = getEdgeAuthSecret();
   const primary = resolveSecureCookie(req);
   let token = await getToken({ req, secret, secureCookie: primary });
   if (!token) {
