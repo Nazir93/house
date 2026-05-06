@@ -77,6 +77,48 @@ pm2 save
 - Сайт открывается, `/projects/aurora` — блок «Комплектация».
 - Логи: `pm2 logs house-next --lines 80`
 
+## Админка `/admin`: редирект на чужой сайт, «дом» или сразу на главную
+
+NextAuth строит CSRF и cookie от **`NEXTAUTH_URL`**. Если в `.env` указан **другой хост** (старый домен, `http://127.0.0.1:3000`, а в браузере открываете **публичный HTTPS**), после ввода логина браузер уезжает не туда или сессия не записывается.
+
+### Что сделать на сервере
+
+1. Откройте **`frontend/.env`** на VPS (тот же каталог, откуда PM2 запускает `next start`).
+
+2. Выставьте **одинаковый публичный адрес** — ровно как в адресной строке при заходе в админку (схема `http`/`https`, **без** лишнего слэша в конце):
+
+   - Сайт открываете как **`https://ваш-домен.ru`** →  
+     `NEXTAUTH_URL=https://ваш-домен.ru`  
+     `NEXT_PUBLIC_SITE_URL=https://ваш-домен.ru`
+
+   - Заходите по IP и порту **`http://123.45.67.89:3000`** →  
+     `NEXTAUTH_URL=http://123.45.67.89:3000`  
+     `NEXT_PUBLIC_SITE_URL=http://123.45.67.89:3000`
+
+3. За **nginx** (HTTPS на 443, Node на :3000) добавьте в `location` прокси:
+
+   ```nginx
+   proxy_set_header Host $host;
+   proxy_set_header X-Forwarded-Proto $scheme;
+   proxy_set_header X-Forwarded-Host $host;
+   ```
+
+   И в **`frontend/.env`**: `AUTH_TRUST_HOST=true` — чтобы NextAuth доверял этим заголовкам.
+
+4. Перезапуск с подхватом env:
+
+   ```bash
+   cd /var/www/house/frontend   # или ваш PROJECT_ROOT/frontend
+   npm run env:check
+   pm2 restart house-next --update-env && pm2 save
+   ```
+
+5. Вход на **`/admin/login`**: email = **`ADMIN_EMAIL`** из `.env` (если не задали — в коде подставляется пример **`admin@dom.ru`**, это **не** адрес сайта, а просто логин), пароль = **`ADMIN_SECRET`**.
+
+6. Если после «Войти» страница **только обновляется** (сессия не держится): за HTTPS nginx обязательно **`X-Forwarded-Proto`** (см. выше). В коде middleware читает этот заголовок, чтобы искать тот же session-cookie, что выдал NextAuth за TLS.
+
+Полный список переменных и смысл каждой — **`frontend/.env.example`** и **`DEPLOY-SERVER.md`**.
+
 ## Ваши уточнения (этот VPS)
 
 Сервер: `7767362-mb967823` (из приглашения shell — при смене хоста обновите).

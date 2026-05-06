@@ -1,6 +1,18 @@
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
+/**
+ * Имя session-cookie в NextAuth зависит от secure: для HTTPS это `__Secure-next-auth.*`.
+ * Выдача сессии берёт origin из запроса (за nginx с TLS это https), а getToken по умолчанию
+ * смотрит только на NEXTAUTH_URL — при http:// в env ищется не тот cookie → вход «обновляет» страницу.
+ */
+function resolveSecureCookie(req: NextRequest): boolean {
+  const forwarded = req.headers.get("x-forwarded-proto");
+  if (forwarded === "https") return true;
+  if (forwarded === "http") return false;
+  return (process.env.NEXTAUTH_URL ?? "").startsWith("https://");
+}
+
 export async function middleware(request: NextRequest) {
   // Редирект HTTP→HTTPS из Node по умолчанию ВЫКЛЮЧЕН: у многих VPS на :3000 всё равно пробрасывают
   // X-Forwarded-* → получался битый Location (например https://0.0.0.0:3000/). На проде редирект на HTTPS
@@ -73,14 +85,10 @@ export async function middleware(request: NextRequest) {
   if (skipToken) return NextResponse.next();
   if (isApiAuth) return NextResponse.next();
 
-  /**
-   * Не задаём secureCookie явно: getToken сам берёт признак из NEXTAUTH_URL.startsWith('https://')
-   * (как и выдача cookie в NextAuth). Если передать только x-forwarded-proto, без заголовка
-   * от nginx приложение будет искать не то имя cookie — вход «не открывает» админку.
-   */
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
+    secureCookie: resolveSecureCookie(request),
   });
 
   const role = token?.role as string | undefined;

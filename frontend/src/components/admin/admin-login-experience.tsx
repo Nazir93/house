@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Suspense, useCallback, useState } from "react";
+import { Suspense, useCallback, useState, useSyncExternalStore } from "react";
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import {
@@ -16,6 +16,21 @@ import { ShowcaseCarouselNav } from "@/components/ui/showcase-carousel-nav";
 import { cn } from "@/lib/utils";
 
 type AuthTab = "email" | "login";
+
+/** Карусель на мобильных ниже формы — без priority, иначе preload «не использован» в консоли Chrome. */
+function useMinWidthLg() {
+  return useSyncExternalStore(
+    (onChange) => {
+      if (typeof window === "undefined") return () => {};
+      const mq = window.matchMedia("(min-width: 1024px)");
+      mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange);
+    },
+    () =>
+      typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches,
+    () => false
+  );
+}
 
 const ADMIN_SLIDES = [
   {
@@ -199,6 +214,7 @@ function AdminLoginForm() {
 
 function AdminShowcaseCarousel() {
   const [i, setI] = useState(0);
+  const isLg = useMinWidthLg();
   const n = ADMIN_SLIDES.length;
 
   const go = useCallback(
@@ -218,7 +234,7 @@ function AdminShowcaseCarousel() {
           src={slide.image}
           alt=""
           fill
-          priority={i === 0}
+          priority={isLg && i === 0}
           className="object-cover object-center transition-opacity duration-500"
           sizes="(max-width: 1024px) 100vw, 55vw"
         />

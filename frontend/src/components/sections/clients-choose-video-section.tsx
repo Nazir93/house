@@ -1,12 +1,13 @@
 ﻿"use client";
 
-import type { Ref } from "react";
+import type { CSSProperties, Ref } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
+/** Высота скролл-трека только от lg (кинозал); на мобильных секция по высоте контента. */
 const SCROLL_VH_PER_ITEM = 100;
 const SERVICES_VIDEO_SRC = "/videos/14654251600401.mp4";
 
@@ -146,8 +147,13 @@ export function ClientsChooseVideoSection() {
     if (!el) return;
     let raf = 0;
     let active = false;
+    const mq =
+      typeof window !== "undefined" && typeof window.matchMedia === "function"
+        ? window.matchMedia("(min-width: 1024px)")
+        : null;
+
     const tick = () => {
-      if (!active) return;
+      if (!active || !mq?.matches) return;
       syncScrollToServices();
       raf = requestAnimationFrame(tick);
     };
@@ -158,7 +164,7 @@ export function ClientsChooseVideoSection() {
         if (next && !active) {
           active = true;
           syncScrollToServices();
-          raf = requestAnimationFrame(tick);
+          if (mq?.matches) raf = requestAnimationFrame(tick);
         } else if (!next && active) {
           active = false;
           cancelAnimationFrame(raf);
@@ -169,7 +175,18 @@ export function ClientsChooseVideoSection() {
     );
     io.observe(el);
 
+    const onMq = () => {
+      if (!mq?.matches && raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      } else if (mq?.matches && active && !raf) {
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    mq?.addEventListener("change", onMq);
+
     return () => {
+      mq?.removeEventListener("change", onMq);
       io.disconnect();
       cancelAnimationFrame(raf);
     };
@@ -191,19 +208,30 @@ export function ClientsChooseVideoSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative border-t border-[var(--border)]"
-      style={{ height: `${SERVICES.length * SCROLL_VH_PER_ITEM}vh`, backgroundColor: "var(--bg)" }}
+      className={cn(
+        "relative touch-pan-y scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)]",
+        "max-lg:h-auto lg:h-[var(--clients-choose-track-height)]"
+      )}
+      style={
+        {
+          "--clients-choose-track-height": `${SERVICES.length * SCROLL_VH_PER_ITEM}vh`,
+          backgroundColor: "var(--bg)",
+        } as CSSProperties
+      }
       aria-labelledby="clients-choose-video-heading"
     >
+      {/*
+        До lg: высота по контенту (без 500vh), иначе огромная пустота и ощущение «скролл не едет».
+        Без sticky и без overflow-y-auto — только скролл документа.
+        От lg: sticky-кинозал и длинный скролл-трек для синхра видео.
+      */}
       <div
         className={cn(
-          "sticky z-0 overflow-y-auto overscroll-y-contain lg:overflow-hidden",
-          /* Под фиксированную шапку — иначе видео наезжает под header на мобилке */
-          "max-lg:top-[var(--site-header-sticky-offset)] max-lg:h-[calc(100dvh-var(--site-header-sticky-offset)-env(safe-area-inset-bottom,0px))]",
-          "lg:top-0 lg:h-[100dvh]",
+          "z-0 max-lg:relative max-lg:top-auto max-lg:h-auto max-lg:overflow-visible",
+          "lg:sticky lg:top-0 lg:h-[100dvh] lg:overflow-hidden",
         )}
       >
-        <div className="mx-auto flex min-h-full w-full max-w-[1380px] flex-col lg:h-full lg:flex-row lg:items-center lg:justify-between lg:gap-10 lg:px-12">
+        <div className="mx-auto flex w-full max-w-[1380px] flex-col lg:h-full lg:min-h-full lg:flex-row lg:items-center lg:justify-between lg:gap-10 lg:px-12">
           <div className="order-2 flex min-w-0 flex-1 flex-col justify-start px-4 pb-10 pt-1 max-md:mt-12 sm:px-6 lg:order-1 lg:max-w-[560px] lg:justify-center lg:px-0 lg:pb-0 lg:pt-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)] md:text-xs">
               Что мы делаем
