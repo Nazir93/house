@@ -6,11 +6,30 @@ import { NextRequest, NextResponse } from "next/server";
  * Выдача сессии берёт origin из запроса (за nginx с TLS это https), а getToken по умолчанию
  * смотрит только на NEXTAUTH_URL — при http:// в env ищется не тот cookie → вход «обновляет» страницу.
  */
+function forwardedProtoHttps(req: NextRequest): boolean | null {
+  const raw = req.headers.get("x-forwarded-proto");
+  if (!raw) return null;
+  const first = raw.split(",")[0]?.trim().toLowerCase();
+  if (first === "https") return true;
+  if (first === "http") return false;
+  return null;
+}
+
 function resolveSecureCookie(req: NextRequest): boolean {
-  const forwarded = req.headers.get("x-forwarded-proto");
-  if (forwarded === "https") return true;
-  if (forwarded === "http") return false;
+  const fromFwd = forwardedProtoHttps(req);
+  if (fromFwd !== null) return fromFwd;
   return (process.env.NEXTAUTH_URL ?? "").startsWith("https://");
+}
+
+/** Сначала по ожидаемому флагу secure, затем с противоположным — смесь nginx / NEXTAUTH_URL не теряет сессию. */
+async function getJwt(req: NextRequest) {
+  const secret = process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET;
+  const primary = resolveSecureCookie(req);
+  let token = await getToken({ req, secret, secureCookie: primary });
+  if (!token) {
+    token = await getToken({ req, secret, secureCookie: !primary });
+  }
+  return token;
 }
 
 export async function middleware(request: NextRequest) {
@@ -85,11 +104,7 @@ export async function middleware(request: NextRequest) {
   if (skipToken) return NextResponse.next();
   if (isApiAuth) return NextResponse.next();
 
-  const token = await getToken({
-    req: request,
-    secret: process.env.NEXTAUTH_SECRET ?? process.env.AUTH_SECRET,
-    secureCookie: resolveSecureCookie(request),
-  });
+  const token = await getJwt(request);
 
   const role = token?.role as string | undefined;
 

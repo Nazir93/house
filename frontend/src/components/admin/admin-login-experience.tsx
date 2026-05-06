@@ -78,15 +78,22 @@ function AdminLoginForm() {
     setError("");
     setLoading(true);
 
-    const result = await signIn("admin", {
-      email: email.trim(),
-      password,
-      redirect: false,
-      callbackUrl,
-    });
+    let result: Awaited<ReturnType<typeof signIn>>;
+    try {
+      result = await signIn("admin", {
+        email: email.trim(),
+        password,
+        redirect: false,
+        callbackUrl,
+      });
+    } catch {
+      setError("Ошибка сети или сервера. Попробуйте ещё раз.");
+      setLoading(false);
+      return;
+    }
 
     if (result?.error) {
-      setError("Неверный email или пароль");
+      setError("Неверный email или пароль (проверьте совпадение с ADMIN_EMAIL и ADMIN_SECRET на сервере).");
       setLoading(false);
       return;
     }
@@ -111,7 +118,7 @@ function AdminLoginForm() {
     }
 
     setError(
-      "Вход заблокирован (CSRF / настройки хоста). На сервере выставьте NEXTAUTH_URL и NEXT_PUBLIC_SITE_URL на этот же адрес, что в браузере — без чужих доменов.",
+      "Вход не завершён (CSRF или несовпадение cookie с HTTPS). На сервере: NEXTAUTH_URL и NEXT_PUBLIC_SITE_URL как в адресной строке; за nginx — X-Forwarded-Proto и AUTH_TRUST_HOST=true; после правок — git pull, npm run build, pm2 reload.",
     );
     setLoading(false);
   }
