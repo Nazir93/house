@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { unlink } from "fs/promises";
 import path from "path";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 async function tryDeleteFile(url: string) {
   if (!url || !url.startsWith("/uploads/")) return;
@@ -15,6 +16,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const body = await request.json();
     const image = await prisma.projectImage.create({
@@ -36,6 +40,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   const imageId = request.nextUrl.searchParams.get("imageId");
   if (!imageId) return NextResponse.json({ error: "imageId required" }, { status: 400 });
 

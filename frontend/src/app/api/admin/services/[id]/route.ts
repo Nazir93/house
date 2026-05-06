@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { mergeServiceTitleIntoLandingJson } from "@/lib/merge-service-title-into-landing";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const service = await prisma.service.findUnique({ where: { id: params.id } });
     if (!service) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -21,6 +25,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const body = await request.json();
     let landingJsonOut: unknown = body.landingJson;
@@ -61,6 +68,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     await prisma.service.delete({ where: { id: params.id } });
     return NextResponse.json({ success: true });

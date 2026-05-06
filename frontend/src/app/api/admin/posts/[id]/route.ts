@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 function normalizeVideoList(arr: unknown, single: unknown): string[] {
   const out: string[] = [];
@@ -20,6 +21,9 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const post = await prisma.post.findUnique({ where: { id: params.id } });
     if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -34,6 +38,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const body = await request.json();
     const { title, slug, excerpt, content, category, coverImage, published } = body;
@@ -74,6 +81,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     await prisma.post.delete({ where: { id: params.id } });
     return NextResponse.json({ success: true });

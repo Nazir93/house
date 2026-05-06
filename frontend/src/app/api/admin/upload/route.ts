@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import sharp from "sharp";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "webp", "gif", "avif", "svg"]);
 const DOCUMENT_EXT = new Set(["pdf", "xlsx", "xls", "doc", "docx", "txt", "csv", "zip", "rar"]);
@@ -101,6 +102,9 @@ export const maxDuration = 300;
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;

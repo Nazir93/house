@@ -1,10 +1,14 @@
 import type { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   const path = request.nextUrl.searchParams.get("path");
 
   try {
@@ -22,6 +26,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const body = await request.json();
     const { path, title, description, keywords, ogTitle, ogDescription, ogImage, h1, bodyHtml, noindex } = body;

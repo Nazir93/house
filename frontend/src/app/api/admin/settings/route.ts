@@ -2,10 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY } from "@/lib/house-construction-calculator-config";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const settings = await prisma.siteSettings.findMany();
     const map: Record<string, string> = {};
@@ -20,6 +24,9 @@ export async function GET() {
 }
 
 export async function PUT(request: NextRequest) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const body: Record<string, string> = await request.json();
 

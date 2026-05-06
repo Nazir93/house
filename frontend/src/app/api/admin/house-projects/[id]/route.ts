@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 function numberOrNull(value: unknown) {
   if (value == null || value === "") return null;
@@ -29,6 +30,9 @@ function jsonOrNull(value: unknown) {
 }
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const project = await (prisma as any).houseProject.findUnique({
       where: { id: params.id },
@@ -46,6 +50,9 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
 }
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const body = await request.json();
     const mediaPatch =
@@ -110,6 +117,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     await (prisma as any).houseProject.delete({ where: { id: params.id } });
     return NextResponse.json({ success: true });

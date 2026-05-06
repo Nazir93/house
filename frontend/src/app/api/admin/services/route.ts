@@ -4,8 +4,12 @@ import { prisma } from "@/lib/db";
 import { ensureDefaultServicePageMetaIfNeeded } from "@/lib/seed-default-page-meta";
 import { ensureDefaultServicesIfNeeded } from "@/lib/seed-default-services";
 import { generateSlug } from "@/lib/utils";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export async function GET() {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     await ensureDefaultServicesIfNeeded();
     await ensureDefaultServicePageMetaIfNeeded();
@@ -20,6 +24,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const body = await request.json();
     const {

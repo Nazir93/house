@@ -4,6 +4,7 @@ import { readProjectVideoUrlsArray } from "@/lib/portfolio-data";
 import { prisma } from "@/lib/db";
 import { unlink } from "fs/promises";
 import path from "path";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 async function tryDeleteFile(url: string | null | undefined) {
   if (!url || !url.startsWith("/uploads/")) return;
@@ -17,6 +18,9 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const project = await prisma.project.findUnique({
       where: { id: params.id },
@@ -37,6 +41,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const body = await request.json();
     const videoPatch =
@@ -87,6 +94,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const project = await prisma.project.findUnique({
       where: { id: params.id },

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 function n(value: unknown) {
   const parsed = Number(value);
@@ -12,6 +13,9 @@ function mediaCreate(urls: unknown, type: "RENDER" | "PLAN" | "BUILD_STAGE" | "V
 }
 
 export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const object = await (prisma as any).builtObject.findUnique({
       where: { id: params.id },
@@ -26,6 +30,9 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
 }
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const body = await request.json();
     const hasMedia = body.renders !== undefined || body.plans !== undefined || body.stages !== undefined || body.videos !== undefined;
@@ -72,6 +79,9 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 }
 
 export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     await (prisma as any).builtObject.delete({ where: { id: params.id } });
     return NextResponse.json({ success: true });

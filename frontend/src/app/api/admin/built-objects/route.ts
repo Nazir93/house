@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { generateSlug } from "@/lib/utils";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +16,9 @@ function mediaCreate(urls: unknown, type: "RENDER" | "PLAN" | "BUILD_STAGE" | "V
 }
 
 export async function GET(request: NextRequest) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   const search = request.nextUrl.searchParams.get("search")?.trim();
   try {
     const objects = await (prisma as any).builtObject.findMany({
@@ -30,6 +34,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const body = await request.json();
     const object = await (prisma as any).builtObject.create({

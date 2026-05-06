@@ -104,51 +104,29 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  const isAdminRoute = pathname.startsWith("/admin");
-  const isAdminLoginPage = pathname === "/admin/login";
+  /**
+   * HTML-страницы /admin не проверяем через getToken в Edge (часто ломается расшифровка JWT).
+   * Доступ контролирует серверный app/admin/layout.tsx через getServerSession (Node).
+   */
+  if (pathname.startsWith("/admin")) {
+    const h = new Headers(request.headers);
+    h.set("x-url-pathname", pathname);
+    return NextResponse.next({ request: { headers: h } });
+  }
+
   const isApiAuth = pathname.startsWith("/api/auth");
-  const isAdminApi = pathname.startsWith("/api/admin");
   const isAccountRoute = pathname.startsWith("/account");
   const isAccountLoginPage = pathname === "/account/login";
   const isClientApi = pathname.startsWith("/api/client");
 
-  const skipToken =
-    !isAdminRoute && !isAdminApi && !isAccountRoute && !isClientApi;
+  /** /api/admin — авторизация в самих route handlers (Node + getServerSession), см. require-admin-api.ts */
+  const skipToken = !isAccountRoute && !isClientApi;
   if (skipToken) return NextResponse.next();
   if (isApiAuth) return NextResponse.next();
 
   const token = await getJwt(request);
 
   const role = token?.role as string | undefined;
-
-  if (isAdminRoute && !isAdminLoginPage) {
-    if (role === "client") {
-      return NextResponse.redirect(new URL("/account/dashboard", request.url));
-    }
-    if (!token || role !== "admin") {
-      const loginUrl = new URL("/admin/login", request.url);
-      loginUrl.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-    return NextResponse.next();
-  }
-
-  if (isAdminLoginPage) {
-    if (token && role === "admin") {
-      return NextResponse.redirect(new URL("/admin", request.url));
-    }
-    if (token && role === "client") {
-      return NextResponse.redirect(new URL("/account/dashboard", request.url));
-    }
-    return NextResponse.next();
-  }
-
-  if (isAdminApi) {
-    if (!token || role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    return NextResponse.next();
-  }
 
   if (isAccountLoginPage) {
     if (token && role === "client") {

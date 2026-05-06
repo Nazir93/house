@@ -117,7 +117,7 @@ NextAuth строит CSRF и cookie от **`NEXTAUTH_URL`**. Если в `.env`
 
 6. Если после «Войти» страница **только обновляется** (сессия не держится): за HTTPS nginx обязательно **`X-Forwarded-Proto`** (см. выше). В коде middleware читает этот заголовок, чтобы искать тот же session-cookie, что выдал NextAuth за TLS.
 
-7. На проде **`NEXTAUTH_SECRET`** должен быть в **`frontend/.env`** или в **окружении PM2** (`pm2 restart … --update-env`). После `git pull` выполняйте **`npm run build`** в каталоге `frontend` и перезапускайте процесс. Middleware читает секрет так, чтобы он подхватывался при **`next start`** вместе с переменными процесса.
+7. На проде **`NEXTAUTH_SECRET`**, **`ADMIN_*`**, **`NEXTAUTH_URL`** — в **`frontend/.env`** и/или **PM2** (`pm2 restart … --update-env`). После `git pull` — **`npm run build`** и перезапуск. HTML-страницы `/admin` и API `/api/admin` проверяют сессию в **Node** (`getServerSession` / `requireAdminApiSession`), а не в Edge middleware — так стабильнее на VPS.
 
 Полный список переменных и смысл каждой — **`frontend/.env.example`** и **`DEPLOY-SERVER.md`**.
 

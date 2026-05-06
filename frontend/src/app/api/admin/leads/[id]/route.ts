@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const lead = await prisma.lead.findUnique({ where: { id: params.id } });
     if (!lead) {
@@ -21,6 +25,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const body = await request.json();
     const { status, notes } = body;
@@ -45,6 +52,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     await prisma.lead.delete({ where: { id: params.id } });
     return NextResponse.json({ success: true });

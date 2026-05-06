@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const redirects = await prisma.redirect.findMany({ orderBy: { createdAt: "desc" } });
     return NextResponse.json(redirects);
@@ -20,6 +24,9 @@ function isRelativePath(p: string): boolean {
 }
 
 export async function POST(request: NextRequest) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const { fromPath, toPath, permanent } = await request.json();
     if (!fromPath || !toPath) {

@@ -3,6 +3,7 @@ import type { ClientPaymentStatus, ClientStageStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { paymentAmountKopeksFromAdminPayload } from "@/lib/client-payment-amount";
 import { hashPassword } from "@/lib/password";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,9 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   const { id } = await params;
   try {
     const project = await prisma.clientConstructionProject.findUnique({
@@ -47,6 +51,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   const { id } = await params;
   try {
     const body = await request.json();
@@ -173,6 +180,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   const { id } = await params;
   try {
     await prisma.clientConstructionProject.delete({ where: { id } });

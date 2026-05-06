@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { generateSlug } from "@/lib/utils";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,9 @@ function jsonOrNull(value: unknown) {
 }
 
 export async function GET(request: NextRequest) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   const search = request.nextUrl.searchParams.get("search")?.trim();
 
   try {
@@ -45,6 +49,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const body = await request.json();
     const slug = body.slug?.trim() || generateSlug(body.title || "project");

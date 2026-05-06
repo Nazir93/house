@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { generateSlug } from "@/lib/utils";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 function normalizeVideoList(arr: unknown, single: unknown): string[] {
   const out: string[] = [];
@@ -18,6 +19,9 @@ function normalizeVideoList(arr: unknown, single: unknown): string[] {
 }
 
 export async function GET(request: NextRequest) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   const { searchParams } = request.nextUrl;
   const search = searchParams.get("search");
   const published = searchParams.get("published");
@@ -45,6 +49,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   try {
     const body = await request.json();
     const { title, excerpt, content, category, coverImage, published } = body;

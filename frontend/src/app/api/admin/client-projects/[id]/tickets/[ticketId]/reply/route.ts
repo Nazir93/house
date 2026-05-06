@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { ClientSupportTicketStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,9 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; ticketId: string }> }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   const { id: projectId, ticketId } = await params;
   try {
     const body = await request.json();

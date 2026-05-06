@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export async function GET(request: NextRequest) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   const { searchParams } = request.nextUrl;
   const status = searchParams.get("status");
   const sourceParam = searchParams.get("source");

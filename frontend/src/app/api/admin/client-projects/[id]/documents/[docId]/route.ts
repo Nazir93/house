@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
 
@@ -7,6 +8,9 @@ export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string; docId: string }> }
 ) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
   const { id: projectId, docId } = await params;
   try {
     const doc = await prisma.clientDocument.findFirst({
