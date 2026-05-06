@@ -3,9 +3,21 @@
  * Локально и на сервере: из каталога frontend выполните npm run env:check
  * (подхватит .env и .env.local). На VPS при переменных только в PM2: export … затем node scripts/…
  */
+const fs = require("fs");
+const path = require("path");
 const { loadEnvFiles } = require("./load-env-files.cjs");
 
 loadEnvFiles();
+
+const envFile = path.join(__dirname, "..", ".env");
+const envLocalFile = path.join(__dirname, "..", ".env.local");
+if (!fs.existsSync(envFile) && !fs.existsSync(envLocalFile)) {
+  console.warn("");
+  console.warn(`  ⚠ Нет ни .env, ни .env.local в ${path.join(__dirname, "..")}`);
+  console.warn("    На сервере: cd …/frontend && cp .env.example .env && nano .env");
+  console.warn("    Файл должен лежать в папке frontend (рядом с package.json), не в корне репозитория.");
+  console.warn("");
+}
 
 const required = [
   "DATABASE_URL",

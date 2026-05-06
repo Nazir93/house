@@ -31,6 +31,14 @@ sudo find /root /home /var/www /opt -type f -path "*/frontend/ecosystem.config.c
 PROJECT_ROOT=/РЕАЛЬНЫЙ/ПУТЬ/К/КОРНЮ РЕПО   # где есть папка frontend и .git
 ```
 
+## Файл `.env` (админка и NextAuth)
+
+- Имя файла: **`.env`** (не `.env.txt`, не только `.env.example`).
+- Путь: **`$PROJECT_ROOT/frontend/.env`** — рядом с `package.json` и `ecosystem.config.cjs`.
+- Шаблон: скопировать **`frontend/.env.example`** → **`.env`** и подставить свои значения.
+- **`ecosystem.config.cjs`** при старте PM2 **читает этот `.env`** и передаёт переменные процессу — если файла нет или он в корне репо без копии в `frontend/`, сессии не заведутся.
+- После первого создания `.env` или смены секретов: из **`frontend`** выполните `npm run env:check`, затем перезапуск PM2 (см. ниже).
+
 ## Типовой сценарий (после `git push` в `main`)
 
 Подставьте **свой** `PROJECT_ROOT` и при необходимости имя процесса PM2.
@@ -59,8 +67,10 @@ npm run build
 # при странностях с Prisma: npm run build:with-prisma
 
 # 5. PM2
-pm2 reload house-next
+pm2 reload house-next --update-env
 pm2 save
+# Если впервые положили frontend/.env или меняли ecosystem.config.cjs и переменные не подхватились:
+# cd "$PROJECT_ROOT/frontend" && pm2 delete house-next && pm2 start ecosystem.config.cjs && pm2 save
 ```
 
 ## Первый запуск PM2 (если процесса ещё нет)
