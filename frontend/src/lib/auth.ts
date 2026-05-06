@@ -24,7 +24,10 @@ export const authOptions: NextAuthOptions = {
         const inputEmail = credentials?.email?.trim() ?? "";
         const inputPassword = credentials?.password ?? "";
 
-        if (inputEmail === adminEmail && inputPassword === adminSecret) {
+        if (
+          inputEmail.toLowerCase() === adminEmail.toLowerCase() &&
+          inputPassword === adminSecret
+        ) {
           return {
             id: "admin",
             email: adminEmail,
@@ -69,6 +72,11 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/admin/login",
   },
+  /**
+   * Иначе при `NEXTAUTH_URL=http://…` NextAuth по запросу HTTPS всё равно мог ставить
+   * `__Secure-next-auth.session-token`, а middleware ожидал другое имя — после «Войти» редирект обратно на логин.
+   */
+  useSecureCookies: (process.env.NEXTAUTH_URL ?? "").trim().startsWith("https://"),
   session: {
     strategy: "jwt",
     maxAge: 7 * 24 * 60 * 60,
