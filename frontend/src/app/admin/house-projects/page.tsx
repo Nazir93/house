@@ -63,7 +63,7 @@ export default function AdminHouseProjectsPage() {
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Типовые проекты домов</h1>
-          <p className="text-sm text-white/40 mt-1">Каталог, фильтры, карточки проектов и сравнение.</p>
+          <p className="text-sm text-white/40 mt-1">Каталог, фильтры и карточки проектов.</p>
         </div>
         <Link href="/admin/house-projects/new" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0F3D2E] hover:bg-[#143f32] text-white text-sm font-semibold transition-colors">
           <Plus size={16} /> Добавить

@@ -25,13 +25,16 @@ import {
   resolveProjectHeroPricing,
   type HouseProjectItem,
 } from "@/lib/construction-data";
-import { CompareButton } from "@/components/construction/compare-button";
 import { HouseProjectCompletionSection } from "@/components/construction/house-project-completion-section";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { SITE_URL } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { useModal } from "@/lib/modal-context";
-import { inferPartOfSoulFloors, partOfSoulRoofOptions, type PartOfSoulRoofPitch } from "@/lib/part-of-soul-pricing";
+import {
+  inferPartOfSoulFloors,
+  resolveProjectRoofPitch,
+  type PartOfSoulRoofPitch,
+} from "@/lib/part-of-soul-pricing";
 
 export function HouseProjectDetailContent({
   project,
@@ -50,17 +53,11 @@ export function HouseProjectDetailContent({
     () => inferPartOfSoulFloors(project.floors, posCfg?.pricingFloors),
     [project.floors, posCfg?.pricingFloors]
   );
-  const roofChoices = useMemo(
-    () => (posCfg?.enabled ? partOfSoulRoofOptions(pricingFloors) : []),
-    [posCfg?.enabled, pricingFloors]
-  );
-  const [roofPitch, setRoofPitch] = useState<PartOfSoulRoofPitch>("dual");
-
-  useEffect(() => {
-    if (!posCfg?.enabled || roofChoices.length === 0) return;
-    const preferred = posCfg.defaultRoof && roofChoices.includes(posCfg.defaultRoof) ? posCfg.defaultRoof : roofChoices[0];
-    if (!roofChoices.includes(roofPitch)) setRoofPitch(preferred ?? "dual");
-  }, [posCfg?.defaultRoof, posCfg?.enabled, roofChoices, roofPitch]);
+  /** Кровля фиксируется данными проекта (calculatorJson.partOfSoul.defaultRoof), без переключателя на странице */
+  const roofPitch = useMemo<PartOfSoulRoofPitch>(() => {
+    if (!posCfg?.enabled) return "dual";
+    return resolveProjectRoofPitch(pricingFloors, posCfg.defaultRoof);
+  }, [posCfg?.defaultRoof, posCfg?.enabled, pricingFloors]);
 
   const heroResolved = useMemo(() => resolveProjectHeroPricing(project), [project]);
   const effectiveHeroTiers = useMemo(() => {
@@ -388,7 +385,6 @@ export function HouseProjectDetailContent({
               ) : null}
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-              <CompareButton projectId={project.id} className="w-full justify-center sm:w-auto sm:min-w-[10rem]" />
               <Link
                 href="/individual-design"
                 className="inline-flex w-full justify-center rounded-full border px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.12em] sm:w-auto"
@@ -507,14 +503,7 @@ export function HouseProjectDetailContent({
                 onTierIndexChange={setMaterialTierIndex}
                 coverImageUrl={renders[0]?.url}
                 partOfSoulContext={
-                  posCfg?.enabled
-                    ? {
-                        pricingFloors,
-                        roofPitch,
-                        roofChoices,
-                        setRoofPitch,
-                      }
-                    : undefined
+                  posCfg?.enabled ? { pricingFloors, roofPitch } : undefined
                 }
               />
             </div>

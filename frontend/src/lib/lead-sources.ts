@@ -1,33 +1,66 @@
 /**
  * Источники заявок (поле Lead.source при POST /api/leads).
- * Используется в админке: фильтры, подписи, подменю.
+ * Список LEAD_SOURCE_OPTIONS — только актуальные формы на сайте (фильтры в админке).
+ * Устаревшие значения в БД подписываются в getLeadSourceLabel.
  */
+import {
+  CONSTRUCTION_SERVICES,
+  CONSTRUCTION_SERVICE_SLUGS,
+  type ConstructionServiceSlug,
+} from "@/lib/construction-service-data";
+
+function serviceLeadOptions(): { value: string; label: string; hint?: string }[] {
+  return CONSTRUCTION_SERVICE_SLUGS.flatMap((slug) => {
+    const title = CONSTRUCTION_SERVICES[slug].title;
+    return [
+      { value: `service-${slug}`, label: `Услуга: ${title}`, hint: `/services/${slug}` },
+      {
+        value: `service-consult-${slug}`,
+        label: `Консультация: ${title}`,
+        hint: `Блок консультации на /services/${slug}`,
+      },
+    ];
+  });
+}
+
 export const LEAD_SOURCE_OPTIONS: { value: string; label: string; hint?: string }[] = [
-  { value: "banner-hero", label: "Баннер: консультация", hint: "Главный экран, форма телефона" },
-  { value: "house-project", label: "Проект дома", hint: "Заявка из карточки типового проекта" },
-  { value: "individual-design", label: "Индивидуальное проектирование", hint: "/individual-design, расчет стоимости проекта" },
-  { value: "house-project-design", label: "Калькулятор проекта (карточка дома)", hint: "Блок справа от планировок на /projects/[slug]" },
-  { value: "mortgage", label: "Ипотека", hint: "/mortgage или ипотечный блок проекта" },
-  { value: "portfolio-tour", label: "Экскурсия по объекту", hint: "Портфолио построенных домов" },
-  { value: "compare", label: "Сравнение проектов", hint: "/projects/compare" },
-  { value: "service-projecting", label: "Услуга: проектирование" },
-  { value: "service-foundation", label: "Услуга: фундамент" },
-  { value: "service-roofing", label: "Услуга: кровля" },
-  { value: "service-engineering", label: "Услуга: инженерные сети" },
-  { value: "service-finishing", label: "Услуга: отделка" },
-  { value: "price-smeta", label: "Смета с калькулятора прайса (архив)", hint: "Легаси; страница /price удалена" },
-  { value: "calculator", label: "Ориентировочный расчёт", hint: "Модалка: калькулятор стоимости" },
-  { value: "offer-page", label: "Оффер (архив, редирект)", hint: "Раньше /offer; редирект на контакты" },
-  { value: "offer-pizza", label: "Оффер: бонус после таймера (архив)", hint: "Легаси-заявки" },
-  { value: "calculator-pizza", label: "Расчёт: пицца / комментарий", hint: "Бонус после ориентировочного расчёта" },
-  { value: "partner-partner", label: "Партнёры: подряд", hint: "/partners/partner" },
-  { value: "partner-supplier", label: "Партнёры: поставщик", hint: "/partners/supplier" },
+  { value: "calculator", label: "Ориентировочный расчёт", hint: "Модалка и страница калькулятора" },
+  { value: "individual-design", label: "Индивидуальное проектирование", hint: "/individual-design" },
+  { value: "house-project-design", label: "Проект (карточка дома)", hint: "Калькулятор на странице типового проекта" },
+  { value: "mortgage", label: "Ипотека", hint: "/mortgage и блок без привязки к проекту" },
+  { value: "house-project-mortgage", label: "Ипотека в карточке проекта", hint: "Страница /projects/[slug]" },
+  ...serviceLeadOptions(),
+  { value: "partner-partner", label: "Партнёрам: подряд", hint: "/partners/partner" },
+  { value: "partner-supplier", label: "Партнёрам: поставщик", hint: "/partners/supplier" },
+  { value: "about-leadership-feedback", label: "Связь с руководством", hint: "Раздел «О компании»" },
 ];
+
+const ARCHIVE_SOURCE_LABELS: Record<string, string> = {
+  "banner-hero": "Баннер: консультация (архив)",
+  "house-project": "Проект дома (архив)",
+  "portfolio-tour": "Экскурсия по объекту (архив)",
+  compare: "Сравнение проектов (архив)",
+  "price-smeta": "Смета с калькулятора прайса (архив)",
+  "offer-page": "Оффер (архив)",
+  "offer-pizza": "Оффер: бонус (архив)",
+  "calculator-pizza": "Расчёт: бонус / комментарий (архив)",
+};
 
 const LEGACY_SOURCE_LABELS: Record<string, string> = {
   "inspection-request": "Выезд инженера (старое)",
   "project-form": "Описание проекта (старое)",
 };
+
+function labelFromConstructionServiceSource(source: string): string | null {
+  const consult = /^service-consult-(.+)$/.exec(source);
+  const plain = /^service-(.+)$/.exec(source);
+  const slugRaw = consult?.[1] ?? plain?.[1];
+  if (!slugRaw) return null;
+  if (!(slugRaw in CONSTRUCTION_SERVICES)) return null;
+  const slug = slugRaw as ConstructionServiceSlug;
+  const title = CONSTRUCTION_SERVICES[slug].title;
+  return consult ? `Консультация: ${title}` : `Услуга: ${title}`;
+}
 
 export function getLeadSourceLabel(source: string | null | undefined): string {
   if (source == null || source === "") {
@@ -38,5 +71,11 @@ export function getLeadSourceLabel(source: string | null | undefined): string {
   }
   const found = LEAD_SOURCE_OPTIONS.find((o) => o.value === source);
   if (found) return found.label;
-  return LEGACY_SOURCE_LABELS[source] ?? source;
+  const fromService = labelFromConstructionServiceSource(source);
+  if (fromService) return fromService;
+  return (
+    ARCHIVE_SOURCE_LABELS[source] ??
+    LEGACY_SOURCE_LABELS[source] ??
+    source
+  );
 }

@@ -199,7 +199,7 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
         </Link>
         <div className="flex-1">
           <h1 className="text-2xl font-bold tracking-tight">{form.id ? "Проект дома" : "Новый проект дома"}</h1>
-          <p className="text-sm text-white/40 mt-1">Каталог типовых домов, фильтры, сравнение и карточка проекта.</p>
+          <p className="text-sm text-white/40 mt-1">Каталог типовых домов, фильтры и карточка проекта.</p>
         </div>
         <button
           onClick={save}
@@ -234,7 +234,7 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
         </div>
       </AdminFormSection>
 
-      <AdminFormSection title="Характеристики и цена" subtitle="Используются в фильтрах, сравнении, карточках и блоке технических характеристик.">
+      <AdminFormSection title="Характеристики и цена" subtitle="Используются в фильтрах, карточках и блоке технических характеристик.">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           {[
             ["floors", "Этажей"],
@@ -325,7 +325,7 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
         </label>
         <label className="space-y-1">
           <span className="block text-xs font-medium text-white/40">
-            Калькулятор комплектации (calculatorJson из PDF): этапы, опции, транспорт. Пустой объект — для «Аврора» кодовый пресет, для других — только транспортная сетка.
+            Калькулятор (calculatorJson): этапы, опции, транспорт. В partOfSoul.defaultRoof укажите кровлю проекта: dual | triple | quad (на сайте не переключается). Пустой объект — для «Аврора» пресет.
           </span>
           <textarea value={form.calculatorJson} onChange={(e) => set("calculatorJson", e.target.value)} rows={12} className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" spellCheck={false} />
         </label>

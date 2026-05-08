@@ -7,14 +7,20 @@ function PartnerLogo({ partner }: { partner: HomePartner }) {
       className="flex h-24 items-center justify-center rounded-2xl px-4 py-3 transition-opacity duration-300 hover:opacity-90 sm:h-28 md:h-32"
       style={{ border: "1px solid var(--border)", backgroundColor: "color-mix(in srgb, var(--bg) 92%, transparent)" }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={partner.logoUrl}
-        alt={partner.name}
-        className="max-h-14 w-auto max-w-full object-contain sm:max-h-16 md:max-h-[4.5rem]"
-        loading="lazy"
-        decoding="async"
-      />
+      {partner.logoUrl ? (
+        /* eslint-disable-next-line @next/next/no-img-element */
+        <img
+          src={partner.logoUrl}
+          alt={partner.name}
+          className="max-h-14 w-auto max-w-full object-contain sm:max-h-16 md:max-h-[4.5rem]"
+          loading="lazy"
+          decoding="async"
+        />
+      ) : (
+        <span className="text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)] sm:text-xs">
+          {partner.name}
+        </span>
+      )}
     </div>
   );
 

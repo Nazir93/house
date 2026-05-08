@@ -6,6 +6,7 @@ import {
   facadeAddonTotalRub,
   inferPartOfSoulFloors,
   partOfSoulRoofOptions,
+  resolveProjectRoofPitch,
   shellRubPerSqm,
   tierIdToWallMaterial,
 } from "./part-of-soul-pricing";
@@ -21,6 +22,12 @@ describe("part-of-soul-pricing", () => {
     expect(partOfSoulRoofOptions(1)).toEqual(["dual", "triple", "quad"]);
     expect(partOfSoulRoofOptions(1.5)).toEqual(["dual", "triple"]);
     expect(partOfSoulRoofOptions(2)).toEqual(["quad"]);
+  });
+
+  it("resolveProjectRoofPitch: defaultRoof из проекта или первая допустимая", () => {
+    expect(resolveProjectRoofPitch(1, "triple")).toBe("triple");
+    expect(resolveProjectRoofPitch(1.5, "quad")).toBe("dual");
+    expect(resolveProjectRoofPitch(2, undefined)).toBe("quad");
   });
 
   it("shellRubPerSqm: 1 эт. двускат, газоблок (PDF)", () => {

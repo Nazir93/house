@@ -39,7 +39,7 @@ export interface PartOfSoulCalculatorConfig {
   enabled: boolean;
   /** Этажность для расчёта (1 / 1,5 / 2). По умолчанию из поля «этаж» проекта. */
   pricingFloors?: PartOfSoulPricingFloors;
-  /** Стартовый выбор кровли (если доступен для этажности). */
+  /** Тип кровли проекта для расчёта (двухскатная / трёхскатная / четырёхскатная); на сайте не переключается. */
   defaultRoof?: PartOfSoulRoofPitch;
   smallHouseThresholdSqm: number;
   /** Надбавка к коробке при площади &lt; порога (PDF: 15 %). */

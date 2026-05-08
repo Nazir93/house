@@ -7,10 +7,12 @@ import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
 type PartnerItem = {
   id: string;
   name: string;
-  logoUrl: string;
+  logoUrl: string | null;
   website: string | null;
   visible: boolean;
   order: number;
+  showInTrustBlock: boolean;
+  showInBankMarquee: boolean;
 };
 
 export default function AdminPartnersPage() {
@@ -24,6 +26,8 @@ export default function AdminPartnersPage() {
   const [name, setName] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [website, setWebsite] = useState("");
+  const [showInTrustBlock, setShowInTrustBlock] = useState(true);
+  const [showInBankMarquee, setShowInBankMarquee] = useState(false);
 
   async function fetchPartners() {
     setLoading(true);
@@ -46,38 +50,54 @@ export default function AdminPartnersPage() {
     setName("");
     setLogoUrl("");
     setWebsite("");
+    setShowInTrustBlock(true);
+    setShowInBankMarquee(false);
     setEditId(null);
     setShowForm(false);
   }
 
   function openEdit(p: PartnerItem) {
     setName(p.name);
-    setLogoUrl(p.logoUrl);
+    setLogoUrl(p.logoUrl || "");
     setWebsite(p.website || "");
+    setShowInTrustBlock(p.showInTrustBlock);
+    setShowInBankMarquee(p.showInBankMarquee);
     setEditId(p.id);
     setShowForm(true);
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!logoUrl.trim()) {
-      setError("Загрузите логотип файлом");
+    setError("");
+    if (!showInTrustBlock && !showInBankMarquee) {
+      setError("Отметьте хотя бы один блок: «Нам доверяют» или лента «Наши партнёры»");
+      return;
+    }
+    if (showInTrustBlock && !logoUrl.trim()) {
+      setError("Для блока «Нам доверяют» загрузите логотип");
       return;
     }
     setSaving(true);
 
     try {
+      const payload = {
+        name,
+        logoUrl: logoUrl.trim() || null,
+        website: website || null,
+        showInTrustBlock,
+        showInBankMarquee,
+      };
       if (editId) {
         await fetch(`/api/admin/partners/${editId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, logoUrl, website: website || null }),
+          body: JSON.stringify(payload),
         });
       } else {
         await fetch("/api/admin/partners", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, logoUrl, website: website || null }),
+          body: JSON.stringify(payload),
         });
       }
       resetForm();
@@ -109,7 +129,9 @@ export default function AdminPartnersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Партнёры</h1>
-          <p className="text-sm text-white/40 mt-1">Логотипы клиентов в разделе &laquo;Нам доверяют&raquo;</p>
+          <p className="text-sm text-white/40 mt-1">
+            Блок &laquo;Нам доверяют&raquo; и бегущая лента &laquo;Наши партнёры&raquo; перед вопросами на главной
+          </p>
         </div>
         <button
           onClick={() => { resetForm(); setShowForm(true); }}
@@ -133,8 +155,29 @@ export default function AdminPartnersPage() {
                 className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#0F3D2E]/50 transition-colors"
                 placeholder="Название компании" />
             </div>
+            <div className="space-y-2 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
+              <p className="text-xs font-medium text-white/50 uppercase tracking-wider">Где показывать на главной</p>
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-white/85">
+                <input
+                  type="checkbox"
+                  checked={showInTrustBlock}
+                  onChange={(e) => setShowInTrustBlock(e.target.checked)}
+                  className="rounded border-white/20 bg-white/5"
+                />
+                Сетка &laquo;Нам доверяют&raquo; / &laquo;С кем работаем&raquo;
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-white/85">
+                <input
+                  type="checkbox"
+                  checked={showInBankMarquee}
+                  onChange={(e) => setShowInBankMarquee(e.target.checked)}
+                  className="rounded border-white/20 bg-white/5"
+                />
+                Бегущая лента &laquo;Наши партнёры&raquo; (перед вопросами)
+              </label>
+            </div>
             <AdminMediaUpload
-              label="Логотип"
+              label={showInTrustBlock ? "Логотип (обязателен для сетки)" : "Логотип (опционально, для ленты)"}
               accept="image"
               value={logoUrl}
               onChange={setLogoUrl}
@@ -171,7 +214,11 @@ export default function AdminPartnersPage() {
             {partners.map((partner) => (
               <div key={partner.id} className="flex items-center gap-4 px-5 py-3 hover:bg-white/[0.03] transition-colors">
                 <div className="w-12 h-8 flex items-center justify-center flex-shrink-0 bg-white/5 rounded-lg overflow-hidden">
-                  <img src={partner.logoUrl} alt={partner.name} className="max-h-6 max-w-10 object-contain" />
+                  {partner.logoUrl ? (
+                    <img src={partner.logoUrl} alt={partner.name} className="max-h-6 max-w-10 object-contain" />
+                  ) : (
+                    <span className="text-[9px] font-bold text-white/25 px-0.5 text-center leading-tight">нет</span>
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <button
@@ -180,6 +227,14 @@ export default function AdminPartnersPage() {
                   >
                     {partner.name}
                   </button>
+                  <div className="mt-1 flex flex-wrap gap-1.5">
+                    {partner.showInTrustBlock ? (
+                      <span className="rounded-md bg-white/[0.06] px-1.5 py-0.5 text-[10px] text-white/45">Сетка</span>
+                    ) : null}
+                    {partner.showInBankMarquee ? (
+                      <span className="rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] text-emerald-300/90">Лента</span>
+                    ) : null}
+                  </div>
                   {partner.website && (
                     <p className="text-xs text-white/25 truncate">{partner.website}</p>
                   )}

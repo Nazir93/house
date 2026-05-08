@@ -237,12 +237,17 @@ model Lead {
 }
 
 model Partner {
-  id      String  @id @default(cuid())
-  name    String
-  logoUrl String
-  website String?
-  visible Boolean @default(true)
-  order   Int     @default(0)
+  id                 String  @id @default(cuid())
+  name               String
+  /// Опционально: в ленте банков можно показать только название
+  logoUrl            String?
+  website            String?
+  visible            Boolean @default(true)
+  order              Int     @default(0)
+  /// Сетка «Нам доверяют» / «С кем работаем»
+  showInTrustBlock   Boolean @default(true)
+  /// Бегущая лента «Наши партнёры» перед блоком вопросов
+  showInBankMarquee  Boolean @default(false)
 }
 
 model TeamMember {

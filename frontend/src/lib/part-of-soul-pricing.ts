@@ -98,6 +98,20 @@ export function partOfSoulRoofOptions(pf: PartOfSoulPricingFloors): PartOfSoulRo
   return ["quad"];
 }
 
+/**
+ * Кровля для расчёта привязана к проекту: `partOfSoul.defaultRoof` в calculatorJson.
+ * Если не задано или не совместимо с этажностью — первая допустимая из матрицы.
+ */
+export function resolveProjectRoofPitch(
+  pricingFloors: PartOfSoulPricingFloors,
+  projectDefault?: PartOfSoulRoofPitch
+): PartOfSoulRoofPitch {
+  const choices = partOfSoulRoofOptions(pricingFloors);
+  if (choices.length === 0) return "dual";
+  if (projectDefault && choices.includes(projectDefault)) return projectDefault;
+  return choices[0];
+}
+
 export function partOfSoulRoofLabels(r: PartOfSoulRoofPitch): string {
   const m: Record<PartOfSoulRoofPitch, string> = {
     dual: "Двухскатная",

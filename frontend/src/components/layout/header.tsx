@@ -7,9 +7,9 @@ import { SiteHeaderBar } from "./site-header-bar";
 import { SITE_NAME } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
-import { VkIcon } from "@/components/icons/vk-icon";
 import { NAV_SECTIONS, isNavGroup, type NavSection } from "@/lib/nav-sections";
 import { useModal } from "@/lib/modal-context";
+import { maxChatUrlFromRawPhone, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
 
 function buildGridPath(
   cols: number, rows: number, cellW: number, cellH: number,
@@ -240,6 +240,10 @@ export function Header() {
   const [expandedMenuSection, setExpandedMenuSection] = useState<string | null>(null);
   const { openModal } = useModal();
   const contact = useContactConfig();
+  const telegramMessengerHref =
+    telegramChatUrlFromRawPhone(contact.phone2Raw) ?? contact.social.telegram?.trim() ?? "";
+  const maxMessengerHref =
+    contact.social.max?.trim() || maxChatUrlFromRawPhone(contact.phone2Raw) || "";
 
   useEffect(() => {
     const handleOpenMenu = () => setIsOpen(true);
@@ -481,10 +485,21 @@ export function Header() {
                 className="shrink-0 pt-4 sm:pt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-3 [@media(max-height:700px)]:pt-2 [@media(max-height:700px)]:gap-2"
                 style={{ animation: "menuFadeIn 0.6s ease-out 0.4s both" }}
               >
-                <div className="flex items-center gap-2 sm:gap-5 flex-wrap">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-x-6">
+                  {contact.phone.trim() && contact.phoneRaw.trim() ? (
+                    <a
+                      href={`tel:${contact.phoneRaw}`}
+                      title="Городской телефон"
+                      className="text-base font-medium tabular-nums transition-colors duration-300 hover:text-[var(--accent)] sm:text-sm md:text-base lg:text-lg"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {contact.phone}
+                    </a>
+                  ) : null}
                   {contact.phone2.trim() && contact.phone2Raw.trim() ? (
                     <a
                       href={`tel:${contact.phone2Raw}`}
+                      title="Мобильный телефон"
                       className="text-base font-medium tabular-nums transition-colors duration-300 hover:text-[var(--accent)] sm:text-sm md:text-base lg:text-lg"
                       style={{ color: "var(--text-muted)" }}
                     >
@@ -512,15 +527,15 @@ export function Header() {
               }}
             >
               <div className="flex flex-col items-center gap-3">
-                {contact.social.telegram && (
+                {telegramMessengerHref ? (
                   <a
-                    href={contact.social.telegram}
+                    href={telegramMessengerHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-300 hover:scale-110 hover:border-[var(--accent)]"
+                    className="group flex h-8 w-8 items-center justify-center rounded-full border transition-all duration-300 hover:scale-110 hover:border-[var(--accent)]"
                     style={{ borderColor: "var(--border)" }}
                     aria-label="Написать в Telegram"
-                    title="Telegram"
+                    title="Telegram — чат по номеру"
                   >
                     <Send
                       size={16}
@@ -529,33 +544,20 @@ export function Header() {
                       aria-hidden
                     />
                   </a>
-                )}
-                {contact.social.vk && (
+                ) : null}
+                {maxMessengerHref ? (
                   <a
-                    href={contact.social.vk}
+                    href={maxMessengerHref}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-300 hover:scale-110 hover:border-[var(--accent)]"
-                    style={{ borderColor: "var(--border)" }}
-                    aria-label="ВКонтакте"
-                    title="ВКонтакте"
-                  >
-                    <VkIcon className="h-4 w-4 text-[var(--text-muted)] opacity-[0.92] transition-colors duration-300 group-hover:text-[var(--accent)] group-hover:opacity-100" aria-hidden />
-                  </a>
-                )}
-                {contact.social.max && (
-                  <a
-                    href={contact.social.max}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group w-8 h-8 rounded-full flex items-center justify-center border transition-all duration-300 hover:scale-110 hover:border-[var(--accent)]"
+                    className="group flex h-8 w-8 items-center justify-center rounded-full border transition-all duration-300 hover:scale-110 hover:border-[var(--accent)]"
                     style={{ borderColor: "var(--border)" }}
                     aria-label="Написать в Max"
-                    title="Max"
+                    title="Max — чат по номеру"
                   >
                     <MaxMessengerIcon className="h-4 w-4 text-[var(--text-muted)] opacity-[0.92] transition-colors duration-300 group-hover:text-[var(--accent)] group-hover:opacity-100" aria-hidden />
                   </a>
-                )}
+                ) : null}
               </div>
 
               <span

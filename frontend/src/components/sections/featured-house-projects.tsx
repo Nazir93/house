@@ -203,11 +203,11 @@ export function FeaturedHouseProjectsSection({ projects }: { projects: HouseProj
 
                       <div className="absolute bottom-2 left-2 right-2 z-[1] sm:bottom-3 sm:left-auto sm:right-3">
                         <Link
-                          href={`${href}#plans`}
+                          href={`${href}#project-calculator`}
                           className="inline-flex w-full min-w-0 items-center justify-center gap-1 rounded-full bg-[#e8f3eb] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#0f3d2e] shadow-sm transition hover:bg-[#dcefe2] sm:w-auto sm:justify-start sm:px-4 sm:text-[11px]"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          Клиентские планировки
+                          Калькулятор проекта
                           <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
                         </Link>
                       </div>

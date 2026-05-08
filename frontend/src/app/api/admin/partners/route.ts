@@ -24,18 +24,28 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { name, logoUrl, website, visible, order } = body;
+    const showInTrustBlock = body.showInTrustBlock ?? true;
+    const showInBankMarquee = body.showInBankMarquee ?? false;
 
-    if (!name || !logoUrl) {
-      return NextResponse.json({ error: "Name and logoUrl are required" }, { status: 400 });
+    if (!name?.trim()) {
+      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    }
+    if (!showInTrustBlock && !showInBankMarquee) {
+      return NextResponse.json({ error: "Выберите хотя бы один блок на главной" }, { status: 400 });
+    }
+    if (showInTrustBlock && !(typeof logoUrl === "string" && logoUrl.trim())) {
+      return NextResponse.json({ error: "Для блока «Нам доверяют» нужен логотип" }, { status: 400 });
     }
 
     const partner = await prisma.partner.create({
       data: {
-        name,
-        logoUrl,
+        name: name.trim(),
+        logoUrl: typeof logoUrl === "string" && logoUrl.trim() ? logoUrl.trim() : null,
         website: website || null,
         visible: visible ?? true,
         order: order ?? 0,
+        showInTrustBlock,
+        showInBankMarquee,
       },
     });
 

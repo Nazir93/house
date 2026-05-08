@@ -120,8 +120,6 @@ export function HouseProjectCompletionSection({
   partOfSoulContext?: {
     pricingFloors: PartOfSoulPricingFloors;
     roofPitch: PartOfSoulRoofPitch;
-    roofChoices: PartOfSoulRoofPitch[];
-    setRoofPitch: (r: PartOfSoulRoofPitch) => void;
   };
 }) {
   const { openModalToEstimate } = useModal();
@@ -275,39 +273,7 @@ export function HouseProjectCompletionSection({
           })}
         </div>
 
-        {partOfSoulContext ?
-          <div className="space-y-2">
-            <p className="text-sm font-semibold" style={{ color: GRAPHITE }}>
-              Тип кровли
-            </p>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Ставки за м² коробки и отделку фасада (1-й этаж) в методике зависят от числа скатов.
-            </p>
-            <div className="flex flex-wrap gap-2 pt-1">
-              {partOfSoulContext.roofChoices.map((r) => {
-                const activeRoof = partOfSoulContext.roofPitch === r;
-                return (
-                  <button
-                    key={r}
-                    type="button"
-                    aria-pressed={activeRoof}
-                    onClick={() => partOfSoulContext.setRoofPitch(r)}
-                    className="rounded-2xl border-2 px-4 py-2.5 text-left text-xs font-bold transition sm:text-sm"
-                    style={
-                      activeRoof ?
-                        { borderColor: ACCENT, backgroundColor: ACCENT, color: "#fff" }
-                      : { borderColor: "var(--border)", backgroundColor: "var(--bg)", color: "var(--text)" }
-                    }
-                  >
-                    {partOfSoulRoofLabels(r)}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        : null}
-
-        <div>
+        <div id="project-calculator" className="scroll-mt-[8.5rem] md:scroll-mt-[9rem]">
           <h3 className="font-heading text-xl md:text-2xl" style={{ color: GRAPHITE }}>
             Входит в стоимость:
           </h3>

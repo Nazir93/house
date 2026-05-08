@@ -72,16 +72,6 @@ export function AboutPageContent() {
         description={`${SITE_NAME}: проектирование и строительство загородных домов под ключ. Офис в ${CITY}, работаем в регионах: ${SERVICE_REGIONS}.`}
       />
 
-      {/* Обратная связь руководству — фон секции бренда */}
-      <section className="py-14 md:py-16" style={{ backgroundColor: "var(--bg-secondary)" }}>
-        <div className="container mx-auto max-w-[1200px] px-5">
-          <LeadershipFeedbackForm />
-          <p className="mx-auto mt-8 max-w-3xl text-center text-[15px] leading-relaxed md:text-base" style={{ color: "var(--text-muted)" }}>
-            Мы дорожим каждым обращением. Поделитесь обратной связью — раз в неделю команда разбирает сообщения клиентов и берёт в работу то, что помогает нам становиться лучше.
-          </p>
-        </div>
-      </section>
-
       {/* Команда / фото — полноширинный блок */}
       <section className="py-12 md:py-16" style={{ backgroundColor: "var(--bg-secondary)" }}>
         <div className="container mx-auto max-w-[1200px] px-5">
@@ -269,6 +259,16 @@ export function AboutPageContent() {
               Оставить заявку
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Обратная связь руководству — внизу страницы (макет) */}
+      <section className="border-t py-16 md:py-24" style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}>
+        <div className="container mx-auto max-w-[1200px] px-5">
+          <LeadershipFeedbackForm />
+          <p className="mx-auto mt-8 max-w-3xl text-center text-[13px] leading-relaxed md:text-[15px]" style={{ color: "var(--text-muted)" }}>
+            Мы дорожим каждым обращением. Поделитесь обратной связью — раз в неделю команда разбирает сообщения клиентов и берёт в работу то, что помогает нам становиться лучше.
+          </p>
         </div>
       </section>
     </article>

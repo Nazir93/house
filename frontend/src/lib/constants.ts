@@ -15,8 +15,17 @@ export const ACCOUNT_PORTAL_EXTERNAL_URL =
 
 export const ACCOUNT_PORTAL_PATH = "/account" as const;
 
-/** Ссылка на карточку организации в Яндекс.Картах для блока «рейтинг»; пусто — ведёт на страницу отзывов. */
+/** Ссылка на карточку организации в Яндекс.Картах (legacy / будущие блоки). */
 export const YANDEX_ORG_URL = process.env.NEXT_PUBLIC_YANDEX_ORG_URL?.trim() || "";
+
+/** Страница отзывов в Яндекс.Картах — шапка сайта (иконка «Я» и рейтинг). */
+export const YANDEX_REVIEWS_URL =
+  process.env.NEXT_PUBLIC_YANDEX_REVIEWS_URL?.trim() ||
+  "https://yandex.com/maps/org/everhouse/190163423712/reviews/?ll=30.304577%2C59.966881&z=16";
+
+/** Оценка рядом с маркой Яндекс в шапке (можно синхронизировать с картами). */
+export const YANDEX_MAPS_RATING_SCORE =
+  process.env.NEXT_PUBLIC_YANDEX_MAPS_RATING?.trim() || "5.0";
 
 /** Фон главного баннера (локальный файл в /public или полный URL). */
 export const BANNER_HERO_IMAGE =

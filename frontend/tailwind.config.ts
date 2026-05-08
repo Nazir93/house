@@ -59,6 +59,7 @@ const config: Config = {
         "fade-in": "fadeIn 0.6s ease-out",
         "slide-up": "slideUp 0.6s ease-out",
         "count-up": "countUp 2s ease-out",
+        "partner-marquee": "partnerMarquee 55s linear infinite",
       },
       keyframes: {
         fadeIn: {
@@ -68,6 +69,10 @@ const config: Config = {
         slideUp: {
           "0%": { opacity: "0", transform: "translateY(30px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        partnerMarquee: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
         },
       },
     },

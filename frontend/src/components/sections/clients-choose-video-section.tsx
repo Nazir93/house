@@ -21,22 +21,27 @@ function warmUpVideo(v: HTMLVideoElement) {
 const SERVICES = [
   {
     title: "Проект",
+    href: "/services/projecting" as const,
     description: "Архитектурное и планировочное решение, адаптированное под участок и задачи семьи.",
   },
   {
     title: "Фундамент",
+    href: "/services/foundation" as const,
     description: "Надежное основание под тип грунта и проект вашего дома.",
   },
   {
     title: "Кровля",
+    href: "/services/roofing" as const,
     description: "Теплая и герметичная кровельная система с правильными узлами.",
   },
   {
     title: "Коммуникации",
+    href: "/services/engineering" as const,
     description: "Вода, канализация, электричество и инженерия, готовые к эксплуатации.",
   },
   {
     title: "Отделка",
+    href: "/services/finishing" as const,
     description: "Чистовая отделка под ключ с аккуратной реализацией каждого этапа.",
   },
 ] as const;
@@ -274,7 +279,12 @@ export function ClientsChooseVideoSection() {
                           on ? "text-[var(--text)]" : "text-[var(--text-muted)]"
                         )}
                       >
-                        {item.title}
+                        <Link
+                          href={item.href}
+                          className="rounded-sm underline-offset-4 transition-colors hover:text-[var(--accent)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+                        >
+                          {item.title}
+                        </Link>
                       </p>
                       <p
                         className={cn(

@@ -59,50 +59,76 @@ export function LeadershipFeedbackForm() {
 
   if (status === "success") {
     return (
-      <p className="rounded-2xl border px-5 py-6 text-center text-[15px] font-medium" style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)", color: "var(--text)" }}>
+      <p
+        className="rounded-[1.25rem] border px-6 py-8 text-center text-[15px] font-medium leading-relaxed md:text-base"
+        style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)", color: "var(--text)" }}
+      >
         Спасибо! Мы передали сообщение руководству.
       </p>
     );
   }
 
+  const fieldClass =
+    "w-full rounded-[1rem] border px-4 py-3.5 text-[15px] leading-snug outline-none transition-[box-shadow] placeholder:text-[var(--text-subtle)] focus-visible:ring-2 focus-visible:ring-[var(--accent)]";
+
   return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
-      <textarea
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        rows={3}
-        placeholder="Хочу поделиться с руководителем…"
-        className="min-h-[88px] flex-1 rounded-2xl border px-4 py-3 text-[15px] leading-relaxed outline-none ring-[var(--accent)] focus-visible:ring-2"
-        style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)", color: "var(--text)" }}
-      />
-      <div className="flex flex-col gap-2 sm:w-[min(100%,280px)]">
-        <input
-          type="text"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Имя"
-          className="rounded-xl border px-3 py-2.5 text-sm"
-          style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)", color: "var(--text)" }}
+    <div className="space-y-4">
+      <div className="grid gap-4 lg:grid-cols-[1fr_minmax(260px,300px)] lg:items-stretch lg:gap-5">
+        <label className="sr-only" htmlFor="leadership-feedback-message">
+          Сообщение руководству
+        </label>
+        <textarea
+          id="leadership-feedback-message"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          rows={6}
+          placeholder="Хочу поделиться с руководителем…"
+          className={`${fieldClass} min-h-[140px] flex-1 resize-y lg:min-h-[200px]`}
+          style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)", color: "var(--text)" }}
         />
-        <input
-          type="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="Телефон"
-          className="rounded-xl border px-3 py-2.5 text-sm"
-          style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)", color: "var(--text)" }}
-        />
-        <button
-          type="button"
-          disabled={status === "loading"}
-          onClick={() => void submit()}
-          className="rounded-full px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-[var(--on-sale)] transition hover:opacity-95 disabled:opacity-60"
-          style={{ backgroundColor: "var(--sale)" }}
-        >
-          {status === "loading" ? "Отправка…" : "Отправить"}
-        </button>
+        <div className="flex flex-col gap-3 lg:min-h-[200px]">
+          <label className="sr-only" htmlFor="leadership-feedback-name">
+            Имя
+          </label>
+          <input
+            id="leadership-feedback-name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Имя"
+            autoComplete="name"
+            className={fieldClass}
+            style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)", color: "var(--text)" }}
+          />
+          <label className="sr-only" htmlFor="leadership-feedback-phone">
+            Телефон
+          </label>
+          <input
+            id="leadership-feedback-phone"
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="Телефон"
+            autoComplete="tel"
+            className={fieldClass}
+            style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)", color: "var(--text)" }}
+          />
+          <button
+            type="button"
+            disabled={status === "loading"}
+            onClick={() => void submit()}
+            className="mt-auto w-full rounded-[1rem] px-5 py-3.5 text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--on-sale)] transition hover:opacity-95 disabled:opacity-60"
+            style={{ backgroundColor: "var(--sale)" }}
+          >
+            {status === "loading" ? "Отправка…" : "Отправить"}
+          </button>
+        </div>
       </div>
-      {errorMessage ? <p className="text-sm sm:col-span-full" style={{ color: "var(--sale)" }}>{errorMessage}</p> : null}
+      {errorMessage ? (
+        <p className="text-center text-sm sm:text-left" style={{ color: "var(--sale)" }}>
+          {errorMessage}
+        </p>
+      ) : null}
     </div>
   );
 }

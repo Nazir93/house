@@ -85,6 +85,12 @@ export async function middleware(request: NextRequest) {
     url.search = "";
     return NextResponse.redirect(url, 308);
   }
+  if (pathname === "/projects/compare" || pathname.startsWith("/projects/compare/")) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/projects";
+    url.search = "";
+    return NextResponse.redirect(url, 308);
+  }
   const legacyService = pathname.match(/^\/services\/([^/]+)$/);
   if (legacyService) {
     const slug = legacyService[1];

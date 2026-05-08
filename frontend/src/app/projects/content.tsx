@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, LayoutGrid, LayoutList, Search, SlidersHorizontal } from "lucide-react";
-import { CompareButton } from "@/components/construction/compare-button";
 import { formatRub, getProjectRenders, type HouseProjectItem } from "@/lib/construction-shared";
 import {
   buildProjectsSearchParams,
@@ -445,7 +444,7 @@ export function ProjectsCatalogContent({ projects }: { projects: HouseProjectIte
               Проекты домов
             </h1>
             <p className="mt-4 max-w-2xl text-[15px] leading-relaxed md:text-base" style={{ color: "var(--text-muted)" }}>
-              Подбор по материалу, этажности, площади и бюджету. Сравнение карточек и расширенный конструктор на главной.
+              Подбор по материалу, этажности, площади и бюджету; на главной — расширенный конструктор подбора.
             </p>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
@@ -602,9 +601,6 @@ export function ProjectsCatalogContent({ projects }: { projects: HouseProjectIte
                           </span>
                           <span className="max-w-[11rem] truncate rounded-full bg-black/45 px-3 py-1 text-[11px] font-medium text-white/95 backdrop-blur-sm">{matLabel}</span>
                         </div>
-                        <div className="absolute right-3 top-3 [&_button]:border-white/45 [&_button]:bg-black/45 [&_button]:text-white [&_button]:backdrop-blur-sm [&_button:hover]:bg-black/60">
-                          <CompareButton projectId={project.id} />
-                        </div>
                         <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
                           <p className="font-heading text-lg font-bold text-white drop-shadow md:text-xl">{project.title}</p>
                           <div className="mt-2 flex flex-wrap items-end justify-between gap-2">
@@ -703,7 +699,6 @@ export function ProjectsCatalogContent({ projects }: { projects: HouseProjectIte
                         >
                           Смотреть проект <ArrowRight size={16} />
                         </Link>
-                        <CompareButton projectId={project.id} />
                       </div>
                     </div>
                   </article>

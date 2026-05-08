@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Percent, Search, UserRound } from "lucide-react";
-import { SITE_NAME, HEADER_TAGLINE, ACCOUNT_PORTAL_PATH } from "@/lib/constants";
+import { ChevronDown, Percent, Search, Send, UserRound } from "lucide-react";
+import { SITE_NAME, HEADER_TAGLINE, HEADER_PHONE_HINT, ACCOUNT_PORTAL_PATH, YANDEX_REVIEWS_URL } from "@/lib/constants";
+import { useContactConfig } from "@/lib/contact-config-context";
+import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
+import { maxChatUrlFromRawPhone, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
 import { NAV_SECTIONS, type NavSection } from "@/lib/nav-sections";
 import { NavDropdownPanel } from "@/components/layout/nav-dropdown-panel";
 import { useModal } from "@/lib/modal-context";
@@ -12,10 +15,17 @@ import { useTheme } from "@/lib/theme-context";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { SiteSearchPanel } from "@/components/layout/site-search-panel";
+import { YandexMapsRatingChip } from "@/components/layout/yandex-maps-rating-chip";
 import { cn } from "@/lib/utils";
 
 export function SiteHeaderBar() {
   const pathname = usePathname();
+  const contact = useContactConfig();
+  const telegramHref =
+    telegramChatUrlFromRawPhone(contact.phone2Raw) ?? contact.social.telegram?.trim() ?? null;
+  /** Ссылка из настроек (канал Max) надёжнее веб-добавления по номеру — номер используем если профиль не задан */
+  const maxHref =
+    contact.social.max?.trim() || maxChatUrlFromRawPhone(contact.phone2Raw) || null;
   const { theme } = useTheme();
   const isHomeBanner = pathname === "/";
   const { openModal } = useModal();
@@ -183,6 +193,68 @@ export function SiteHeaderBar() {
           </nav>
 
           <div className="flex min-w-0 flex-wrap items-center justify-end gap-1.5 xl:gap-2">
+            {(contact.phone.trim() && contact.phoneRaw.trim()) ||
+            telegramHref ||
+            maxHref ||
+            YANDEX_REVIEWS_URL.trim() ? (
+              <div className="mr-2 flex min-w-0 flex-row flex-wrap items-center justify-end gap-2 border-r border-[var(--header-bar-border)] pr-2 xl:mr-3 xl:gap-3 xl:pr-4">
+                {contact.phone.trim() && contact.phoneRaw.trim() ? (
+                  <div className="flex min-w-0 flex-col items-end gap-0">
+                    <a
+                      href={`tel:${contact.phoneRaw}`}
+                      title="Городской телефон"
+                      className="text-[10px] font-semibold tabular-nums leading-tight tracking-tight transition hover:opacity-90 xl:text-[11px]"
+                      style={{ color: "var(--header-bar-text)" }}
+                    >
+                      {contact.phone}
+                    </a>
+                    <span
+                      className="hidden max-w-[12rem] truncate text-[8px] font-medium uppercase leading-none tracking-wide xl:block"
+                      style={{ color: "var(--header-bar-muted)" }}
+                    >
+                      {HEADER_PHONE_HINT}
+                    </span>
+                  </div>
+                ) : null}
+                {(telegramHref || maxHref) && (
+                  <div className="flex shrink-0 items-center gap-1">
+                    {telegramHref ? (
+                      <a
+                        href={telegramHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Написать в Telegram"
+                        className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition hover:bg-black/[0.04] dark:hover:bg-white/10"
+                        style={{
+                          borderColor: "var(--header-bar-border)",
+                          color: "var(--header-bar-text)",
+                        }}
+                        aria-label="Написать в Telegram"
+                      >
+                        <Send className="h-3 w-3" strokeWidth={2} aria-hidden />
+                      </a>
+                    ) : null}
+                    {maxHref ? (
+                      <a
+                        href={maxHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title="Написать в Max"
+                        className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition hover:bg-black/[0.04] dark:hover:bg-white/10"
+                        style={{
+                          borderColor: "var(--header-bar-border)",
+                          color: "var(--header-bar-text)",
+                        }}
+                        aria-label="Написать в Max"
+                      >
+                        <MaxMessengerIcon className="h-3.5 w-3.5 opacity-95" aria-hidden />
+                      </a>
+                    ) : null}
+                  </div>
+                )}
+                <YandexMapsRatingChip />
+              </div>
+            ) : null}
             <button
               type="button"
               onClick={toggleSearch}
@@ -249,6 +321,39 @@ export function SiteHeaderBar() {
           <BrandLogo height={38} className="min-w-0" brightOnBackdrop={heroGlassLightInk} />
         </Link>
         <div className="flex min-w-0 shrink-0 items-center justify-end gap-1 sm:gap-1.5">
+          {telegramHref ? (
+            <a
+              href={telegramHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98] lg:hidden"
+              style={{
+                borderColor: "var(--header-bar-border)",
+                color: "var(--header-bar-text)",
+              }}
+              aria-label="Написать в Telegram"
+              title="Telegram"
+            >
+              <Send className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+            </a>
+          ) : null}
+          {maxHref ? (
+            <a
+              href={maxHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98] lg:hidden"
+              style={{
+                borderColor: "var(--header-bar-border)",
+                color: "var(--header-bar-text)",
+              }}
+              aria-label="Написать в Max"
+              title="Max"
+            >
+              <MaxMessengerIcon className="h-4 w-4 opacity-95" aria-hidden />
+            </a>
+          ) : null}
+          <YandexMapsRatingChip compact />
           <button
             type="button"
             onClick={toggleSearch}
