@@ -12,7 +12,8 @@ function mediaCreate(urls: unknown, type: "RENDER" | "PLAN" | "BUILD_STAGE" | "V
   return list.map(String).map((url) => url.trim()).filter(Boolean).map((url, order) => ({ type, url, order }));
 }
 
-export async function GET(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const gate = await requireAdminApiSession();
   if (!gate.ok) return gate.response;
 
@@ -29,7 +30,8 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const gate = await requireAdminApiSession();
   if (!gate.ok) return gate.response;
 
@@ -78,7 +80,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const gate = await requireAdminApiSession();
   if (!gate.ok) return gate.response;
 

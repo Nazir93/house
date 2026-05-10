@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { uploadAdminMedia } from "@/lib/admin-upload";
+import { CmsImage } from "@/components/ui/cms-image";
 
 function isGifUrl(url: string): boolean {
   return /\.gif($|\?)/i.test(url);
@@ -43,7 +44,15 @@ export function AdminVideoListUpload({
           className="flex gap-2 items-start rounded-xl border border-white/[0.08] p-2 bg-white/[0.02]"
         >
           {isGifUrl(url) ? (
-            <img src={url} alt="GIF" className="max-h-40 flex-1 rounded-lg bg-black/40 w-full max-w-lg object-contain" />
+            <div className="relative h-40 flex-1 max-w-lg w-full shrink min-w-0">
+              <CmsImage
+                src={url}
+                alt="GIF"
+                fill
+                className="rounded-lg bg-black/40 object-contain"
+                sizes="(max-width: 1024px) 90vw, 512px"
+              />
+            </div>
           ) : (
             <video src={url} controls playsInline preload="metadata" className="max-h-40 flex-1 rounded-lg bg-black/40 w-full max-w-lg" />
           )}

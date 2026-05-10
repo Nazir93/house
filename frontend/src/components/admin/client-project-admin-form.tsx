@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus, Trash2, Upload } from "lucide-react";
+import { CmsImage } from "@/components/ui/cms-image";
 
 function toDateInput(iso: string | null | undefined): string {
   if (!iso) return "";
@@ -545,8 +546,7 @@ export function ClientProjectAdminForm({
         <ul className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {photos.map((p) => (
             <li key={p.id} className="relative group rounded-lg overflow-hidden border border-white/[0.08] aspect-square">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.url} alt="" className="w-full h-full object-cover" />
+              <CmsImage src={p.url} alt="" fill className="object-cover" sizes="160px" />
               <button
                 type="button"
                 className="absolute top-1 right-1 p-1 bg-black/60 rounded text-xs text-red-300 opacity-0 group-hover:opacity-100"

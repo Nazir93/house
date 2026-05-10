@@ -7,6 +7,7 @@ import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { BuiltObjectItem } from "@/lib/construction-shared";
 import { builtObjectMaterialLabel, getBuiltObjectCover } from "@/lib/construction-shared";
+import { CmsImage } from "@/components/ui/cms-image";
 
 if (typeof window !== "undefined") {
   delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: string })._getIconUrl;
@@ -68,7 +69,14 @@ export function PortfolioBuiltMap({ objects }: { objects: BuiltObjectItem[] }) {
               <Popup>
                 <div className="min-w-[150px] max-w-[220px]">
                   {cover ? (
-                    <img src={cover.url} alt="" className="mb-2 h-20 w-full rounded-md object-cover" />
+                    <CmsImage
+                      src={cover.url}
+                      alt=""
+                      width={220}
+                      height={80}
+                      className="mb-2 h-20 w-full rounded-md object-cover"
+                      sizes="220px"
+                    />
                   ) : null}
                   <p className="text-sm font-bold uppercase leading-tight text-[#1a1a1a]">{o.title}</p>
                   <p className="mt-1 text-xs text-neutral-600">{builtObjectMaterialLabel(o.material)}</p>

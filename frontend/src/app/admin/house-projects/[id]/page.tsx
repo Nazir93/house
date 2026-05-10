@@ -4,7 +4,8 @@ import { HouseProjectForm } from "@/components/admin/house-project-form";
 
 export const dynamic = "force-dynamic";
 
-export default async function EditHouseProjectPage({ params }: { params: { id: string } }) {
+export default async function EditHouseProjectPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   let project: any = null;
   try {
     project = await (prisma as any).houseProject.findUnique({

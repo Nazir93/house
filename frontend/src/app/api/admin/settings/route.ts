@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
 import { HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY } from "@/lib/house-construction-calculator-config";
+import { MORTGAGE_PAGE_SETTINGS_KEY } from "@/lib/mortgage-settings-config";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
@@ -41,7 +42,11 @@ export async function PUT(request: NextRequest) {
     await Promise.all(operations);
 
     if (Object.prototype.hasOwnProperty.call(body, HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY)) {
-      revalidateTag("house-construction-calculator-config");
+      revalidateTag("house-construction-calculator-config", "default");
+    }
+
+    if (Object.prototype.hasOwnProperty.call(body, MORTGAGE_PAGE_SETTINGS_KEY)) {
+      revalidateTag("mortgage-page-settings", "default");
     }
 
     return NextResponse.json({ success: true });

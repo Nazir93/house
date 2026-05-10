@@ -24,12 +24,16 @@ export function ConstructionScheduleGantt({ steps }: { steps: ConstructionStep[]
     const weeks = steps.map((s) => Math.max(parseTermToWeeks(s.term), 1));
     const totalWeeks = weeks.reduce((a, b) => a + b, 0);
     const monthCount = Math.min(Math.max(Math.ceil(totalWeeks / 4), steps.length), 12);
-    let cursor = 0;
+    const startWeekAt: number[] = [];
+    let acc = 0;
+    for (let i = 0; i < steps.length; i++) {
+      startWeekAt.push(acc);
+      acc += weeks[i] ?? 4;
+    }
     const bars = steps.map((step, i) => {
       const w = weeks[i] ?? 4;
-      const start = cursor / totalWeeks;
+      const start = (startWeekAt[i] ?? 0) / totalWeeks;
       const width = w / totalWeeks;
-      cursor += w;
       return { step, startPct: start * 100, widthPct: Math.max(width * 100, 4), weeks: w };
     });
     return { months: monthCount, bars };

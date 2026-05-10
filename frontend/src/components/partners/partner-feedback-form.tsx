@@ -91,7 +91,9 @@ export function PartnerFeedbackForm({
       });
       if (response.ok) {
         const result = (await response.json()) as { redirectUrl?: string };
-        if (result.redirectUrl) window.location.href = result.redirectUrl;
+        if (result.redirectUrl) {
+          window.location.assign(result.redirectUrl);
+        }
       } else {
         setSubmitError(await readLeadError(response));
       }

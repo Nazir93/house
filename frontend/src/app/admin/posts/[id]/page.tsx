@@ -9,6 +9,7 @@ import { AdminVideoListUpload } from "@/components/admin/admin-video-list-upload
 import { RichEditor } from "@/components/admin/rich-editor";
 import { uploadAdminMedia } from "@/lib/admin-upload";
 import { AdminNativeSelect, AdminSelectOption } from "@/components/admin/admin-native-select";
+import { CmsImage } from "@/components/ui/cms-image";
 
 const CATEGORIES = [
   "Строительство домов",
@@ -208,7 +209,7 @@ export default function AdminEditPostPage() {
             <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
               {galleryUrls.map((url, i) => (
                 <div key={`${url}-${i}`} className="relative group rounded-lg overflow-hidden aspect-square bg-white/[0.03]">
-                  <img src={url} alt="" className="w-full h-full object-cover" />
+                  <CmsImage src={url} alt="" fill className="object-cover" sizes="(max-width: 768px) 33vw, 180px" />
                   <button
                     type="button"
                     onClick={() => removeGalleryImage(i)}

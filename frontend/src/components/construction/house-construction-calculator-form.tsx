@@ -142,12 +142,23 @@ export function HouseConstructionCalculatorForm({
     </>
   ),
   calculatorConfig,
+  /** Промо со страницы QR: одна бесплатная услуга попадает в calcData и Lead.service */
+  promoFreeService,
+  promoServiceRequired,
+  leadSourceOverride,
+  leadServiceLabelOverride,
+  submitButtonLabel,
 }: {
   onSuccess: (leadId: string, name: string, phone: string) => void;
   getRecaptchaToken?: (action: string) => Promise<string>;
   heading?: ReactNode;
   /** Прайс с сервера; без пропа — загрузка через /api/calculator-config */
   calculatorConfig?: HouseConstructionCalculatorConfig;
+  promoFreeService?: { slug: string; title: string } | null;
+  promoServiceRequired?: boolean;
+  leadSourceOverride?: string;
+  leadServiceLabelOverride?: string;
+  submitButtonLabel?: string;
 }) {
   const { config: configFromHook } = useHouseConstructionCalculatorConfig();
   const config = calculatorConfig ?? configFromHook;
@@ -218,6 +229,10 @@ export function HouseConstructionCalculatorForm({
 
   async function onSubmit(data: HouseConstructionFormData) {
     if (data.honeypot) return;
+    if (promoServiceRequired && !promoFreeService?.slug) {
+      setSubmitError("Выберите одну услугу в подарок по акции.");
+      return;
+    }
     setSubmitError(null);
     setLoading(true);
     try {
@@ -226,21 +241,36 @@ export function HouseConstructionCalculatorForm({
       const rawAreaSubmit = parseFloat(String(data.area ?? "").replace(",", "."));
       const areaForPayload = Number.isFinite(rawAreaSubmit) && rawAreaSubmit > 0 ? rawAreaSubmit : 0;
       const payload = buildHouseConstructionCalcPayload(data, areaForPayload, config);
+      const calcData =
+        promoFreeService?.slug && promoFreeService.title
+          ? {
+              ...payload,
+              promoQrBanner: true,
+              promoFreeServiceSlug: promoFreeService.slug,
+              promoFreeServiceTitle: promoFreeService.title,
+            }
+          : payload;
+      const source = leadSourceOverride ?? "calculator";
+      const serviceLine =
+        leadServiceLabelOverride ??
+        (promoFreeService?.title
+          ? `Промо (QR): бесплатно — ${promoFreeService.title}`
+          : "Ориентировочный расчёт");
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: data.name,
           phone: data.phone,
-          service: "Ориентировочный расчёт",
-          source: "calculator",
+          service: serviceLine,
+          source,
           pageUrl: window.location.href,
           honeypot: data.honeypot || "",
           recaptchaToken: recaptchaToken || undefined,
           utmSource: params.get("utm_source"),
           utmMedium: params.get("utm_medium"),
           utmCampaign: params.get("utm_campaign"),
-          calcData: payload,
+          calcData,
         }),
       });
       if (response.ok) {
@@ -526,7 +556,7 @@ export function HouseConstructionCalculatorForm({
               <p className="text-sm text-red-400 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3">{submitError}</p>
             )}
             <FillButton type="submit" disabled={loading}>
-              {loading ? "Отправка..." : "Получить точный расчёт"}
+              {loading ? "Отправка..." : submitButtonLabel ?? "Получить точный расчёт"}
             </FillButton>
           </form>
         </div>

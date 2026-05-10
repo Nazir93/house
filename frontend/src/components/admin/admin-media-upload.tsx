@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Upload, X } from "lucide-react";
 import { uploadAdminMedia } from "@/lib/admin-upload";
+import { CmsImage } from "@/components/ui/cms-image";
 
 type Accept = "image" | "video";
 
@@ -77,21 +78,15 @@ export function AdminMediaUpload({
           : "MP4, WebM, MOV, AVI и др. На сервере действует лимит размера (nginx ~25–300 МБ — см. конфиг). Файл без расширения определяется по типу в браузере."}
       </p>
       {value && accept === "image" ? (
-        // eslint-disable-next-line @next/next/no-img-element -- админ-превью по произвольному URL
-        <img
-          src={value}
-          alt=""
-          className="mt-2 max-h-44 rounded-lg border border-white/[0.08] object-contain bg-black/20"
-        />
+        <div className="relative mt-2 h-44 w-full max-w-lg">
+          <CmsImage src={value} alt="" fill className="rounded-lg border border-white/[0.08] object-contain bg-black/20" sizes="512px" />
+        </div>
       ) : null}
       {value && accept === "video" ? (
         /\.gif($|\?)/i.test(value) ? (
-          // eslint-disable-next-line @next/next/no-img-element -- админ-превью GIF
-          <img
-            src={value}
-            alt="GIF"
-            className="mt-2 max-h-52 rounded-lg border border-white/[0.08] w-full max-w-lg object-contain bg-black/20"
-          />
+          <div className="relative mt-2 h-52 w-full max-w-lg">
+            <CmsImage src={value} alt="GIF" fill className="rounded-lg border border-white/[0.08] object-contain bg-black/20" sizes="512px" />
+          </div>
         ) : (
           <video
             src={value}

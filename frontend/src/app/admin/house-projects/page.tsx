@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff, Home, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { formatRub } from "@/lib/construction-shared";
+import { CmsImage } from "@/components/ui/cms-image";
 
 interface AdminHouseProject {
   id: string;
@@ -102,7 +103,9 @@ export default function AdminHouseProjectsPage() {
             return (
               <article key={project.id} className="rounded-2xl overflow-hidden bg-white/[0.03] border border-white/[0.08]">
                 <div className="h-40 bg-white/[0.04] relative">
-                  {cover ? <img src={cover} alt={project.title} className="h-full w-full object-cover" /> : null}
+                  {cover ? (
+                    <CmsImage src={cover} alt={project.title} fill className="object-cover" sizes="(max-width: 1280px) 50vw, 380px" />
+                  ) : null}
                   <div className="absolute left-3 top-3 flex gap-2">
                     {!project.published ? <span className="rounded-full bg-black/60 px-2 py-1 text-[11px] text-white/60">Черновик</span> : null}
                     {project.isNew ? <span className="rounded-full bg-[#6E2A1F] px-2 py-1 text-[11px] text-white">Новый</span> : null}

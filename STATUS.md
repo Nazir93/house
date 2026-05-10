@@ -1,6 +1,6 @@
 # Дом — Статус проекта
 
-> Дата обновления: 16 марта 2026
+> Дата обновления: 9 мая 2026
 
 **Продакшен-сайт:** [https://dom.ru](https://dom.ru)
 
@@ -32,6 +32,9 @@ docker compose up postgres -d
 # Применить схему БД
 cd frontend
 npx prisma db push
+
+# Если ведёте миграции (лимит лидов LeadIpRateBucket и др.):
+# npx prisma migrate dev
 
 # Запустить dev-сервер
 npm run dev
@@ -149,6 +152,7 @@ docker compose up -d
 - `Review` — отзывы
 - `Faq` — FAQ
 - `ThankYouToken` — токены "спасибо" страницы
+- `LeadIpRateBucket` — скользящее окно лимита POST `/api/leads` по IP (совместно для всех воркеров)
 
 ### Уведомления
 
@@ -183,18 +187,30 @@ RECAPTCHA_SECRET_KEY=""
 NEXT_PUBLIC_RECAPTCHA_SITE_KEY=""
 RESEND_API_KEY=""
 NOTIFICATION_EMAIL=""
+
+# SEO: верификация в кабинетах поиска (мета-теги на всех страницах)
+GOOGLE_SITE_VERIFICATION=""
+YANDEX_VERIFICATION=""
+FACEBOOK_DOMAIN_VERIFICATION=""
+
+# Картинка по умолчанию для OG/Twitter, если страница не задала свою (относительный путь или полный URL)
+NEXT_PUBLIC_DEFAULT_OG_IMAGE="/icon.png"
+# Лого издателя в JSON-LD (Article и Organization); по умолчанию /icon.png
+NEXT_PUBLIC_PUBLISHER_LOGO_URL="/icon.png"
 ```
 
 ---
 
 ### SEO (Фаза 4 — реализовано)
 
-- [x] **Sitemap.xml** — автогенерация из статических + динамических страниц (посты, проекты)
+- [x] **Sitemap.xml** — статика + посты блога, проекты, портфолио, **опубликованные услуги из БД** (`/services/{slug}`), раздел «Технологии», без дубликатов URL
 - [x] **Robots.txt** — стандартные правила + редактирование через админку (`/admin/seo` → вкладка Robots.txt)
 - [x] **Мета-теги** — Title, Description, Keywords, OG-теги для каждой страницы через админку
 - [x] **301 Редиректы** — управление через админку (`/admin/seo` → вкладка Редиректы)
 - [x] **404 Логирование** — автоматическая запись 404 ошибок с referer и user-agent
-- [x] **JSON-LD** — Organization, ElectricalContractor, FAQPage, Reviews (из БД)
+- [x] **JSON-LD** — Organization (с `logo`), FAQPage, Reviews (из БД); статьи блога — **Article** + **BreadcrumbList**; услуги/проекты/портфолио — **BreadcrumbList**
+- [x] **Twitter Card** (`summary_large_image`) и абсолютные URL для OG-изображений (`/uploads/…` → полный адрес сайта)
+- [x] **Googlebot** при индексируемых страницах: крупные превью изображений и фрагменты (max-image-preview и др.)
 - [x] **Яндекс.Метрика + Google Analytics** — скрипты подгружаются из настроек
 - [x] **Загрузка изображений** — API `/api/admin/upload` с авто-конвертацией в WebP (через sharp)
 - [x] **Open Graph** — OG Title, OG Description, OG Image для каждой страницы
@@ -204,11 +220,12 @@ NOTIFICATION_EMAIL=""
 
 ## Что ещё предстоит (Фаза 5)
 
-- [ ] Портфолио CRUD через админку
+- [x] **Портфолио CRUD через админку** — `/admin/projects`, галерея, RichEditor для описаний
+- [x] **Визуальный редактор (WYSIWYG)** — TipTap `RichEditor` в постах, проектах, SEO body, описаниях объектов
+- [x] **Лимит заявок `/api/leads` между инстансами** — таблица `LeadIpRateBucket` в PostgreSQL (15 запросов / 10 мин / IP; при сбое БД — fallback в память процесса)
 - [ ] Массовое редактирование мета-тегов
-- [ ] Визуальный контент-редактор (WYSIWYG)
 - [ ] Интеграция с Яндекс.Вебмастером
-- [ ] Развёртывание на VPS
+- [ ] Развёртывание на VPS (частично описано в `DEPLOY-STEPS.md`, `frontend/DEPLOY-SERVER.md`)
 
 ---
 

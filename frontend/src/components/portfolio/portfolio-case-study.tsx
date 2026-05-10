@@ -8,6 +8,7 @@ import {
   type CaseStudyChipNode,
   type CaseStudyViewMode,
 } from "@/lib/portfolio-case-study";
+import { CmsImage } from "@/components/ui/cms-image";
 
 function pickFirstTier1(phase: CaseStudyPhase | undefined): CaseStudyTier1Chip | null {
   if (!phase) return null;
@@ -309,23 +310,27 @@ function CaseStudyGallery({
   return (
     <div className={`mt-6 ${gridClass}`}>
       {images.map((src, i) => {
-        const inner = (
-          <img
-            src={src}
-            alt={`${altBase} — ${i + 1}`}
-            className={`w-full object-cover ${mode === "list" ? "max-h-[min(78vh,720px)]" : "aspect-[4/3] sm:aspect-[3/2]"}`}
-            loading="lazy"
-          />
-        );
+        const boxClass =
+          mode === "list"
+            ? "relative w-full overflow-hidden rounded-2xl bg-[var(--stone)] max-h-[min(78vh,720px)] h-[min(78vh,720px)] min-h-[180px]"
+            : "relative w-full overflow-hidden rounded-2xl bg-[var(--stone)] aspect-[4/3] sm:aspect-[3/2]";
         return (
-          <figure key={`${src}-${i}`} className="overflow-hidden rounded-2xl bg-[var(--stone)]">
+          <figure key={`${src}-${i}`} className={boxClass}>
+            <CmsImage
+              src={src}
+              alt={`${altBase} — ${i + 1}`}
+              fill
+              className="object-cover"
+              sizes={mode === "list" ? "100vw" : "(max-width: 640px) 100vw, 50vw"}
+            />
             {onImageClick ? (
-              <button type="button" onClick={() => onImageClick(src)} className="block w-full cursor-zoom-in">
-                {inner}
-              </button>
-            ) : (
-              inner
-            )}
+              <button
+                type="button"
+                onClick={() => onImageClick(src)}
+                className="absolute inset-0 z-[1] cursor-zoom-in rounded-2xl bg-transparent"
+                aria-label={`Открыть фото ${i + 1}`}
+              />
+            ) : null}
           </figure>
         );
       })}

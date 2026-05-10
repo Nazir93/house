@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Users, Eye, EyeOff, Trash2, X } from "lucide-react";
 import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
+import { CmsImage } from "@/components/ui/cms-image";
 
 type PartnerItem = {
   id: string;
@@ -215,7 +216,7 @@ export default function AdminPartnersPage() {
               <div key={partner.id} className="flex items-center gap-4 px-5 py-3 hover:bg-white/[0.03] transition-colors">
                 <div className="w-12 h-8 flex items-center justify-center flex-shrink-0 bg-white/5 rounded-lg overflow-hidden">
                   {partner.logoUrl ? (
-                    <img src={partner.logoUrl} alt={partner.name} className="max-h-6 max-w-10 object-contain" />
+                    <CmsImage src={partner.logoUrl} alt={partner.name} width={40} height={24} className="max-h-6 max-w-10 object-contain" sizes="40px" />
                   ) : (
                     <span className="text-[9px] font-bold text-white/25 px-0.5 text-center leading-tight">нет</span>
                   )}

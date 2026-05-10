@@ -7,6 +7,7 @@ import { LayoutGrid, MapPinned } from "lucide-react";
 import { PortfolioExcursionFab } from "@/components/portfolio/portfolio-excursion-fab";
 import { builtObjectMaterialLabel, getBuiltObjectCover, type BuiltObjectItem } from "@/lib/construction-shared";
 import { cn } from "@/lib/utils";
+import { CmsImage } from "@/components/ui/cms-image";
 
 const PortfolioBuiltMap = dynamic(
   () => import("@/components/portfolio/portfolio-built-map").then((m) => m.PortfolioBuiltMap),
@@ -290,12 +291,12 @@ export function BuiltPortfolioContent({
                       <Link href={`/portfolio/${object.slug}`} className="group block">
                         <div className="relative aspect-[4/3] overflow-hidden rounded-sm bg-[var(--stone)] ring-1 ring-[var(--border)] transition-shadow duration-300 group-hover:ring-[var(--accent)]/40">
                           {cover ? (
-                            // Изображение по умолчанию в «ч/б»; при hover — полный цвет
-                            <img
+                            <CmsImage
                               src={cover.url}
                               alt={cover.alt || object.title}
-                              className="h-full w-full object-cover transition-[filter,transform] duration-700 ease-out [filter:grayscale(1)_brightness(0.88)_contrast(1.05)] group-hover:scale-[1.03] group-hover:[filter:grayscale(0)_brightness(1)_contrast(1)]"
-                              loading="lazy"
+                              fill
+                              className="object-cover transition-[filter,transform] duration-700 ease-out [filter:grayscale(1)_brightness(0.88)_contrast(1.05)] group-hover:scale-[1.03] group-hover:[filter:grayscale(0)_brightness(1)_contrast(1)]"
+                              sizes="(max-width: 768px) 50vw, 360px"
                             />
                           ) : (
                             <div className="flex h-full items-center justify-center text-xs text-[var(--text-muted)]">Нет фото</div>

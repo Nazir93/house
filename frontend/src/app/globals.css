@@ -558,3 +558,91 @@
   }
 }
 
+/* —— Админка: боковая панель под день/ночь (контент остаётся в тёмной рабочей зоне) */
+.admin-app {
+  --adm-accent: #0f3d2e;
+  --adm-nav-fg: rgba(255, 255, 255, 0.55);
+  --adm-nav-fg-hover: rgba(255, 255, 255, 0.9);
+  --adm-nav-hover-bg: rgba(255, 255, 255, 0.06);
+  --adm-nav-active-fg: #6ee7b7;
+  --adm-nav-active-bg: rgba(15, 61, 46, 0.2);
+  --adm-sidebar-bg: #0c0f0d;
+  --adm-sidebar-border: rgba(255, 255, 255, 0.08);
+  --adm-sidebar-glow: 0 0 0 1px rgba(255, 255, 255, 0.04), 4px 0 32px rgba(0, 0, 0, 0.35);
+  --adm-logo: #f4f4f0;
+  --adm-foot-fg: rgba(255, 255, 255, 0.38);
+  --adm-mobile-btn-fg: rgba(255, 255, 255, 0.78);
+}
+
+.admin-sidebar-fallback {
+  background-color: var(--adm-sidebar-bg);
+  border-right: 1px solid var(--adm-sidebar-border);
+}
+
+[data-theme="light"] .admin-app {
+  --adm-nav-fg: rgba(26, 30, 29, 0.52);
+  --adm-nav-fg-hover: rgba(26, 30, 29, 0.92);
+  --adm-nav-hover-bg: rgba(15, 61, 46, 0.06);
+  --adm-nav-active-fg: #0b352a;
+  --adm-nav-active-bg: rgba(15, 61, 46, 0.12);
+  --adm-sidebar-bg: #ebe9e4;
+  --adm-sidebar-border: rgba(26, 30, 29, 0.1);
+  --adm-sidebar-glow: 0 0 0 1px rgba(26, 30, 29, 0.06), 6px 0 40px rgba(15, 61, 46, 0.08);
+  --adm-logo: #0f3d2e;
+  --adm-foot-fg: rgba(26, 30, 29, 0.42);
+  --adm-mobile-btn-fg: rgba(26, 30, 29, 0.82);
+}
+
+.admin-main-surface {
+  background:
+    radial-gradient(ellipse 110% 70% at 50% -25%, rgba(15, 61, 46, 0.22), transparent 52%),
+    linear-gradient(165deg, #0b0d0c 0%, #070908 45%, #050706 100%);
+}
+
+[data-theme="light"] .admin-main-surface {
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -20%, rgba(15, 61, 46, 0.14), transparent 48%),
+    linear-gradient(165deg, #0c0e0d 0%, #090b0a 50%, #070908 100%);
+}
+
+/* Личный кабинет: премиальная подложка под тему сайта */
+.account-premium-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.account-premium-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+[data-theme="light"] .account-premium-shell::before {
+  background:
+    radial-gradient(ellipse 85% 55% at 100% 0%, rgba(15, 61, 46, 0.07), transparent 52%),
+    radial-gradient(ellipse 70% 45% at 0% 100%, rgba(215, 210, 203, 0.55), transparent 50%),
+    var(--bg);
+}
+
+[data-theme="dark"] .account-premium-shell::before {
+  background:
+    radial-gradient(ellipse 80% 50% at 90% 10%, rgba(61, 143, 110, 0.09), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 0% 90%, rgba(15, 61, 46, 0.06), transparent 45%),
+    var(--bg);
+}
+
+.account-premium-sidebar {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    4px 0 40px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"] .account-premium-sidebar {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    6px 0 48px rgba(0, 0, 0, 0.35);
+}
+

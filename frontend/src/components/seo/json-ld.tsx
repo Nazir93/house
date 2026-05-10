@@ -1,4 +1,5 @@
 import { SITE_NAME, CITY, SITE_URL, buildSchemaAreaServed, getDefaultSiteGeoDescription } from "@/lib/constants";
+import { toAbsoluteSiteUrl } from "@/lib/absolute-site-url";
 import { OFFICE_OPENING_HOURS_JSON_LD } from "@/lib/contact-config";
 import { loadContactConfig } from "@/lib/load-contact-config";
 import { prisma } from "@/lib/db";
@@ -21,12 +22,24 @@ export async function JsonLd() {
 
   const tel = [contact.phoneRaw, contact.phone2Raw].filter((t) => t?.trim());
   const sameAs = [contact.social.telegram, contact.social.vk, contact.social.max].filter((u) => u?.trim());
+  const logoUrl = toAbsoluteSiteUrl(
+    process.env.NEXT_PUBLIC_PUBLISHER_LOGO_URL?.trim() || "/icon.png"
+  );
+
   const organization = {
     "@context": "https://schema.org",
     "@type": "GeneralContractor",
     name: SITE_NAME,
     description: getDefaultSiteGeoDescription(),
     url: SITE_URL,
+    ...(logoUrl
+      ? {
+          logo: {
+            "@type": "ImageObject",
+            url: logoUrl,
+          },
+        }
+      : {}),
     ...(tel.length > 0 ? { telephone: tel } : {}),
     ...(contact.email.trim() ? { email: contact.email.trim() } : {}),
     address: {

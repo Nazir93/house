@@ -213,6 +213,17 @@ model BuiltObjectMedia {
   @@index([builtObjectId, type, order])
 }
 
+/// Счётчик запросов к POST /api/leads по IP в фиксированном окне времени (несколько инстансов приложения видят общий лимит).
+model LeadIpRateBucket {
+  ipKey       String
+  bucketStart DateTime
+  count       Int      @default(1)
+  updatedAt   DateTime @updatedAt
+
+  @@id([ipKey, bucketStart])
+  @@index([bucketStart])
+}
+
 model Lead {
   id          String     @id @default(cuid())
   name        String

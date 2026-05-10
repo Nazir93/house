@@ -106,13 +106,13 @@ export function BuiltObjectDetailContent({ object }: { object: BuiltObjectItem }
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
               {object.latitude && object.longitude ? (
-                <a
+                <Link
                   href="/portfolio?view=map#portfolio-map"
                   className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white"
                   style={{ backgroundColor: "var(--accent)" }}
                 >
                   <MapPinned size={16} /> Дом на карте
-                </a>
+                </Link>
               ) : null}
               {object.houseProjectSlug ? (
                 <Link

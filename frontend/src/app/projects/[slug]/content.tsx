@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -27,6 +27,7 @@ import {
 } from "@/lib/construction-data";
 import { HouseProjectCompletionSection } from "@/components/construction/house-project-completion-section";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
+import { CmsImage } from "@/components/ui/cms-image";
 import { SITE_URL } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { useModal } from "@/lib/modal-context";
@@ -57,7 +58,7 @@ export function HouseProjectDetailContent({
   const roofPitch = useMemo<PartOfSoulRoofPitch>(() => {
     if (!posCfg?.enabled) return "dual";
     return resolveProjectRoofPitch(pricingFloors, posCfg.defaultRoof);
-  }, [posCfg?.defaultRoof, posCfg?.enabled, pricingFloors]);
+  }, [posCfg, pricingFloors]);
 
   const heroResolved = useMemo(() => resolveProjectHeroPricing(project), [project]);
   const effectiveHeroTiers = useMemo(() => {
@@ -72,10 +73,8 @@ export function HouseProjectDetailContent({
     );
   }, [heroResolved.tiers, posCfg, pricingFloors, project.area, roofPitch]);
   const [materialTierIndex, setMaterialTierIndex] = useState(0);
-
-  useEffect(() => {
-    setMaterialTierIndex((idx) => Math.min(idx, Math.max(0, effectiveHeroTiers.length - 1)));
-  }, [effectiveHeroTiers.length]);
+  const tierMax = Math.max(0, effectiveHeroTiers.length - 1);
+  const tierIdx = Math.min(materialTierIndex, tierMax);
   const [activeRender, setActiveRender] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -180,8 +179,19 @@ export function HouseProjectDetailContent({
           <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,400px)] lg:items-start">
             <div className="relative min-h-0 overflow-hidden rounded-[32px] bg-[var(--stone)] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
               {active ? (
-                <button type="button" onClick={() => openMedia(activeRender)} className="relative block min-h-[320px] w-full cursor-zoom-in sm:min-h-[380px] lg:min-h-[420px]">
-                  <img src={active.url} alt={active.alt || project.title} className="h-[58vw] max-h-[640px] min-h-[320px] w-full object-cover sm:h-[min(58vw,520px)]" />
+                <button
+                  type="button"
+                  onClick={() => openMedia(activeRender)}
+                  className="relative block h-[58vw] max-h-[640px] min-h-[320px] w-full cursor-zoom-in sm:h-[min(58vw,520px)] sm:min-h-[380px] lg:min-h-[420px]"
+                >
+                  <CmsImage
+                    src={active.url}
+                    alt={active.alt || project.title}
+                    fill
+                    priority
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 920px"
+                  />
                 </button>
               ) : (
                 <div className="flex min-h-[420px] items-center justify-center text-[var(--text-subtle)]">Рендер проекта</div>
@@ -298,7 +308,7 @@ export function HouseProjectDetailContent({
               </p>
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
                 {effectiveHeroTiers.map((t, i) => {
-                  const activeTier = i === materialTierIndex;
+                  const activeTier = i === tierIdx;
                   return (
                     <button
                       key={t.id}
@@ -444,12 +454,16 @@ export function HouseProjectDetailContent({
                         className="group overflow-hidden rounded-[24px] border bg-[var(--bg)] text-left shadow-sm transition hover:border-[#778da9]"
                         style={{ borderColor: "var(--border)" }}
                       >
-                        <div className="relative flex max-h-[min(70vh,560px)] min-h-[220px] items-center justify-center bg-[var(--stone)] p-3 sm:min-h-[260px]">
-                          <img
-                            src={plan.url}
-                            alt={plan.alt || plan.label || project.title}
-                            className="max-h-[min(68vh,520px)] w-full object-contain transition duration-300 group-hover:scale-[1.02]"
-                          />
+                        <div className="relative flex max-h-[min(70vh,560px)] min-h-[220px] w-full items-center justify-center bg-[var(--stone)] p-3 sm:min-h-[260px]">
+                          <div className="relative h-[min(68vh,520px)] w-full">
+                            <CmsImage
+                              src={plan.url}
+                              alt={plan.alt || plan.label || project.title}
+                              fill
+                              className="object-contain transition duration-300 group-hover:scale-[1.02]"
+                              sizes="(max-width: 1024px) 100vw, 480px"
+                            />
+                          </div>
                         </div>
                         <div className="border-t p-4 font-semibold" style={{ borderColor: "var(--border)" }}>
                           {plan.label || (plan.floor != null ? `${plan.floor} этаж` : "Планировка")}
@@ -474,13 +488,15 @@ export function HouseProjectDetailContent({
                         key={r.id}
                         type="button"
                         onClick={() => openMedia(i)}
-                        className="group overflow-hidden rounded-2xl border bg-[var(--stone)] shadow-sm transition hover:border-[#778da9]"
+                        className="group relative aspect-[4/3] overflow-hidden rounded-2xl border bg-[var(--stone)] shadow-sm transition hover:border-[#778da9]"
                         style={{ borderColor: "var(--border)" }}
                       >
-                        <img
+                        <CmsImage
                           src={r.url}
                           alt={r.alt || `${project.title}, фасад ${i + 1}`}
-                          className="aspect-[4/3] w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                          fill
+                          className="object-cover transition duration-300 group-hover:scale-[1.02]"
+                          sizes="(max-width: 1024px) 45vw, 320px"
                         />
                       </button>
                     ))}
@@ -499,7 +515,7 @@ export function HouseProjectDetailContent({
                 project={project}
                 calculatorUi={calculatorUi}
                 heroTiers={effectiveHeroTiers}
-                tierIndex={materialTierIndex}
+                tierIndex={tierIdx}
                 onTierIndexChange={setMaterialTierIndex}
                 coverImageUrl={renders[0]?.url}
                 partOfSoulContext={

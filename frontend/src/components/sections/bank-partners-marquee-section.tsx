@@ -1,16 +1,17 @@
 import type { HomePartner } from "@/lib/get-home-partners";
+import { CmsImage } from "@/components/ui/cms-image";
 
 function MarqueeItem({ partner }: { partner: HomePartner }) {
   const content = (
     <span className="inline-flex items-center gap-3 whitespace-nowrap rounded-xl border border-[color-mix(in_srgb,var(--border)_80%,transparent)] bg-[color-mix(in_srgb,var(--bg)_94%,transparent)] px-5 py-3 shadow-sm">
       {partner.logoUrl ? (
-        /* eslint-disable-next-line @next/next/no-img-element */
-        <img
+        <CmsImage
           src={partner.logoUrl}
           alt={partner.name}
+          width={140}
+          height={36}
           className="h-7 w-auto max-w-[140px] object-contain opacity-90 sm:h-8"
-          loading="lazy"
-          decoding="async"
+          sizes="140px"
         />
       ) : (
         <span className="font-heading text-sm font-semibold tracking-tight text-[var(--text)] sm:text-base">

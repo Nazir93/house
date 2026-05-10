@@ -17,10 +17,8 @@ function normalizeVideoList(arr: unknown, single: unknown): string[] {
   return out;
 }
 
-export async function GET(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(_request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const gate = await requireAdminApiSession();
   if (!gate.ok) return gate.response;
 
@@ -34,10 +32,8 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const gate = await requireAdminApiSession();
   if (!gate.ok) return gate.response;
 
@@ -77,10 +73,8 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  _request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(_request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const gate = await requireAdminApiSession();
   if (!gate.ok) return gate.response;
 

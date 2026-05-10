@@ -31,15 +31,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/partners/rent-repair`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.45 },
     { url: `${baseUrl}/consent`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.2 },
     { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
+    { url: `${baseUrl}/technology/materials`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.55 },
+    { url: `${baseUrl}/technology/house-area`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.55 },
   ];
 
   let dynamicPages: MetadataRoute.Sitemap = [];
 
   try {
-    const [posts, houseProjects, builtObjects] = await Promise.all([
+    const [posts, houseProjects, builtObjects, servicesFromDb] = await Promise.all([
       prisma.post.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
-      (prisma as any).houseProject.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
-      (prisma as any).builtObject.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
+      prisma.houseProject.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
+      prisma.builtObject.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
+      prisma.service.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
     ]);
 
     dynamicPages = [
@@ -49,17 +52,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         changeFrequency: "monthly" as const,
         priority: 0.6,
       })),
-      ...houseProjects.map((p: { slug: string; updatedAt: Date }) => ({
+      ...houseProjects.map((p) => ({
         url: `${baseUrl}/projects/${p.slug}`,
         lastModified: p.updatedAt,
         changeFrequency: "monthly" as const,
         priority: 0.75,
       })),
-      ...builtObjects.map((p: { slug: string; updatedAt: Date }) => ({
+      ...builtObjects.map((p) => ({
         url: `${baseUrl}/portfolio/${p.slug}`,
         lastModified: p.updatedAt,
         changeFrequency: "monthly" as const,
         priority: 0.65,
+      })),
+      ...servicesFromDb.map((s) => ({
+        url: `${baseUrl}/services/${s.slug}`,
+        lastModified: s.updatedAt,
+        changeFrequency: "monthly" as const,
+        priority: 0.72,
       })),
     ];
   } catch {
@@ -79,5 +88,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ];
   }
 
-  return [...staticPages, ...dynamicPages];
+  const merged = [...staticPages, ...dynamicPages];
+  const seen = new Set<string>();
+  return merged.filter((entry) => {
+    if (seen.has(entry.url)) return false;
+    seen.add(entry.url);
+    return true;
+  });
 }

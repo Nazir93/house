@@ -4,7 +4,8 @@ import { BuiltObjectForm } from "@/components/admin/built-object-form";
 
 export const dynamic = "force-dynamic";
 
-export default async function EditBuiltObjectPage({ params }: { params: { id: string } }) {
+export default async function EditBuiltObjectPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   let object: any = null;
   try {
     object = await (prisma as any).builtObject.findUnique({

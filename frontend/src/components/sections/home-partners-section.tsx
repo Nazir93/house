@@ -1,5 +1,6 @@
 import type { HomePartner } from "@/lib/get-home-partners";
 import { TrustLeadCardBody, TrustLeadCardShell } from "@/components/sections/trust-lead-card";
+import { CmsImage } from "@/components/ui/cms-image";
 
 function PartnerLogo({ partner }: { partner: HomePartner }) {
   const inner = (
@@ -8,13 +9,13 @@ function PartnerLogo({ partner }: { partner: HomePartner }) {
       style={{ border: "1px solid var(--border)", backgroundColor: "color-mix(in srgb, var(--bg) 92%, transparent)" }}
     >
       {partner.logoUrl ? (
-        /* eslint-disable-next-line @next/next/no-img-element */
-        <img
+        <CmsImage
           src={partner.logoUrl}
           alt={partner.name}
+          width={240}
+          height={120}
           className="max-h-14 w-auto max-w-full object-contain sm:max-h-16 md:max-h-[4.5rem]"
-          loading="lazy"
-          decoding="async"
+          sizes="(max-width: 768px) 40vw, 200px"
         />
       ) : (
         <span className="text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--text-muted)] sm:text-xs">

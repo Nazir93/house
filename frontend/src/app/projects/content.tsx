@@ -20,6 +20,7 @@ import {
   type MaterialFilterId,
   type ProjectsSortKey,
 } from "@/lib/project-filters";
+import { CmsImage } from "@/components/ui/cms-image";
 
 const PAGE_SIZE = 6;
 
@@ -130,7 +131,10 @@ export function ProjectsCatalogContent({ projects }: { projects: HouseProjectIte
     floors,
     sort,
   });
-  filtersRef.current = { areaMin, areaMax, priceMinRub, priceMaxRub, material, floors, sort };
+
+  useEffect(() => {
+    filtersRef.current = { areaMin, areaMax, priceMinRub, priceMaxRub, material, floors, sort };
+  }, [areaMin, areaMax, priceMinRub, priceMaxRub, material, floors, sort]);
 
   /** Поиск по строке с задержкой; актуальные фильтры берём из ref */
   useEffect(() => {
@@ -588,10 +592,12 @@ export function ProjectsCatalogContent({ projects }: { projects: HouseProjectIte
                     <article key={project.id} className="group relative overflow-hidden rounded-[1.25rem] border" style={{ borderColor: "var(--border)" }}>
                       <Link href={`/projects/${project.slug}`} className="relative block aspect-[4/3] overflow-hidden bg-[var(--stone)]">
                         {cover ? (
-                          <img
+                          <CmsImage
                             src={cover.url}
                             alt={cover.alt || project.title}
-                            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                            fill
+                            className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                            sizes="(max-width: 1280px) 50vw, 400px"
                           />
                         ) : null}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" aria-hidden />
@@ -631,10 +637,12 @@ export function ProjectsCatalogContent({ projects }: { projects: HouseProjectIte
                   >
                     <Link href={`/projects/${project.slug}`} className="relative min-h-[260px] overflow-hidden bg-[var(--stone)]">
                       {cover ? (
-                        <img
+                        <CmsImage
                           src={cover.url}
                           alt={cover.alt || project.title}
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          fill
+                          className="object-cover transition-transform duration-700 group-hover:scale-105"
+                          sizes="(max-width: 768px) 100vw, 420px"
                         />
                       ) : null}
                       <div className="absolute left-4 top-4 flex gap-2">

@@ -11,6 +11,7 @@ import {
   UserCircle,
 } from "lucide-react";
 import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
+import { CmsImage } from "@/components/ui/cms-image";
 
 interface TeamItem {
   id: string;
@@ -169,9 +170,9 @@ export default function AdminTeamPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {members.map((m) => (
             <div key={m.id} className={`rounded-xl bg-white/[0.03] border border-white/[0.08] p-4 flex gap-4 ${!m.visible ? "opacity-50" : ""}`}>
-              <div className="w-14 h-14 rounded-full bg-white/[0.06] flex-shrink-0 overflow-hidden">
+              <div className="relative w-14 h-14 rounded-full bg-white/[0.06] flex-shrink-0 overflow-hidden">
                 {m.photoUrl ? (
-                  <img src={m.photoUrl} alt={m.name} className="w-full h-full object-cover" />
+                  <CmsImage src={m.photoUrl} alt={m.name} fill className="object-cover" sizes="56px" />
                 ) : (
                   <UserCircle size={56} className="text-white/10" />
                 )}

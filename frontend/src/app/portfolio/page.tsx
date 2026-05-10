@@ -14,7 +14,8 @@ export async function generateMetadata() {
   });
 }
 
-export default async function PortfolioPage({ searchParams }: { searchParams?: { view?: string } }) {
+export default async function PortfolioPage(props: { searchParams?: Promise<{ view?: string }> }) {
+  const searchParams = await props.searchParams;
   await getPageMetaFields("/portfolio");
   const objects = await getBuiltObjects();
   const initialView = searchParams?.view === "map" ? ("map" as const) : ("grid" as const);

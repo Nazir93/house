@@ -63,10 +63,8 @@ const sharedHeaders = {
   "Cache-Control": "public, max-age=604800, immutable",
 } as const;
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { path: string[] } }
-) {
+export async function GET(request: NextRequest, props: { params: Promise<{ path: string[] }> }) {
+  const params = await props.params;
   const segments = params.path;
   if (!segments || segments.length === 0) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });

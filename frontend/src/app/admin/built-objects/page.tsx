@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Eye, EyeOff, MapPinned, Pencil, Plus, Trash2 } from "lucide-react";
 import { builtObjectMaterialLabel } from "@/lib/construction-shared";
+import { CmsImage } from "@/components/ui/cms-image";
 
 interface BuiltObjectAdminItem {
   id: string;
@@ -78,7 +79,7 @@ export default function AdminBuiltObjectsPage() {
             return (
               <article key={object.id} className="rounded-2xl overflow-hidden bg-white/[0.03] border border-white/[0.08]">
                 <div className="h-40 bg-white/[0.04] relative">
-                  {cover ? <img src={cover} alt={object.title} className="h-full w-full object-cover" /> : null}
+                  {cover ? <CmsImage src={cover} alt={object.title} fill className="object-cover" sizes="(max-width: 1280px) 50vw, 380px" /> : null}
                   {!object.published ? <span className="absolute right-3 top-3 rounded-full bg-black/60 px-2 py-1 text-[11px] text-white/60">Черновик</span> : null}
                 </div>
                 <div className="p-4 space-y-3">

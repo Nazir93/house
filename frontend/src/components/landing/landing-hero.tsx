@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import { CmsImage } from "@/components/ui/cms-image";
 
 interface LandingHeroProps {
   title: string;
@@ -70,19 +71,26 @@ export function LandingHero({
               transitionDelay: "150ms",
             }}
           >
-            <picture>
+            <div className="relative h-[min(46vh,420px)] min-h-[180px] w-full overflow-hidden rounded-xl border border-[var(--border)]">
               {bannerImageDesktop ? (
-                <source media="(min-width: 768px)" srcSet={bannerImageDesktop} />
+                <CmsImage
+                  src={bannerImageDesktop}
+                  alt=""
+                  fill
+                  priority
+                  className="hidden object-cover md:block"
+                  sizes="100vw"
+                />
               ) : null}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={bannerImageMobile || bannerImageDesktop || ""}
+              <CmsImage
+                src={(bannerImageMobile || bannerImageDesktop)!}
                 alt=""
-                className="w-full rounded-xl object-cover max-h-[min(46vh,420px)] border border-[var(--border)]"
-                loading="eager"
-                decoding="async"
+                fill
+                priority
+                className={`object-cover ${bannerImageDesktop ? "md:hidden" : ""}`}
+                sizes="100vw"
               />
-            </picture>
+            </div>
           </div>
         )}
 

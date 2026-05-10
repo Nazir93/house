@@ -21,6 +21,7 @@ import {
 } from "@/lib/construction-data";
 import type { CalculatorAddonItem, CalculatorStageId, CalculatorStageTable, ProjectCalculatorUi } from "@/lib/project-calculator-types";
 import { useModal } from "@/lib/modal-context";
+import { CmsImage } from "@/components/ui/cms-image";
 import {
   computePartOfSoulAddonRub,
   partOfSoulRoofLabels,
@@ -311,10 +312,14 @@ export function HouseProjectCompletionSection({
 
         <div className="overflow-hidden rounded-3xl border bg-[var(--bg)] shadow-sm" style={{ borderColor: "var(--border)" }}>
           <div className="grid gap-0 md:grid-cols-2 md:divide-x md:[&>*]:divide-[var(--border)]" style={{ borderColor: "var(--border)" } as CSSProperties}>
-            <div className="relative min-h-[200px] bg-[var(--stone)] md:min-h-[280px]">
-              <button type="button" onClick={() => window.open(imgSrc, "_blank")} className="block h-full w-full cursor-zoom-in">
-                <img src={imgSrc} alt="" className="h-full max-h-[400px] w-full object-cover" />
-              </button>
+            <div className="relative min-h-[200px] w-full bg-[var(--stone)] md:min-h-[280px] md:max-h-[400px] md:h-[min(400px,50vh)]">
+              <CmsImage src={imgSrc} alt="" fill className="object-cover" sizes="(max-width: 768px) 100vw, 45vw" />
+              <button
+                type="button"
+                onClick={() => window.open(imgSrc, "_blank")}
+                className="absolute inset-0 z-10 cursor-zoom-in bg-transparent"
+                aria-label="Открыть изображение в новой вкладке"
+              />
             </div>
             <div className="flex flex-col justify-center p-5 md:p-6">
               <p className="text-xs font-semibold uppercase tracking-[0.12em]" style={{ color: ACCENT }}>
@@ -400,13 +405,18 @@ export function HouseProjectCompletionSection({
                                   style={{ backgroundColor: "var(--bg)" }}
                                 >
                                   <div className="flex gap-3 md:min-w-[200px] md:max-w-[220px] md:flex-col md:gap-2">
-                                    {item.imageUrl ?
-                                      <img
+                                    {item.imageUrl ? (
+                                      <CmsImage
                                         src={item.imageUrl}
                                         alt=""
+                                        width={64}
+                                        height={64}
                                         className="h-14 w-14 shrink-0 rounded-xl object-cover sm:h-16 sm:w-16"
+                                        sizes="64px"
                                       />
-                                    : <div className="h-14 w-14 shrink-0 rounded-xl bg-[var(--stone)] sm:h-16 sm:w-16" />}
+                                    ) : (
+                                      <div className="h-14 w-14 shrink-0 rounded-xl bg-[var(--stone)] sm:h-16 sm:w-16" />
+                                    )}
                                     <p className="min-w-0 font-bold leading-snug text-[var(--text)]">{item.name}</p>
                                   </div>
 

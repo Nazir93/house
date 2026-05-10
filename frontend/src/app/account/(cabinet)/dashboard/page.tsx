@@ -13,6 +13,7 @@ import {
   stageStatusLabel,
   ticketStatusLabel,
 } from "@/lib/client-portal-labels";
+import { AccountAttentionStrip } from "@/components/account/account-attention-strip";
 
 export const metadata = {
   title: "Главная — личный кабинет",
@@ -57,6 +58,8 @@ export default async function AccountDashboardPage() {
 
   return (
     <div className="space-y-8">
+      <AccountAttentionStrip projectId={projectId} />
+
       {/* Карточка объекта */}
       <section
         className="rounded-2xl border overflow-hidden grid lg:grid-cols-[1fr_1.2fr] gap-0"

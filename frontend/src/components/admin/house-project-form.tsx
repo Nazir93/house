@@ -7,6 +7,7 @@ import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react";
 import { AdminFormSection } from "@/components/admin/admin-form-section";
 import { RichEditor } from "@/components/admin/rich-editor";
 import { uploadAdminMedia } from "@/lib/admin-upload";
+import { CmsImage } from "@/components/ui/cms-image";
 
 type PlanInput = { url: string; label: string; floor: string };
 
@@ -289,7 +290,7 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {form.renders.map((url, index) => (
               <div key={`${url}-${index}`} className="relative rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.08]">
-                <img src={url} alt="" className="h-28 w-full object-cover" />
+                <CmsImage src={url} alt="" width={320} height={112} className="h-28 w-full object-cover" sizes="320px" />
                 <button onClick={() => set("renders", form.renders.filter((_, i) => i !== index))} className="absolute top-2 right-2 rounded-lg bg-black/60 p-1 text-white/70"><Trash2 size={14} /></button>
               </div>
             ))}
@@ -306,7 +307,7 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
           <div className="space-y-2">
             {form.plans.map((plan, index) => (
               <div key={`${plan.url}-${index}`} className="grid grid-cols-[72px_1fr_90px_auto] gap-3 items-center rounded-xl bg-white/[0.03] border border-white/[0.08] p-2">
-                <img src={plan.url} alt="" className="h-14 w-16 object-cover rounded-lg" />
+                <CmsImage src={plan.url} alt="" width={64} height={56} className="h-14 w-16 object-cover rounded-lg" sizes="64px" />
                 <input value={plan.label} onChange={(e) => set("plans", form.plans.map((p, i) => i === index ? { ...p, label: e.target.value } : p))} placeholder="1 этаж" className="px-3 py-2 rounded-lg bg-white/[0.05] text-sm text-white" />
                 <input value={plan.floor} onChange={(e) => set("plans", form.plans.map((p, i) => i === index ? { ...p, floor: e.target.value } : p))} placeholder="Этаж" className="px-3 py-2 rounded-lg bg-white/[0.05] text-sm text-white" />
                 <button onClick={() => set("plans", form.plans.filter((_, i) => i !== index))} className="p-2 text-red-300/70"><Trash2 size={16} /></button>

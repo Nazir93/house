@@ -12,10 +12,8 @@ async function tryDeleteFile(url: string) {
   } catch { /* file may not exist */ }
 }
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const gate = await requireAdminApiSession();
   if (!gate.ok) return gate.response;
 
@@ -36,10 +34,8 @@ export async function POST(
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: NextRequest, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const gate = await requireAdminApiSession();
   if (!gate.ok) return gate.response;
 

@@ -18,8 +18,8 @@ export function useSmartCaptchaToken() {
 
 export function SmartCaptchaGate({ children }: { children: React.ReactNode }) {
   const [triggerExecute, setTriggerExecute] = useState(false);
-  const resolveRef = useRef<(token: string) => void>();
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const resolveRef = useRef<((token: string) => void) | undefined>(undefined);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const getToken = useCallback(() => {
     if (!siteKey) return Promise.resolve("");

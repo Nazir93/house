@@ -53,9 +53,12 @@ export function SiteSearchPanel({
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
 
   const allLinks = useMemo(() => getSiteSearchLinks(), []);
+
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) return;

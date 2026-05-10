@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import { toAbsoluteSiteUrl } from "@/lib/absolute-site-url";
+
+const DEFAULT_OG_PATH = process.env.NEXT_PUBLIC_DEFAULT_OG_IMAGE?.trim() || "/icon.png";
 
 interface MetaDefaults {
   title: string;
@@ -11,6 +14,19 @@ interface MetaDefaults {
   ogImage?: string;
   /** Open Graph: для статей блога — article, иначе website */
   openGraphType?: "website" | "article";
+  /** Поля для OG type=article и соцсетей */
+  article?: {
+    publishedTime?: string;
+    modifiedTime?: string;
+    authors?: string[];
+    section?: string;
+    tags?: string[];
+  };
+  /**
+   * Если не true — при отсутствии og из БД/страницы подставляется NEXT_PUBLIC_DEFAULT_OG_IMAGE или /icon.png
+   * (лучше сниппеты в мессенджерах).
+   */
+  skipDefaultOgImage?: boolean;
 }
 
 /** Одна выборка на путь, кэш ISR — меньше обращений к БД при статической выкладке. */
@@ -50,6 +66,28 @@ export async function getPageMeta(defaults: MetaDefaults): Promise<Metadata> {
 
   const baseUrl = SITE_URL.replace(/\/$/, "");
   const canonical = `${baseUrl}${defaults.path === "/" ? "" : defaults.path}`;
+  const noindex = Boolean(dbMeta?.noindex);
+
+  const explicitOg = (dbMeta?.ogImage || defaults.ogImage || "").trim();
+  const fallbackRel = defaults.skipDefaultOgImage ? "" : DEFAULT_OG_PATH;
+  const ogHref = explicitOg || fallbackRel;
+  const ogAbs = ogHref ? toAbsoluteSiteUrl(ogHref) : undefined;
+  const ogImages =
+    ogAbs != null ? [{ url: ogAbs, alt: title }] : undefined;
+
+  const art = defaults.openGraphType === "article" ? defaults.article : undefined;
+  const ogArticleExtras =
+    art &&
+    {
+      ...(art.publishedTime ? { publishedTime: art.publishedTime } : {}),
+      ...(art.modifiedTime ? { modifiedTime: art.modifiedTime } : {}),
+      ...(art.authors?.length ? { authors: art.authors } : {}),
+      ...(art.section ? { section: art.section } : {}),
+      ...(art.tags?.length ? { tags: art.tags } : {}),
+    };
+
+  const twitterTitle = dbMeta?.ogTitle?.trim() || title;
+  const twitterDescription = dbMeta?.ogDescription?.trim() || description;
 
   return {
     title: { absolute: title },
@@ -58,16 +96,41 @@ export async function getPageMeta(defaults: MetaDefaults): Promise<Metadata> {
     openGraph: {
       title: dbMeta?.ogTitle || title,
       description: dbMeta?.ogDescription || description,
-      type: defaults.openGraphType ?? "website",
+      type: (defaults.openGraphType ?? "website") as "website" | "article",
       locale: "ru_RU",
       siteName: SITE_NAME,
       url: `${baseUrl}${defaults.path}`,
-      ...(dbMeta?.ogImage || defaults.ogImage
-        ? { images: [{ url: dbMeta?.ogImage || defaults.ogImage! }] }
-        : {}),
+      ...(ogImages ? { images: ogImages } : {}),
+      ...(ogArticleExtras ?? {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: twitterTitle,
+      description: twitterDescription,
+      ...(ogAbs ? { images: [ogAbs] } : {}),
     },
     alternates: { canonical },
-    ...(dbMeta?.noindex ? { robots: { index: false, follow: false } } : {}),
+    ...(noindex
+      ? {
+          robots: {
+            index: false,
+            follow: false,
+            googleBot: { index: false, follow: false },
+          },
+        }
+      : {
+          robots: {
+            index: true,
+            follow: true,
+            googleBot: {
+              index: true,
+              follow: true,
+              "max-image-preview": "large",
+              "max-snippet": -1,
+              "max-video-preview": -1,
+            },
+          },
+        }),
   };
 }
 

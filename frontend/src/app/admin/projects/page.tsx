@@ -11,6 +11,7 @@ import {
   Pencil,
   Image as ImageIcon,
 } from "lucide-react";
+import { CmsImage } from "@/components/ui/cms-image";
 
 interface ProjectItem {
   id: string;
@@ -136,10 +137,12 @@ export default function AdminProjectsPage() {
             >
               {p.coverImage && (
                 <div className="h-40 bg-white/[0.03] relative overflow-hidden">
-                  <img
+                  <CmsImage
                     src={p.coverImage}
                     alt={p.title}
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                    fill
+                    className="object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                    sizes="(max-width: 768px) 100vw, 400px"
                   />
                   {!p.published && (
                     <span className="absolute top-2 right-2 px-2 py-0.5 rounded-md bg-black/60 text-xs text-white/50">

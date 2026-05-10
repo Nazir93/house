@@ -3,21 +3,25 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { SITE_NAME } from "@/lib/constants";
 import { getPageMeta, getPageH1 } from "@/lib/get-page-meta";
+import { BlogArticleJsonLd } from "@/components/seo/blog-article-json-ld";
 import { BlogPostContent } from "./content";
 
 export const revalidate = 60;
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   let post: {
     title: string;
     excerpt: string;
     slug: string;
     coverImage: string | null;
     category: string;
+    createdAt: Date;
+    updatedAt: Date;
   } | null = null;
   try {
     post = await prisma.post.findUnique({
@@ -29,6 +33,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         coverImage: true,
         coverVideo: true,
         category: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
   } catch {
@@ -46,6 +52,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords,
     ogImage: post.coverImage || undefined,
     openGraphType: "article",
+    article: {
+      publishedTime: post.createdAt.toISOString(),
+      modifiedTime: post.updatedAt.toISOString(),
+      authors: [SITE_NAME],
+      section: post.category,
+    },
   });
 }
 
@@ -59,7 +71,8 @@ async function getPost(slug: string) {
   }
 }
 
-export default async function BlogPostPage({ params }: Props) {
+export default async function BlogPostPage(props: Props) {
+  const params = await props.params;
   const post = await getPost(params.slug);
   if (!post) notFound();
 
@@ -68,7 +81,17 @@ export default async function BlogPostPage({ params }: Props) {
 
   const raw = post as unknown as { coverVideos?: string[]; galleryUrls?: string[] };
   return (
-    <BlogPostContent
+    <>
+      <BlogArticleJsonLd
+        title={post.title}
+        slug={post.slug}
+        description={post.excerpt}
+        coverImage={post.coverImage}
+        galleryUrls={raw.galleryUrls ?? []}
+        datePublished={post.createdAt.toISOString()}
+        dateModified={post.updatedAt.toISOString()}
+      />
+      <BlogPostContent
       pageH1={pageH1}
       post={{
         title: post.title,
@@ -83,5 +106,6 @@ export default async function BlogPostPage({ params }: Props) {
         createdAt: post.createdAt.toISOString(),
       }}
     />
+    </>
   );
 }

@@ -9,6 +9,7 @@ import { ArrowLeft, ChevronRight, Eye, EyeOff, Home, UserRound } from "lucide-re
 
 import { SITE_NAME } from "@/lib/constants";
 import { ShowcaseCarouselNav } from "@/components/ui/showcase-carousel-nav";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 const CLIENT_SLIDES = [
   {
@@ -198,7 +199,12 @@ function ClientShowcaseCarousel() {
 
 export function AccountLoginExperience() {
   return (
-    <div className="min-h-screen bg-[#e8ebe9] text-[#1a1d1c]">
+    <div className="relative min-h-screen bg-[#e8ebe9] text-[#1a1d1c] dark:bg-[#0d1210] dark:text-[#e8ebe9]">
+      <div className="pointer-events-none absolute right-4 top-4 z-50 sm:right-6 sm:top-6">
+        <span className="pointer-events-auto inline-block rounded-xl bg-[color-mix(in_srgb,var(--bg)_85%,transparent)] p-0.5 shadow-sm backdrop-blur-sm dark:bg-[color-mix(in_srgb,#0d1210_88%,transparent)]">
+          <ThemeToggle variant="outline" />
+        </span>
+      </div>
       <div className="flex min-h-screen min-w-0 flex-col lg:flex-row">
         <div className="relative z-10 flex flex-1 flex-col justify-center px-5 py-12 sm:px-10 lg:w-[min(100%,46rem)] lg:max-w-[46%] lg:flex-none lg:px-14 xl:px-20">
           <div className="pointer-events-none absolute -left-24 top-1/4 h-72 w-72 rounded-full bg-[#0f3d2e]/[0.06] blur-3xl" aria-hidden />

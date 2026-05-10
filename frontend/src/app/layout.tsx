@@ -11,10 +11,27 @@ import { SessionProvider } from "@/components/admin/session-provider";
 import { ThemeProvider } from "@/lib/theme-context";
 import { ModalProvider } from "@/lib/modal-context";
 import { SITE_NAME, CITY, SITE_URL, getDefaultSiteGeoDescription } from "@/lib/constants";
+import { toAbsoluteSiteUrl } from "@/lib/absolute-site-url";
 import { AnalyticsScripts } from "@/components/seo/analytics";
 import { JsonLd } from "@/components/seo/json-ld";
 import { ContactConfigProvider } from "@/lib/contact-config-context";
 import { loadContactConfig } from "@/lib/load-contact-config";
+
+function buildSiteVerification(): Metadata["verification"] | undefined {
+  const google = process.env.GOOGLE_SITE_VERIFICATION?.trim();
+  const yandex = process.env.YANDEX_VERIFICATION?.trim();
+  const fb = process.env.FACEBOOK_DOMAIN_VERIFICATION?.trim();
+  const out: Metadata["verification"] = {};
+  if (google) out.google = google;
+  if (yandex) out.yandex = yandex;
+  if (fb) out.other = { "facebook-domain-verification": fb };
+  return google || yandex || fb ? out : undefined;
+}
+
+const defaultOgImageUrl = toAbsoluteSiteUrl(
+  process.env.NEXT_PUBLIC_DEFAULT_OG_IMAGE?.trim() || "/icon.png"
+);
+const siteVerification = buildSiteVerification();
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -37,6 +54,7 @@ export const metadata: Metadata = {
     siteName: SITE_NAME,
     title: `${SITE_NAME} — загородные дома под ключ в ${CITY}`,
     description: getDefaultSiteGeoDescription(),
+    ...(defaultOgImageUrl ? { images: [{ url: defaultOgImageUrl, alt: SITE_NAME }] } : {}),
   },
   robots: {
     index: true,
@@ -46,6 +64,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: SITE_URL,
   },
+  ...(siteVerification ? { verification: siteVerification } : {}),
 };
 
 export default async function RootLayout({

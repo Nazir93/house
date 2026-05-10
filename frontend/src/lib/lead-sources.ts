@@ -24,6 +24,7 @@ function serviceLeadOptions(): { value: string; label: string; hint?: string }[]
 }
 
 export const LEAD_SOURCE_OPTIONS: { value: string; label: string; hint?: string }[] = [
+  { value: "promo-qr-banner", label: "Промо: QR с баннера", hint: "Страница /promo только по QR, не в меню сайта" },
   { value: "calculator", label: "Ориентировочный расчёт", hint: "Модалка и страница калькулятора" },
   { value: "individual-design", label: "Индивидуальное проектирование", hint: "/individual-design" },
   { value: "house-project-design", label: "Проект (карточка дома)", hint: "Калькулятор на странице типового проекта" },

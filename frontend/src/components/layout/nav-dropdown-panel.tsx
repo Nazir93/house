@@ -48,7 +48,11 @@ function ProjectsDropdown({
   section: NavSection;
   onClose: () => void;
 }) {
-  let thumbIdx = 0;
+  const thumbLinks = section.items.filter((item) => {
+    if (isNavGroup(item)) return false;
+    if ("action" in item && item.action === "openModal") return false;
+    return "href" in item;
+  });
 
   return (
     <div className={cn(panelShell, "min-w-[300px] max-w-[340px] p-3")}>
@@ -67,12 +71,9 @@ function ProjectsDropdown({
         </span>
       </Link>
       <ul className="flex flex-col gap-0.5">
-        {section.items.map((item) => {
-          if (isNavGroup(item)) return null;
-          if ("action" in item && item.action === "openModal") return null;
+        {thumbLinks.map((item, thumbIdx) => {
           if (!("href" in item)) return null;
           const thumb = PROJECT_THUMBS[thumbIdx % PROJECT_THUMBS.length] ?? PROJECT_THUMBS[0];
-          thumbIdx += 1;
           return (
             <li key={item.href}>
               <Link
@@ -100,7 +101,12 @@ function PortfolioDropdown({
   section: NavSection;
   onClose: () => void;
 }) {
-  let thumbIdx = 0;
+  const thumbLinks = section.items.filter((item) => {
+    if (isNavGroup(item)) return false;
+    if ("action" in item && item.action === "openModal") return false;
+    return "href" in item;
+  });
+
   return (
     <div className={cn(panelShell, "min-w-[300px] max-w-[340px] p-3")}>
       <Link
@@ -118,12 +124,9 @@ function PortfolioDropdown({
         </span>
       </Link>
       <ul className="flex flex-col gap-0.5">
-        {section.items.map((item) => {
-          if (isNavGroup(item)) return null;
-          if ("action" in item && item.action === "openModal") return null;
+        {thumbLinks.map((item, thumbIdx) => {
           if (!("href" in item)) return null;
           const thumb = PORTFOLIO_THUMBS[thumbIdx % PORTFOLIO_THUMBS.length] ?? PORTFOLIO_THUMBS[0];
-          thumbIdx += 1;
           return (
             <li key={item.href}>
               <Link

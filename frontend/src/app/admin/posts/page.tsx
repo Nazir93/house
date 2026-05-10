@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Plus, Search, X, FileText, Eye, EyeOff, Trash2 } from "lucide-react";
 
@@ -19,7 +19,7 @@ export default function AdminPostsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  async function fetchPosts() {
+  const fetchPosts = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams();
@@ -32,11 +32,11 @@ export default function AdminPostsPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [search]);
 
   useEffect(() => {
-    fetchPosts();
-  }, [search]);
+    void fetchPosts();
+  }, [fetchPosts]);
 
   async function togglePublished(id: string, published: boolean) {
     await fetch(`/api/admin/posts/${id}`, {

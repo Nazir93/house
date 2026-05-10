@@ -5,6 +5,12 @@ import { v4 as uuidv4 } from "uuid";
 import { sendTelegramNotification, formatLeadMessage } from "@/lib/telegram";
 import { sendBitrixLead } from "@/lib/bitrix";
 
+function logLeadDebug(payload: Record<string, unknown>) {
+  if (process.env.NODE_ENV !== "production" || process.env.LEADS_DEBUG === "1") {
+    console.info("[LEAD]", payload);
+  }
+}
+
 /** Второй шаг оффера: комментарий к пицце без капчи, если previousLeadId — реальная заявка */
 async function verifyOfferPizzaPreviousLead(calcData: unknown): Promise<boolean> {
   let obj: unknown = calcData;
@@ -27,8 +33,9 @@ const RATE_LIMIT_MAX = 15;
 const RATE_LIMIT_WINDOW = 10 * 60 * 1000;
 const CLEANUP_INTERVAL = 5 * 60 * 1000;
 let lastCleanup = Date.now();
+let lastBucketDbCleanup = 0;
 
-function checkRateLimit(ip: string): boolean {
+function checkMemoryRateLimit(ip: string): boolean {
   const now = Date.now();
 
   if (now - lastCleanup > CLEANUP_INTERVAL) {
@@ -51,6 +58,38 @@ function checkRateLimit(ip: string): boolean {
   return true;
 }
 
+async function maybeCleanupStaleRateBuckets(now: number) {
+  if (now - lastBucketDbCleanup < CLEANUP_INTERVAL) return;
+  lastBucketDbCleanup = now;
+  const cutoff = new Date(now - 3 * RATE_LIMIT_WINDOW);
+  try {
+    await prisma.leadIpRateBucket.deleteMany({ where: { bucketStart: { lt: cutoff } } });
+  } catch {
+    /* ignore — не блокируем заявку */
+  }
+}
+
+/** Общий лимит между инстансами через PostgreSQL; при ошибке БД — память процесса. */
+async function checkLeadRateLimit(ip: string): Promise<boolean> {
+  const nowMs = Date.now();
+  await maybeCleanupStaleRateBuckets(nowMs);
+  const bucketStart = new Date(Math.floor(nowMs / RATE_LIMIT_WINDOW) * RATE_LIMIT_WINDOW);
+
+  try {
+    const row = await prisma.leadIpRateBucket.upsert({
+      where: {
+        ipKey_bucketStart: { ipKey: ip, bucketStart },
+      },
+      create: { ipKey: ip, bucketStart, count: 1 },
+      update: { count: { increment: 1 } },
+    });
+    return row.count <= RATE_LIMIT_MAX;
+  } catch (e) {
+    console.error("[LEAD] rate-limit DB unavailable, fallback memory:", e);
+    return checkMemoryRateLimit(ip);
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const ip =
@@ -58,7 +97,7 @@ export async function POST(request: NextRequest) {
       request.headers.get("x-real-ip") ||
       "unknown";
 
-    if (!checkRateLimit(ip)) {
+    if (!(await checkLeadRateLimit(ip))) {
       return NextResponse.json(
         { error: "Слишком много запросов. Попробуйте позже." },
         { status: 429 }
@@ -190,7 +229,7 @@ export async function POST(request: NextRequest) {
       console.error("[leads] Bitrix lead sync failed:", bitrixErr);
     }
 
-    console.log("[LEAD]", {
+    logLeadDebug({
       id: createdLead.id,
       source,
       timestamp: new Date().toISOString(),

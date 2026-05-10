@@ -10,6 +10,7 @@ import { AdminNativeSelect, AdminSelectOption } from "@/components/admin/admin-n
 import { RichEditor } from "@/components/admin/rich-editor";
 import { uploadAdminMedia } from "@/lib/admin-upload";
 import { ADMIN_PROJECT_SERVICE_OPTIONS } from "@/lib/admin-service-options";
+import { CmsImage } from "@/components/ui/cms-image";
 
 const CATEGORIES = [
   { value: "RESTAURANT", label: "Ресторан" },
@@ -276,7 +277,7 @@ export default function NewProjectPage() {
           <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
             {galleryUrls.map((url, i) => (
               <div key={`${url}-${i}`} className="relative group rounded-lg overflow-hidden aspect-square bg-white/[0.03]">
-                <img src={url} alt="" className="w-full h-full object-cover" />
+                <CmsImage src={url} alt="" fill className="object-cover" sizes="(max-width: 768px) 33vw, 180px" />
                 {i === 0 && (
                   <span className="absolute top-1 left-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-[#0F3D2E] text-[#F6F6F4]">
                     Обложка
