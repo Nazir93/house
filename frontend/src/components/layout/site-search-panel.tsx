@@ -198,8 +198,10 @@ export function SiteSearchPanel({
             </div>
           </div>
 
-          {/* Слева колонки разделов, справа «окно» как превью баннера — личный кабинет + заявка */}
-          <div className="mt-4 grid min-h-0 flex-1 grid-cols-1 gap-4 pb-2 lg:mt-5 lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] lg:items-stretch lg:gap-8">
+          {/* Слева колонки разделов, справа «окно» как превью баннера — личный кабинет + заявка.
+              На мобилке вторая строка сетки должна иметь minmax(0,1fr), иначе строки auto и список
+              растёт по контенту — без ограничения высоты overflow-y не скроллится. */}
+          <div className="mt-4 grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_minmax(0,1fr)] gap-4 pb-2 lg:mt-5 lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] lg:grid-rows-1 lg:items-stretch lg:gap-8">
             <aside
               className={cn(glassPane, "order-1 flex shrink-0 flex-col justify-between gap-4 p-4 sm:p-5 lg:order-2 lg:col-start-2 lg:h-full lg:min-h-0")}
             >
@@ -298,7 +300,7 @@ export function SiteSearchPanel({
               ) : (
                 <div
                   className={cn(
-                    "grid min-h-0 flex-1 auto-rows-max content-start gap-2.5 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-2 lg:grid-cols-3 lg:gap-3 xl:grid-cols-3",
+                    "grid min-h-0 flex-1 touch-pan-y auto-rows-max content-start gap-2.5 overflow-y-auto overscroll-contain pr-1 [-webkit-overflow-scrolling:touch] sm:grid-cols-2 lg:grid-cols-3 lg:gap-3 xl:grid-cols-3",
                   )}
                   style={{
                     scrollbarGutter: "stable",
