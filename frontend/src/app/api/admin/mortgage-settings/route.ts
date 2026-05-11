@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidateTag } from "next/cache";
 
 import { prisma } from "@/lib/db";
+import { revalidateTagWithProfile } from "@/lib/revalidate-tag";
 import {
   mortgagePageSettingsSchema,
   DEFAULT_MORTGAGE_PAGE_SETTINGS,
@@ -58,7 +58,7 @@ export async function PUT(request: NextRequest) {
       create: { key: MORTGAGE_PAGE_SETTINGS_KEY, value: JSON.stringify(validated.data) },
     });
 
-    revalidateTag("mortgage-page-settings", "default");
+    revalidateTagWithProfile("mortgage-page-settings");
     return NextResponse.json({ success: true });
   } catch (e) {
     console.error("[ADMIN MORTGAGE SETTINGS PUT]", e);

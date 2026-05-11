@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidateTag } from "next/cache";
 import { prisma } from "@/lib/db";
+import { revalidateTagWithProfile } from "@/lib/revalidate-tag";
 import { HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY } from "@/lib/house-construction-calculator-config";
 import { MORTGAGE_PAGE_SETTINGS_KEY } from "@/lib/mortgage-settings-config";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
@@ -42,11 +42,11 @@ export async function PUT(request: NextRequest) {
     await Promise.all(operations);
 
     if (Object.prototype.hasOwnProperty.call(body, HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY)) {
-      revalidateTag("house-construction-calculator-config", "default");
+      revalidateTagWithProfile("house-construction-calculator-config");
     }
 
     if (Object.prototype.hasOwnProperty.call(body, MORTGAGE_PAGE_SETTINGS_KEY)) {
-      revalidateTag("mortgage-page-settings", "default");
+      revalidateTagWithProfile("mortgage-page-settings");
     }
 
     return NextResponse.json({ success: true });
