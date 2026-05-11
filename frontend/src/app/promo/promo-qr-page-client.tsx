@@ -41,30 +41,21 @@ export function PromoQrPageClient() {
   return (
     <>
       <div className="container mx-auto max-w-[1280px] px-5 pt-28 pb-4">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
-          <div>
-            <span
-              className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs uppercase tracking-[0.14em]"
-              style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
-            >
-              <Gift size={14} className="shrink-0" aria-hidden />
-              Акция по QR
-            </span>
-            <h1 className="mt-5 font-heading text-3xl md:text-5xl tracking-tight max-w-3xl">
-              Специальное предложение для гостей баннера
-            </h1>
-            <p className="mt-4 max-w-2xl text-lg" style={{ color: "var(--text-muted)" }}>
-              Выберите одну услугу из списка — при расчёте дома она учитывается как промо (одна позиция на заявку).
-              Заполните параметры ориентировочного расчёта и отправьте заявку — менеджер свяжется с вами.
-            </p>
-          </div>
-          <Link
-            href="/"
-            className="shrink-0 inline-flex items-center justify-center rounded-xl border px-5 py-3 text-sm font-semibold transition-colors hover:bg-black/[0.03] dark:hover:bg-white/[0.06]"
-            style={{ borderColor: "var(--border)", color: "var(--text)" }}
+        <div className="mb-8">
+          <span
+            className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs uppercase tracking-[0.14em]"
+            style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
           >
-            На основной сайт
-          </Link>
+            <Gift size={14} className="shrink-0" aria-hidden />
+            Акция по QR
+          </span>
+          <h1 className="mt-5 font-heading text-3xl md:text-5xl tracking-tight max-w-3xl">
+            Специальное предложение для гостей баннера
+          </h1>
+          <p className="mt-4 max-w-2xl text-lg" style={{ color: "var(--text-muted)" }}>
+            Выберите одну услугу из списка — при расчёте дома она учитывается как промо (одна позиция на заявку).
+            Заполните параметры ориентировочного расчёта и отправьте заявку — менеджер свяжется с вами.
+          </p>
         </div>
 
         <section
