@@ -22,7 +22,7 @@ function resolveSecureCookie(req: NextRequest): boolean {
 }
 
 /**
- * Секрет для middleware: читаем через Reflect/get по строкам ключей — так надёжнее для runtime
+ * Секрет для Edge proxy: читаем через Reflect/get по строкам ключей — так надёжнее для runtime
  * (PM2 / `.env` при `next start`), чем статический `process.env.NEXTAUTH_SECRET` в некоторых сборках.
  */
 function getEdgeAuthSecret(): string | undefined {
@@ -45,7 +45,7 @@ async function getJwt(req: NextRequest) {
   return token;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Редирект HTTP→HTTPS из Node по умолчанию ВЫКЛЮЧЕН: у многих VPS на :3000 всё равно пробрасывают
   // X-Forwarded-* → получался битый Location (например https://0.0.0.0:3000/). На проде редирект на HTTPS
   // делайте в nginx. Явно включить: MIDDLEWARE_HTTPS_REDIRECT=true в .env (и корректные proxy-заголовки).
