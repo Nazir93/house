@@ -179,11 +179,9 @@ export function AdminSidebar() {
 
         {/* Footer */}
         <div className="p-2 border-t space-y-1.5" style={{ borderColor: "var(--adm-sidebar-border)" }}>
-          <ThemeToggle
-            compact={collapsed}
-            variant="outline"
-            className={`w-full justify-center ${collapsed ? "!px-2" : ""}`}
-          />
+          <div className="flex justify-center">
+            <ThemeToggle variant="outline" />
+          </div>
           <button
             onClick={() => signOut({ callbackUrl: "/admin/login" })}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-150 hover:text-red-400 hover:bg-red-500/[0.08]"

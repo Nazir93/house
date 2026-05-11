@@ -147,6 +147,11 @@ export function AccountShell({
             );
           })}
         </nav>
+        <div className="hidden border-t p-3 lg:block" style={{ borderColor: "var(--border)" }}>
+          <div className="flex justify-center">
+            <ThemeToggle variant="outline" />
+          </div>
+        </div>
         <div className="p-4 text-xs border-t space-y-1" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
           <p className="font-semibold" style={{ color: "var(--text)" }}>
             Поддержка
@@ -179,7 +184,9 @@ export function AccountShell({
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <ThemeToggle variant="outline" className="shrink-0" />
+            <div className="lg:hidden">
+              <ThemeToggle variant="outline" />
+            </div>
             <Link
               href={bellHref}
               title={bellLabel}
