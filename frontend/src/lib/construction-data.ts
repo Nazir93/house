@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
+import { CACHE_TAG_PUBLIC_BUILT_OBJECTS, CACHE_TAG_PUBLIC_HOUSE_PROJECTS } from "@/lib/cache-tags-public";
 import { AURORA_PROJECT_CALCULATOR_UI } from "@/lib/project-calculator-aurora-defaults";
 import type { ProjectCalculatorUi } from "@/lib/project-calculator-types";
 import {
@@ -618,7 +619,7 @@ const getHouseProjectsCached = unstable_cache(
     return FALLBACK_HOUSE_PROJECTS;
   },
   ["house-projects-published"],
-  { revalidate: 60 }
+  { revalidate: 60, tags: [CACHE_TAG_PUBLIC_HOUSE_PROJECTS] }
 );
 
 export async function getHouseProjects(): Promise<HouseProjectItem[]> {
@@ -642,7 +643,7 @@ const getHouseProjectBySlugCached = unstable_cache(
     return FALLBACK_HOUSE_PROJECTS.find((project) => project.slug === slug) ?? null;
   },
   ["house-project-by-slug"],
-  { revalidate: 60 }
+  { revalidate: 60, tags: [CACHE_TAG_PUBLIC_HOUSE_PROJECTS] }
 );
 
 export async function getHouseProjectBySlug(slug: string): Promise<HouseProjectItem | null> {
@@ -684,7 +685,7 @@ const getBuiltObjectsCached = unstable_cache(
     return FALLBACK_BUILT_OBJECTS;
   },
   ["built-objects-published"],
-  { revalidate: 60 }
+  { revalidate: 60, tags: [CACHE_TAG_PUBLIC_BUILT_OBJECTS] }
 );
 
 export async function getBuiltObjects(): Promise<BuiltObjectItem[]> {
@@ -717,7 +718,7 @@ const getBuiltObjectBySlugCached = unstable_cache(
     return FALLBACK_BUILT_OBJECTS.find((object) => object.slug === slug) ?? null;
   },
   ["built-object-by-slug"],
-  { revalidate: 60 }
+  { revalidate: 60, tags: [CACHE_TAG_PUBLIC_BUILT_OBJECTS] }
 );
 
 export async function getBuiltObjectBySlug(slug: string): Promise<BuiltObjectItem | null> {

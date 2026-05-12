@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
+import { revalidatePublicConstructionCatalog } from "@/lib/revalidate-public-content";
 
 function numberOrNull(value: unknown) {
   if (value == null || value === "") return null;
@@ -111,6 +112,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         ...(mediaPatch && { media: mediaPatch }),
       },
     });
+    revalidatePublicConstructionCatalog();
     return NextResponse.json(project);
   } catch (error) {
     console.error("[ADMIN HOUSE PROJECT UPDATE]", error);
@@ -125,6 +127,7 @@ export async function DELETE(_request: NextRequest, props: { params: Promise<{ i
 
   try {
     await (prisma as any).houseProject.delete({ where: { id: params.id } });
+    revalidatePublicConstructionCatalog();
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[ADMIN HOUSE PROJECT DELETE]", error);

@@ -26,7 +26,6 @@ import {
 import { useState } from "react";
 import { SITE_NAME } from "@/lib/constants";
 import { useAdminNewLeadsNotify } from "@/hooks/use-admin-new-leads-notify";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Дашборд", icon: LayoutDashboard, exact: true },
@@ -190,9 +189,6 @@ export function AdminSidebar({ collapsed: collapsedProp, onCollapsedChange }: Ad
 
         {/* Footer */}
         <div className="p-2 border-t space-y-1.5" style={{ borderColor: "var(--adm-sidebar-border)" }}>
-          <div className="flex justify-center">
-            <ThemeToggle variant="outline" />
-          </div>
           <button
             onClick={() => signOut({ callbackUrl: "/admin/login" })}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-150 hover:text-red-400 hover:bg-red-500/[0.08]"

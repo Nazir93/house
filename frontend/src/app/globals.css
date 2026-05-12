@@ -558,7 +558,7 @@
   }
 }
 
-/* —— Админка: боковая панель под день/ночь (контент остаётся в тёмной рабочей зоне) */
+/* —— Админка: сайдбар + рабочая область синхронно с data-theme */
 .admin-app {
   --adm-accent: #0f3d2e;
   --adm-nav-fg: rgba(255, 255, 255, 0.55);
@@ -572,6 +572,22 @@
   --adm-logo: #f4f4f0;
   --adm-foot-fg: rgba(255, 255, 255, 0.38);
   --adm-mobile-btn-fg: rgba(255, 255, 255, 0.78);
+  /* рабочая зона (main) */
+  --adm-main-fg: rgba(243, 244, 240, 0.92);
+  --adm-main-fg-heading: rgba(255, 255, 255, 0.9);
+  --adm-main-fg-muted: rgba(255, 255, 255, 0.65);
+  --adm-main-fg-subtle: rgba(255, 255, 255, 0.4);
+  --adm-main-fg-faint: rgba(255, 255, 255, 0.28);
+  --adm-card-bg: rgba(255, 255, 255, 0.03);
+  --adm-card-border: rgba(255, 255, 255, 0.08);
+  --adm-field-bg: rgba(255, 255, 255, 0.05);
+  --adm-field-border: rgba(255, 255, 255, 0.08);
+  --adm-field-fg: rgba(255, 255, 255, 0.96);
+  --adm-main-bg: radial-gradient(ellipse 110% 70% at 50% -25%, rgba(15, 61, 46, 0.22), transparent 52%),
+    linear-gradient(165deg, #0b0d0c 0%, #070908 45%, #050706 100%);
+  --adm-theme-toggle-bg: rgba(255, 255, 255, 0.06);
+  --adm-theme-toggle-border: rgba(255, 255, 255, 0.12);
+  --adm-theme-toggle-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
 }
 
 .admin-sidebar-fallback {
@@ -591,21 +607,194 @@
   --adm-logo: #0f3d2e;
   --adm-foot-fg: rgba(26, 30, 29, 0.42);
   --adm-mobile-btn-fg: rgba(26, 30, 29, 0.82);
+  --adm-main-fg: rgba(22, 26, 25, 0.92);
+  --adm-main-fg-heading: rgba(22, 26, 25, 0.9);
+  --adm-main-fg-muted: rgba(22, 26, 25, 0.62);
+  --adm-main-fg-subtle: rgba(22, 26, 25, 0.45);
+  --adm-main-fg-faint: rgba(22, 26, 25, 0.32);
+  --adm-card-bg: rgba(255, 255, 255, 0.72);
+  --adm-card-border: rgba(22, 26, 25, 0.1);
+  --adm-field-bg: rgba(255, 255, 255, 0.94);
+  --adm-field-border: rgba(22, 26, 25, 0.14);
+  --adm-field-fg: rgba(22, 26, 25, 0.94);
+  --adm-main-bg: radial-gradient(ellipse 95% 65% at 50% -18%, rgba(15, 61, 46, 0.12), transparent 50%),
+    linear-gradient(165deg, #f3f1ec 0%, #ebe8e1 42%, #e2dfd7 100%);
+  --adm-theme-toggle-bg: rgba(255, 255, 255, 0.88);
+  --adm-theme-toggle-border: rgba(22, 26, 25, 0.12);
+  --adm-theme-toggle-shadow: 0 10px 32px rgba(15, 61, 46, 0.12);
 }
 
 .admin-main-surface {
-  /* Рабочая зона админки всегда тёмная; общая тема день/ночь влияет на сайдбар через --adm-* */
-  color: rgba(243, 244, 240, 0.92);
+  color: var(--adm-main-fg);
   color-scheme: dark;
-  background:
-    radial-gradient(ellipse 110% 70% at 50% -25%, rgba(15, 61, 46, 0.22), transparent 52%),
-    linear-gradient(165deg, #0b0d0c 0%, #070908 45%, #050706 100%);
+  background: var(--adm-main-bg);
+  transition: background 0.35s ease, color 0.25s ease;
 }
 
-[data-theme="light"] .admin-main-surface {
-  background:
-    radial-gradient(ellipse 90% 55% at 50% -20%, rgba(15, 61, 46, 0.14), transparent 48%),
-    linear-gradient(165deg, #0c0e0d 0%, #090b0a 50%, #070908 100%);
+[data-theme="light"] .admin-app .admin-main-surface {
+  color-scheme: light;
+}
+
+/* Светлая тема: типовые tailwind-классы внутри main (пока формы на text-white/…) */
+[data-theme="light"] .admin-main-surface .text-white\/90 {
+  color: var(--adm-main-fg-heading) !important;
+}
+[data-theme="light"] .admin-main-surface .text-white\/80 {
+  color: rgb(22 26 25 / 0.78) !important;
+}
+[data-theme="light"] .admin-main-surface .text-white\/70 {
+  color: var(--adm-main-fg-muted) !important;
+}
+[data-theme="light"] .admin-main-surface .text-white\/60 {
+  color: rgb(22 26 25 / 0.58) !important;
+}
+[data-theme="light"] .admin-main-surface .text-white\/55 {
+  color: rgb(22 26 25 / 0.52) !important;
+}
+[data-theme="light"] .admin-main-surface .text-white\/50 {
+  color: rgb(22 26 25 / 0.48) !important;
+}
+[data-theme="light"] .admin-main-surface .text-white\/45 {
+  color: rgb(22 26 25 / 0.44) !important;
+}
+[data-theme="light"] .admin-main-surface .text-white\/40 {
+  color: var(--adm-main-fg-subtle) !important;
+}
+[data-theme="light"] .admin-main-surface .text-white\/35 {
+  color: rgb(22 26 25 / 0.38) !important;
+}
+[data-theme="light"] .admin-main-surface .text-white\/30 {
+  color: rgb(22 26 25 / 0.34) !important;
+}
+[data-theme="light"] .admin-main-surface .text-white\/25 {
+  color: rgb(22 26 25 / 0.3) !important;
+}
+[data-theme="light"] .admin-main-surface .text-white\/20 {
+  color: rgb(22 26 25 / 0.26) !important;
+}
+[data-theme="light"] .admin-main-surface .text-white\/10 {
+  color: rgb(22 26 25 / 0.14) !important;
+}
+[data-theme="light"] .admin-main-surface .text-white {
+  color: var(--adm-main-fg) !important;
+}
+[data-theme="light"] .admin-main-surface .hover\:text-white:hover {
+  color: var(--adm-main-fg) !important;
+}
+[data-theme="light"] .admin-main-surface .hover\:text-white\/70:hover {
+  color: var(--adm-main-fg-muted) !important;
+}
+[data-theme="light"] .admin-main-surface .hover\:text-white\/95:hover {
+  color: var(--adm-main-fg-heading) !important;
+}
+[data-theme="light"] .admin-main-surface [class*="marker:text-white"] ::marker {
+  color: rgb(22 26 25 / 0.35) !important;
+}
+
+[data-theme="light"] .admin-main-surface .border-white\/\[0\.06\] {
+  border-color: rgb(22 26 25 / 0.08) !important;
+}
+[data-theme="light"] .admin-main-surface .border-white\/\[0\.08\] {
+  border-color: var(--adm-card-border) !important;
+}
+[data-theme="light"] .admin-main-surface .border-white\/\[0\.04\] {
+  border-color: rgb(22 26 25 / 0.06) !important;
+}
+[data-theme="light"] .admin-main-surface .border-white\/\[0\.14\] {
+  border-color: rgb(22 26 25 / 0.14) !important;
+}
+[data-theme="light"] .admin-main-surface .hover\:border-white\/\[0\.14\]:hover {
+  border-color: rgb(15 61 46 / 0.28) !important;
+}
+[data-theme="light"] .admin-main-surface .placeholder\:text-white\/20::placeholder {
+  color: rgb(22 26 25 / 0.32) !important;
+}
+[data-theme="light"] .admin-main-surface .placeholder\:text-white\/25::placeholder {
+  color: rgb(22 26 25 / 0.36) !important;
+}
+[data-theme="light"] .admin-main-surface .border-white\/15 {
+  border-color: rgb(22 26 25 / 0.16) !important;
+}
+
+[data-theme="light"] .admin-main-surface .bg-white\/\[0\.02\] {
+  background-color: rgb(255 255 255 / 0.55) !important;
+}
+[data-theme="light"] .admin-main-surface .bg-white\/\[0\.03\] {
+  background-color: rgb(255 255 255 / 0.58) !important;
+}
+[data-theme="light"] .admin-main-surface .bg-white\/\[0\.04\] {
+  background-color: rgb(255 255 255 / 0.62) !important;
+}
+[data-theme="light"] .admin-main-surface .bg-white\/\[0\.05\] {
+  background-color: var(--adm-field-bg) !important;
+}
+[data-theme="light"] .admin-main-surface .bg-white\/\[0\.06\] {
+  background-color: rgb(255 255 255 / 0.72) !important;
+}
+[data-theme="light"] .admin-main-surface .bg-white\/5 {
+  background-color: rgb(22 26 25 / 0.05) !important;
+}
+[data-theme="light"] .admin-main-surface .hover\:bg-white\/5:hover {
+  background-color: rgb(22 26 25 / 0.06) !important;
+}
+[data-theme="light"] .admin-main-surface .hover\:bg-white\/\[0\.04\]:hover {
+  background-color: rgb(22 26 25 / 0.05) !important;
+}
+[data-theme="light"] .admin-main-surface .hover\:bg-white\/\[0\.03\]:hover {
+  background-color: rgb(22 26 25 / 0.045) !important;
+}
+[data-theme="light"] .admin-main-surface .hover\:bg-white\/10:hover {
+  background-color: rgb(22 26 25 / 0.09) !important;
+}
+[data-theme="light"] .admin-main-surface .bg-white\/10 {
+  background-color: rgb(22 26 25 / 0.08) !important;
+}
+
+[data-theme="light"] .admin-main-surface .bg-black\/20 {
+  background-color: rgb(22 26 25 / 0.06) !important;
+}
+[data-theme="light"] .admin-main-surface .bg-black\/15 {
+  background-color: rgb(22 26 25 / 0.05) !important;
+}
+[data-theme="light"] .admin-main-surface .bg-black\/60 {
+  background-color: rgb(22 26 25 / 0.45) !important;
+}
+
+[data-theme="light"] .admin-main-surface :is(input, textarea, select):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"]) {
+  background-color: var(--adm-field-bg) !important;
+  border-color: var(--adm-field-border) !important;
+  color: var(--adm-field-fg) !important;
+}
+[data-theme="light"]
+  .admin-main-surface
+  :is(input, textarea, select):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"])::placeholder {
+  color: rgb(22 26 25 / 0.38) !important;
+}
+
+/* Текст на сплошных кнопках/ссылках бренда — не перекрашивать в тёмный */
+[data-theme="light"] .admin-main-surface :is(a, button)[class*="bg-[#0F3D2E]"] {
+  color: #f6f6f4 !important;
+}
+[data-theme="light"] .admin-main-surface .text-\[\#F6F6F4\] {
+  color: #f6f6f4 !important;
+}
+
+[data-theme="light"] .admin-main-surface .prose-invert {
+  --tw-prose-body: rgb(22 26 25 / 0.88);
+  --tw-prose-headings: rgb(22 26 25 / 0.94);
+  --tw-prose-bold: rgb(22 26 25 / 0.95);
+  --tw-prose-quotes: rgb(22 26 25 / 0.75);
+  --tw-prose-quote-borders: rgb(15 61 46 / 0.35);
+  --tw-prose-bullets: rgb(15 61 46 / 0.55);
+  --tw-prose-counters: rgb(22 26 25 / 0.5);
+  --tw-prose-hr: rgb(22 26 25 / 0.12);
+}
+
+/* Плавающий переключатель темы в админке */
+.admin-theme-toggle-wrap {
+  background: var(--adm-theme-toggle-bg);
+  border: 1px solid var(--adm-theme-toggle-border);
+  box-shadow: var(--adm-theme-toggle-shadow);
 }
 
 /* Личный кабинет: премиальная подложка под тему сайта */

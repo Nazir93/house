@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { generateSlug } from "@/lib/utils";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
+import { revalidatePublicConstructionCatalog } from "@/lib/revalidate-public-content";
 
 export const dynamic = "force-dynamic";
 
@@ -102,6 +103,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    revalidatePublicConstructionCatalog();
     return NextResponse.json(project, { status: 201 });
   } catch (error) {
     console.error("[ADMIN HOUSE PROJECT CREATE]", error);

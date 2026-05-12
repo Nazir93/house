@@ -1,7 +1,9 @@
 import { revalidatePath } from "next/cache";
 import { revalidateTagWithProfile } from "@/lib/revalidate-tag";
 import {
+  CACHE_TAG_PUBLIC_BUILT_OBJECTS,
   CACHE_TAG_PUBLIC_FAQS,
+  CACHE_TAG_PUBLIC_HOUSE_PROJECTS,
   CACHE_TAG_PUBLIC_REVIEWS,
   CACHE_TAG_PUBLIC_TEAM,
 } from "@/lib/cache-tags-public";
@@ -25,4 +27,16 @@ export function revalidatePublicReviews(): void {
 export function revalidatePublicTeam(): void {
   revalidateTagWithProfile(CACHE_TAG_PUBLIC_TEAM);
   revalidatePath("/team");
+}
+
+/**
+ * После изменений типовых проектов домов и/или построенных объектов в админке:
+ * сброс `unstable_cache` в `construction-data` и страниц, где показываются каталоги и превью.
+ */
+export function revalidatePublicConstructionCatalog(): void {
+  revalidateTagWithProfile(CACHE_TAG_PUBLIC_HOUSE_PROJECTS);
+  revalidateTagWithProfile(CACHE_TAG_PUBLIC_BUILT_OBJECTS);
+  revalidatePath("/", "layout");
+  revalidatePath("/projects");
+  revalidatePath("/portfolio");
 }

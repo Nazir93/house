@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
+import { revalidatePublicConstructionCatalog } from "@/lib/revalidate-public-content";
 
 function n(value: unknown) {
   const parsed = Number(value);
@@ -73,6 +74,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         }),
       },
     });
+    revalidatePublicConstructionCatalog();
     return NextResponse.json(object);
   } catch (error) {
     console.error("[ADMIN BUILT OBJECT UPDATE]", error);
@@ -87,6 +89,7 @@ export async function DELETE(_request: NextRequest, props: { params: Promise<{ i
 
   try {
     await (prisma as any).builtObject.delete({ where: { id: params.id } });
+    revalidatePublicConstructionCatalog();
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[ADMIN BUILT OBJECT DELETE]", error);
