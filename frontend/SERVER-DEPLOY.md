@@ -39,7 +39,27 @@ PROJECT_ROOT=/РЕАЛЬНЫЙ/ПУТЬ/К/КОРНЮ РЕПО   # где ест
 - **`ecosystem.config.cjs`** при старте PM2 **читает этот `.env`** и передаёт переменные процессу — если файла нет или он в корне репо без копии в `frontend/`, сессии не заведутся.
 - После первого создания `.env` или смены секретов: из **`frontend`** выполните `npm run env:check`, затем перезапуск PM2 (см. ниже).
 
-## Типовой сценарий (после `git push` в `main`)
+## Одна команда на сервере (после `git push` в `main`)
+
+С **любой** текущей папки SSH (путь как у вас в блоке «Ваши уточнения» ниже):
+
+```bash
+bash /var/www/house/scripts/deploy-vps.sh
+```
+
+Другой корень репозитория — одна строка (подставьте путь к клону, где лежит `scripts/deploy-vps.sh`):
+
+```bash
+HOUSE_ROOT=/ваш/путь bash /ваш/путь/scripts/deploy-vps.sh
+```
+
+Скрипт делает подряд: `git pull` → `npm ci` в `frontend` → `prisma migrate deploy` → `npm run build` → `pm2 reload house-next --update-env` → `pm2 save`.
+
+Если миграции на этом сервере не используете (только `db:push`) — откройте `scripts/deploy-vps.sh` и уберите или закомментируйте строку с `migrate deploy`.
+
+---
+
+## Типовой сценарий по шагам (если нужно вручную)
 
 Подставьте **свой** `PROJECT_ROOT` и при необходимости имя процесса PM2.
 
@@ -140,13 +160,8 @@ NextAuth строит CSRF и cookie от **`NEXTAUTH_URL`**. Если в `.env`
 - База: вариант A (`migrate deploy`) или B (`db push`): `________________` *(допишите, как у вас принято)*
 - Другое (докер, порт, имя процесса PM2): процесс **`house-next`**, порт в `ecosystem.config.cjs` — **3000**
 
-Копипаст для деплоя на этом сервере:
+Копипаст — **одна строка**:
 
 ```bash
-export PROJECT_ROOT=/var/www/house
-cd "$PROJECT_ROOT" && git pull origin main
-cd "$PROJECT_ROOT/frontend" && npm ci && npm run build
-pm2 reload house-next && pm2 save
+bash /var/www/house/scripts/deploy-vps.sh
 ```
-
-*(Перед `build` при необходимости — `DATABASE_URL` и миграции / `db:push` по разделу выше.)*

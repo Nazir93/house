@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
-# Закреплённый деплой на VPS (PM2: house-next).
-# На сервере: cd /var/www/house && bash scripts/deploy-vps.sh
-# Другой корень: HOUSE_ROOT=/path/to/repo bash scripts/deploy-vps.sh
+# Один заход: pull → зависимости → миграции → сборка → PM2.
+# На сервере (одна команда):
+#   cd /var/www/house && bash scripts/deploy-vps.sh
+# Другой корень репозитория:
+#   HOUSE_ROOT=/path/to/repo bash scripts/deploy-vps.sh
 set -euo pipefail
 
 ROOT="${HOUSE_ROOT:-/var/www/house}"
@@ -9,11 +11,12 @@ cd "$ROOT"
 
 git pull origin main
 
-cd frontend
-npx prisma generate
-npx prisma migrate deploy
+cd "$ROOT/frontend"
+npm ci
+npx prisma migrate deploy --schema=prisma/schema.prisma
 npm run build
 
-pm2 restart house-next
+pm2 reload house-next --update-env
+pm2 save
 
-echo "OK: деплой завершён, перезапущен pm2 process house-next"
+echo "OK: деплой завершён (house-next перезагружен)."
