@@ -4,7 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -48,7 +48,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<SiteTheme>("light");
   const hydratedRef = useRef(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!hydratedRef.current) {
       hydratedRef.current = true;
       const t = readThemeFromDom();

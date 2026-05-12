@@ -21,6 +21,7 @@ const FOOTER_COLUMNS: { title: string; links: { href: string; label: string }[] 
     title: "О компании",
     links: [
       { href: "/about", label: "О компании" },
+      { href: "/team", label: "Команда" },
       { href: "/partners/vacancies", label: "Вакансии" },
       { href: "/reviews", label: "Отзывы" },
       { href: "/blog", label: "Новости" },

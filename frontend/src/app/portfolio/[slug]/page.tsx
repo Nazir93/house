@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { SITE_NAME } from "@/lib/constants";
 import { getBuiltObjectBySlug } from "@/lib/construction-data";
+import { getPublicFaqs } from "@/lib/get-public-faqs";
 import { getBuiltObjectCover } from "@/lib/construction-shared";
 import { getPageMeta } from "@/lib/get-page-meta";
 import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
@@ -35,7 +36,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
 export default async function CasePage(props: Props) {
   const params = await props.params;
-  const object = await getBuiltObjectBySlug(params.slug);
+  const [object, faqItems] = await Promise.all([getBuiltObjectBySlug(params.slug), getPublicFaqs()]);
   if (!object) notFound();
   return (
     <>
@@ -46,7 +47,7 @@ export default async function CasePage(props: Props) {
           { name: object.title, path: `/portfolio/${object.slug}` },
         ]}
       />
-      <BuiltObjectDetailContent object={object} />
+      <BuiltObjectDetailContent object={object} faqItems={faqItems} />
     </>
   );
 }

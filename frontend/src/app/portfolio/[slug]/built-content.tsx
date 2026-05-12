@@ -7,13 +7,20 @@ import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { PortfolioCaseStudy } from "@/components/portfolio/portfolio-case-study";
 import { getCaseStudyPhasesForObject } from "@/lib/portfolio-case-study";
 import {
-  CaseStudyFaqSection,
+  CaseStudyFaqSectionClient,
   CaseStudyLeadCtaSection,
   ConstructionServicesStagesSection,
 } from "@/components/sections/case-study-landing-sections";
+import type { PublicFaqItem } from "@/lib/get-public-faqs";
 import { builtObjectMaterialLabel, type BuiltObjectItem } from "@/lib/construction-shared";
 
-export function BuiltObjectDetailContent({ object }: { object: BuiltObjectItem }) {
+export function BuiltObjectDetailContent({
+  object,
+  faqItems,
+}: {
+  object: BuiltObjectItem;
+  faqItems: PublicFaqItem[];
+}) {
   const [expanded, setExpanded] = useState(false);
   const [worksOpen, setWorksOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -78,7 +85,7 @@ export function BuiltObjectDetailContent({ object }: { object: BuiltObjectItem }
             <PortfolioCaseStudy phases={casePhases} onGalleryImageClick={openLightboxByUrl} />
           </div>
 
-          <CaseStudyFaqSection />
+          <CaseStudyFaqSectionClient items={faqItems} />
           <ConstructionServicesStagesSection />
           <CaseStudyLeadCtaSection />
 

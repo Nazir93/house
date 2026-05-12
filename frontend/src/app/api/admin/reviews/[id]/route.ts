@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { revalidatePublicReviews } from "@/lib/revalidate-public-content";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -23,6 +24,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         ...(body.order !== undefined && { order: body.order }),
       },
     });
+    revalidatePublicReviews();
     return NextResponse.json(review);
   } catch (error) {
     console.error("[ADMIN REVIEW UPDATE]", error);
@@ -37,6 +39,7 @@ export async function DELETE(_request: NextRequest, props: { params: Promise<{ i
 
   try {
     await prisma.review.delete({ where: { id: params.id } });
+    revalidatePublicReviews();
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[ADMIN REVIEW DELETE]", error);

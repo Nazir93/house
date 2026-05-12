@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { revalidatePublicFaqs } from "@/lib/revalidate-public-content";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +33,7 @@ export async function POST(request: NextRequest) {
         order: body.order ?? 0,
       },
     });
+    revalidatePublicFaqs();
     return NextResponse.json(faq, { status: 201 });
   } catch (error) {
     console.error("[ADMIN FAQ CREATE]", error);

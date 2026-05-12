@@ -594,6 +594,9 @@
 }
 
 .admin-main-surface {
+  /* Рабочая зона админки всегда тёмная; общая тема день/ночь влияет на сайдбар через --adm-* */
+  color: rgba(243, 244, 240, 0.92);
+  color-scheme: dark;
   background:
     radial-gradient(ellipse 110% 70% at 50% -25%, rgba(15, 61, 46, 0.22), transparent 52%),
     linear-gradient(165deg, #0b0d0c 0%, #070908 45%, #050706 100%);

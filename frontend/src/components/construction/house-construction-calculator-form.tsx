@@ -148,6 +148,11 @@ export function HouseConstructionCalculatorForm({
   leadSourceOverride,
   leadServiceLabelOverride,
   submitButtonLabel,
+  /** Узкая вёрстка для встраивания (страница промо QR, шаг 2) — без полноэкранной высоты и лишних отступов */
+  compactLayout,
+  /** Промо QR: без типа объекта и без выбора кровли (кровля подставляется по этажности из прайса) */
+  hideObjectType,
+  hideRoofSelector,
 }: {
   onSuccess: (leadId: string, name: string, phone: string) => void;
   getRecaptchaToken?: (action: string) => Promise<string>;
@@ -159,6 +164,9 @@ export function HouseConstructionCalculatorForm({
   leadSourceOverride?: string;
   leadServiceLabelOverride?: string;
   submitButtonLabel?: string;
+  compactLayout?: boolean;
+  hideObjectType?: boolean;
+  hideRoofSelector?: boolean;
 }) {
   const { config: configFromHook } = useHouseConstructionCalculatorConfig();
   const config = calculatorConfig ?? configFromHook;
@@ -288,20 +296,34 @@ export function HouseConstructionCalculatorForm({
   }
 
   return (
-    <div className="min-h-screen flex items-start md:items-center">
-      <div className="container mx-auto py-20 md:py-16 pt-24 md:pt-20">
+    <div
+      className={
+        compactLayout
+          ? "flex items-start"
+          : "min-h-screen flex items-start md:items-center"
+      }
+    >
+      <div
+        className={
+          compactLayout
+            ? "container mx-auto w-full py-6 pt-2 md:py-8"
+            : "container mx-auto py-20 md:py-16 pt-24 md:pt-20"
+        }
+      >
         <div className="max-w-2xl mx-auto">
-          <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl leading-[1.05] mb-6">{heading}</h2>
+          <h2 className={`font-heading text-2xl sm:text-3xl md:text-4xl leading-[1.05] ${compactLayout ? "mb-4" : "mb-6"}`}>{heading}</h2>
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
-            <InputField label="Тип объекта (по желанию)">
-              <input
-                type="text"
-                placeholder="Например, загородный дом"
-                className="funnel-text-input w-full px-0 py-3 bg-transparent border-b text-base sm:text-sm focus:outline-none"
-                style={{ borderColor: "var(--border)", color: "var(--text)" }}
-                {...register("objectType")}
-              />
-            </InputField>
+            {!hideObjectType ? (
+              <InputField label="Тип объекта (по желанию)">
+                <input
+                  type="text"
+                  placeholder="Например, загородный дом"
+                  className="funnel-text-input w-full px-0 py-3 bg-transparent border-b text-base sm:text-sm focus:outline-none"
+                  style={{ borderColor: "var(--border)", color: "var(--text)" }}
+                  {...register("objectType")}
+                />
+              </InputField>
+            ) : null}
 
             <InputField label="Строительная площадь, м²">
               <input
@@ -353,24 +375,26 @@ export function HouseConstructionCalculatorForm({
               </InputField>
             </div>
 
-            <InputField label="Тип кровли">
-              <Controller
-                name="roof"
-                control={control}
-                render={({ field }) => (
-                  <FunnelSelect
-                    variant="underline"
-                    options={roofOptionsForFloor(catalogFloor, config)}
-                    placeholder="Выберите"
-                    value={field.value}
-                    onChange={field.onChange}
-                    onBlur={field.onBlur}
-                  />
-                )}
-              />
-            </InputField>
+            {!hideRoofSelector ? (
+              <InputField label="Тип кровли">
+                <Controller
+                  name="roof"
+                  control={control}
+                  render={({ field }) => (
+                    <FunnelSelect
+                      variant="underline"
+                      options={roofOptionsForFloor(catalogFloor, config)}
+                      placeholder="Выберите"
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                    />
+                  )}
+                />
+              </InputField>
+            ) : null}
 
-            {!configOk && (
+            {!hideRoofSelector && !configOk && (
               <p className="text-sm rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-amber-900 dark:text-amber-100/90">
                 Для выбранной этажности такой тип кровли в типовом каталоге не предусмотрен — оставьте заявку, рассчитаем
                 индивидуально.

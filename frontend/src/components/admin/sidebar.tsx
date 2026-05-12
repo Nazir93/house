@@ -46,9 +46,20 @@ const NAV_ITEMS = [
   { href: "/admin/settings", label: "Настройки", icon: Settings },
 ];
 
-export function AdminSidebar() {
+type AdminSidebarProps = {
+  collapsed?: boolean;
+  onCollapsedChange?: (collapsed: boolean) => void;
+};
+
+export function AdminSidebar({ collapsed: collapsedProp, onCollapsedChange }: AdminSidebarProps = {}) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsedLocal, setCollapsedLocal] = useState(false);
+  const isControlled = collapsedProp !== undefined && onCollapsedChange !== undefined;
+  const collapsed = isControlled ? collapsedProp! : collapsedLocal;
+  const setCollapsed = (next: boolean) => {
+    if (isControlled) onCollapsedChange!(next);
+    else setCollapsedLocal(next);
+  };
   const [mobileOpen, setMobileOpen] = useState(false);
   const { highlight: leadsHighlight, badgeCount: leadsBadge } = useAdminNewLeadsNotify();
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { revalidatePublicTeam } from "@/lib/revalidate-public-content";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -20,6 +21,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         ...(body.order !== undefined && { order: body.order }),
       },
     });
+    revalidatePublicTeam();
     return NextResponse.json(member);
   } catch (error) {
     console.error("[ADMIN TEAM UPDATE]", error);
@@ -34,6 +36,7 @@ export async function DELETE(_request: NextRequest, props: { params: Promise<{ i
 
   try {
     await prisma.teamMember.delete({ where: { id: params.id } });
+    revalidatePublicTeam();
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[ADMIN TEAM DELETE]", error);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { revalidatePublicReviews } from "@/lib/revalidate-public-content";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
@@ -36,6 +37,7 @@ export async function POST(request: NextRequest) {
         order: body.order ?? 0,
       },
     });
+    revalidatePublicReviews();
     return NextResponse.json(review, { status: 201 });
   } catch (error) {
     console.error("[ADMIN REVIEW CREATE]", error);

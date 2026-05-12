@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { revalidatePublicTeam } from "@/lib/revalidate-public-content";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +34,7 @@ export async function POST(request: NextRequest) {
         order: body.order ?? 0,
       },
     });
+    revalidatePublicTeam();
     return NextResponse.json(member, { status: 201 });
   } catch (error) {
     console.error("[ADMIN TEAM CREATE]", error);

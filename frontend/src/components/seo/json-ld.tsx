@@ -2,6 +2,7 @@ import { SITE_NAME, CITY, SITE_URL, buildSchemaAreaServed, getDefaultSiteGeoDesc
 import { toAbsoluteSiteUrl } from "@/lib/absolute-site-url";
 import { OFFICE_OPENING_HOURS_JSON_LD } from "@/lib/contact-config";
 import { loadContactConfig } from "@/lib/load-contact-config";
+import { htmlToPlainText } from "@/lib/html-to-plain-text";
 import { prisma } from "@/lib/db";
 
 async function getDbData() {
@@ -73,7 +74,7 @@ export async function JsonLd() {
         "@type": "Review",
         author: { "@type": "Person", name: r.authorName },
         reviewRating: { "@type": "Rating", ratingValue: r.rating, bestRating: 5 },
-        reviewBody: r.text,
+        reviewBody: htmlToPlainText(r.text) || r.text,
         ...(r.objectName && { itemReviewed: { "@type": "LocalBusiness", name: r.objectName } }),
       })),
     }),
@@ -87,8 +88,8 @@ export async function JsonLd() {
       "@type": "FAQPage",
       mainEntity: faqs.map((f) => ({
         "@type": "Question",
-        name: f.question,
-        acceptedAnswer: { "@type": "Answer", text: f.answer },
+        name: htmlToPlainText(f.question) || f.question,
+        acceptedAnswer: { "@type": "Answer", text: htmlToPlainText(f.answer) || f.answer },
       })),
     });
   }
