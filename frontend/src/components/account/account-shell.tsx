@@ -184,9 +184,7 @@ export function AccountShell({
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <div className="lg:hidden">
-              <ThemeToggle variant="outline" />
-            </div>
+            <ThemeToggle variant="outline" />
             <Link
               href={bellHref}
               title={bellLabel}

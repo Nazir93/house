@@ -58,6 +58,7 @@ export default async function AccountPaymentsPage() {
                 <th className="p-3 font-semibold">Сумма</th>
                 <th className="p-3 font-semibold">Статус</th>
                 <th className="p-3 font-semibold">Срок</th>
+                <th className="p-3 font-semibold whitespace-nowrap">Оплачен</th>
               </tr>
             </thead>
             <tbody>
@@ -66,7 +67,8 @@ export default async function AccountPaymentsPage() {
                   <td className="p-3">{p.label}</td>
                   <td className="p-3 tabular-nums">{formatRub(kopeksToRubles(p.amountKopeks))}</td>
                   <td className="p-3">{paymentStatusLabel(p.status)}</td>
-                  <td className="p-3">{formatDateRu(p.dueDate)}</td>
+                  <td className="p-3 tabular-nums">{formatDateRu(p.dueDate)}</td>
+                  <td className="p-3 tabular-nums">{formatDateRu(p.paidAt)}</td>
                 </tr>
               ))}
             </tbody>

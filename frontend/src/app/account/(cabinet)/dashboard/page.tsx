@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, FileText } from "lucide-react";
 import { getClientProjectIdFromSession } from "@/lib/client-session";
 import { prisma } from "@/lib/db";
 import { formatRub } from "@/lib/construction-shared";
@@ -14,6 +14,7 @@ import {
   ticketStatusLabel,
 } from "@/lib/client-portal-labels";
 import { AccountAttentionStrip } from "@/components/account/account-attention-strip";
+import { SupportNewTicketForm } from "@/components/account/support-new-ticket-form";
 
 export const metadata = {
   title: "Главная — личный кабинет",
@@ -36,6 +37,7 @@ export default async function AccountDashboardPage() {
           orderBy: { updatedAt: "desc" },
           take: 5,
         },
+        houseProject: { select: { slug: true, title: true } },
       },
     }),
     prisma.clientDocument.count({ where: { projectId } }),
@@ -99,11 +101,23 @@ export default async function AccountDashboardPage() {
                 {project.foremanName}
               </p>
             ) : null}
+            {project.houseProject?.slug ? (
+              <p className="sm:col-span-2">
+                <span className="font-medium" style={{ color: "var(--text)" }}>Типовой проект:</span>{" "}
+                <Link
+                  href={`/projects/${project.houseProject.slug}`}
+                  className="font-medium underline-offset-2 hover:underline"
+                  style={{ color: "var(--accent)" }}
+                >
+                  {project.houseProject.title || project.houseProject.slug}
+                </Link>
+              </p>
+            ) : null}
           </div>
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <div className="flex-1 min-w-[140px]">
               <div className="flex justify-between text-sm mb-1">
-                <span style={{ color: "var(--text-muted)" }}>Готовность</span>
+                <span style={{ color: "var(--text-muted)" }}>Готовность объекта</span>
                 <span className="font-bold">{project.overallProgress}%</span>
               </div>
               <div
@@ -120,12 +134,17 @@ export default async function AccountDashboardPage() {
               </div>
             </div>
             {project.currentStageLabel ? (
-              <div
-                className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium border"
-                style={{ borderColor: "var(--border)" }}
-              >
-                <StageIcon iconKey="hammer" className="h-4 w-4 opacity-80" />
-                {project.currentStageLabel}
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>
+                  Текущий этап
+                </p>
+                <div
+                  className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium border max-w-full"
+                  style={{ borderColor: "var(--border)" }}
+                >
+                  <StageIcon iconKey="hammer" className="h-4 w-4 opacity-80 shrink-0" />
+                  <span className="truncate max-w-[200px] sm:max-w-[280px]">{project.currentStageLabel}</span>
+                </div>
               </div>
             ) : null}
           </div>
@@ -139,12 +158,18 @@ export default async function AccountDashboardPage() {
           className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin"
           style={{ scrollbarColor: "var(--border) transparent" }}
         >
-          {project.stages.map((stage) => (
+          {project.stages.map((stage, idx) => (
             <div
               key={stage.id}
               className="min-w-[120px] sm:min-w-[140px] rounded-xl border p-3 text-center"
               style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)" }}
             >
+              <div
+                className="mx-auto mb-2 flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold border"
+                style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+              >
+                {idx + 1}
+              </div>
               <div className="flex justify-center mb-2">
                 {stage.status === "DONE" ? (
                   <CheckCircle2 className="h-8 w-8 text-emerald-500" aria-hidden />
@@ -211,20 +236,37 @@ export default async function AccountDashboardPage() {
           className="rounded-2xl border p-4 sm:p-5"
           style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)" }}
         >
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between mb-3">
             <h2 className="font-heading font-bold">Фотоотчёты</h2>
-            <Link href="/account/photos" className="text-sm font-medium" style={{ color: "var(--accent)" }}>
-              Все ({photoReportsTotal})
-            </Link>
+            <div className="flex items-center justify-between gap-3 sm:justify-end">
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                Всего фото: {photoReportsTotal}
+              </p>
+              <Link href="/account/photos" className="text-sm font-medium shrink-0" style={{ color: "var(--accent)" }}>
+                Смотреть все
+              </Link>
+            </div>
           </div>
           {project.photoReports.length === 0 ? (
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>Фото появятся по мере строительства.</p>
           ) : (
             <div className="grid grid-cols-3 gap-2">
               {project.photoReports.map((ph) => (
-                <Link key={ph.id} href="/account/photos" className="relative aspect-square rounded-lg overflow-hidden bg-black/5">
-                  <Image src={ph.url} alt={ph.caption || ""} fill className="object-cover" sizes="120px" />
-                </Link>
+                <figure
+                  key={ph.id}
+                  className="rounded-lg overflow-hidden border bg-black/5 flex flex-col"
+                  style={{ borderColor: "var(--border)" }}
+                >
+                  <Link href="/account/photos" className="relative block aspect-square">
+                    <Image src={ph.url} alt={ph.caption || "Фото объекта"} fill className="object-cover" sizes="120px" />
+                  </Link>
+                  {(ph.caption || ph.shotAt) ? (
+                    <figcaption className="p-1.5 text-[10px] leading-snug flex-1" style={{ color: "var(--text-muted)" }}>
+                      {ph.caption ? <span className="line-clamp-2">{ph.caption}</span> : null}
+                      {ph.shotAt ? <span className="block mt-0.5 tabular-nums">{formatDateRu(ph.shotAt)}</span> : null}
+                    </figcaption>
+                  ) : null}
+                </figure>
               ))}
             </div>
           )}
@@ -259,7 +301,8 @@ export default async function AccountDashboardPage() {
                 <th className="pb-2 pr-3 font-medium">Этап / основание</th>
                 <th className="pb-2 pr-3 font-medium">Сумма</th>
                 <th className="pb-2 pr-3 font-medium">Статус</th>
-                <th className="pb-2 font-medium">Срок</th>
+                <th className="pb-2 pr-3 font-medium">Срок</th>
+                <th className="pb-2 font-medium whitespace-nowrap">Оплачен</th>
               </tr>
             </thead>
             <tbody>
@@ -268,7 +311,8 @@ export default async function AccountDashboardPage() {
                   <td className="py-2 pr-3">{p.label}</td>
                   <td className="py-2 pr-3 tabular-nums">{formatRub(kopeksToRubles(p.amountKopeks))}</td>
                   <td className="py-2 pr-3">{paymentStatusLabel(p.status)}</td>
-                  <td className="py-2">{formatDateRu(p.dueDate)}</td>
+                  <td className="py-2 pr-3 tabular-nums">{formatDateRu(p.dueDate)}</td>
+                  <td className="py-2 tabular-nums">{formatDateRu(p.paidAt)}</td>
                 </tr>
               ))}
             </tbody>
@@ -293,9 +337,10 @@ export default async function AccountDashboardPage() {
           </div>
           <ul className="space-y-2">
             {project.documents.map((d) => (
-              <li key={d.id} className="flex items-center justify-between gap-2 text-sm">
-                <span className="truncate" title={d.filename}>{d.filename}</span>
-                <span className="shrink-0 text-xs" style={{ color: "var(--text-muted)" }}>
+              <li key={d.id} className="flex items-center gap-2 text-sm rounded-xl border p-3" style={{ borderColor: "var(--border)", backgroundColor: "color-mix(in srgb, var(--bg) 40%, transparent)" }}>
+                <FileText className="h-7 w-7 shrink-0 opacity-70" aria-hidden />
+                <span className="truncate flex-1 min-w-0" title={d.filename}>{d.filename}</span>
+                <span className="shrink-0 text-xs tabular-nums" style={{ color: "var(--text-muted)" }}>
                   {formatDateRu(d.uploadedAt)}
                 </span>
                 <a
@@ -323,9 +368,15 @@ export default async function AccountDashboardPage() {
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-heading font-bold">Обращения</h2>
             <Link href="/account/support" className="text-sm font-medium" style={{ color: "var(--accent)" }}>
-              Все
+              Вся история
             </Link>
           </div>
+          <div className="mb-5">
+            <SupportNewTicketForm />
+          </div>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>
+            Последние обращения
+          </p>
           <ul className="space-y-2">
             {project.tickets.map((t) => (
               <li key={t.id} className="flex flex-wrap items-center gap-2 text-sm">

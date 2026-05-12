@@ -38,11 +38,15 @@ export function SupportNewTicketForm() {
 
   return (
     <form
+      id="support-new-ticket"
       onSubmit={handleSubmit}
       className="rounded-2xl border p-5 space-y-4"
       style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)" }}
     >
-      <h2 className="font-heading font-bold text-lg">Задать вопрос</h2>
+      <h2 className="font-heading font-bold text-lg flex items-center gap-2">
+        <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-base font-bold" style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}>+</span>
+        Задать вопрос
+      </h2>
       {error ? (
         <p className="text-sm text-red-500">{error}</p>
       ) : null}
