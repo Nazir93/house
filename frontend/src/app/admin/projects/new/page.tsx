@@ -9,7 +9,8 @@ import { AdminFormSection } from "@/components/admin/admin-form-section";
 import { AdminNativeSelect, AdminSelectOption } from "@/components/admin/admin-native-select";
 import { RichEditor } from "@/components/admin/rich-editor";
 import { uploadAdminMedia } from "@/lib/admin-upload";
-import { ADMIN_PROJECT_SERVICE_OPTIONS } from "@/lib/admin-service-options";
+import { mergeProjectServiceOptionsForForm } from "@/lib/admin-service-options";
+import { useProjectServiceSelectOptions } from "@/lib/use-project-service-select-options";
 import { CmsImage } from "@/components/ui/cms-image";
 
 const CATEGORIES = [
@@ -22,6 +23,7 @@ const CATEGORIES = [
 
 export default function NewProjectPage() {
   const router = useRouter();
+  const { options: cmsServiceOptions } = useProjectServiceSelectOptions();
   const [saving, setSaving] = useState(false);
   const [galleryUrls, setGalleryUrls] = useState<string[]>([]);
   const [uploadingGallery, setUploadingGallery] = useState(false);
@@ -102,7 +104,7 @@ export default function NewProjectPage() {
 
       <AdminFormSection
         title="Обязательно для публикации"
-        subtitle="Название, категория объекта, услуга и описание — как на странице кейса и в списке портфолио."
+        subtitle="Название, категория объекта, услуга и описание — как на странице кейса и в списке портфолио. Услуга в списке совпадает с карточками в «Услуги» (тип из поля услуги в CMS)."
       >
         <div>
           <label className="block text-xs font-medium text-white/40 mb-1">Название проекта</label>
@@ -129,7 +131,7 @@ export default function NewProjectPage() {
           <div>
             <label className="block text-xs font-medium text-white/40 mb-1">Услуга</label>
             <AdminNativeSelect value={form.service} onChange={(e) => set("service", e.target.value)}>
-              {ADMIN_PROJECT_SERVICE_OPTIONS.map((s) => (
+              {mergeProjectServiceOptionsForForm(cmsServiceOptions, form.service).map((s) => (
                 <AdminSelectOption key={s.value} value={s.value}>
                   {s.label}
                 </AdminSelectOption>

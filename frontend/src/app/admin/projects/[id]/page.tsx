@@ -10,7 +10,8 @@ import { AdminFormSection } from "@/components/admin/admin-form-section";
 import { uploadAdminMedia } from "@/lib/admin-upload";
 import { RichEditor } from "@/components/admin/rich-editor";
 import { AdminNativeSelect, AdminSelectOption } from "@/components/admin/admin-native-select";
-import { ADMIN_PROJECT_SERVICE_OPTIONS } from "@/lib/admin-service-options";
+import { mergeProjectServiceOptionsForForm } from "@/lib/admin-service-options";
+import { useProjectServiceSelectOptions } from "@/lib/use-project-service-select-options";
 import { CmsImage } from "@/components/ui/cms-image";
 
 const CATEGORIES = [
@@ -32,6 +33,7 @@ export default function EditProjectPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
+  const { options: cmsServiceOptions } = useProjectServiceSelectOptions();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -158,7 +160,7 @@ export default function EditProjectPage() {
 
       <AdminFormSection
         title="Обязательно для публикации"
-        subtitle="Название, описание, обложка и карточка в списке. Баннер на странице кейса — обложка и галерея (ниже)."
+        subtitle="Название, описание, обложка и карточка в списке. Баннер на странице кейса — обложка и галерея (ниже). Услуга в списке — как заголовки в «Услуги» (тип услуги в CMS)."
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -187,7 +189,7 @@ export default function EditProjectPage() {
           <div>
             <label className="block text-xs font-medium text-white/40 mb-1">Услуга</label>
             <AdminNativeSelect value={form.service} onChange={(e) => set("service", e.target.value)}>
-              {ADMIN_PROJECT_SERVICE_OPTIONS.map((s) => (
+              {mergeProjectServiceOptionsForForm(cmsServiceOptions, form.service).map((s) => (
                 <AdminSelectOption key={s.value} value={s.value}>
                   {s.label}
                 </AdminSelectOption>

@@ -12,6 +12,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 import { CmsImage } from "@/components/ui/cms-image";
+import { serviceTypeLabelsWithCms, type CmsServiceForProjectSelect } from "@/lib/admin-service-options";
 
 interface ProjectItem {
   id: string;
@@ -35,20 +36,14 @@ const CATEGORY_LABELS: Record<string, string> = {
   OTHER: "Другое",
 };
 
-const SERVICE_LABELS: Record<string, string> = {
-  ELECTRICAL: "Электрика",
-  ACOUSTICS: "Акустика",
-  STRUCTURED_CABLING: "СКС",
-  SMART_HOME: "Умный дом",
-  SECURITY: "Безопасность",
-  ARCHITECTURAL_LIGHTING: "Архитектурная подсветка",
-};
-
 export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [loadError, setLoadError] = useState("");
+  const [serviceLabels, setServiceLabels] = useState<Record<string, string>>(() =>
+    serviceTypeLabelsWithCms(undefined)
+  );
 
   const load = useCallback(() => {
     setLoadError("");
@@ -66,6 +61,17 @@ export default function AdminProjectsPage() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    fetch("/api/admin/services")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((data: unknown) => {
+        if (Array.isArray(data)) {
+          setServiceLabels(serviceTypeLabelsWithCms(data as CmsServiceForProjectSelect[]));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   async function togglePublish(id: string, published: boolean) {
     await fetch(`/api/admin/projects/${id}`, {
@@ -163,7 +169,7 @@ export default function AdminProjectsPage() {
                     {CATEGORY_LABELS[p.category] || p.category}
                   </span>
                   <span className="px-2 py-0.5 rounded-md bg-white/[0.06] text-[11px] text-white/40">
-                    {SERVICE_LABELS[p.service] || p.service}
+                    {serviceLabels[p.service] || p.service}
                   </span>
                   <span className="px-2 py-0.5 rounded-md bg-white/[0.06] text-[11px] text-white/40">
                     {p.images.length} фото
