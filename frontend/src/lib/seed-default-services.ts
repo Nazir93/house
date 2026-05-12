@@ -2,8 +2,8 @@ import type { ServiceType } from "@prisma/client";
 import { prisma } from "@/lib/db";
 
 /**
- * Шаблон услуг для таблицы Service (динамические лендинги /services/[slug]).
- * Сид пустой: услуги создаются в админке под актуальное направление сайта.
+ * Шаблон услуг для таблицы Service (лендинги /services/[slug]).
+ * При пустой таблице создаются записи под загородное строительство (см. constants SERVICES).
  */
 const DEFAULT_SERVICES: Array<{
   slug: string;
@@ -11,11 +11,61 @@ const DEFAULT_SERVICES: Array<{
   title: string;
   shortDescription: string;
   icon: string;
-}> = [];
+}> = [
+  {
+    slug: "proektirovanie",
+    serviceType: "HOUSE_DESIGN",
+    title: "Проектирование",
+    shortDescription:
+      "Типовые и индивидуальные проекты домов: планировки, фасады, рабочая документация и сметная логика.",
+    icon: "home",
+  },
+  {
+    slug: "fundament",
+    serviceType: "HOUSE_FOUNDATION",
+    title: "Фундамент под ключ",
+    shortDescription:
+      "Подбор основания, земляные работы, армирование, бетон и контроль качества фундамента.",
+    icon: "layers",
+  },
+  {
+    slug: "karkas",
+    serviceType: "HOUSE_STRUCTURE",
+    title: "Коробка дома",
+    shortDescription:
+      "Возведение стен, перекрытий и несущих конструкций по проекту: сроки и контроль этапов.",
+    icon: "home",
+  },
+  {
+    slug: "krovlya",
+    serviceType: "HOUSE_ROOFING",
+    title: "Монтаж кровли",
+    shortDescription:
+      "Стропильная система, кровельный пирог, покрытие, водостоки и узлы примыканий.",
+    icon: "home",
+  },
+  {
+    slug: "inzheneriya",
+    serviceType: "HOUSE_ENGINEERING",
+    title: "Инженерные сети",
+    shortDescription:
+      "Электрика, отопление, водоснабжение, канализация и подготовка котельной.",
+    icon: "network",
+  },
+  {
+    slug: "otdelka",
+    serviceType: "HOUSE_FINISHING",
+    title: "Отделка под ключ",
+    shortDescription:
+      "Черновая и чистовая отделка, фасадные решения, комплектация и финальная приёмка дома.",
+    icon: "brush",
+  },
+];
 
 export async function ensureDefaultServicesIfNeeded(): Promise<void> {
+  if (DEFAULT_SERVICES.length === 0) return;
   const n = await prisma.service.count();
-  if (n >= DEFAULT_SERVICES.length) return;
+  if (n > 0) return;
   await ensureDefaultServices();
 }
 

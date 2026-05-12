@@ -81,6 +81,24 @@ const hubBySlugSegment: Record<string, ServiceHubCopy> = {
     ctaLabel: "Рассчитать фундамент",
     centerImageSrc: "/images/services/hub/hub-foundation.png",
   },
+  karkas: {
+    navTitle: "Коробка дома",
+    cardDescription:
+      "Стены, перекрытия и узлы сопряжения — возводим коробку по проекту с геодезией и поэтапной приёмкой.",
+    sectionParagraphs: [
+      "Собираем несущие конструкции по рабочей документации: материал стен, армирование, перемычки и опирание плит — с контролем геометрии и влажности кладки или монтажа блоков.",
+      "Перекрытия и лестничные маршы монтируем с учётом нагрузок и будущей инженерии: закладные под коммуникации согласуем до бетонных работ.",
+      "Промежуточная приёмка этапов фиксируется актами и фотоотчётом — чтобы переходить к кровле и инженерии без сюрпризов.",
+    ],
+    features: [
+      { Icon: BrickWall, label: "Стены и армирование" },
+      { Icon: LayoutGrid, label: "Перекрытия и ригели" },
+      { Icon: Ruler, label: "Геодезия и плоскости" },
+      { Icon: BadgeCheck, label: "Приёмка по чек-листу" },
+    ],
+    ctaLabel: "Обсудить коробку",
+    centerImageSrc: "/images/services/hub/hub-foundation.png",
+  },
   roofing: {
     navTitle: "Монтаж кровли",
     cardDescription:
@@ -146,8 +164,18 @@ export function slugSegmentFromServiceHref(slug: string): string {
   return seg || "";
 }
 
+const RU_HUB_SEGMENT_ALIASES: Record<string, string> = {
+  proektirovanie: "projecting",
+  fundament: "foundation",
+  karkas: "karkas",
+  krovlya: "roofing",
+  inzheneriya: "engineering",
+  otdelka: "finishing",
+};
+
 export function getServiceHubCopy(segment: string): ServiceHubCopy | null {
-  return hubBySlugSegment[segment] ?? null;
+  const key = RU_HUB_SEGMENT_ALIASES[segment] ?? segment;
+  return hubBySlugSegment[key] ?? null;
 }
 
 export const BENEFITS_BAR = [
@@ -176,7 +204,7 @@ export const SERVICES_PROCESS_STEPS = [
   {
     Icon: Zap,
     title: "Инженерные сети",
-    description: "Электрика, вода, отопление.",
+    description: "Вода, отопление, вентиляция, электроснабжение.",
   },
   {
     Icon: Brush,

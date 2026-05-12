@@ -140,7 +140,7 @@ export const SOCIAL_LINKS = {
 export const SERVICES = [
   {
     id: "projecting",
-    slug: "/services/projecting",
+    slug: "/services/proektirovanie",
     title: "Проектирование",
     shortDescription:
       "Типовые и индивидуальные проекты домов: планировки, фасады, рабочая документация и сметная логика.",
@@ -150,7 +150,7 @@ export const SERVICES = [
   },
   {
     id: "foundation",
-    slug: "/services/foundation",
+    slug: "/services/fundament",
     title: "Фундамент под ключ",
     shortDescription:
       "Подбор основания, земляные работы, армирование, бетон и контроль качества фундамента.",
@@ -159,8 +159,18 @@ export const SERVICES = [
     videoUrl: null as string | null,
   },
   {
+    id: "shell",
+    slug: "/services/karkas",
+    title: "Коробка дома",
+    shortDescription:
+      "Возведение стен, перекрытий и несущих конструкций по проекту: сроки и контроль этапов.",
+    icon: "home" as const,
+    coverImage: null as string | null,
+    videoUrl: null as string | null,
+  },
+  {
     id: "roofing",
-    slug: "/services/roofing",
+    slug: "/services/krovlya",
     title: "Монтаж кровли",
     shortDescription:
       "Стропильная система, кровельный пирог, покрытие, водостоки и узлы примыканий.",
@@ -170,7 +180,7 @@ export const SERVICES = [
   },
   {
     id: "engineering",
-    slug: "/services/engineering",
+    slug: "/services/inzheneriya",
     title: "Инженерные сети",
     shortDescription:
       "Электрика, отопление, водоснабжение, канализация и подготовка котельной.",
@@ -180,7 +190,7 @@ export const SERVICES = [
   },
   {
     id: "finishing",
-    slug: "/services/finishing",
+    slug: "/services/otdelka",
     title: "Отделка под ключ",
     shortDescription:
       "Черновая и чистовая отделка, фасадные решения, комплектация и финальная приемка дома.",

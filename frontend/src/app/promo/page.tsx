@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { SITE_NAME } from "@/lib/constants";
 import { PromoQrPageClient } from "./promo-qr-page-client";
 
@@ -11,5 +12,9 @@ export const metadata: Metadata = {
 };
 
 export default function PromoQrPage() {
-  return <PromoQrPageClient />;
+  return (
+    <Suspense fallback={<div className="min-h-[40vh] pt-28 text-center text-sm text-white/40">Загрузка…</div>}>
+      <PromoQrPageClient />
+    </Suspense>
+  );
 }

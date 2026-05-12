@@ -12,7 +12,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
-import { ADMIN_PROJECT_SERVICE_OPTIONS } from "@/lib/admin-service-options";
+import { FULL_SERVICE_TYPE_DROPDOWN_OPTIONS } from "@/lib/service-type-admin-options";
 
 interface ReviewItem {
   id: string;
@@ -29,7 +29,7 @@ interface ReviewItem {
 
 const SERVICE_OPTIONS = [
   { value: "", label: "Все / без привязки" },
-  ...ADMIN_PROJECT_SERVICE_OPTIONS,
+  ...FULL_SERVICE_TYPE_DROPDOWN_OPTIONS,
 ];
 
 const emptyForm = {

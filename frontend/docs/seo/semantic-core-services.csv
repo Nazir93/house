@@ -2,8 +2,9 @@ query,intent,target_url,cluster_layer,notes
 "строительство домов под ключ",commercial,/services,HF,"Подставьте город из констант сайта"
 "проектирование индивидуального дома",commercial,/individual-design,HF,
 "типовой проект дома",commercial,/projects,MF,
-"фундамент под дом цена",commercial,/services/foundation,MF,
-"монтаж кровли дома",commercial,/services/roofing,MF,
-"инженерные сети коттедж",commercial,/services/engineering,MF,
-"отделка дома под ключ",commercial,/services/finishing,MF,
+"фундамент под дом цена",commercial,/services/fundament,MF,
+"монтаж кровли дома",commercial,/services/krovlya,MF,
+"инженерные сети коттедж",commercial,/services/inzheneriya,MF,
+"отделка дома под ключ",commercial,/services/otdelka,MF,
+"каркас дома под ключ",commercial,/services/karkas,MF,
 "ипотека на строительство дома",commercial,/mortgage,MF,

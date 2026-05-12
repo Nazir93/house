@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db";
 import { SITE_URL } from "@/lib/constants";
 import { FALLBACK_BUILT_OBJECTS, FALLBACK_HOUSE_PROJECTS } from "@/lib/construction-data";
+import { KNOWN_CMS_SERVICE_SLUGS } from "@/lib/service-slug-routes";
 
 export const revalidate = 300;
 
@@ -11,11 +12,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: "weekly", priority: 1.0 },
     { url: `${baseUrl}/services`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${baseUrl}/services/projecting`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/services/foundation`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/services/roofing`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/services/engineering`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/services/finishing`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
     { url: `${baseUrl}/projects`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
     { url: `${baseUrl}/portfolio`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
     { url: `${baseUrl}/individual-design`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
@@ -74,6 +70,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ];
   } catch {
     dynamicPages = [
+      ...KNOWN_CMS_SERVICE_SLUGS.map((slug) => ({
+        url: `${baseUrl}/services/${slug}`,
+        lastModified: new Date(),
+        changeFrequency: "monthly" as const,
+        priority: 0.72,
+      })),
       ...FALLBACK_HOUSE_PROJECTS.map((p) => ({
         url: `${baseUrl}/projects/${p.slug}`,
         lastModified: new Date(),

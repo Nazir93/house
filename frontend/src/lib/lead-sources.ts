@@ -8,16 +8,18 @@ import {
   CONSTRUCTION_SERVICE_SLUGS,
   type ConstructionServiceSlug,
 } from "@/lib/construction-service-data";
+import { servicePagePathForInternalKey } from "@/lib/service-slug-routes";
 
 function serviceLeadOptions(): { value: string; label: string; hint?: string }[] {
   return CONSTRUCTION_SERVICE_SLUGS.flatMap((slug) => {
     const title = CONSTRUCTION_SERVICES[slug].title;
+    const path = servicePagePathForInternalKey(slug);
     return [
-      { value: `service-${slug}`, label: `Услуга: ${title}`, hint: `/services/${slug}` },
+      { value: `service-${slug}`, label: `Услуга: ${title}`, hint: path },
       {
         value: `service-consult-${slug}`,
         label: `Консультация: ${title}`,
-        hint: `Блок консультации на /services/${slug}`,
+        hint: `Блок консультации на ${path}`,
       },
     ];
   });

@@ -48,7 +48,7 @@ const SLIDES: Slide[] = [
     highlight: "Коробка, инженерия, отделка — в одном подряде",
     description:
       "Не нужно искать отдельно проектировщика, кровельщиков и отделку: единая ответственность и согласованные сроки между этапами.",
-    action: { type: "link", href: "/services/projecting", label: "Направления работ" },
+    action: { type: "link", href: "/services", label: "Направления работ" },
   },
   {
     number: "05",

@@ -14,10 +14,10 @@ import { useProjectServiceSelectOptions } from "@/lib/use-project-service-select
 import { CmsImage } from "@/components/ui/cms-image";
 
 const CATEGORIES = [
-  { value: "RESTAURANT", label: "Ресторан" },
-  { value: "OFFICE", label: "Офис" },
-  { value: "APARTMENT", label: "Квартира" },
-  { value: "SHOP", label: "Магазин" },
+  { value: "RESTAURANT", label: "Коттедж" },
+  { value: "OFFICE", label: "Таунхаус / дуплекс" },
+  { value: "APARTMENT", label: "Дача / компактный дом" },
+  { value: "SHOP", label: "Баня / гостевой дом" },
   { value: "OTHER", label: "Другое" },
 ];
 
@@ -31,7 +31,7 @@ export default function NewProjectPage() {
   const [form, setForm] = useState({
     title: "",
     category: "OTHER",
-    service: "ELECTRICAL",
+    service: "HOUSE_DESIGN",
     area: "",
     description: "",
     seoDescription: "",

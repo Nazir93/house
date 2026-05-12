@@ -2,7 +2,7 @@ import { unstable_cache } from "next/cache";
 import { CACHE_TAG_PUBLIC_REVIEWS } from "@/lib/cache-tags-public";
 import { htmlToPlainText } from "@/lib/html-to-plain-text";
 import { prisma } from "@/lib/db";
-import { ADMIN_PROJECT_SERVICE_OPTIONS } from "@/lib/admin-service-options";
+import { SERVICE_TYPE_LABEL_BY_VALUE } from "@/lib/service-type-admin-options";
 
 export type PublicReviewItem = {
   id: string;
@@ -17,8 +17,7 @@ export type PublicReviewItem = {
 
 function serviceLabel(service: string | null): string | null {
   if (!service) return null;
-  const opt = ADMIN_PROJECT_SERVICE_OPTIONS.find((o) => o.value === service);
-  return opt?.label ?? null;
+  return SERVICE_TYPE_LABEL_BY_VALUE[service] ?? null;
 }
 
 const FALLBACK_REVIEWS: PublicReviewItem[] = [

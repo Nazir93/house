@@ -36,11 +36,12 @@ export const NAV_SECTIONS: NavSection[] = [
       {
         label: "Строительство",
         children: [
-          { href: "/services/projecting", label: "Проектирование" },
-          { href: "/services/foundation", label: "Фундамент под ключ" },
-          { href: "/services/roofing", label: "Монтаж кровли" },
-          { href: "/services/engineering", label: "Инженерные сети" },
-          { href: "/services/finishing", label: "Отделка под ключ" },
+          { href: "/services/proektirovanie", label: "Проектирование" },
+          { href: "/services/fundament", label: "Фундамент под ключ" },
+          { href: "/services/karkas", label: "Коробка дома" },
+          { href: "/services/krovlya", label: "Монтаж кровли" },
+          { href: "/services/inzheneriya", label: "Инженерные сети" },
+          { href: "/services/otdelka", label: "Отделка под ключ" },
         ],
       },
       { href: "/individual-design", label: "Создать свой проект" },

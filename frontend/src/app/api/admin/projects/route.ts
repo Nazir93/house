@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         slug,
         title: body.title,
         category: body.category || "OTHER",
-        service: body.service || "ELECTRICAL",
+        service: body.service || "HOUSE_DESIGN",
         area: body.area ? parseInt(body.area) : null,
         description: body.description || "",
         seoDescription: body.seoDescription?.trim() || null,

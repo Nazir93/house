@@ -6,16 +6,11 @@ import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
 
-const SERVICE_TYPES = [
-  { value: "ELECTRICAL", label: "Электрика" },
-  { value: "ACOUSTICS", label: "Акустика" },
-  { value: "STRUCTURED_CABLING", label: "Слаботочные системы" },
-  { value: "SMART_HOME", label: "Умный дом" },
-  { value: "SECURITY", label: "Безопасность" },
-  { value: "ARCHITECTURAL_LIGHTING", label: "Архитектурная подсветка" },
-];
+import { FULL_SERVICE_TYPE_DROPDOWN_OPTIONS } from "@/lib/service-type-admin-options";
 
-const ICONS = ["zap", "speaker", "network", "home", "shield", "sun"];
+const SERVICE_TYPES = FULL_SERVICE_TYPE_DROPDOWN_OPTIONS;
+
+const ICONS = ["zap", "speaker", "network", "home", "shield", "sun", "layers", "brush"];
 
 export default function AdminNewServicePage() {
   const router = useRouter();
@@ -24,7 +19,7 @@ export default function AdminNewServicePage() {
 
   const [title, setTitle] = useState("");
   const [shortDescription, setShortDescription] = useState("");
-  const [serviceType, setServiceType] = useState("ELECTRICAL");
+  const [serviceType, setServiceType] = useState("HOUSE_DESIGN");
   const [icon, setIcon] = useState("zap");
   const [coverImage, setCoverImage] = useState("");
   const [videoUrl, setVideoUrl] = useState("");

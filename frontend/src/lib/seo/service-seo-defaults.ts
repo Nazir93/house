@@ -36,7 +36,7 @@ export function getServicesIndexSeo(): ServicesIndexSeoBundle {
     h1: `Услуги — проектирование и строительство в ${C}`,
     landingTheses: [
       "Главная услуг — обзор направлений: проектирование, фундамент, кровля, инженерия, отделка.",
-      "Карточки ведут на отдельные страницы /services/projecting, foundation, roofing, engineering, finishing.",
+      "Карточки ведут на отдельные страницы /services/proektirovanie, fundament, karkas, krovlya, inzheneriya, otdelka.",
       "Гео: город офиса и регионы из констант.",
     ],
   };

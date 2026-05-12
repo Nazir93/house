@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { SERVICE_TYPE_LABEL_BY_VALUE } from "@/lib/service-type-admin-options";
 import {
   mergeProjectVideoUrls,
   readProjectVideoUrlsArray,
@@ -27,23 +28,15 @@ export interface ProjectListItem {
 }
 
 function serviceTypeToLabel(st: string): string {
-  const map: Record<string, string> = {
-    ELECTRICAL: "Электрика",
-    ACOUSTICS: "Акустика",
-    STRUCTURED_CABLING: "СКС",
-    SMART_HOME: "Умный дом",
-    SECURITY: "Видеонаблюдение",
-    ARCHITECTURAL_LIGHTING: "Архитектурная подсветка",
-  };
-  return map[st] || st;
+  return SERVICE_TYPE_LABEL_BY_VALUE[st] || st;
 }
 
 function categoryToLabel(cat: string): string {
   const map: Record<string, string> = {
-    RESTAURANT: "Ресторан",
-    OFFICE: "Офис",
-    APARTMENT: "Квартира",
-    SHOP: "Магазин",
+    RESTAURANT: "Коттедж",
+    OFFICE: "Таунхаус / дуплекс",
+    APARTMENT: "Дача / компактный дом",
+    SHOP: "Баня / гостевой дом",
     OTHER: "Другое",
   };
   return map[cat] || cat;

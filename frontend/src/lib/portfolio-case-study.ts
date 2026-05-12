@@ -43,7 +43,7 @@ const DEFAULT_PHASE_TITLES: { id: string; title: string }[] = [
   },
   { id: "ext-vent", title: "Внешняя вентиляция" },
   { id: "conditioning", title: "Кондиционирование" },
-  { id: "electrical", title: "Электрика" },
+  { id: "power", title: "Электроснабжение" },
   { id: "floors", title: "Полы" },
   { id: "facade", title: "Фасад" },
   { id: "blind-area", title: "Отмостка и дренаж" },

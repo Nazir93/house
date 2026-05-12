@@ -15,7 +15,7 @@ export async function ServiceLandingRenderer({
   pagePath,
 }: {
   document: ServiceLandingDocument;
-  /** Путь страницы для H1 из SEO (PageMeta), например `/services/foundation` */
+  /** Путь страницы для H1 из SEO (PageMeta), например `/services/fundament` */
   pagePath: string;
 }) {
   const contact = await loadContactConfig();

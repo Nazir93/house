@@ -8,7 +8,7 @@ export const PROMO_QR_OFFER_SLUGS = [
   "promo-gift-biostation",
   "promo-gift-warm-floor",
   "promo-gift-radiators",
-  "promo-gift-electrical",
+  "promo-gift-house-electrics",
 ] as const;
 
 export type PromoQrOfferSlug = (typeof PROMO_QR_OFFER_SLUGS)[number];
@@ -50,9 +50,24 @@ export const PROMO_QR_OFFERS: readonly PromoQrOffer[] = [
     description: "Произведём монтаж с учётом площади, планировки и особенностей вашего дома.",
   },
   {
-    slug: "promo-gift-electrical",
-    title: "Электромонтаж",
+    slug: "promo-gift-house-electrics",
+    title: "Электромонтаж в доме",
     description:
-      "Выполним разводку кабелей и подготовим надёжную основу для безопасной и стабильной работы всей электросистемы дома.",
+      "Разводка кабелей, группы и щит: готовим надёжную основу для безопасной эксплуатации электросети в загородном доме.",
   },
 ];
+
+/** Старые slug в QR/CRM → актуальный из PROMO_QR_OFFER_SLUGS */
+export const PROMO_QR_SLUG_ALIASES: Record<string, PromoQrOfferSlug> = {
+  "promo-gift-electrical": "promo-gift-house-electrics",
+};
+
+const PROMO_SLUG_SET = new Set<string>(PROMO_QR_OFFER_SLUGS);
+
+export function normalizePromoQrOfferSlug(raw: string | null | undefined): PromoQrOfferSlug | null {
+  if (raw == null || typeof raw !== "string") return null;
+  const t = raw.trim();
+  if (!t) return null;
+  const mapped = (PROMO_QR_SLUG_ALIASES[t] ?? t) as string;
+  return PROMO_SLUG_SET.has(mapped) ? (mapped as PromoQrOfferSlug) : null;
+}

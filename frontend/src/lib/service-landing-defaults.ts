@@ -20,6 +20,12 @@ const LEGACY_SLUG: Record<ServiceType, string> = {
   SMART_HOME: "smart-home",
   SECURITY: "security",
   ARCHITECTURAL_LIGHTING: "architectural-lighting",
+  HOUSE_DESIGN: "proektirovanie",
+  HOUSE_FOUNDATION: "fundament",
+  HOUSE_STRUCTURE: "karkas",
+  HOUSE_ROOFING: "krovlya",
+  HOUSE_ENGINEERING: "inzheneriya",
+  HOUSE_FINISHING: "otdelka",
 };
 
 function fallbackLandingDoc(serviceType: ServiceType): ServiceLandingDocument {

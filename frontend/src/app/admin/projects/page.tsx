@@ -29,10 +29,10 @@ interface ProjectItem {
 }
 
 const CATEGORY_LABELS: Record<string, string> = {
-  RESTAURANT: "Ресторан",
-  OFFICE: "Офис",
-  APARTMENT: "Квартира",
-  SHOP: "Магазин",
+  RESTAURANT: "Коттедж",
+  OFFICE: "Таунхаус / дуплекс",
+  APARTMENT: "Дача / компактный дом",
+  SHOP: "Баня / гостевой дом",
   OTHER: "Другое",
 };
 

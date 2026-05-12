@@ -15,14 +15,9 @@ type ServiceItem = {
   order: number;
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  ELECTRICAL: "Электрика",
-  ACOUSTICS: "Акустика",
-  STRUCTURED_CABLING: "СКС",
-  SMART_HOME: "Умный дом",
-  SECURITY: "Безопасность",
-  ARCHITECTURAL_LIGHTING: "Арх. подсветка",
-};
+import { SERVICE_TYPE_LABEL_BY_VALUE } from "@/lib/service-type-admin-options";
+
+const TYPE_LABELS = SERVICE_TYPE_LABEL_BY_VALUE;
 
 export default function AdminServicesPage() {
   const [services, setServices] = useState<ServiceItem[]>([]);

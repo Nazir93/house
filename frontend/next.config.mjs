@@ -36,6 +36,15 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      { source: "/services/projecting", destination: "/services/proektirovanie", permanent: true },
+      { source: "/services/foundation", destination: "/services/fundament", permanent: true },
+      { source: "/services/roofing", destination: "/services/krovlya", permanent: true },
+      { source: "/services/engineering", destination: "/services/inzheneriya", permanent: true },
+      { source: "/services/finishing", destination: "/services/otdelka", permanent: true },
+    ];
+  },
   async rewrites() {
     return {
       beforeFiles: [

@@ -21,27 +21,27 @@ function warmUpVideo(v: HTMLVideoElement) {
 const SERVICES = [
   {
     title: "Проект",
-    href: "/services/projecting" as const,
+    href: "/services/proektirovanie" as const,
     description: "Архитектурное и планировочное решение, адаптированное под участок и задачи семьи.",
   },
   {
     title: "Фундамент",
-    href: "/services/foundation" as const,
+    href: "/services/fundament" as const,
     description: "Надежное основание под тип грунта и проект вашего дома.",
   },
   {
     title: "Кровля",
-    href: "/services/roofing" as const,
+    href: "/services/krovlya" as const,
     description: "Теплая и герметичная кровельная система с правильными узлами.",
   },
   {
     title: "Коммуникации",
-    href: "/services/engineering" as const,
+    href: "/services/inzheneriya" as const,
     description: "Вода, канализация, электричество и инженерия, готовые к эксплуатации.",
   },
   {
     title: "Отделка",
-    href: "/services/finishing" as const,
+    href: "/services/otdelka" as const,
     description: "Чистовая отделка под ключ с аккуратной реализацией каждого этапа.",
   },
 ] as const;

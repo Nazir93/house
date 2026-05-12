@@ -30,10 +30,11 @@ const FOOTER_COLUMNS: { title: string; links: { href: string; label: string }[] 
   {
     title: "Технологии",
     links: [
-      { href: "/services/foundation", label: "Фундамент" },
-      { href: "/services/roofing", label: "Кровля" },
-      { href: "/services/projecting", label: "Проектирование" },
-      { href: "/services/engineering", label: "Инженерия" },
+      { href: "/services/proektirovanie", label: "Проектирование" },
+      { href: "/services/fundament", label: "Фундамент" },
+      { href: "/services/karkas", label: "Коробка дома" },
+      { href: "/services/krovlya", label: "Кровля" },
+      { href: "/services/inzheneriya", label: "Инженерия" },
     ],
   },
   {

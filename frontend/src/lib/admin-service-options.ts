@@ -1,16 +1,10 @@
-/** Опции поля «Услуга» у проекта (совпадает с Prisma ServiceType) — запасной список, если в БД нет услуг. */
-export const ADMIN_PROJECT_SERVICE_OPTIONS: { value: string; label: string }[] = [
-  { value: "ELECTRICAL", label: "Электрика" },
-  { value: "ACOUSTICS", label: "Акустика" },
-  { value: "STRUCTURED_CABLING", label: "СКС" },
-  { value: "SMART_HOME", label: "Умный дом" },
-  { value: "SECURITY", label: "Безопасность" },
-  { value: "ARCHITECTURAL_LIGHTING", label: "Архитектурная подсветка" },
-];
+import { SERVICE_TYPE_ADMIN_OPTIONS, SERVICE_TYPE_LABEL_BY_VALUE } from "@/lib/service-type-admin-options";
 
-export const SERVICE_TYPE_LABELS_FALLBACK: Record<string, string> = Object.fromEntries(
-  ADMIN_PROJECT_SERVICE_OPTIONS.map((o) => [o.value, o.label])
-) as Record<string, string>;
+/** Опции поля «Услуга» у проекта (Prisma ServiceType). Совпадают с типом в CMS «Услуги». */
+export const ADMIN_PROJECT_SERVICE_OPTIONS = SERVICE_TYPE_ADMIN_OPTIONS;
+
+/** Все известные подписи ServiceType (включая устаревшие enum для старых записей). */
+export const SERVICE_TYPE_LABELS_FALLBACK: Record<string, string> = { ...SERVICE_TYPE_LABEL_BY_VALUE };
 
 /** Строка из GET /api/admin/services для селекта «Услуга» у проекта */
 export type CmsServiceForProjectSelect = {
@@ -49,8 +43,8 @@ export function mergeProjectServiceOptionsForForm(
   const cur = (currentService || "").trim();
   const base = cmsOptions.length > 0 ? cmsOptions : ADMIN_PROJECT_SERVICE_OPTIONS;
   if (!cur || base.some((o) => o.value === cur)) return base;
-  const fb = ADMIN_PROJECT_SERVICE_OPTIONS.find((o) => o.value === cur);
-  const extra = fb ?? { value: cur, label: cur };
+  const label = SERVICE_TYPE_LABEL_BY_VALUE[cur];
+  const extra = label ? { value: cur, label } : { value: cur, label: cur };
   return [extra, ...base.filter((o) => o.value !== cur)];
 }
 

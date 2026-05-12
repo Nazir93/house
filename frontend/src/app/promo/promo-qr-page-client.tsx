@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle, ChevronLeft, Gift } from "lucide-react";
 import { HouseConstructionCalculatorForm } from "@/components/construction/house-construction-calculator-form";
-import { PROMO_QR_OFFERS, type PromoQrOfferSlug } from "@/lib/promo-qr-offers";
+import { PROMO_QR_OFFERS, normalizePromoQrOfferSlug, type PromoQrOfferSlug } from "@/lib/promo-qr-offers";
 import { cn } from "@/lib/utils";
 
 function TwoStepIndicator({ step }: { step: 1 | 2 }) {
@@ -59,11 +60,18 @@ function TwoStepIndicator({ step }: { step: 1 | 2 }) {
 }
 
 export function PromoQrPageClient() {
+  const searchParams = useSearchParams();
   const [done, setDone] = useState<{ name: string } | null>(null);
   const [step, setStep] = useState<1 | 2>(1);
   const [selected, setSelected] = useState<PromoQrOfferSlug | null>(null);
 
   const selectedOffer = selected ? PROMO_QR_OFFERS.find((o) => o.slug === selected) ?? null : null;
+
+  useEffect(() => {
+    const raw = searchParams.get("offer") ?? searchParams.get("gift");
+    const slug = normalizePromoQrOfferSlug(raw);
+    if (slug) setSelected(slug);
+  }, [searchParams]);
 
   useEffect(() => {
     if (step === 2) {

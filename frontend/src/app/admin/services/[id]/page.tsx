@@ -11,16 +11,11 @@ import { parseServiceLandingDocument, type ServiceLandingDocument } from "@/lib/
 import { mergeServiceTitleIntoLandingJson } from "@/lib/merge-service-title-into-landing";
 import { ServiceLandingTextForm } from "@/components/admin/service-landing-text-form";
 
-const SERVICE_TYPES = [
-  { value: "ELECTRICAL", label: "Электрика" },
-  { value: "ACOUSTICS", label: "Акустика" },
-  { value: "STRUCTURED_CABLING", label: "Слаботочные системы" },
-  { value: "SMART_HOME", label: "Умный дом" },
-  { value: "SECURITY", label: "Безопасность" },
-  { value: "ARCHITECTURAL_LIGHTING", label: "Архитектурная подсветка" },
-];
+import { FULL_SERVICE_TYPE_DROPDOWN_OPTIONS } from "@/lib/service-type-admin-options";
 
-const ICONS = ["zap", "speaker", "network", "home", "shield", "sun"];
+const SERVICE_TYPES = FULL_SERVICE_TYPE_DROPDOWN_OPTIONS;
+
+const ICONS = ["zap", "speaker", "network", "home", "shield", "sun", "layers", "brush"];
 
 export default function AdminEditServicePage() {
   const params = useParams();

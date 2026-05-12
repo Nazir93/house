@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db";
 import type { ServiceType } from "@prisma/client";
-import { SITE_NAME } from "@/lib/constants";
+import { SERVICES, SITE_NAME } from "@/lib/constants";
+import { CMS_SERVICE_SLUG_TO_SERVICE_TYPE } from "@/lib/service-slug-routes";
+import { SERVICE_TYPE_LABEL_BY_VALUE } from "@/lib/service-type-admin-options";
 import { resolveServiceLandingDocument, stripShowcaseSections } from "@/lib/service-landing-defaults";
 import type { ServiceLandingDocument } from "@/lib/service-landing-schema";
 import { getServiceLandingHeroBannerFields } from "@/lib/service-card-media";
@@ -71,7 +73,15 @@ async function loadServiceRowForSlug(slug: string): Promise<ServiceRowPick | nul
     return null;
   }
 
-  return null;
+  const fallbackType = CMS_SERVICE_SLUG_TO_SERVICE_TYPE[slug];
+  if (!fallbackType) return null;
+  return {
+    published: true,
+    landingJson: null,
+    bannerImageDesktop: null,
+    bannerImageMobile: null,
+    serviceType: fallbackType,
+  };
 }
 
 /**
@@ -98,6 +108,26 @@ export async function getServiceMetadataDefaults(slug: string): Promise<{
     }
   } catch {
     // БД недоступна
+  }
+
+  const fromConstants = SERVICES.find((x) => x.slug === `/services/${slug}`);
+  if (fromConstants) {
+    const description = fromConstants.shortDescription.replace(/\s+/g, " ").trim();
+    return {
+      title: `${fromConstants.title} | ${SITE_NAME}`,
+      description: description.length > 200 ? `${description.slice(0, 197)}…` : description,
+      keywords: [fromConstants.title, SITE_NAME],
+    };
+  }
+
+  const st = CMS_SERVICE_SLUG_TO_SERVICE_TYPE[slug];
+  if (st) {
+    const title = SERVICE_TYPE_LABEL_BY_VALUE[st] ?? slug;
+    return {
+      title: `${title} | ${SITE_NAME}`,
+      description: `Услуги загородного строительства: ${title.toLowerCase()}. ${SITE_NAME}.`,
+      keywords: [title, SITE_NAME],
+    };
   }
 
   return null;

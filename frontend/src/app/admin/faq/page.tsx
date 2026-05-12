@@ -12,7 +12,7 @@ import {
   ChevronDown,
   ChevronRight,
 } from "lucide-react";
-import { ADMIN_PROJECT_SERVICE_OPTIONS } from "@/lib/admin-service-options";
+import { FULL_SERVICE_TYPE_DROPDOWN_OPTIONS } from "@/lib/service-type-admin-options";
 
 interface FaqItem {
   id: string;
@@ -25,7 +25,7 @@ interface FaqItem {
 
 const SERVICE_OPTIONS = [
   { value: "", label: "Общий" },
-  ...ADMIN_PROJECT_SERVICE_OPTIONS,
+  ...FULL_SERVICE_TYPE_DROPDOWN_OPTIONS,
 ];
 
 const emptyForm = { question: "", answer: "", service: "", visible: true, order: 0 };

@@ -1,16 +1,21 @@
 import type { ServiceItem } from "@/lib/get-services";
 
 /**
- * Запасные изображения для карточек услуг (главная hero, fallback), если в админке не загружено фото/видео.
- * Ключ — полный путь slug; часть ключей — устаревшие URL (редирект на /services).
+ * Запасные изображения для карточек услуг (главная, fallback), если в админке нет обложки.
+ * Ключ — путь `/services/{slug}` из CMS.
  */
 const FALLBACK_SIDE_IMAGE_BY_SLUG: Record<string, string> = {
-  "/services/acoustics": "/images/hero/hero-01.png",
-  "/services/smart-home": "/images/hero/hero-02.png",
-  "/services/electrical": "/images/hero/hero-03.png",
-  "/services/structured-cabling": "/images/hero/hero-04.png",
-  "/services/security": "/images/hero/hero-05.png",
-  "/services/architectural-lighting": "/images/hero/architectural-lighting.png",
+  "/services/proektirovanie": "/images/hero/hero-01.png",
+  "/services/projecting": "/images/hero/hero-01.png",
+  "/services/fundament": "/images/hero/hero-02.png",
+  "/services/foundation": "/images/hero/hero-02.png",
+  "/services/karkas": "/images/hero/hero-03.png",
+  "/services/krovlya": "/images/hero/hero-04.png",
+  "/services/roofing": "/images/hero/hero-04.png",
+  "/services/inzheneriya": "/images/hero/hero-05.png",
+  "/services/engineering": "/images/hero/hero-05.png",
+  "/services/otdelka": "/images/hero/architectural-lighting.png",
+  "/services/finishing": "/images/hero/architectural-lighting.png",
 };
 
 function normalizeSlugPath(slug: string): string {
