@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import { getLeadSourceLabel } from "@/lib/lead-sources";
+import { houseConstructionCalcDisplayRows } from "@/lib/house-construction-calc-display";
 
 type Lead = {
   id: string;
@@ -144,11 +145,47 @@ export default function AdminLeadDetailPage() {
         ))}
 
         {lead.calcData != null && (
-          <div>
-            <span className="text-xs uppercase tracking-wider text-white/30">Данные калькулятора</span>
-            <pre className="mt-1.5 text-xs text-white/50 bg-white/[0.03] rounded-lg p-3 overflow-x-auto">
-              {String(JSON.stringify(lead.calcData, null, 2))}
-            </pre>
+          <div className="space-y-3">
+            <span className="text-xs uppercase tracking-wider text-white/30 block">Данные калькулятора</span>
+            {(() => {
+              const calc = lead.calcData as Record<string, unknown>;
+              const summary =
+                typeof calc.selectionSummaryRu === "string" && calc.selectionSummaryRu.trim()
+                  ? calc.selectionSummaryRu.trim()
+                  : null;
+              const rows = houseConstructionCalcDisplayRows(lead.calcData);
+              return (
+                <>
+                  {summary ? (
+                    <div className="rounded-lg border border-white/[0.08] bg-white/[0.04] p-3">
+                      <p className="text-[10px] uppercase tracking-wider text-emerald-400/90 mb-2">Что выбрал клиент</p>
+                      <pre className="text-sm text-white/90 whitespace-pre-wrap font-sans leading-relaxed">
+                        {summary}
+                      </pre>
+                    </div>
+                  ) : rows?.length ? (
+                    <div className="rounded-lg border border-white/[0.08] bg-white/[0.04] p-3 space-y-2">
+                      <p className="text-[10px] uppercase tracking-wider text-emerald-400/90 mb-1">Что выбрал клиент</p>
+                      {rows.map((r) => (
+                        <div key={r.label} className="flex items-start gap-3 text-sm">
+                          <span className="text-white/40 w-40 flex-shrink-0">{r.label}</span>
+                          <span className="text-white/85">{r.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                  <details className="group">
+                    <summary className="text-xs text-white/35 cursor-pointer hover:text-white/50 list-none flex items-center gap-2">
+                      <span className="group-open:rotate-90 transition-transform inline-block">▸</span>
+                      Технический JSON
+                    </summary>
+                    <pre className="mt-1.5 text-xs text-white/50 bg-white/[0.03] rounded-lg p-3 overflow-x-auto">
+                      {String(JSON.stringify(lead.calcData, null, 2))}
+                    </pre>
+                  </details>
+                </>
+              );
+            })()}
           </div>
         )}
       </div>

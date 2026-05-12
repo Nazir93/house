@@ -16,8 +16,15 @@ export async function sendBitrixLead(payload: BitrixLeadPayload) {
     payload.service ? `Услуга: ${payload.service}` : null,
     payload.source ? `Источник: ${payload.source}` : null,
     payload.pageUrl ? `Страница: ${payload.pageUrl}` : null,
-    payload.calcData ? `Данные расчета: ${JSON.stringify(payload.calcData)}` : null,
-  ].filter(Boolean).join("\n");
+    (() => {
+      const c = payload.calcData;
+      if (!c || typeof c !== "object") return null;
+      const summary = (c as { selectionSummaryRu?: string }).selectionSummaryRu?.trim();
+      if (summary) return `Выбор клиента (калькулятор):\n${summary}`;
+      return null;
+    })(),
+    payload.calcData ? `Данные расчета (JSON): ${JSON.stringify(payload.calcData)}` : null,
+  ].filter(Boolean).join("\n\n");
 
   const res = await fetch(webhook, {
     method: "POST",

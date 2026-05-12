@@ -258,6 +258,17 @@ export type EngineeringSelection = {
   bio: boolean;
 };
 
+/** Подписи опций инженерии — для заявки, админки, Telegram */
+export const ENGINEERING_OPTION_LABELS: Record<keyof EngineeringSelection, string> = {
+  electric: "Электроснабжение",
+  water: "Разводка воды по дому",
+  sewage: "Канализация",
+  radiators: "Радиаторы",
+  warmFloor: "Тёплый пол (1-й этаж)",
+  boiler: "Котельная (фикс.)",
+  bio: "Станция биоочистки (фикс.)",
+};
+
 export const defaultEngineeringSelection = (): EngineeringSelection => ({
   electric: false,
   water: false,

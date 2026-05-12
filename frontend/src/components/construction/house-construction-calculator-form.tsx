@@ -13,6 +13,7 @@ import {
   type RoofTypeId,
   type WallMaterialId,
   WALL_MATERIAL_LABELS,
+  ENGINEERING_OPTION_LABELS,
   FACADE_FINISH_LABELS,
   computeHouseConstructionQuote,
   defaultEngineeringSelection,
@@ -23,6 +24,12 @@ import {
   type EngineeringSelection,
   type HouseConstructionCalculatorConfig,
 } from "@/lib/house-construction-calculator";
+import {
+  buildHouseConstructionSelectionSummaryRu,
+  engineeringSelectedHumanLabels,
+  resolveFacadeFinishLabel,
+  HOUSE_CONSTRUCTION_ENGINEERING_FIELD_ORDER,
+} from "@/lib/house-construction-calc-display";
 import { formatRub } from "@/lib/construction-shared";
 import { readLeadError } from "@/lib/read-lead-error";
 import { useContactConfig } from "@/lib/contact-config-context";
@@ -46,16 +53,6 @@ const facadeSelectOptions: { value: FacadeFinishId; label: string }[] = [
   { value: "thermo", label: FACADE_FINISH_LABELS.thermo },
   { value: "brick_insulated", label: FACADE_FINISH_LABELS.brick_insulated },
 ];
-
-const engineeringKeys = [
-  ["electric", "Электроснабжение"],
-  ["water", "Разводка воды по дому"],
-  ["sewage", "Канализация"],
-  ["radiators", "Радиаторы"],
-  ["warmFloor", "Тёплый пол (1-й этаж)"],
-  ["boiler", "Котельная (фикс.)"],
-  ["bio", "Станция биоочистки (фикс.)"],
-] as const;
 
 const houseConstructionSchema = z.object({
   objectType: z.string().optional(),
@@ -88,7 +85,8 @@ function roofOptionsForFloor(floor: CatalogFloorId, cfg: HouseConstructionCalcul
 export function buildHouseConstructionCalcPayload(
   data: HouseConstructionFormData,
   areaNum: number,
-  config: HouseConstructionCalculatorConfig
+  config: HouseConstructionCalculatorConfig,
+  extras?: { promoFreeServiceTitle?: string | null }
 ) {
   const q = computeHouseConstructionQuote(
     {
@@ -101,7 +99,21 @@ export function buildHouseConstructionCalcPayload(
     },
     config
   );
+  const facadeFinishLabel = resolveFacadeFinishLabel(data.facadeFinish);
+  const engineeringSelectedLabels = engineeringSelectedHumanLabels(data.engineering);
+  const selectionSummaryRu = buildHouseConstructionSelectionSummaryRu({
+    objectType: data.objectType?.trim() || null,
+    area: data.area?.trim() || null,
+    catalogFloorLabel: CATALOG_FLOOR_LABELS[data.catalogFloor],
+    roofLabel: ROOF_LABELS[data.roof],
+    wallMaterialLabel: WALL_MATERIAL_LABELS[data.wallMaterial],
+    facadeFinishLabel,
+    engineeringLabels: engineeringSelectedLabels,
+    grandTotalRub: q.grandTotalRub,
+    promoFreeServiceTitle: extras?.promoFreeServiceTitle ?? null,
+  });
   return {
+    selectionSummaryRu,
     kind: "house-construction-quote" as const,
     objectType: data.objectType?.trim() || null,
     area: data.area?.trim() || null,
@@ -112,7 +124,9 @@ export function buildHouseConstructionCalcPayload(
     wallMaterial: data.wallMaterial,
     wallMaterialLabel: WALL_MATERIAL_LABELS[data.wallMaterial],
     engineering: data.engineering,
+    engineeringSelectedLabels,
     facadeFinish: data.facadeFinish,
+    facadeFinishLabel,
     estimate: q.grandTotalRub,
     quote: {
       validConfiguration: q.validConfiguration,
@@ -248,7 +262,10 @@ export function HouseConstructionCalculatorForm({
       const params = new URLSearchParams(window.location.search);
       const rawAreaSubmit = parseFloat(String(data.area ?? "").replace(",", "."));
       const areaForPayload = Number.isFinite(rawAreaSubmit) && rawAreaSubmit > 0 ? rawAreaSubmit : 0;
-      const payload = buildHouseConstructionCalcPayload(data, areaForPayload, config);
+      const payload = buildHouseConstructionCalcPayload(data, areaForPayload, config, {
+        promoFreeServiceTitle:
+          promoFreeService?.slug && promoFreeService.title ? promoFreeService.title : null,
+      });
       const calcData =
         promoFreeService?.slug && promoFreeService.title
           ? {
@@ -406,7 +423,8 @@ export function HouseConstructionCalculatorForm({
                 Инженерные опции (привязка к площади и этажу)
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {engineeringKeys.map(([key, label]) => {
+                {HOUSE_CONSTRUCTION_ENGINEERING_FIELD_ORDER.map((key) => {
+                  const label = ENGINEERING_OPTION_LABELS[key];
                   const on = Boolean(engineering?.[key]);
                   return (
                   <label

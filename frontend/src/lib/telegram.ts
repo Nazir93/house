@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { engineeringSelectedHumanLabels, resolveFacadeFinishLabel } from "@/lib/house-construction-calc-display";
 
 function getTelegramChatIdsFromEnv(): string[] {
   const multi = process.env.TELEGRAM_CHAT_IDS?.trim();
@@ -322,25 +323,40 @@ export function formatLeadMessage(lead: {
       wallMaterialLabel?: string;
       engineering?: Partial<Record<string, boolean>>;
       facadeFinish?: string;
+      facadeFinishLabel?: string;
+      engineeringSelectedLabels?: string[];
+      selectionSummaryRu?: string;
       estimate?: number | null;
       quote?: { grandTotalRub?: number | null };
+      promoQrBanner?: boolean;
+      promoFreeServiceTitle?: string;
     };
     lines.push(``, `<b>Калькулятор строительства (прайс)</b>`);
-    if (h.objectType?.trim()) lines.push(`<b>Объект:</b> ${escapeHtml(h.objectType.trim())}`);
-    if (h.catalogFloorLabel) lines.push(`<b>Этажность:</b> ${escapeHtml(h.catalogFloorLabel)}`);
-    if (h.roofLabel) lines.push(`<b>Кровля:</b> ${escapeHtml(h.roofLabel)}`);
-    if (h.wallMaterialLabel) lines.push(`<b>Стены:</b> ${escapeHtml(h.wallMaterialLabel)}`);
-    if (h.area?.trim()) lines.push(`<b>Площадь:</b> ${escapeHtml(h.area.trim())} м²`);
-    if (h.engineering) {
-      const keys = Object.entries(h.engineering)
-        .filter(([, v]) => v === true)
-        .map(([k]) => k);
-      if (keys.length) lines.push(`<b>Инженерия (ключи):</b> ${escapeHtml(keys.join(", "))}`);
-    }
-    if (h.facadeFinish && h.facadeFinish !== "none") lines.push(`<b>Фасад:</b> ${escapeHtml(h.facadeFinish)}`);
-    const g = h.quote?.grandTotalRub ?? h.estimate;
-    if (typeof g === "number" && Number.isFinite(g)) {
-      lines.push(`<b>Ориентировочно:</b> ${g.toLocaleString("ru-RU")} ₽`);
+    if (h.selectionSummaryRu?.trim()) {
+      lines.push(
+        h.selectionSummaryRu
+          .trim()
+          .split("\n")
+          .map((ln) => escapeHtml(ln))
+          .join("<br>")
+      );
+    } else {
+      if (h.objectType?.trim()) lines.push(`<b>Объект:</b> ${escapeHtml(h.objectType.trim())}`);
+      if (h.catalogFloorLabel) lines.push(`<b>Этажность:</b> ${escapeHtml(h.catalogFloorLabel)}`);
+      if (h.roofLabel) lines.push(`<b>Кровля:</b> ${escapeHtml(h.roofLabel)}`);
+      if (h.wallMaterialLabel) lines.push(`<b>Стены:</b> ${escapeHtml(h.wallMaterialLabel)}`);
+      if (h.area?.trim()) lines.push(`<b>Площадь:</b> ${escapeHtml(h.area.trim())} м²`);
+      const engText =
+        Array.isArray(h.engineeringSelectedLabels) && h.engineeringSelectedLabels.length
+          ? h.engineeringSelectedLabels.join(", ")
+          : engineeringSelectedHumanLabels(h.engineering).join(", ");
+      if (engText) lines.push(`<b>Инженерия:</b> ${escapeHtml(engText)}`);
+      const facadeHuman = h.facadeFinishLabel?.trim() || resolveFacadeFinishLabel(h.facadeFinish);
+      lines.push(`<b>Фасад:</b> ${escapeHtml(facadeHuman)}`);
+      const g = h.quote?.grandTotalRub ?? h.estimate;
+      if (typeof g === "number" && Number.isFinite(g)) {
+        lines.push(`<b>Ориентировочно:</b> ${g.toLocaleString("ru-RU")} ₽`);
+      }
     }
   }
 
