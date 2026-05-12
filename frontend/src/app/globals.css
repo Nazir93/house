@@ -610,7 +610,8 @@
   --adm-main-fg: rgba(22, 26, 25, 0.92);
   --adm-main-fg-heading: rgba(22, 26, 25, 0.9);
   --adm-main-fg-muted: rgba(22, 26, 25, 0.62);
-  --adm-main-fg-subtle: rgba(22, 26, 25, 0.45);
+  /* Подписи полей на светлой подложке — читаемый тёмный текст (не «серый на белом»). */
+  --adm-main-fg-subtle: rgba(22, 26, 25, 0.88);
   --adm-main-fg-faint: rgba(22, 26, 25, 0.32);
   --adm-card-bg: rgba(255, 255, 255, 0.72);
   --adm-card-border: rgba(22, 26, 25, 0.1);
@@ -768,7 +769,7 @@
 [data-theme="light"]
   .admin-main-surface
   :is(input, textarea, select):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="hidden"])::placeholder {
-  color: rgb(22 26 25 / 0.38) !important;
+  color: rgb(22 26 25 / 0.52) !important;
 }
 
 /* Текст на сплошных кнопках/ссылках бренда — не перекрашивать в тёмный */
