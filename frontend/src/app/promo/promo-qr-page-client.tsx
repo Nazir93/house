@@ -18,11 +18,7 @@ function TwoStepIndicator({ step }: { step: 1 | 2 }) {
       <p className="text-[11px] font-semibold uppercase tracking-[0.18em]" style={{ color: "var(--text-muted)" }}>
         Всего два шага
       </p>
-      <p className="mt-1.5 text-[13px] font-medium leading-snug sm:text-sm" style={{ color: "var(--text-muted)" }}>
-        Сначала <span style={{ color: "var(--text)" }}>шаг 1</span> — выберите подарок, затем{" "}
-        <span style={{ color: "var(--text)" }}>шаг 2</span> — заполните расчёт и отправьте заявку.
-      </p>
-      <div className="mt-4 flex items-center gap-2 sm:gap-3">
+      <div className="mt-3 flex items-center gap-2 sm:gap-3 sm:mt-4">
         <div className="flex items-center gap-2">
           <span
             className={cn(
@@ -58,9 +54,6 @@ function TwoStepIndicator({ step }: { step: 1 | 2 }) {
           </span>
         </div>
       </div>
-      <p className="mt-3 text-xs leading-snug sm:text-[13px]" style={{ color: "var(--text-subtle)" }}>
-        Показываем один шаг за раз — без пролистывания длинной страницы.
-      </p>
     </div>
   );
 }
@@ -105,7 +98,7 @@ export function PromoQrPageClient() {
   return (
     <div style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
       <div className="container mx-auto max-w-[1280px] px-5 pt-24 pb-10 sm:pt-28">
-        <div className="mb-6">
+        <div className="mb-6 w-full">
           <span
             className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs uppercase tracking-[0.14em]"
             style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
@@ -113,13 +106,9 @@ export function PromoQrPageClient() {
             <Gift size={14} className="shrink-0" aria-hidden />
             Акция по QR
           </span>
-          <h1 className="mt-4 font-heading text-2xl tracking-tight sm:text-4xl md:text-5xl max-w-3xl">
+          <h1 className="mt-4 w-full max-w-none font-heading text-balance text-xl leading-snug tracking-tight sm:text-2xl sm:leading-snug md:text-3xl md:leading-tight lg:text-3xl xl:text-4xl">
             Специальное предложение для гостей баннера
           </h1>
-          <p className="mt-3 max-w-2xl text-base sm:text-lg" style={{ color: "var(--text-muted)" }}>
-            Два шага: сначала выберите одну услугу в подарок, затем ориентировочный расчёт и заявку. Одна позиция на
-            заявку; финальные условия фиксирует менеджер при звонке.
-          </p>
         </div>
 
         <TwoStepIndicator step={step} />
@@ -136,10 +125,6 @@ export function PromoQrPageClient() {
             <h2 id="promo-step1-heading" className="mt-2 font-heading text-lg font-bold sm:text-xl">
               Выберите одну услугу по акции
             </h2>
-            <p className="mt-2 text-sm max-w-3xl" style={{ color: "var(--text-muted)" }}>
-              Отметьте только один пункт. Нажмите «Дальше — шаг 2», чтобы заполнить расчёт — выбранная позиция будет
-              подсвечена как подарок.
-            </p>
 
             <div className="mt-5 grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3 sm:gap-3">
               {PROMO_QR_OFFERS.map((offer) => {
