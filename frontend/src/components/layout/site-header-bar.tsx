@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Percent, Search, Send, UserRound } from "lucide-react";
-import { SITE_NAME, HEADER_TAGLINE, HEADER_PHONE_HINT, ACCOUNT_PORTAL_PATH, YANDEX_REVIEWS_URL } from "@/lib/constants";
+import { SITE_NAME, HEADER_TAGLINE, ACCOUNT_PORTAL_PATH, YANDEX_REVIEWS_URL } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { maxChatUrlFromRawPhone, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
@@ -141,8 +141,8 @@ export function SiteHeaderBar() {
           >
       {/* ——— Desktop ——— */}
       <div className="hidden lg:block">
-        <div className="mx-auto grid max-w-[1440px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-x-3 overflow-visible py-1 pl-4 pr-3 xl:gap-x-6 xl:pl-8 xl:pr-5">
-          <div className="flex min-w-0 items-center gap-2 xl:gap-3">
+        <div className="mx-auto flex max-w-[1440px] items-center gap-x-2 overflow-visible py-1 pl-4 pr-3 xl:gap-x-3 xl:pl-8 xl:pr-5">
+          <div className="flex min-w-0 shrink-0 items-center gap-2 xl:gap-3">
             <Link
               href="/"
               className="flex min-w-0 shrink-0 items-center no-underline"
@@ -151,7 +151,7 @@ export function SiteHeaderBar() {
               <BrandLogo height={44} className="min-w-0" brightOnBackdrop={heroGlassLightInk} />
             </Link>
             <p
-              className="hidden max-w-[220px] text-[9px] font-medium uppercase leading-snug tracking-[0.11em] min-[1100px]:block xl:max-w-[280px] xl:tracking-[0.12em]"
+              className="hidden max-w-[200px] text-[9px] font-medium uppercase leading-snug tracking-[0.11em] min-[1100px]:block xl:max-w-[260px] xl:tracking-[0.12em]"
               style={{ color: "var(--header-bar-muted)" }}
             >
               {HEADER_TAGLINE}
@@ -159,19 +159,19 @@ export function SiteHeaderBar() {
           </div>
 
           <nav
-            className="flex max-w-[min(72vw,720px)] flex-wrap justify-center gap-x-3 gap-y-1 overflow-visible xl:max-w-none xl:gap-x-5"
+            className="ml-4 flex shrink-0 flex-nowrap items-center gap-x-2 overflow-visible sm:ml-5 xl:ml-7 xl:gap-x-3.5"
             aria-label="Основное меню"
           >
             {orderedNav.map((section) => (
               <div
                 key={section.label}
-                className="relative overflow-visible"
+                className="relative shrink-0 overflow-visible"
                 onMouseEnter={() => handleEnter(section.label)}
                 onMouseLeave={handleLeave}
               >
                 <button
                   type="button"
-                  className="flex items-center gap-0.5 whitespace-nowrap py-0.5 text-left text-[10px] font-semibold uppercase tracking-[0.06em] xl:gap-1 xl:text-[11px]"
+                  className="flex items-center gap-0.5 whitespace-nowrap py-0.5 text-left text-[9px] font-semibold uppercase tracking-[0.06em] xl:gap-1 xl:text-[10px]"
                   style={{
                     color:
                       openSection === section.label
@@ -192,29 +192,21 @@ export function SiteHeaderBar() {
             ))}
           </nav>
 
-          <div className="flex min-w-0 flex-nowrap items-center justify-end gap-1 xl:gap-1.5">
+          <div className="ml-auto flex min-w-0 shrink-0 flex-nowrap items-center justify-end gap-1 xl:gap-1.5">
             {(contact.phone.trim() && contact.phoneRaw.trim()) ||
             telegramHref ||
             maxHref ||
             YANDEX_REVIEWS_URL.trim() ? (
               <div className="mr-1 flex min-w-0 shrink flex-nowrap items-center justify-end gap-1.5 border-r border-[var(--header-bar-border)] pr-1.5 xl:mr-2 xl:gap-2 xl:pr-3">
                 {contact.phone.trim() && contact.phoneRaw.trim() ? (
-                  <div className="flex min-w-0 shrink items-center gap-1.5">
-                    <a
-                      href={`tel:${contact.phoneRaw}`}
-                      title="Городской телефон"
-                      className="shrink-0 text-[10px] font-semibold tabular-nums leading-none tracking-tight transition hover:opacity-90 xl:text-[11px]"
-                      style={{ color: "var(--header-bar-text)" }}
-                    >
-                      {contact.phone}
-                    </a>
-                    <span
-                      className="min-w-0 max-w-[7.5rem] truncate text-[7px] font-medium uppercase leading-none tracking-wide xl:max-w-[9.5rem] xl:text-[8px]"
-                      style={{ color: "var(--header-bar-muted)" }}
-                    >
-                      {HEADER_PHONE_HINT}
-                    </span>
-                  </div>
+                  <a
+                    href={`tel:${contact.phoneRaw}`}
+                    title={`Позвонить: ${contact.phone}`}
+                    className="shrink-0 whitespace-nowrap text-[10px] font-semibold tabular-nums tracking-tight transition hover:opacity-90 xl:text-[11px]"
+                    style={{ color: "var(--header-bar-text)" }}
+                  >
+                    {contact.phone}
+                  </a>
                 ) : null}
                 {(telegramHref || maxHref) && (
                   <div className="flex shrink-0 items-center gap-1">
