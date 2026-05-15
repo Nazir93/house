@@ -193,11 +193,65 @@ export function SiteHeaderBar() {
           </nav>
 
           <div className="ml-auto flex min-w-0 shrink-0 flex-nowrap items-center justify-end gap-1 xl:gap-1.5">
+            {/*
+              Компактные кнопки сначала: при overflow-x:hidden у body широкий блок
+              контактов иначе выталкивал поиск и переключатель темы за край экрана.
+            */}
+            <button
+              type="button"
+              onClick={toggleSearch}
+              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition hover:bg-black/[0.04] dark:hover:bg-white/10"
+              style={{
+                borderColor: "var(--header-bar-border)",
+                color: "var(--header-bar-text)",
+              }}
+              aria-label={searchOpen ? "Закрыть поиск по сайту" : "Поиск по сайту"}
+              aria-expanded={searchOpen}
+            >
+              <Search className="h-3 w-3" strokeWidth={2} aria-hidden />
+            </button>
+
+            <ThemeToggle variant="header" />
+
+            <Link
+              href={ACCOUNT_PORTAL_PATH}
+              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition hover:bg-black/[0.04] dark:hover:bg-white/10"
+              style={{
+                borderColor: "var(--header-bar-border)",
+                color: "var(--header-bar-text)",
+              }}
+              aria-label="Личный кабинет"
+            >
+              <UserRound className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+            </Link>
+
+            <Link
+              href="/mortgage"
+              className={cn(
+                "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 xl:gap-1.5 xl:px-3.5 xl:py-1.5 xl:text-[10px]",
+                heroGlassLightInk &&
+                  "border border-white/25 bg-white/95 text-[#0f3d2e] shadow-[0_8px_28px_rgba(0,0,0,0.22)] backdrop-blur-sm hover:bg-white hover:shadow-[0_10px_32px_rgba(0,0,0,0.26)] focus-visible:outline-white/80",
+                heroGlassDarkInk &&
+                  "border border-white/30 bg-black/45 text-white shadow-[0_8px_28px_rgba(0,0,0,0.35)] backdrop-blur-md hover:border-white/40 hover:bg-black/55 focus-visible:outline-[var(--accent)]",
+                !heroGlassLightInk &&
+                  !heroGlassDarkInk &&
+                  theme === "light" &&
+                  "border border-[rgba(26,30,29,0.14)] bg-white text-[#1a1e1d] shadow-[0_1px_3px_rgba(15,61,46,0.08)] hover:border-[rgba(26,30,29,0.22)] hover:bg-[#fafaf8] focus-visible:outline-[var(--accent)]",
+                !heroGlassLightInk &&
+                  !heroGlassDarkInk &&
+                  theme === "dark" &&
+                  "border border-white/14 bg-white/[0.07] text-[#f1f5f3] shadow-none hover:border-white/22 hover:bg-white/[0.11] focus-visible:outline-[var(--accent)]",
+              )}
+            >
+              <Percent className="h-3 w-3 shrink-0 opacity-95" strokeWidth={2} aria-hidden />
+              Ипотека и финансы
+            </Link>
+
             {(contact.phone.trim() && contact.phoneRaw.trim()) ||
             telegramHref ||
             maxHref ||
             YANDEX_REVIEWS_URL.trim() ? (
-              <div className="mr-1 flex min-w-0 shrink flex-nowrap items-center justify-end gap-1.5 border-r border-[var(--header-bar-border)] pr-1.5 xl:mr-2 xl:gap-2 xl:pr-3">
+              <div className="ml-1 flex min-w-0 shrink flex-nowrap items-center justify-end gap-1.5 border-l border-[var(--header-bar-border)] pl-1.5 xl:ml-2 xl:gap-2 xl:pl-3">
                 {contact.phone.trim() && contact.phoneRaw.trim() ? (
                   <a
                     href={`tel:${contact.phoneRaw}`}
@@ -247,55 +301,6 @@ export function SiteHeaderBar() {
                 <YandexMapsRatingChip />
               </div>
             ) : null}
-            <button
-              type="button"
-              onClick={toggleSearch}
-              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition hover:bg-black/[0.04] dark:hover:bg-white/10"
-              style={{
-                borderColor: "var(--header-bar-border)",
-                color: "var(--header-bar-text)",
-              }}
-              aria-label={searchOpen ? "Закрыть поиск по сайту" : "Поиск по сайту"}
-              aria-expanded={searchOpen}
-            >
-              <Search className="h-3 w-3" strokeWidth={2} aria-hidden />
-            </button>
-
-            <ThemeToggle variant="header" />
-
-            <Link
-              href="/mortgage"
-              className={cn(
-                "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 xl:gap-1.5 xl:px-3.5 xl:py-1.5 xl:text-[10px]",
-                heroGlassLightInk &&
-                  "border border-white/25 bg-white/95 text-[#0f3d2e] shadow-[0_8px_28px_rgba(0,0,0,0.22)] backdrop-blur-sm hover:bg-white hover:shadow-[0_10px_32px_rgba(0,0,0,0.26)] focus-visible:outline-white/80",
-                heroGlassDarkInk &&
-                  "border border-white/30 bg-black/45 text-white shadow-[0_8px_28px_rgba(0,0,0,0.35)] backdrop-blur-md hover:border-white/40 hover:bg-black/55 focus-visible:outline-[var(--accent)]",
-                !heroGlassLightInk &&
-                  !heroGlassDarkInk &&
-                  theme === "light" &&
-                  "border border-[rgba(26,30,29,0.14)] bg-white text-[#1a1e1d] shadow-[0_1px_3px_rgba(15,61,46,0.08)] hover:border-[rgba(26,30,29,0.22)] hover:bg-[#fafaf8] focus-visible:outline-[var(--accent)]",
-                !heroGlassLightInk &&
-                  !heroGlassDarkInk &&
-                  theme === "dark" &&
-                  "border border-white/14 bg-white/[0.07] text-[#f1f5f3] shadow-none hover:border-white/22 hover:bg-white/[0.11] focus-visible:outline-[var(--accent)]",
-              )}
-            >
-              <Percent className="h-3 w-3 shrink-0 opacity-95" strokeWidth={2} aria-hidden />
-              Ипотека и финансы
-            </Link>
-
-            <Link
-              href={ACCOUNT_PORTAL_PATH}
-              className="-mr-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition hover:bg-black/[0.04] dark:hover:bg-white/10"
-              style={{
-                borderColor: "var(--header-bar-border)",
-                color: "var(--header-bar-text)",
-              }}
-              aria-label="Личный кабинет"
-            >
-              <UserRound className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-            </Link>
           </div>
         </div>
       </div>

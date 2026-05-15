@@ -9,6 +9,7 @@ import { useContactConfig } from "@/lib/contact-config-context";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { NAV_SECTIONS, isNavGroup, type NavSection } from "@/lib/nav-sections";
 import { useModal } from "@/lib/modal-context";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { maxChatUrlFromRawPhone, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
 
 function buildGridPath(
@@ -352,6 +353,7 @@ export function Header() {
               Часть души
             </Link>
             <div className="flex items-center gap-2">
+              <ThemeToggle variant="outline" />
               <button
                 onClick={() => setIsOpen(false)}
                 className="w-9 h-9 rounded-full flex items-center justify-center border transition-colors"
