@@ -2,15 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 import { revalidatePublicConstructionCatalog } from "@/lib/revalidate-public-content";
+import { builtObjectFormHasMediaPayload, builtObjectMediaCreatePayload } from "@/lib/built-object-admin-media";
 
 function n(value: unknown) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
-}
-
-function mediaCreate(urls: unknown, type: "RENDER" | "PLAN" | "BUILD_STAGE" | "VIDEO") {
-  const list = Array.isArray(urls) ? urls : typeof urls === "string" ? urls.split("\n") : [];
-  return list.map(String).map((url) => url.trim()).filter(Boolean).map((url, order) => ({ type, url, order }));
 }
 
 export async function GET(_request: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -38,7 +34,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
 
   try {
     const body = await request.json();
-    const hasMedia = body.renders !== undefined || body.plans !== undefined || body.stages !== undefined || body.videos !== undefined;
+    const hasMedia = builtObjectFormHasMediaPayload(body);
     const object = await (prisma as any).builtObject.update({
       where: { id: params.id },
       data: {
@@ -64,12 +60,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         ...(hasMedia && {
           media: {
             deleteMany: {},
-            create: [
-              ...mediaCreate(body.renders, "RENDER"),
-              ...mediaCreate(body.plans, "PLAN"),
-              ...mediaCreate(body.stages, "BUILD_STAGE"),
-              ...mediaCreate(body.videos, "VIDEO"),
-            ],
+            create: builtObjectMediaCreatePayload(body),
           },
         }),
       },

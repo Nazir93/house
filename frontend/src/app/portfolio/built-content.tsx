@@ -289,7 +289,7 @@ export function BuiltPortfolioContent({
                   return (
                     <li key={object.id}>
                       <Link href={`/portfolio/${object.slug}`} className="group block">
-                        <div className="relative aspect-[4/3] overflow-hidden rounded-sm bg-[var(--stone)] ring-1 ring-[var(--border)] transition-shadow duration-300 group-hover:ring-[var(--accent)]/40">
+                        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-[var(--stone)] ring-1 ring-[var(--border)] transition-shadow duration-300 group-hover:ring-[var(--accent)]/40">
                           {cover ? (
                             <CmsImage
                               src={cover.url}

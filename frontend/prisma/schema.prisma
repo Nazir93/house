@@ -215,9 +215,12 @@ model BuiltObjectMedia {
   url           String
   alt           String                @default("")
   label         String?
+  /// Ключ раздела кейса (foundation, walls, …) для BUILD_STAGE
+  phaseKey      String?
   order         Int                   @default(0)
 
   @@index([builtObjectId, type, order])
+  @@index([builtObjectId, phaseKey])
 }
 
 /// Счётчик запросов к POST /api/leads по IP в фиксированном окне времени (несколько инстансов приложения видят общий лимит).

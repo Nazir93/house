@@ -8,6 +8,8 @@ import { AdminFormSection } from "@/components/admin/admin-form-section";
 import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
 import { RichEditor } from "@/components/admin/rich-editor";
 import { AdminSelect } from "@/components/admin/admin-select";
+import { CASE_STUDY_CONSTRUCTION_PHASES } from "@/lib/portfolio-case-study-phases";
+import { initialPhaseMediaForm, mediaUrlsForForm } from "@/lib/built-object-admin-media";
 
 const MATERIALS = [
   ["GAS_BLOCK", "Газобетон"],
@@ -20,7 +22,7 @@ const MATERIALS = [
 const MATERIAL_OPTIONS = MATERIALS.map(([value, label]) => ({ value, label }));
 
 function urls(media: any[] | undefined, type: string) {
-  return (media || []).filter((item) => item.type === type).map((item) => item.url).join("\n");
+  return mediaUrlsForForm(media, type);
 }
 
 export function BuiltObjectForm({ initial }: { initial?: any }) {
@@ -50,7 +52,8 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
     order: String(initial?.order ?? 0),
     renders: urls(initial?.media, "RENDER"),
     plans: urls(initial?.media, "PLAN"),
-    stages: urls(initial?.media, "BUILD_STAGE"),
+    phaseMedia: initialPhaseMediaForm(initial?.media),
+    stages: mediaUrlsForForm(initial?.media, "BUILD_STAGE", null),
     videos: urls(initial?.media, "VIDEO"),
   });
 
@@ -65,6 +68,25 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
       const cur = (prev[field] as string).trim();
       return { ...prev, [field]: cur ? `${cur}\n${u}` : u };
     });
+  }
+
+  function appendPhaseMediaLine(phaseId: string, url: string) {
+    const u = url.trim();
+    if (!u) return;
+    setForm((prev) => {
+      const cur = (prev.phaseMedia[phaseId] ?? "").trim();
+      return {
+        ...prev,
+        phaseMedia: { ...prev.phaseMedia, [phaseId]: cur ? `${cur}\n${u}` : u },
+      };
+    });
+  }
+
+  function setPhaseMedia(phaseId: string, value: string) {
+    setForm((prev) => ({
+      ...prev,
+      phaseMedia: { ...prev.phaseMedia, [phaseId]: value },
+    }));
   }
 
   async function save() {
@@ -135,13 +157,18 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
         </div>
       </AdminFormSection>
 
-      <AdminFormSection title="Медиа и ссылки" subtitle="Одна строка в поле — один URL. Кнопки загрузки: можно выбрать сразу несколько файлов (Ctrl/⌘ или Shift в диалоге).">
+      <AdminFormSection
+        title="Кейс на сайте — медиа по разделам"
+        subtitle="Раздел на странице /portfolio/slug появляется только если загружены фото (или для «Рендеров» — описание объекта выше). Пустые разделы на сайте скрыты."
+      >
         <p className="text-[11px] text-white/45 leading-relaxed rounded-xl bg-white/[0.02] border border-white/[0.06] px-3 py-2.5">
           <span className="font-semibold text-white/60">Быстрее открывается сайт, если</span> картинки с вашего домена
           (/uploads или /public): при загрузке растр до 1920px по длинной стороне сохраняется как WebP. Лимит одного файла
           — 30&nbsp;МБ; видео — до 250&nbsp;МБ (на nginx может быть свой потолок).
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/50">Рендеры и фото объекта</p>
           <AdminMediaUpload
             label="Загрузить фото → рендеры"
             accept="image"
@@ -149,6 +176,11 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
             multiple
             onChange={(url) => appendMediaLine("renders", url)}
           />
+          <textarea value={form.renders} onChange={(e) => set("renders", e.target.value)} rows={6} placeholder="Рендеры / фото объекта — по одному URL на строку" className="w-full min-h-[120px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
+        </div>
+
+        <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/50">Планировки</p>
           <AdminMediaUpload
             label="Загрузить изображение → планировки"
             accept="image"
@@ -156,25 +188,60 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
             multiple
             onChange={(url) => appendMediaLine("plans", url)}
           />
+          <textarea value={form.plans} onChange={(e) => set("plans", e.target.value)} rows={4} placeholder="Планировки — по одному URL на строку" className="w-full min-h-[96px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
+        </div>
+
+        <div className="space-y-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/50">Этапы строительства (таймлайн кейса)</p>
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+            {CASE_STUDY_CONSTRUCTION_PHASES.map(({ id, title }) => (
+              <div key={id} className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+                <p className="text-sm font-medium text-white/85">{title}</p>
+                <AdminMediaUpload
+                  label={`Загрузить → ${title}`}
+                  accept="image"
+                  value=""
+                  multiple
+                  onChange={(url) => appendPhaseMediaLine(id, url)}
+                />
+                <textarea
+                  value={form.phaseMedia[id] ?? ""}
+                  onChange={(e) => setPhaseMedia(id, e.target.value)}
+                  rows={3}
+                  placeholder="URL фото — по одному на строку"
+                  className="w-full min-h-[72px] px-3 py-2 rounded-lg bg-white/[0.05] border border-white/[0.08] text-xs text-white font-mono"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-3 rounded-xl border border-dashed border-white/[0.1] bg-white/[0.01] p-4">
+          <p className="text-xs font-semibold text-white/45">Прочие фото этапов (без раздела)</p>
+          <p className="text-[11px] text-white/35 leading-relaxed">
+            Старое поле: попадает в раздел «Фото этапов строительства» в конце таймлайна. Для новых объектов лучше загружать в разделы выше.
+          </p>
           <AdminMediaUpload
-            label="Загрузить фото → этапы стройки"
+            label="Загрузить фото → прочие этапы"
             accept="image"
             value=""
             multiple
             onChange={(url) => appendMediaLine("stages", url)}
           />
+          <textarea value={form.stages} onChange={(e) => set("stages", e.target.value)} rows={4} placeholder="По одному URL на строку" className="w-full min-h-[96px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
+        </div>
+
+        <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/50">Видео</p>
           <AdminMediaUpload
-            label="Загрузить видео → видео"
+            label="Загрузить видео"
             accept="video"
             value=""
             multiple
             onChange={(url) => appendMediaLine("videos", url)}
           />
+          <textarea value={form.videos} onChange={(e) => set("videos", e.target.value)} rows={4} placeholder="Видео / reels — по одному URL на строку" className="w-full min-h-[96px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
         </div>
-        <textarea value={form.renders} onChange={(e) => set("renders", e.target.value)} rows={10} placeholder="Рендеры / фото объекта — по одному URL на строку" className="w-full min-h-[180px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
-        <textarea value={form.plans} onChange={(e) => set("plans", e.target.value)} rows={6} placeholder="Планировки — по одному URL на строку" className="w-full min-h-[120px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
-        <textarea value={form.stages} onChange={(e) => set("stages", e.target.value)} rows={10} placeholder="Фото этапов строительства — по одному URL на строку" className="w-full min-h-[180px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
-        <textarea value={form.videos} onChange={(e) => set("videos", e.target.value)} rows={6} placeholder="Видео / reels — по одному URL на строку" className="w-full min-h-[120px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <input value={form.houseProjectId} onChange={(e) => set("houseProjectId", e.target.value)} placeholder="ID типового проекта" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
           <input value={form.telegramUrl} onChange={(e) => set("telegramUrl", e.target.value)} placeholder="Telegram" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />

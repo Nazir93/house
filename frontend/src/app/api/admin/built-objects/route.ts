@@ -3,17 +3,13 @@ import { prisma } from "@/lib/db";
 import { generateSlug } from "@/lib/utils";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 import { revalidatePublicConstructionCatalog } from "@/lib/revalidate-public-content";
+import { builtObjectMediaCreatePayload } from "@/lib/built-object-admin-media";
 
 export const dynamic = "force-dynamic";
 
 function n(value: unknown) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : null;
-}
-
-function mediaCreate(urls: unknown, type: "RENDER" | "PLAN" | "BUILD_STAGE" | "VIDEO") {
-  const list = Array.isArray(urls) ? urls : typeof urls === "string" ? urls.split("\n") : [];
-  return list.map(String).map((url) => url.trim()).filter(Boolean).map((url, order) => ({ type, url, order }));
 }
 
 export async function GET(request: NextRequest) {
@@ -62,12 +58,7 @@ export async function POST(request: NextRequest) {
         published: Boolean(body.published),
         order: Number(body.order) || 0,
         media: {
-          create: [
-            ...mediaCreate(body.renders, "RENDER"),
-            ...mediaCreate(body.plans, "PLAN"),
-            ...mediaCreate(body.stages, "BUILD_STAGE"),
-            ...mediaCreate(body.videos, "VIDEO"),
-          ],
+          create: builtObjectMediaCreatePayload(body),
         },
       },
     });

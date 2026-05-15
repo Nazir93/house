@@ -6,6 +6,8 @@ export interface ConstructionMedia {
   url: string;
   alt: string;
   label?: string | null;
+  /** Раздел кейса на /portfolio/[slug] (foundation, walls, …) */
+  phaseKey?: string | null;
   floor?: number | null;
   order: number;
 }
@@ -118,8 +120,18 @@ export function getBuiltObjectCover(object: BuiltObjectItem) {
   return object.media.find((item) => item.type === "RENDER") ?? object.media[0] ?? null;
 }
 
+/** Фото этапов без привязки к разделу кейса (legacy). */
 export function getBuiltObjectStages(object: BuiltObjectItem) {
-  return mediaOf(object.media, "BUILD_STAGE");
+  return object.media
+    .filter((item) => item.type === "BUILD_STAGE" && !item.phaseKey)
+    .sort((a, b) => a.order - b.order);
+}
+
+/** Фото конкретного раздела таймлайна кейса из админки. */
+export function getBuiltObjectPhaseMedia(object: BuiltObjectItem, phaseKey: string) {
+  return object.media
+    .filter((item) => item.type === "BUILD_STAGE" && item.phaseKey === phaseKey)
+    .sort((a, b) => a.order - b.order);
 }
 
 /** Рендеры / обложки (порядок как в админке). */

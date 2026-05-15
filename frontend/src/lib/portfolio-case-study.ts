@@ -1,6 +1,12 @@
 import type { BuiltObjectItem } from "@/lib/construction-shared";
-import { getBuiltObjectStages, getBuiltObjectRenders, getBuiltObjectPlans } from "@/lib/construction-shared";
-import { getTier1ContentForPhase } from "@/lib/portfolio-case-study-phases-content";
+import {
+  getBuiltObjectStages,
+  getBuiltObjectRenders,
+  getBuiltObjectPlans,
+  getBuiltObjectPhaseMedia,
+} from "@/lib/construction-shared";
+import { CASE_STUDY_CONSTRUCTION_PHASES } from "@/lib/portfolio-case-study-phases";
+import { formatArticleBody } from "@/lib/html-content";
 
 /** Конкретный подпункт с галереей (второй ряд чипов на референсе). */
 export interface CaseStudyChipNode {
@@ -27,103 +33,69 @@ export interface CaseStudyPhase {
 
 export type CaseStudyViewMode = "list" | "grid-sm" | "grid-lg";
 
-const DEFAULT_PHASE_TITLES: { id: string; title: string }[] = [
-  { id: "foundation", title: "Фундамент" },
-  { id: "walls", title: "Стены" },
-  { id: "roof", title: "Кровля" },
-  { id: "windows", title: "Окна" },
-  { id: "partitions", title: "Перегородки" },
-  {
-    id: "prep-base",
-    title: "Подготовка основания под монтаж инженерных коммуникаций",
-  },
-  {
-    id: "mep",
-    title: "Отопление, водоснабжение, вентиляция, канализация",
-  },
-  { id: "ext-vent", title: "Внешняя вентиляция" },
-  { id: "conditioning", title: "Кондиционирование" },
-  { id: "power", title: "Электроснабжение" },
-  { id: "floors", title: "Полы" },
-  { id: "facade", title: "Фасад" },
-  { id: "blind-area", title: "Отмостка и дренаж" },
-  { id: "landscaping", title: "Благоустройство" },
-  { id: "external-networks", title: "Наружные сети" },
-];
-
-/** Этапы таймлайна с чипами первого/второго уровня — см. `portfolio-case-study-phases-content.ts`. */
-export function getDefaultCaseStudyPhases(): CaseStudyPhase[] {
-  return DEFAULT_PHASE_TITLES.map((row) => ({
-    id: row.id,
-    title: row.title,
-    tier1: getTier1ContentForPhase(row.id),
-  }));
+function galleryPhase(phaseId: string, title: string, urls: string[], description?: string): CaseStudyPhase {
+  return {
+    id: phaseId,
+    title,
+    tier1: [
+      {
+        id: `${phaseId}-gallery`,
+        label: "Галерея",
+        tier2: [
+          {
+            id: `${phaseId}-all`,
+            label: urls.length > 1 ? "Все фото" : "Фото",
+            description,
+            images: urls,
+          },
+        ],
+      },
+    ],
+  };
 }
 
-/**
- * Рендеры и планировки из админки — в начало таймлайна кейса, чтобы они были видны
- * (шаблонные фазы ниже остаются как «скелет» разделов).
- */
 function prependCmsMediaPhases(object: BuiltObjectItem, phases: CaseStudyPhase[]): CaseStudyPhase[] {
   const prefix: CaseStudyPhase[] = [];
 
   const renders = getBuiltObjectRenders(object);
   const renderUrls = renders.map((m) => m.url).filter(Boolean);
-  if (renderUrls.length > 0) {
-    prefix.push({
-      id: "_cms_renders",
-      title: "Рендеры и фото объекта",
-      tier1: [
-        {
-          id: "_cms_renders_t1",
-          label: "Галерея",
-          tier2: [
-            {
-              id: "_cms_renders_all",
-              label: renderUrls.length > 1 ? "Все изображения" : "Фото",
-              description: "Материалы из карточки портфолио.",
-              images: renderUrls,
-            },
-          ],
-        },
-      ],
-    });
+  const descriptionHtml = formatArticleBody(object.description ?? "");
+  const showRendersPhase = renderUrls.length > 0 || descriptionHtml.trim().length > 0;
+
+  if (showRendersPhase) {
+    prefix.push(
+      galleryPhase(
+        "_cms_renders",
+        "Рендеры и фото объекта",
+        renderUrls,
+        renderUrls.length > 0 ? "Материалы из карточки портфолио." : undefined
+      )
+    );
   }
 
   const plans = getBuiltObjectPlans(object);
   const planUrls = plans.map((m) => m.url).filter(Boolean);
   if (planUrls.length > 0) {
-    prefix.push({
-      id: "_cms_plans",
-      title: "Планировки",
-      tier1: [
-        {
-          id: "_cms_plans_t1",
-          label: "Схемы",
-          tier2: [
-            {
-              id: "_cms_plans_all",
-              label: planUrls.length > 1 ? "Все планировки" : "Планировка",
-              description: "Из карточки портфолио.",
-              images: planUrls,
-            },
-          ],
-        },
-      ],
-    });
+    prefix.push(galleryPhase("_cms_plans", "Планировки", planUrls, "Из карточки портфолио."));
   }
 
   return [...prefix, ...phases];
 }
 
-/**
- * Если в объекте есть фото этапов (BUILD_STAGE), добавляем блок с реальными снимками,
- * чтобы контент из админки не терялся до появления полной структуры кейса.
- */
-function appendStagesArchivePhase(object: BuiltObjectItem, phases: CaseStudyPhase[]): CaseStudyPhase[] {
-  const stages = getBuiltObjectStages(object);
-  if (stages.length === 0) return phases;
+/** Разделы стройки: только если в админке загружены фото для phaseKey. */
+function constructionPhasesFromAdmin(object: BuiltObjectItem): CaseStudyPhase[] {
+  return CASE_STUDY_CONSTRUCTION_PHASES.flatMap(({ id, title }) => {
+    const urls = getBuiltObjectPhaseMedia(object, id)
+      .map((m) => m.url)
+      .filter(Boolean);
+    if (urls.length === 0) return [];
+    return [galleryPhase(id, title, urls)];
+  });
+}
 
+/** Legacy: общее поле «этапы стройки» без phaseKey — отдельный раздел в конце. */
+function appendLegacyStagesPhase(object: BuiltObjectItem, phases: CaseStudyPhase[]): CaseStudyPhase[] {
+  const stages = getBuiltObjectStages(object);
   const images = stages.map((s) => s.url).filter(Boolean);
   if (images.length === 0) return phases;
 
@@ -148,7 +120,7 @@ function appendStagesArchivePhase(object: BuiltObjectItem, phases: CaseStudyPhas
                 {
                   id: "_all_in_one",
                   label: "Все фотографии",
-                  description: "Снимки из карточки объекта (этапы строительства).",
+                  description: "Снимки без привязки к разделу кейса.",
                   images,
                 },
                 ...tier2,
@@ -160,9 +132,12 @@ function appendStagesArchivePhase(object: BuiltObjectItem, phases: CaseStudyPhas
   return [...phases, archive];
 }
 
-/** Полная конфигурация кейса для страницы объекта. */
+/**
+ * Таймлайн кейса: только разделы с контентом из админки
+ * (рендеры, описание, планировки, фото по phaseKey, legacy-этапы).
+ */
 export function getCaseStudyPhasesForObject(object: BuiltObjectItem): CaseStudyPhase[] {
-  const base = getDefaultCaseStudyPhases();
-  const withStages = appendStagesArchivePhase(object, base);
-  return prependCmsMediaPhases(object, withStages);
+  const withConstruction = constructionPhasesFromAdmin(object);
+  const withMedia = prependCmsMediaPhases(object, withConstruction);
+  return appendLegacyStagesPhase(object, withMedia);
 }

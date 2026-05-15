@@ -6,6 +6,7 @@ import { ChevronDown, MapPinned, Play } from "lucide-react";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { PortfolioCaseStudy } from "@/components/portfolio/portfolio-case-study";
 import { getCaseStudyPhasesForObject } from "@/lib/portfolio-case-study";
+import { formatArticleBody } from "@/lib/html-content";
 import {
   CaseStudyFaqSectionClient,
   CaseStudyLeadCtaSection,
@@ -21,7 +22,6 @@ export function BuiltObjectDetailContent({
   object: BuiltObjectItem;
   faqItems: PublicFaqItem[];
 }) {
-  const [expanded, setExpanded] = useState(false);
   const [worksOpen, setWorksOpen] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -31,6 +31,7 @@ export function BuiltObjectDetailContent({
   const slides = useMemo(() => images.map((media) => ({ type: "image" as const, url: media.url })), [images]);
 
   const casePhases = useMemo(() => getCaseStudyPhasesForObject(object), [object]);
+  const caseStudyDescriptionHtml = useMemo(() => formatArticleBody(object.description ?? ""), [object.description]);
 
   function openLightbox(index: number) {
     setLightboxIndex(index);
@@ -82,7 +83,11 @@ export function BuiltObjectDetailContent({
 
           {/* Как на референсе: сразу двухколоночный кейс без полноэкранного героя сверху (обложка — в галерее / блоке параметров) */}
           <div className="mt-8 sm:mt-10 lg:mt-11">
-            <PortfolioCaseStudy phases={casePhases} onGalleryImageClick={openLightboxByUrl} />
+            <PortfolioCaseStudy
+              phases={casePhases}
+              phaseDescriptionHtml={caseStudyDescriptionHtml}
+              onGalleryImageClick={openLightboxByUrl}
+            />
           </div>
 
           <CaseStudyFaqSectionClient items={faqItems} />
@@ -131,22 +136,6 @@ export function BuiltObjectDetailContent({
                 </Link>
               ) : null}
             </div>
-          </section>
-
-          <section className="mt-10 rounded-[1.25rem] p-6 md:mt-12" style={{ backgroundColor: "rgba(233, 231, 227, 0.35)" }}>
-            <button
-              type="button"
-              onClick={() => setExpanded((value) => !value)}
-              className="flex w-full items-center justify-between gap-4 text-left"
-            >
-              <span className="font-heading text-xl md:text-2xl">Описание объекта</span>
-              <ChevronDown className={expanded ? "rotate-180 transition-transform" : "transition-transform"} />
-            </button>
-            <div
-              className={expanded ? "mt-4 text-sm leading-relaxed" : "mt-4 line-clamp-3 text-sm leading-relaxed"}
-              style={{ color: "var(--text-muted)" }}
-              dangerouslySetInnerHTML={{ __html: object.description }}
-            />
           </section>
 
           {videos.length > 0 ? (

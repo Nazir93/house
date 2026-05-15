@@ -19,6 +19,7 @@ export interface ConstructionMedia {
   url: string;
   alt: string;
   label?: string | null;
+  phaseKey?: string | null;
   floor?: number | null;
   order: number;
 }
@@ -598,7 +599,9 @@ function attachDevPortfolioCovers(objects: BuiltObjectItem[]): BuiltObjectItem[]
 }
 
 export function getBuiltObjectStages(object: BuiltObjectItem) {
-  return mediaOf(object.media, "BUILD_STAGE");
+  return object.media
+    .filter((item) => item.type === "BUILD_STAGE" && !item.phaseKey)
+    .sort((a, b) => a.order - b.order);
 }
 
 const getHouseProjectsCached = unstable_cache(
