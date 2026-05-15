@@ -135,7 +135,7 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
         </div>
       </AdminFormSection>
 
-      <AdminFormSection title="Медиа и ссылки" subtitle="Одна строка — один URL. Загрузка добавляет ссылку в конец выбранного списка.">
+      <AdminFormSection title="Медиа и ссылки" subtitle="Одна строка в поле — один URL. Кнопки загрузки: можно выбрать сразу несколько файлов (Ctrl/⌘ или Shift в диалоге).">
         <p className="text-[11px] text-white/45 leading-relaxed rounded-xl bg-white/[0.02] border border-white/[0.06] px-3 py-2.5">
           <span className="font-semibold text-white/60">Быстрее открывается сайт, если</span> картинки с вашего домена
           (/uploads или /public): при загрузке растр до 1920px по длинной стороне сохраняется как WebP. Лимит одного файла
@@ -146,31 +146,35 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
             label="Загрузить фото → рендеры"
             accept="image"
             value=""
+            multiple
             onChange={(url) => appendMediaLine("renders", url)}
           />
           <AdminMediaUpload
             label="Загрузить изображение → планировки"
             accept="image"
             value=""
+            multiple
             onChange={(url) => appendMediaLine("plans", url)}
           />
           <AdminMediaUpload
             label="Загрузить фото → этапы стройки"
             accept="image"
             value=""
+            multiple
             onChange={(url) => appendMediaLine("stages", url)}
           />
           <AdminMediaUpload
             label="Загрузить видео → видео"
             accept="video"
             value=""
+            multiple
             onChange={(url) => appendMediaLine("videos", url)}
           />
         </div>
-        <textarea value={form.renders} onChange={(e) => set("renders", e.target.value)} rows={4} placeholder="Рендеры / фото объекта" className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
-        <textarea value={form.plans} onChange={(e) => set("plans", e.target.value)} rows={3} placeholder="Планировки" className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
-        <textarea value={form.stages} onChange={(e) => set("stages", e.target.value)} rows={4} placeholder="Фото этапов строительства" className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
-        <textarea value={form.videos} onChange={(e) => set("videos", e.target.value)} rows={3} placeholder="Видео / reels" className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
+        <textarea value={form.renders} onChange={(e) => set("renders", e.target.value)} rows={10} placeholder="Рендеры / фото объекта — по одному URL на строку" className="w-full min-h-[180px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
+        <textarea value={form.plans} onChange={(e) => set("plans", e.target.value)} rows={6} placeholder="Планировки — по одному URL на строку" className="w-full min-h-[120px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
+        <textarea value={form.stages} onChange={(e) => set("stages", e.target.value)} rows={10} placeholder="Фото этапов строительства — по одному URL на строку" className="w-full min-h-[180px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
+        <textarea value={form.videos} onChange={(e) => set("videos", e.target.value)} rows={6} placeholder="Видео / reels — по одному URL на строку" className="w-full min-h-[120px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <input value={form.houseProjectId} onChange={(e) => set("houseProjectId", e.target.value)} placeholder="ID типового проекта" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
           <input value={form.telegramUrl} onChange={(e) => set("telegramUrl", e.target.value)} placeholder="Telegram" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />

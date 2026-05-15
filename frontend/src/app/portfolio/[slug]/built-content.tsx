@@ -153,11 +153,34 @@ export function BuiltObjectDetailContent({
             <section className="mt-12 rounded-[1.25rem] p-6 text-white md:mt-14" style={{ backgroundColor: "var(--accent)" }}>
               <h2 className="font-heading text-2xl md:text-3xl">Видео со стройки</h2>
               <div className="mt-6 grid gap-4 md:grid-cols-2">
-                {videos.map((video) => (
-                  <a key={video.id} href={video.url} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-2xl bg-white/10 p-4">
-                    <Play size={18} /> {video.label || "Смотреть видео"}
-                  </a>
-                ))}
+                {videos.map((video) => {
+                  const url = video.url.trim();
+                  const inlineVideo =
+                    /^https?:\/\//i.test(url) && /\.(mp4|webm|mov)(\?|$)/i.test(url.split("?")[0] ?? "");
+                  const localUpload = url.startsWith("/uploads/") && /\.(mp4|webm|mov|mkv)(\?|$)/i.test(url);
+                  if (inlineVideo || localUpload) {
+                    return (
+                      <div key={video.id} className="overflow-hidden rounded-2xl bg-black/25 ring-1 ring-white/10">
+                        <video
+                          src={url}
+                          controls
+                          playsInline
+                          preload="metadata"
+                          className="aspect-video w-full bg-black/40 object-contain"
+                          aria-label={video.label || "Видео объекта"}
+                        />
+                        {video.label ? (
+                          <p className="px-3 py-2 text-xs text-white/80">{video.label}</p>
+                        ) : null}
+                      </div>
+                    );
+                  }
+                  return (
+                    <a key={video.id} href={url} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-2xl bg-white/10 p-4">
+                      <Play size={18} /> {video.label || "Смотреть видео"}
+                    </a>
+                  );
+                })}
               </div>
               <div className="mt-5 flex flex-wrap gap-3">
                 {object.telegramUrl ? (

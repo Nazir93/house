@@ -12,20 +12,25 @@ export function AdminMediaUpload({
   accept,
   value,
   onChange,
+  multiple = false,
   className = "",
 }: {
   label: string;
   accept: Accept;
   value: string;
   onChange: (url: string) => void;
+  /** Несколько файлов за один выбор (Ctrl/⌘ + клик); каждый загружается по очереди, URL передаётся в onChange по одному. */
+  multiple?: boolean;
   className?: string;
 }) {
   const [uploading, setUploading] = useState(false);
+  const [batchHint, setBatchHint] = useState("");
   const [error, setError] = useState("");
 
   async function onFile(file: File | undefined) {
     if (!file) return;
     setError("");
+    setBatchHint("");
     setUploading(true);
     const res = await uploadAdminMedia(file);
     setUploading(false);
@@ -33,13 +38,44 @@ export function AdminMediaUpload({
     else if (res.url) onChange(res.url);
   }
 
+  async function onFiles(files: FileList | null) {
+    if (!files?.length) return;
+    const list = Array.from(files);
+    setError("");
+    setBatchHint("");
+    setUploading(true);
+    try {
+      for (let i = 0; i < list.length; i++) {
+        setBatchHint(`${i + 1} / ${list.length}`);
+        const res = await uploadAdminMedia(list[i]!);
+        if (res.error) {
+          setError(`${res.error} (файл ${i + 1} из ${list.length}: ${list[i]!.name})`);
+          break;
+        }
+        if (res.url) onChange(res.url);
+      }
+    } finally {
+      setBatchHint("");
+      setUploading(false);
+    }
+  }
+
   const acceptAttr =
     accept === "image"
       ? "image/jpeg,image/png,image/webp,image/gif,image/svg+xml,image/avif,.jpg,.jpeg,.png,.webp,.gif,.svg,.avif"
       : "video/*,video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov,.mkv,.m4v,.avi,image/gif,.gif";
 
-  const btnLabel =
-    uploading ? "Загрузка…" : accept === "image" ? "Выбрать изображение" : "Выбрать видеофайл";
+  const btnLabel = uploading
+    ? batchHint
+      ? `Загрузка ${batchHint}…`
+      : "Загрузка…"
+    : multiple
+      ? accept === "image"
+        ? "Выбрать изображения (несколько)"
+        : "Выбрать видео (несколько)"
+      : accept === "image"
+        ? "Выбрать изображение"
+        : "Выбрать видеофайл";
 
   return (
     <div className={className}>
@@ -55,8 +91,10 @@ export function AdminMediaUpload({
             accept={acceptAttr}
             className="hidden"
             disabled={uploading}
+            multiple={multiple}
             onChange={(e) => {
-              onFile(e.target.files?.[0]);
+              if (multiple) void onFiles(e.target.files);
+              else void onFile(e.target.files?.[0]);
               e.target.value = "";
             }}
           />
@@ -74,8 +112,8 @@ export function AdminMediaUpload({
       {error ? <p className="text-red-400 text-xs mt-1.5">{error}</p> : null}
       <p className="text-[11px] text-white/25 mt-1.5">
         {accept === "image"
-          ? "До 30 МБ. JPG, PNG, WebP, GIF, SVG, AVIF — растр по возможности режется до 1920px и сохраняется как WebP (качество 78)."
-          : "До 250 МБ. MP4, WebM, MOV, AVI и др. На прокси может быть свой лимит (часто 25–300 МБ). Файл без расширения определяется по типу в браузере."}
+          ? `До 30 МБ за файл. JPG, PNG, WebP, GIF, SVG, AVIF — растр по возможности режется до 1920px и сохраняется как WebP (качество 78).${multiple ? " Несколько файлов: Ctrl/⌘ + выбор или Shift + диапазон." : ""}`
+          : `До 250 МБ за файл. MP4, WebM, MOV, AVI и др. На прокси может быть свой лимит (часто 25–300 МБ). Файл без расширения — по MIME в браузере.${multiple ? " Несколько роликов: множественный выбор в диалоге." : ""}`}
       </p>
       {value && accept === "image" ? (
         <div className="relative mt-2 h-44 w-full max-w-lg">

@@ -121,3 +121,13 @@ export function getBuiltObjectCover(object: BuiltObjectItem) {
 export function getBuiltObjectStages(object: BuiltObjectItem) {
   return mediaOf(object.media, "BUILD_STAGE");
 }
+
+/** Рендеры / обложки (порядок как в админке). */
+export function getBuiltObjectRenders(object: BuiltObjectItem) {
+  return mediaOf(object.media, "RENDER");
+}
+
+/** Планировки (порядок как в админке). */
+export function getBuiltObjectPlans(object: BuiltObjectItem) {
+  return mediaOf(object.media, "PLAN");
+}

@@ -1,5 +1,5 @@
 import type { BuiltObjectItem } from "@/lib/construction-shared";
-import { getBuiltObjectStages } from "@/lib/construction-shared";
+import { getBuiltObjectStages, getBuiltObjectRenders, getBuiltObjectPlans } from "@/lib/construction-shared";
 import { getTier1ContentForPhase } from "@/lib/portfolio-case-study-phases-content";
 
 /** Конкретный подпункт с галереей (второй ряд чипов на референсе). */
@@ -61,6 +61,62 @@ export function getDefaultCaseStudyPhases(): CaseStudyPhase[] {
 }
 
 /**
+ * Рендеры и планировки из админки — в начало таймлайна кейса, чтобы они были видны
+ * (шаблонные фазы ниже остаются как «скелет» разделов).
+ */
+function prependCmsMediaPhases(object: BuiltObjectItem, phases: CaseStudyPhase[]): CaseStudyPhase[] {
+  const prefix: CaseStudyPhase[] = [];
+
+  const renders = getBuiltObjectRenders(object);
+  const renderUrls = renders.map((m) => m.url).filter(Boolean);
+  if (renderUrls.length > 0) {
+    prefix.push({
+      id: "_cms_renders",
+      title: "Рендеры и фото объекта",
+      tier1: [
+        {
+          id: "_cms_renders_t1",
+          label: "Галерея",
+          tier2: [
+            {
+              id: "_cms_renders_all",
+              label: renderUrls.length > 1 ? "Все изображения" : "Фото",
+              description: "Материалы из карточки портфолио.",
+              images: renderUrls,
+            },
+          ],
+        },
+      ],
+    });
+  }
+
+  const plans = getBuiltObjectPlans(object);
+  const planUrls = plans.map((m) => m.url).filter(Boolean);
+  if (planUrls.length > 0) {
+    prefix.push({
+      id: "_cms_plans",
+      title: "Планировки",
+      tier1: [
+        {
+          id: "_cms_plans_t1",
+          label: "Схемы",
+          tier2: [
+            {
+              id: "_cms_plans_all",
+              label: planUrls.length > 1 ? "Все планировки" : "Планировка",
+              description: "Из карточки портфолио.",
+              images: planUrls,
+            },
+          ],
+        },
+      ],
+    });
+  }
+
+  return [...prefix, ...phases];
+}
+
+/**
  * Если в объекте есть фото этапов (BUILD_STAGE), добавляем блок с реальными снимками,
  * чтобы контент из админки не терялся до появления полной структуры кейса.
  */
@@ -107,5 +163,6 @@ function appendStagesArchivePhase(object: BuiltObjectItem, phases: CaseStudyPhas
 /** Полная конфигурация кейса для страницы объекта. */
 export function getCaseStudyPhasesForObject(object: BuiltObjectItem): CaseStudyPhase[] {
   const base = getDefaultCaseStudyPhases();
-  return appendStagesArchivePhase(object, base);
+  const withStages = appendStagesArchivePhase(object, base);
+  return prependCmsMediaPhases(object, withStages);
 }
