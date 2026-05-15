@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ReactElement } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from "react";
 import { ChevronDown, LayoutGrid, LayoutList, RectangleHorizontal } from "lucide-react";
 import {
   type CaseStudyPhase,
@@ -22,9 +22,8 @@ function pickFirstTier2(tier1: CaseStudyTier1Chip | null): CaseStudyChipNode | n
 }
 
 const asideSurfaceStyle = {
-  borderColor: "var(--border)",
-  backgroundColor: "var(--card-bg)",
-  boxShadow: "inset 0 1px 0 color-mix(in srgb, var(--text) 6%, transparent)",
+  backgroundColor: "color-mix(in srgb, var(--bg-secondary) 72%, transparent)",
+  backdropFilter: "blur(12px)",
 } as const;
 
 function PhaseTimelineNav({
@@ -32,18 +31,19 @@ function PhaseTimelineNav({
   activePhaseId,
   onPhaseClick,
   idPrefix,
+  pulseTick,
 }: {
   phases: CaseStudyPhase[];
   activePhaseId: string | undefined;
   onPhaseClick: (id: string) => void;
-  /** Уникальный префикс id кнопок (два экземпляра навигации: моб. / десктоп) */
   idPrefix: "mobile" | "desktop";
+  pulseTick: number;
 }) {
   return (
     <nav aria-label="Этапы строительства">
       <ul className="relative space-y-0 pl-1">
         <li
-          className="pointer-events-none absolute bottom-4 left-[13px] top-4 w-px bg-[var(--border)]"
+          className="pointer-events-none absolute bottom-4 left-[13px] top-4 w-px bg-gradient-to-b from-transparent via-[color-mix(in_srgb,var(--border)_75%,transparent)] to-transparent"
           aria-hidden
         />
         {phases.map((p) => {
@@ -54,22 +54,22 @@ function PhaseTimelineNav({
                 id={`${idPrefix}-phase-${p.id}`}
                 type="button"
                 onClick={() => onPhaseClick(p.id)}
-                className="flex w-full gap-2 rounded-lg py-2 pl-1 pr-0.5 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--text)_6%,transparent)] max-lg:gap-2 max-lg:py-1.5 sm:gap-3 sm:py-2.5 sm:pr-1"
+                className="flex w-full gap-2 rounded-xl py-2 pl-1 pr-0.5 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--text)_5%,transparent)] max-lg:gap-2 max-lg:py-1.5 sm:gap-3 sm:py-2.5 sm:pr-1"
               >
                 <span className="relative z-[1] mt-[7px] flex h-[18px] w-[18px] shrink-0 items-center justify-center">
                   <span
-                    className="rounded-full border-[1.5px] transition-all duration-200"
+                    key={active ? `${p.id}-${pulseTick}` : `${p.id}-dot`}
+                    className={`rounded-full border transition-all duration-200 ${active ? "case-study-timeline-marker-pulse border-[var(--accent)]" : "border-[color-mix(in_srgb,var(--text-muted)_40%,transparent)]"}`}
                     style={{
-                      width: active ? 11 : 9,
-                      height: active ? 11 : 9,
-                      borderColor: active ? "var(--accent)" : "color-mix(in srgb, var(--text-muted) 55%, transparent)",
+                      width: active ? 11 : 8,
+                      height: active ? 11 : 8,
                       backgroundColor: active ? "var(--accent)" : "transparent",
-                      boxShadow: active ? "0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent)" : "none",
+                      boxShadow: active ? "0 0 0 2px color-mix(in srgb, var(--accent) 18%, transparent)" : "none",
                     }}
                   />
                 </span>
                 <span
-                  className={`min-w-0 text-[11px] leading-[1.35] sm:text-[13px] sm:leading-[1.38] md:text-[14px] ${active ? "font-semibold text-[var(--accent)]" : "font-normal text-[var(--text-muted)]"}`}
+                  className={`min-w-0 text-[11px] leading-[1.38] tracking-[0.01em] sm:text-[13px] sm:leading-[1.42] md:text-[14px] ${active ? "font-semibold text-[var(--accent)]" : "font-normal text-[var(--text-muted)]"}`}
                 >
                   {p.title}
                 </span>
@@ -101,6 +101,33 @@ export function PortfolioCaseStudy({
   /** Как на референсе: по умолчанию колонка фото (список), не крупная сетка */
   const [viewMode, setViewMode] = useState<CaseStudyViewMode>("list");
   const [descriptionOpen, setDescriptionOpen] = useState(false);
+  const [pulseTick, setPulseTick] = useState(0);
+  const asideScrollRefs = useRef<(HTMLElement | null)[]>([]);
+
+  const setAsideScrollRef = useCallback((index: 0 | 1) => (el: HTMLElement | null) => {
+    asideScrollRefs.current[index] = el;
+  }, []);
+
+  const bumpMarkerPulse = useCallback(() => {
+    setPulseTick((n) => n + 1);
+  }, []);
+
+  useLayoutEffect(() => {
+    let debounce: number | undefined;
+    const onScroll = () => {
+      if (debounce !== undefined) window.clearTimeout(debounce);
+      debounce = window.setTimeout(() => {
+        debounce = undefined;
+        bumpMarkerPulse();
+      }, 180);
+    };
+    const nodes = asideScrollRefs.current.filter((n): n is HTMLElement => Boolean(n));
+    for (const el of nodes) el.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      if (debounce !== undefined) window.clearTimeout(debounce);
+      for (const el of nodes) el.removeEventListener("scroll", onScroll);
+    };
+  }, [bumpMarkerPulse, phases.length]);
 
   const phase = useMemo(() => phases.find((p) => p.id === phaseId) ?? phases[0], [phases, phaseId]);
 
@@ -143,7 +170,8 @@ export function PortfolioCaseStudy({
 
   const onPhaseClick = useCallback((id: string) => {
     setPhaseId(id);
-  }, []);
+    bumpMarkerPulse();
+  }, [bumpMarkerPulse]);
 
   if (!phases.length) {
     return (
@@ -155,7 +183,8 @@ export function PortfolioCaseStudy({
     <div className="relative">
       {/* Мобильная и планшетная: навигация закреплена справа, скролл списка внутри панели */}
       <aside
-        className="lg:hidden fixed right-2 top-[max(5rem,env(safe-area-inset-top,0px)+4.5rem)] z-[38] w-[min(12.75rem,calc(100vw-2.75rem))] max-h-[min(72vh,calc(100dvh-6rem-env(safe-area-inset-bottom,0px)))] overflow-y-auto overflow-x-hidden overscroll-contain rounded-2xl border py-3 pl-2 pr-1.5 shadow-[0_10px_40px_rgba(0,0,0,0.14)] sm:right-3 sm:top-[max(5.5rem,env(safe-area-inset-top,0px)+4.75rem)] sm:rounded-[1.25rem] sm:py-4 sm:pl-2.5 sm:pr-2"
+        ref={setAsideScrollRef(0)}
+        className="case-study-timeline-aside-scroll lg:hidden fixed right-2 top-[max(5rem,env(safe-area-inset-top,0px)+4.5rem)] z-[38] w-[min(12.75rem,calc(100vw-2.75rem))] max-h-[min(72vh,calc(100dvh-6rem-env(safe-area-inset-bottom,0px)))] overflow-y-auto overflow-x-hidden overscroll-contain rounded-2xl py-3 pl-2 pr-1.5 sm:right-3 sm:top-[max(5.5rem,env(safe-area-inset-top,0px)+4.75rem)] sm:rounded-3xl sm:py-4 sm:pl-2.5 sm:pr-2"
         style={{
           ...asideSurfaceStyle,
           WebkitOverflowScrolling: "touch",
@@ -166,12 +195,14 @@ export function PortfolioCaseStudy({
           activePhaseId={phase?.id}
           onPhaseClick={onPhaseClick}
           idPrefix="mobile"
+          pulseTick={pulseTick}
         />
       </aside>
 
       <div className="grid gap-8 max-lg:pr-[min(13.25rem,calc(11.5rem+1.75rem))] lg:grid-cols-[minmax(240px,280px)_minmax(0,1fr)] lg:items-start lg:gap-10 lg:pr-0 xl:gap-x-12">
         <aside
-          className="hidden rounded-[1.35rem] border py-5 pl-3 pr-3 sm:rounded-[1.5rem] sm:pl-4 sm:pr-4 lg:block lg:sticky lg:top-[7rem] lg:max-h-[min(88vh,calc(100vh-7rem))] lg:overflow-y-auto lg:self-start lg:py-6"
+          ref={setAsideScrollRef(1)}
+          className="case-study-timeline-aside-scroll hidden rounded-3xl py-5 pl-3 pr-2 sm:pl-4 sm:pr-3 lg:block lg:sticky lg:top-[7rem] lg:max-h-[min(88vh,calc(100vh-7rem))] lg:overflow-y-auto lg:self-start lg:py-6"
           style={asideSurfaceStyle}
         >
           <PhaseTimelineNav
@@ -179,6 +210,7 @@ export function PortfolioCaseStudy({
             activePhaseId={phase?.id}
             onPhaseClick={onPhaseClick}
             idPrefix="desktop"
+            pulseTick={pulseTick}
           />
         </aside>
 

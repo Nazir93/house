@@ -119,7 +119,6 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
         </Link>
         <div className="flex-1">
           <h1 className="text-2xl font-bold tracking-tight">{form.id ? "Объект портфолио" : "Новый объект портфолио"}</h1>
-          <p className="text-sm text-white/40 mt-1">Карта, карточки на сайте, этапы стройки и связь с типовым проектом.</p>
         </div>
         <button onClick={save} disabled={saving || !form.title.trim()} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0F3D2E] text-white text-sm font-semibold disabled:opacity-50">
           <Save size={16} /> {saving ? "Сохранение..." : "Сохранить"}
@@ -128,7 +127,7 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
 
       {error ? <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">{error}</div> : null}
 
-      <AdminFormSection title="Основное" subtitle="Название, материал, координаты и технические характеристики построенного дома.">
+      <AdminFormSection title="Основное">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Дом в д. Вырица" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
           <input value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="slug" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
@@ -157,16 +156,7 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
         </div>
       </AdminFormSection>
 
-      <AdminFormSection
-        title="Кейс на сайте — медиа по разделам"
-        subtitle="Раздел на странице /portfolio/slug появляется только если загружены фото (или для «Рендеров» — описание объекта выше). Пустые разделы на сайте скрыты."
-      >
-        <p className="text-[11px] text-white/45 leading-relaxed rounded-xl bg-white/[0.02] border border-white/[0.06] px-3 py-2.5">
-          <span className="font-semibold text-white/60">Быстрее открывается сайт, если</span> картинки с вашего домена
-          (/uploads или /public): при загрузке растр до 1920px по длинной стороне сохраняется как WebP. Лимит одного файла
-          — 30&nbsp;МБ; видео — до 250&nbsp;МБ (на nginx может быть свой потолок).
-        </p>
-
+      <AdminFormSection title="Кейс на сайте — медиа по разделам">
         <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/50">Рендеры и фото объекта</p>
           <AdminMediaUpload
