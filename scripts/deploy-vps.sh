@@ -8,7 +8,10 @@
 #   HOUSE_ROOT=/path/to/clone bash /path/to/clone/scripts/deploy-vps.sh
 #
 # Без миграций (только db push — см. ниже):
-#   SKIP_MIGRATE=1 RUN_DB_PUSH=1 bash /var/www/house/scripts/deploy-vps.sh
+#   SKIP_MIGRATE=1 bash /var/www/house/scripts/deploy-vps.sh
+#
+# Без db push после migrate (строго только migrate deploy):
+#   SKIP_DB_PUSH=1 bash /var/www/house/scripts/deploy-vps.sh
 #
 set -euo pipefail
 
@@ -38,9 +41,11 @@ else
   npx prisma migrate deploy --schema=prisma/schema.prisma
 fi
 
-if [[ "${RUN_DB_PUSH:-}" == "1" ]]; then
-  echo "==> RUN_DB_PUSH=1 — prisma db push"
-  npm run db:push:server
+if [[ "${SKIP_DB_PUSH:-}" == "1" ]]; then
+  echo "==> SKIP_DB_PUSH=1 — prisma db push пропущен"
+else
+  echo "==> prisma db push (синхронизация schema.prisma с БД после migrate)"
+  npx prisma db push --schema=prisma/schema.prisma --skip-generate
 fi
 
 echo "==> npm run build"

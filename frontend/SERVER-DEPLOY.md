@@ -53,11 +53,10 @@ bash /var/www/house/scripts/deploy-vps.sh
 HOUSE_ROOT=/ваш/путь bash /ваш/путь/scripts/deploy-vps.sh
 ```
 
-Скрипт делает подряд: `git pull` → `npm ci` в `frontend` → `prisma migrate deploy` → `npm run build` → `pm2 reload house-next --update-env` → `pm2 save`.
+Скрипт делает подряд: `git pull` → `npm ci` в `frontend` → `prisma migrate deploy` → **`prisma db push`** (подтягивает поля из `schema.prisma`, если забыли файл миграции) → `npm run build` → `pm2 reload house-next --update-env` → `pm2 save`.
 
-Если миграции на этом сервере не используете (только `db:push`) — запуск с переменными:  
-`SKIP_MIGRATE=1 RUN_DB_PUSH=1 bash /var/www/house/scripts/deploy-vps.sh`  
-либо откройте `scripts/deploy-vps.sh` и уберите/закомментируйте строку с `migrate deploy`.
+- Только `db push`, без `migrate deploy`: `SKIP_MIGRATE=1 bash /var/www/house/scripts/deploy-vps.sh`
+- Только миграции, без `db push`: `SKIP_DB_PUSH=1 bash /var/www/house/scripts/deploy-vps.sh`
 
 ---
 

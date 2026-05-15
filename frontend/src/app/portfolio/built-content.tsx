@@ -6,6 +6,7 @@ import { useMemo, useRef, useState } from "react";
 import { LayoutGrid, MapPinned } from "lucide-react";
 import { PortfolioExcursionFab } from "@/components/portfolio/portfolio-excursion-fab";
 import { builtObjectMaterialLabel, getBuiltObjectCover, type BuiltObjectItem } from "@/lib/construction-shared";
+import { effectiveBuiltObjectRegionSlug } from "@/lib/built-object-map-taxonomy";
 import { cn } from "@/lib/utils";
 import { CmsImage } from "@/components/ui/cms-image";
 
@@ -29,10 +30,11 @@ type RegionFilter = "all" | "lo" | "mo";
 type FloorFilter = "all" | "1" | "2plus";
 type AreaFilter = "all" | "lte150" | "mid" | "gt250";
 
+/** Сетка портфолио: два чипа региона — как на карте, сначала `regionSlug`, затем эвристика по адресу. */
 function regionBucket(o: BuiltObjectItem): "lo" | "mo" | "other" {
-  const l = (o.location || "").toLowerCase();
-  if (/моск|подмоск|м\. о\.|московск/.test(l)) return "mo";
-  if (/ленинград|санкт|спб|петербург|псков|карел/.test(l)) return "lo";
+  const slug = effectiveBuiltObjectRegionSlug(o);
+  if (slug === "mo") return "mo";
+  if (slug === "lo" || slug === "vnovgorod") return "lo";
   return "other";
 }
 
