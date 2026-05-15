@@ -24,6 +24,9 @@ export interface ConstructionStep {
   description: string;
 }
 
+/** Статус площадки на карте (иконка маркера). */
+export type BuiltObjectSiteStatus = "COMPLETED" | "UNDER_CONSTRUCTION";
+
 export interface HouseProjectItem {
   id: string;
   slug: string;
@@ -70,6 +73,11 @@ export interface BuiltObjectItem {
   walls?: string | null;
   roof?: string | null;
   floors?: number | null;
+  /** Slug региона для карты (если пусто — эвристика по `location`). */
+  regionSlug?: string | null;
+  /** Slug района из справочника карты. */
+  district?: string | null;
+  siteStatus?: BuiltObjectSiteStatus;
   location?: string | null;
   latitude?: number | null;
   longitude?: number | null;
@@ -78,6 +86,9 @@ export interface BuiltObjectItem {
   telegramUrl?: string | null;
   vkUrl?: string | null;
   houseProjectSlug?: string | null;
+  /** Комнаты/санузлы из привязанного типового проекта (для превью на карте). */
+  linkedProjectRooms?: number | null;
+  linkedProjectBathrooms?: number | null;
   published: boolean;
   order: number;
   /** Год в строке списка (из даты карточки в БД) */

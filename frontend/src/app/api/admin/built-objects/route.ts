@@ -12,6 +12,13 @@ function n(value: unknown) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function nf(value: unknown): number | null {
+  if (value === "" || value == null) return null;
+  const s = String(value).trim().replace(",", ".");
+  const parsed = parseFloat(s);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 export async function GET(request: NextRequest) {
   const gate = await requireAdminApiSession();
   if (!gate.ok) return gate.response;
@@ -46,7 +53,10 @@ export async function POST(request: NextRequest) {
         foundation: body.foundation || null,
         walls: body.walls || null,
         roof: body.roof || null,
-        floors: n(body.floors),
+        floors: nf(body.floors),
+        regionSlug: body.regionSlug?.trim() || null,
+        district: body.district?.trim() || null,
+        siteStatus: body.siteStatus === "UNDER_CONSTRUCTION" ? "UNDER_CONSTRUCTION" : "COMPLETED",
         location: body.location || null,
         latitude: n(body.latitude),
         longitude: n(body.longitude),

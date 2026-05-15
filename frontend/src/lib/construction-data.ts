@@ -10,6 +10,7 @@ import {
   type PartOfSoulPricingFloors,
   type PartOfSoulRoofPitch,
 } from "@/lib/part-of-soul-pricing";
+import type { BuiltObjectItem } from "@/lib/construction-shared";
 
 export type ConstructionMediaType = "RENDER" | "PLAN" | "BUILD_STAGE" | "VIDEO";
 
@@ -78,30 +79,7 @@ export interface HouseProjectItem {
   calculatorUi?: ProjectCalculatorUi | null;
 }
 
-export interface BuiltObjectItem {
-  id: string;
-  slug: string;
-  title: string;
-  material: string;
-  area?: number | null;
-  buildTerm?: string | null;
-  foundation?: string | null;
-  walls?: string | null;
-  roof?: string | null;
-  floors?: number | null;
-  location?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-  description: string;
-  worksDescription?: string | null;
-  telegramUrl?: string | null;
-  vkUrl?: string | null;
-  houseProjectSlug?: string | null;
-  published: boolean;
-  order: number;
-  year?: string | null;
-  media: ConstructionMedia[];
-}
+export type { BuiltObjectItem } from "@/lib/construction-shared";
 
 const defaultAnchors = [
   { id: "plans", label: "Планировки и фасады" },
@@ -252,6 +230,11 @@ export const FALLBACK_BUILT_OBJECTS: BuiltObjectItem[] = [
     walls: "Газобетон",
     roof: "Металлочерепица",
     floors: 1,
+    regionSlug: "lo",
+    district: "vyritsa",
+    siteStatus: "COMPLETED",
+    linkedProjectRooms: 4,
+    linkedProjectBathrooms: 2,
     location: "Ленинградская область, д. Вырица",
     latitude: 59.407,
     longitude: 30.346,
@@ -285,7 +268,12 @@ export const FALLBACK_BUILT_OBJECTS: BuiltObjectItem[] = [
     foundation: "Ленточный фундамент",
     walls: "Керамический блок",
     roof: "Фальцевая кровля",
-    floors: 2,
+    floors: 1.5,
+    regionSlug: "lo",
+    district: "priyutninskoe",
+    siteStatus: "COMPLETED",
+    linkedProjectRooms: 5,
+    linkedProjectBathrooms: 3,
     location: "Ленинградская область, п. Приветнинское",
     latitude: 59.25,
     longitude: 29.91,
@@ -307,6 +295,9 @@ export const FALLBACK_BUILT_OBJECTS: BuiltObjectItem[] = [
     area: 145,
     buildTerm: "8 месяцев",
     floors: 2,
+    regionSlug: "lo",
+    district: "vsevolozhsk",
+    siteStatus: "UNDER_CONSTRUCTION",
     location: "Ленинградская область, д. Токсово",
     latitude: 60.255,
     longitude: 30.527,
@@ -324,6 +315,9 @@ export const FALLBACK_BUILT_OBJECTS: BuiltObjectItem[] = [
     area: 178,
     buildTerm: "10 месяцев",
     floors: 1,
+    regionSlug: "mo",
+    district: "ramenskoe",
+    siteStatus: "COMPLETED",
     location: "Московская область, Раменское",
     latitude: 55.567,
     longitude: 38.23,
@@ -341,6 +335,9 @@ export const FALLBACK_BUILT_OBJECTS: BuiltObjectItem[] = [
     area: 98,
     buildTerm: "6 месяцев",
     floors: 1,
+    regionSlug: "mo",
+    district: "krasnogorsk",
+    siteStatus: "COMPLETED",
     location: "Московская область, Красногорск",
     latitude: 55.831,
     longitude: 37.329,
@@ -358,6 +355,9 @@ export const FALLBACK_BUILT_OBJECTS: BuiltObjectItem[] = [
     area: 212,
     buildTerm: "11 месяцев",
     floors: 2,
+    regionSlug: "lo",
+    district: "vyborg",
+    siteStatus: "COMPLETED",
     location: "Ленинградская область, Выборг",
     latitude: 60.713,
     longitude: 28.753,
@@ -522,6 +522,12 @@ function mapHouseProject(row: any): HouseProjectItem {
 }
 
 function mapBuiltObject(row: any): BuiltObjectItem {
+  const siteRaw = row.siteStatus as string | undefined;
+  const siteStatus =
+    siteRaw === "UNDER_CONSTRUCTION" ? ("UNDER_CONSTRUCTION" as const) : ("COMPLETED" as const);
+  const floorsVal = row.floors;
+  const floors =
+    floorsVal == null || floorsVal === "" ? null : typeof floorsVal === "number" ? floorsVal : Number(floorsVal);
   return {
     id: row.id,
     slug: row.slug,
@@ -532,7 +538,10 @@ function mapBuiltObject(row: any): BuiltObjectItem {
     foundation: row.foundation,
     walls: row.walls,
     roof: row.roof,
-    floors: row.floors,
+    floors: Number.isFinite(floors as number) ? (floors as number) : null,
+    regionSlug: row.regionSlug ?? null,
+    district: row.district ?? null,
+    siteStatus,
     location: row.location,
     latitude: row.latitude,
     longitude: row.longitude,
@@ -541,6 +550,8 @@ function mapBuiltObject(row: any): BuiltObjectItem {
     telegramUrl: row.telegramUrl,
     vkUrl: row.vkUrl,
     houseProjectSlug: row.houseProject?.slug ?? null,
+    linkedProjectRooms: row.houseProject?.rooms ?? null,
+    linkedProjectBathrooms: row.houseProject?.bathrooms ?? null,
     published: row.published,
     order: row.order,
     year: row.createdAt ? String(new Date(row.createdAt).getFullYear()) : null,
@@ -678,7 +689,7 @@ const getBuiltObjectsCached = unstable_cache(
         orderBy: [{ order: "asc" }, { createdAt: "desc" }],
         include: {
           media: { orderBy: [{ type: "asc" }, { order: "asc" }] },
-          houseProject: { select: { slug: true } },
+          houseProject: { select: { slug: true, rooms: true, bathrooms: true } },
         },
       });
       if (rows.length > 0) return rows.map(mapBuiltObject);
@@ -711,7 +722,7 @@ const getBuiltObjectBySlugCached = unstable_cache(
         where: { slug },
         include: {
           media: { orderBy: [{ type: "asc" }, { order: "asc" }] },
-          houseProject: { select: { slug: true } },
+          houseProject: { select: { slug: true, rooms: true, bathrooms: true } },
         },
       });
       if (row?.published) return mapBuiltObject(row);

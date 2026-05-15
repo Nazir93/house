@@ -1,7 +1,20 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from "react";
-import { ChevronDown, LayoutGrid, LayoutList, RectangleHorizontal } from "lucide-react";
+import {
+  Anchor,
+  BrickWall,
+  ChevronDown,
+  DraftingCompass,
+  Home,
+  Images,
+  Layers,
+  LayoutGrid,
+  LayoutList,
+  List,
+  RectangleHorizontal,
+  X,
+} from "lucide-react";
 import {
   type CaseStudyPhase,
   type CaseStudyTier1Chip,
@@ -10,6 +23,11 @@ import {
 } from "@/lib/portfolio-case-study";
 import { PAGE_INTRO_PROSE_CLASS } from "@/lib/html-content";
 import { CmsImage } from "@/components/ui/cms-image";
+import {
+  collectAllCaseStudyImages,
+  collectCaseStudyImagesForPhase,
+  prefetchCaseStudyImageUrls,
+} from "@/lib/portfolio-case-study-prefetch";
 
 function pickFirstTier1(phase: CaseStudyPhase | undefined): CaseStudyTier1Chip | null {
   if (!phase) return null;
@@ -38,16 +56,169 @@ const asideSurfaceStyle = {
   backdropFilter: "blur(12px)",
 } as const;
 
+const iconStroke = 2;
+
+function phaseMobileIcon(phaseId: string): ReactElement {
+  const id = phaseId.toLowerCase();
+  const c = "h-[18px] w-[18px] shrink-0";
+  if (id === "_cms_renders") return <Images className={c} strokeWidth={iconStroke} aria-hidden />;
+  if (id === "_cms_plans") return <DraftingCompass className={c} strokeWidth={iconStroke} aria-hidden />;
+  if (id === "foundation" || id.includes("foundation")) return <Anchor className={c} strokeWidth={iconStroke} aria-hidden />;
+  if (id === "walls" || id.includes("wall")) return <BrickWall className={c} strokeWidth={iconStroke} aria-hidden />;
+  if (id === "roof" || id.includes("roof")) return <Home className={c} strokeWidth={iconStroke} aria-hidden />;
+  return <Layers className={c} strokeWidth={iconStroke} aria-hidden />;
+}
+
+function MobileCaseStudyPhaseRail({
+  phases,
+  activePhaseId,
+  onSelectPhase,
+  onPhasePointerEnter,
+}: {
+  phases: CaseStudyPhase[];
+  activePhaseId: string | undefined;
+  onSelectPhase: (id: string, opts?: { toastTitle?: string }) => void;
+  onPhasePointerEnter?: (id: string) => void;
+}) {
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setDrawerOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [drawerOpen]);
+
+  return (
+    <>
+      <aside
+        className="pointer-events-auto fixed right-2 top-[max(5rem,env(safe-area-inset-top,0px)+4.5rem)] z-[38] flex w-11 flex-col items-center gap-1 rounded-2xl border py-2 shadow-lg sm:right-3 sm:top-[max(5.5rem,env(safe-area-inset-top,0px)+4.75rem)] sm:w-12 sm:rounded-3xl sm:py-2.5"
+        style={{
+          ...asideSurfaceStyle,
+          borderColor: "var(--border)",
+        }}
+        aria-label="Этапы строительства"
+      >
+        {phases.map((p) => {
+          const active = p.id === activePhaseId;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              title={p.title}
+              aria-label={p.title}
+              aria-current={active ? "true" : undefined}
+              onClick={() => onSelectPhase(p.id, { toastTitle: p.title })}
+              onPointerEnter={() => onPhasePointerEnter?.(p.id)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl transition-colors active:scale-[0.96] sm:h-11 sm:w-11"
+              style={{
+                color: active ? "var(--accent)" : "var(--text-muted)",
+                backgroundColor: active ? "rgba(15, 61, 46, 0.12)" : "transparent",
+                boxShadow: active ? "inset 0 0 0 1px color-mix(in srgb, var(--accent) 35%, transparent)" : "none",
+              }}
+            >
+              {phaseMobileIcon(p.id)}
+            </button>
+          );
+        })}
+        <div className="mt-0.5 w-8 shrink-0 border-t sm:w-9" style={{ borderColor: "var(--border)" }} aria-hidden />
+        <button
+          type="button"
+          title="Все этапы — список"
+          aria-label="Открыть список этапов с названиями"
+          aria-expanded={drawerOpen}
+          onClick={() => setDrawerOpen(true)}
+          className="flex h-10 w-10 items-center justify-center rounded-xl text-[var(--text-muted)] transition-colors hover:bg-[color-mix(in_srgb,var(--text)_6%,transparent)] active:scale-[0.96] sm:h-11 sm:w-11"
+        >
+          <List className="h-[18px] w-[18px]" strokeWidth={iconStroke} aria-hidden />
+        </button>
+      </aside>
+
+      {drawerOpen ? (
+        <div
+          className="fixed inset-0 z-[42] flex justify-end bg-black/45 backdrop-blur-[2px] lg:hidden"
+          role="presentation"
+          onClick={() => setDrawerOpen(false)}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Этапы строительства"
+            className="flex h-full w-[min(20rem,88vw)] flex-col border-l shadow-2xl"
+            style={{
+              backgroundColor: "var(--bg)",
+              borderColor: "var(--border)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between gap-3 border-b px-4 py-3" style={{ borderColor: "var(--border)" }}>
+              <span className="font-heading text-base font-semibold text-[var(--text)]">Этапы</span>
+              <button
+                type="button"
+                className="flex h-9 w-9 items-center justify-center rounded-full border transition-colors active:scale-[0.97]"
+                style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+                aria-label="Закрыть"
+                onClick={() => setDrawerOpen(false)}
+              >
+                <X className="h-4 w-4" strokeWidth={2} aria-hidden />
+              </button>
+            </div>
+            <nav className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-2" aria-label="Выбор этапа">
+              <ul className="space-y-0.5">
+                {phases.map((p) => {
+                  const active = p.id === activePhaseId;
+                  return (
+                    <li key={p.id}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onSelectPhase(p.id, { toastTitle: p.title });
+                          setDrawerOpen(false);
+                        }}
+                        className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm transition-colors active:scale-[0.99]"
+                        style={{
+                          backgroundColor: active ? "rgba(15, 61, 46, 0.1)" : "transparent",
+                          color: active ? "var(--accent)" : "var(--text)",
+                          fontWeight: active ? 600 : 500,
+                        }}
+                      >
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
+                          {phaseMobileIcon(p.id)}
+                        </span>
+                        <span className="min-w-0 leading-snug">{p.title}</span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}
+
 function PhaseTimelineNav({
   phases,
   activePhaseId,
   onPhaseClick,
+  onPhasePointerEnter,
   idPrefix,
   pulseTick,
 }: {
   phases: CaseStudyPhase[];
   activePhaseId: string | undefined;
   onPhaseClick: (id: string) => void;
+  /** Подгрузка фото этапа при наведении — к клику кэш уже тёплый */
+  onPhasePointerEnter?: (id: string) => void;
   idPrefix: "mobile" | "desktop";
   pulseTick: number;
 }) {
@@ -66,6 +237,7 @@ function PhaseTimelineNav({
                 id={`${idPrefix}-phase-${p.id}`}
                 type="button"
                 onClick={() => onPhaseClick(p.id)}
+                onPointerEnter={() => onPhasePointerEnter?.(p.id)}
                 className="flex w-full gap-2 rounded-xl py-2 pl-1 pr-0.5 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--text)_5%,transparent)] max-lg:gap-2 max-lg:py-1.5 sm:gap-3 sm:py-2.5 sm:pr-1"
               >
                 <span className="relative z-[1] mt-[7px] flex h-[18px] w-[18px] shrink-0 items-center justify-center">
@@ -110,11 +282,13 @@ export function PortfolioCaseStudy({
   const [tier2Id, setTier2Id] = useState<string | null>(() =>
     pickFirstTier2(pickFirstTier1(phases[0] ?? null))?.id ?? null
   );
-  /** По умолчанию — сетка (не «Крупно») */
-  const [viewMode, setViewMode] = useState<CaseStudyViewMode>("grid-sm");
+  /** По умолчанию — третий режим (крупная сетка / один ряд крупных кадров) */
+  const [viewMode, setViewMode] = useState<CaseStudyViewMode>("grid-lg");
   const [descriptionOpen, setDescriptionOpen] = useState(false);
   const [pulseTick, setPulseTick] = useState(0);
+  const [mobilePhaseToast, setMobilePhaseToast] = useState<string | null>(null);
   const asideScrollRefs = useRef<(HTMLElement | null)[]>([]);
+  const phaseHoverPrefetchTimers = useRef<Map<string, number>>(new Map());
 
   const setAsideScrollRef = useCallback((index: 0 | 1) => (el: HTMLElement | null) => {
     asideScrollRefs.current[index] = el;
@@ -123,6 +297,51 @@ export function PortfolioCaseStudy({
   const bumpMarkerPulse = useCallback(() => {
     setPulseTick((n) => n + 1);
   }, []);
+
+  const schedulePrefetchPhaseOnHover = useCallback(
+    (id: string) => {
+      const prev = phaseHoverPrefetchTimers.current.get(id);
+      if (prev !== undefined) window.clearTimeout(prev);
+      const t = window.setTimeout(() => {
+        phaseHoverPrefetchTimers.current.delete(id);
+        const ph = phases.find((p) => p.id === id);
+        if (ph) prefetchCaseStudyImageUrls(collectCaseStudyImagesForPhase(ph), { max: 18, width: 828, quality: 78 });
+      }, 200);
+      phaseHoverPrefetchTimers.current.set(id, t);
+    },
+    [phases]
+  );
+
+  useEffect(() => {
+    return () => {
+      for (const timer of phaseHoverPrefetchTimers.current.values()) window.clearTimeout(timer);
+      phaseHoverPrefetchTimers.current.clear();
+    };
+  }, []);
+
+  /** После первой отрисовки — в фоне подогреваем `/_next/image` по всем этапам (как «сразу грузят» витрины). */
+  useEffect(() => {
+    if (phases.length === 0) return;
+    const urls = collectAllCaseStudyImages(phases);
+    if (urls.length === 0) return;
+    const run = () => prefetchCaseStudyImageUrls(urls, { max: 40, width: 828, quality: 78 });
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (typeof w.requestIdleCallback === "function") {
+      const id = w.requestIdleCallback(() => run(), { timeout: 3200 });
+      return () => w.cancelIdleCallback?.(id);
+    }
+    const tid = window.setTimeout(run, 1600);
+    return () => window.clearTimeout(tid);
+  }, [phases]);
+
+  useEffect(() => {
+    if (!mobilePhaseToast) return;
+    const t = window.setTimeout(() => setMobilePhaseToast(null), 2600);
+    return () => window.clearTimeout(t);
+  }, [mobilePhaseToast]);
 
   useLayoutEffect(() => {
     let debounce: number | undefined;
@@ -188,10 +407,24 @@ export function PortfolioCaseStudy({
     return t1.tier2.length === 1;
   }, [phase]);
 
-  const onPhaseClick = useCallback((id: string) => {
-    setPhaseId(id);
-    bumpMarkerPulse();
-  }, [bumpMarkerPulse]);
+  const selectPhase = useCallback(
+    (id: string, opts?: { toastTitle?: string }) => {
+      setPhaseId(id);
+      bumpMarkerPulse();
+      if (opts?.toastTitle) setMobilePhaseToast(opts.toastTitle);
+    },
+    [bumpMarkerPulse]
+  );
+
+  useEffect(() => {
+    const ph = phases.find((p) => p.id === phaseId);
+    if (!ph) return;
+    const t1 = ph.tier1.find((t) => t.id === tier1Id) ?? ph.tier1[0];
+    const t2 = t1?.tier2.find((t) => t.id === tier2Id) ?? t1?.tier2[0];
+    const urls = t2?.images?.filter(Boolean) ?? [];
+    if (urls.length <= 5) return;
+    prefetchCaseStudyImageUrls(urls.slice(5), { max: 36, width: 828, quality: 78 });
+  }, [phaseId, tier1Id, tier2Id, phases]);
 
   if (!phases.length) {
     return (
@@ -201,25 +434,14 @@ export function PortfolioCaseStudy({
 
   return (
     <div className="relative">
-      {/* Мобильная и планшетная: навигация закреплена справа, скролл списка внутри панели */}
-      <aside
-        ref={setAsideScrollRef(0)}
-        className="case-study-timeline-aside-scroll lg:hidden fixed right-2 top-[max(5rem,env(safe-area-inset-top,0px)+4.5rem)] z-[38] w-[min(12.75rem,calc(100vw-2.75rem))] max-h-[min(72vh,calc(100dvh-6rem-env(safe-area-inset-bottom,0px)))] overflow-y-auto overflow-x-hidden overscroll-contain rounded-2xl py-3 pl-2 pr-1.5 sm:right-3 sm:top-[max(5.5rem,env(safe-area-inset-top,0px)+4.75rem)] sm:rounded-3xl sm:py-4 sm:pl-2.5 sm:pr-2"
-        style={{
-          ...asideSurfaceStyle,
-          WebkitOverflowScrolling: "touch",
-        }}
-      >
-        <PhaseTimelineNav
-          phases={phases}
-          activePhaseId={phase?.id}
-          onPhaseClick={onPhaseClick}
-          idPrefix="mobile"
-          pulseTick={pulseTick}
-        />
-      </aside>
+      <MobileCaseStudyPhaseRail
+        phases={phases}
+        activePhaseId={phase?.id}
+        onSelectPhase={selectPhase}
+        onPhasePointerEnter={schedulePrefetchPhaseOnHover}
+      />
 
-      <div className="grid gap-8 max-lg:pr-[min(13.25rem,calc(11.5rem+1.75rem))] lg:grid-cols-[minmax(240px,280px)_minmax(0,1fr)] lg:items-start lg:gap-10 lg:pr-0 xl:gap-x-12">
+      <div className="grid gap-8 max-lg:pr-16 lg:grid-cols-[minmax(240px,280px)_minmax(0,1fr)] lg:items-start lg:gap-10 lg:pr-0 xl:gap-x-12">
         <aside
           ref={setAsideScrollRef(1)}
           className="case-study-timeline-aside-scroll hidden rounded-3xl py-5 pl-3 pr-2 sm:pl-4 sm:pr-3 lg:block lg:sticky lg:top-[7rem] lg:max-h-[min(88vh,calc(100vh-7rem))] lg:overflow-y-auto lg:self-start lg:py-6"
@@ -228,7 +450,8 @@ export function PortfolioCaseStudy({
           <PhaseTimelineNav
             phases={phases}
             activePhaseId={phase?.id}
-            onPhaseClick={onPhaseClick}
+            onPhaseClick={(id) => selectPhase(id)}
+            onPhasePointerEnter={schedulePrefetchPhaseOnHover}
             idPrefix="desktop"
             pulseTick={pulseTick}
           />
@@ -306,6 +529,11 @@ export function PortfolioCaseStudy({
                           key={t.id}
                           type="button"
                           onClick={() => setTier2Id(t.id)}
+                          onPointerEnter={() => {
+                            const imgs = t.images?.filter(Boolean);
+                            if (imgs?.length)
+                              prefetchCaseStudyImageUrls(imgs, { max: 16, width: 828, quality: 78 });
+                          }}
                           className="rounded-2xl px-3 py-2.5 text-left text-[12px] font-medium leading-snug transition-colors sm:px-3.5 sm:text-[13px]"
                           style={{
                             backgroundColor: on ? "var(--accent)" : "var(--bg-secondary)",
@@ -363,6 +591,21 @@ export function PortfolioCaseStudy({
         />
         </div>
       </div>
+
+      {mobilePhaseToast ? (
+        <div
+          className="pointer-events-none fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] left-1/2 z-[43] max-w-[min(92vw,22rem)] -translate-x-1/2 rounded-full border px-4 py-2.5 text-center text-[13px] font-medium leading-snug shadow-lg lg:hidden"
+          style={{
+            borderColor: "var(--border)",
+            backgroundColor: "var(--card-bg)",
+            color: "var(--text)",
+            boxShadow: "0 12px 40px rgba(0,0,0,0.18)",
+          }}
+          role="status"
+        >
+          {mobilePhaseToast}
+        </div>
+      ) : null}
     </div>
   );
 }

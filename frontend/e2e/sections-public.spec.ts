@@ -11,6 +11,9 @@ test.describe("Портфолио", () => {
   test("/portfolio", async ({ page }) => {
     await expectPublicPage(page, "/portfolio");
   });
+  test("/portfolio/map", async ({ page }) => {
+    await expectPublicPage(page, "/portfolio/map");
+  });
 });
 
 test.describe("Каталог типовых проектов", () => {

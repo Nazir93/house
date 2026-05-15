@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
@@ -10,6 +10,7 @@ import { RichEditor } from "@/components/admin/rich-editor";
 import { AdminSelect } from "@/components/admin/admin-select";
 import { CASE_STUDY_CONSTRUCTION_PHASES } from "@/lib/portfolio-case-study-phases";
 import { initialPhaseMediaForm, mediaUrlsForForm } from "@/lib/built-object-admin-media";
+import { BUILT_OBJECT_MAP_DISTRICTS, BUILT_OBJECT_MAP_REGIONS } from "@/lib/built-object-map-taxonomy";
 
 const MATERIALS = [
   ["GAS_BLOCK", "Газобетон"],
@@ -20,6 +21,16 @@ const MATERIALS = [
 ] as const;
 
 const MATERIAL_OPTIONS = MATERIALS.map(([value, label]) => ({ value, label }));
+
+const REGION_OPTIONS = [
+  { value: "", label: "Не указан (регион по адресу)" },
+  ...BUILT_OBJECT_MAP_REGIONS.map((r) => ({ value: r.slug, label: r.label })),
+];
+
+const SITE_STATUS_OPTIONS = [
+  { value: "COMPLETED", label: "Сдан / готов" },
+  { value: "UNDER_CONSTRUCTION", label: "Строится (стройплощадка)" },
+];
 
 function urls(media: any[] | undefined, type: string) {
   return mediaUrlsForForm(media, type);
@@ -43,6 +54,9 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
     location: initial?.location || "",
     latitude: String(initial?.latitude ?? ""),
     longitude: String(initial?.longitude ?? ""),
+    regionSlug: initial?.regionSlug || "",
+    district: initial?.district || "",
+    siteStatus: initial?.siteStatus === "UNDER_CONSTRUCTION" ? "UNDER_CONSTRUCTION" : "COMPLETED",
     description: initial?.description || "",
     worksDescription: initial?.worksDescription || "",
     telegramUrl: initial?.telegramUrl || "",
@@ -60,6 +74,16 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
   function set(field: string, value: string | boolean) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
+
+  const districtOptions = useMemo(() => {
+    const rs = form.regionSlug?.trim();
+    if (!rs) return [{ value: "", label: "Сначала выберите регион" }];
+    const list = BUILT_OBJECT_MAP_DISTRICTS[rs] ?? [];
+    const opts = [{ value: "", label: "Не указан" }, ...list.map((d) => ({ value: d.slug, label: d.label }))];
+    const cur = form.district?.trim();
+    if (cur && !opts.some((o) => o.value === cur)) opts.push({ value: cur, label: `${cur} (из БД)` });
+    return opts;
+  }, [form.regionSlug, form.district]);
 
   function appendMediaLine(field: "renders" | "plans" | "stages" | "videos", url: string) {
     const u = url.trim();
@@ -135,7 +159,7 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <AdminSelect value={form.material} onValueChange={(v) => set("material", v)} options={MATERIAL_OPTIONS} />
           <input value={form.area} onChange={(e) => set("area", e.target.value)} placeholder="Площадь" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
-          <input value={form.floors} onChange={(e) => set("floors", e.target.value)} placeholder="Этажность" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
+          <input value={form.floors} onChange={(e) => set("floors", e.target.value)} placeholder="Этажность (1, 1.5, 2…)" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
           <input value={form.buildTerm} onChange={(e) => set("buildTerm", e.target.value)} placeholder="Срок строительства" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -147,6 +171,20 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
           <input value={form.location} onChange={(e) => set("location", e.target.value)} placeholder="Адрес/населенный пункт" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
           <input value={form.latitude} onChange={(e) => set("latitude", e.target.value)} placeholder="Широта" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
           <input value={form.longitude} onChange={(e) => set("longitude", e.target.value)} placeholder="Долгота" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <AdminSelect
+            value={form.regionSlug}
+            onValueChange={(v) => setForm((prev) => ({ ...prev, regionSlug: v, district: "" }))}
+            options={REGION_OPTIONS}
+          />
+          <AdminSelect
+            value={form.district}
+            onValueChange={(v) => set("district", v)}
+            options={districtOptions}
+            disabled={!form.regionSlug.trim()}
+          />
+          <AdminSelect value={form.siteStatus} onValueChange={(v) => set("siteStatus", v)} options={SITE_STATUS_OPTIONS} />
         </div>
         <RichEditor value={form.description} onChange={(value) => set("description", value)} minHeight="150px" />
         <RichEditor value={form.worksDescription} onChange={(value) => set("worksDescription", value)} minHeight="120px" />

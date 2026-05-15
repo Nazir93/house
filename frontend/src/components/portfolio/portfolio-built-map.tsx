@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import Link from "next/link";
 import L from "leaflet";
-import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import type { BuiltObjectItem } from "@/lib/construction-shared";
-import { builtObjectMaterialLabel, getBuiltObjectCover } from "@/lib/construction-shared";
-import { CmsImage } from "@/components/ui/cms-image";
+import type { BuiltObjectItem, BuiltObjectSiteStatus } from "@/lib/construction-shared";
 
 if (typeof window !== "undefined") {
   delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: string })._getIconUrl;
@@ -32,7 +29,53 @@ function FitBounds({ positions }: { positions: [number, number][] }) {
   return null;
 }
 
-export function PortfolioBuiltMap({ objects }: { objects: BuiltObjectItem[] }) {
+function buildMarkerIcon(status: BuiltObjectSiteStatus | undefined, selected: boolean): L.DivIcon {
+  const kind = status === "UNDER_CONSTRUCTION" ? "UNDER_CONSTRUCTION" : "COMPLETED";
+  const bg = kind === "UNDER_CONSTRUCTION" ? "#e07018" : "#0F3D2E";
+  const ring = selected ? "0 0 0 4px rgba(61,143,110,0.45)" : "0 4px 16px rgba(0,0,0,0.28)";
+  const svgHouse =
+    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10.5L12 4l8 6.5V20h-5v-6H9v6H4V10.5z" fill="white" fill-opacity="0.95"/></svg>';
+  const svgBuild =
+    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 20h16M7 8h10M10 8V4h4v4M9 16v4h6v-4M6 12h12" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const inner = kind === "UNDER_CONSTRUCTION" ? svgBuild : svgHouse;
+  return L.divIcon({
+    className: "everhouse-map-pin",
+    html: `<div style="width:42px;height:42px;border-radius:14px;background:${bg};box-shadow:${ring};display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.95);transform:translateY(-6px)">${inner}</div>`,
+    iconSize: [42, 50],
+    iconAnchor: [21, 50],
+  });
+}
+
+function MapBackgroundClicks({ onClear }: { onClear: () => void }) {
+  useMapEvents({
+    click(e) {
+      const t = e.originalEvent?.target as HTMLElement | undefined;
+      if (t?.closest?.(".leaflet-marker-icon")) return;
+      onClear();
+    },
+  });
+  return null;
+}
+
+export type PortfolioBuiltMapProps = {
+  objects: BuiltObjectItem[];
+  selectedId: string | null;
+  onSelectMarker: (id: string) => void;
+  onMapBackgroundClick: () => void;
+  /** Высота карты: по умолчанию как в портфолио */
+  mapHeightClass?: string;
+  /** Убрать скругление и рамку (полноэкранный блок внутри explorer) */
+  frameless?: boolean;
+};
+
+export function PortfolioBuiltMap({
+  objects,
+  selectedId,
+  onSelectMarker,
+  onMapBackgroundClick,
+  mapHeightClass = "h-[min(520px,70vh)]",
+  frameless = false,
+}: PortfolioBuiltMapProps) {
   const withCoords = useMemo(
     () => objects.filter((o) => o.latitude != null && o.longitude != null),
     [objects]
@@ -43,51 +86,53 @@ export function PortfolioBuiltMap({ objects }: { objects: BuiltObjectItem[] }) {
   );
   const center: [number, number] = positions[0] ?? [59.93, 30.35];
 
+  const iconsById = useMemo(() => {
+    const m = new Map<string, L.DivIcon>();
+    for (const o of withCoords) {
+      m.set(o.id, buildMarkerIcon(o.siteStatus, selectedId === o.id));
+    }
+    return m;
+  }, [withCoords, selectedId]);
+
   if (withCoords.length === 0) {
     return (
-      <p className="rounded-2xl border p-6 text-sm" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
+      <p
+        className="rounded-2xl border p-6 text-sm"
+        style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+      >
         У объектов не заданы координаты — карта появится после заполнения широты и долготы в админке.
       </p>
     );
   }
 
+  const frame =
+    frameless ? "overflow-hidden rounded-none border-0" : "overflow-hidden rounded-[1.35rem] border border-[rgba(43,47,45,0.09)]";
+
   return (
-    <div className="overflow-hidden rounded-[1.35rem] border" style={{ borderColor: "rgba(43, 47, 45, 0.09)" }}>
+    <div className={frame}>
       <MapContainer
         center={center}
         zoom={8}
         scrollWheelZoom
-        className="z-0 h-[min(520px,70vh)] w-full [&_.leaflet-control-attribution]:text-[10px]"
+        className={`z-0 w-full ${mapHeightClass} [&_.leaflet-control-attribution]:text-[10px]`}
         style={{ background: "var(--stone)" }}
       >
         <TileLayer attribution="&copy; OpenStreetMap" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <MapBackgroundClicks onClear={onMapBackgroundClick} />
         <FitBounds positions={positions} />
-        {withCoords.map((o) => {
-          const cover = getBuiltObjectCover(o);
-          return (
-            <Marker key={o.id} position={[o.latitude!, o.longitude!]}>
-              <Popup>
-                <div className="min-w-[150px] max-w-[220px]">
-                  {cover ? (
-                    <CmsImage
-                      src={cover.url}
-                      alt=""
-                      width={220}
-                      height={80}
-                      className="mb-2 h-20 w-full rounded-md object-cover"
-                      sizes="220px"
-                    />
-                  ) : null}
-                  <p className="text-sm font-bold uppercase leading-tight text-[#1a1a1a]">{o.title}</p>
-                  <p className="mt-1 text-xs text-neutral-600">{builtObjectMaterialLabel(o.material)}</p>
-                  <Link href={`/portfolio/${o.slug}`} className="mt-2 inline-block text-xs font-semibold text-[#0F3D2E] underline">
-                    Карточка объекта
-                  </Link>
-                </div>
-              </Popup>
-            </Marker>
-          );
-        })}
+        {withCoords.map((o) => (
+          <Marker
+            key={o.id}
+            position={[o.latitude!, o.longitude!]}
+            icon={iconsById.get(o.id)}
+            eventHandlers={{
+              click: (e) => {
+                L.DomEvent.stopPropagation(e);
+                onSelectMarker(o.id);
+              },
+            }}
+          />
+        ))}
       </MapContainer>
     </div>
   );

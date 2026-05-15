@@ -53,6 +53,12 @@ enum BuiltObjectMaterial {
   OTHER
 }
 
+/// Статус площадки на карте портфолио (иконка и подпись).
+enum BuiltObjectSiteStatus {
+  COMPLETED
+  UNDER_CONSTRUCTION
+}
+
 model Project {
   id             String         @id @default(cuid())
   slug           String         @unique
@@ -186,7 +192,12 @@ model BuiltObject {
   foundation          String?
   walls               String?
   roof                String?
-  floors              Int?
+  floors              Float?
+  /// Регион для фильтров карты (slug: lo, mo, …).
+  regionSlug          String?
+  /// Район / населённый пункт (slug из справочника в админке).
+  district            String?
+  siteStatus          BuiltObjectSiteStatus @default(COMPLETED)
   location            String?
   latitude            Float?
   longitude           Float?
@@ -204,6 +215,7 @@ model BuiltObject {
 
   @@index([published, material])
   @@index([published, order])
+  @@index([published, regionSlug])
   @@index([houseProjectId])
 }
 

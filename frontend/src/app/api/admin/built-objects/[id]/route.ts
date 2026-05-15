@@ -9,6 +9,13 @@ function n(value: unknown) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function nf(value: unknown): number | null {
+  if (value === "" || value == null) return null;
+  const s = String(value).trim().replace(",", ".");
+  const parsed = parseFloat(s);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 export async function GET(_request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const gate = await requireAdminApiSession();
@@ -46,7 +53,12 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         ...(body.foundation !== undefined && { foundation: body.foundation || null }),
         ...(body.walls !== undefined && { walls: body.walls || null }),
         ...(body.roof !== undefined && { roof: body.roof || null }),
-        ...(body.floors !== undefined && { floors: n(body.floors) }),
+        ...(body.floors !== undefined && { floors: nf(body.floors) }),
+        ...(body.regionSlug !== undefined && { regionSlug: body.regionSlug?.trim() || null }),
+        ...(body.district !== undefined && { district: body.district?.trim() || null }),
+        ...(body.siteStatus !== undefined && {
+          siteStatus: body.siteStatus === "UNDER_CONSTRUCTION" ? "UNDER_CONSTRUCTION" : "COMPLETED",
+        }),
         ...(body.location !== undefined && { location: body.location || null }),
         ...(body.latitude !== undefined && { latitude: n(body.latitude) }),
         ...(body.longitude !== undefined && { longitude: n(body.longitude) }),

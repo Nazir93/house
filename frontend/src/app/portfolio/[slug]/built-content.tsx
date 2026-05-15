@@ -82,7 +82,7 @@ export function BuiltObjectDetailContent({
           ) : null}
 
           {/* Как на референсе: сразу двухколоночный кейс без полноэкранного героя сверху (обложка — в галерее / блоке параметров) */}
-          <div className="mt-8 sm:mt-10 lg:mt-11">
+          <div className="mt-4 sm:mt-5 lg:mt-7">
             <PortfolioCaseStudy
               phases={casePhases}
               phaseDescriptionHtml={caseStudyDescriptionHtml}

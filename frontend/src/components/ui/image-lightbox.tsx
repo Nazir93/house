@@ -69,6 +69,14 @@ export function ImageLightbox({
   );
 }
 
+function lightboxImageUnoptimized(url: string): boolean {
+  const t = url.trim();
+  if (t.startsWith("data:") || /\.(gif|svg)($|\?)/i.test(t)) return true;
+  /** Локальные файлы: без `/_next/image` — не ждём ресайз на сервере при открытии модалки. */
+  if (t.startsWith("/uploads/")) return true;
+  return false;
+}
+
 function ImageLightboxBody({
   slide,
   index,
@@ -87,14 +95,17 @@ function ImageLightboxBody({
   onClose: () => void;
 }) {
   const [mediaReady, setMediaReady] = useState(false);
+  const [imageSlowLoad, setImageSlowLoad] = useState(false);
 
   useEffect(() => {
     setMediaReady(false);
+    setImageSlowLoad(false);
   }, [slide.url, slide.type, index]);
 
   useEffect(() => {
-    const id = window.setTimeout(() => setMediaReady(true), 12000);
-    return () => clearTimeout(id);
+    if (slide.type !== "image") return;
+    const id = window.setTimeout(() => setImageSlowLoad(true), 350);
+    return () => window.clearTimeout(id);
   }, [slide.url, slide.type, index]);
 
   return (
@@ -150,53 +161,66 @@ function ImageLightboxBody({
         className="relative z-[205] w-full max-w-[min(96vw,1400px)] h-[min(85vh,90vw)] pointer-events-none"
         onClick={(e) => e.stopPropagation()}
       >
-        {!mediaReady && (
-          <div className="absolute inset-0 z-[1] flex items-center justify-center pointer-events-none">
-            <div
-              className="h-10 w-10 rounded-full border-2 border-white/25 border-t-white animate-spin"
-              role="status"
-              aria-label="Загрузка"
-            />
-          </div>
-        )}
         {slide.type === "image" ? (
-          <Image
-            src={slide.url}
-            alt={`${alt} — ${kindLabel} ${index + 1}`}
-            fill
-            className={`object-contain pointer-events-auto transition-opacity duration-300 ${
-              mediaReady ? "opacity-100" : "opacity-0"
-            }`}
-            sizes="96vw"
-            quality={85}
-            priority
-            unoptimized={
-              slide.url.trim().startsWith("data:") || /\.(gif|svg)($|\?)/i.test(slide.url)
-            }
-            onLoadingComplete={() => setMediaReady(true)}
-            onLoad={() => setMediaReady(true)}
-          />
+          <>
+            {imageSlowLoad ? (
+              <div className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center">
+                <div
+                  className={`h-10 w-10 rounded-full border-2 border-white/25 border-t-white animate-spin transition-opacity duration-200 ${
+                    mediaReady ? "opacity-0" : "opacity-90"
+                  }`}
+                  role="status"
+                  aria-label="Загрузка"
+                />
+              </div>
+            ) : null}
+            <Image
+              src={slide.url}
+              alt={`${alt} — ${kindLabel} ${index + 1}`}
+              fill
+              className="pointer-events-auto object-contain opacity-100"
+              sizes="(max-width: 1400px) 96vw, 1200px"
+              quality={78}
+              priority
+              fetchPriority="high"
+              decoding="async"
+              unoptimized={lightboxImageUnoptimized(slide.url)}
+              onLoadingComplete={() => setMediaReady(true)}
+              onLoad={() => setMediaReady(true)}
+            />
+          </>
         ) : (
-          <video
-            key={`${slide.url}-${index}`}
-            src={slide.url}
-            controls
-            playsInline
-            preload="auto"
-            onLoadedMetadata={() => setMediaReady(true)}
-            onLoadedData={() => setMediaReady(true)}
-            onCanPlay={() => setMediaReady(true)}
-            className={`absolute inset-0 w-full h-full object-contain pointer-events-auto transition-opacity duration-300 ${
-              mediaReady ? "opacity-100" : "opacity-0"
-            }`}
-            style={{ backgroundColor: "rgba(0,0,0,0.35)" }}
-            aria-label={`${alt} — ${kindLabel} ${index + 1}`}
-          />
+          <>
+            {!mediaReady ? (
+              <div className="pointer-events-none absolute inset-0 z-[1] flex items-center justify-center">
+                <div
+                  className="h-10 w-10 rounded-full border-2 border-white/25 border-t-white animate-spin"
+                  role="status"
+                  aria-label="Загрузка"
+                />
+              </div>
+            ) : null}
+            <video
+              key={`${slide.url}-${index}`}
+              src={slide.url}
+              controls
+              playsInline
+              preload="auto"
+              onLoadedMetadata={() => setMediaReady(true)}
+              onLoadedData={() => setMediaReady(true)}
+              onCanPlay={() => setMediaReady(true)}
+              className={`pointer-events-auto absolute inset-0 h-full w-full object-contain transition-opacity duration-300 ${
+                mediaReady ? "opacity-100" : "opacity-0"
+              }`}
+              style={{ backgroundColor: "rgba(0,0,0,0.35)" }}
+              aria-label={`${alt} — ${kindLabel} ${index + 1}`}
+            />
+          </>
         )}
       </div>
 
       {n > 1 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[210] text-xs tabular-nums text-white/70">
+        <div className="absolute bottom-6 left-1/2 z-[210] -translate-x-1/2 text-xs tabular-nums text-white/70">
           {index + 1} / {n}
         </div>
       )}

@@ -9,8 +9,8 @@ import { builtObjectMaterialLabel, getBuiltObjectCover, type BuiltObjectItem } f
 import { cn } from "@/lib/utils";
 import { CmsImage } from "@/components/ui/cms-image";
 
-const PortfolioBuiltMap = dynamic(
-  () => import("@/components/portfolio/portfolio-built-map").then((m) => m.PortfolioBuiltMap),
+const PortfolioObjectMapExplorer = dynamic(
+  () => import("@/components/portfolio/portfolio-object-map-explorer").then((m) => m.PortfolioObjectMapExplorer),
   {
     ssr: false,
     loading: () => (
@@ -146,182 +146,187 @@ export function BuiltPortfolioContent({
           </div>
 
           <div ref={explorerRef} id="portfolio-explorer" className="mt-8 scroll-mt-24 space-y-8 md:scroll-mt-28">
-            <div className="flex w-full flex-wrap items-center gap-2 border-b border-[var(--border)] pb-6">
-              {view === "map" ? (
-                <button
-                  type="button"
-                  onClick={() => setView("grid")}
-                  className={cn("inline-flex items-center gap-2 font-semibold", chipBaseClass(true))}
-                >
-                  <LayoutGrid size={17} strokeWidth={2} aria-hidden />
-                  К сетке
-                </button>
-              ) : null}
-
-              <button
-                type="button"
-                onClick={resetAllFilters}
-                className={chipBaseClass(filtersAreDefault)}
-                aria-pressed={filtersAreDefault}
-              >
-                Все
-              </button>
-
-              <span className="hidden h-4 w-px bg-[var(--border)] sm:block" aria-hidden />
-
-              <span className="w-full text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)] sm:hidden">
-                Материал
-              </span>
-              {materials.map((item) => {
-                if (item === "Все") return null;
-                const on = material === item;
-                return (
+            {view === "map" ? (
+              <div className="space-y-6">
+                <div className="flex w-full flex-wrap items-center gap-2 border-b border-[var(--border)] pb-6">
                   <button
-                    key={item}
                     type="button"
-                    onClick={() => setMaterial(item)}
-                    className={chipBaseClass(on)}
+                    onClick={() => setView("grid")}
+                    className={cn("inline-flex items-center gap-2 font-semibold", chipBaseClass(true))}
                   >
-                    {chipLabel(item)}
+                    <LayoutGrid size={17} strokeWidth={2} aria-hidden />
+                    К сетке
                   </button>
-                );
-              })}
-
-              {hasFloorData ? (
-                <>
-                  <span className="w-full text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)] sm:ml-1 sm:w-auto">
-                    Этажность
-                  </span>
-                  {(
-                    [
-                      { id: "all" as const, label: "Любая" },
-                      { id: "1" as const, label: "1 этаж" },
-                      { id: "2plus" as const, label: "2+ этажа" },
-                    ] as const
-                  ).map(({ id, label }) => {
-                    const on = floorFilter === id;
-                    return (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => setFloorFilter(id)}
-                        className={chipMutedClass(on)}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </>
-              ) : null}
-
-              {hasAreaData ? (
-                <>
-                  <span className="w-full text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)] sm:ml-1 sm:w-auto">
-                    Площадь
-                  </span>
-                  {(
-                    [
-                      { id: "all" as const, label: "Любая" },
-                      { id: "lte150" as const, label: "до 150 м²" },
-                      { id: "mid" as const, label: "150–250 м²" },
-                      { id: "gt250" as const, label: "свыше 250 м²" },
-                    ] as const
-                  ).map(({ id, label }) => {
-                    const on = areaFilter === id;
-                    return (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => setAreaFilter(id)}
-                        className={chipMutedClass(on)}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </>
-              ) : null}
-
-              <span className="w-full text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)] sm:ml-1 sm:w-auto">
-                Регион
-              </span>
-              {(
-                [
-                  { id: "all" as const, label: "Все регионы" },
-                  { id: "lo" as const, label: "Северо-Запад и ЛО" },
-                  { id: "mo" as const, label: "Москва и область" },
-                ] as const
-              ).map(({ id, label }) => {
-                const on = region === id;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setRegion(id)}
-                    className={chipMutedClass(on)}
+                  <Link
+                    href="/portfolio/map"
+                    className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-2 text-[13px] font-semibold text-[var(--accent)] transition-colors hover:border-[var(--accent)] dark:bg-[var(--card-bg)] sm:text-sm"
                   >
-                    {label}
-                  </button>
-                );
-              })}
-
-              {view === "grid" ? (
-                <button
-                  type="button"
-                  onClick={() => showMapView()}
-                  className="ml-auto inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-2 text-[13px] font-semibold text-[var(--text)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] dark:bg-[var(--card-bg)] sm:text-sm"
-                >
-                  <MapPinned size={17} strokeWidth={2} className="shrink-0 text-[var(--accent)]" aria-hidden />
-                  Показать на карте
-                  <span className="text-[11px] font-normal text-[var(--text-muted)]">({mappedCount})</span>
-                </button>
-              ) : null}
-            </div>
-
-            {objects.length === 0 ? (
-              <p className="py-16 text-center text-sm text-[var(--text-muted)]">Объекты портфолио пока не добавлены.</p>
-            ) : filtered.length === 0 ? (
-              <p className="py-16 text-center text-sm text-[var(--text-muted)]">Нет объектов с выбранными фильтрами.</p>
-            ) : view === "grid" ? (
-              <ul className="grid list-none grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-                {filtered.map((object) => {
-                  const cover = getBuiltObjectCover(object);
-                  return (
-                    <li key={object.id}>
-                      <Link href={`/portfolio/${object.slug}`} className="group block">
-                        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-[var(--stone)] ring-1 ring-[var(--border)] transition-shadow duration-300 group-hover:ring-[var(--accent)]/40">
-                          {cover ? (
-                            <CmsImage
-                              src={cover.url}
-                              alt={cover.alt || object.title}
-                              fill
-                              className="object-cover transition-[filter,transform] duration-700 ease-out [filter:grayscale(1)_brightness(0.88)_contrast(1.05)] group-hover:scale-[1.03] group-hover:[filter:grayscale(0)_brightness(1)_contrast(1)]"
-                              sizes="(max-width: 768px) 50vw, 360px"
-                            />
-                          ) : (
-                            <div className="flex h-full items-center justify-center text-xs text-[var(--text-muted)]">Нет фото</div>
-                          )}
-                        </div>
-                        <div className="mt-3 space-y-1 px-0.5">
-                          <h2 className="font-heading text-[13px] font-bold uppercase leading-snug tracking-[0.04em] text-[var(--text)] sm:text-sm md:text-[15px]">
-                            {object.title}
-                          </h2>
-                          <p className="text-[11px] font-normal leading-relaxed text-[var(--text-muted)] sm:text-xs md:text-[13px]">
-                            {builtObjectMaterialLabel(object.material)}
-                          </p>
-                        </div>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            ) : (
-              <div id="portfolio-map" className="scroll-mt-24 md:scroll-mt-28">
-                <PortfolioBuiltMap objects={filtered} />
-                <p className="mt-4 text-xs leading-relaxed text-[var(--text-muted)] md:text-sm">
-                  Масштаб компании виден по географии точек. Нажмите на маркер — откроется карточка объекта.
-                </p>
+                    <MapPinned size={17} strokeWidth={2} aria-hidden />
+                    Открыть страницу карты
+                  </Link>
+                </div>
+                <PortfolioObjectMapExplorer objects={objects} layout="embedded" />
               </div>
+            ) : (
+              <>
+                <div className="flex w-full flex-wrap items-center gap-2 border-b border-[var(--border)] pb-6">
+                  <button
+                    type="button"
+                    onClick={resetAllFilters}
+                    className={chipBaseClass(filtersAreDefault)}
+                    aria-pressed={filtersAreDefault}
+                  >
+                    Все
+                  </button>
+
+                  <span className="hidden h-4 w-px bg-[var(--border)] sm:block" aria-hidden />
+
+                  <span className="w-full text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)] sm:hidden">
+                    Материал
+                  </span>
+                  {materials.map((item) => {
+                    if (item === "Все") return null;
+                    const on = material === item;
+                    return (
+                      <button
+                        key={item}
+                        type="button"
+                        onClick={() => setMaterial(item)}
+                        className={chipBaseClass(on)}
+                      >
+                        {chipLabel(item)}
+                      </button>
+                    );
+                  })}
+
+                  {hasFloorData ? (
+                    <>
+                      <span className="w-full text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)] sm:ml-1 sm:w-auto">
+                        Этажность
+                      </span>
+                      {(
+                        [
+                          { id: "all" as const, label: "Любая" },
+                          { id: "1" as const, label: "1 этаж" },
+                          { id: "2plus" as const, label: "2+ этажа" },
+                        ] as const
+                      ).map(({ id, label }) => {
+                        const on = floorFilter === id;
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={() => setFloorFilter(id)}
+                            className={chipMutedClass(on)}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </>
+                  ) : null}
+
+                  {hasAreaData ? (
+                    <>
+                      <span className="w-full text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)] sm:ml-1 sm:w-auto">
+                        Площадь
+                      </span>
+                      {(
+                        [
+                          { id: "all" as const, label: "Любая" },
+                          { id: "lte150" as const, label: "до 150 м²" },
+                          { id: "mid" as const, label: "150–250 м²" },
+                          { id: "gt250" as const, label: "свыше 250 м²" },
+                        ] as const
+                      ).map(({ id, label }) => {
+                        const on = areaFilter === id;
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            onClick={() => setAreaFilter(id)}
+                            className={chipMutedClass(on)}
+                          >
+                            {label}
+                          </button>
+                        );
+                      })}
+                    </>
+                  ) : null}
+
+                  <span className="w-full text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--text-subtle)] sm:ml-1 sm:w-auto">
+                    Регион
+                  </span>
+                  {(
+                    [
+                      { id: "all" as const, label: "Все регионы" },
+                      { id: "lo" as const, label: "Северо-Запад и ЛО" },
+                      { id: "mo" as const, label: "Москва и область" },
+                    ] as const
+                  ).map(({ id, label }) => {
+                    const on = region === id;
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => setRegion(id)}
+                        className={chipMutedClass(on)}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    type="button"
+                    onClick={() => showMapView()}
+                    className="ml-auto inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-2 text-[13px] font-semibold text-[var(--text)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] dark:bg-[var(--card-bg)] sm:text-sm"
+                  >
+                    <MapPinned size={17} strokeWidth={2} className="shrink-0 text-[var(--accent)]" aria-hidden />
+                    Показать на карте
+                    <span className="text-[11px] font-normal text-[var(--text-muted)]">({mappedCount})</span>
+                  </button>
+                </div>
+
+                {objects.length === 0 ? (
+                  <p className="py-16 text-center text-sm text-[var(--text-muted)]">Объекты портфолио пока не добавлены.</p>
+                ) : filtered.length === 0 ? (
+                  <p className="py-16 text-center text-sm text-[var(--text-muted)]">Нет объектов с выбранными фильтрами.</p>
+                ) : (
+                  <ul className="grid list-none grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+                    {filtered.map((object) => {
+                      const cover = getBuiltObjectCover(object);
+                      return (
+                        <li key={object.id}>
+                          <Link href={`/portfolio/${object.slug}`} className="group block">
+                            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-[var(--stone)] ring-1 ring-[var(--border)] transition-shadow duration-300 group-hover:ring-[var(--accent)]/40">
+                              {cover ? (
+                                <CmsImage
+                                  src={cover.url}
+                                  alt={cover.alt || object.title}
+                                  fill
+                                  className="object-cover transition-[filter,transform] duration-700 ease-out [filter:grayscale(1)_brightness(0.88)_contrast(1.05)] group-hover:scale-[1.03] group-hover:[filter:grayscale(0)_brightness(1)_contrast(1)]"
+                                  sizes="(max-width: 768px) 50vw, 360px"
+                                />
+                              ) : (
+                                <div className="flex h-full items-center justify-center text-xs text-[var(--text-muted)]">Нет фото</div>
+                              )}
+                            </div>
+                            <div className="mt-3 space-y-1 px-0.5">
+                              <h2 className="font-heading text-[13px] font-bold uppercase leading-snug tracking-[0.04em] text-[var(--text)] sm:text-sm md:text-[15px]">
+                                {object.title}
+                              </h2>
+                              <p className="text-[11px] font-normal leading-relaxed text-[var(--text-muted)] sm:text-xs md:text-[13px]">
+                                {builtObjectMaterialLabel(object.material)}
+                              </p>
+                            </div>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </>
             )}
           </div>
         </div>
