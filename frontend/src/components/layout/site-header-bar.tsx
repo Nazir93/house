@@ -51,7 +51,7 @@ export function SiteHeaderBar() {
     : "color-mix(in srgb, var(--header-bar-bg) 44%, transparent)";
 
   const orderedNav = useMemo(() => {
-    const order = ["Проекты", "Наши проекты", "Услуги", "О компании"];
+    const order = ["Проекты", "Портфолио", "Услуги", "О компании"];
     return order
       .map((label) => NAV_SECTIONS.find((s) => s.label === label))
       .filter((s): s is NavSection => Boolean(s));
@@ -192,24 +192,24 @@ export function SiteHeaderBar() {
             ))}
           </nav>
 
-          <div className="flex min-w-0 flex-wrap items-center justify-end gap-1.5 xl:gap-2">
+          <div className="flex min-w-0 flex-nowrap items-center justify-end gap-1 xl:gap-1.5">
             {(contact.phone.trim() && contact.phoneRaw.trim()) ||
             telegramHref ||
             maxHref ||
             YANDEX_REVIEWS_URL.trim() ? (
-              <div className="mr-2 flex min-w-0 flex-row flex-wrap items-center justify-end gap-2 border-r border-[var(--header-bar-border)] pr-2 xl:mr-3 xl:gap-3 xl:pr-4">
+              <div className="mr-1 flex min-w-0 shrink flex-nowrap items-center justify-end gap-1.5 border-r border-[var(--header-bar-border)] pr-1.5 xl:mr-2 xl:gap-2 xl:pr-3">
                 {contact.phone.trim() && contact.phoneRaw.trim() ? (
-                  <div className="flex min-w-0 flex-col items-end gap-0">
+                  <div className="flex min-w-0 shrink items-center gap-1.5">
                     <a
                       href={`tel:${contact.phoneRaw}`}
                       title="Городской телефон"
-                      className="text-[10px] font-semibold tabular-nums leading-tight tracking-tight transition hover:opacity-90 xl:text-[11px]"
+                      className="shrink-0 text-[10px] font-semibold tabular-nums leading-none tracking-tight transition hover:opacity-90 xl:text-[11px]"
                       style={{ color: "var(--header-bar-text)" }}
                     >
                       {contact.phone}
                     </a>
                     <span
-                      className="hidden max-w-[12rem] truncate text-[8px] font-medium uppercase leading-none tracking-wide xl:block"
+                      className="min-w-0 max-w-[7.5rem] truncate text-[7px] font-medium uppercase leading-none tracking-wide xl:max-w-[9.5rem] xl:text-[8px]"
                       style={{ color: "var(--header-bar-muted)" }}
                     >
                       {HEADER_PHONE_HINT}

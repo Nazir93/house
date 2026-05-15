@@ -355,7 +355,7 @@ export function NavDropdownPanel({
   let body: ReactNode;
   if (section.label === "Проекты") {
     body = <ProjectsDropdown section={section} onClose={onClose} />;
-  } else if (section.label === "Наши проекты") {
+  } else if (section.label === "Портфолио") {
     body = <PortfolioDropdown section={section} onClose={onClose} />;
   } else if (section.label === "Услуги") {
     body = <ServicesDropdown section={section} onClose={onClose} openModal={openModal} />;

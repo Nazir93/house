@@ -23,7 +23,7 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    label: "Наши проекты",
+    label: "Портфолио",
     items: [
       { href: "/portfolio", label: "Реализованные объекты" },
       { href: "/portfolio?view=map#portfolio-map", label: "Карта объектов" },
