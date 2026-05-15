@@ -21,6 +21,18 @@ function pickFirstTier2(tier1: CaseStudyTier1Chip | null): CaseStudyChipNode | n
   return tier1.tier2[0] ?? null;
 }
 
+/** `sizes` для `next/image`: совпадает с сеткой, иначе браузер заказывает слишком широкий srcset и тянет лишние мегабайты. */
+function caseStudyGallerySizes(mode: CaseStudyViewMode): string {
+  switch (mode) {
+    case "list":
+      return "(max-width: 1240px) 100vw, 1160px";
+    case "grid-sm":
+      return "50vw";
+    case "grid-lg":
+      return "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 34vw";
+  }
+}
+
 const asideSurfaceStyle = {
   backgroundColor: "color-mix(in srgb, var(--bg-secondary) 72%, transparent)",
   backdropFilter: "blur(12px)",
@@ -445,7 +457,10 @@ function CaseStudyGallery({
               alt={`${altBase} — ${i + 1}`}
               fill
               className="object-cover"
-              sizes={mode === "list" ? "100vw" : "(max-width: 640px) 100vw, 50vw"}
+              sizes={caseStudyGallerySizes(mode)}
+              quality={78}
+              priority={i === 0}
+              fetchPriority={i > 0 && i < 4 ? "high" : "auto"}
             />
             {onImageClick ? (
               <button

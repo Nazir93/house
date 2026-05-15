@@ -167,9 +167,12 @@ function ImageLightboxBody({
             className={`object-contain pointer-events-auto transition-opacity duration-300 ${
               mediaReady ? "opacity-100" : "opacity-0"
             }`}
-            sizes="100vw"
+            sizes="96vw"
+            quality={85}
             priority
-            unoptimized={slide.url.startsWith("/uploads/")}
+            unoptimized={
+              slide.url.trim().startsWith("data:") || /\.(gif|svg)($|\?)/i.test(slide.url)
+            }
             onLoadingComplete={() => setMediaReady(true)}
             onLoad={() => setMediaReady(true)}
           />
