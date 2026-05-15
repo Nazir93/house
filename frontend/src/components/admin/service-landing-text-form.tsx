@@ -1,6 +1,7 @@
 "use client";
 
 import type { ServiceLandingDocument, ServiceLandingSection } from "@/lib/service-landing-schema";
+import { AdminSelect } from "@/components/admin/admin-select";
 
 const ADV_ICONS = ["wrench", "file-text", "zap", "shield", "users", "smartphone", "sun"] as const;
 
@@ -220,21 +221,20 @@ export function ServiceLandingTextForm({ document, onChange }: Props) {
                     <div key={j} className="rounded-lg border border-white/[0.06] p-3 space-y-2 bg-black/20">
                       <div className="flex gap-2 flex-wrap items-center">
                         <label className="text-[10px] text-white/35">Иконка</label>
-                        <select
-                          className={`${inputClass} w-auto max-w-[200px]`}
+                        <AdminSelect
+                          className="max-w-[200px]"
+                          triggerClassName={`${inputClass} py-2`}
                           value={item.icon}
-                          onChange={(e) => {
+                          onValueChange={(ic) => {
                             const items = [...section.items];
-                            items[j] = { ...item, icon: e.target.value };
+                            items[j] = { ...item, icon: ic };
                             patch({ ...section, items });
                           }}
-                        >
-                          {Array.from(new Set([item.icon, ...ADV_ICONS])).map((ic) => (
-                            <option key={ic} value={ic} className="bg-[#111]">
-                              {ic}
-                            </option>
-                          ))}
-                        </select>
+                          options={Array.from(new Set([item.icon, ...ADV_ICONS])).map((ic) => ({
+                            value: ic,
+                            label: ic,
+                          }))}
+                        />
                       </div>
                       <input
                         placeholder="Заголовок карточки"

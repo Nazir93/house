@@ -8,7 +8,7 @@ import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
 import { AdminVideoListUpload } from "@/components/admin/admin-video-list-upload";
 import { RichEditor } from "@/components/admin/rich-editor";
 import { uploadAdminMedia } from "@/lib/admin-upload";
-import { AdminNativeSelect, AdminSelectOption } from "@/components/admin/admin-native-select";
+import { AdminSelect } from "@/components/admin/admin-select";
 import { CmsImage } from "@/components/ui/cms-image";
 
 const CATEGORIES = [
@@ -160,13 +160,11 @@ export default function AdminEditPostPage() {
 
         <div>
           <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Категория</label>
-          <AdminNativeSelect value={category} onChange={(e) => setCategory(e.target.value)}>
-            {CATEGORIES.map((c) => (
-              <AdminSelectOption key={c} value={c}>
-                {c}
-              </AdminSelectOption>
-            ))}
-          </AdminNativeSelect>
+          <AdminSelect
+            value={category}
+            onValueChange={setCategory}
+            options={CATEGORIES.map((c) => ({ value: c, label: c }))}
+          />
         </div>
 
         <AdminMediaUpload

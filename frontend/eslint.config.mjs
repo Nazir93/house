@@ -5,6 +5,8 @@ export default defineConfig([
   ...nextCoreWebVitals,
   globalIgnores([
     "vitest.config.ts",
+    "playwright.config.ts",
+    "e2e/**",
     "**/*.test.ts",
     "scripts/**",
     "ecosystem.config.cjs",

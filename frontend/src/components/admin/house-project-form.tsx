@@ -5,10 +5,16 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react";
 import { AdminFormSection } from "@/components/admin/admin-form-section";
+import { AdminSelect } from "@/components/admin/admin-select";
 import { RichEditor } from "@/components/admin/rich-editor";
 import { uploadAdminMedia } from "@/lib/admin-upload";
 import { CmsImage } from "@/components/ui/cms-image";
 import { AdminJsonEditor } from "@/components/admin/admin-json-editor";
+
+const MORTGAGE_MODE_OPTIONS = [
+  { value: "CALCULATOR", label: "Калькулятор на карточке + заявка" },
+  { value: "LEAD", label: "Заявка и ссылка на страницу ипотеки" },
+] as const;
 
 type PlanInput = { url: string; label: string; floor: string };
 
@@ -267,14 +273,13 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
           </div>
           <label className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-medium text-white/40 shrink-0">Режим блока ипотеки (если включён)</span>
-            <select
+            <AdminSelect
+              className="min-w-[min(100%,22rem)] flex-1"
               value={form.mortgageMode}
-              onChange={(e) => set("mortgageMode", e.target.value as HouseProjectFormState["mortgageMode"])}
-              className="rounded-xl bg-white/[0.05] border border-white/[0.08] px-3 py-2 text-sm text-white"
-            >
-              <option value="CALCULATOR">Калькулятор на карточке + заявка</option>
-              <option value="LEAD">Заявка и ссылка на страницу ипотеки</option>
-            </select>
+              onValueChange={(v) => set("mortgageMode", v as HouseProjectFormState["mortgageMode"])}
+              options={[...MORTGAGE_MODE_OPTIONS]}
+              triggerClassName="rounded-xl px-3 py-2"
+            />
           </label>
         </div>
       </AdminFormSection>

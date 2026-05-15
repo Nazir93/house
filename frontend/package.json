@@ -16,7 +16,11 @@
     "check": "npm run lint && npm run typecheck && npm run test",
     "validate": "npm run check",
     "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:install": "playwright install chromium",
     "test:watch": "vitest",
+    "check:with-e2e": "npm run check && npm run test:e2e",
     "db:generate": "prisma generate",
     "db:push": "dotenv -e .env.local -- prisma db push",
     "db:push:server": "prisma db push --schema=prisma/schema.prisma",
@@ -61,6 +65,7 @@
     "zod": "^3.23.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@types/leaflet": "^1.9.14",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",

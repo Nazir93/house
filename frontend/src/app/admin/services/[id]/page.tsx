@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Save, Trash2 } from "lucide-react";
 import type { ServiceType } from "@prisma/client";
 import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
+import { AdminSelect } from "@/components/admin/admin-select";
 import { getDefaultServiceLandingDocument } from "@/lib/service-landing-defaults";
 import { parseServiceLandingDocument, type ServiceLandingDocument } from "@/lib/service-landing-schema";
 import { mergeServiceTitleIntoLandingJson } from "@/lib/merge-service-title-into-landing";
@@ -184,12 +185,7 @@ export default function AdminEditServicePage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Тип</label>
-            <select value={serviceType} onChange={(e) => setServiceType(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white focus:outline-none focus:border-[#0F3D2E]/50 transition-colors">
-              {SERVICE_TYPES.map((t) => (
-                <option key={t.value} value={t.value} className="bg-[#111111]">{t.label}</option>
-              ))}
-            </select>
+            <AdminSelect value={serviceType} onValueChange={setServiceType} options={SERVICE_TYPES} />
           </div>
           <div>
             <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Порядок</label>

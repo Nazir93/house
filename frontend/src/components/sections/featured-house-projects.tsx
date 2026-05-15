@@ -184,7 +184,7 @@ export function FeaturedHouseProjectsSection({ projects }: { projects: HouseProj
                           src={cover}
                           alt={p.title}
                           fill
-                          quality={90}
+                          quality={78}
                           className="object-cover transition duration-500 hover:scale-[1.02]"
                           sizes="(max-width: 768px) 100vw, 50vw"
                         />

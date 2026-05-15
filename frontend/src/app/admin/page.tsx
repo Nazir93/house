@@ -7,7 +7,6 @@ import {
   HelpCircle,
   Star,
   ContactRound,
-  MapPinned,
   UserRound,
   Users,
   Briefcase,
@@ -25,7 +24,6 @@ type ContentStats = {
   newLeads: number;
   posts: number;
   houseProjects: number;
-  portfolioProjects: number;
   faqs: number;
   reviews: number;
   teamMembers: number;
@@ -43,7 +41,6 @@ async function getStats(): Promise<ContentStats> {
       newLeads,
       posts,
       houseProjects,
-      portfolioProjects,
       faqs,
       reviews,
       teamMembers,
@@ -56,7 +53,6 @@ async function getStats(): Promise<ContentStats> {
       prisma.lead.count({ where: { status: "NEW" } }),
       prisma.post.count(),
       prisma.houseProject.count(),
-      prisma.project.count(),
       prisma.faq.count(),
       prisma.review.count(),
       prisma.teamMember.count(),
@@ -70,7 +66,6 @@ async function getStats(): Promise<ContentStats> {
       newLeads,
       posts,
       houseProjects,
-      portfolioProjects,
       faqs,
       reviews,
       teamMembers,
@@ -86,7 +81,6 @@ async function getStats(): Promise<ContentStats> {
       newLeads: 0,
       posts: 0,
       houseProjects: 0,
-      portfolioProjects: 0,
       faqs: 0,
       reviews: 0,
       teamMembers: 0,
@@ -264,9 +258,9 @@ export default async function AdminDashboard() {
         <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wider">Контент сайта</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <CompactStatCard
-            href="/admin/projects"
-            label="Портфолио (кейсы)"
-            value={stats.portfolioProjects}
+            href="/admin/built-objects"
+            label="Портфолио"
+            value={stats.builtObjects}
             icon={Images}
             accent="text-cyan-400"
             bg="bg-cyan-500/10"
@@ -301,14 +295,6 @@ export default async function AdminDashboard() {
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wider">Каталог и клиенты</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-          <CompactStatCard
-            href="/admin/built-objects"
-            label="Построенные объекты"
-            value={stats.builtObjects}
-            icon={MapPinned}
-            accent="text-orange-400"
-            bg="bg-orange-500/10"
-          />
           <CompactStatCard
             href="/admin/client-projects"
             label="Личные кабинеты"

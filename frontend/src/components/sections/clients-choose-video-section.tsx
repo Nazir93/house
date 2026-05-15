@@ -7,7 +7,7 @@ import { ArrowUpRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-/** Высота скролл-трека только от lg (кинозал); на мобильных секция по высоте контента. */
+/** Высота скролл-трека от md (кинозал); ниже md — секция по высоте контента, без закрепа. */
 const SCROLL_VH_PER_ITEM = 100;
 const SERVICES_VIDEO_SRC = "/videos/14654251600401.mp4";
 
@@ -48,8 +48,8 @@ const SERVICES = [
 
 function VideoPanel({ videoRef }: { videoRef: Ref<HTMLVideoElement> }) {
   return (
-    <div className="relative w-full overflow-hidden rounded-[22px] shadow-[0_20px_56px_rgba(0,0,0,0.08)] lg:rounded-[30px]">
-      <div className="relative aspect-video w-full overflow-hidden rounded-[inherit] lg:aspect-[4/3]">
+    <div className="relative w-full overflow-hidden rounded-[22px] shadow-[0_20px_56px_rgba(0,0,0,0.08)] md:rounded-[30px]">
+      <div className="relative aspect-video w-full overflow-hidden rounded-[inherit] md:aspect-[4/3]">
         <video
           ref={videoRef}
           src={SERVICES_VIDEO_SRC}
@@ -154,7 +154,7 @@ export function ClientsChooseVideoSection() {
     let active = false;
     const mq =
       typeof window !== "undefined" && typeof window.matchMedia === "function"
-        ? window.matchMedia("(min-width: 1024px)")
+        ? window.matchMedia("(min-width: 768px)")
         : null;
 
     const tick = () => {
@@ -215,7 +215,7 @@ export function ClientsChooseVideoSection() {
       ref={sectionRef}
       className={cn(
         "relative touch-pan-y scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)]",
-        "max-lg:h-auto lg:h-[var(--clients-choose-track-height)]"
+        "max-md:h-auto md:h-[var(--clients-choose-track-height)]"
       )}
       style={
         {
@@ -226,18 +226,17 @@ export function ClientsChooseVideoSection() {
       aria-labelledby="clients-choose-video-heading"
     >
       {/*
-        До lg: высота по контенту (без 500vh), иначе огромная пустота и ощущение «скролл не едет».
-        Без sticky и без overflow-y-auto — только скролл документа.
-        От lg: sticky-кинозал и длинный скролл-трек для синхра видео.
+        До md: высота по контенту (без длинного трека), без sticky — только скролл документа.
+        От md: sticky-кинозал и длинный скролл-трек для синхра видео/списка услуг (планшет и выше).
       */}
       <div
         className={cn(
-          "z-0 max-lg:relative max-lg:top-auto max-lg:h-auto max-lg:overflow-visible",
-          "lg:sticky lg:top-0 lg:h-[100dvh] lg:overflow-hidden",
+          "z-0 max-md:relative max-md:top-auto max-md:h-auto max-md:overflow-visible",
+          "md:sticky md:top-0 md:h-[100dvh] md:overflow-hidden",
         )}
       >
-        <div className="mx-auto flex w-full max-w-[1380px] flex-col lg:h-full lg:min-h-full lg:flex-row lg:items-center lg:justify-between lg:gap-10 lg:px-12">
-          <div className="order-2 flex min-w-0 flex-1 flex-col justify-start px-4 pb-10 pt-1 max-md:mt-12 sm:px-6 lg:order-1 lg:max-w-[560px] lg:justify-center lg:px-0 lg:pb-0 lg:pt-0">
+        <div className="mx-auto flex w-full max-w-[1380px] flex-col md:h-full md:min-h-full md:flex-row md:items-center md:justify-between md:gap-8 md:px-8 lg:gap-10 lg:px-12">
+          <div className="order-2 flex min-w-0 flex-1 flex-col justify-start px-4 pb-10 pt-1 max-md:mt-12 sm:px-6 md:order-1 md:max-w-[560px] md:justify-center md:px-0 md:pb-0 md:pt-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)] md:text-xs">
               Что мы делаем
             </p>
@@ -311,8 +310,8 @@ export function ClientsChooseVideoSection() {
             </div>
           </div>
 
-          <div className="order-1 w-full shrink-0 px-4 pt-4 sm:px-6 lg:order-2 lg:flex-none lg:w-[46%] lg:px-0 lg:pt-0">
-            <div className="mx-auto w-full max-w-[640px] lg:max-w-[560px]">
+          <div className="order-1 w-full shrink-0 px-4 pt-4 sm:px-6 md:order-2 md:flex-none md:w-[46%] md:px-0 md:pt-0">
+            <div className="mx-auto w-full max-w-[640px] md:max-w-[560px]">
               <VideoPanel videoRef={videoRef} />
               {/* До md прогресс уже под заголовком «Наши услуги»; под видео — с md, чтобы не было двух полос */}
               <div className="mt-4 hidden items-center gap-2 md:flex" aria-hidden>

@@ -127,7 +127,7 @@ export function BannerSection() {
           fetchPriority={theme === "dark" ? "high" : "low"}
           loading={theme === "dark" ? "eager" : "lazy"}
           sizes="100vw"
-          quality={82}
+          quality={75}
           className={cn(
             "object-cover object-center transition-opacity duration-700 ease-out",
             theme === "dark" ? "opacity-100" : "opacity-0",
@@ -141,7 +141,7 @@ export function BannerSection() {
           fetchPriority={theme === "light" ? "high" : "low"}
           loading={theme === "light" ? "eager" : "lazy"}
           sizes="100vw"
-          quality={82}
+          quality={75}
           className={cn(
             "object-cover object-center transition-opacity duration-700 ease-out",
             theme === "light" ? "opacity-100" : "opacity-0",
@@ -310,7 +310,7 @@ export function BannerSection() {
                       src={slide.image}
                       alt={slide.label}
                       fill
-                      quality={85}
+                      quality={75}
                       sizes="(max-width: 1023px) 96vw, 380px"
                       priority={activeSlide === 0}
                       fetchPriority={activeSlide === 0 ? "high" : "low"}

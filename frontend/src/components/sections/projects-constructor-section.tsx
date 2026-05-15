@@ -198,7 +198,7 @@ export function ProjectsConstructorSection() {
                   src={card.image}
                   alt={card.title}
                   fill
-                  quality={96}
+                  quality={78}
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
                   className="object-cover object-center transition duration-700 ease-out hover:scale-[1.03]"
                   priority={i === 0}

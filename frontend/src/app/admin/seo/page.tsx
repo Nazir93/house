@@ -107,7 +107,7 @@ function MetaTab() {
   const [drafts, setDrafts] = useState<Record<string, Partial<PageMetaItem>>>({});
 
   useEffect(() => {
-    fetch("/api/admin/projects")
+    fetch("/api/admin/built-objects")
       .then(async (r) => {
         const data = await r.json();
         if (r.ok && Array.isArray(data)) {
@@ -232,10 +232,10 @@ function MetaTab() {
         Задайте уникальные мета-теги для каждой страницы. Незаполненные поля используют значения по умолчанию из кода.
       </p>
       <p className="text-xs text-white/20 mb-4">
-        «Новости» и «Портфолио»: тексты и обложки в соответствующих разделах. Ниже — блоки по URL для{" "}
+        «Новости» и «Портфолио» (построенные дома): тексты и обложки в соответствующих разделах. Ниже — блоки по URL для{" "}
         <code className="text-white/40">/blog/slug</code> и{" "}
         <code className="text-white/40">/portfolio/slug</code>
-        : сниппет и H1 по умолчанию из статьи/проекта; полное переопределение title/description/H1/OG — здесь (PageMeta).
+        : сниппет и H1 по умолчанию из статьи/объекта; полное переопределение title/description/H1/OG — здесь (PageMeta).
       </p>
 
       {[
@@ -246,7 +246,7 @@ function MetaTab() {
         })),
         ...portfolioCases.map((c) => ({
           path: `/portfolio/${c.slug}`,
-          label: `Кейс: ${c.title}`,
+          label: `Портфолио: ${c.title}`,
         })),
       ].map(({ path, label }) => (
         <div

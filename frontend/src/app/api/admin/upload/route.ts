@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
       try {
         await sharp(buffer)
           .resize({ width: 1920, height: 1920, fit: "inside", withoutEnlargement: true })
-          .webp({ quality: 82 })
+          .webp({ quality: 78 })
           .toFile(webpPath);
         savedPath = `/uploads/${webpName}`;
       } catch (sharpError) {

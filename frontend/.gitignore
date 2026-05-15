@@ -7,6 +7,12 @@ out/
 *.tsbuildinfo
 next-env.d.ts
 
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
 # Загруженные из админки файлы (хранятся на сервере)
 public/uploads/*
 !public/uploads/.gitkeep

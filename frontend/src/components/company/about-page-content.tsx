@@ -1,9 +1,19 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { SITE_NAME, CITY, SERVICE_REGIONS } from "@/lib/constants";
+import { CmsImage } from "@/components/ui/cms-image";
 import { CompanyPageHeader } from "./company-page-header";
 import { LeadershipFeedbackForm } from "./leadership-feedback-form";
+
+/** Локальные иллюстрации (без внешних CDN) — замените на свои снимки в CMS или через /uploads. */
+const DEMO = {
+  h01: "/images/portfolio/demo-house-01.svg",
+  h02: "/images/portfolio/demo-house-02.svg",
+  h03: "/images/portfolio/demo-house-03.svg",
+  h04: "/images/portfolio/demo-house-04.svg",
+  h05: "/images/portfolio/demo-house-05.svg",
+  h06: "/images/portfolio/demo-house-06.svg",
+} as const;
 
 const APPROACH = [
   {
@@ -33,34 +43,34 @@ const VALUES = [
     title: "Клиент = партнёр",
     caption: "Совместный проект",
     text: "Вместе проходим этапы от планировки до сдачи: понятные сроки и доступная команда.",
-    src: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=80",
+    src: DEMO.h01,
     alt: "Обсуждение проекта",
   },
   {
     title: "Внимание к деталям",
     caption: "Интерьер и узлы",
     text: "Продумываем инженерию, тепло и шум: чтобы жить было комфортно с первого дня.",
-    src: "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80",
+    src: DEMO.h02,
     alt: "Современный интерьер",
   },
   {
     title: "Честный диалог",
     caption: "Стройка на площадке",
     text: "Показываем процесс, отвечаем на вопросы и фиксируем договорённости в документах.",
-    src: "https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=800&q=80",
+    src: DEMO.h03,
     alt: "Строительная площадка",
   },
 ] as const;
 
 const GALLERY = [
-  "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&q=80",
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80",
-  "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?w=600&q=80",
-  "https://images.unsplash.com/photo-1600566753190-acf79b681f62?w=600&q=80",
-  "https://images.unsplash.com/photo-1600585154363-67eb9e2e2099?w=600&q=80",
-  "https://images.unsplash.com/photo-1605276374104-dee2a0ed3cd6?w=600&q=80",
-  "https://images.unsplash.com/photo-1600607687644-c7171b42498f?w=600&q=80",
-  "https://images.unsplash.com/photo-1600585154084-4e5fe7c39198?w=600&q=80",
+  DEMO.h01,
+  DEMO.h02,
+  DEMO.h03,
+  DEMO.h04,
+  DEMO.h05,
+  DEMO.h06,
+  DEMO.h01,
+  DEMO.h02,
 ] as const;
 
 export function AboutPageContent() {
@@ -76,8 +86,8 @@ export function AboutPageContent() {
       <section className="py-12 md:py-16" style={{ backgroundColor: "var(--bg-secondary)" }}>
         <div className="container mx-auto max-w-[1200px] px-5">
           <div className="relative aspect-[21/9] min-h-[220px] overflow-hidden rounded-[1.25rem] bg-[var(--card-bg)] md:aspect-[24/9]">
-            <Image
-              src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1600&q=80"
+            <CmsImage
+              src={DEMO.h01}
               alt="Команда компании"
               fill
               className="object-cover"
@@ -132,12 +142,13 @@ export function AboutPageContent() {
               </div>
             </div>
             <div className="relative aspect-[4/5] overflow-hidden rounded-[1.25rem] bg-[var(--card-bg)] lg:aspect-[3/4]">
-              <Image
-                src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=900&q=80"
+              <CmsImage
+                src={DEMO.h04}
                 alt="Команда на объекте"
                 fill
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 440px"
+                decoding="async"
               />
             </div>
           </div>
@@ -157,7 +168,14 @@ export function AboutPageContent() {
             {VALUES.map((v) => (
               <article key={v.title} className="flex flex-col overflow-hidden rounded-[1.15rem] border" style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)" }}>
                 <div className="relative aspect-[4/3] w-full overflow-hidden">
-                  <Image src={v.src} alt={v.alt} fill className="object-cover" sizes="(max-width: 768px) 100vw, 33vw" />
+                  <CmsImage
+                    src={v.src}
+                    alt={v.alt}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    decoding="async"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-transparent to-transparent" />
                   <p className="absolute bottom-3 left-4 right-4 font-heading text-lg font-bold text-white drop-shadow-sm">{v.title}</p>
                 </div>
@@ -206,8 +224,15 @@ export function AboutPageContent() {
           </div>
           <div className="mt-10 grid grid-cols-2 gap-px bg-[var(--border)] md:grid-cols-4">
             {GALLERY.map((src, i) => (
-              <div key={src} className="relative aspect-square bg-[var(--card-bg)]">
-                <Image src={src} alt={`Объект ${i + 1}`} fill className="object-cover" sizes="(max-width: 768px) 50vw, 25vw" />
+              <div key={`${i}-${src}`} className="relative aspect-square bg-[var(--card-bg)]">
+                <CmsImage
+                  src={src}
+                  alt={`Объект ${i + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 25vw"
+                  decoding="async"
+                />
               </div>
             ))}
           </div>
@@ -225,21 +250,23 @@ export function AboutPageContent() {
           </p>
           <div className="mt-10 grid gap-4 md:grid-cols-2 md:gap-6">
             <div className="relative aspect-[16/10] overflow-hidden rounded-[1.15rem] bg-[var(--card-bg)]">
-              <Image
-                src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=900&q=80"
+              <CmsImage
+                src={DEMO.h05}
                 alt="Награды и команда"
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
+                decoding="async"
               />
             </div>
             <div className="relative aspect-[16/10] overflow-hidden rounded-[1.15rem] bg-[var(--card-bg)]">
-              <Image
-                src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=900&q=80"
+              <CmsImage
+                src={DEMO.h06}
                 alt="Команда на объекте"
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 50vw"
+                decoding="async"
               />
             </div>
           </div>

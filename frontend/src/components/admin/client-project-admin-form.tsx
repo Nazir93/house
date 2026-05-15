@@ -5,6 +5,28 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Plus, Trash2, Upload } from "lucide-react";
 import { CmsImage } from "@/components/ui/cms-image";
+import { AdminSelect } from "@/components/admin/admin-select";
+
+const STAGE_STATUS_OPTIONS = [
+  { value: "NOT_STARTED", label: "Не начат" },
+  { value: "IN_PROGRESS", label: "В работе" },
+  { value: "DONE", label: "Завершён" },
+];
+
+const PAYMENT_STATUS_OPTIONS = [
+  { value: "NOT_ISSUED", label: "Не выставлен" },
+  { value: "EXPECTED", label: "Ожидается" },
+  { value: "PAID", label: "Оплачен" },
+];
+
+const TICKET_STATUS_OPTIONS = [
+  { value: "OPEN", label: "Открыт" },
+  { value: "IN_PROGRESS", label: "В работе" },
+  { value: "CLOSED", label: "Закрыт" },
+];
+
+const ADMIN_COMPACT_SELECT_TRIGGER =
+  "rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 py-2 text-sm text-white focus:outline-none focus:border-[#0F3D2E]";
 
 function toDateInput(iso: string | null | undefined): string {
   if (!iso) return "";
@@ -423,19 +445,17 @@ export function ClientProjectAdminForm({
                 next[i] = { ...row, iconKey: e.target.value };
                 setStages(next);
               }} placeholder="iconKey" />
-              <select
-                className={`${inp} w-36`}
+              <AdminSelect
+                className="w-36 shrink-0"
+                triggerClassName={ADMIN_COMPACT_SELECT_TRIGGER}
                 value={row.status}
-                onChange={(e) => {
+                onValueChange={(v) => {
                   const next = [...stages];
-                  next[i] = { ...row, status: e.target.value };
+                  next[i] = { ...row, status: v };
                   setStages(next);
                 }}
-              >
-                <option value="NOT_STARTED">Не начат</option>
-                <option value="IN_PROGRESS">В работе</option>
-                <option value="DONE">Завершён</option>
-              </select>
+                options={STAGE_STATUS_OPTIONS}
+              />
               <button type="button" className="p-2 text-red-400/80" onClick={() => setStages((s) => s.filter((_, j) => j !== i))}>
                 <Trash2 size={16} />
               </button>
@@ -479,19 +499,17 @@ export function ClientProjectAdminForm({
               next[i] = { ...row, dueDate: e.target.value };
               setPayments(next);
             }} />
-            <select
-              className={`${inp} w-36`}
+            <AdminSelect
+              className="w-36 shrink-0"
+              triggerClassName={ADMIN_COMPACT_SELECT_TRIGGER}
               value={row.status}
-              onChange={(e) => {
+              onValueChange={(v) => {
                 const next = [...payments];
-                next[i] = { ...row, status: e.target.value };
+                next[i] = { ...row, status: v };
                 setPayments(next);
               }}
-            >
-              <option value="NOT_ISSUED">Не выставлен</option>
-              <option value="EXPECTED">Ожидается</option>
-              <option value="PAID">Оплачен</option>
-            </select>
+              options={PAYMENT_STATUS_OPTIONS}
+            />
             <button type="button" className="p-2 text-red-400/80" onClick={() => setPayments((p) => p.filter((_, j) => j !== i))}>
               <Trash2 size={16} />
             </button>
@@ -575,15 +593,13 @@ export function ClientProjectAdminForm({
               ))}
             </ul>
             <div className="flex flex-wrap gap-2 items-end">
-              <select
-                className={inp + " w-40"}
+              <AdminSelect
+                className="w-40 shrink-0"
+                triggerClassName={ADMIN_COMPACT_SELECT_TRIGGER}
                 value={ticketStatus[t.id] ?? t.status}
-                onChange={(e) => setTicketStatus((s) => ({ ...s, [t.id]: e.target.value }))}
-              >
-                <option value="OPEN">Открыт</option>
-                <option value="IN_PROGRESS">В работе</option>
-                <option value="CLOSED">Закрыт</option>
-              </select>
+                onValueChange={(v) => setTicketStatus((s) => ({ ...s, [t.id]: v }))}
+                options={TICKET_STATUS_OPTIONS}
+              />
               <input
                 className={inp + " flex-1 min-w-[200px]"}
                 value={ticketReplies[t.id] ?? ""}

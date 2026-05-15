@@ -89,7 +89,7 @@ export function ConstructionServicesStagesSection({ sectionClassName }: { sectio
             alt={activeStage.title}
             fill
             sizes="(max-width: 1024px) 100vw, 380px"
-            quality={90}
+            quality={78}
             className="object-cover object-center transition-opacity duration-500 ease-out"
             priority={false}
           />

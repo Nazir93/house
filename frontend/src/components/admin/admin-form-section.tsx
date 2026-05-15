@@ -12,7 +12,7 @@ type AdminFormSectionProps = {
 /** Всегда раскрытый блок с заголовком (основные поля формы). */
 export function AdminFormSection({ title, subtitle, children }: AdminFormSectionProps) {
   return (
-    <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] overflow-hidden">
+    <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] overflow-visible">
       <div className="px-5 pt-5 pb-2">
         <h2 className="text-sm font-semibold text-white/90 tracking-tight">{title}</h2>
         {subtitle ? <p className="text-[11px] text-white/35 mt-1.5 leading-relaxed">{subtitle}</p> : null}

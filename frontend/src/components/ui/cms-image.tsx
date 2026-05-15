@@ -7,7 +7,8 @@ export type CmsImageProps = Omit<ImageProps, "src" | "alt"> & {
 
 function shouldUnoptimize(src: string): boolean {
   const t = src.trim();
-  return t.startsWith("data:") || /\.gif($|\?)/i.test(t);
+  /** SVG не гоняем через `/_next/image` — быстрее и без сюрпризов с вектором. */
+  return t.startsWith("data:") || /\.(gif|svg)($|\?)/i.test(t);
 }
 
 /** Картинки из CMS/загрузок: локальные пути и разрешённые remote; GIF и data URI без оптимизации. */

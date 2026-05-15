@@ -74,8 +74,8 @@ export function AdminMediaUpload({
       {error ? <p className="text-red-400 text-xs mt-1.5">{error}</p> : null}
       <p className="text-[11px] text-white/25 mt-1.5">
         {accept === "image"
-          ? "JPG, PNG, WebP, GIF, SVG, AVIF — по возможности конвертируется в WebP."
-          : "MP4, WebM, MOV, AVI и др. На сервере действует лимит размера (nginx ~25–300 МБ — см. конфиг). Файл без расширения определяется по типу в браузере."}
+          ? "До 30 МБ. JPG, PNG, WebP, GIF, SVG, AVIF — растр по возможности режется до 1920px и сохраняется как WebP (качество 78)."
+          : "До 250 МБ. MP4, WebM, MOV, AVI и др. На прокси может быть свой лимит (часто 25–300 МБ). Файл без расширения определяется по типу в браузере."}
       </p>
       {value && accept === "image" ? (
         <div className="relative mt-2 h-44 w-full max-w-lg">

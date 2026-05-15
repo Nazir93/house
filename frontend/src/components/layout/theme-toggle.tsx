@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useTheme } from "@/lib/theme-context";
 import { cn } from "@/lib/utils";
 
@@ -8,7 +9,8 @@ export function ThemeToggle({
   variant = "ghost",
 }: {
   className?: string;
-  variant?: "ghost" | "outline";
+  /** `header` — как кнопки поиска/кабинета в шапке сайта (круг, бордер, те же переменные). */
+  variant?: "ghost" | "outline" | "header";
 }) {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
@@ -16,23 +18,45 @@ export function ThemeToggle({
   const base =
     variant === "outline"
       ? "border border-[color-mix(in_srgb,var(--text)_14%,transparent)] bg-[color-mix(in_srgb,var(--bg)_88%,var(--text)_12%)] hover:bg-[color-mix(in_srgb,var(--bg)_82%,var(--text)_18%)]"
-      : "bg-[color-mix(in_srgb,var(--text)_6%,transparent)] hover:bg-[color-mix(in_srgb,var(--text)_10%,transparent)]";
+      : variant === "header"
+        ? "rounded-full border text-[var(--header-bar-text)] transition hover:bg-black/[0.04] dark:hover:bg-white/10 h-8 w-8 lg:h-7 lg:w-7 active:scale-[0.98] lg:active:scale-100"
+        : "bg-[color-mix(in_srgb,var(--text)_6%,transparent)] hover:bg-[color-mix(in_srgb,var(--text)_10%,transparent)]";
+
+  const headerBarStyle: CSSProperties | undefined =
+    variant === "header"
+      ? { borderColor: "var(--header-bar-border)", color: "var(--header-bar-text)" }
+      : undefined;
 
   return (
     <button
       type="button"
       onClick={toggleTheme}
+      style={headerBarStyle}
       className={cn(
-        "inline-flex h-10 min-h-[40px] w-10 min-w-[40px] shrink-0 items-center justify-center rounded-xl p-0 text-[var(--text)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/35",
+        variant === "header"
+          ? "inline-flex shrink-0 items-center justify-center p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/35"
+          : "inline-flex h-10 min-h-[40px] w-10 min-w-[40px] shrink-0 items-center justify-center rounded-xl p-0 text-[var(--text)] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/35",
         base,
         className,
       )}
       aria-label={isDark ? "Включить светлую тему" : "Включить тёмную тему"}
       title="Тема оформления"
     >
-      <span className="relative flex h-4 w-4 shrink-0 items-center justify-center" aria-hidden>
+      <span
+        className={cn(
+          "relative flex shrink-0 items-center justify-center",
+          variant === "header" ? "h-3.5 w-3.5 lg:h-3 lg:w-3" : "h-4 w-4",
+        )}
+        aria-hidden
+      >
         {isDark ? (
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+          <svg
+            className={variant === "header" ? "h-3.5 w-3.5 lg:h-3 lg:w-3" : "h-4 w-4"}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={variant === "header" ? 2 : 1.75}
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -40,7 +64,13 @@ export function ThemeToggle({
             />
           </svg>
         ) : (
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
+          <svg
+            className={variant === "header" ? "h-3.5 w-3.5 lg:h-3 lg:w-3" : "h-4 w-4"}
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={variant === "header" ? 2 : 1.75}
+          >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

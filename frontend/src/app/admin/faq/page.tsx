@@ -13,6 +13,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { FULL_SERVICE_TYPE_DROPDOWN_OPTIONS } from "@/lib/service-type-admin-options";
+import { AdminSelect } from "@/components/admin/admin-select";
 
 interface FaqItem {
   id: string;
@@ -134,10 +135,7 @@ export default function AdminFaqPage() {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs text-white/40 mb-1">Привязка к услуге</label>
-              <select value={form.service} onChange={(e) => set("service", e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-white/[0.05] border border-white/[0.08] text-sm text-white focus:outline-none focus:border-[#0F3D2E]/50 transition-colors">
-                {SERVICE_OPTIONS.map((s) => <option key={s.value} value={s.value} className="bg-[#111111]">{s.label}</option>)}
-              </select>
+              <AdminSelect value={form.service} onValueChange={(v) => set("service", v)} options={SERVICE_OPTIONS} />
             </div>
             <div>
               <label className="block text-xs text-white/40 mb-1">Порядок</label>

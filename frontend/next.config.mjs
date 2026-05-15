@@ -8,8 +8,12 @@ const nextConfig = {
     /** Кэш оптимизированных картинок на CDN/edge — повторный визит быстрее (сек.). */
     minimumCacheTTL: 60 * 60 * 24 * 7,
     formats: ["image/avif", "image/webp"],
-    /** Шире диапазон — меньше апскейла крупных PNG на мониторах 2K+ (герой 100vw). */
-    deviceSizes: [640, 750, 828, 1080, 1200, 1440, 1920, 2048, 2560, 3840],
+    /**
+     * Явные quality из кода (баннер, карточки). Без списка Next 16 ругается и может вести себя непредсказуемо.
+     * Меньше «мегабайтных» брейкпоинтов — быстрее первый ответ `/_next/image` и меньше трафик, чем 2.5K–4K.
+     */
+    qualities: [75, 78, 80, 82, 85, 90, 96],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1440, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
       { protocol: "http", hostname: "localhost" },
@@ -29,10 +33,6 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "*.garantmontazh.ru",
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
       },
     ],
   },

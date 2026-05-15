@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
+import { AdminSelect } from "@/components/admin/admin-select";
 
 import { FULL_SERVICE_TYPE_DROPDOWN_OPTIONS } from "@/lib/service-type-admin-options";
 
@@ -83,15 +84,7 @@ export default function AdminNewServicePage() {
 
         <div>
           <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Тип</label>
-          <select
-            value={serviceType}
-            onChange={(e) => setServiceType(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white focus:outline-none focus:border-[#0F3D2E]/50 transition-colors"
-          >
-            {SERVICE_TYPES.map((t) => (
-              <option key={t.value} value={t.value} className="bg-[#111111]">{t.label}</option>
-            ))}
-          </select>
+          <AdminSelect value={serviceType} onValueChange={setServiceType} options={SERVICE_TYPES} />
         </div>
 
         <div>

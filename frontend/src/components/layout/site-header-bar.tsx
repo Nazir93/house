@@ -269,7 +269,7 @@ export function SiteHeaderBar() {
               <Search className="h-3 w-3" strokeWidth={2} aria-hidden />
             </button>
 
-            <ThemeToggle />
+            <ThemeToggle variant="header" />
 
             <Link
               href="/mortgage"
@@ -367,7 +367,7 @@ export function SiteHeaderBar() {
           >
             <Search className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
           </button>
-          <ThemeToggle />
+          <ThemeToggle variant="header" />
           <Link
             href={ACCOUNT_PORTAL_PATH}
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98]"

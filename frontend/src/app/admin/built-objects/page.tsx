@@ -53,8 +53,8 @@ export default function AdminBuiltObjectsPage() {
     <div className="space-y-6 max-w-6xl">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Построенные объекты</h1>
-          <p className="text-sm text-white/40 mt-1">Портфолио, карта, история стройки и видео.</p>
+          <h1 className="text-2xl font-bold tracking-tight">Портфолио</h1>
+          <p className="text-sm text-white/40 mt-1">Построенные дома: карта, карточки на /portfolio и главной.</p>
         </div>
         <Link href="/admin/built-objects/new" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0F3D2E] text-white text-sm font-semibold">
           <Plus size={16} /> Добавить
@@ -70,7 +70,7 @@ export default function AdminBuiltObjectsPage() {
       ) : objects.length === 0 ? (
         <div className="text-center py-16 rounded-2xl border border-white/[0.08] bg-white/[0.03]">
           <MapPinned size={44} className="mx-auto mb-3 text-white/15" />
-          <p className="text-white/45 text-sm">Пока нет построенных объектов.</p>
+          <p className="text-white/45 text-sm">Пока нет объектов в портфолио.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

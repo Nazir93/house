@@ -5,7 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 import { AdminFormSection } from "@/components/admin/admin-form-section";
+import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
 import { RichEditor } from "@/components/admin/rich-editor";
+import { AdminSelect } from "@/components/admin/admin-select";
 
 const MATERIALS = [
   ["GAS_BLOCK", "Газобетон"],
@@ -13,7 +15,9 @@ const MATERIALS = [
   ["CERAMIC_BLOCK", "Керамический блок"],
   ["FRAME", "Каркас"],
   ["OTHER", "Другое"],
-];
+] as const;
+
+const MATERIAL_OPTIONS = MATERIALS.map(([value, label]) => ({ value, label }));
 
 function urls(media: any[] | undefined, type: string) {
   return (media || []).filter((item) => item.type === type).map((item) => item.url).join("\n");
@@ -54,6 +58,15 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  function appendMediaLine(field: "renders" | "plans" | "stages" | "videos", url: string) {
+    const u = url.trim();
+    if (!u) return;
+    setForm((prev) => {
+      const cur = (prev[field] as string).trim();
+      return { ...prev, [field]: cur ? `${cur}\n${u}` : u };
+    });
+  }
+
   async function save() {
     if (!form.title.trim()) return;
     setSaving(true);
@@ -83,8 +96,8 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
           <ArrowLeft size={18} />
         </Link>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold tracking-tight">{form.id ? "Построенный объект" : "Новый построенный объект"}</h1>
-          <p className="text-sm text-white/40 mt-1">Портфолио, карта, история стройки и связь с типовым проектом.</p>
+          <h1 className="text-2xl font-bold tracking-tight">{form.id ? "Объект портфолио" : "Новый объект портфолио"}</h1>
+          <p className="text-sm text-white/40 mt-1">Карта, карточки на сайте, этапы стройки и связь с типовым проектом.</p>
         </div>
         <button onClick={save} disabled={saving || !form.title.trim()} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0F3D2E] text-white text-sm font-semibold disabled:opacity-50">
           <Save size={16} /> {saving ? "Сохранение..." : "Сохранить"}
@@ -99,9 +112,7 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
           <input value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="slug" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <select value={form.material} onChange={(e) => set("material", e.target.value)} className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white">
-            {MATERIALS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-          </select>
+          <AdminSelect value={form.material} onValueChange={(v) => set("material", v)} options={MATERIAL_OPTIONS} />
           <input value={form.area} onChange={(e) => set("area", e.target.value)} placeholder="Площадь" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
           <input value={form.floors} onChange={(e) => set("floors", e.target.value)} placeholder="Этажность" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
           <input value={form.buildTerm} onChange={(e) => set("buildTerm", e.target.value)} placeholder="Срок строительства" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
@@ -124,7 +135,38 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
         </div>
       </AdminFormSection>
 
-      <AdminFormSection title="Медиа и ссылки" subtitle="URL по одному на строку. Можно использовать загруженные через общий upload пути из /uploads.">
+      <AdminFormSection title="Медиа и ссылки" subtitle="Одна строка — один URL. Загрузка добавляет ссылку в конец выбранного списка.">
+        <p className="text-[11px] text-white/45 leading-relaxed rounded-xl bg-white/[0.02] border border-white/[0.06] px-3 py-2.5">
+          <span className="font-semibold text-white/60">Быстрее открывается сайт, если</span> картинки с вашего домена
+          (/uploads или /public): при загрузке растр до 1920px по длинной стороне сохраняется как WebP. Лимит одного файла
+          — 30&nbsp;МБ; видео — до 250&nbsp;МБ (на nginx может быть свой потолок).
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <AdminMediaUpload
+            label="Загрузить фото → рендеры"
+            accept="image"
+            value=""
+            onChange={(url) => appendMediaLine("renders", url)}
+          />
+          <AdminMediaUpload
+            label="Загрузить изображение → планировки"
+            accept="image"
+            value=""
+            onChange={(url) => appendMediaLine("plans", url)}
+          />
+          <AdminMediaUpload
+            label="Загрузить фото → этапы стройки"
+            accept="image"
+            value=""
+            onChange={(url) => appendMediaLine("stages", url)}
+          />
+          <AdminMediaUpload
+            label="Загрузить видео → видео"
+            accept="video"
+            value=""
+            onChange={(url) => appendMediaLine("videos", url)}
+          />
+        </div>
         <textarea value={form.renders} onChange={(e) => set("renders", e.target.value)} rows={4} placeholder="Рендеры / фото объекта" className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
         <textarea value={form.plans} onChange={(e) => set("plans", e.target.value)} rows={3} placeholder="Планировки" className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
         <textarea value={form.stages} onChange={(e) => set("stages", e.target.value)} rows={4} placeholder="Фото этапов строительства" className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
