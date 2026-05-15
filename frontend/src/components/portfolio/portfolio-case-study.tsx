@@ -98,8 +98,8 @@ export function PortfolioCaseStudy({
   const [tier2Id, setTier2Id] = useState<string | null>(() =>
     pickFirstTier2(pickFirstTier1(phases[0] ?? null))?.id ?? null
   );
-  /** Как на референсе: по умолчанию колонка фото (список), не крупная сетка */
-  const [viewMode, setViewMode] = useState<CaseStudyViewMode>("list");
+  /** По умолчанию — сетка (не «Крупно») */
+  const [viewMode, setViewMode] = useState<CaseStudyViewMode>("grid-sm");
   const [descriptionOpen, setDescriptionOpen] = useState(false);
   const [pulseTick, setPulseTick] = useState(0);
   const asideScrollRefs = useRef<(HTMLElement | null)[]>([]);
@@ -167,6 +167,14 @@ export function PortfolioCaseStudy({
   const images = selectedTier2?.images?.filter(Boolean) ?? [];
   const showPhaseDescription =
     phase?.id === "_cms_renders" && Boolean(phaseDescriptionHtml?.trim());
+
+  /** Один «Галерея» + один подпункт с фото — зелёные пилюли не нужны */
+  const hideRedundantGalleryChips = useMemo(() => {
+    if (!phase?.tier1.length) return false;
+    if (phase.tier1.length !== 1) return false;
+    const t1 = phase.tier1[0];
+    return t1.tier2.length === 1;
+  }, [phase]);
 
   const onPhaseClick = useCallback((id: string) => {
     setPhaseId(id);
@@ -249,54 +257,57 @@ export function PortfolioCaseStudy({
 
         {phase && phase.tier1.length > 0 ? (
           <>
-            {/* Крупные «пилюли» подзадач этапа (как Плита / Ростверк на референсе) */}
-            <div className="mt-6 flex flex-wrap gap-2.5">
-              {phase.tier1.map((t) => {
-                const on = t.id === selectedTier1?.id;
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => {
-                      setTier1Id(t.id);
-                      const first2 = t.tier2[0];
-                      setTier2Id(first2?.id ?? null);
-                    }}
-                    className="rounded-full px-6 py-3 text-[14px] font-semibold transition-colors sm:px-7 sm:text-[15px]"
-                    style={{
-                      backgroundColor: on ? "var(--accent)" : "var(--bg-secondary)",
-                      color: on ? "#fff" : "var(--text)",
-                      border: `1px solid ${on ? "var(--accent)" : "var(--border)"}`,
-                      boxShadow: on ? "none" : "inset 0 1px 0 color-mix(in srgb, var(--text) 5%, transparent)",
-                    }}
-                  >
-                    {t.label}
-                  </button>
-                );
-              })}
-            </div>
+            {!hideRedundantGalleryChips ? (
+              <>
+                <div className="mt-6 flex flex-wrap gap-2.5">
+                  {phase.tier1.map((t) => {
+                    const on = t.id === selectedTier1?.id;
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => {
+                          setTier1Id(t.id);
+                          const first2 = t.tier2[0];
+                          setTier2Id(first2?.id ?? null);
+                        }}
+                        className="rounded-full px-6 py-3 text-[14px] font-semibold transition-colors sm:px-7 sm:text-[15px]"
+                        style={{
+                          backgroundColor: on ? "var(--accent)" : "var(--bg-secondary)",
+                          color: on ? "#fff" : "var(--text)",
+                          border: `1px solid ${on ? "var(--accent)" : "var(--border)"}`,
+                          boxShadow: on ? "none" : "inset 0 1px 0 color-mix(in srgb, var(--text) 5%, transparent)",
+                        }}
+                      >
+                        {t.label}
+                      </button>
+                    );
+                  })}
+                </div>
 
-            {selectedTier1 && selectedTier1.tier2.length > 0 ? (
-              <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-                {selectedTier1.tier2.map((t) => {
-                  const on = t.id === selectedTier2?.id;
-                  return (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => setTier2Id(t.id)}
-                      className="rounded-2xl px-3 py-2.5 text-left text-[12px] font-medium leading-snug transition-colors sm:px-3.5 sm:text-[13px]"
-                      style={{
-                        backgroundColor: on ? "var(--accent)" : "var(--bg-secondary)",
-                        color: on ? "#fff" : "var(--text)",
-                        border: `1px solid ${on ? "var(--accent)" : "var(--border)"}`,
-                      }}
-                    >
-                      {t.label}
-                    </button>
-                  );
-                })}
-              </div>
+                {selectedTier1 && selectedTier1.tier2.length > 0 ? (
+                  <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+                    {selectedTier1.tier2.map((t) => {
+                      const on = t.id === selectedTier2?.id;
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => setTier2Id(t.id)}
+                          className="rounded-2xl px-3 py-2.5 text-left text-[12px] font-medium leading-snug transition-colors sm:px-3.5 sm:text-[13px]"
+                          style={{
+                            backgroundColor: on ? "var(--accent)" : "var(--bg-secondary)",
+                            color: on ? "#fff" : "var(--text)",
+                            border: `1px solid ${on ? "var(--accent)" : "var(--border)"}`,
+                          }}
+                        >
+                          {t.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </>
             ) : null}
           </>
         ) : (
@@ -305,26 +316,32 @@ export function PortfolioCaseStudy({
           </p>
         )}
 
-        <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
-          <div className="min-w-0 flex-1">
-            {selectedTier2 ? (
-              <>
-                <p className="font-heading text-base font-semibold text-[var(--text)] sm:text-[17px]">
-                  {selectedTier2.label}
-                </p>
-                {selectedTier2.description ? (
-                  <p className="mt-2 max-w-prose text-[13px] leading-relaxed text-[var(--text-muted)] sm:text-sm">
-                    {selectedTier2.description}
-                  </p>
-                ) : null}
-              </>
-            ) : phase && phase.tier1.length > 0 ? (
-              <p className="text-sm text-[var(--text-muted)]">Выберите подраздел выше.</p>
-            ) : null}
+        {hideRedundantGalleryChips ? (
+          <div className="mt-6 flex justify-end">
+            <ViewModeToggle mode={viewMode} onChange={setViewMode} />
           </div>
+        ) : (
+          <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+            <div className="min-w-0 flex-1">
+              {selectedTier2 ? (
+                <>
+                  <p className="font-heading text-base font-semibold text-[var(--text)] sm:text-[17px]">
+                    {selectedTier2.label}
+                  </p>
+                  {selectedTier2.description ? (
+                    <p className="mt-2 max-w-prose text-[13px] leading-relaxed text-[var(--text-muted)] sm:text-sm">
+                      {selectedTier2.description}
+                    </p>
+                  ) : null}
+                </>
+              ) : phase && phase.tier1.length > 0 ? (
+                <p className="text-sm text-[var(--text-muted)]">Выберите подраздел выше.</p>
+              ) : null}
+            </div>
 
-          <ViewModeToggle mode={viewMode} onChange={setViewMode} />
-        </div>
+            <ViewModeToggle mode={viewMode} onChange={setViewMode} />
+          </div>
+        )}
 
         <CaseStudyGallery
           images={images}
