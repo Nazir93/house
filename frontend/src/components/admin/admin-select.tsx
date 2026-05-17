@@ -34,6 +34,8 @@ export type AdminSelectProps = {
   disabled?: boolean;
   placeholder?: string;
   id?: string;
+  /** Нижняя строка в выпадающем списке (например «+ добавить»). */
+  listFooter?: React.ReactNode;
 };
 
 function getAdminSelectPortalRoot(): HTMLElement | null {
@@ -50,6 +52,7 @@ export function AdminSelect({
   disabled,
   placeholder = "Выберите…",
   id,
+  listFooter,
 }: AdminSelectProps) {
   const [open, setOpen] = useState(false);
   const [panelStyle, setPanelStyle] = useState<{ top: number; left: number; width: number } | null>(null);
@@ -137,6 +140,11 @@ export function AdminSelect({
             </button>
           </li>
         ))}
+        {listFooter ? (
+          <li role="presentation" className="border-t border-white/[0.08]">
+            {listFooter}
+          </li>
+        ) : null}
       </ul>
     ) : null;
 

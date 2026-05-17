@@ -1,0 +1,30 @@
+import { NextRequest, NextResponse } from "next/server";
+import { publishClientProjectToCabinet } from "@/lib/client-project-publish";
+import { requireAdminApiSession } from "@/lib/require-admin-api";
+
+export const dynamic = "force-dynamic";
+
+/** Публикация в ЛК: данные для клиента + уведомления по платежам/этапам. */
+export async function POST(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const gate = await requireAdminApiSession();
+  if (!gate.ok) return gate.response;
+
+  const { id } = await params;
+  try {
+    await publishClientProjectToCabinet(id);
+    return NextResponse.json({ ok: true, publishedAt: new Date().toISOString() });
+  } catch (e) {
+    const msg = (e as Error)?.message;
+    if (msg === "NOT_FOUND") {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    if (msg === "CONTRACT_EXISTS") {
+      return NextResponse.json({ error: "Такой номер договора уже есть" }, { status: 409 });
+    }
+    console.error("[ADMIN CLIENT PROJECT PUBLISH]", e);
+    return NextResponse.json({ error: "DB error" }, { status: 500 });
+  }
+}

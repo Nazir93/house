@@ -451,6 +451,28 @@ enum ClientTicketAuthorType {
   STAFF
 }
 
+/// Тип уведомления в личном кабинете клиента (п. 7 ТЗ)
+enum ClientNotificationType {
+  PAYMENT_EXPECTED
+  STAGE_IN_PROGRESS
+  STAGE_DONE
+  DOCUMENT_NEW
+  PHOTO_NEW
+}
+
+/// Статус документа в личном кабинете (ознакомление → подписание в офисе)
+enum ClientDocumentSignatureStatus {
+  AWAITING_REVIEW
+  AWAITING_SIGNATURE
+  SIGNED
+}
+
+/// Способ подписания: в офисе (вручную) или ЭП
+enum ClientDocumentSignatureMethod {
+  MANUAL
+  ES
+}
+
 /// Объект договора: один номер договора + пароль = доступ в кабинет
 model ClientConstructionProject {
   id                String               @id @default(cuid())
@@ -471,6 +493,11 @@ model ClientConstructionProject {
   cameraStreamUrl   String?
   houseProjectId    String?
   houseProject      HouseProject?        @relation(fields: [houseProjectId], references: [id], onDelete: SetNull)
+  /// Черновик админки (поля, этапы, платежи) до публикации в ЛК
+  draftData         Json?
+  draftSavedAt      DateTime?
+  /// Когда последний раз выгружали в личный кабинет клиента
+  cabinetPublishedAt DateTime?
   createdAt         DateTime             @default(now())
   updatedAt         DateTime             @updatedAt
   stages            ClientProjectStage[]
@@ -478,20 +505,41 @@ model ClientConstructionProject {
   documents         ClientDocument[]
   photoReports      ClientPhotoReport[]
   tickets           ClientSupportTicket[]
+  notifications     ClientNotification[]
 
   @@index([houseProjectId])
+}
+
+/// Уведомления клиента в кабинете (в перспективе — SMS / мессенджер)
+model ClientNotification {
+  id        String                 @id @default(cuid())
+  projectId String
+  project   ClientConstructionProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type      ClientNotificationType
+  title     String
+  body      String                 @db.Text
+  payload   Json?
+  readAt    DateTime?
+  createdAt DateTime               @default(now())
+
+  @@index([projectId, createdAt])
+  @@index([projectId, readAt])
 }
 
 model ClientProjectStage {
   id        String            @id @default(cuid())
   projectId String
   project   ClientConstructionProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  parentId  String?
+  parent    ClientProjectStage?  @relation("ClientStageTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children  ClientProjectStage[] @relation("ClientStageTree")
   order     Int               @default(0)
   title     String
   iconKey   String            @default("circle")
   status    ClientStageStatus @default(NOT_STARTED)
 
   @@index([projectId, order])
+  @@index([projectId, parentId])
 }
 
 /// Суммы в копейках (целое число)
@@ -516,8 +564,19 @@ model ClientDocument {
   project    ClientConstructionProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
   filename   String
   url        String
-  uploadedAt DateTime @default(now())
+  order            Int                           @default(0)
+  isDraft          Boolean                       @default(false)
+  signatureStatus    ClientDocumentSignatureStatus @default(AWAITING_REVIEW)
+  signatureMethod    ClientDocumentSignatureMethod?
+  signedByName       String?
+  signatureSmsPhone  String?
+  signedResultUrl    String?
+  downloadedAt       DateTime?
+  signedAt           DateTime?
+  uploadedAt         DateTime                      @default(now())
 
+  @@index([projectId, order])
+  @@index([projectId, isDraft, order])
   @@index([projectId, uploadedAt])
 }
 
@@ -529,8 +588,10 @@ model ClientPhotoReport {
   caption   String?  @default("")
   shotAt    DateTime?
   order     Int      @default(0)
+  isDraft   Boolean  @default(false)
 
   @@index([projectId, order])
+  @@index([projectId, isDraft, order])
 }
 
 model ClientSupportTicket {

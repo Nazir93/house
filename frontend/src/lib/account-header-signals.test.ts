@@ -10,11 +10,13 @@ vi.mock("react", async () => {
 
 const paymentCount = vi.fn();
 const ticketCount = vi.fn();
+const notificationCount = vi.fn();
 
 vi.mock("@/lib/db", () => ({
   prisma: {
     clientPayment: { count: (...args: unknown[]) => paymentCount(...args) },
     clientSupportTicket: { count: (...args: unknown[]) => ticketCount(...args) },
+    clientNotification: { count: (...args: unknown[]) => notificationCount(...args) },
   },
 }));
 
@@ -24,14 +26,17 @@ describe("getAccountHeaderSignals", () => {
   beforeEach(() => {
     paymentCount.mockResolvedValue(2);
     ticketCount.mockResolvedValue(3);
+    notificationCount.mockResolvedValue(1);
   });
 
-  it("агрегирует платежи и обращения", async () => {
+  it("агрегирует уведомления, платежи и обращения", async () => {
     const r = await getAccountHeaderSignals("project-id");
+    expect(r.notificationsUnread).toBe(1);
     expect(r.paymentsDue).toBe(2);
     expect(r.ticketsActive).toBe(3);
-    expect(r.attentionCount).toBe(5);
+    expect(r.attentionCount).toBe(6);
     expect(paymentCount).toHaveBeenCalledOnce();
     expect(ticketCount).toHaveBeenCalledOnce();
+    expect(notificationCount).toHaveBeenCalledOnce();
   });
 });

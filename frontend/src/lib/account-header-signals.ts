@@ -2,8 +2,10 @@ import { cache } from "react";
 import { prisma } from "@/lib/db";
 
 export type AccountHeaderSignals = {
-  /** Сумма напоминаний: платежи в горизонте + открытые обращения */
+  /** Сумма напоминаний: непрочитанные уведомления + платежи в горизонте + обращения */
   attentionCount: number;
+  /** Непрочитанные уведомления в кабинете (п. 7 ТЗ) */
+  notificationsUnread: number;
   /** Платежи с датой: просроченные и ближайшие 14 дней (статус ожидается / не выставлен) */
   paymentsDue: number;
   /** Обращения в работе (не закрыты) */
@@ -18,7 +20,7 @@ export const getAccountHeaderSignals = cache(
     const horizon = new Date();
     horizon.setDate(horizon.getDate() + 14);
 
-    const [paymentsDue, ticketsActive] = await Promise.all([
+    const [paymentsDue, ticketsActive, notificationsUnread] = await Promise.all([
       prisma.clientPayment.count({
         where: {
           projectId,
@@ -32,12 +34,16 @@ export const getAccountHeaderSignals = cache(
           status: { in: ["OPEN", "IN_PROGRESS"] },
         },
       }),
+      prisma.clientNotification.count({
+        where: { projectId, readAt: null },
+      }),
     ]);
 
     return {
       paymentsDue,
       ticketsActive,
-      attentionCount: paymentsDue + ticketsActive,
+      notificationsUnread,
+      attentionCount: notificationsUnread + paymentsDue + ticketsActive,
     };
   }
 );

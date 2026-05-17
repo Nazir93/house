@@ -194,7 +194,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Нет прав на запись в папку uploads (часто в Docker: смонтируйте volume на public/uploads или проверьте владельца каталога).",
+            "Нет прав на запись в папку public/uploads — проверьте владельца каталога и права на сервере.",
         },
         { status: 500 }
       );

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CreditCard, MessageCircle, AlertCircle } from "lucide-react";
+import { Bell, CreditCard, MessageCircle, AlertCircle } from "lucide-react";
 import { getAccountHeaderSignals } from "@/lib/account-header-signals";
 
 export async function AccountAttentionStrip({ projectId }: { projectId: string }) {
@@ -30,9 +30,32 @@ export async function AccountAttentionStrip({ projectId }: { projectId: string }
             Требует внимания
           </h2>
           <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
-            Проверьте платежи и открытые обращения — так вы ничего не пропустите по объекту.
+            Проверьте уведомления, платежи и открытые обращения — так вы ничего не пропустите по объекту.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
+            {s.notificationsUnread > 0 ? (
+              <Link
+                href="/account/notifications"
+                className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition hover:opacity-90"
+                style={{
+                  borderColor: "var(--border)",
+                  backgroundColor: "var(--card-bg)",
+                  color: "var(--text)",
+                }}
+              >
+                <Bell className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+                Уведомления
+                <span
+                  className="rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums"
+                  style={{
+                    backgroundColor: "color-mix(in srgb, var(--accent) 14%, transparent)",
+                    color: "var(--accent)",
+                  }}
+                >
+                  {s.notificationsUnread}
+                </span>
+              </Link>
+            ) : null}
             {s.paymentsDue > 0 ? (
               <Link
                 href="/account/payments"

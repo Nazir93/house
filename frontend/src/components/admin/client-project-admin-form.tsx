@@ -1,23 +1,34 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type {
+  ClientDocumentSignatureMethod,
+  ClientDocumentSignatureStatus,
+  ClientStageStatus,
+} from "@prisma/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Plus, Trash2, Upload } from "lucide-react";
-import { CmsImage } from "@/components/ui/cms-image";
+import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { AdminSelect } from "@/components/admin/admin-select";
-
-const STAGE_STATUS_OPTIONS = [
-  { value: "NOT_STARTED", label: "Не начат" },
-  { value: "IN_PROGRESS", label: "В работе" },
-  { value: "DONE", label: "Завершён" },
-];
-
-const PAYMENT_STATUS_OPTIONS = [
-  { value: "NOT_ISSUED", label: "Не выставлен" },
-  { value: "EXPECTED", label: "Ожидается" },
-  { value: "PAID", label: "Оплачен" },
-];
+import { AdminDocumentsEditor } from "@/components/admin/admin-documents-editor";
+import {
+  AdminPaymentsEditorTable,
+  type AdminPaymentRow,
+} from "@/components/admin/admin-payments-editor-table";
+import { AdminPhotoReportsEditor } from "@/components/admin/admin-photo-reports-editor";
+import { ClientWallMaterialSelect } from "@/components/admin/client-wall-material-select";
+import {
+  createAdminStageRow,
+  orderedAdminStageIndices,
+  removeAdminStageWithChildren,
+  type AdminStageRow,
+} from "@/lib/admin-client-stage-rows";
+import { computeOverallProgressFromStages } from "@/lib/client-project-progress";
+import {
+  formatCurrentStageLabel,
+  getCurrentStagesInProgress,
+} from "@/lib/client-project-stage-status";
+import { CLIENT_STAGE_STATUS_OPTIONS } from "@/lib/client-stage-status";
 
 const TICKET_STATUS_OPTIONS = [
   { value: "OPEN", label: "Открыт" },
@@ -35,16 +46,6 @@ function toDateInput(iso: string | null | undefined): string {
   return d.toISOString().slice(0, 10);
 }
 
-type StageRow = { order: number; title: string; iconKey: string; status: string };
-type PaymentRow = {
-  order: number;
-  label: string;
-  amountRubles: number;
-  dueDate: string;
-  status: string;
-  paidAt: string;
-};
-
 export type ClientProjectAdminInitial = {
   contractNumber: string;
   title: string;
@@ -60,7 +61,17 @@ export type ClientProjectAdminInitial = {
   foremanName: string | null;
   cameraStreamUrl: string | null;
   houseProjectId: string | null;
-  stages: { order: number; title: string; iconKey: string; status: string }[];
+  hasUnpublishedDraft?: boolean;
+  draftSavedAt?: string | null;
+  cabinetPublishedAt?: string | null;
+  stages: {
+    id: string;
+    parentId: string | null;
+    order: number;
+    title: string;
+    iconKey: string;
+    status: string;
+  }[];
   payments: {
     label: string;
     amountKopeks: number;
@@ -69,8 +80,19 @@ export type ClientProjectAdminInitial = {
     paidAt: string | null;
     order: number;
   }[];
-  documents: { id: string; filename: string; url: string }[];
-  photoReports: { id: string; url: string; caption: string | null }[];
+  documents: {
+    id: string;
+    filename: string;
+    url: string;
+    order: number;
+    signatureStatus: ClientDocumentSignatureStatus;
+    signatureMethod: ClientDocumentSignatureMethod | null;
+    signedByName: string | null;
+    signatureSmsPhone: string | null;
+    signedResultUrl: string | null;
+    signedAt: string | null;
+  }[];
+  photoReports: { id: string; url: string; caption: string | null; order: number }[];
   tickets: {
     id: string;
     subject: string;
@@ -100,24 +122,61 @@ export function ClientProjectAdminForm({
   const [startDate, setStartDate] = useState(toDateInput(initial.startDate));
   const [plannedEndDate, setPlannedEndDate] = useState(toDateInput(initial.plannedEndDate));
   const [coverImageUrl, setCoverImageUrl] = useState(initial.coverImageUrl ?? "");
-  const [overallProgress, setOverallProgress] = useState(initial.overallProgress.toString());
-  const [currentStageLabel, setCurrentStageLabel] = useState(initial.currentStageLabel ?? "");
   const [foremanName, setForemanName] = useState(initial.foremanName ?? "");
   const [cameraStreamUrl, setCameraStreamUrl] = useState(initial.cameraStreamUrl ?? "");
   const [houseProjectId, setHouseProjectId] = useState(initial.houseProjectId ?? "");
 
-  const [stages, setStages] = useState<StageRow[]>(
+  const [stages, setStages] = useState<AdminStageRow[]>(
     initial.stages.length > 0
       ? initial.stages.map((s) => ({
+          clientKey: s.id,
+          parentClientKey: s.parentId,
           order: s.order,
           title: s.title,
           iconKey: s.iconKey,
           status: s.status,
         }))
-      : [{ order: 0, title: "Этап", iconKey: "circle", status: "NOT_STARTED" }]
+      : [createAdminStageRow({ title: "Этап" })]
   );
 
-  const [payments, setPayments] = useState<PaymentRow[]>(
+  const computedProgress = useMemo(
+    () =>
+      computeOverallProgressFromStages(
+        stages.map((s) => ({
+          clientKey: s.clientKey,
+          parentClientKey: s.parentClientKey,
+          status: s.status as ClientStageStatus,
+        }))
+      ),
+    [stages]
+  );
+
+  const stageDisplayOrder = useMemo(() => orderedAdminStageIndices(stages), [stages]);
+
+  const stagesWithMeta = useMemo(
+    () =>
+      stages.map((s) => ({
+        id: s.clientKey,
+        parentId: s.parentClientKey,
+        status: s.status as ClientStageStatus,
+        title: s.title,
+        iconKey: s.iconKey,
+        order: s.order,
+      })),
+    [stages]
+  );
+
+  const currentStagesPreview = useMemo(
+    () => getCurrentStagesInProgress(stagesWithMeta),
+    [stagesWithMeta]
+  );
+
+  const currentStageLabelPreview = useMemo(
+    () => formatCurrentStageLabel(stagesWithMeta),
+    [stagesWithMeta]
+  );
+
+  const [payments, setPayments] = useState<AdminPaymentRow[]>(
     initial.payments.length > 0
       ? initial.payments.map((p) => ({
           order: p.order,
@@ -130,15 +189,16 @@ export function ClientProjectAdminForm({
       : []
   );
 
-  const [documents, setDocuments] = useState(initial.documents);
-  const [photos, setPhotos] = useState(initial.photoReports);
   const [tickets, setTickets] = useState(initial.tickets);
 
-  const [docFilename, setDocFilename] = useState("");
-  const [docUrl, setDocUrl] = useState("");
-  const [photoUrlInput, setPhotoUrlInput] = useState("");
   const [ticketReplies, setTicketReplies] = useState<Record<string, string>>({});
   const [ticketStatus, setTicketStatus] = useState<Record<string, string>>({});
+  const [hasUnpublishedDraft, setHasUnpublishedDraft] = useState(initial.hasUnpublishedDraft ?? false);
+  const [publishing, setPublishing] = useState(false);
+
+  useEffect(() => {
+    setHasUnpublishedDraft(initial.hasUnpublishedDraft ?? false);
+  }, [initial.hasUnpublishedDraft]);
 
   const saveMain = useCallback(async () => {
     setErr("");
@@ -158,12 +218,17 @@ export function ClientProjectAdminForm({
           startDate: startDate || null,
           plannedEndDate: plannedEndDate || null,
           coverImageUrl: coverImageUrl.trim() || null,
-          overallProgress: parseInt(overallProgress, 10) || 0,
-          currentStageLabel: currentStageLabel.trim() || null,
           foremanName: foremanName.trim() || null,
           cameraStreamUrl: cameraStreamUrl.trim() || null,
           houseProjectId: houseProjectId.trim() || null,
-          stages,
+          stages: stages.map((s) => ({
+            clientKey: s.clientKey,
+            parentClientKey: s.parentClientKey,
+            order: s.order,
+            title: s.title,
+            iconKey: s.iconKey,
+            status: s.status,
+          })),
           payments: payments.map((p, i) => ({
             order: p.order ?? i,
             label: p.label,
@@ -179,7 +244,8 @@ export function ClientProjectAdminForm({
         setErr(data?.error || "Ошибка сохранения");
         return;
       }
-      setMsg("Сохранено");
+      setMsg("Черновик сохранён. Уведомления клиенту не отправляются — только после публикации в личный кабинет.");
+      setHasUnpublishedDraft(Boolean(data.hasUnpublishedDraft));
       setPlainPassword("");
       router.refresh();
     } catch {
@@ -197,8 +263,6 @@ export function ClientProjectAdminForm({
     startDate,
     plannedEndDate,
     coverImageUrl,
-    overallProgress,
-    currentStageLabel,
     foremanName,
     cameraStreamUrl,
     houseProjectId,
@@ -207,95 +271,26 @@ export function ClientProjectAdminForm({
     router,
   ]);
 
-  async function uploadFile(file: File): Promise<string | null> {
-    const fd = new FormData();
-    fd.set("file", file);
-    const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data.url) {
-      setErr(data?.error || "Ошибка загрузки");
-      return null;
-    }
-    return data.url as string;
-  }
-
-  async function addDocument() {
-    if (!docFilename.trim() || !docUrl.trim()) {
-      setErr("Имя файла и URL документа");
-      return;
-    }
-    const res = await fetch(`/api/admin/client-projects/${projectId}/documents`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ filename: docFilename.trim(), url: docUrl.trim() }),
-    });
-    const row = await res.json().catch(() => null);
-    if (!res.ok) {
-      setErr(row?.error || "Не удалось добавить документ");
-      return;
-    }
-    setDocuments((prev) => [{ id: row.id, filename: row.filename, url: row.url }, ...prev]);
-    setDocFilename("");
-    setDocUrl("");
+  async function publishToCabinet() {
+    if (!confirm("Опубликовать текущий черновик в личный кабинет клиента?")) return;
+    setPublishing(true);
     setErr("");
-  }
-
-  async function delDocument(id: string) {
-    if (!confirm("Удалить документ из кабинета?")) return;
-    await fetch(`/api/admin/client-projects/${projectId}/documents/${id}`, { method: "DELETE" });
-    setDocuments((prev) => prev.filter((d) => d.id !== id));
-  }
-
-  async function onDocFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    setErr("");
-    const url = await uploadFile(file);
-    if (!url) return;
-    setDocUrl(url);
-    if (!docFilename.trim()) setDocFilename(file.name.replace(/\.[^.]+$/, "") || file.name);
-  }
-
-  async function addPhoto() {
-    const url = photoUrlInput.trim();
-    if (!url) return;
-    const res = await fetch(`/api/admin/client-projects/${projectId}/photos`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }),
-    });
-    const row = await res.json().catch(() => null);
-    if (!res.ok) {
-      setErr(row?.error || "Не удалось добавить фото");
-      return;
+    setMsg("");
+    try {
+      const res = await fetch(`/api/admin/client-projects/${projectId}/publish`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setErr(data?.error || "Не удалось опубликовать");
+        return;
+      }
+      setHasUnpublishedDraft(false);
+      setMsg("Опубликовано в личный кабинет. Клиент видит актуальные данные и получает уведомления по изменениям.");
+      router.refresh();
+    } catch {
+      setErr("Сеть");
+    } finally {
+      setPublishing(false);
     }
-    setPhotos((prev) => [{ id: row.id, url: row.url, caption: row.caption }, ...prev]);
-    setPhotoUrlInput("");
-  }
-
-  async function onPhotoFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    setErr("");
-    const url = await uploadFile(file);
-    if (!url) return;
-    const res = await fetch(`/api/admin/client-projects/${projectId}/photos`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }),
-    });
-    const row = await res.json().catch(() => null);
-    if (res.ok && row?.id) {
-      setPhotos((prev) => [{ id: row.id, url: row.url, caption: row.caption }, ...prev]);
-    }
-  }
-
-  async function delPhoto(id: string) {
-    if (!confirm("Удалить фото?")) return;
-    await fetch(`/api/admin/client-projects/${projectId}/photos/${id}`, { method: "DELETE" });
-    setPhotos((prev) => prev.filter((p) => p.id !== id));
   }
 
   async function sendReply(ticketId: string) {
@@ -345,6 +340,17 @@ export function ClientProjectAdminForm({
         </Link>
       </div>
 
+      {hasUnpublishedDraft ? (
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100/90">
+          Есть неопубликованные изменения. Клиент видит только последнюю опубликованную версию; уведомления не отправляются, пока вы не нажмёте «Опубликовать».
+          {initial.draftSavedAt ? (
+            <span className="block mt-1 text-xs text-amber-100/60">
+              Черновик: {new Date(initial.draftSavedAt).toLocaleString("ru-RU")}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+
       {msg ? <p className="text-sm text-emerald-400">{msg}</p> : null}
       {err ? <p className="text-sm text-red-400">{err}</p> : null}
 
@@ -377,7 +383,11 @@ export function ClientProjectAdminForm({
           </div>
           <div>
             <label className="block text-[11px] uppercase text-white/40 mb-1">Материал стен</label>
-            <input className={inp} value={wallMaterial} onChange={(e) => setWallMaterial(e.target.value)} />
+            <ClientWallMaterialSelect
+              value={wallMaterial}
+              onValueChange={setWallMaterial}
+              triggerClassName={inp + " flex items-center justify-between"}
+            />
           </div>
           <div>
             <label className="block text-[11px] uppercase text-white/40 mb-1">Начало</label>
@@ -389,11 +399,26 @@ export function ClientProjectAdminForm({
           </div>
           <div>
             <label className="block text-[11px] uppercase text-white/40 mb-1">Прогресс %</label>
-            <input className={inp} value={overallProgress} onChange={(e) => setOverallProgress(e.target.value)} />
+            <div
+              className={inp + " flex items-center justify-between tabular-nums"}
+              title="Считается автоматически по этапам со статусом «Сдан клиенту»"
+            >
+              <span>{computedProgress}%</span>
+              <span className="text-[10px] normal-case text-white/35">авто</span>
+            </div>
           </div>
-          <div>
-            <label className="block text-[11px] uppercase text-white/40 mb-1">Текущий этап (подпись)</label>
-            <input className={inp} value={currentStageLabel} onChange={(e) => setCurrentStageLabel(e.target.value)} />
+          <div className="sm:col-span-2">
+            <label className="block text-[11px] uppercase text-white/40 mb-1">Текущий этап (авто)</label>
+            <div
+              className={inp + " min-h-[42px] flex flex-col justify-center gap-1 text-sm"}
+              title="Подставляется в кабинет: этапы со статусом «В работе»"
+            >
+              {currentStageLabelPreview ? (
+                currentStagesPreview.map((s) => <span key={s.id}>{s.title}</span>)
+              ) : (
+                <span className="text-white/35">Нет этапов «В работе»</span>
+              )}
+            </div>
           </div>
           <div>
             <label className="block text-[11px] uppercase text-white/40 mb-1">Бригадир</label>
@@ -420,16 +445,32 @@ export function ClientProjectAdminForm({
           <button
             type="button"
             onClick={() =>
-              setStages((s) => [...s, { order: s.length, title: "", iconKey: "circle", status: "NOT_STARTED" }])
+              setStages((s) => [
+                ...s,
+                createAdminStageRow({
+                  title: "",
+                  order: s.filter((x) => !x.parentClientKey).length,
+                }),
+              ])
             }
             className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400"
           >
-            <Plus size={14} /> Добавить
+            <Plus size={14} /> Этап
           </button>
         </div>
+        <p className="text-xs text-white/40">
+          Прогресс: {computedProgress}% — по верхнеуровневым этапам со статусом «Сдан клиенту».
+        </p>
         <div className="space-y-2">
-          {stages.map((row, i) => (
-            <div key={i} className="flex flex-wrap gap-2 items-end border border-white/[0.06] rounded-lg p-2">
+          {stageDisplayOrder.map(({ index: i, depth }) => {
+            const row = stages[i]!;
+            const isSub = depth > 0;
+            return (
+              <div
+                key={row.clientKey}
+                className="flex flex-wrap gap-2 items-end border border-white/[0.06] rounded-lg p-2"
+                style={{ marginLeft: depth * 16 }}
+              >
               <input className={`${inp} w-12`} type="number" value={row.order} onChange={(e) => {
                 const next = [...stages];
                 next[i] = { ...row, order: parseInt(e.target.value, 10) || 0 };
@@ -439,14 +480,14 @@ export function ClientProjectAdminForm({
                 const next = [...stages];
                 next[i] = { ...row, title: e.target.value };
                 setStages(next);
-              }} placeholder="Название" />
+              }} placeholder={isSub ? "Подэтап" : "Название этапа"} />
               <input className={`${inp} w-28`} value={row.iconKey} onChange={(e) => {
                 const next = [...stages];
                 next[i] = { ...row, iconKey: e.target.value };
                 setStages(next);
               }} placeholder="iconKey" />
               <AdminSelect
-                className="w-36 shrink-0"
+                className="w-40 shrink-0"
                 triggerClassName={ADMIN_COMPACT_SELECT_TRIGGER}
                 value={row.status}
                 onValueChange={(v) => {
@@ -454,128 +495,55 @@ export function ClientProjectAdminForm({
                   next[i] = { ...row, status: v };
                   setStages(next);
                 }}
-                options={STAGE_STATUS_OPTIONS}
+                options={CLIENT_STAGE_STATUS_OPTIONS}
               />
-              <button type="button" className="p-2 text-red-400/80" onClick={() => setStages((s) => s.filter((_, j) => j !== i))}>
+                {!isSub ? (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1 px-2 py-2 text-xs text-emerald-400/90 shrink-0"
+                    onClick={() => {
+                      const parentKey = row.clientKey;
+                      const subCount = stages.filter((s) => s.parentClientKey === parentKey).length;
+                      setStages((s) => [
+                        ...s,
+                        createAdminStageRow({
+                          title: "",
+                          parentClientKey: parentKey,
+                          order: subCount,
+                        }),
+                      ]);
+                    }}
+                  >
+                    <Plus size={14} /> Подэтап
+                  </button>
+                ) : null}
+              <button
+                type="button"
+                className="p-2 text-red-400/80"
+                onClick={() => setStages((s) => removeAdminStageWithChildren(s, i))}
+              >
                 <Trash2 size={16} />
               </button>
             </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
-      <section className="space-y-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">Платежи (тыс. ₽ в поле — целые рубли)</h2>
-          <button
-            type="button"
-            onClick={() =>
-              setPayments((p) => [...p, { order: p.length, label: "", amountRubles: 0, dueDate: "", status: "EXPECTED", paidAt: "" }])
-            }
-            className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400"
-          >
-            <Plus size={14} /> Добавить
-          </button>
-        </div>
-        {payments.map((row, i) => (
-          <div key={i} className="flex flex-wrap gap-2 items-end border border-white/[0.06] rounded-lg p-2">
-            <input className={`${inp} flex-1 min-w-[100px]`} value={row.label} onChange={(e) => {
-              const next = [...payments];
-              next[i] = { ...row, label: e.target.value };
-              setPayments(next);
-            }} placeholder="Основание" />
-            <input
-              className={`${inp} w-28`}
-              type="number"
-              value={row.amountRubles}
-              onChange={(e) => {
-                const next = [...payments];
-                next[i] = { ...row, amountRubles: parseFloat(e.target.value) || 0 };
-                setPayments(next);
-              }}
-            />
-            <input type="date" className={`${inp} w-40`} value={row.dueDate} onChange={(e) => {
-              const next = [...payments];
-              next[i] = { ...row, dueDate: e.target.value };
-              setPayments(next);
-            }} />
-            <AdminSelect
-              className="w-36 shrink-0"
-              triggerClassName={ADMIN_COMPACT_SELECT_TRIGGER}
-              value={row.status}
-              onValueChange={(v) => {
-                const next = [...payments];
-                next[i] = { ...row, status: v };
-                setPayments(next);
-              }}
-              options={PAYMENT_STATUS_OPTIONS}
-            />
-            <button type="button" className="p-2 text-red-400/80" onClick={() => setPayments((p) => p.filter((_, j) => j !== i))}>
-              <Trash2 size={16} />
-            </button>
-          </div>
-        ))}
-      </section>
+      <AdminPaymentsEditorTable rows={payments} onChange={setPayments} />
 
-      <section className="space-y-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
-        <h2 className="text-lg font-bold">Документы</h2>
-        <div className="flex flex-wrap gap-2 items-end">
-          <label className="inline-flex items-center gap-2 text-xs text-white/50 cursor-pointer">
-            <Upload size={14} />
-            Загрузить файл
-            <input type="file" className="hidden" accept=".pdf,.doc,.docx,.xlsx,.xls,.txt" onChange={onDocFile} />
-          </label>
-          <input className={inp + " flex-1 min-w-[140px]"} value={docFilename} onChange={(e) => setDocFilename(e.target.value)} placeholder="Имя файла" />
-          <input className={inp + " flex-1 min-w-[160px]"} value={docUrl} onChange={(e) => setDocUrl(e.target.value)} placeholder="/uploads/..." />
-          <button type="button" onClick={addDocument} className="px-3 py-2 rounded-lg bg-[#0F3D2E] text-sm font-semibold">
-            Добавить
-          </button>
-        </div>
-        <ul className="text-sm space-y-1">
-          {documents.map((d) => (
-            <li key={d.id} className="flex justify-between gap-2 border-b border-white/[0.06] py-2">
-              <span className="truncate">{d.filename}</span>
-              <div className="flex gap-2 shrink-0">
-                <a href={d.url} target="_blank" rel="noreferrer" className="text-emerald-400 text-xs">
-                  Открыть
-                </a>
-                <button type="button" className="text-red-400 text-xs" onClick={() => delDocument(d.id)}>
-                  Удалить
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <AdminDocumentsEditor
+        projectId={projectId}
+        initialDocuments={initial.documents}
+        defaultClientName={initial.clientName}
+        onError={setErr}
+      />
 
-      <section className="space-y-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
-        <h2 className="text-lg font-bold">Фотоотчёты</h2>
-        <div className="flex flex-wrap gap-2">
-          <label className="inline-flex items-center gap-2 text-xs text-white/50 cursor-pointer">
-            <Upload size={14} />
-            Загрузить фото
-            <input type="file" className="hidden" accept="image/*" onChange={onPhotoFile} />
-          </label>
-          <input className={inp + " flex-1 min-w-[200px]"} value={photoUrlInput} onChange={(e) => setPhotoUrlInput(e.target.value)} placeholder="или URL" />
-          <button type="button" onClick={addPhoto} className="px-3 py-2 rounded-lg bg-white/[0.08] text-sm">
-            Добавить URL
-          </button>
-        </div>
-        <ul className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {photos.map((p) => (
-            <li key={p.id} className="relative group rounded-lg overflow-hidden border border-white/[0.08] aspect-square">
-              <CmsImage src={p.url} alt="" fill className="object-cover" sizes="160px" />
-              <button
-                type="button"
-                className="absolute top-1 right-1 p-1 bg-black/60 rounded text-xs text-red-300 opacity-0 group-hover:opacity-100"
-                onClick={() => delPhoto(p.id)}
-              >
-                <Trash2 size={14} />
-              </button>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <AdminPhotoReportsEditor
+        projectId={projectId}
+        initialPhotos={initial.photoReports}
+        onError={setErr}
+      />
 
       <section className="space-y-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
         <h2 className="text-lg font-bold">Обращения</h2>
@@ -619,13 +587,27 @@ export function ClientProjectAdminForm({
         {tickets.length === 0 ? <p className="text-white/40 text-sm">Нет обращений</p> : null}
       </section>
 
-      <button
-        type="button"
-        onClick={saveMain}
-        className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#0F3D2E] font-bold text-sm"
-      >
-        Сохранить объект, этапы и платежи
-      </button>
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={saveMain}
+          className="px-6 py-3 rounded-xl bg-white/[0.08] border border-white/[0.12] font-bold text-sm hover:bg-white/[0.12]"
+        >
+          Сохранить черновик
+        </button>
+        <button
+          type="button"
+          onClick={publishToCabinet}
+          disabled={publishing}
+          className="px-6 py-3 rounded-xl bg-[#0F3D2E] font-bold text-sm disabled:opacity-50"
+        >
+          {publishing ? "Публикация…" : "Опубликовать в личном кабинете"}
+        </button>
+      </div>
+      <p className="text-xs text-white/40 max-w-xl">
+        «Сохранить черновик» — правки только в админке, без уведомлений клиенту. Фото и документы тоже остаются черновиком.
+        «Опубликовать в личном кабинете» — клиент увидит данные; уведомления уйдут только при смене статусов (платёж «Ожидает оплаты», этап «В работе» / «Сдан клиенту»).
+      </p>
     </div>
   );
 }

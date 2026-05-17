@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getClientProjectIdFromSession } from "@/lib/client-session";
 import { prisma } from "@/lib/db";
 import { formatDateRu } from "@/lib/client-portal-labels";
+import { clientPhotoReportOrderBy, publishedPhotoWhere } from "@/lib/client-portal-order";
 
 export const metadata = {
   title: "Фотоотчёты — личный кабинет",
@@ -14,8 +15,8 @@ export default async function AccountPhotosPage() {
   if (!projectId) redirect("/account/login");
 
   const photos = await prisma.clientPhotoReport.findMany({
-    where: { projectId },
-    orderBy: [{ order: "asc" }, { shotAt: "desc" }],
+    where: { projectId, ...publishedPhotoWhere },
+    orderBy: clientPhotoReportOrderBy,
   });
 
   return (

@@ -1,22 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { ClientPaymentStatus, ClientStageStatus } from "@prisma/client";
+import type { ClientPaymentStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { buildDefaultClientProjectStagesPayload } from "@/lib/client-project-default-stages";
+import {
+  normalizeAdminStagesPayload,
+  replaceClientProjectStages,
+} from "@/lib/client-project-stages-persist";
 import { hashPassword } from "@/lib/password";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
-
-const DEFAULT_STAGES: { title: string; iconKey: string }[] = [
-  { title: "Фундамент", iconKey: "foundation" },
-  { title: "Стены", iconKey: "walls" },
-  { title: "Кровля", iconKey: "roof" },
-  { title: "Инженерные сети", iconKey: "engineering" },
-  { title: "Отделка", iconKey: "finish" },
-];
-
-function parseStageStatus(v: unknown): ClientStageStatus {
-  return v === "DONE" || v === "IN_PROGRESS" || v === "NOT_STARTED" ? v : "NOT_STARTED";
-}
 
 function parsePaymentStatus(v: unknown): ClientPaymentStatus {
   return v === "PAID" || v === "EXPECTED" || v === "NOT_ISSUED" ? v : "EXPECTED";
@@ -82,49 +75,47 @@ export async function POST(request: NextRequest) {
     const passwordHash = await hashPassword(plainPassword);
 
     const stagesIn = Array.isArray(body.stages) ? body.stages : null;
-    const stagesData =
-      stagesIn && stagesIn.length > 0
-        ? stagesIn.map((s: Record<string, unknown>, i: number) => ({
-            order: typeof s.order === "number" && s.order >= 0 ? s.order : i,
-            title: String(s.title || `Этап ${i + 1}`),
-            iconKey: String(s.iconKey || "circle"),
-            status: parseStageStatus(s.status),
-          }))
-        : DEFAULT_STAGES.map((s, i) => ({
-            order: i,
-            title: s.title,
-            iconKey: s.iconKey,
-            status: "NOT_STARTED" as ClientStageStatus,
-          }));
+    const stagesPayload =
+      stagesIn && stagesIn.length > 0 ? stagesIn : buildDefaultClientProjectStagesPayload();
+    const { progress: initialProgress } = normalizeAdminStagesPayload(stagesPayload);
 
-    const project = await prisma.clientConstructionProject.create({
-      data: {
-        contractNumber,
-        passwordHash,
-        title,
-        clientName: body.clientName?.trim() || null,
-        clientEmail: body.clientEmail?.trim() || null,
-        area:
-          body.area === undefined || body.area === null || body.area === ""
-            ? null
-            : parseInt(String(body.area), 10) || null,
-        wallMaterial: body.wallMaterial?.trim() || null,
-        startDate: body.startDate ? new Date(String(body.startDate)) : null,
-        plannedEndDate: body.plannedEndDate ? new Date(String(body.plannedEndDate)) : null,
-        coverImageUrl: body.coverImageUrl?.trim() || null,
-        overallProgress:
-          body.overallProgress === undefined || body.overallProgress === null || body.overallProgress === ""
-            ? 0
-            : Math.min(100, Math.max(0, parseInt(String(body.overallProgress), 10) || 0)),
-        currentStageLabel: body.currentStageLabel?.trim() || null,
-        foremanName: body.foremanName?.trim() || null,
-        cameraStreamUrl: body.cameraStreamUrl?.trim() || null,
-        houseProjectId: body.houseProjectId?.trim() || null,
-        stages: { create: stagesData },
-      },
+    const project = await prisma.$transaction(async (tx) => {
+      const created = await tx.clientConstructionProject.create({
+        data: {
+          contractNumber,
+          passwordHash,
+          title,
+          clientName: body.clientName?.trim() || null,
+          clientEmail: body.clientEmail?.trim() || null,
+          area:
+            body.area === undefined || body.area === null || body.area === ""
+              ? null
+              : parseInt(String(body.area), 10) || null,
+          wallMaterial: body.wallMaterial?.trim() || null,
+          startDate: body.startDate ? new Date(String(body.startDate)) : null,
+          plannedEndDate: body.plannedEndDate ? new Date(String(body.plannedEndDate)) : null,
+          coverImageUrl: body.coverImageUrl?.trim() || null,
+          overallProgress: 0,
+          currentStageLabel: body.currentStageLabel?.trim() || null,
+          foremanName: body.foremanName?.trim() || null,
+          cameraStreamUrl: body.cameraStreamUrl?.trim() || null,
+          houseProjectId: body.houseProjectId?.trim() || null,
+          cabinetPublishedAt: new Date(),
+        },
+      });
+
+      const progress = await replaceClientProjectStages(tx, created.id, stagesPayload);
+      await tx.clientConstructionProject.update({
+        where: { id: created.id },
+        data: { overallProgress: progress },
+      });
+      return created;
     });
 
-    return NextResponse.json({ id: project.id, contractNumber: project.contractNumber }, { status: 201 });
+    return NextResponse.json(
+      { id: project.id, contractNumber: project.contractNumber, overallProgress: initialProgress },
+      { status: 201 }
+    );
   } catch (e) {
     console.error("[ADMIN CLIENT PROJECT CREATE]", e);
     return NextResponse.json({ error: "DB error" }, { status: 500 });

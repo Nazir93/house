@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { touchDraftSavedAt } from "@/lib/client-project-draft-media";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +21,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
     await prisma.clientPhotoReport.delete({ where: { id: photoId } });
+    await touchDraftSavedAt(projectId);
     return NextResponse.json({ ok: true });
   } catch (e) {
     console.error("[ADMIN CLIENT PHOTO DELETE]", e);

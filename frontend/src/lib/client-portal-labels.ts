@@ -20,7 +20,7 @@ export function paymentStatusLabel(s: ClientPaymentStatus): string {
     case "PAID":
       return "Оплачен";
     case "EXPECTED":
-      return "Ожидается";
+      return "Ожидает оплаты";
     case "NOT_ISSUED":
       return "Не выставлен";
     default:
@@ -31,11 +31,11 @@ export function paymentStatusLabel(s: ClientPaymentStatus): string {
 export function stageStatusLabel(s: ClientStageStatus): string {
   switch (s) {
     case "DONE":
-      return "Завершён";
+      return "Сдан клиенту";
     case "IN_PROGRESS":
       return "В работе";
     case "NOT_STARTED":
-      return "Не начат";
+      return "Ожидает старта";
     default:
       return s;
   }

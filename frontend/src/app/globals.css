@@ -891,3 +891,89 @@
     6px 0 48px rgba(0, 0, 0, 0.35);
 }
 
+/* ЛК: компактные цветные иконки этапов (light / dark) */
+.stage-icon-tint--foundation {
+  color: #9a6b2e;
+}
+.stage-icon-tint--walls {
+  color: #4a6fa5;
+}
+.stage-icon-tint--roof {
+  color: #5c6b7a;
+}
+.stage-icon-tint--engineering {
+  color: #c9a227;
+}
+.stage-icon-tint--finish {
+  color: #3d8f6e;
+}
+.stage-icon-tint--windows {
+  color: #5b8fd4;
+}
+.stage-icon-tint--facade {
+  color: #8b6b9e;
+}
+.stage-icon-tint--landscaping {
+  color: #4d8f5c;
+}
+.stage-icon-tint--default {
+  color: var(--accent);
+}
+
+[data-theme="dark"] .stage-icon-tint--foundation {
+  color: #d4a85a;
+}
+[data-theme="dark"] .stage-icon-tint--walls {
+  color: #7ba3d4;
+}
+[data-theme="dark"] .stage-icon-tint--roof {
+  color: #9aa8b5;
+}
+[data-theme="dark"] .stage-icon-tint--engineering {
+  color: #e8c547;
+}
+[data-theme="dark"] .stage-icon-tint--finish {
+  color: #5fbf96;
+}
+[data-theme="dark"] .stage-icon-tint--windows {
+  color: #7eb3f0;
+}
+[data-theme="dark"] .stage-icon-tint--facade {
+  color: #b89fd0;
+}
+[data-theme="dark"] .stage-icon-tint--landscaping {
+  color: #72c987;
+}
+[data-theme="dark"] .stage-icon-tint--default {
+  color: color-mix(in srgb, var(--accent) 88%, white 12%);
+}
+
+.account-premium-sidebar--collapsed .account-sidebar-label,
+.account-premium-sidebar--collapsed .account-sidebar-support-text,
+.account-premium-sidebar--collapsed .account-sidebar-subtitle {
+  display: none;
+}
+
+.account-premium-sidebar--collapsed .account-sidebar-brand-text {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.account-premium-sidebar--collapsed .account-nav-link {
+  justify-content: center;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.account-premium-sidebar--collapsed .account-nav-badge {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.35rem;
+  min-width: 0.4rem;
+  height: 0.4rem;
+  padding: 0;
+  font-size: 0;
+  border-radius: 9999px;
+}
+

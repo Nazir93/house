@@ -28,7 +28,6 @@
     "db:studio": "dotenv -e .env.local -- prisma studio",
     "db:verify": "node scripts/verify-db.cjs",
     "env:check": "node scripts/check-production-env.cjs",
-    "docker:db": "docker compose -f ../docker-compose.yml up -d postgres",
     "db:tunnel": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/db-tunnel.ps1",
     "postinstall": "prisma generate --schema=prisma/schema.prisma",
     "pm2:start": "pm2 start ecosystem.config.cjs",

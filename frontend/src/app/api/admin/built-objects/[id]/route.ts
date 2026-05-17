@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 import { revalidatePublicConstructionCatalog } from "@/lib/revalidate-public-content";
 import { builtObjectFormHasMediaPayload, builtObjectMediaCreatePayload } from "@/lib/built-object-admin-media";
+import { builtObjectCoordinatesFromBody } from "@/lib/built-object-coordinates";
 
 function n(value: unknown) {
   const parsed = Number(value);
@@ -41,6 +42,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
 
   try {
     const body = await request.json();
+    const coords = builtObjectCoordinatesFromBody(body);
     const hasMedia = builtObjectFormHasMediaPayload(body);
     const object = await (prisma as any).builtObject.update({
       where: { id: params.id },
@@ -60,8 +62,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
           siteStatus: body.siteStatus === "UNDER_CONSTRUCTION" ? "UNDER_CONSTRUCTION" : "COMPLETED",
         }),
         ...(body.location !== undefined && { location: body.location || null }),
-        ...(body.latitude !== undefined && { latitude: n(body.latitude) }),
-        ...(body.longitude !== undefined && { longitude: n(body.longitude) }),
+        ...(coords != null && { latitude: coords.latitude, longitude: coords.longitude }),
         ...(body.description !== undefined && { description: body.description }),
         ...(body.worksDescription !== undefined && { worksDescription: body.worksDescription || null }),
         ...(body.telegramUrl !== undefined && { telegramUrl: body.telegramUrl || null }),

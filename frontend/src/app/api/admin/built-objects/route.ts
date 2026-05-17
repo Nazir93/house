@@ -4,6 +4,7 @@ import { generateSlug } from "@/lib/utils";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 import { revalidatePublicConstructionCatalog } from "@/lib/revalidate-public-content";
 import { builtObjectMediaCreatePayload } from "@/lib/built-object-admin-media";
+import { builtObjectCoordinatesFromBody } from "@/lib/built-object-coordinates";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
+    const coords = builtObjectCoordinatesFromBody(body);
     const object = await (prisma as any).builtObject.create({
       data: {
         slug: body.slug?.trim() || generateSlug(body.title || "built-object"),
@@ -58,8 +60,8 @@ export async function POST(request: NextRequest) {
         district: body.district?.trim() || null,
         siteStatus: body.siteStatus === "UNDER_CONSTRUCTION" ? "UNDER_CONSTRUCTION" : "COMPLETED",
         location: body.location || null,
-        latitude: n(body.latitude),
-        longitude: n(body.longitude),
+        latitude: coords?.latitude ?? n(body.latitude),
+        longitude: coords?.longitude ?? n(body.longitude),
         description: body.description || "",
         worksDescription: body.worksDescription || null,
         telegramUrl: body.telegramUrl || null,

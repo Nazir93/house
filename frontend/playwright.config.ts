@@ -2,6 +2,7 @@ import { defineConfig, devices } from "@playwright/test";
 
 const baseURL = process.env.PLAYWRIGHT_BASE_URL?.trim() || "http://localhost:3000";
 const skipWebServer = process.env.PLAYWRIGHT_SKIP_WEBSERVER === "1";
+const e2eSecret = process.env.E2E_SECRET?.trim() || "local-e2e-secret";
 
 export default defineConfig({
   testDir: "e2e",
@@ -35,6 +36,11 @@ export default defineConfig({
           stdout: "pipe",
           stderr: "pipe",
           timeout: 300_000,
+          env: {
+            ...process.env,
+            E2E_ENABLED: "1",
+            E2E_SECRET: e2eSecret,
+          },
         },
       }),
 });

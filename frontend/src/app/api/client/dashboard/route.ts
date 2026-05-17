@@ -2,6 +2,14 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { resolveClientOverallProgress } from "@/lib/client-project-overall-progress";
+import {
+  clientDocumentOrderBy,
+  clientPhotoReportOrderBy,
+  publishedDocumentWhere,
+  publishedPhotoWhere,
+} from "@/lib/client-portal-order";
+import { formatCurrentStageLabel, getCurrentStagesInProgress } from "@/lib/client-project-stage-status";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -17,8 +25,8 @@ export async function GET() {
         include: {
           stages: { orderBy: { order: "asc" } },
           payments: { orderBy: [{ order: "asc" }, { dueDate: "asc" }] },
-          documents: { orderBy: { uploadedAt: "desc" }, take: 8 },
-          photoReports: { orderBy: [{ order: "asc" }, { shotAt: "desc" }], take: 6 },
+          documents: { where: publishedDocumentWhere, orderBy: clientDocumentOrderBy, take: 8 },
+          photoReports: { where: publishedPhotoWhere, orderBy: clientPhotoReportOrderBy, take: 6 },
           tickets: {
             orderBy: { updatedAt: "desc" },
             take: 10,
@@ -26,8 +34,8 @@ export async function GET() {
           },
         },
       }),
-      prisma.clientDocument.count({ where: { projectId } }),
-      prisma.clientPhotoReport.count({ where: { projectId } }),
+      prisma.clientDocument.count({ where: { projectId, ...publishedDocumentWhere } }),
+      prisma.clientPhotoReport.count({ where: { projectId, ...publishedPhotoWhere } }),
     ]);
 
     if (!project) {
@@ -46,6 +54,28 @@ export async function GET() {
     const photoPreview = project.photoReports;
     const docPreview = project.documents.slice(0, 5);
 
+    const stageNodes = project.stages.map((s) => ({
+      id: s.id,
+      parentId: s.parentId,
+      status: s.status,
+    }));
+    const overallProgress = await resolveClientOverallProgress(
+      project.id,
+      stageNodes,
+      project.overallProgress
+    );
+
+    const stagesWithMeta = project.stages.map((s) => ({
+      id: s.id,
+      parentId: s.parentId,
+      status: s.status,
+      title: s.title,
+      iconKey: s.iconKey,
+      order: s.order,
+    }));
+    const currentStagesInProgress = getCurrentStagesInProgress(stagesWithMeta);
+    const currentStageLabel = formatCurrentStageLabel(stagesWithMeta);
+
     return NextResponse.json({
       project: {
         id: project.id,
@@ -57,8 +87,9 @@ export async function GET() {
         startDate: project.startDate?.toISOString() ?? null,
         plannedEndDate: project.plannedEndDate?.toISOString() ?? null,
         coverImageUrl: project.coverImageUrl,
-        overallProgress: project.overallProgress,
-        currentStageLabel: project.currentStageLabel,
+        overallProgress,
+        currentStageLabel,
+        currentStagesInProgress,
         foremanName: project.foremanName,
         cameraStreamUrl: project.cameraStreamUrl,
         stages: project.stages,

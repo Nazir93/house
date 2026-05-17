@@ -21,24 +21,23 @@ npm run dev
 > Без PostgreSQL сайт работает нормально (контент берётся из захардкоженных данных).
 > Админка откроется, но не сможет сохранять/загружать данные из БД.
 
-### 2. Запуск с базой данных (Docker)
+### 2. Запуск с базой данных (PostgreSQL локально)
 
-Убедитесь, что Docker Desktop установлен и запущен.
+Установите [PostgreSQL](https://www.postgresql.org/download/) (Windows — установщик с официального сайта), создайте базу и пользователя.
+
+В `frontend/.env.local` укажите подключение, например:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@127.0.0.1:5432/house?schema=public"
+```
 
 ```bash
-# Из корня проекта
-docker compose up postgres -d
-
-# Применить схему БД
 cd frontend
-npx prisma db push
-
-# Если ведёте миграции (лимит лидов LeadIpRateBucket и др.):
-# npx prisma migrate dev
-
-# Запустить dev-сервер
+npx prisma migrate deploy
 npm run dev
 ```
+
+Проверка: `npm run db:verify`
 
 ### 3. Вход в админку
 
@@ -46,11 +45,9 @@ npm run dev
 - **Email:** `admin@dom.ru`
 - **Пароль:** значение `ADMIN_SECRET` из `.env.local` (сейчас: `dev-secret-change-in-production`)
 
-### 4. Полный запуск (Next.js + PostgreSQL + Nginx)
+### 4. Продакшен на VPS
 
-```bash
-docker compose up -d
-```
+Next.js через **PM2**, PostgreSQL на сервере, **Nginx** как reverse proxy. Подробно: `frontend/DEPLOY-SERVER.md`, `DEPLOY-STEPS.md`.
 
 ---
 
@@ -237,7 +234,7 @@ NEXT_PUBLIC_PUBLISHER_LOGO_URL="/icon.png"
 - **Database:** PostgreSQL 16
 - **ORM:** Prisma 5
 - **Auth:** NextAuth v4
-- **Deploy:** Docker + Nginx
+- **Deploy:** PM2 + Nginx
 - **Icons:** Lucide React
 - **Forms:** React Hook Form + Zod
 - **Animations:** Framer Motion

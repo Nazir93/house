@@ -22,10 +22,9 @@ cd /var/www/house && bash scripts/deploy-vps.sh
 
 - отдельный файл `.env` / `.env.production` в каталоге `frontend` (если процесс его подхватывает);
 - **pm2** — `ecosystem.config.js` → `env`;
-- **Docker** — `environment:` в `docker-compose.yml` или соседний `.env`;
 - **systemd** — `EnvironmentFile=/path/to/app.env`.
 
-После **любого** изменения переменных нужен **перезапуск** процесса Node (`pm2 restart`, `docker compose up -d`, `systemctl restart …`).
+После **любого** изменения переменных нужен **перезапуск** процесса Node (`pm2 restart`, `systemctl restart …`).
 
 ---
 
@@ -76,7 +75,7 @@ cd /var/www/house/frontend && npm run env:check && npm run db:verify
 
 ## Первый запуск: связать админку и входы клиентов
 
-Секреты **в Git не кладутся** — задаются только на сервере в `frontend/.env`, **PM2 `env`**, **systemd** или **Docker**.
+Секреты **в Git не кладутся** — задаются только на сервере в `frontend/.env`, **PM2 `env`** или **systemd**.
 
 ### 1. База и миграции
 

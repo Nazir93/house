@@ -22,14 +22,14 @@ describe("client-portal-labels", () => {
 
   it("paymentStatusLabel", () => {
     expect(paymentStatusLabel("PAID")).toBe("Оплачен");
-    expect(paymentStatusLabel("EXPECTED")).toBe("Ожидается");
+    expect(paymentStatusLabel("EXPECTED")).toBe("Ожидает оплаты");
     expect(paymentStatusLabel("NOT_ISSUED")).toBe("Не выставлен");
   });
 
   it("stageStatusLabel", () => {
-    expect(stageStatusLabel("DONE")).toBe("Завершён");
+    expect(stageStatusLabel("DONE")).toBe("Сдан клиенту");
     expect(stageStatusLabel("IN_PROGRESS")).toBe("В работе");
-    expect(stageStatusLabel("NOT_STARTED")).toBe("Не начат");
+    expect(stageStatusLabel("NOT_STARTED")).toBe("Ожидает старта");
   });
 
   it("ticketStatusLabel", () => {

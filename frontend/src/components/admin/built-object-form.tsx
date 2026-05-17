@@ -11,6 +11,7 @@ import { AdminSelect } from "@/components/admin/admin-select";
 import { CASE_STUDY_CONSTRUCTION_PHASES } from "@/lib/portfolio-case-study-phases";
 import { initialPhaseMediaForm, mediaUrlsForForm } from "@/lib/built-object-admin-media";
 import { BUILT_OBJECT_MAP_DISTRICTS, BUILT_OBJECT_MAP_REGIONS } from "@/lib/built-object-map-taxonomy";
+import { BuiltObjectMapPicker } from "@/components/admin/built-object-map-picker";
 
 const MATERIALS = [
   ["GAS_BLOCK", "Газобетон"],
@@ -169,9 +170,14 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <input value={form.location} onChange={(e) => set("location", e.target.value)} placeholder="Адрес/населенный пункт" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
-          <input value={form.latitude} onChange={(e) => set("latitude", e.target.value)} placeholder="Широта" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
-          <input value={form.longitude} onChange={(e) => set("longitude", e.target.value)} placeholder="Долгота" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
+          <input value={form.latitude} onChange={(e) => set("latitude", e.target.value)} placeholder="Широта (≈59 для СПб)" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
+          <input value={form.longitude} onChange={(e) => set("longitude", e.target.value)} placeholder="Долгота (≈30 для СПб)" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
         </div>
+        <BuiltObjectMapPicker
+          latitude={form.latitude}
+          longitude={form.longitude}
+          onCoordinatesChange={(lat, lon) => setForm((prev) => ({ ...prev, latitude: lat, longitude: lon }))}
+        />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <AdminSelect
             value={form.regionSlug}

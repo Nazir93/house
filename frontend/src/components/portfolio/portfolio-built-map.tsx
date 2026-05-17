@@ -5,6 +5,11 @@ import L from "leaflet";
 import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { BuiltObjectItem, BuiltObjectSiteStatus } from "@/lib/construction-shared";
+import {
+  DEFAULT_MAP_CENTER,
+  PORTFOLIO_MAP_TILE_ATTRIBUTION,
+  PORTFOLIO_MAP_TILE_URL,
+} from "@/lib/map-tiles";
 
 if (typeof window !== "undefined") {
   delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: string })._getIconUrl;
@@ -50,7 +55,7 @@ function MapBackgroundClicks({ onClear }: { onClear: () => void }) {
   useMapEvents({
     click(e) {
       const t = e.originalEvent?.target as HTMLElement | undefined;
-      if (t?.closest?.(".leaflet-marker-icon")) return;
+      if (t?.closest?.(".leaflet-marker-icon, .everhouse-map-pin")) return;
       onClear();
     },
   });
@@ -62,9 +67,7 @@ export type PortfolioBuiltMapProps = {
   selectedId: string | null;
   onSelectMarker: (id: string) => void;
   onMapBackgroundClick: () => void;
-  /** Высота карты: по умолчанию как в портфолио */
   mapHeightClass?: string;
-  /** Убрать скругление и рамку (полноэкранный блок внутри explorer) */
   frameless?: boolean;
 };
 
@@ -84,7 +87,7 @@ export function PortfolioBuiltMap({
     () => withCoords.map((o) => [o.latitude!, o.longitude!] as [number, number]),
     [withCoords]
   );
-  const center: [number, number] = positions[0] ?? [59.93, 30.35];
+  const center: [number, number] = positions[0] ?? DEFAULT_MAP_CENTER;
 
   const iconsById = useMemo(() => {
     const m = new Map<string, L.DivIcon>();
@@ -100,13 +103,14 @@ export function PortfolioBuiltMap({
         className="rounded-2xl border p-6 text-sm"
         style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
       >
-        У объектов не заданы координаты — карта появится после заполнения широты и долготы в админке.
+        У объектов не заданы координаты — в админке кликните на карте, где стоит дом, и сохраните объект.
       </p>
     );
   }
 
-  const frame =
-    frameless ? "overflow-hidden rounded-none border-0" : "overflow-hidden rounded-[1.35rem] border border-[rgba(43,47,45,0.09)]";
+  const frame = frameless
+    ? "overflow-hidden rounded-none border-0"
+    : "overflow-hidden rounded-[1.35rem] border border-[rgba(43,47,45,0.09)]";
 
   return (
     <div className={frame}>
@@ -117,7 +121,7 @@ export function PortfolioBuiltMap({
         className={`z-0 w-full ${mapHeightClass} [&_.leaflet-control-attribution]:text-[10px]`}
         style={{ background: "var(--stone)" }}
       >
-        <TileLayer attribution="&copy; OpenStreetMap" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <TileLayer attribution={PORTFOLIO_MAP_TILE_ATTRIBUTION} url={PORTFOLIO_MAP_TILE_URL} />
         <MapBackgroundClicks onClear={onMapBackgroundClick} />
         <FitBounds positions={positions} />
         {withCoords.map((o) => (

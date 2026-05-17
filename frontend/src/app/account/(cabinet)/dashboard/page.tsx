@@ -1,20 +1,26 @@
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { CheckCircle2, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { getClientProjectIdFromSession } from "@/lib/client-session";
 import { prisma } from "@/lib/db";
-import { formatRub } from "@/lib/construction-shared";
-import { StageIcon } from "@/components/account/stage-icon";
-import {
-  formatDateRu,
-  kopeksToRubles,
-  paymentStatusLabel,
-  stageStatusLabel,
-  ticketStatusLabel,
-} from "@/lib/client-portal-labels";
+import { AccountPaymentsDashboardBlock } from "@/components/account/account-payments-dashboard-block";
+import { AccountObjectCardProgress } from "@/components/account/account-object-card-progress";
+import { DashboardStagesStrip } from "@/components/account/dashboard-stages-strip";
+import { formatDateRu, ticketStatusLabel } from "@/lib/client-portal-labels";
+import { ClientDocumentDownloadLink } from "@/components/account/client-document-download-link";
+import { formatDocumentClientStatusLine, isDocumentSigned } from "@/lib/client-document-signature";
+import { isStageCompleteForDisplay } from "@/lib/client-project-progress";
+import { getCurrentStagesInProgress, getEffectiveStageStatus } from "@/lib/client-project-stage-status";
+import { resolveClientOverallProgress } from "@/lib/client-project-overall-progress";
 import { AccountAttentionStrip } from "@/components/account/account-attention-strip";
 import { SupportNewTicketForm } from "@/components/account/support-new-ticket-form";
+import {
+  clientDocumentOrderBy,
+  clientPhotoReportOrderBy,
+  publishedDocumentWhere,
+  publishedPhotoWhere,
+} from "@/lib/client-portal-order";
 
 export const metadata = {
   title: "Главная — личный кабинет",
@@ -31,8 +37,8 @@ export default async function AccountDashboardPage() {
       include: {
         stages: { orderBy: { order: "asc" } },
         payments: { orderBy: [{ order: "asc" }, { dueDate: "asc" }] },
-        documents: { orderBy: { uploadedAt: "desc" }, take: 5 },
-        photoReports: { orderBy: [{ order: "asc" }, { shotAt: "desc" }], take: 6 },
+        documents: { where: publishedDocumentWhere, orderBy: clientDocumentOrderBy, take: 5 },
+        photoReports: { where: publishedPhotoWhere, orderBy: clientPhotoReportOrderBy, take: 6 },
         tickets: {
           orderBy: { updatedAt: "desc" },
           take: 5,
@@ -40,21 +46,36 @@ export default async function AccountDashboardPage() {
         houseProject: { select: { slug: true, title: true } },
       },
     }),
-    prisma.clientDocument.count({ where: { projectId } }),
-    prisma.clientPhotoReport.count({ where: { projectId } }),
+    prisma.clientDocument.count({ where: { projectId, ...publishedDocumentWhere } }),
+    prisma.clientPhotoReport.count({ where: { projectId, ...publishedPhotoWhere } }),
   ]);
 
   if (!project) redirect("/account/login");
 
-  const paymentsOpen = project.payments.filter(
-    (p) => p.status === "EXPECTED" || p.status === "NOT_ISSUED"
+  const topLevelStages = project.stages
+    .filter((s) => !s.parentId)
+    .sort((a, b) => a.order - b.order);
+  const stagesForComplete = project.stages.map((s) => ({
+    id: s.id,
+    parentId: s.parentId,
+    status: s.status,
+  }));
+
+  const overallProgress = await resolveClientOverallProgress(
+    project.id,
+    stagesForComplete,
+    project.overallProgress
   );
-  const upcoming =
-    paymentsOpen
-      .filter((p) => p.dueDate)
-      .sort((a, b) => a.dueDate!.getTime() - b.dueDate!.getTime())[0]
-      ?? paymentsOpen[0]
-      ?? null;
+
+  const stagesWithMeta = project.stages.map((s) => ({
+    id: s.id,
+    parentId: s.parentId,
+    status: s.status,
+    title: s.title,
+    iconKey: s.iconKey,
+    order: s.order,
+  }));
+  const currentStagesInProgress = getCurrentStagesInProgress(stagesWithMeta);
 
   const cover = project.coverImageUrl || "/images/banner-hero.png";
 
@@ -72,122 +93,64 @@ export default async function AccountDashboardPage() {
         </div>
         <div className="p-6 sm:p-8 flex flex-col justify-center">
           <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight">{project.title}</h1>
-          <div className="mt-4 grid sm:grid-cols-2 gap-3 text-sm" style={{ color: "var(--text-muted)" }}>
-            {project.area != null ? (
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2.5 text-sm" style={{ color: "var(--text-muted)" }}>
+            <div className="space-y-2.5">
               <p>
-                <span className="font-medium" style={{ color: "var(--text)" }}>Площадь:</span> {project.area} м²
+                <span className="font-medium" style={{ color: "var(--text)" }}>Договор:</span> {project.contractNumber}
               </p>
-            ) : null}
-            {project.wallMaterial ? (
               <p>
-                <span className="font-medium" style={{ color: "var(--text)" }}>Стены:</span> {project.wallMaterial}
+                <span className="font-medium" style={{ color: "var(--text)" }}>Начало:</span>{" "}
+                {formatDateRu(project.startDate)}
               </p>
-            ) : null}
-            <p>
-              <span className="font-medium" style={{ color: "var(--text)" }}>Начало:</span>{" "}
-              {formatDateRu(project.startDate)}
-            </p>
-            <p>
-              <span className="font-medium" style={{ color: "var(--text)" }}>Сдача (план):</span>{" "}
-              {formatDateRu(project.plannedEndDate)}
-            </p>
-            <p>
-              <span className="font-medium" style={{ color: "var(--text)" }}>Договор:</span>{" "}
-              {project.contractNumber}
-            </p>
-            {project.foremanName ? (
               <p>
-                <span className="font-medium" style={{ color: "var(--text)" }}>Бригадир:</span>{" "}
-                {project.foremanName}
+                <span className="font-medium" style={{ color: "var(--text)" }}>Сдача дома:</span>{" "}
+                {formatDateRu(project.plannedEndDate)}
               </p>
-            ) : null}
-            {project.houseProject?.slug ? (
-              <p className="sm:col-span-2">
-                <span className="font-medium" style={{ color: "var(--text)" }}>Типовой проект:</span>{" "}
-                <Link
-                  href={`/projects/${project.houseProject.slug}`}
-                  className="font-medium underline-offset-2 hover:underline"
-                  style={{ color: "var(--accent)" }}
-                >
-                  {project.houseProject.title || project.houseProject.slug}
-                </Link>
-              </p>
-            ) : null}
-          </div>
-          <div className="mt-6 flex flex-wrap items-center gap-4">
-            <div className="flex-1 min-w-[140px]">
-              <div className="flex justify-between text-sm mb-1">
-                <span style={{ color: "var(--text-muted)" }}>Готовность объекта</span>
-                <span className="font-bold">{project.overallProgress}%</span>
-              </div>
-              <div
-                className="h-2 rounded-full overflow-hidden"
-                style={{ background: "color-mix(in srgb, var(--text) 12%, transparent)" }}
-              >
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{
-                    width: `${Math.min(100, Math.max(0, project.overallProgress))}%`,
-                    backgroundColor: "var(--accent)",
-                  }}
-                />
-              </div>
             </div>
-            {project.currentStageLabel ? (
-              <div className="min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-wider mb-1" style={{ color: "var(--text-muted)" }}>
-                  Текущий этап
-                </p>
-                <div
-                  className="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium border max-w-full"
-                  style={{ borderColor: "var(--border)" }}
-                >
-                  <StageIcon iconKey="hammer" className="h-4 w-4 opacity-80 shrink-0" />
-                  <span className="truncate max-w-[200px] sm:max-w-[280px]">{project.currentStageLabel}</span>
-                </div>
-              </div>
-            ) : null}
+            <div className="space-y-2.5">
+              <p>
+                <span className="font-medium" style={{ color: "var(--text)" }}>Площадь:</span>{" "}
+                {project.area != null ? `${project.area} м²` : "—"}
+              </p>
+              <p>
+                <span className="font-medium" style={{ color: "var(--text)" }}>Стены:</span> {project.wallMaterial || "—"}
+              </p>
+              <p>
+                <span className="font-medium" style={{ color: "var(--text)" }}>Бригадир:</span> {project.foremanName || "—"}
+              </p>
+            </div>
           </div>
+          {project.houseProject?.slug ? (
+            <p className="mt-3 text-sm" style={{ color: "var(--text-muted)" }}>
+              <span className="font-medium" style={{ color: "var(--text)" }}>Типовой проект:</span>{" "}
+              <Link
+                href={`/projects/${project.houseProject.slug}`}
+                className="font-medium underline-offset-2 hover:underline"
+                style={{ color: "var(--accent)" }}
+              >
+                {project.houseProject.title || project.houseProject.slug}
+              </Link>
+            </p>
+          ) : null}
+          <AccountObjectCardProgress overallProgress={overallProgress} currentStages={currentStagesInProgress} />
         </div>
       </section>
 
-      {/* Этапы — горизонтальная лента */}
-      <section>
-        <h2 className="font-heading text-lg font-bold mb-4">Этапы строительства</h2>
-        <div
-          className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin"
-          style={{ scrollbarColor: "var(--border) transparent" }}
-        >
-          {project.stages.map((stage, idx) => (
-            <div
-              key={stage.id}
-              className="min-w-[120px] sm:min-w-[140px] rounded-xl border p-3 text-center"
-              style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)" }}
-            >
-              <div
-                className="mx-auto mb-2 flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold border"
-                style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
-              >
-                {idx + 1}
-              </div>
-              <div className="flex justify-center mb-2">
-                {stage.status === "DONE" ? (
-                  <CheckCircle2 className="h-8 w-8 text-emerald-500" aria-hidden />
-                ) : (
-                  <StageIcon iconKey={stage.iconKey} className="h-8 w-8 opacity-80" />
-                )}
-              </div>
-              <p className="text-xs font-semibold leading-tight line-clamp-2">{stage.title}</p>
-              <p className="text-[10px] mt-1" style={{ color: "var(--text-muted)" }}>
-                {stageStatusLabel(stage.status)}
-              </p>
-            </div>
-          ))}
-        </div>
-        <Link href="/account/stages" className="inline-block mt-3 text-sm font-medium underline-offset-2 hover:underline" style={{ color: "var(--accent)" }}>
-          Все этапы
-        </Link>
-      </section>
+      <DashboardStagesStrip
+        stages={topLevelStages.map((stage) => {
+          const children = project.stages.filter((s) => s.parentId === stage.id);
+          return {
+            id: stage.id,
+            title: stage.title,
+            iconKey: stage.iconKey,
+            displayStatus:
+              children.length > 0
+                ? getEffectiveStageStatus(stage, stagesForComplete)
+                : stage.status,
+            complete: isStageCompleteForDisplay(stage, stagesForComplete),
+          };
+        })}
+      />
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Камера */}
@@ -273,55 +236,7 @@ export default async function AccountDashboardPage() {
         </section>
       </div>
 
-      {/* Платежи */}
-      <section
-        className="rounded-2xl border p-4 sm:p-6"
-        style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)" }}
-      >
-        <h2 className="font-heading font-bold mb-4">Платежи</h2>
-        {upcoming ? (
-          <div
-            className="mb-6 rounded-xl p-4 border"
-            style={{ borderColor: "var(--accent)", background: "color-mix(in srgb, var(--accent) 8%, var(--card-bg))" }}
-          >
-            <p className="text-xs uppercase tracking-wider font-semibold" style={{ color: "var(--text-muted)" }}>
-              Следующий платёж
-            </p>
-            <p className="text-2xl font-bold mt-1">{formatRub(kopeksToRubles(upcoming.amountKopeks))}</p>
-            <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
-              {upcoming.label}
-              {upcoming.dueDate ? ` · до ${formatDateRu(upcoming.dueDate)}` : ""}
-            </p>
-          </div>
-        ) : null}
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr style={{ color: "var(--text-muted)", borderColor: "var(--border)" }} className="text-left border-b">
-                <th className="pb-2 pr-3 font-medium">Этап / основание</th>
-                <th className="pb-2 pr-3 font-medium">Сумма</th>
-                <th className="pb-2 pr-3 font-medium">Статус</th>
-                <th className="pb-2 pr-3 font-medium">Срок</th>
-                <th className="pb-2 font-medium whitespace-nowrap">Оплачен</th>
-              </tr>
-            </thead>
-            <tbody>
-              {project.payments.map((p) => (
-                <tr key={p.id} className="border-b" style={{ borderColor: "var(--border)" }}>
-                  <td className="py-2 pr-3">{p.label}</td>
-                  <td className="py-2 pr-3 tabular-nums">{formatRub(kopeksToRubles(p.amountKopeks))}</td>
-                  <td className="py-2 pr-3">{paymentStatusLabel(p.status)}</td>
-                  <td className="py-2 pr-3 tabular-nums">{formatDateRu(p.dueDate)}</td>
-                  <td className="py-2 tabular-nums">{formatDateRu(p.paidAt)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <Link href="/account/payments" className="inline-block mt-4 text-sm font-medium" style={{ color: "var(--accent)" }}>
-          Подробнее о платежах
-        </Link>
-      </section>
+      <AccountPaymentsDashboardBlock payments={project.payments} />
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Документы */}
@@ -337,21 +252,27 @@ export default async function AccountDashboardPage() {
           </div>
           <ul className="space-y-2">
             {project.documents.map((d) => (
-              <li key={d.id} className="flex items-center gap-2 text-sm rounded-xl border p-3" style={{ borderColor: "var(--border)", backgroundColor: "color-mix(in srgb, var(--bg) 40%, transparent)" }}>
+              <li key={d.id} className="flex flex-wrap items-center gap-2 text-sm rounded-xl border p-3" style={{ borderColor: "var(--border)", backgroundColor: "color-mix(in srgb, var(--bg) 40%, transparent)" }}>
                 <FileText className="h-7 w-7 shrink-0 opacity-70" aria-hidden />
                 <span className="truncate flex-1 min-w-0" title={d.filename}>{d.filename}</span>
-                <span className="shrink-0 text-xs tabular-nums" style={{ color: "var(--text-muted)" }}>
-                  {formatDateRu(d.uploadedAt)}
+                <span
+                  className="shrink-0 text-xs font-medium whitespace-nowrap"
+                  style={{
+                    color: isDocumentSigned(d.signatureStatus) ? "var(--accent)" : "var(--text-muted)",
+                  }}
+                >
+                  {formatDocumentClientStatusLine(d.signatureStatus, d.signedAt)}
                 </span>
-                <a
-                  href={d.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                {!isDocumentSigned(d.signatureStatus) ? (
+                  <span className="shrink-0 text-xs tabular-nums" style={{ color: "var(--text-muted)" }}>
+                    {formatDateRu(d.uploadedAt)}
+                  </span>
+                ) : null}
+                <ClientDocumentDownloadLink
+                  documentId={d.id}
                   className="shrink-0 text-xs font-semibold"
                   style={{ color: "var(--accent)" }}
-                >
-                  Скачать
-                </a>
+                />
               </li>
             ))}
           </ul>

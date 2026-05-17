@@ -52,6 +52,9 @@ export function ClientProjectNewForm() {
         Назад
       </Link>
       <h1 className="text-2xl font-bold">Новый клиентский объект</h1>
+      <p className="text-sm text-white/45">
+        Будут созданы 8 основных этапов по ТЗ (инженерия и благоустройство — с подэтапами).
+      </p>
       <form onSubmit={submit} className="space-y-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-6">
         {err ? <p className="text-sm text-red-400">{err}</p> : null}
         <div>
