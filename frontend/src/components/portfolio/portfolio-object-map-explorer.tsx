@@ -83,9 +83,6 @@ export function PortfolioObjectMapExplorer({
           <h1 className="mt-2 font-heading text-2xl font-bold tracking-tight text-[var(--accent)] md:text-3xl dark:text-[var(--text)]">
             Карта построенных объектов
           </h1>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-[var(--text-muted)]">
-            Выберите объект на карте — откроется краткая карточка. Переход к полному кейсу — только по кнопке «Открыть проект в портфолио».
-          </p>
         </header>
       ) : null}
 

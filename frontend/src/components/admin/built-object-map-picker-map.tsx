@@ -2,13 +2,11 @@
 
 import { useEffect } from "react";
 import L from "leaflet";
-import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, Marker, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import {
-  DEFAULT_MAP_CENTER,
-  PORTFOLIO_MAP_TILE_ATTRIBUTION,
-  PORTFOLIO_MAP_TILE_URL,
-} from "@/lib/map-tiles";
+import { LeafletAttributionClean } from "@/components/map/leaflet-attribution-clean";
+import { PortfolioMapTileLayer } from "@/components/map/portfolio-map-tile-layer";
+import { DEFAULT_MAP_CENTER } from "@/lib/map-tiles";
 
 if (typeof window !== "undefined") {
   delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: string })._getIconUrl;
@@ -55,7 +53,8 @@ export function BuiltObjectMapPickerMap({ latitude, longitude, onPick }: BuiltOb
       scrollWheelZoom
       className="z-0 h-[280px] w-full rounded-xl [&_.leaflet-control-attribution]:text-[9px]"
     >
-      <TileLayer attribution={PORTFOLIO_MAP_TILE_ATTRIBUTION} url={PORTFOLIO_MAP_TILE_URL} />
+      <PortfolioMapTileLayer />
+      <LeafletAttributionClean />
       <MapClickPlace onPick={onPick} />
       <MapViewSync lat={latitude} lon={longitude} />
       {latitude != null && longitude != null ? (

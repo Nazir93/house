@@ -2,14 +2,12 @@
 
 import { useEffect, useMemo } from "react";
 import L from "leaflet";
-import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, Marker, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import type { BuiltObjectItem, BuiltObjectSiteStatus } from "@/lib/construction-shared";
-import {
-  DEFAULT_MAP_CENTER,
-  PORTFOLIO_MAP_TILE_ATTRIBUTION,
-  PORTFOLIO_MAP_TILE_URL,
-} from "@/lib/map-tiles";
+import { LeafletAttributionClean } from "@/components/map/leaflet-attribution-clean";
+import { PortfolioMapTileLayer } from "@/components/map/portfolio-map-tile-layer";
+import { DEFAULT_MAP_CENTER } from "@/lib/map-tiles";
 
 if (typeof window !== "undefined") {
   delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: string })._getIconUrl;
@@ -121,7 +119,8 @@ export function PortfolioBuiltMap({
         className={`z-0 w-full ${mapHeightClass} [&_.leaflet-control-attribution]:text-[10px]`}
         style={{ background: "var(--stone)" }}
       >
-        <TileLayer attribution={PORTFOLIO_MAP_TILE_ATTRIBUTION} url={PORTFOLIO_MAP_TILE_URL} />
+        <PortfolioMapTileLayer />
+        <LeafletAttributionClean />
         <MapBackgroundClicks onClear={onMapBackgroundClick} />
         <FitBounds positions={positions} />
         {withCoords.map((o) => (
