@@ -43,7 +43,7 @@ export function ClientStageAccordion({ stages }: { stages: ClientStageAccordionI
   const [expanded, setExpanded] = useState<Set<string>>(() => defaultExpandedIds(topLevel, all));
 
   if (topLevel.length === 0) {
-    return <p style={{ color: "var(--text-muted)" }}>Этапы ещё не добавлены.</p>;
+    return <p className="text-sm opacity-60">—</p>;
   }
 
   const toggle = (id: string) => {

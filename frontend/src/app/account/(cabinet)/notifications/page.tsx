@@ -23,13 +23,7 @@ export default async function AccountNotificationsPage() {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <div>
-        <h1 className="font-heading text-2xl font-bold">Уведомления</h1>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
-          Все события по объекту: платежи, этапы, документы, фотоотчёты и другие сообщения. Нажмите на
-          уведомление, чтобы перейти в нужный раздел.
-        </p>
-      </div>
+      <h1 className="font-heading text-2xl font-bold">Уведомления</h1>
 
       <section
         className="rounded-2xl border p-4 sm:p-6"

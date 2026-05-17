@@ -50,9 +50,7 @@ export default async function AccountCameraPage() {
           </a>
         </>
       ) : (
-        <p style={{ color: "var(--text-muted)" }}>
-          Ссылка на трансляцию не настроена. Свяжитесь с менеджером.
-        </p>
+        <p className="text-sm opacity-60">—</p>
       )}
     </div>
   );

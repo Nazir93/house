@@ -66,7 +66,7 @@ cd /var/www/house/frontend && npm run env:check && npm run db:verify
 
 | Что нужно | Действие |
 |-----------|----------|
-| Таблицы `ClientConstructionProject` и связанные | Входит в миграции Prisma (`prisma/migrations/..._client_portal`). На сервере: **`npx prisma migrate deploy`** из каталога `frontend` после `npm ci`. |
+| Таблицы `ClientConstructionProject` и связанные | Цепочка миграций в `prisma/migrations/` (от `client_portal` до документов, уведомлений, `PHOTO_NEW`). На сервере: **`bash /var/www/house/scripts/deploy-vps.sh`** или `npx prisma migrate deploy` после `npm ci`. |
 | Учётка клиента | В админке: **«Клиенты (кабинет)»** → `/admin/client-projects` → создать объект, задать **номер договора** и **пароль** (они же для входа на `/account/login`). |
 | Переменные | Те же, что для сайта: `DATABASE_URL`, `NEXTAUTH_*`, `ADMIN_*`. Отдельный секрет для кабинета не требуется — пароль клиента хранится в БД (хэш). |
 | Внешний портал | Если задан **`NEXT_PUBLIC_ACCOUNT_PORTAL_URL`**, раздел `/account` может редиректить наружу — для встроенного кабинета оставьте пустым (см. `.env.example`). |

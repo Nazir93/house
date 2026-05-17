@@ -31,9 +31,7 @@ export function AccountPaymentsDashboardBlock({
       {previewRows.length > 0 ? (
         <ClientPaymentsScheduleTable payments={previewRows} variant="dashboard" />
       ) : (
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-          График платежей не заведён.
-        </p>
+        <p className="text-sm opacity-60">—</p>
       )}
 
       {totalCount > 0 ? (
@@ -42,7 +40,7 @@ export function AccountPaymentsDashboardBlock({
           className="inline-block mt-4 text-sm font-medium"
           style={{ color: "var(--accent)" }}
         >
-          {totalCount > 2 ? "Смотреть все" : "Подробнее о платежах"}
+          Все
         </Link>
       ) : null}
     </section>

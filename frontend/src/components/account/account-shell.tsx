@@ -135,13 +135,7 @@ export function AccountShell({
             <span className="account-sidebar-brand-text text-base truncate transition-opacity">{SITE_NAME}</span>
           </Link>
         </div>
-        <p
-          className="account-sidebar-subtitle px-3 -mt-1 pb-2 text-[10px] uppercase tracking-[0.14em]"
-          style={{ color: "var(--text-muted)" }}
-        >
-          Личный кабинет
-        </p>
-        <nav className="flex-1 overflow-y-auto px-2 py-1 space-y-0.5">
+        <nav className="flex-1 overflow-y-auto px-2 py-1 space-y-0.5 mt-1">
           {NAV.map(({ href, label, icon: Icon }) => {
             const active = pathname === href || (href !== "/account/dashboard" && pathname.startsWith(href));
             const navBadge =

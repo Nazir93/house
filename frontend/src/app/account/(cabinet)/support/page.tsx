@@ -28,7 +28,7 @@ export default async function AccountSupportPage() {
       <div className="space-y-4">
         <h2 className="font-semibold text-lg">История</h2>
         {tickets.length === 0 ? (
-          <p style={{ color: "var(--text-muted)" }}>Пока нет обращений.</p>
+          <p className="text-sm opacity-60">—</p>
         ) : (
           <ul className="space-y-4">
             {tickets.map((t) => (

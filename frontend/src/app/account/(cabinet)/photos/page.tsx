@@ -23,7 +23,7 @@ export default async function AccountPhotosPage() {
     <div className="space-y-6">
       <h1 className="font-heading text-2xl font-bold">Фотоотчёты</h1>
       {photos.length === 0 ? (
-        <p style={{ color: "var(--text-muted)" }}>Фотографии появятся позже.</p>
+        <p className="text-sm opacity-60">—</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {photos.map((ph) => (

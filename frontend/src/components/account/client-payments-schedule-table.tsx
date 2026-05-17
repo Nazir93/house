@@ -14,7 +14,7 @@ export function ClientPaymentsScheduleTable({
   variant?: "full" | "dashboard";
 }) {
   if (payments.length === 0) {
-    return <p style={{ color: "var(--text-muted)" }}>График платежей не заведён.</p>;
+    return <p className="text-sm opacity-60 p-4">—</p>;
   }
 
   const showPaidColumn = variant === "full";

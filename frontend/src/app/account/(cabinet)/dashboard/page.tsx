@@ -188,9 +188,7 @@ export default async function AccountDashboardPage() {
               </a>
             </div>
           ) : (
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-              Трансляция пока не подключена.
-            </p>
+            <p className="text-sm opacity-60">—</p>
           )}
         </section>
 
@@ -211,7 +209,7 @@ export default async function AccountDashboardPage() {
             </div>
           </div>
           {project.photoReports.length === 0 ? (
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>Фото появятся по мере строительства.</p>
+            <p className="text-sm opacity-60">—</p>
           ) : (
             <div className="grid grid-cols-3 gap-2">
               {project.photoReports.map((ph) => (
@@ -295,9 +293,6 @@ export default async function AccountDashboardPage() {
           <div className="mb-5">
             <SupportNewTicketForm />
           </div>
-          <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: "var(--text-muted)" }}>
-            Последние обращения
-          </p>
           <ul className="space-y-2">
             {project.tickets.map((t) => (
               <li key={t.id} className="flex flex-wrap items-center gap-2 text-sm">
@@ -315,7 +310,7 @@ export default async function AccountDashboardPage() {
             ))}
           </ul>
           {project.tickets.length === 0 ? (
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>Обращений пока нет.</p>
+            <p className="text-sm opacity-60">—</p>
           ) : null}
         </section>
       </div>

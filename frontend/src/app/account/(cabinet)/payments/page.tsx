@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getClientProjectIdFromSession } from "@/lib/client-session";
 import { prisma } from "@/lib/db";
@@ -24,16 +23,7 @@ export default async function AccountPaymentsPage() {
 
   return (
     <div className="space-y-6 max-w-4xl">
-      <div>
-        <h1 className="font-heading text-2xl font-bold">Платежи</h1>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
-          Полный график платежей. Документы для ознакомления и подписания — в разделе{" "}
-          <Link href="/account/documents" className="font-medium" style={{ color: "var(--accent)" }}>
-            Документы
-          </Link>
-          .
-        </p>
-      </div>
+      <h1 className="font-heading text-2xl font-bold">Платежи</h1>
 
       {upcoming ? <AccountPaymentsNextCard payment={upcoming} /> : null}
 
