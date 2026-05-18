@@ -21,9 +21,10 @@ import {
   Fence,
   Map,
 } from "lucide-react";
+import { resolveStageIconAssetUrl } from "@/lib/client-stage-icon-assets";
 import { cn } from "@/lib/utils";
 
-const MAP: Record<string, LucideIcon> = {
+const LUCIDE_MAP: Record<string, LucideIcon> = {
   circle: Circle,
   foundation: Landmark,
   walls: Layers,
@@ -51,7 +52,7 @@ const MAP: Record<string, LucideIcon> = {
   default: Circle,
 };
 
-/** Цвета иконок этапов: light / dark (п. 4 ТЗ). */
+/** Цвета иконок этапов: light / dark (п. 4–5 ТЗ). */
 const COLORED_CLASS: Record<string, string> = {
   foundation: "stage-icon-tint stage-icon-tint--foundation",
   walls: "stage-icon-tint stage-icon-tint--walls",
@@ -78,6 +79,8 @@ const COLORED_CLASS: Record<string, string> = {
   default: "stage-icon-tint stage-icon-tint--default",
 };
 
+const THEME_CLASS = "stage-icon-mask stage-icon-mask--theme";
+
 export function StageIcon({
   iconKey,
   className,
@@ -88,8 +91,35 @@ export function StageIcon({
   /** Маленькие цветные иконки для ленты на главной ЛК */
   colored?: boolean;
 }) {
-  const key = iconKey in MAP ? iconKey : "default";
-  const I = MAP[key] ?? MAP.default;
-  const tint = COLORED_CLASS[key] ?? COLORED_CLASS.default;
+  const assetUrl = resolveStageIconAssetUrl(iconKey);
+  const tint = COLORED_CLASS[iconKey in COLORED_CLASS ? iconKey : "default"] ?? COLORED_CLASS.default;
+
+  if (assetUrl) {
+    return (
+      <span
+        role="img"
+        aria-hidden
+        className={cn(
+          "inline-block shrink-0 bg-current",
+          THEME_CLASS,
+          colored ? tint : null,
+          className
+        )}
+        style={{
+          WebkitMaskImage: `url(${assetUrl})`,
+          maskImage: `url(${assetUrl})`,
+          WebkitMaskSize: "contain",
+          maskSize: "contain",
+          WebkitMaskRepeat: "no-repeat",
+          maskRepeat: "no-repeat",
+          WebkitMaskPosition: "center",
+          maskPosition: "center",
+        }}
+      />
+    );
+  }
+
+  const key = iconKey in LUCIDE_MAP ? iconKey : "default";
+  const I = LUCIDE_MAP[key] ?? LUCIDE_MAP.default;
   return <I className={cn(className, colored && tint)} aria-hidden />;
 }

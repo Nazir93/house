@@ -19,6 +19,8 @@ export type StageNotificationPayload = {
 export type DocumentNotificationPayload = {
   kind: "document";
   filename: string;
+  /** Для снятия уведомления при удалении документа. */
+  url?: string;
   /** manual — подписание в офисе; es — электронная подпись (когда подключена) */
   signingMode: "manual" | "es";
 };
@@ -120,6 +122,7 @@ export function buildPhotoNewNotification(input: {
 
 export function buildDocumentNewNotification(input: {
   filename: string;
+  url?: string;
   /** По умолчанию manual; es — когда в проекте включена ЭП */
   electronicSign?: boolean;
 }): {
@@ -138,6 +141,11 @@ export function buildDocumentNewNotification(input: {
     type: "DOCUMENT_NEW",
     title: DOCUMENT_NEW_NOTIFICATION_TITLE,
     body,
-    payload: { kind: "document", filename: input.filename, signingMode },
+    payload: {
+      kind: "document",
+      filename: input.filename,
+      ...(input.url ? { url: input.url } : {}),
+      signingMode,
+    },
   };
 }

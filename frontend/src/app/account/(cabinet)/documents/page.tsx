@@ -4,6 +4,8 @@ import { prisma } from "@/lib/db";
 import { clientDocumentOrderBy, publishedDocumentWhere } from "@/lib/client-portal-order";
 import { ClientDocumentsList } from "@/components/account/client-documents-list";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Документы — личный кабинет",
   robots: { index: false, follow: true },

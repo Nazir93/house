@@ -123,12 +123,6 @@ export function PortfolioObjectMapDrawer({ object, onClose }: Props) {
             >
               Открыть проект в портфолио
             </Link>
-            <Link
-              href="/contacts"
-              className="flex w-full items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-2.5 text-sm font-medium text-[var(--text)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
-            >
-              Посетить объект / экскурсия
-            </Link>
           </div>
 
           <button

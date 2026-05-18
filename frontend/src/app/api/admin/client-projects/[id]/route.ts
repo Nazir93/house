@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import {
   buildDraftDataFromAdminBody,
+  clientProjectDraftSectionSavedMessage,
   draftDataToJson,
   hasUnpublishedDraft,
+  mergeClientProjectDraft,
+  parseClientProjectDraftData,
+  parseClientProjectDraftSection,
 } from "@/lib/client-project-draft";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
@@ -48,7 +52,10 @@ export async function PUT(
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const draft = buildDraftDataFromAdminBody(body);
+    const section = parseClientProjectDraftSection(body.draftSection) ?? "main";
+    const existingDraft = parseClientProjectDraftData(exists.draftData);
+    const patch = buildDraftDataFromAdminBody(body);
+    const draft = mergeClientProjectDraft(existingDraft, patch, section);
     const nextContract = draft.contractNumber?.trim();
     if (nextContract && nextContract !== exists.contractNumber) {
       const clash = await prisma.clientConstructionProject.findFirst({
@@ -77,6 +84,8 @@ export async function PUT(
       ok: true,
       draftSavedAt: updated.draftSavedAt?.toISOString(),
       hasUnpublishedDraft: hasUnpublishedDraft(updated),
+      savedSection: section,
+      message: clientProjectDraftSectionSavedMessage(section),
     });
   } catch (e) {
     console.error("[ADMIN CLIENT PROJECT PUT]", e);

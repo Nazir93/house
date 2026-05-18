@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { clientDocumentDownloadUpdate } from "@/lib/client-document-download";
+import { documentSignatureSyncWhere } from "@/lib/client-document-signature-sync";
 import { prisma } from "@/lib/db";
 import { publishedDocumentWhere } from "@/lib/client-portal-order";
 
@@ -31,7 +32,11 @@ export async function GET(
     const update = clientDocumentDownloadUpdate(doc);
     if (update) {
       await prisma.clientDocument.updateMany({
-        where: { projectId, url: doc.url },
+        where: documentSignatureSyncWhere(projectId, {
+          url: doc.url,
+          filename: doc.filename,
+          order: doc.order,
+        }),
         data: update,
       });
     }

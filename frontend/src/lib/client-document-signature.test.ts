@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  documentSignatureBadgeClass,
   documentSignatureLabel,
   documentSigningHint,
   formatDocumentClientStatusLine,
@@ -31,6 +32,12 @@ describe("client-document-signature", () => {
     expect(formatDocumentClientStatusLine("SIGNED", new Date("2026-05-15T12:00:00"))).toMatch(
       /^Подписан \d{2}\.\d{2}\.\d{4}$/
     );
+  });
+
+  it("documentSignatureBadgeClass", () => {
+    expect(documentSignatureBadgeClass("SIGNED")).toContain("emerald");
+    expect(documentSignatureBadgeClass("AWAITING_SIGNATURE")).toContain("amber");
+    expect(documentSignatureBadgeClass("AWAITING_REVIEW")).toContain("border-white");
   });
 
   it("documentSigningHint", () => {

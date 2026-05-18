@@ -14,12 +14,32 @@ function parsePaymentStatus(v: unknown): ClientPaymentStatus {
   return v === "PAID" || v === "EXPECTED" || v === "NOT_ISSUED" ? v : "EXPECTED";
 }
 
-/** Применяет черновик к опубликованным данным ЛК и шлёт уведомления. */
+function documentsChanged(
+  oldDocs: { url: string }[],
+  newDocs: { url: string }[]
+): boolean {
+  if (oldDocs.length !== newDocs.length) return true;
+  const oldUrls = new Set(oldDocs.map((d) => d.url));
+  return newDocs.some((d) => !oldUrls.has(d.url));
+}
+
+function photosChanged(
+  oldPhotos: { url: string }[],
+  newPhotos: { url: string }[]
+): boolean {
+  if (oldPhotos.length !== newPhotos.length) return true;
+  const oldUrls = new Set(oldPhotos.map((p) => p.url));
+  return newPhotos.some((p) => !oldUrls.has(p.url));
+}
+
+/** Применяет черновик к опубликованным данным ЛК и шлёт уведомления только по изменённым блокам. */
 export async function publishClientProjectToCabinet(projectId: string): Promise<void> {
   const project = await prisma.clientConstructionProject.findUnique({ where: { id: projectId } });
   if (!project) throw new Error("NOT_FOUND");
 
   const draft = parseClientProjectDraftData(project.draftData);
+  const paymentsInDraft = draft?.payments !== undefined;
+  const stagesInDraft = draft?.stages !== undefined;
 
   const [oldPayments, oldStages, oldPublishedDocuments, oldPublishedPhotos] = await Promise.all([
     prisma.clientPayment.findMany({
@@ -28,7 +48,7 @@ export async function publishClientProjectToCabinet(projectId: string): Promise<
     }),
     prisma.clientProjectStage.findMany({
       where: { projectId },
-      select: { id: true, title: true, status: true },
+      select: { id: true, parentId: true, order: true, title: true, status: true },
     }),
     prisma.clientDocument.findMany({
       where: { projectId, isDraft: false },
@@ -47,8 +67,8 @@ export async function publishClientProjectToCabinet(projectId: string): Promise<
       await applyDraftFields(tx, projectId, project.contractNumber, draft);
     }
 
-    if (draft?.stages) {
-      const progressFromStages = await replaceClientProjectStages(tx, projectId, draft.stages);
+    if (stagesInDraft) {
+      const progressFromStages = await replaceClientProjectStages(tx, projectId, draft.stages!);
       const stageRows = await tx.clientProjectStage.findMany({
         where: { projectId },
         orderBy: { order: "asc" },
@@ -69,11 +89,11 @@ export async function publishClientProjectToCabinet(projectId: string): Promise<
       });
     }
 
-    if (draft?.payments) {
+    if (paymentsInDraft) {
       await tx.clientPayment.deleteMany({ where: { projectId } });
-      if (draft.payments.length > 0) {
+      if (draft!.payments!.length > 0) {
         await tx.clientPayment.createMany({
-          data: draft.payments.map((p, i) => ({
+          data: draft.payments!.map((p, i) => ({
             projectId,
             label: p.label,
             amountKopeks: paymentAmountKopeksFromAdminPayload({
@@ -105,15 +125,18 @@ export async function publishClientProjectToCabinet(projectId: string): Promise<
       }),
     ]);
 
+    const mediaDocsChanged = documentsChanged(oldPublishedDocuments, newPublishedDocuments);
+    const mediaPhotosChanged = photosChanged(oldPublishedPhotos, newPublishedPhotos);
+
     const notificationSpecs = collectNotificationsForPublish({
       oldPayments,
-      newPayments: draft?.payments ? newPaymentsAfterPublish : undefined,
+      newPayments: paymentsInDraft ? newPaymentsAfterPublish : undefined,
       oldStages,
-      draftStages: draft?.stages,
+      draftStages: stagesInDraft ? draft!.stages : undefined,
       oldDocuments: oldPublishedDocuments,
-      newDocuments: newPublishedDocuments,
+      newDocuments: mediaDocsChanged ? newPublishedDocuments : undefined,
       oldPhotos: oldPublishedPhotos,
-      newPhotos: newPublishedPhotos,
+      newPhotos: mediaPhotosChanged ? newPublishedPhotos : undefined,
     });
 
     if (notificationSpecs.length > 0) {

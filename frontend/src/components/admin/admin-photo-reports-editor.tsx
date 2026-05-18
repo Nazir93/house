@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, type ReactNode } from "react";
 import { GripVertical, Trash2, Upload } from "lucide-react";
 import { CmsImage } from "@/components/ui/cms-image";
 import { moveItemInArray } from "@/lib/reorder-list";
@@ -35,10 +35,16 @@ export function AdminPhotoReportsEditor({
   projectId,
   initialPhotos,
   onError,
+  headerActions,
+  surfaceClass = "",
+  onSectionDirty,
 }: {
   projectId: string;
   initialPhotos: AdminPhotoRow[];
   onError: (message: string) => void;
+  headerActions?: ReactNode;
+  surfaceClass?: string;
+  onSectionDirty?: () => void;
 }) {
   const [photos, setPhotos] = useState(() => sortPhotos(initialPhotos));
   const [uploading, setUploading] = useState(false);
@@ -78,11 +84,12 @@ export function AdminPhotoReportsEditor({
         if (Array.isArray(rows)) {
           setPhotos(normalizePhotoRows(rows));
         }
+        onSectionDirty?.();
       } finally {
         setSavingOrder(false);
       }
     },
-    [projectId, onError]
+    [projectId, onError, onSectionDirty]
   );
 
   const addPhotosByUrls = useCallback(
@@ -111,8 +118,9 @@ export function AdminPhotoReportsEditor({
         ])
       );
       onError("");
+      onSectionDirty?.();
     },
-    [projectId, onError]
+    [projectId, onError, onSectionDirty]
   );
 
   async function onPhotoFiles(e: React.ChangeEvent<HTMLInputElement>) {
@@ -153,6 +161,7 @@ export function AdminPhotoReportsEditor({
     const next = photos.filter((p) => p.id !== id);
     setPhotos(next);
     await persistOrder(next.map((p) => p.id));
+    onSectionDirty?.();
   }
 
   function handleDragStart(index: number) {
@@ -179,14 +188,19 @@ export function AdminPhotoReportsEditor({
   }
 
   return (
-    <section className="space-y-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
+    <section
+      className={`space-y-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-shadow ${surfaceClass}`}
+    >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-bold">Фотоотчёты</h2>
-        {(uploading || savingOrder) && (
-          <span className="text-xs text-white/45">
-            {uploading ? "Загрузка…" : "Сохранение порядка…"}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {headerActions}
+          {(uploading || savingOrder) && (
+            <span className="text-xs text-white/45">
+              {uploading ? "Загрузка…" : "Сохранение порядка…"}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2 items-end">
@@ -250,9 +264,6 @@ export function AdminPhotoReportsEditor({
           ))}
         </ul>
       )}
-      {photos.length > 1 ? (
-        <p className="text-[11px] text-white/35">Перетащите фото мышью, чтобы изменить порядок в кабинете клиента.</p>
-      ) : null}
     </section>
   );
 }

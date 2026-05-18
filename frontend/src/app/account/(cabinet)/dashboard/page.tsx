@@ -22,6 +22,8 @@ import {
   publishedPhotoWhere,
 } from "@/lib/client-portal-order";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Главная — личный кабинет",
   robots: { index: false, follow: true },

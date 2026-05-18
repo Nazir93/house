@@ -13,6 +13,7 @@ export function AdminMediaUpload({
   value,
   onChange,
   multiple = false,
+  showHint = true,
   className = "",
 }: {
   label: string;
@@ -21,6 +22,7 @@ export function AdminMediaUpload({
   onChange: (url: string) => void;
   /** Несколько файлов за один выбор (Ctrl/⌘ + клик); каждый загружается по очереди, URL передаётся в onChange по одному. */
   multiple?: boolean;
+  showHint?: boolean;
   className?: string;
 }) {
   const [uploading, setUploading] = useState(false);
@@ -110,11 +112,13 @@ export function AdminMediaUpload({
         ) : null}
       </div>
       {error ? <p className="text-red-400 text-xs mt-1.5">{error}</p> : null}
-      <p className="text-[11px] text-white/25 mt-1.5">
-        {accept === "image"
-          ? `До 30 МБ за файл. JPG, PNG, WebP, GIF, SVG, AVIF — растр по возможности режется до 1920px и сохраняется как WebP (качество 78).${multiple ? " Несколько файлов: Ctrl/⌘ + выбор или Shift + диапазон." : ""}`
-          : `До 250 МБ за файл. MP4, WebM, MOV, AVI и др. На прокси может быть свой лимит (часто 25–300 МБ). Файл без расширения — по MIME в браузере.${multiple ? " Несколько роликов: множественный выбор в диалоге." : ""}`}
-      </p>
+      {showHint ? (
+        <p className="text-[11px] text-white/25 mt-1.5">
+          {accept === "image"
+            ? `До 30 МБ за файл. JPG, PNG, WebP, GIF, SVG, AVIF — растр по возможности режется до 1920px и сохраняется как WebP (качество 78).${multiple ? " Несколько файлов: Ctrl/⌘ + выбор или Shift + диапазон." : ""}`
+            : `До 250 МБ за файл. MP4, WebM, MOV, AVI и др. На прокси может быть свой лимит (часто 25–300 МБ). Файл без расширения — по MIME в браузере.${multiple ? " Несколько роликов: множественный выбор в диалоге." : ""}`}
+        </p>
+      ) : null}
       {value && accept === "image" ? (
         <div className="relative mt-2 h-44 w-full max-w-lg">
           <CmsImage src={value} alt="" fill className="rounded-lg border border-white/[0.08] object-contain bg-black/20" sizes="512px" />

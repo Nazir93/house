@@ -2,7 +2,6 @@ import Link from "next/link";
 import { getPageMeta, getPageMetaFields } from "@/lib/get-page-meta";
 import { getBuiltObjects } from "@/lib/construction-data";
 import { SITE_NAME } from "@/lib/constants";
-import { PortfolioExcursionFab } from "@/components/portfolio/portfolio-excursion-fab";
 import { PortfolioObjectMapExplorer } from "@/components/portfolio/portfolio-object-map-explorer";
 
 export const revalidate = 60;
@@ -22,7 +21,6 @@ export default async function PortfolioMapPage() {
 
   return (
     <>
-      <PortfolioExcursionFab />
       <section className="pb-24 pt-28" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
         <div className="container mx-auto max-w-[1320px] px-5">
           <nav className="text-[12px] tracking-[0.02em] text-[var(--text-muted)] sm:text-[13px]" aria-label="Навигация по разделу">

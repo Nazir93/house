@@ -27,6 +27,100 @@ export type ClientProjectDraftData = {
   }>;
 };
 
+export type ClientProjectDraftSection =
+  | "main"
+  | "stages"
+  | "payments"
+  | "documents"
+  | "photos";
+
+const DRAFT_SECTIONS: ClientProjectDraftSection[] = [
+  "main",
+  "stages",
+  "payments",
+  "documents",
+  "photos",
+];
+
+export function parseClientProjectDraftSection(value: unknown): ClientProjectDraftSection | null {
+  if (typeof value !== "string") return null;
+  return DRAFT_SECTIONS.includes(value as ClientProjectDraftSection)
+    ? (value as ClientProjectDraftSection)
+    : null;
+}
+
+export const CLIENT_PROJECT_DRAFT_SECTION_LABELS: Record<ClientProjectDraftSection, string> = {
+  main: "Основная информация",
+  stages: "Этапы строительства",
+  payments: "Платежи",
+  documents: "Документы",
+  photos: "Фотоотчёты",
+};
+
+export function clientProjectDraftSectionSavedMessage(section: ClientProjectDraftSection): string {
+  return `${CLIENT_PROJECT_DRAFT_SECTION_LABELS[section]} сохранена в черновик. Уведомления клиенту не отправляются.`;
+}
+
+const MAIN_DRAFT_KEYS = [
+  "contractNumber",
+  "plainPassword",
+  "title",
+  "clientName",
+  "clientEmail",
+  "area",
+  "wallMaterial",
+  "startDate",
+  "plannedEndDate",
+  "coverImageUrl",
+  "foremanName",
+  "cameraStreamUrl",
+  "houseProjectId",
+] as const satisfies readonly (keyof ClientProjectDraftData)[];
+
+function assignDefinedMainFields(
+  target: ClientProjectDraftData,
+  patch: ClientProjectDraftData
+): void {
+  for (const key of MAIN_DRAFT_KEYS) {
+    if (patch[key] !== undefined) {
+      (target as Record<string, unknown>)[key] = patch[key];
+    }
+  }
+}
+
+/** Объединяет черновик: обновляет только поля выбранного блока. */
+export function mergeClientProjectDraft(
+  existing: ClientProjectDraftData | null,
+  patch: ClientProjectDraftData,
+  section: ClientProjectDraftSection
+): ClientProjectDraftData {
+  const base: ClientProjectDraftData = { ...(existing ?? {}) };
+
+  if (section === "documents" || section === "photos") {
+    return base;
+  }
+
+  if (section === "main") {
+    assignDefinedMainFields(base, patch);
+    return base;
+  }
+
+  if (section === "stages") {
+    if (patch.stages !== undefined) base.stages = patch.stages;
+    return base;
+  }
+
+  if (section === "payments") {
+    if (patch.payments !== undefined) base.payments = patch.payments;
+    return base;
+  }
+
+  assignDefinedMainFields(base, patch);
+  if (patch.stages !== undefined) base.stages = patch.stages;
+  if (patch.payments !== undefined) base.payments = patch.payments;
+  return base;
+}
+
 export function parseClientProjectDraftData(raw: unknown): ClientProjectDraftData | null {
   if (!raw || typeof raw !== "object") return null;
   return raw as ClientProjectDraftData;

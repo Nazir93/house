@@ -7,6 +7,11 @@ import {
   DOCUMENT_NEW_NOTIFICATION_TITLE,
 } from "@/lib/client-notification-messages";
 import {
+  documentNotificationMatchesDeletedDoc,
+  documentRowMatchesDeleteAnchor,
+  filterActiveClientNotifications,
+} from "@/lib/client-document-delete";
+import {
   collectNotificationsForPublish,
   detectNewDocumentNotifications,
 } from "@/lib/client-notification-sync";
@@ -97,6 +102,31 @@ describe("client-document-workflow (TZ manual signing)", () => {
     expect(signedAt).not.toBeNull();
     expect(formatDocumentSignedAtRu(signedAt)).toMatch(/16[./]05[./]2026/);
     expect(formatDocumentClientStatusLine("SIGNED", signedAt)).toMatch(/^Подписан /);
+  });
+
+  it("п.10: удаление — черновик и ЛК, уведомление снимается", () => {
+    const anchor = { url, filename, order: 0 };
+    expect(
+      documentRowMatchesDeleteAnchor({ url, filename, order: 0 }, anchor)
+    ).toBe(true);
+    expect(
+      documentNotificationMatchesDeletedDoc(
+        { kind: "document", filename, url, signingMode: "manual" },
+        anchor
+      )
+    ).toBe(true);
+    expect(
+      filterActiveClientNotifications(
+        [
+          {
+            id: "n1",
+            type: "DOCUMENT_NEW",
+            payload: { kind: "document", filename, signingMode: "manual" },
+          },
+        ],
+        []
+      )
+    ).toHaveLength(0);
   });
 
   it("повторная публикация без нового URL — без уведомления", () => {

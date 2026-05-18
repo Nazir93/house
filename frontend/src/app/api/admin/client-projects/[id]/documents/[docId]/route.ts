@@ -1,12 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { deleteClientDocumentWithNotifications } from "@/lib/client-document-delete";
 import { resolveAdminDocumentPatch } from "@/lib/client-document-admin-patch";
+import {
+  documentSignatureSyncWhere,
+  type DocumentSignatureAnchor,
+} from "@/lib/client-document-signature-sync";
 import { touchDraftSavedAt } from "@/lib/client-project-draft-media";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
 
-/** Ручная отметка «Подписан», дата и кто подписал (только администратор). */
+async function syncSignatureFields(
+  projectId: string,
+  anchor: DocumentSignatureAnchor,
+  data: Prisma.ClientDocumentUpdateManyMutationInput
+): Promise<void> {
+  await prisma.clientDocument.updateMany({
+    where: documentSignatureSyncWhere(projectId, anchor),
+    data,
+  });
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string; docId: string }> }
@@ -35,30 +51,24 @@ export async function PATCH(
       return NextResponse.json({ error: plan.error }, { status: plan.status });
     }
 
+    const anchor: DocumentSignatureAnchor = {
+      url: doc.url,
+      filename: doc.filename,
+      order: doc.order,
+    };
+
     if (plan.action === "update_signed_at") {
-      const updated = await prisma.clientDocument.updateMany({
-        where: { projectId, url: doc.url },
-        data: {
-          signedAt: plan.signedAt,
-          ...(plan.signedByName ? { signedByName: plan.signedByName } : {}),
-        },
+      await syncSignatureFields(projectId, anchor, {
+        signedAt: plan.signedAt,
+        ...(plan.signedByName ? { signedByName: plan.signedByName } : {}),
       });
-      if (updated.count === 0) {
-        return NextResponse.json({ error: "Not found" }, { status: 404 });
-      }
-      const row = await prisma.clientDocument.findFirst({ where: { id: docId } });
-      await touchDraftSavedAt(projectId);
-      return NextResponse.json(row);
+    } else {
+      await syncSignatureFields(projectId, anchor, plan.data);
     }
 
-    await prisma.clientDocument.updateMany({
-      where: { projectId, url: doc.url },
-      data: plan.data,
-    });
-
-    const updated = await prisma.clientDocument.findFirst({ where: { id: docId } });
+    const row = await prisma.clientDocument.findFirst({ where: { id: docId } });
     await touchDraftSavedAt(projectId);
-    return NextResponse.json(updated);
+    return NextResponse.json(row);
   } catch (e) {
     console.error("[ADMIN CLIENT DOC PATCH]", e);
     return NextResponse.json({ error: "DB error" }, { status: 500 });
@@ -80,9 +90,23 @@ export async function DELETE(
     if (!doc) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
-    await prisma.clientDocument.delete({ where: { id: docId } });
+
+    const anchor: DocumentSignatureAnchor = {
+      url: doc.url,
+      filename: doc.filename,
+      order: doc.order,
+    };
+
+    const result = await prisma.$transaction((tx) =>
+      deleteClientDocumentWithNotifications(tx, projectId, anchor)
+    );
+
+    if (result.documentsDeleted === 0) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
     await touchDraftSavedAt(projectId);
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, ...result });
   } catch (e) {
     console.error("[ADMIN CLIENT DOC DELETE]", e);
     return NextResponse.json({ error: "DB error" }, { status: 500 });

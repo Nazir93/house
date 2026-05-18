@@ -90,7 +90,7 @@ export async function PUT(
     }
 
     const existing = await prisma.clientDocument.findMany({
-      where: { projectId },
+      where: { projectId, ...draftDocumentWhere },
       select: { id: true },
     });
     const existingSet = new Set(existing.map((r) => r.id));

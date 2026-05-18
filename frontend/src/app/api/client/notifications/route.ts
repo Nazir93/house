@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { markClientNotificationsRead } from "@/lib/client-notifications";
+import { listClientNotificationsForCabinet } from "@/lib/client-notifications-query";
 
 export const dynamic = "force-dynamic";
 
@@ -14,14 +15,7 @@ export async function GET() {
   }
 
   try {
-    const [items, unreadCount] = await Promise.all([
-      prisma.clientNotification.findMany({
-        where: { projectId },
-        orderBy: { createdAt: "desc" },
-        take: 100,
-      }),
-      prisma.clientNotification.count({ where: { projectId, readAt: null } }),
-    ]);
+    const { items, unreadCount } = await listClientNotificationsForCabinet(projectId);
 
     return NextResponse.json({
       items: items.map((n) => ({

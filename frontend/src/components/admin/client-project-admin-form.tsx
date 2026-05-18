@@ -8,26 +8,31 @@ import type {
 } from "@prisma/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
+import {
+  AdminDraftSectionSaveControl,
+  AdminSectionHeader,
+  draftSectionSurfaceClass,
+} from "@/components/admin/admin-draft-section-save";
+import { AdminClientProjectPublishBar } from "@/components/admin/admin-client-project-publish-bar";
+import { AdminStagesEditor } from "@/components/admin/admin-stages-editor";
+import { useAdminDraftSectionSave } from "@/components/admin/use-admin-draft-section-save";
 import { AdminSelect } from "@/components/admin/admin-select";
 import { AdminDocumentsEditor } from "@/components/admin/admin-documents-editor";
 import {
   AdminPaymentsEditorTable,
   type AdminPaymentRow,
 } from "@/components/admin/admin-payments-editor-table";
+import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
 import { AdminPhotoReportsEditor } from "@/components/admin/admin-photo-reports-editor";
 import { ClientWallMaterialSelect } from "@/components/admin/client-wall-material-select";
-import {
-  createAdminStageRow,
-  orderedAdminStageIndices,
-  removeAdminStageWithChildren,
-  type AdminStageRow,
-} from "@/lib/admin-client-stage-rows";
+import { createAdminStageRow, type AdminStageRow } from "@/lib/admin-client-stage-rows";
 import { computeOverallProgressFromStages } from "@/lib/client-project-progress";
 import {
   formatCurrentStageLabel,
   getCurrentStagesInProgress,
 } from "@/lib/client-project-stage-status";
+import type { ClientProjectDraftSection } from "@/lib/client-project-draft";
 import { CLIENT_STAGE_STATUS_OPTIONS } from "@/lib/client-stage-status";
 
 const TICKET_STATUS_OPTIONS = [
@@ -151,8 +156,6 @@ export function ClientProjectAdminForm({
     [stages]
   );
 
-  const stageDisplayOrder = useMemo(() => orderedAdminStageIndices(stages), [stages]);
-
   const stagesWithMeta = useMemo(
     () =>
       stages.map((s) => ({
@@ -195,81 +198,113 @@ export function ClientProjectAdminForm({
   const [ticketStatus, setTicketStatus] = useState<Record<string, string>>({});
   const [hasUnpublishedDraft, setHasUnpublishedDraft] = useState(initial.hasUnpublishedDraft ?? false);
   const [publishing, setPublishing] = useState(false);
-
   useEffect(() => {
     setHasUnpublishedDraft(initial.hasUnpublishedDraft ?? false);
   }, [initial.hasUnpublishedDraft]);
 
-  const saveMain = useCallback(async () => {
-    setErr("");
-    setMsg("");
-    try {
-      const res = await fetch(`/api/admin/client-projects/${projectId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contractNumber,
-          plainPassword: plainPassword.trim() || undefined,
-          title,
-          clientName: clientName.trim() || null,
-          clientEmail: clientEmail.trim() || null,
-          area: area.trim() === "" ? null : parseInt(area, 10) || null,
-          wallMaterial: wallMaterial.trim() || null,
-          startDate: startDate || null,
-          plannedEndDate: plannedEndDate || null,
-          coverImageUrl: coverImageUrl.trim() || null,
-          foremanName: foremanName.trim() || null,
-          cameraStreamUrl: cameraStreamUrl.trim() || null,
-          houseProjectId: houseProjectId.trim() || null,
-          stages: stages.map((s) => ({
-            clientKey: s.clientKey,
-            parentClientKey: s.parentClientKey,
-            order: s.order,
-            title: s.title,
-            iconKey: s.iconKey,
-            status: s.status,
-          })),
-          payments: payments.map((p, i) => ({
-            order: p.order ?? i,
-            label: p.label,
-            amountRubles: p.amountRubles,
-            dueDate: p.dueDate || null,
-            status: p.status,
-            paidAt: p.paidAt || null,
-          })),
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setErr(data?.error || "Ошибка сохранения");
-        return;
+  useEffect(() => {
+    setCoverImageUrl(initial.coverImageUrl ?? "");
+  }, [initial.coverImageUrl]);
+
+  const buildDraftPayload = useCallback(
+    (section: ClientProjectDraftSection): Record<string, unknown> => {
+      switch (section) {
+        case "main":
+          return {
+            contractNumber,
+            plainPassword: plainPassword.trim() || undefined,
+            title,
+            clientName: clientName.trim() || null,
+            clientEmail: clientEmail.trim() || null,
+            area: area.trim() === "" ? null : parseInt(area, 10) || null,
+            wallMaterial: wallMaterial.trim() || null,
+            startDate: startDate || null,
+            plannedEndDate: plannedEndDate || null,
+            coverImageUrl: coverImageUrl.trim() || null,
+            foremanName: foremanName.trim() || null,
+            cameraStreamUrl: cameraStreamUrl.trim() || null,
+            houseProjectId: houseProjectId.trim() || null,
+          };
+        case "stages":
+          return {
+            stages: stages.map((s) => ({
+              clientKey: s.clientKey,
+              parentClientKey: s.parentClientKey,
+              order: s.order,
+              title: s.title,
+              iconKey: s.iconKey,
+              status: s.status,
+            })),
+          };
+        case "payments":
+          return {
+            payments: payments.map((p, i) => ({
+              order: p.order ?? i,
+              label: p.label,
+              amountRubles: p.amountRubles,
+              dueDate: p.dueDate || null,
+              status: p.status,
+              paidAt: p.paidAt || null,
+            })),
+          };
+        case "documents":
+        case "photos":
+          return {};
       }
-      setMsg("Черновик сохранён. Уведомления клиенту не отправляются — только после публикации в личный кабинет.");
-      setHasUnpublishedDraft(Boolean(data.hasUnpublishedDraft));
-      setPlainPassword("");
-      router.refresh();
-    } catch {
-      setErr("Сеть");
-    }
-  }, [
-    projectId,
-    contractNumber,
-    plainPassword,
-    title,
-    clientName,
-    clientEmail,
-    area,
-    wallMaterial,
-    startDate,
-    plannedEndDate,
-    coverImageUrl,
-    foremanName,
-    cameraStreamUrl,
-    houseProjectId,
-    stages,
-    payments,
-    router,
-  ]);
+    },
+    [
+      contractNumber,
+      plainPassword,
+      title,
+      clientName,
+      clientEmail,
+      area,
+      wallMaterial,
+      startDate,
+      plannedEndDate,
+      coverImageUrl,
+      foremanName,
+      cameraStreamUrl,
+      houseProjectId,
+      stages,
+      payments,
+    ]
+  );
+
+  const { getUiState, getErrorMessage, saveDraftSection, markMediaSectionDirty } =
+    useAdminDraftSectionSave({
+      projectId,
+      buildDraftPayload,
+      router,
+      setGlobalErr: setErr,
+    });
+
+  const handleSaveSection = useCallback(
+    async (section: ClientProjectDraftSection) => {
+      setMsg("");
+      const result = await saveDraftSection(section);
+      if (result.ok) {
+        setHasUnpublishedDraft(result.hasUnpublishedDraft);
+        if (section === "main") setPlainPassword("");
+      }
+    },
+    [saveDraftSection]
+  );
+
+  const sectionSaveControl = (section: ClientProjectDraftSection) => (
+    <AdminDraftSectionSaveControl
+      section={section}
+      uiState={getUiState(section)}
+      errorMessage={getErrorMessage(section)}
+      onSave={() => handleSaveSection(section)}
+    />
+  );
+
+  const sectionClass = (
+    section: ClientProjectDraftSection,
+    density: "normal" | "compact" = "normal"
+  ) =>
+    `${density === "compact" ? "space-y-3" : "space-y-4"} rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-shadow ${draftSectionSurfaceClass(getUiState(section))}`;
 
   async function publishToCabinet() {
     if (!confirm("Опубликовать текущий черновик в личный кабинет клиента?")) return;
@@ -330,6 +365,11 @@ export function ClientProjectAdminForm({
 
   return (
     <div className="space-y-8 max-w-5xl">
+      <AdminClientProjectPublishBar
+        publishing={publishing}
+        hasUnpublishedDraft={hasUnpublishedDraft}
+        onPublish={() => void publishToCabinet()}
+      />
       <div className="flex items-center gap-3">
         <Link
           href="/admin/client-projects"
@@ -354,8 +394,8 @@ export function ClientProjectAdminForm({
       {msg ? <p className="text-sm text-emerald-400">{msg}</p> : null}
       {err ? <p className="text-sm text-red-400">{err}</p> : null}
 
-      <section className="space-y-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
-        <h2 className="text-lg font-bold">Объект и доступ</h2>
+      <section className={sectionClass("main")}>
+        <AdminSectionHeader title="Объект и доступ" actions={sectionSaveControl("main")} />
         <div className="grid sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-[11px] uppercase text-white/40 mb-1">Номер договора</label>
@@ -425,8 +465,13 @@ export function ClientProjectAdminForm({
             <input className={inp} value={foremanName} onChange={(e) => setForemanName(e.target.value)} />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-[11px] uppercase text-white/40 mb-1">URL обложки</label>
-            <input className={inp} value={coverImageUrl} onChange={(e) => setCoverImageUrl(e.target.value)} />
+            <AdminMediaUpload
+              label="Обложка"
+              accept="image"
+              value={coverImageUrl}
+              onChange={setCoverImageUrl}
+              showHint={false}
+            />
           </div>
           <div className="sm:col-span-2">
             <label className="block text-[11px] uppercase text-white/40 mb-1">URL онлайн-камеры (iframe)</label>
@@ -439,110 +484,69 @@ export function ClientProjectAdminForm({
         </div>
       </section>
 
-      <section className="space-y-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold">Этапы</h2>
-          <button
-            type="button"
-            onClick={() =>
-              setStages((s) => [
-                ...s,
-                createAdminStageRow({
-                  title: "",
-                  order: s.filter((x) => !x.parentClientKey).length,
-                }),
-              ])
-            }
-            className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400"
-          >
-            <Plus size={14} /> Этап
-          </button>
-        </div>
-        <p className="text-xs text-white/40">
-          Прогресс: {computedProgress}% — по верхнеуровневым этапам со статусом «Сдан клиенту».
-        </p>
-        <div className="space-y-2">
-          {stageDisplayOrder.map(({ index: i, depth }) => {
-            const row = stages[i]!;
-            const isSub = depth > 0;
-            return (
-              <div
-                key={row.clientKey}
-                className="flex flex-wrap gap-2 items-end border border-white/[0.06] rounded-lg p-2"
-                style={{ marginLeft: depth * 16 }}
-              >
-              <input className={`${inp} w-12`} type="number" value={row.order} onChange={(e) => {
-                const next = [...stages];
-                next[i] = { ...row, order: parseInt(e.target.value, 10) || 0 };
-                setStages(next);
-              }} />
-              <input className={`${inp} flex-1 min-w-[120px]`} value={row.title} onChange={(e) => {
-                const next = [...stages];
-                next[i] = { ...row, title: e.target.value };
-                setStages(next);
-              }} placeholder={isSub ? "Подэтап" : "Название этапа"} />
-              <input className={`${inp} w-28`} value={row.iconKey} onChange={(e) => {
-                const next = [...stages];
-                next[i] = { ...row, iconKey: e.target.value };
-                setStages(next);
-              }} placeholder="iconKey" />
-              <AdminSelect
-                className="w-40 shrink-0"
-                triggerClassName={ADMIN_COMPACT_SELECT_TRIGGER}
-                value={row.status}
-                onValueChange={(v) => {
-                  const next = [...stages];
-                  next[i] = { ...row, status: v };
-                  setStages(next);
-                }}
-                options={CLIENT_STAGE_STATUS_OPTIONS}
-              />
-                {!isSub ? (
-                  <button
-                    type="button"
-                    className="inline-flex items-center gap-1 px-2 py-2 text-xs text-emerald-400/90 shrink-0"
-                    onClick={() => {
-                      const parentKey = row.clientKey;
-                      const subCount = stages.filter((s) => s.parentClientKey === parentKey).length;
-                      setStages((s) => [
-                        ...s,
-                        createAdminStageRow({
-                          title: "",
-                          parentClientKey: parentKey,
-                          order: subCount,
-                        }),
-                      ]);
-                    }}
-                  >
-                    <Plus size={14} /> Подэтап
-                  </button>
-                ) : null}
+      <section className={sectionClass("stages", "compact")}>
+        <AdminSectionHeader
+          title="Этапы"
+          actions={
+            <>
+              {sectionSaveControl("stages")}
               <button
                 type="button"
-                className="p-2 text-red-400/80"
-                onClick={() => setStages((s) => removeAdminStageWithChildren(s, i))}
+                onClick={() =>
+                  setStages((s) => [
+                    ...s,
+                    createAdminStageRow({
+                      title: "",
+                      order: s.filter((x) => !x.parentClientKey).length,
+                      iconKey: "foundation",
+                    }),
+                  ])
+                }
+                className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400"
               >
-                <Trash2 size={16} />
+                <Plus size={14} /> Этап
               </button>
-            </div>
-            );
-          })}
-        </div>
+            </>
+          }
+        />
+        <AdminStagesEditor
+          stages={stages}
+          onChange={setStages}
+          progressHint={`Прогресс: ${computedProgress}% — по верхнеуровневым этапам со статусом «Сдан клиенту».`}
+        />
       </section>
 
-      <AdminPaymentsEditorTable rows={payments} onChange={setPayments} />
+      <AdminPaymentsEditorTable
+        rows={payments}
+        onChange={setPayments}
+        headerActions={sectionSaveControl("payments")}
+        surfaceClass={draftSectionSurfaceClass(getUiState("payments"))}
+        onImportError={(msg) => {
+          setErr(msg);
+          setMsg("");
+        }}
+        onImported={() => {
+          setErr("");
+        }}
+      />
 
       <AdminDocumentsEditor
         projectId={projectId}
         initialDocuments={initial.documents}
         defaultClientName={initial.clientName}
         onError={setErr}
+        headerActions={sectionSaveControl("documents")}
+        surfaceClass={draftSectionSurfaceClass(getUiState("documents"))}
+        onSectionDirty={() => markMediaSectionDirty("documents")}
       />
 
       <AdminPhotoReportsEditor
         projectId={projectId}
         initialPhotos={initial.photoReports}
         onError={setErr}
+        headerActions={sectionSaveControl("photos")}
+        surfaceClass={draftSectionSurfaceClass(getUiState("photos"))}
+        onSectionDirty={() => markMediaSectionDirty("photos")}
       />
 
       <section className="space-y-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
@@ -587,27 +591,6 @@ export function ClientProjectAdminForm({
         {tickets.length === 0 ? <p className="text-white/40 text-sm">Нет обращений</p> : null}
       </section>
 
-      <div className="flex flex-wrap gap-3">
-        <button
-          type="button"
-          onClick={saveMain}
-          className="px-6 py-3 rounded-xl bg-white/[0.08] border border-white/[0.12] font-bold text-sm hover:bg-white/[0.12]"
-        >
-          Сохранить черновик
-        </button>
-        <button
-          type="button"
-          onClick={publishToCabinet}
-          disabled={publishing}
-          className="px-6 py-3 rounded-xl bg-[#0F3D2E] font-bold text-sm disabled:opacity-50"
-        >
-          {publishing ? "Публикация…" : "Опубликовать в личном кабинете"}
-        </button>
-      </div>
-      <p className="text-xs text-white/40 max-w-xl">
-        «Сохранить черновик» — правки только в админке, без уведомлений клиенту. Фото и документы тоже остаются черновиком.
-        «Опубликовать в личном кабинете» — клиент увидит данные; уведомления уйдут только при смене статусов (платёж «Ожидает оплаты», этап «В работе» / «Сдан клиенту»).
-      </p>
     </div>
   );
 }

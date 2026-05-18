@@ -850,6 +850,14 @@
   box-shadow: var(--adm-theme-toggle-shadow);
 }
 
+.admin-client-project-publish-bar {
+  background: var(--adm-theme-toggle-bg);
+  border: 1px solid var(--adm-theme-toggle-border);
+  box-shadow: var(--adm-theme-toggle-shadow);
+  border-radius: 0.75rem;
+  padding: 0.25rem;
+}
+
 /* Личный кабинет: премиальная подложка под тему сайта */
 .account-premium-shell {
   position: relative;
@@ -889,6 +897,19 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
     6px 0 48px rgba(0, 0, 0, 0.35);
+}
+
+/* PNG-иконки этапов: маска + цвет темы (light / dark) */
+.stage-icon-mask--theme {
+  color: rgb(28 32 36 / 0.88);
+}
+
+[data-theme="dark"] .stage-icon-mask--theme {
+  color: rgb(255 255 255 / 0.9);
+}
+
+.admin-app .stage-icon-mask--theme {
+  color: rgb(255 255 255 / 0.88);
 }
 
 /* ЛК: компактные цветные иконки этапов (light / dark) */

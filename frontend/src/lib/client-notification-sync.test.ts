@@ -38,8 +38,8 @@ describe("client-notification-sync", () => {
 
   it("detectStageStatusNotifications — этап в работе и сдан", () => {
     const old = [
-      { id: "s1", title: "Кровля", status: "NOT_STARTED" as const },
-      { id: "s2", title: "Окна", status: "IN_PROGRESS" as const },
+      { id: "s1", parentId: null, order: 0, title: "Кровля", status: "NOT_STARTED" as const },
+      { id: "s2", parentId: null, order: 1, title: "Окна", status: "IN_PROGRESS" as const },
     ];
     const incoming = [
       { clientKey: "s1", order: 0, title: "Кровля", iconKey: "roof", status: "IN_PROGRESS" },
@@ -69,7 +69,7 @@ describe("client-notification-sync", () => {
           dueDate: null,
         },
       ],
-      oldStages: [{ id: "s1", title: "Кровля", status: "NOT_STARTED" }],
+      oldStages: [{ id: "s1", parentId: null, order: 0, title: "Кровля", status: "NOT_STARTED" }],
       draftStages: [{ clientKey: "s1", order: 0, title: "Кровля", iconKey: "roof", status: "IN_PROGRESS" }],
     });
     expect(specs.length).toBeGreaterThanOrEqual(2);
@@ -120,6 +120,45 @@ describe("client-notification-sync", () => {
     });
     expect(specs).toHaveLength(1);
     expect(specs[0]?.type).toBe("PHOTO_NEW");
+  });
+
+  it("detectStageStatusNotifications — без уведомления при том же статусе и другом clientKey", () => {
+    const old = [
+      { id: "db-1", parentId: null, order: 0, title: "Кровля", status: "IN_PROGRESS" as const },
+    ];
+    const specs = detectStageStatusNotifications(old, [
+      { clientKey: "stage-0", order: 0, title: "Кровля", iconKey: "roof", status: "IN_PROGRESS" },
+    ]);
+    expect(specs).toHaveLength(0);
+  });
+
+  it("collectNotificationsForPublish — только платёж, этапы без изменений", () => {
+    const specs = collectNotificationsForPublish({
+      oldPayments: [{ order: 0, label: "Аванс", status: "NOT_ISSUED" }],
+      newPayments: [
+        {
+          order: 0,
+          label: "Аванс",
+          status: "EXPECTED",
+          amountKopeks: 100,
+          dueDate: null,
+        },
+      ],
+      oldStages: [{ id: "db-1", parentId: null, order: 0, title: "Кровля", status: "IN_PROGRESS" }],
+      draftStages: [{ clientKey: "stage-0", order: 0, title: "Кровля", iconKey: "roof", status: "IN_PROGRESS" }],
+    });
+    expect(specs).toHaveLength(1);
+    expect(specs[0]?.type).toBe("PAYMENT_EXPECTED");
+  });
+
+  it("collectNotificationsForPublish — без документов, если newDocuments не передан", () => {
+    const specs = collectNotificationsForPublish({
+      oldPayments: [],
+      newPayments: [],
+      oldStages: [],
+      draftStages: [],
+    });
+    expect(specs).toHaveLength(0);
   });
 
   it("detectStageStatusNotifications — новый подэтап в работе", () => {

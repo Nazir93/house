@@ -35,6 +35,18 @@ export function signatureStatusAfterClientDownload(
   return null;
 }
 
+export function documentSignatureBadgeClass(status: ClientDocumentSignatureStatus): string {
+  const base = "inline-block rounded-md border px-2 py-0.5 text-[11px] font-semibold leading-tight";
+  switch (status) {
+    case "SIGNED":
+      return `${base} border-emerald-500/45 bg-emerald-500/15 text-emerald-300`;
+    case "AWAITING_SIGNATURE":
+      return `${base} border-amber-500/40 bg-amber-500/12 text-amber-200`;
+    default:
+      return `${base} border-white/15 bg-white/[0.06] text-white/65`;
+  }
+}
+
 export function documentSigningHint(status: ClientDocumentSignatureStatus): string {
   switch (status) {
     case "SIGNED":

@@ -1,9 +1,13 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 import type { ClientDocumentSignatureMethod, ClientDocumentSignatureStatus } from "@prisma/client";
-import { FileText, GripVertical, Trash2, Upload } from "lucide-react";
-import { documentSignatureLabel } from "@/lib/client-document-signature";
+import { Check, FileText, GripVertical, Trash2, Upload } from "lucide-react";
+import {
+  documentSignatureBadgeClass,
+  documentSignatureLabel,
+} from "@/lib/client-document-signature";
 import {
   defaultAdminSignedDateInput,
   formatAdminSignedDateInput,
@@ -72,13 +76,21 @@ export function AdminDocumentsEditor({
   initialDocuments,
   defaultClientName,
   onError,
+  headerActions,
+  surfaceClass = "",
+  onSectionDirty,
 }: {
   projectId: string;
   initialDocuments: AdminDocumentRow[];
   defaultClientName: string | null;
   onError: (message: string) => void;
+  headerActions?: ReactNode;
+  surfaceClass?: string;
+  onSectionDirty?: () => void;
 }) {
+  const router = useRouter();
   const [documents, setDocuments] = useState(() => sortDocuments(initialDocuments));
+  const [savedDocId, setSavedDocId] = useState<string | null>(null);
   const [signDates, setSignDates] = useState<Record<string, string>>(() => {
     const map: Record<string, string> = {};
     for (const d of initialDocuments) {
@@ -101,6 +113,33 @@ export function AdminDocumentsEditor({
   const [docFilename, setDocFilename] = useState("");
   const [docUrl, setDocUrl] = useState("");
   const dragIndex = useRef<number | null>(null);
+
+  useEffect(() => {
+    const sorted = sortDocuments(initialDocuments);
+    setDocuments(sorted);
+    setSignDates((prev) => {
+      const next = { ...prev };
+      for (const d of sorted) {
+        next[d.id] = d.signedAt
+          ? formatAdminSignedDateInput(d.signedAt)
+          : prev[d.id] ?? defaultAdminSignedDateInput();
+      }
+      return next;
+    });
+    setSignedByNames((prev) => {
+      const next = { ...prev };
+      for (const d of sorted) {
+        next[d.id] = d.signedByName ?? defaultClientName ?? prev[d.id] ?? "";
+      }
+      return next;
+    });
+  }, [initialDocuments, defaultClientName]);
+
+  useEffect(() => {
+    if (!savedDocId) return;
+    const t = window.setTimeout(() => setSavedDocId(null), 2200);
+    return () => window.clearTimeout(t);
+  }, [savedDocId]);
 
   const uploadFile = useCallback(
     async (file: File): Promise<string | null> => {
@@ -134,11 +173,12 @@ export function AdminDocumentsEditor({
         if (Array.isArray(rows)) {
           setDocuments(normalizeDocumentRows(rows));
         }
+        onSectionDirty?.();
       } finally {
         setSavingOrder(false);
       }
     },
-    [projectId, onError]
+    [projectId, onError, onSectionDirty]
   );
 
   const addDocuments = useCallback(
@@ -172,8 +212,9 @@ export function AdminDocumentsEditor({
         return next;
       });
       onError("");
+      onSectionDirty?.();
     },
-    [projectId, onError, defaultClientName]
+    [projectId, onError, defaultClientName, onSectionDirty]
   );
 
   async function onDocFiles(e: React.ChangeEvent<HTMLInputElement>) {
@@ -256,6 +297,9 @@ export function AdminDocumentsEditor({
         return;
       }
       applyRowFromApi(id, data as Record<string, unknown>);
+      setSavedDocId(id);
+      onSectionDirty?.();
+      router.refresh();
     } finally {
       setSavingSignatureId(null);
     }
@@ -273,6 +317,9 @@ export function AdminDocumentsEditor({
     const next = documents.filter((d) => d.id !== id);
     setDocuments(next);
     await persistOrder(next.map((d) => d.id));
+    onError("");
+    onSectionDirty?.();
+    router.refresh();
   }
 
   function handleDragStart(index: number) {
@@ -299,18 +346,23 @@ export function AdminDocumentsEditor({
   }
 
   return (
-    <section className="space-y-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
+    <section
+      className={`space-y-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-shadow ${surfaceClass}`}
+    >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-lg font-bold">Документы</h2>
-        {(uploading || savingOrder || savingSignatureId) && (
-          <span className="text-xs text-white/45">
-            {uploading
-              ? "Загрузка…"
-              : savingOrder
-                ? "Сохранение порядка…"
-                : "Сохранение…"}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {headerActions}
+          {(uploading || savingOrder || savingSignatureId) && (
+            <span className="text-xs text-white/45">
+              {uploading
+                ? "Загрузка…"
+                : savingOrder
+                  ? "Сохранение порядка…"
+                  : "Сохранение…"}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2 items-end">
@@ -387,13 +439,23 @@ export function AdminDocumentsEditor({
                       <span className="break-words leading-snug">{d.filename}</span>
                     </div>
                   </td>
-                  <td className="py-2 pr-2 whitespace-nowrap text-white/70">
-                    {documentSignatureLabel(d.signatureStatus)}
-                    {d.signatureStatus === "SIGNED" && d.signedAt ? (
-                      <span className="block text-[10px] text-white/40 tabular-nums">
-                        {formatDocumentSignedAtRu(d.signedAt)}
+                  <td className="py-2 pr-2 min-w-[9.5rem]">
+                    <div className="flex flex-col gap-1">
+                      <span className={documentSignatureBadgeClass(d.signatureStatus)}>
+                        {documentSignatureLabel(d.signatureStatus)}
                       </span>
-                    ) : null}
+                      {d.signatureStatus === "SIGNED" && d.signedAt ? (
+                        <span className="text-[10px] text-white/40 tabular-nums">
+                          {formatDocumentSignedAtRu(d.signedAt)}
+                        </span>
+                      ) : null}
+                      {savedDocId === d.id ? (
+                        <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-400">
+                          <Check size={12} aria-hidden />
+                          Сохранено
+                        </span>
+                      ) : null}
+                    </div>
                   </td>
                   <td className="py-2 pr-2">
                     <input
@@ -475,11 +537,6 @@ export function AdminDocumentsEditor({
           </table>
         </div>
       )}
-      <p className="text-[11px] text-white/35 leading-relaxed">
-        Загрузка → «Ожидает ознакомления». После скачивания клиентом → «Ожидает подписания».
-        Статус «Подписан» и дату подписания указывает только администратор. Уведомление админу о
-        подписании клиентом — после подключения ЭП.
-      </p>
     </section>
   );
 }

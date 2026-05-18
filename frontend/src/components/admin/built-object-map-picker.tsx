@@ -40,13 +40,7 @@ export function BuiltObjectMapPicker({ latitude, longitude, onCoordinatesChange 
 
   return (
     <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/50">Где дом на карте</p>
-        <p className="mt-1 max-w-xl text-[11px] leading-relaxed text-white/40">
-          Бесплатная карта, без ключей. Кликните на место дома или перетащите метку. Поле «адрес» выше — только текст
-          для сайта, на карту не влияет.
-        </p>
-      </div>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/50">Где дом на карте</p>
 
       {swapHint ? (
         <p className="text-xs text-amber-300/90">

@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { countActiveUnreadNotifications } from "@/lib/client-notifications-query";
 import { prisma } from "@/lib/db";
 
 export type AccountHeaderSignals = {
@@ -34,9 +35,7 @@ export const getAccountHeaderSignals = cache(
           status: { in: ["OPEN", "IN_PROGRESS"] },
         },
       }),
-      prisma.clientNotification.count({
-        where: { projectId, readAt: null },
-      }),
+      countActiveUnreadNotifications(projectId),
     ]);
 
     return {

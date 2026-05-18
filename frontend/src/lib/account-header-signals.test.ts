@@ -10,14 +10,17 @@ vi.mock("react", async () => {
 
 const paymentCount = vi.fn();
 const ticketCount = vi.fn();
-const notificationCount = vi.fn();
+const unreadNotifications = vi.fn();
 
 vi.mock("@/lib/db", () => ({
   prisma: {
     clientPayment: { count: (...args: unknown[]) => paymentCount(...args) },
     clientSupportTicket: { count: (...args: unknown[]) => ticketCount(...args) },
-    clientNotification: { count: (...args: unknown[]) => notificationCount(...args) },
   },
+}));
+
+vi.mock("@/lib/client-notifications-query", () => ({
+  countActiveUnreadNotifications: (...args: unknown[]) => unreadNotifications(...args),
 }));
 
 import { getAccountHeaderSignals } from "@/lib/account-header-signals";
@@ -26,7 +29,7 @@ describe("getAccountHeaderSignals", () => {
   beforeEach(() => {
     paymentCount.mockResolvedValue(2);
     ticketCount.mockResolvedValue(3);
-    notificationCount.mockResolvedValue(1);
+    unreadNotifications.mockResolvedValue(1);
   });
 
   it("агрегирует уведомления, платежи и обращения", async () => {
@@ -37,6 +40,6 @@ describe("getAccountHeaderSignals", () => {
     expect(r.attentionCount).toBe(6);
     expect(paymentCount).toHaveBeenCalledOnce();
     expect(ticketCount).toHaveBeenCalledOnce();
-    expect(notificationCount).toHaveBeenCalledOnce();
+    expect(unreadNotifications).toHaveBeenCalledOnce();
   });
 });

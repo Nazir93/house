@@ -19,6 +19,9 @@
 # Без проверки БД после миграций:
 #   SKIP_VERIFY=1 bash /var/www/house/scripts/deploy-vps.sh
 #
+# Без lint/typecheck/unit перед сборкой (не рекомендуется):
+#   SKIP_TESTS=1 bash /var/www/house/scripts/deploy-vps.sh
+#
 set -euo pipefail
 
 ROOT="${HOUSE_ROOT:-/var/www/house}"
@@ -72,6 +75,13 @@ if [[ "${SKIP_VERIFY:-}" == "1" ]]; then
 else
   echo "==> npm run db:verify"
   npm run db:verify
+fi
+
+if [[ "${SKIP_TESTS:-}" == "1" ]]; then
+  echo "==> SKIP_TESTS=1 — npm run check пропущен"
+else
+  echo "==> npm run check (lint + typecheck + unit)"
+  npm run check
 fi
 
 echo "==> npm run build"

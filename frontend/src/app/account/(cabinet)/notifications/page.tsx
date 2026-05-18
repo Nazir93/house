@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
 import { getClientProjectIdFromSession } from "@/lib/client-session";
-import { prisma } from "@/lib/db";
+import { listClientNotificationsForCabinet } from "@/lib/client-notifications-query";
 import { ClientNotificationsList } from "@/components/account/client-notifications-list";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Уведомления — личный кабинет",
@@ -12,14 +14,7 @@ export default async function AccountNotificationsPage() {
   const projectId = await getClientProjectIdFromSession();
   if (!projectId) redirect("/account/login");
 
-  const [items, unreadCount] = await Promise.all([
-    prisma.clientNotification.findMany({
-      where: { projectId },
-      orderBy: { createdAt: "desc" },
-      take: 100,
-    }),
-    prisma.clientNotification.count({ where: { projectId, readAt: null } }),
-  ]);
+  const { items, unreadCount } = await listClientNotificationsForCabinet(projectId);
 
   return (
     <div className="space-y-6 max-w-3xl">

@@ -17,17 +17,16 @@ export function ClientPaymentsScheduleTable({
     return <p className="text-sm opacity-60 p-4">—</p>;
   }
 
-  const showPaidColumn = variant === "full";
+  const labelColClass = variant === "dashboard" ? "w-[38%] min-w-[8rem]" : "w-[40%] min-w-[8rem]";
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm table-fixed">
         <colgroup>
-          <col className={showPaidColumn ? "w-[32%] min-w-[8rem]" : "w-[38%] min-w-[8rem]"} />
-          <col className="w-[16%]" />
+          <col className={labelColClass} />
           <col className="w-[18%]" />
-          <col className={showPaidColumn ? "w-[17%]" : "w-[28%]"} />
-          {showPaidColumn ? <col className="w-[17%]" /> : null}
+          <col className="w-[22%]" />
+          <col className="w-[20%]" />
         </colgroup>
         <thead>
           <tr
@@ -37,12 +36,7 @@ export function ClientPaymentsScheduleTable({
             <th className="p-3 font-semibold">Этап / основание</th>
             <th className="p-3 font-semibold whitespace-nowrap">Сумма</th>
             <th className="p-3 font-semibold">Статус</th>
-            <th className="p-3 font-semibold whitespace-nowrap">
-              {showPaidColumn ? "Срок" : "Дата"}
-            </th>
-            {showPaidColumn ? (
-              <th className="p-3 font-semibold whitespace-nowrap">Оплачен</th>
-            ) : null}
+            <th className="p-3 font-semibold whitespace-nowrap">Дата</th>
           </tr>
         </thead>
         <tbody>
@@ -56,9 +50,6 @@ export function ClientPaymentsScheduleTable({
               </td>
               <td className="p-3 whitespace-nowrap">{paymentStatusLabel(p.status)}</td>
               <td className="p-3 tabular-nums whitespace-nowrap">{formatDateRu(p.dueDate)}</td>
-              {showPaidColumn ? (
-                <td className="p-3 tabular-nums whitespace-nowrap">{formatDateRu(p.paidAt)}</td>
-              ) : null}
             </tr>
           ))}
         </tbody>
