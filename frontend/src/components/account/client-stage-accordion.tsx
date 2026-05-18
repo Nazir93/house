@@ -74,7 +74,7 @@ export function ClientStageAccordion({ stages }: { stages: ClientStageAccordionI
           >
             <button
               type="button"
-              className="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-black/[0.02] dark:hover:bg-white/[0.02]"
+              className="flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--text)_4%,transparent)]"
               onClick={() => hasChildren && toggle(parent.id)}
               aria-expanded={hasChildren ? isOpen : undefined}
             >

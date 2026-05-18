@@ -1013,10 +1013,24 @@
   padding: 0.25rem;
 }
 
-/* Личный кабинет: премиальная подложка под тему сайта */
+/* Личный кабинет: те же токены фона, что на сайте (без серого clay в карточках) */
 .account-premium-shell {
   position: relative;
   isolation: isolate;
+  --card-bg: var(--bg);
+  --account-panel-bg: var(--bg);
+  --account-elevated-bg: var(--bg);
+}
+
+[data-theme="light"] .account-premium-shell {
+  /* белые карточки на тёплом #f6f6f4 — как на сайте, без clay #d7d2cb */
+  --account-elevated-bg: #ffffff;
+  --card-bg: #ffffff;
+}
+
+[data-theme="dark"] .account-premium-shell {
+  --account-elevated-bg: var(--bg-secondary);
+  --card-bg: var(--bg-secondary);
 }
 
 .account-premium-shell::before {
@@ -1025,33 +1039,38 @@
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.85;
+  background: var(--bg);
 }
 
 [data-theme="light"] .account-premium-shell::before {
   background:
-    radial-gradient(ellipse 85% 55% at 100% 0%, rgba(15, 61, 46, 0.07), transparent 52%),
-    radial-gradient(ellipse 70% 45% at 0% 100%, rgba(215, 210, 203, 0.55), transparent 50%),
+    radial-gradient(ellipse 90% 60% at 100% -10%, rgba(15, 61, 46, 0.06), transparent 55%),
     var(--bg);
 }
 
 [data-theme="dark"] .account-premium-shell::before {
   background:
-    radial-gradient(ellipse 80% 50% at 90% 10%, rgba(61, 143, 110, 0.09), transparent 55%),
-    radial-gradient(ellipse 60% 40% at 0% 90%, rgba(15, 61, 46, 0.06), transparent 45%),
+    radial-gradient(ellipse 80% 50% at 90% 0%, rgba(61, 143, 110, 0.08), transparent 55%),
     var(--bg);
 }
 
+/* Карточки и панели ЛК — фон сайта + бордер, без отдельного серого слоя */
+.account-premium-shell .account-surface-card {
+  background-color: var(--account-elevated-bg);
+  border-color: var(--border);
+}
+
 .account-premium-sidebar {
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    4px 0 40px rgba(0, 0, 0, 0.06);
+  background-color: var(--bg) !important;
+  box-shadow: none;
+}
+
+[data-theme="light"] .account-premium-sidebar {
+  border-right-color: var(--border);
 }
 
 [data-theme="dark"] .account-premium-sidebar {
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    6px 0 48px rgba(0, 0, 0, 0.35);
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.06);
 }
 
 /* PNG-иконки этапов: маска + цвет темы (light / dark) */

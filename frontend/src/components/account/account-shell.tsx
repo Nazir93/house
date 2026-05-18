@@ -115,7 +115,7 @@ export function AccountShell({
         `}
         style={{
           borderColor: "var(--border)",
-          backgroundColor: "color-mix(in srgb, var(--card-bg) 92%, var(--bg) 8%)",
+          backgroundColor: "var(--bg)",
         }}
       >
         <div className="p-3 border-b flex items-center gap-2 min-h-[3.25rem]" style={{ borderColor: "var(--border)" }}>
@@ -243,7 +243,7 @@ export function AccountShell({
                 color: notificationsUnread > 0 ? "var(--accent)" : "var(--text-muted)",
                 backgroundColor:
                   notificationsUnread > 0
-                    ? "color-mix(in srgb, var(--accent) 8%, var(--card-bg))"
+                    ? "color-mix(in srgb, var(--accent) 8%, var(--bg))"
                     : "color-mix(in srgb, var(--bg) 55%, transparent)",
               }}
             >

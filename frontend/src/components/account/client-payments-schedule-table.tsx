@@ -30,8 +30,12 @@ export function ClientPaymentsScheduleTable({
         </colgroup>
         <thead>
           <tr
-            className="text-left border-b bg-black/[0.02] dark:bg-white/[0.02]"
-            style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+            className="text-left border-b"
+            style={{
+              borderColor: "var(--border)",
+              color: "var(--text-muted)",
+              backgroundColor: "color-mix(in srgb, var(--bg) 92%, var(--border) 8%)",
+            }}
           >
             <th className="p-3 font-semibold">Этап / основание</th>
             <th className="p-3 font-semibold whitespace-nowrap">Сумма</th>

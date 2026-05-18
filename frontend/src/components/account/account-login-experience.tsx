@@ -255,7 +255,7 @@ export function AccountLoginExperience({ callbackUrl }: { callbackUrl: string })
 
             <AccountLoginForm callbackUrl={callbackUrl} />
 
-            <div className="mt-8 flex items-start gap-3 rounded-[1rem] border border-[var(--border)] bg-[color-mix(in_srgb,var(--card-bg)_75%,var(--bg)_25%)] p-4 text-[11px] leading-relaxed text-[var(--text-muted)] shadow-sm">
+            <div className="mt-8 flex items-start gap-3 rounded-[1rem] border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_96%,var(--accent)_4%)] p-4 text-[11px] leading-relaxed text-[var(--text-muted)] shadow-sm">
               <Home className="mt-0.5 h-4 w-4 shrink-0 text-[var(--text-subtle)]" aria-hidden />
               <span>
                 <strong className="text-[var(--text)]">Первый раз в кабинете?</strong> Убедитесь, что в договоре нет
