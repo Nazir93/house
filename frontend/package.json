@@ -37,7 +37,7 @@
     "@fontsource/montserrat": "^5.2.8",
     "@hookform/resolvers": "^3.9.0",
     "@prisma/client": "5.22.0",
-    "@tiptap/extension-image": "^3.22.2",
+    "@tiptap/extension-image": "^3.23.4",
     "@tiptap/extension-link": "^3.22.2",
     "@tiptap/extension-placeholder": "^3.22.2",
     "@tiptap/extension-underline": "^3.22.2",
