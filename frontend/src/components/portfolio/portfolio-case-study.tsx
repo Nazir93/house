@@ -441,10 +441,10 @@ export function PortfolioCaseStudy({
         onPhasePointerEnter={schedulePrefetchPhaseOnHover}
       />
 
-      <div className="grid gap-8 max-lg:pr-16 lg:grid-cols-[minmax(240px,280px)_minmax(0,1fr)] lg:items-start lg:gap-10 lg:pr-0 xl:gap-x-12">
+      <div className="grid gap-6 max-lg:pr-16 lg:grid-cols-[minmax(240px,280px)_minmax(0,1fr)] lg:items-start lg:gap-8 lg:pr-0 xl:gap-x-10">
         <aside
           ref={setAsideScrollRef(1)}
-          className="case-study-timeline-aside-scroll hidden rounded-3xl py-5 pl-3 pr-2 sm:pl-4 sm:pr-3 lg:block lg:sticky lg:top-[7rem] lg:max-h-[min(88vh,calc(100vh-7rem))] lg:overflow-y-auto lg:self-start lg:py-6"
+          className="case-study-timeline-aside-scroll hidden rounded-3xl py-5 pl-3 pr-2 sm:pl-4 sm:pr-3 lg:block lg:sticky lg:top-[calc(var(--site-header-sticky-offset)+1rem)] lg:max-h-[min(88vh,calc(100dvh-var(--site-header-sticky-offset)-1rem))] lg:overflow-y-auto lg:self-start lg:py-5"
           style={asideSurfaceStyle}
         >
           <PhaseTimelineNav

@@ -12,7 +12,7 @@ describe("client-stage-icon-assets", () => {
     expect(resolveStageIconAssetUrl("driveway")).toBe("/icons/stages/landscaping.png");
   });
 
-  it("resolveStageIconAssetUrl — неизвестный ключ", () => {
-    expect(resolveStageIconAssetUrl("circle")).toBeNull();
+  it("resolveStageIconAssetUrl — legacy circle → foundation", () => {
+    expect(resolveStageIconAssetUrl("circle")).toBe("/icons/stages/foundation.png");
   });
 });

@@ -59,7 +59,10 @@ export function BuiltObjectDetailContent({
         onIndexChange={setLightboxIndex}
         alt={object.title}
       />
-      <article className="pb-20 pt-28" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
+      <article
+        className="pb-20 pt-[calc(var(--site-header-sticky-offset)+1rem)] sm:pt-[calc(var(--site-header-sticky-offset)+1.25rem)]"
+        style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}
+      >
         <div className="container mx-auto max-w-[1200px] px-5">
           <nav className="text-[12px] tracking-[0.02em] text-[var(--text-muted)] sm:text-[13px]" aria-label="Навигация по разделу">
             <Link href="/" className="transition-colors hover:text-[var(--accent)]">
@@ -73,7 +76,7 @@ export function BuiltObjectDetailContent({
             </Link>
           </nav>
 
-          <h1 className="mt-3 font-heading text-[1.65rem] font-bold leading-[1.15] tracking-tight text-[var(--text)] sm:mt-4 sm:text-4xl md:text-[2.35rem] lg:text-[2.65rem] lg:leading-[1.1]">
+          <h1 className="mt-2 font-heading text-[1.65rem] font-bold leading-[1.15] tracking-tight text-[var(--text)] sm:mt-2.5 sm:text-4xl md:text-[2.35rem] lg:text-[2.65rem] lg:leading-[1.1]">
             {object.title}
           </h1>
 
@@ -82,7 +85,7 @@ export function BuiltObjectDetailContent({
           ) : null}
 
           {/* Как на референсе: сразу двухколоночный кейс без полноэкранного героя сверху (обложка — в галерее / блоке параметров) */}
-          <div className="mt-4 sm:mt-5 lg:mt-7">
+          <div className="mt-3 sm:mt-4 lg:mt-5">
             <PortfolioCaseStudy
               phases={casePhases}
               phaseDescriptionHtml={caseStudyDescriptionHtml}

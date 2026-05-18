@@ -79,8 +79,6 @@ const COLORED_CLASS: Record<string, string> = {
   default: "stage-icon-tint stage-icon-tint--default",
 };
 
-const THEME_CLASS = "stage-icon-mask stage-icon-mask--theme";
-
 export function StageIcon({
   iconKey,
   className,
@@ -96,25 +94,13 @@ export function StageIcon({
 
   if (assetUrl) {
     return (
-      <span
-        role="img"
+      // eslint-disable-next-line @next/next/no-img-element -- локальные PNG из public/icons/stages
+      <img
+        src={assetUrl}
+        alt=""
         aria-hidden
-        className={cn(
-          "inline-block shrink-0 bg-current",
-          THEME_CLASS,
-          colored ? tint : null,
-          className
-        )}
-        style={{
-          WebkitMaskImage: `url(${assetUrl})`,
-          maskImage: `url(${assetUrl})`,
-          WebkitMaskSize: "contain",
-          maskSize: "contain",
-          WebkitMaskRepeat: "no-repeat",
-          maskRepeat: "no-repeat",
-          WebkitMaskPosition: "center",
-          maskPosition: "center",
-        }}
+        draggable={false}
+        className={cn("inline-block shrink-0 object-contain", className)}
       />
     );
   }

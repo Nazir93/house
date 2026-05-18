@@ -58,8 +58,16 @@ export const ADMIN_STAGE_ICON_SELECT_OPTIONS: { value: StageIconAssetKey; label:
   { value: "landscaping", label: "landscaping — Благоустройство" },
 ];
 
+/** Старые этапы в БД с iconKey circle/default — показываем фундамент. */
+const LEGACY_DEFAULT_ASSET: StageIconAssetKey = "foundation";
+
 export function resolveStageIconAssetKey(iconKey: string): StageIconAssetKey | null {
-  return ICON_KEY_TO_ASSET[iconKey] ?? null;
+  const mapped = ICON_KEY_TO_ASSET[iconKey];
+  if (mapped) return mapped;
+  if (iconKey === "circle" || iconKey === "default" || iconKey === "check") {
+    return LEGACY_DEFAULT_ASSET;
+  }
+  return null;
 }
 
 export function stageIconAssetUrl(assetKey: StageIconAssetKey): string {

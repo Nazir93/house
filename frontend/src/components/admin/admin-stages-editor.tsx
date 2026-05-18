@@ -2,13 +2,14 @@
 
 import { Check, Plus, Trash2 } from "lucide-react";
 import { StageIcon } from "@/components/account/stage-icon";
+import { AdminStageIconPicker } from "@/components/admin/admin-stage-icon-picker";
 import { AdminSelect } from "@/components/admin/admin-select";
 import {
   createAdminStageRow,
   removeAdminStageWithChildren,
   type AdminStageRow,
 } from "@/lib/admin-client-stage-rows";
-import { ADMIN_STAGE_ICON_SELECT_OPTIONS } from "@/lib/client-stage-icon-assets";
+import { resolveStageIconAssetKey } from "@/lib/client-stage-icon-assets";
 import { CLIENT_STAGE_STATUS_OPTIONS } from "@/lib/client-stage-status";
 import { cn } from "@/lib/utils";
 
@@ -43,8 +44,8 @@ function subStageEntries(
     .sort((a, b) => a.row.order - b.row.order);
 }
 
-function resolveIconSelectValue(iconKey: string): string {
-  return ADMIN_STAGE_ICON_SELECT_OPTIONS.some((o) => o.value === iconKey) ? iconKey : "foundation";
+function resolveIconPickerValue(iconKey: string): string {
+  return resolveStageIconAssetKey(iconKey) ?? "foundation";
 }
 
 /** Компактные карточки этапов (сетка 2 колонки) с подэтапами внутри родителя. */
@@ -102,13 +103,10 @@ export function AdminStagesEditor({ stages, onChange, progressHint }: AdminStage
               </div>
 
               <div>
-                <label className={labelCls}>Код / slug</label>
-                <AdminSelect
-                  className="w-full"
-                  triggerClassName={selectTrigger + " font-mono text-xs"}
-                  value={resolveIconSelectValue(row.iconKey)}
-                  onValueChange={(iconKey) => patchRow(index, { iconKey })}
-                  options={ADMIN_STAGE_ICON_SELECT_OPTIONS}
+                <label className={labelCls}>Иконка</label>
+                <AdminStageIconPicker
+                  value={resolveIconPickerValue(row.iconKey)}
+                  onChange={(iconKey) => patchRow(index, { iconKey })}
                 />
               </div>
 

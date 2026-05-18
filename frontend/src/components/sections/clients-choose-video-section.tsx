@@ -7,8 +7,10 @@ import { ArrowUpRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
-/** Высота скролл-трека от md (кинозал); ниже md — секция по высоте контента, без закрепа. */
-const SCROLL_VH_PER_ITEM = 100;
+/** Высота скролл-трека на один пункт услуги (vh). */
+const SCROLL_VH_PER_ITEM_MOBILE = 72;
+const SCROLL_VH_PER_ITEM_DESKTOP = 100;
+
 const SERVICES_VIDEO_SRC = "/videos/14654251600401.mp4";
 
 function warmUpVideo(v: HTMLVideoElement) {
@@ -49,7 +51,7 @@ const SERVICES = [
 function VideoPanel({ videoRef }: { videoRef: Ref<HTMLVideoElement> }) {
   return (
     <div className="relative w-full overflow-hidden rounded-[22px] shadow-[0_20px_56px_rgba(0,0,0,0.08)] md:rounded-[30px]">
-      <div className="relative aspect-video w-full overflow-hidden rounded-[inherit] md:aspect-[4/3]">
+      <div className="relative aspect-[16/10] max-h-[min(38vh,260px)] w-full overflow-hidden rounded-[inherit] md:aspect-[4/3] md:max-h-none">
         <video
           ref={videoRef}
           src={SERVICES_VIDEO_SRC}
@@ -61,6 +63,30 @@ function VideoPanel({ videoRef }: { videoRef: Ref<HTMLVideoElement> }) {
           aria-hidden="true"
         />
       </div>
+    </div>
+  );
+}
+
+function ServiceProgressBars({
+  scrollProgress,
+  className,
+}: {
+  scrollProgress: number;
+  className?: string;
+}) {
+  return (
+    <div className={cn("flex items-center gap-1.5 md:gap-2", className)} aria-hidden>
+      {SERVICES.map((_, i) => {
+        const fill = Math.max(0, Math.min(scrollProgress * SERVICES.length - i, 1));
+        return (
+          <div key={i} className="h-0.5 flex-1 overflow-hidden rounded-full bg-[var(--border)]/65 md:h-1">
+            <div
+              className="h-full bg-[var(--accent)] transition-[width] duration-200 ease-linear"
+              style={{ width: `${fill * 100}%` }}
+            />
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -152,13 +178,9 @@ export function ClientsChooseVideoSection() {
     if (!el) return;
     let raf = 0;
     let active = false;
-    const mq =
-      typeof window !== "undefined" && typeof window.matchMedia === "function"
-        ? window.matchMedia("(min-width: 768px)")
-        : null;
 
     const tick = () => {
-      if (!active || !mq?.matches) return;
+      if (!active) return;
       syncScrollToServices();
       raf = requestAnimationFrame(tick);
     };
@@ -169,29 +191,18 @@ export function ClientsChooseVideoSection() {
         if (next && !active) {
           active = true;
           syncScrollToServices();
-          if (mq?.matches) raf = requestAnimationFrame(tick);
+          raf = requestAnimationFrame(tick);
         } else if (!next && active) {
           active = false;
           cancelAnimationFrame(raf);
           raf = 0;
         }
       },
-      { root: null, rootMargin: "60% 0px", threshold: 0 }
+      { root: null, rootMargin: "40% 0px", threshold: 0 },
     );
     io.observe(el);
 
-    const onMq = () => {
-      if (!mq?.matches && raf) {
-        cancelAnimationFrame(raf);
-        raf = 0;
-      } else if (mq?.matches && active && !raf) {
-        raf = requestAnimationFrame(tick);
-      }
-    };
-    mq?.addEventListener("change", onMq);
-
     return () => {
-      mq?.removeEventListener("change", onMq);
       io.disconnect();
       cancelAnimationFrame(raf);
     };
@@ -210,33 +221,48 @@ export function ClientsChooseVideoSection() {
     };
   }, [syncScrollToServices]);
 
+  const activeService = SERVICES[activeIndex]!;
+
   return (
     <section
       ref={sectionRef}
       className={cn(
         "relative touch-pan-y scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)]",
-        "max-md:h-auto md:h-[var(--clients-choose-track-height)]"
+        "h-[calc(var(--clients-choose-scroll-vh-mobile)*1vh*var(--clients-choose-count))]",
+        "md:h-[calc(var(--clients-choose-scroll-vh-desktop)*1vh*var(--clients-choose-count))]",
       )}
       style={
         {
-          "--clients-choose-track-height": `${SERVICES.length * SCROLL_VH_PER_ITEM}vh`,
+          "--clients-choose-count": SERVICES.length,
+          "--clients-choose-scroll-vh-mobile": SCROLL_VH_PER_ITEM_MOBILE,
+          "--clients-choose-scroll-vh-desktop": SCROLL_VH_PER_ITEM_DESKTOP,
           backgroundColor: "var(--bg)",
         } as CSSProperties
       }
       aria-labelledby="clients-choose-video-heading"
     >
       {/*
-        До md: высота по контенту (без длинного трека), без sticky — только скролл документа.
-        От md: sticky-кинозал и длинный скролл-трек для синхра видео/списка услуг (планшет и выше).
+        Видео закреплено под шапкой; скролл секции меняет кадр и активную услугу
+        (мобильные, планшет и десктоп).
       */}
       <div
         className={cn(
-          "z-0 max-md:relative max-md:top-auto max-md:h-auto max-md:overflow-visible",
-          "md:sticky md:top-0 md:h-[100dvh] md:overflow-hidden",
+          "sticky z-10 overflow-hidden",
+          "top-[var(--site-header-sticky-offset)]",
+          "h-[calc(100dvh-var(--site-header-sticky-offset))]",
         )}
+        style={{ backgroundColor: "var(--bg)" }}
       >
-        <div className="mx-auto flex w-full max-w-[1380px] flex-col md:h-full md:min-h-full md:flex-row md:items-center md:justify-between md:gap-8 md:px-8 lg:gap-10 lg:px-12">
-          <div className="order-2 flex min-w-0 flex-1 flex-col justify-start px-4 pb-10 pt-1 max-md:mt-12 sm:px-6 md:order-1 md:max-w-[560px] md:justify-center md:px-0 md:pb-0 md:pt-0">
+        <div className="mx-auto flex h-full min-h-0 w-full max-w-[1380px] flex-col md:flex-row md:items-center md:justify-between md:gap-8 md:px-8 lg:gap-10 lg:px-12">
+          {/* Видео — сверху на телефоне/планшете, справа на lg+ */}
+          <div className="shrink-0 px-4 pt-3 sm:px-6 md:order-2 md:flex-none md:w-[46%] md:px-0 md:pt-0">
+            <div className="mx-auto w-full max-w-[640px] md:max-w-[560px]">
+              <VideoPanel videoRef={videoRef} />
+              <ServiceProgressBars scrollProgress={scrollProgress} className="mt-3 md:mt-4" />
+            </div>
+          </div>
+
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center px-4 pb-6 pt-4 sm:px-6 md:order-1 md:max-w-[560px] md:px-0 md:pb-0 md:pt-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)] md:text-xs">
               Что мы делаем
             </p>
@@ -247,20 +273,23 @@ export function ClientsChooseVideoSection() {
               Наши услуги
             </h2>
 
-            <div className="mt-4 flex items-center gap-1.5 md:hidden">
-              {SERVICES.map((_, i) => (
-                <div
-                  key={i}
-                  className="h-0.5 flex-1 rounded-full transition-all duration-500 ease-out"
-                  style={{
-                    backgroundColor: i <= activeIndex ? "var(--accent)" : "var(--text-subtle)",
-                    opacity: i <= activeIndex ? 1 : 0.28,
-                  }}
-                />
-              ))}
+            {/* Мобильный / узкий планшет: одна активная услуга, меняется при скролле */}
+            <div className="mt-5 min-h-[5.5rem] md:hidden" aria-live="polite">
+              <p className="border-l-[3px] border-[var(--accent)] pl-4 text-[15px] font-semibold leading-snug text-[var(--text)]">
+                <Link
+                  href={activeService.href}
+                  className="rounded-sm underline-offset-4 transition-colors hover:text-[var(--accent)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+                >
+                  {activeService.title}
+                </Link>
+              </p>
+              <p className="mt-2 pl-[calc(1rem+3px)] text-[14px] leading-relaxed text-[var(--text-muted)]">
+                {activeService.description}
+              </p>
             </div>
 
-            <div className="mt-6">
+            {/* Десктоп: полный список с подсветкой активного */}
+            <div className="mt-6 hidden md:block">
               <ul className="max-w-xl space-y-4 text-pretty sm:space-y-5">
                 {SERVICES.map((item, idx) => {
                   const on = idx === activeIndex;
@@ -268,14 +297,14 @@ export function ClientsChooseVideoSection() {
                     <li
                       key={item.title}
                       className={cn(
-                        "border-l-[3px] pl-4 transition-all duration-500 ease-out sm:pl-5 md:border-l-[4px] md:pl-6",
-                        on ? "border-[var(--accent)] opacity-100" : "border-[var(--border)] opacity-[0.44] md:opacity-50"
+                        "border-l-[4px] pl-6 transition-all duration-500 ease-out",
+                        on ? "border-[var(--accent)] opacity-100" : "border-[var(--border)] opacity-50",
                       )}
                     >
                       <p
                         className={cn(
-                          "text-[15px] font-semibold leading-snug transition-colors duration-500 sm:text-[0.98rem] md:text-[1.05rem]",
-                          on ? "text-[var(--text)]" : "text-[var(--text-muted)]"
+                          "text-[1.05rem] font-semibold leading-snug transition-colors duration-500",
+                          on ? "text-[var(--text)]" : "text-[var(--text-muted)]",
                         )}
                       >
                         <Link
@@ -287,8 +316,8 @@ export function ClientsChooseVideoSection() {
                       </p>
                       <p
                         className={cn(
-                          "mt-1.5 text-[14px] leading-relaxed transition-colors duration-500 sm:mt-2 sm:text-[15px]",
-                          on ? "text-[var(--text)]" : "text-[var(--text-muted)]"
+                          "mt-2 text-[15px] leading-relaxed transition-colors duration-500",
+                          on ? "text-[var(--text)]" : "text-[var(--text-muted)]",
                         )}
                       >
                         {item.description}
@@ -299,7 +328,7 @@ export function ClientsChooseVideoSection() {
               </ul>
             </div>
 
-            <div className="mt-8 md:mt-10">
+            <div className="mt-6 md:mt-10">
               <Link
                 href="/services"
                 className="inline-flex w-fit items-center gap-1.5 text-[13px] font-semibold text-[var(--text)] underline-offset-4 transition hover:text-[var(--accent)] hover:underline sm:text-sm"
@@ -307,26 +336,6 @@ export function ClientsChooseVideoSection() {
                 Все услуги
                 <ArrowUpRight className="h-4 w-4 shrink-0 opacity-80" strokeWidth={2} aria-hidden />
               </Link>
-            </div>
-          </div>
-
-          <div className="order-1 w-full shrink-0 px-4 pt-4 sm:px-6 md:order-2 md:flex-none md:w-[46%] md:px-0 md:pt-0">
-            <div className="mx-auto w-full max-w-[640px] md:max-w-[560px]">
-              <VideoPanel videoRef={videoRef} />
-              {/* До md прогресс уже под заголовком «Наши услуги»; под видео — с md, чтобы не было двух полос */}
-              <div className="mt-4 hidden items-center gap-2 md:flex" aria-hidden>
-                {SERVICES.map((_, i) => {
-                  const fill = Math.max(0, Math.min(scrollProgress * SERVICES.length - i, 1));
-                  return (
-                    <div key={i} className="h-1 flex-1 overflow-hidden rounded-full bg-[var(--border)]/65">
-                      <div
-                        className="h-full bg-[var(--accent)] transition-[width] duration-200 ease-linear"
-                        style={{ width: `${fill * 100}%` }}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
             </div>
           </div>
         </div>

@@ -22,7 +22,7 @@ export function createAdminStageRow(
     parentClientKey: partial.parentClientKey ?? null,
     order: partial.order ?? 0,
     title: partial.title,
-    iconKey: partial.iconKey ?? "circle",
+    iconKey: partial.iconKey ?? "foundation",
     status: partial.status ?? "NOT_STARTED",
   };
 }

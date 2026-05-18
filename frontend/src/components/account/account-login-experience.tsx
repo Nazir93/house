@@ -2,14 +2,15 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Suspense, useCallback, useState } from "react";
+import { useCallback, useState } from "react";
 import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
 import { ArrowLeft, ChevronRight, Eye, EyeOff, Home, UserRound } from "lucide-react";
 
 import { SITE_NAME } from "@/lib/constants";
+import { publicFormFieldClass, publicFormFieldStyle } from "@/lib/public-form-field";
 import { ShowcaseCarouselNav } from "@/components/ui/showcase-carousel-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { cn } from "@/lib/utils";
 
 const CLIENT_SLIDES = [
   {
@@ -36,10 +37,7 @@ const CLIENT_SLIDES = [
 
 const AUTO_ADVANCE_MS = 7500;
 
-function AccountLoginFormInner() {
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/account/dashboard";
-
+function AccountLoginForm({ callbackUrl }: { callbackUrl: string }) {
   const [contractNumber, setContractNumber] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -74,45 +72,59 @@ function AccountLoginFormInner() {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {error ? (
-        <div className="rounded-xl border border-red-500/25 bg-red-500/[0.08] px-4 py-3 text-sm text-red-700 dark:text-red-300">
+        <div
+          className="rounded-[1rem] border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm"
+          style={{ color: "var(--text)" }}
+          role="alert"
+        >
           {error}
         </div>
       ) : null}
 
       <div>
-        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-[#0f3d2e]/55">
+        <label
+          htmlFor="account-login-contract"
+          className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-subtle)]"
+        >
           Номер договора
         </label>
         <input
+          id="account-login-contract"
           type="text"
           autoComplete="username"
           value={contractNumber}
           onChange={(e) => setContractNumber(e.target.value)}
           required
-          className="w-full rounded-xl border border-[#0f3d2e]/12 bg-white px-4 py-3 text-sm text-[#1a1d1c] shadow-inner shadow-black/[0.02] placeholder:text-[#0f3d2e]/30 focus:border-[#0f3d2e]/35 focus:outline-none focus:ring-2 focus:ring-[#0f3d2e]/15"
+          className={publicFormFieldClass}
+          style={publicFormFieldStyle}
           placeholder="Например, Д-2025-001"
         />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-[#0f3d2e]/55">
+        <label
+          htmlFor="account-login-password"
+          className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-subtle)]"
+        >
           Пароль
         </label>
         <div className="relative">
           <input
+            id="account-login-password"
             type={showPw ? "text" : "password"}
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full rounded-xl border border-[#0f3d2e]/12 bg-white py-3 pl-4 pr-12 text-sm text-[#1a1d1c] shadow-inner shadow-black/[0.02] placeholder:text-[#0f3d2e]/30 focus:border-[#0f3d2e]/35 focus:outline-none focus:ring-2 focus:ring-[#0f3d2e]/15"
+            className={cn(publicFormFieldClass, "pr-12")}
+            style={publicFormFieldStyle}
             placeholder="••••••••"
           />
           <button
             type="button"
             tabIndex={-1}
             onClick={() => setShowPw((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-[#0f3d2e]/40 transition hover:bg-[#0f3d2e]/5 hover:text-[#0f3d2e]/70"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-[var(--text-subtle)] transition hover:bg-[color-mix(in_srgb,var(--text)_8%,transparent)] hover:text-[var(--text)]"
             aria-label={showPw ? "Скрыть пароль" : "Показать пароль"}
           >
             {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -123,7 +135,7 @@ function AccountLoginFormInner() {
       <button
         type="submit"
         disabled={loading}
-        className="group relative w-full overflow-hidden rounded-2xl bg-[#0f3d2e] py-3.5 text-sm font-bold uppercase tracking-[0.14em] text-[#f6f6f4] shadow-[0_12px_40px_rgba(15,61,46,0.28)] transition hover:bg-[#174d3b] disabled:cursor-not-allowed disabled:opacity-45"
+        className="group relative w-full overflow-hidden rounded-[1rem] bg-[var(--accent)] py-3.5 text-[13px] font-semibold uppercase tracking-[0.12em] text-[var(--accent-contrast)] shadow-[0_12px_40px_color-mix(in_srgb,var(--accent)_35%,transparent)] transition hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:opacity-45"
       >
         <span className="relative z-10">{loading ? "Вход…" : "Войти"}</span>
         <span
@@ -132,7 +144,7 @@ function AccountLoginFormInner() {
         />
       </button>
 
-      <p className="text-center text-[11px] leading-relaxed text-[#0f3d2e]/45">
+      <p className="text-center text-[11px] leading-relaxed text-[var(--text-subtle)]">
         Данные выдаёт офис при заключении договора. Забыли пароль — напишите нам с сайта или позвоните.
       </p>
     </form>
@@ -197,63 +209,68 @@ function ClientShowcaseCarousel() {
   );
 }
 
-export function AccountLoginExperience() {
+export function AccountLoginExperience({ callbackUrl }: { callbackUrl: string }) {
   return (
-    <div className="relative min-h-screen bg-[#e8ebe9] text-[#1a1d1c] dark:bg-[#0d1210] dark:text-[#e8ebe9]">
+    <div className="relative min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <div className="pointer-events-none absolute right-4 top-4 z-50 sm:right-6 sm:top-6">
-        <span className="pointer-events-auto inline-block rounded-xl bg-[color-mix(in_srgb,var(--bg)_85%,transparent)] p-0.5 shadow-sm backdrop-blur-sm dark:bg-[color-mix(in_srgb,#0d1210_88%,transparent)]">
+        <span className="pointer-events-auto inline-block rounded-xl border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_92%,transparent)] p-0.5 shadow-sm backdrop-blur-sm">
           <ThemeToggle variant="outline" />
         </span>
       </div>
+
       <div className="flex min-h-screen min-w-0 flex-col lg:flex-row">
         <div className="relative z-10 flex flex-1 flex-col justify-center px-5 py-12 sm:px-10 lg:w-[min(100%,46rem)] lg:max-w-[46%] lg:flex-none lg:px-14 xl:px-20">
-          <div className="pointer-events-none absolute -left-24 top-1/4 h-72 w-72 rounded-full bg-[#0f3d2e]/[0.06] blur-3xl" aria-hidden />
+          <div
+            className="pointer-events-none absolute -left-24 top-1/4 h-72 w-72 rounded-full bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] blur-3xl"
+            aria-hidden
+          />
 
           <div className="relative mx-auto w-full max-w-[400px]">
             <Link
               href="/"
-              className="mb-8 inline-flex items-center gap-2 text-[13px] font-semibold text-[#0f3d2e]/55 transition hover:text-[#0f3d2e]"
+              className="mb-8 inline-flex items-center gap-2 text-[13px] font-semibold text-[var(--text-muted)] transition hover:text-[var(--accent)]"
             >
               <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
               На главную
             </Link>
 
             <div className="mb-10 flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#0f3d2e] text-[#f6f6f4] shadow-lg shadow-[#0f3d2e]/25">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--accent-contrast)] shadow-lg shadow-[color-mix(in_srgb,var(--accent)_28%,transparent)]">
                 <UserRound className="h-5 w-5" aria-hidden />
               </span>
               <div>
-                <h1 className="font-heading text-xl font-bold uppercase tracking-tight text-[#0f3d2e] sm:text-2xl">
+                <h1 className="font-heading text-xl font-bold uppercase tracking-tight text-[var(--text)] sm:text-2xl">
                   {SITE_NAME}
                 </h1>
-                <p className="mt-1 flex items-center gap-1 text-[13px] text-[#0f3d2e]/55">
+                <p className="mt-1 flex items-center gap-1 text-[13px] text-[var(--text-muted)]">
                   Вход в личный кабинет
                   <ChevronRight className="h-3.5 w-3.5 opacity-50" aria-hidden />
                 </p>
               </div>
             </div>
 
-            <p className="mb-6 text-sm leading-relaxed text-[#0f3d2e]/70">
+            <p className="mb-6 text-sm leading-relaxed text-[var(--text-muted)]">
               Введите номер договора и пароль, которые вам выдали при работе с проектом. Это тот же доступ, что и у
               заказчика по договору строительства.
             </p>
 
-            <Suspense fallback={<div className="py-10 text-center text-sm text-[#0f3d2e]/40">Загрузка формы…</div>}>
-              <AccountLoginFormInner />
-            </Suspense>
+            <AccountLoginForm callbackUrl={callbackUrl} />
 
-            <div className="mt-8 flex items-start gap-3 rounded-2xl border border-[#0f3d2e]/15 bg-white/60 p-4 text-[11px] leading-relaxed text-[#1a1d1c]/80 shadow-sm backdrop-blur-sm">
-              <Home className="mt-0.5 h-4 w-4 shrink-0 text-[#0f3d2e]/45" aria-hidden />
+            <div className="mt-8 flex items-start gap-3 rounded-[1rem] border border-[var(--border)] bg-[color-mix(in_srgb,var(--card-bg)_75%,var(--bg)_25%)] p-4 text-[11px] leading-relaxed text-[var(--text-muted)] shadow-sm">
+              <Home className="mt-0.5 h-4 w-4 shrink-0 text-[var(--text-subtle)]" aria-hidden />
               <span>
-                <strong className="text-[#0f3d2e]">Первый раз в кабинете?</strong> Убедитесь, что в договоре нет лишних
-                пробелов при вводе номера. Копируйте номер из письма или скана, если сомневаетесь.
+                <strong className="text-[var(--text)]">Первый раз в кабинете?</strong> Убедитесь, что в договоре нет
+                лишних пробелов при вводе номера. Копируйте номер из письма или скана, если сомневаетесь.
               </span>
             </div>
           </div>
         </div>
 
-        <div className="relative flex min-h-[420px] min-w-0 flex-1 flex-col border-t border-[#0f3d2e]/10 bg-[#0a1210] lg:min-h-screen lg:border-l lg:border-t-0">
-          <div className="pointer-events-none absolute -left-px top-0 hidden h-full w-20 bg-gradient-to-r from-[#e8ebe9] to-transparent lg:block" aria-hidden />
+        <div className="relative flex min-h-[420px] min-w-0 flex-1 flex-col border-t border-[var(--border)] bg-[#0a1210] lg:min-h-screen lg:border-l lg:border-t-0">
+          <div
+            className="pointer-events-none absolute -left-px top-0 hidden h-full w-20 bg-gradient-to-r from-[var(--bg)] to-transparent lg:block"
+            aria-hidden
+          />
           <div className="relative flex min-h-[420px] min-w-0 flex-1 flex-col p-4 sm:p-6 lg:min-h-0 lg:flex-1 lg:p-8 lg:pl-12">
             <ClientShowcaseCarousel />
           </div>

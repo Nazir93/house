@@ -193,38 +193,6 @@ export function SiteHeaderBar() {
           </nav>
 
           <div className="ml-auto flex min-w-0 shrink-0 flex-nowrap items-center justify-end gap-1 xl:gap-1.5">
-            {/*
-              Компактные кнопки сначала: при overflow-x:hidden у body широкий блок
-              контактов иначе выталкивал поиск и переключатель темы за край экрана.
-            */}
-            <button
-              type="button"
-              onClick={toggleSearch}
-              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition hover:bg-black/[0.04] dark:hover:bg-white/10"
-              style={{
-                borderColor: "var(--header-bar-border)",
-                color: "var(--header-bar-text)",
-              }}
-              aria-label={searchOpen ? "Закрыть поиск по сайту" : "Поиск по сайту"}
-              aria-expanded={searchOpen}
-            >
-              <Search className="h-3 w-3" strokeWidth={2} aria-hidden />
-            </button>
-
-            <ThemeToggle variant="header" />
-
-            <Link
-              href={ACCOUNT_PORTAL_PATH}
-              className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition hover:bg-black/[0.04] dark:hover:bg-white/10"
-              style={{
-                borderColor: "var(--header-bar-border)",
-                color: "var(--header-bar-text)",
-              }}
-              aria-label="Личный кабинет"
-            >
-              <UserRound className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-            </Link>
-
             <Link
               href="/mortgage"
               className={cn(
@@ -301,6 +269,39 @@ export function SiteHeaderBar() {
                 <YandexMapsRatingChip />
               </div>
             ) : null}
+
+            <div
+              className="ml-1 flex shrink-0 flex-nowrap items-center gap-1 border-l pl-1.5 xl:ml-2 xl:gap-1.5 xl:pl-2"
+              style={{ borderColor: "var(--header-bar-border)" }}
+            >
+              <button
+                type="button"
+                onClick={toggleSearch}
+                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition hover:bg-black/[0.04] dark:hover:bg-white/10"
+                style={{
+                  borderColor: "var(--header-bar-border)",
+                  color: "var(--header-bar-text)",
+                }}
+                aria-label={searchOpen ? "Закрыть поиск по сайту" : "Поиск по сайту"}
+                aria-expanded={searchOpen}
+              >
+                <Search className="h-3 w-3" strokeWidth={2} aria-hidden />
+              </button>
+
+              <ThemeToggle variant="header" />
+
+              <Link
+                href={ACCOUNT_PORTAL_PATH}
+                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition hover:bg-black/[0.04] dark:hover:bg-white/10"
+                style={{
+                  borderColor: "var(--header-bar-border)",
+                  color: "var(--header-bar-text)",
+                }}
+                aria-label="Личный кабинет"
+              >
+                <UserRound className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -351,31 +352,36 @@ export function SiteHeaderBar() {
             </a>
           ) : null}
           <YandexMapsRatingChip compact />
-          <button
-            type="button"
-            onClick={toggleSearch}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98]"
-            style={{
-              borderColor: "var(--header-bar-border)",
-              color: "var(--header-bar-text)",
-            }}
-            aria-label={searchOpen ? "Закрыть поиск" : "Поиск по сайту"}
-            aria-expanded={searchOpen}
+          <div
+            className="ml-0.5 flex shrink-0 items-center gap-1 border-l pl-1.5 sm:gap-1.5 sm:pl-2"
+            style={{ borderColor: "var(--header-bar-border)" }}
           >
-            <Search className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-          </button>
-          <ThemeToggle variant="header" />
-          <Link
-            href={ACCOUNT_PORTAL_PATH}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98]"
-            style={{
-              borderColor: "var(--header-bar-border)",
-              color: "var(--header-bar-text)",
-            }}
-            aria-label="Личный кабинет"
-          >
-            <UserRound className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-          </Link>
+            <button
+              type="button"
+              onClick={toggleSearch}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98]"
+              style={{
+                borderColor: "var(--header-bar-border)",
+                color: "var(--header-bar-text)",
+              }}
+              aria-label={searchOpen ? "Закрыть поиск" : "Поиск по сайту"}
+              aria-expanded={searchOpen}
+            >
+              <Search className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+            </button>
+            <ThemeToggle variant="header" />
+            <Link
+              href={ACCOUNT_PORTAL_PATH}
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98]"
+              style={{
+                borderColor: "var(--header-bar-border)",
+                color: "var(--header-bar-text)",
+              }}
+              aria-label="Личный кабинет"
+            >
+              <UserRound className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+            </Link>
+          </div>
           <button
             type="button"
             onClick={() => window.dispatchEvent(new Event("open-mobile-menu"))}

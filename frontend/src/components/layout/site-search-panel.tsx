@@ -187,7 +187,7 @@ export function SiteSearchPanel({
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Фильтр по разделам и страницам…"
                 className={cn(
-                  "w-full rounded-2xl border py-3.5 pl-12 pr-4 text-[15px] leading-snug outline-none backdrop-blur-sm transition focus-visible:ring-2 focus-visible:ring-emerald-400/35",
+                  "funnel-text-input w-full !rounded-2xl border py-3.5 pl-12 pr-4 text-[15px] leading-snug outline-none backdrop-blur-sm transition focus-visible:ring-2 focus-visible:ring-emerald-400/35",
                   isLight
                     ? "border-[rgba(26,30,29,0.16)] bg-white/92 text-[var(--text)] placeholder:text-[color:rgba(26,30,29,0.45)] shadow-[inset_0_1px_0_rgba(255,255,255,0.92)]"
                     : "border-black/40 bg-black/50 text-neutral-100 placeholder:text-white/42",
