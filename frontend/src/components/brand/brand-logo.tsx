@@ -10,11 +10,16 @@ const LOGO_AR = 1024 / 442;
 type Props = {
   height: number;
   className?: string;
-  /** Светлый знак над тёмным баннером при светлой теме сайта */
+  /** Светлый знак над тёмным баннером при светлой теме сайта (только variant="header") */
   brightOnBackdrop?: boolean;
+  /**
+   * header — шапка сайта (день: зелёный, ночь: цвет текста шапки).
+   * app — админка и ЛК (день: --accent, ночь: --text через --app-logo-fill).
+   */
+  variant?: "header" | "app";
 };
 
-export function BrandLogo({ height, className, brightOnBackdrop }: Props) {
+export function BrandLogo({ height, className, brightOnBackdrop, variant = "header" }: Props) {
   const q = `v=${LOGO_ASSET_V}`;
   const logoUrl = `/images/brand/logo.png?${q}`;
   const w = Math.round(height * LOGO_AR);
@@ -30,6 +35,18 @@ export function BrandLogo({ height, className, brightOnBackdrop }: Props) {
     WebkitMaskPosition: "center",
     maskPosition: "center",
   };
+
+  if (variant === "app") {
+    return (
+      <span className={`inline-flex shrink-0 items-center ${className ?? ""}`}>
+        <span
+          role="presentation"
+          className="shrink-0"
+          style={{ ...mask, backgroundColor: "var(--app-logo-fill, var(--accent))" }}
+        />
+      </span>
+    );
+  }
 
   const lightThemeFill =
     brightOnBackdrop ? "rgba(245, 247, 246, 0.96)" : "var(--accent)";

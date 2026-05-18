@@ -4,8 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { signIn } from "next-auth/react";
-import { ArrowLeft, ChevronRight, Eye, EyeOff, Home, UserRound } from "lucide-react";
+import { ArrowLeft, ChevronRight, Eye, EyeOff, Home } from "lucide-react";
 
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { SITE_NAME } from "@/lib/constants";
 import { publicFormFieldClass, publicFormFieldStyle } from "@/lib/public-form-field";
 import { ShowcaseCarouselNav } from "@/components/ui/showcase-carousel-nav";
@@ -211,7 +212,7 @@ function ClientShowcaseCarousel() {
 
 export function AccountLoginExperience({ callbackUrl }: { callbackUrl: string }) {
   return (
-    <div className="relative min-h-screen bg-[var(--bg)] text-[var(--text)]">
+    <div className="app-branded-surface relative min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <div className="pointer-events-none absolute right-4 top-4 z-50 sm:right-6 sm:top-6">
         <span className="pointer-events-auto inline-block rounded-xl border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_92%,transparent)] p-0.5 shadow-sm backdrop-blur-sm">
           <ThemeToggle variant="outline" />
@@ -235,9 +236,7 @@ export function AccountLoginExperience({ callbackUrl }: { callbackUrl: string })
             </Link>
 
             <div className="mb-10 flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--accent-contrast)] shadow-lg shadow-[color-mix(in_srgb,var(--accent)_28%,transparent)]">
-                <UserRound className="h-5 w-5" aria-hidden />
-              </span>
+              <BrandLogo height={40} variant="app" className="shrink-0" />
               <div>
                 <h1 className="font-heading text-xl font-bold uppercase tracking-tight text-[var(--text)] sm:text-2xl">
                   {SITE_NAME}

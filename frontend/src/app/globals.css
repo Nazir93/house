@@ -601,7 +601,17 @@
 }
 
 /* —— Админка: сайдбар + рабочая область синхронно с data-theme */
+/* Логотип в админке и ЛК: день — зелёный, ночь — светлый */
+.app-branded-surface {
+  --app-logo-fill: var(--accent);
+}
+
+[data-theme="dark"] .app-branded-surface {
+  --app-logo-fill: var(--text);
+}
+
 .admin-app {
+  --app-logo-fill: var(--adm-logo);
   --adm-accent: #0f3d2e;
   --adm-nav-fg: rgba(255, 255, 255, 0.55);
   --adm-nav-fg-hover: rgba(255, 255, 255, 0.9);
@@ -652,9 +662,9 @@
   --adm-main-fg: #121211;
   --adm-main-fg-heading: #0a0a09;
   --adm-main-fg-muted: rgb(12 14 13 / 0.78);
-  /* Подписи и второстепенный текст — тёмный, не «серый на бежевом». */
-  --adm-main-fg-subtle: rgb(12 14 13 / 0.68);
-  --adm-main-fg-faint: rgb(12 14 13 / 0.48);
+  /* Подписи и второстепенный текст — читаемый контраст на светлом фоне */
+  --adm-main-fg-subtle: rgb(12 14 13 / 0.8);
+  --adm-main-fg-faint: rgb(12 14 13 / 0.62);
   --adm-card-bg: rgba(255, 255, 255, 0.88);
   --adm-card-border: rgba(22, 26, 25, 0.12);
   --adm-field-bg: #ffffff;
@@ -701,22 +711,22 @@
   color: rgb(12 14 13 / 0.74) !important;
 }
 [data-theme="light"] .admin-main-surface .text-white\/40 {
-  color: rgb(12 14 13 / 0.7) !important;
+  color: rgb(12 14 13 / 0.82) !important;
 }
 [data-theme="light"] .admin-main-surface .text-white\/35 {
-  color: rgb(12 14 13 / 0.66) !important;
+  color: rgb(12 14 13 / 0.78) !important;
 }
 [data-theme="light"] .admin-main-surface .text-white\/30 {
-  color: rgb(12 14 13 / 0.62) !important;
+  color: rgb(12 14 13 / 0.74) !important;
 }
 [data-theme="light"] .admin-main-surface .text-white\/25 {
-  color: rgb(12 14 13 / 0.56) !important;
+  color: rgb(12 14 13 / 0.68) !important;
 }
 [data-theme="light"] .admin-main-surface .text-white\/20 {
-  color: rgb(12 14 13 / 0.5) !important;
+  color: rgb(12 14 13 / 0.62) !important;
 }
 [data-theme="light"] .admin-main-surface .text-white\/10 {
-  color: rgb(12 14 13 / 0.38) !important;
+  color: rgb(12 14 13 / 0.48) !important;
 }
 [data-theme="light"] .admin-main-surface .text-white {
   color: var(--adm-main-fg) !important;
@@ -828,8 +838,153 @@
 [data-theme="light"] .admin-main-surface .text-emerald-200 {
   color: rgb(4 120 87) !important;
 }
+[data-theme="light"] .admin-main-surface .text-emerald-100 {
+  color: rgb(6 78 59) !important;
+}
+[data-theme="light"] .admin-main-surface .text-emerald-300,
+[data-theme="light"] .admin-main-surface .text-emerald-300\/90 {
+  color: rgb(5 150 105) !important;
+}
+[data-theme="light"] .admin-main-surface .text-emerald-400,
+[data-theme="light"] .admin-main-surface .text-emerald-400\/90,
+[data-theme="light"] .admin-main-surface .text-emerald-400\/80 {
+  color: rgb(4 120 87) !important;
+}
+[data-theme="light"] .admin-main-surface .hover\:text-emerald-300:hover,
+[data-theme="light"] .admin-main-surface .group:hover .group-hover\:text-emerald-300\/90 {
+  color: rgb(4 120 87) !important;
+}
+[data-theme="light"] .admin-main-surface .group:hover .group-hover\:text-emerald-400\/80 {
+  color: rgb(5 150 105) !important;
+}
+[data-theme="light"] .admin-main-surface .text-amber-100,
+[data-theme="light"] .admin-main-surface .text-amber-100\/90 {
+  color: rgb(120 53 15) !important;
+}
+[data-theme="light"] .admin-main-surface .text-amber-100\/60 {
+  color: rgb(146 64 14) !important;
+}
+[data-theme="light"] .admin-main-surface .text-amber-200 {
+  color: rgb(146 64 14) !important;
+}
+[data-theme="light"] .admin-main-surface .text-amber-300\/90,
+[data-theme="light"] .admin-main-surface .text-amber-400\/95 {
+  color: rgb(180 83 9) !important;
+}
+[data-theme="light"] .admin-main-surface .bg-amber-500\/10 {
+  background-color: rgb(254 243 199 / 0.9) !important;
+}
+[data-theme="light"] .admin-main-surface .bg-emerald-500\/10 {
+  background-color: rgb(209 250 229 / 0.85) !important;
+}
+[data-theme="light"] .admin-main-surface .border-emerald-500\/35 {
+  border-color: rgb(16 185 129 / 0.4) !important;
+}
+[data-theme="light"] .admin-main-surface .border-amber-500\/30,
+[data-theme="light"] .admin-main-surface .border-amber-500\/45 {
+  border-color: rgb(245 158 11 / 0.45) !important;
+}
+[data-theme="light"] .admin-main-surface [class*="bg-[#0F3D2E]/25"],
+[data-theme="light"] .admin-main-surface [class*="bg-[#0F3D2E]/35"] {
+  background-color: rgba(15, 61, 46, 0.1) !important;
+  border-color: rgba(15, 61, 46, 0.28) !important;
+}
+[data-theme="light"] .admin-main-surface [class*="bg-[#0F3D2E]/25"]:hover,
+[data-theme="light"] .admin-main-surface [class*="bg-[#0F3D2E]/35"]:hover,
+[data-theme="light"] .admin-main-surface [class*="hover:bg-[#0F3D2E]/35"]:hover {
+  background-color: rgba(15, 61, 46, 0.16) !important;
+}
 [data-theme="light"] .admin-main-surface .text-\[\#F6F6F4\] {
   color: #f6f6f4 !important;
+}
+
+/* Семантические классы рабочей зоны (не зависят от text-white/…) */
+.admin-main-surface .adm-muted {
+  color: var(--adm-main-fg-muted);
+}
+.admin-main-surface .adm-subtle {
+  color: var(--adm-main-fg-subtle);
+}
+.admin-main-surface .adm-faint {
+  color: var(--adm-main-fg-faint);
+}
+.admin-main-surface .adm-section-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--adm-main-fg-subtle);
+}
+.admin-main-surface .adm-uppercase-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--adm-main-fg-subtle);
+}
+.admin-main-surface .adm-card-foot {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--adm-main-fg-faint);
+  transition: color 0.15s;
+}
+.admin-main-surface .group:hover .adm-card-foot {
+  color: #0f3d2e;
+}
+[data-theme="dark"] .admin-main-surface .group:hover .adm-card-foot {
+  color: rgb(110 231 183);
+}
+.admin-main-surface .adm-banner-warn {
+  border-radius: 0.75rem;
+  border: 1px solid rgb(245 158 11 / 0.38);
+  background: rgb(255 251 235);
+  color: rgb(120 53 15);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+[data-theme="dark"] .admin-main-surface .adm-banner-warn {
+  border-color: rgb(245 158 11 / 0.3);
+  background: rgb(245 158 11 / 0.1);
+  color: rgb(254 243 199 / 0.92);
+}
+.admin-main-surface .adm-banner-warn-meta {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: rgb(146 64 14);
+}
+[data-theme="dark"] .admin-main-surface .adm-banner-warn-meta {
+  color: rgb(254 243 199 / 0.62);
+}
+.admin-main-surface .adm-btn-media {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  border: 1px solid rgba(15, 61, 46, 0.28);
+  background: rgba(15, 61, 46, 0.08);
+  color: rgb(6 95 70);
+}
+.admin-main-surface .adm-btn-media:hover {
+  background: rgba(15, 61, 46, 0.14);
+  border-color: rgba(15, 61, 46, 0.35);
+}
+[data-theme="dark"] .admin-main-surface .adm-btn-media {
+  border-color: rgba(15, 61, 46, 0.35);
+  background: rgba(15, 61, 46, 0.25);
+  color: rgb(110 231 183);
+}
+[data-theme="dark"] .admin-main-surface .adm-btn-media:hover {
+  background: rgba(15, 61, 46, 0.35);
 }
 
 [data-theme="light"] .admin-main-surface .prose-invert {

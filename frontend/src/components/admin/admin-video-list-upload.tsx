@@ -66,7 +66,7 @@ export function AdminVideoListUpload({
           </button>
         </div>
       ))}
-      <label className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0F3D2E]/25 hover:bg-[#0F3D2E]/35 text-emerald-300 text-sm font-medium cursor-pointer transition-colors border border-[#0F3D2E]/30">
+      <label className="adm-btn-media">
         <Plus size={16} />
         {uploading ? "Загрузка…" : "Добавить видео / GIF"}
         <input
@@ -81,7 +81,7 @@ export function AdminVideoListUpload({
         />
       </label>
       {error ? <p className="text-red-400 text-xs mt-1">{error}</p> : null}
-      <p className="text-[11px] text-white/25 mt-1">
+      <p className="text-[11px] adm-faint mt-1">
         Несколько роликов показываются в карусели баннера после фото. MP4, WebM, MOV, GIF.
       </p>
     </div>

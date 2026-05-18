@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { SITE_NAME } from "@/lib/constants";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import type { AccountHeaderSignals } from "@/lib/account-header-signals";
 import { CLIENT_CABINET_NOTIFICATIONS_HREF } from "@/lib/client-cabinet-bell";
@@ -93,7 +94,7 @@ export function AccountShell({
 
   return (
     <div
-      className="account-premium-shell min-h-screen flex"
+      className="account-premium-shell app-branded-surface min-h-screen flex"
       style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}
     >
       {mobileOpen && (
@@ -120,19 +121,14 @@ export function AccountShell({
         <div className="p-3 border-b flex items-center gap-2 min-h-[3.25rem]" style={{ borderColor: "var(--border)" }}>
           <Link
             href="/account/dashboard"
-            className="font-heading font-bold tracking-tight text-[var(--accent)] min-w-0 flex items-center gap-2"
+            className="min-w-0 flex items-center gap-2.5 transition-opacity hover:opacity-90"
             title={SITE_NAME}
+            aria-label={SITE_NAME}
           >
-            <span
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold"
-              style={{
-                backgroundColor: "color-mix(in srgb, var(--accent) 16%, transparent)",
-                color: "var(--accent)",
-              }}
-            >
-              Ч
+            <BrandLogo height={30} variant="app" className="shrink-0" />
+            <span className="account-sidebar-brand-text font-heading text-base font-bold tracking-tight truncate transition-opacity">
+              {SITE_NAME}
             </span>
-            <span className="account-sidebar-brand-text text-base truncate transition-opacity">{SITE_NAME}</span>
           </Link>
         </div>
         <nav className="flex-1 overflow-y-auto px-2 py-1 space-y-0.5 mt-1">
@@ -197,9 +193,6 @@ export function AccountShell({
             )}
             <span className="account-sidebar-label">Свернуть меню</span>
           </button>
-          <div className={`flex ${sidebarCollapsed ? "justify-center" : "justify-center px-1"}`}>
-            <ThemeToggle variant="outline" />
-          </div>
         </div>
 
         <div

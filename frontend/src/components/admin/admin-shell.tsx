@@ -7,7 +7,9 @@ import { ThemeToggle } from "@/components/layout/theme-toggle";
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isLogin = pathname === "/admin/login";
+  const isLogin =
+    pathname === "/admin/login" ||
+    pathname.startsWith("/admin/login/");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   if (isLogin) {

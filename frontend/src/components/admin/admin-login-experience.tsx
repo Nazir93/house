@@ -8,9 +8,9 @@ import {
   ChevronRight,
   Eye,
   EyeOff,
-  LayoutDashboard,
 } from "lucide-react";
 
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { SITE_NAME } from "@/lib/constants";
 import { ShowcaseCarouselNav } from "@/components/ui/showcase-carousel-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -281,7 +281,7 @@ function AdminShowcaseCarousel() {
 
 export function AdminLoginExperience() {
   return (
-    <div className="relative min-h-screen bg-[#e8ebe9] text-[#1a1d1c] dark:bg-[#0d1210] dark:text-[#e8ebe9]">
+    <div className="app-branded-surface relative min-h-screen bg-[#e8ebe9] text-[#1a1d1c] dark:bg-[#0d1210] dark:text-[#e8ebe9]">
       <div className="pointer-events-none absolute right-4 top-4 z-50 sm:right-6 sm:top-6">
         <span className="pointer-events-auto inline-block rounded-xl bg-[color-mix(in_srgb,var(--bg)_85%,transparent)] p-0.5 shadow-sm backdrop-blur-sm dark:bg-[color-mix(in_srgb,#0d1210_88%,transparent)]">
           <ThemeToggle variant="outline" />
@@ -295,9 +295,7 @@ export function AdminLoginExperience() {
           />
           <div className="relative mx-auto w-full max-w-[400px]">
             <div className="mb-10 flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#0f3d2e] text-[#f6f6f4] shadow-lg shadow-[#0f3d2e]/25">
-                <LayoutDashboard className="h-5 w-5" aria-hidden />
-              </span>
+              <BrandLogo height={40} variant="app" className="shrink-0" />
               <div>
                 <h1 className="font-heading text-xl font-bold uppercase tracking-tight text-[#0f3d2e] sm:text-2xl">
                   {SITE_NAME}

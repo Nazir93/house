@@ -381,10 +381,10 @@ export function ClientProjectAdminForm({
       </div>
 
       {hasUnpublishedDraft ? (
-        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100/90">
+        <div className="adm-banner-warn">
           Есть неопубликованные изменения. Клиент видит только последнюю опубликованную версию; уведомления не отправляются, пока вы не нажмёте «Опубликовать».
           {initial.draftSavedAt ? (
-            <span className="block mt-1 text-xs text-amber-100/60">
+            <span className="adm-banner-warn-meta">
               Черновик: {new Date(initial.draftSavedAt).toLocaleString("ru-RU")}
             </span>
           ) : null}

@@ -135,11 +135,11 @@ function StatCard({
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs uppercase tracking-wider text-white/40 mb-2">{label}</p>
+          <p className="adm-uppercase-label mb-2">{label}</p>
           <p className={`text-3xl font-bold tabular-nums ${accent}`}>
             {value}
             {subValue != null ? (
-              <span className="text-sm font-normal text-white/30 ml-1">{subValue}</span>
+              <span className="text-sm font-normal adm-faint ml-1">{subValue}</span>
             ) : null}
           </p>
         </div>
@@ -147,7 +147,7 @@ function StatCard({
           <Icon size={20} className={accent} />
         </div>
       </div>
-      <span className="mt-4 flex items-center gap-1 text-[11px] font-medium text-white/35 group-hover:text-emerald-300/90 transition-colors">
+      <span className="adm-card-foot">
         Перейти
         <ChevronRight size={14} className="opacity-70 group-hover:translate-x-0.5 transition-transform" />
       </span>
@@ -179,10 +179,10 @@ function CompactStatCard({
         <Icon size={18} className={accent} />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[11px] uppercase tracking-wider text-white/35 truncate">{label}</p>
+        <p className="adm-uppercase-label text-[11px] truncate">{label}</p>
         <p className={`text-xl font-bold tabular-nums ${accent}`}>{value}</p>
       </div>
-      <ChevronRight size={16} className="text-white/20 shrink-0 group-hover:text-emerald-400/80 group-hover:translate-x-0.5 transition-all" />
+      <ChevronRight size={16} className="adm-faint shrink-0 group-hover:translate-x-0.5 transition-all" />
     </Link>
   );
 }
@@ -195,7 +195,7 @@ export default async function AdminDashboard() {
     <div className="space-y-10">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Дашборд</h1>
-        <p className="text-sm text-white/40 mt-1">Обзор системы управления и быстрый доступ к разделам</p>
+        <p className="text-sm adm-subtle mt-1">Обзор системы управления и быстрый доступ к разделам</p>
         {stats.dbConnected ? (
           <p className="text-xs text-emerald-400/70 mt-2">База данных подключена — счётчики актуальны.</p>
         ) : null}
@@ -224,7 +224,7 @@ export default async function AdminDashboard() {
       )}
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wider">Главное</h2>
+        <h2 className="adm-section-title">Главное</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatCard
             href="/admin/leads"
@@ -255,7 +255,7 @@ export default async function AdminDashboard() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wider">Контент сайта</h2>
+        <h2 className="adm-section-title">Контент сайта</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <CompactStatCard
             href="/admin/built-objects"
@@ -293,7 +293,7 @@ export default async function AdminDashboard() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wider">Каталог и клиенты</h2>
+        <h2 className="adm-section-title">Каталог и клиенты</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <CompactStatCard
             href="/admin/client-projects"
@@ -323,7 +323,7 @@ export default async function AdminDashboard() {
       </section>
 
       <section className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5">
-        <p className="text-xs font-semibold uppercase tracking-wider text-white/40 mb-3">Ещё разделы</p>
+        <p className="adm-uppercase-label font-semibold mb-3">Ещё разделы</p>
         <div className="flex flex-wrap gap-2">
           <Link
             href="/admin/mortgage"

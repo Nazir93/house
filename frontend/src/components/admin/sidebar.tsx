@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { SITE_NAME } from "@/lib/constants";
+import { BrandLogo } from "@/components/brand/brand-logo";
+import { cn } from "@/lib/utils";
 import { useAdminNewLeadsNotify } from "@/hooks/use-admin-new-leads-notify";
 
 const NAV_ITEMS = [
@@ -98,18 +100,22 @@ export function AdminSidebar({ collapsed: collapsedProp, onCollapsedChange }: Ad
       >
         {/* Header */}
         <div
-          className="h-14 flex items-center justify-between px-4 border-b"
+          className={cn(
+            "flex border-b",
+            collapsed
+              ? "flex-col items-center gap-1 py-2.5 px-2"
+              : "h-14 items-center justify-between px-4",
+          )}
           style={{ borderColor: "var(--adm-sidebar-border)" }}
         >
-          {!collapsed && (
-            <Link
-              href="/admin"
-              className="text-sm font-bold tracking-wide transition-colors"
-              style={{ color: "var(--adm-logo)" }}
-            >
-              {SITE_NAME}
-            </Link>
-          )}
+          <Link
+            href="/admin"
+            className="flex min-w-0 items-center transition-opacity hover:opacity-90"
+            aria-label={SITE_NAME}
+            title={SITE_NAME}
+          >
+            <BrandLogo height={collapsed ? 28 : 32} variant="app" className="min-w-0" />
+          </Link>
           <button
             onClick={() => {
               setCollapsed(!collapsed);
