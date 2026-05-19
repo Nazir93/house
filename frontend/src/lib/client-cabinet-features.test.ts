@@ -30,8 +30,8 @@ import {
   detectNewPhotoNotifications,
 } from "@/lib/client-notification-sync";
 import {
+  buildUpcomingPaymentSummary,
   pickDashboardPaymentPreview,
-  pickNextUnpaidPayment,
 } from "@/lib/client-payments-dashboard";
 import { hasUnpublishedDraft } from "@/lib/client-project-draft";
 import { getCurrentStagesInProgress } from "@/lib/client-project-stage-status";
@@ -61,7 +61,9 @@ describe("личный кабинет — сводка по ТЗ (чат)", () =
         { id: "2", label: "Фундамент", amountKopeks: 200, dueDate: new Date("2026-04-10"), status: "EXPECTED" as const, paidAt: null, order: 1 },
         { id: "3", label: "Стены", amountKopeks: 300, dueDate: null, status: "NOT_ISSUED" as const, paidAt: null, order: 2 },
       ];
-      expect(pickNextUnpaidPayment(rows)?.label).toBe("Фундамент");
+      const upcoming = buildUpcomingPaymentSummary(rows);
+      expect(upcoming?.payments.map((p) => p.label)).toEqual(["Фундамент"]);
+      expect(upcoming?.payments.some((p) => p.status === "NOT_ISSUED")).toBe(false);
       expect(pickDashboardPaymentPreview(rows, 2)).toHaveLength(2);
     });
   });

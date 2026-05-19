@@ -24,12 +24,15 @@ function documentsChanged(
 }
 
 function photosChanged(
-  oldPhotos: { url: string }[],
-  newPhotos: { url: string }[]
+  oldPhotos: { url: string; order: number }[],
+  newPhotos: { url: string; order: number }[]
 ): boolean {
   if (oldPhotos.length !== newPhotos.length) return true;
-  const oldUrls = new Set(oldPhotos.map((p) => p.url));
-  return newPhotos.some((p) => !oldUrls.has(p.url));
+  const seq = (rows: { url: string; order: number }[]) =>
+    [...rows].sort((a, b) => a.order - b.order).map((p) => p.url);
+  const oldSeq = seq(oldPhotos);
+  const newSeq = seq(newPhotos);
+  return oldSeq.some((url, i) => url !== newSeq[i]);
 }
 
 /** Применяет черновик к опубликованным данным ЛК и шлёт уведомления только по изменённым блокам. */
@@ -56,7 +59,7 @@ export async function publishClientProjectToCabinet(projectId: string): Promise<
     }),
     prisma.clientPhotoReport.findMany({
       where: { projectId, isDraft: false },
-      select: { url: true, caption: true },
+      select: { url: true, caption: true, order: true },
     }),
   ]);
 
@@ -121,7 +124,7 @@ export async function publishClientProjectToCabinet(projectId: string): Promise<
       }),
       tx.clientPhotoReport.findMany({
         where: { projectId, isDraft: false },
-        select: { url: true, caption: true },
+        select: { url: true, caption: true, order: true },
       }),
     ]);
 

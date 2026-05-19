@@ -9,6 +9,7 @@ import {
   publishedDocumentWhere,
   publishedPhotoWhere,
 } from "@/lib/client-portal-order";
+import { buildUpcomingPaymentSummary } from "@/lib/client-payments-dashboard";
 import { formatCurrentStageLabel, getCurrentStagesInProgress } from "@/lib/client-project-stage-status";
 
 export async function GET() {
@@ -42,14 +43,7 @@ export async function GET() {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const paymentsOpen = project.payments.filter(
-      (p) => p.status === "EXPECTED" || p.status === "NOT_ISSUED"
-    );
-    const upcoming = paymentsOpen
-      .filter((p) => p.dueDate)
-      .sort((a, b) => (a.dueDate!.getTime() - b.dueDate!.getTime()))[0]
-      ?? paymentsOpen[0]
-      ?? null;
+    const upcomingSummary = buildUpcomingPaymentSummary(project.payments);
 
     const photoPreview = project.photoReports;
     const docPreview = project.documents.slice(0, 5);
@@ -94,7 +88,7 @@ export async function GET() {
         cameraStreamUrl: project.cameraStreamUrl,
         stages: project.stages,
         payments: project.payments,
-        upcomingPayment: upcoming,
+        upcomingPayment: upcomingSummary,
         documents: docPreview,
         documentsTotal,
         photoReports: photoPreview,

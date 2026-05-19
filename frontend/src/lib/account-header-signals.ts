@@ -7,7 +7,7 @@ export type AccountHeaderSignals = {
   attentionCount: number;
   /** Непрочитанные уведомления в кабинете (п. 7 ТЗ) */
   notificationsUnread: number;
-  /** Платежи с датой: просроченные и ближайшие 14 дней (статус ожидается / не выставлен) */
+  /** Платежи с датой: просроченные и ближайшие 14 дней (статус «Ожидает оплаты») */
   paymentsDue: number;
   /** Обращения в работе (не закрыты) */
   ticketsActive: number;
@@ -25,7 +25,7 @@ export const getAccountHeaderSignals = cache(
       prisma.clientPayment.count({
         where: {
           projectId,
-          status: { in: ["EXPECTED", "NOT_ISSUED"] },
+          status: "EXPECTED",
           dueDate: { not: null, lte: horizon },
         },
       }),

@@ -1,42 +1,5 @@
-/** PNG-иконки этапов (public/icons/stages). */
-export const STAGE_ICON_ASSET_FILES = {
-  foundation: "foundation.png",
-  walls: "walls.png",
-  roof: "roof.png",
-  windows: "windows.png",
-  engineering: "engineering.png",
-  facade: "facade.png",
-  interior: "interior.png",
-  landscaping: "landscaping.png",
-} as const;
-
-export type StageIconAssetKey = keyof typeof STAGE_ICON_ASSET_FILES;
-
-const ICON_KEY_TO_ASSET: Record<string, StageIconAssetKey> = {
-  foundation: "foundation",
-  walls: "walls",
-  roof: "roof",
-  windows: "windows",
-  engineering: "engineering",
-  facade: "facade",
-  interior: "interior",
-  landscaping: "landscaping",
-  finish: "interior",
-  house: "facade",
-  electric: "engineering",
-  water: "engineering",
-  "floor-heating": "engineering",
-  radiators: "engineering",
-  boiler: "engineering",
-  septic: "engineering",
-  well: "engineering",
-  hammer: "engineering",
-  driveway: "landscaping",
-  "retaining-wall": "landscaping",
-  "landscape-plan": "landscaping",
-};
-
-export const CLIENT_STAGE_ICON_PICKER_KEYS: StageIconAssetKey[] = [
+/** Ключи Lucide-иконок для этапов (админка + личный кабинет). */
+export const CLIENT_STAGE_ICON_PICKER_KEYS = [
   "foundation",
   "walls",
   "roof",
@@ -45,36 +8,65 @@ export const CLIENT_STAGE_ICON_PICKER_KEYS: StageIconAssetKey[] = [
   "facade",
   "interior",
   "landscaping",
-];
+  "electric",
+  "water",
+  "ventilation",
+  "floor-heating",
+  "radiators",
+  "boiler",
+  "septic",
+  "well",
+  "driveway",
+  "retaining-wall",
+  "landscape-plan",
+] as const;
 
-export const ADMIN_STAGE_ICON_SELECT_OPTIONS: { value: StageIconAssetKey; label: string }[] = [
-  { value: "foundation", label: "foundation — Фундамент" },
-  { value: "walls", label: "walls — Стены" },
-  { value: "roof", label: "roof — Кровля" },
-  { value: "windows", label: "windows — Окна" },
-  { value: "engineering", label: "engineering — Инж. сети" },
-  { value: "facade", label: "facade — Фасад" },
-  { value: "interior", label: "interior — Внутр. отделка" },
-  { value: "landscaping", label: "landscaping — Благоустройство" },
-];
+export type StageIconPickerKey = (typeof CLIENT_STAGE_ICON_PICKER_KEYS)[number];
 
-/** Старые этапы в БД с iconKey circle/default — показываем фундамент. */
-const LEGACY_DEFAULT_ASSET: StageIconAssetKey = "foundation";
+const STAGE_ICON_LABELS: Record<StageIconPickerKey, string> = {
+  foundation: "Фундамент",
+  walls: "Стены",
+  roof: "Кровля",
+  windows: "Окна",
+  engineering: "Инж. сети",
+  facade: "Фасад",
+  interior: "Внутр. отделка",
+  landscaping: "Благоустройство",
+  electric: "Электрика",
+  water: "Водоснабжение",
+  ventilation: "Вентиляция",
+  "floor-heating": "Тёплый пол",
+  radiators: "Радиаторы",
+  boiler: "Котельная",
+  septic: "Канализация",
+  well: "Скважина",
+  driveway: "Подъезд",
+  "retaining-wall": "Подпорная стена",
+  "landscape-plan": "Ландшафт",
+};
 
-export function resolveStageIconAssetKey(iconKey: string): StageIconAssetKey | null {
-  const mapped = ICON_KEY_TO_ASSET[iconKey];
-  if (mapped) return mapped;
-  if (iconKey === "circle" || iconKey === "default" || iconKey === "check") {
-    return LEGACY_DEFAULT_ASSET;
-  }
-  return null;
-}
+export const ADMIN_STAGE_ICON_SELECT_OPTIONS: { value: StageIconPickerKey; label: string }[] =
+  CLIENT_STAGE_ICON_PICKER_KEYS.map((value) => ({
+    value,
+    label: `${value} — ${STAGE_ICON_LABELS[value]}`,
+  }));
 
-export function stageIconAssetUrl(assetKey: StageIconAssetKey): string {
-  return `/icons/stages/${STAGE_ICON_ASSET_FILES[assetKey]}`;
-}
+const PICKER_KEY_SET = new Set<string>(CLIENT_STAGE_ICON_PICKER_KEYS);
 
-export function resolveStageIconAssetUrl(iconKey: string): string | null {
-  const assetKey = resolveStageIconAssetKey(iconKey);
-  return assetKey ? stageIconAssetUrl(assetKey) : null;
+/** Старые alias в БД → ключ из пикера. */
+const LEGACY_ICON_KEY_ALIASES: Record<string, StageIconPickerKey> = {
+  circle: "foundation",
+  default: "foundation",
+  check: "foundation",
+  finish: "interior",
+  house: "facade",
+  hammer: "engineering",
+};
+
+/** Значение для пикера в админке (сохраняем исходный ключ, если он в списке). */
+export function resolveStageIconPickerKey(iconKey: string): StageIconPickerKey {
+  if (PICKER_KEY_SET.has(iconKey)) return iconKey as StageIconPickerKey;
+  const alias = LEGACY_ICON_KEY_ALIASES[iconKey];
+  if (alias) return alias;
+  return "foundation";
 }

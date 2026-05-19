@@ -91,3 +91,14 @@ export async function touchDraftSavedAt(projectId: string): Promise<void> {
     data: { draftSavedAt: new Date() },
   });
 }
+
+/** Публикует черновые фото/документы в личный кабинет (без сброса остального черновика). */
+export async function publishDraftMediaToCabinet(projectId: string): Promise<void> {
+  await prisma.$transaction(async (tx) => {
+    await publishDraftMedia(tx, projectId);
+    await tx.clientConstructionProject.update({
+      where: { id: projectId },
+      data: { draftSavedAt: new Date() },
+    });
+  });
+}

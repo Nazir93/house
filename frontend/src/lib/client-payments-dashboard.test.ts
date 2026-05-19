@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildUpcomingPaymentSummary,
+  isAwaitingPayment,
   isUnpaidPayment,
   pickDashboardPaymentPreview,
   pickNextUnpaidPayment,
@@ -36,20 +38,44 @@ const base = [
 ];
 
 describe("client-payments-dashboard (п. 10 ТЗ)", () => {
-  it("isUnpaidPayment", () => {
-    expect(isUnpaidPayment("EXPECTED")).toBe(true);
-    expect(isUnpaidPayment("NOT_ISSUED")).toBe(true);
-    expect(isUnpaidPayment("PAID")).toBe(false);
+  it("isAwaitingPayment — только EXPECTED", () => {
+    expect(isAwaitingPayment("EXPECTED")).toBe(true);
+    expect(isAwaitingPayment("NOT_ISSUED")).toBe(false);
+    expect(isAwaitingPayment("PAID")).toBe(false);
+    expect(isUnpaidPayment("NOT_ISSUED")).toBe(false);
   });
 
-  it("pickNextUnpaidPayment — ближайший по сроку", () => {
-    expect(pickNextUnpaidPayment(base)?.label).toBe("Заливка фундамента");
+  it("buildUpcomingPaymentSummary — один платёж EXPECTED", () => {
+    const summary = buildUpcomingPaymentSummary(base);
+    expect(summary?.payments.map((p) => p.label)).toEqual(["Заливка фундамента"]);
+    expect(summary?.totalAmountKopeks).toBe(420_000_00);
   });
 
-  it("pickNextUnpaidPayment — без неоплаченных", () => {
+  it("buildUpcomingPaymentSummary — NOT_ISSUED не входит", () => {
+    const summary = buildUpcomingPaymentSummary(base);
+    expect(summary?.payments.some((p) => p.status === "NOT_ISSUED")).toBe(false);
+  });
+
+  it("buildUpcomingPaymentSummary — суммирует несколько EXPECTED", () => {
+    const rows = [
+      { ...base[1]!, id: "a", label: "Аванс", amountKopeks: 100_00, order: 0 },
+      { ...base[1]!, id: "b", label: "Коробка", amountKopeks: 200_00, order: 1 },
+      base[2]!,
+    ];
+    const summary = buildUpcomingPaymentSummary(rows);
+    expect(summary?.payments.map((p) => p.label)).toEqual(["Аванс", "Коробка"]);
+    expect(summary?.totalAmountKopeks).toBe(300_00);
+  });
+
+  it("buildUpcomingPaymentSummary — пусто без EXPECTED", () => {
+    expect(buildUpcomingPaymentSummary([{ ...base[0]!, status: "PAID" }])).toBeNull();
     expect(
-      pickNextUnpaidPayment([{ ...base[0]!, status: "PAID" }])
+      buildUpcomingPaymentSummary([{ ...base[2]!, status: "NOT_ISSUED" }])
     ).toBeNull();
+  });
+
+  it("pickNextUnpaidPayment — первый из EXPECTED (совместимость)", () => {
+    expect(pickNextUnpaidPayment(base)?.label).toBe("Заливка фундамента");
   });
 
   it("pickDashboardPaymentPreview — только первые две позиции", () => {

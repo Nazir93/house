@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import type { DraftSectionSaveUiState } from "@/components/admin/admin-draft-section-save";
 import type { ClientProjectDraftSection } from "@/lib/client-project-draft";
+import { isDraftPayloadDirty, stableDraftPayloadString } from "@/lib/draft-section-baseline";
 
 const PAYLOAD_SECTIONS: ClientProjectDraftSection[] = ["main", "stages", "payments"];
 const MEDIA_SECTIONS: ClientProjectDraftSection[] = ["documents", "photos"];
@@ -12,17 +13,16 @@ type SectionSaveMeta =
   | { kind: "saved"; at: number }
   | { kind: "error"; message: string };
 
-function stableStringify(value: unknown): string {
-  return JSON.stringify(value);
-}
-
 export function useAdminDraftSectionSave({
   projectId,
+  baselineKey,
   buildDraftPayload,
   router,
   setGlobalErr,
 }: {
   projectId: string;
+  /** Меняется при загрузке объекта с сервера (обновление страницы, router.refresh). */
+  baselineKey: string;
   buildDraftPayload: (section: ClientProjectDraftSection) => Record<string, unknown>;
   router: AppRouterInstance;
   setGlobalErr: (message: string) => void;
@@ -30,30 +30,45 @@ export function useAdminDraftSectionSave({
   const [savingSection, setSavingSection] = useState<ClientProjectDraftSection | null>(null);
   const [saveMeta, setSaveMeta] = useState<Partial<Record<ClientProjectDraftSection, SectionSaveMeta>>>({});
   const [mediaDirty, setMediaDirty] = useState<Partial<Record<"documents" | "photos", boolean>>>({});
+  const [snapshotsReady, setSnapshotsReady] = useState(false);
 
   const snapshotsRef = useRef<Partial<Record<ClientProjectDraftSection, string>>>({});
-  const snapshotsReadyRef = useRef(false);
+  const lastBaselineKeyRef = useRef(baselineKey);
 
   const payloadBySection = useMemo(() => {
     const out: Partial<Record<ClientProjectDraftSection, string>> = {};
     for (const section of PAYLOAD_SECTIONS) {
-      out[section] = stableStringify(buildDraftPayload(section));
+      out[section] = stableDraftPayloadString(buildDraftPayload(section));
     }
     return out as Record<(typeof PAYLOAD_SECTIONS)[number], string>;
   }, [buildDraftPayload]);
 
   useEffect(() => {
-    if (snapshotsReadyRef.current) return;
-    snapshotsReadyRef.current = true;
-    for (const section of PAYLOAD_SECTIONS) {
-      snapshotsRef.current[section] = payloadBySection[section];
-    }
-  }, [payloadBySection]);
+    if (lastBaselineKeyRef.current === baselineKey) return;
+    lastBaselineKeyRef.current = baselineKey;
+    snapshotsRef.current = {};
+    setSnapshotsReady(false);
+    setMediaDirty({});
+    setSaveMeta({});
+  }, [baselineKey]);
+
+  useEffect(() => {
+    if (snapshotsReady) return;
+
+    const timer = window.setTimeout(() => {
+      for (const section of PAYLOAD_SECTIONS) {
+        snapshotsRef.current[section] = payloadBySection[section];
+      }
+      setSnapshotsReady(true);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [payloadBySection, snapshotsReady, baselineKey]);
 
   const isPayloadDirty = useCallback(
     (section: (typeof PAYLOAD_SECTIONS)[number]) =>
-      payloadBySection[section] !== snapshotsRef.current[section],
-    [payloadBySection]
+      isDraftPayloadDirty(snapshotsReady, payloadBySection[section], snapshotsRef.current[section]),
+    [payloadBySection, snapshotsReady]
   );
 
   const isSectionDirty = useCallback(
@@ -149,7 +164,7 @@ export function useAdminDraftSectionSave({
         setSavingSection(null);
       }
     },
-    [projectId, buildDraftPayload, payloadBySection, router, setGlobalErr, isSectionDirty]
+    [projectId, buildDraftPayload, payloadBySection, router, setGlobalErr]
   );
 
   useEffect(() => {

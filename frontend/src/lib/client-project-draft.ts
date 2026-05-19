@@ -122,8 +122,10 @@ export function mergeClientProjectDraft(
 }
 
 export function parseClientProjectDraftData(raw: unknown): ClientProjectDraftData | null {
-  if (!raw || typeof raw !== "object") return null;
-  return raw as ClientProjectDraftData;
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const draft = raw as ClientProjectDraftData;
+  const hasContent = Object.values(draft).some((v) => v !== undefined);
+  return hasContent ? draft : null;
 }
 
 export function hasUnpublishedDraft(project: {
@@ -131,8 +133,11 @@ export function hasUnpublishedDraft(project: {
   cabinetPublishedAt: Date | null;
   draftData: unknown;
 }): boolean {
-  if (!project.draftSavedAt || !project.draftData) return false;
-  if (!project.cabinetPublishedAt) return true;
+  const draft = parseClientProjectDraftData(project.draftData);
+  if (!project.cabinetPublishedAt) {
+    return Boolean(project.draftSavedAt || draft);
+  }
+  if (!project.draftSavedAt) return false;
   return project.draftSavedAt.getTime() > project.cabinetPublishedAt.getTime();
 }
 

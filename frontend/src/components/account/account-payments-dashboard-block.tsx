@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { ClientPaymentsScheduleTable } from "@/components/account/client-payments-schedule-table";
-import { AccountPaymentsNextCard } from "@/components/account/account-payments-next-card";
 import {
+  AccountPaymentsNextCard,
+  AccountPaymentsNextEmpty,
+} from "@/components/account/account-payments-next-card";
+import {
+  buildUpcomingPaymentSummary,
   pickDashboardPaymentPreview,
-  pickNextUnpaidPayment,
   type ClientPaymentScheduleItem,
 } from "@/lib/client-payments-dashboard";
 
@@ -13,7 +16,7 @@ export function AccountPaymentsDashboardBlock({
 }: {
   payments: ClientPaymentScheduleItem[];
 }) {
-  const upcoming = pickNextUnpaidPayment(payments);
+  const upcoming = buildUpcomingPaymentSummary(payments);
   const previewRows = pickDashboardPaymentPreview(payments, 2);
   const totalCount = payments.length;
 
@@ -26,7 +29,11 @@ export function AccountPaymentsDashboardBlock({
         Платежи
       </h2>
 
-      {upcoming ? <AccountPaymentsNextCard payment={upcoming} compact /> : null}
+      {upcoming ? (
+        <AccountPaymentsNextCard summary={upcoming} compact />
+      ) : (
+        <AccountPaymentsNextEmpty compact />
+      )}
 
       {previewRows.length > 0 ? (
         <ClientPaymentsScheduleTable payments={previewRows} variant="dashboard" />

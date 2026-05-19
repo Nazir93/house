@@ -11,7 +11,7 @@ type AdminStageIconPickerProps = {
   className?: string;
 };
 
-/** Выбор одной из 8 иконок этапа. */
+/** Выбор Lucide-иконки этапа. */
 export function AdminStageIconPicker({ value, onChange, className }: AdminStageIconPickerProps) {
   return (
     <div

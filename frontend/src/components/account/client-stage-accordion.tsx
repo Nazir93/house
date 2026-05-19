@@ -87,7 +87,7 @@ export function ClientStageAccordion({ stages }: { stages: ClientStageAccordionI
               {complete ? (
                 <CheckCircle2 className="h-7 w-7 text-emerald-500 shrink-0" aria-hidden />
               ) : (
-                <StageIcon iconKey={parent.iconKey} className="h-7 w-7 shrink-0 opacity-85" />
+                <StageIcon iconKey={parent.iconKey} className="h-7 w-7 shrink-0" colored />
               )}
               <span className="min-w-0 flex-1">
                 <span className="block font-semibold text-base leading-snug">{parent.title}</span>
@@ -127,7 +127,7 @@ function SubStageRow({ stage, status }: { stage: ClientStageAccordionItem; statu
       {done ? (
         <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" aria-hidden />
       ) : (
-        <StageIcon iconKey={stage.iconKey} className="h-5 w-5 shrink-0 opacity-75" />
+        <StageIcon iconKey={stage.iconKey} className="h-5 w-5 shrink-0" colored />
       )}
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-medium">{stage.title}</span>

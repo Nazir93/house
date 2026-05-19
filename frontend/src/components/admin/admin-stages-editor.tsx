@@ -9,7 +9,12 @@ import {
   removeAdminStageWithChildren,
   type AdminStageRow,
 } from "@/lib/admin-client-stage-rows";
-import { resolveStageIconAssetKey } from "@/lib/client-stage-icon-assets";
+import { resolveStageIconPickerKey } from "@/lib/client-stage-icon-assets";
+import {
+  isStandardStageTitle,
+  resolveDefaultIconKeyForStageTitle,
+  standardSubStageTemplate,
+} from "@/lib/client-project-stage-icons";
 import { CLIENT_STAGE_STATUS_OPTIONS } from "@/lib/client-stage-status";
 import { cn } from "@/lib/utils";
 
@@ -45,7 +50,7 @@ function subStageEntries(
 }
 
 function resolveIconPickerValue(iconKey: string): string {
-  return resolveStageIconAssetKey(iconKey) ?? "foundation";
+  return resolveStageIconPickerKey(iconKey);
 }
 
 /** Компактные карточки этапов (сетка 2 колонки) с подэтапами внутри родителя. */
@@ -97,17 +102,30 @@ export function AdminStagesEditor({ stages, onChange, progressHint }: AdminStage
                 <input
                   className={inp}
                   value={row.title}
-                  onChange={(e) => patchRow(index, { title: e.target.value })}
+                  onChange={(e) => {
+                    const title = e.target.value;
+                    const autoIcon = resolveDefaultIconKeyForStageTitle(title);
+                    patchRow(index, autoIcon ? { title, iconKey: autoIcon } : { title });
+                  }}
                   placeholder="Название этапа"
                 />
               </div>
 
               <div>
                 <label className={labelCls}>Иконка</label>
-                <AdminStageIconPicker
-                  value={resolveIconPickerValue(row.iconKey)}
-                  onChange={(iconKey) => patchRow(index, { iconKey })}
-                />
+                {isStandardStageTitle(row.title) ? (
+                  <div className="flex items-center gap-2 py-1">
+                    <StageIcon iconKey={row.iconKey} className="h-7 w-7 shrink-0" colored />
+                    <span className="text-[10px] text-white/45 leading-snug">
+                      Подставляется автоматически для типового этапа
+                    </span>
+                  </div>
+                ) : (
+                  <AdminStageIconPicker
+                    value={resolveIconPickerValue(row.iconKey)}
+                    onChange={(iconKey) => patchRow(index, { iconKey })}
+                  />
+                )}
               </div>
 
               <div>
@@ -178,13 +196,14 @@ export function AdminStagesEditor({ stages, onChange, progressHint }: AdminStage
               <button
                 type="button"
                 onClick={() => {
+                  const template = standardSubStageTemplate(row.iconKey, subs.length);
                   onChange([
                     ...stages,
                     createAdminStageRow({
-                      title: "",
+                      title: template?.title ?? "",
                       parentClientKey: row.clientKey,
                       order: subs.length,
-                      iconKey: "electric",
+                      iconKey: template?.iconKey,
                     }),
                   ]);
                 }}

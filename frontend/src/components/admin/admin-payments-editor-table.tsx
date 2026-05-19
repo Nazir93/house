@@ -22,8 +22,14 @@ const selectTrigger =
   "rounded-lg border border-white/[0.1] bg-white/[0.05] px-2.5 py-1.5 text-sm text-white focus:outline-none focus:border-[#0F3D2E]";
 
 function createEmptyRow(order: number): AdminPaymentRow {
-  return { order, label: "", amountRubles: 0, dueDate: "", status: "EXPECTED", paidAt: "" };
+  return { order, label: "", amountRubles: 0, dueDate: "", status: "NOT_ISSUED", paidAt: "" };
 }
+
+const IMPORTED_PAYMENT_DEFAULTS = {
+  dueDate: "",
+  status: "NOT_ISSUED",
+  paidAt: "",
+} as const;
 
 export function AdminPaymentsEditorTable({
   rows,
@@ -63,11 +69,9 @@ export function AdminPaymentsEditorTable({
         const mapped: AdminPaymentRow[] = rawRows.map(
           (r: { label?: string; amountRubles?: number }, i: number) => ({
             order: i,
-            label: typeof r.label === "string" ? r.label : "Платёж",
+            label: typeof r.label === "string" && r.label.trim() ? r.label.trim() : "Платёж",
             amountRubles: typeof r.amountRubles === "number" ? r.amountRubles : 0,
-            dueDate: "",
-            status: "EXPECTED",
-            paidAt: "",
+            ...IMPORTED_PAYMENT_DEFAULTS,
           })
         );
         if (mapped.length === 0) {
@@ -110,7 +114,13 @@ export function AdminPaymentsEditorTable({
     (mode: "replace" | "append") => {
       importModeRef.current = mode;
       if (mode === "replace" && rows.length > 0) {
-        if (!window.confirm("Заменить график?")) return;
+        if (
+          !window.confirm(
+            "Текущий график платежей будет полностью заменён строками из файла. Продолжить?"
+          )
+        ) {
+          return;
+        }
       }
       fileInputRef.current?.click();
     },
@@ -162,15 +172,16 @@ export function AdminPaymentsEditorTable({
           className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.12] bg-white/[0.06] px-3 py-1.5 text-xs font-semibold text-white/90 hover:bg-white/[0.1] disabled:opacity-50"
         >
           {importing ? <Loader2 className="animate-spin" size={14} /> : <FileUp size={14} />}
-          Заменить из файла
+          Загрузить из файла (заменить график)
         </button>
         <button
           type="button"
           disabled={importing}
           onClick={() => pickImport("append")}
           className="inline-flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-transparent px-3 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.04] disabled:opacity-50"
+          title="Добавить строки из файла в конец текущего графика"
         >
-          Добавить из файла
+          Добавить в конец из файла
         </button>
       </div>
       {importNote ? <p className="text-xs text-white/35">{importNote}</p> : null}

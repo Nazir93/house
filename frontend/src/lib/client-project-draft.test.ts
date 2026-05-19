@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   hasUnpublishedDraft,
   mergeClientProjectDraft,
+  parseClientProjectDraftData,
   parseClientProjectDraftSection,
 } from "./client-project-draft";
 
@@ -16,14 +17,30 @@ describe("hasUnpublishedDraft", () => {
     ).toBe(true);
   });
 
-  it("false если публикация позже черновика", () => {
+  it("false если публикация позже сохранения черновика", () => {
     expect(
       hasUnpublishedDraft({
-        draftData: { title: "x" },
+        draftData: null,
         draftSavedAt: new Date("2026-05-16T10:00:00Z"),
         cabinetPublishedAt: new Date("2026-05-16T12:00:00Z"),
       })
     ).toBe(false);
+  });
+
+  it("true при правках медиа без draftData (только draftSavedAt)", () => {
+    expect(
+      hasUnpublishedDraft({
+        draftData: {},
+        draftSavedAt: new Date("2026-05-16T12:00:00Z"),
+        cabinetPublishedAt: new Date("2026-05-16T10:00:00Z"),
+      })
+    ).toBe(true);
+  });
+});
+
+describe("parseClientProjectDraftData", () => {
+  it("пустой объект — null (не сбрасывает этапы в админке)", () => {
+    expect(parseClientProjectDraftData({})).toBeNull();
   });
 });
 

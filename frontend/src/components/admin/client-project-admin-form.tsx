@@ -27,12 +27,17 @@ import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
 import { AdminPhotoReportsEditor } from "@/components/admin/admin-photo-reports-editor";
 import { ClientWallMaterialSelect } from "@/components/admin/client-wall-material-select";
 import { createAdminStageRow, type AdminStageRow } from "@/lib/admin-client-stage-rows";
+import {
+  buildDefaultAdminStageRows,
+  standardTopLevelStageTemplate,
+} from "@/lib/client-project-stage-icons";
 import { computeOverallProgressFromStages } from "@/lib/client-project-progress";
 import {
   formatCurrentStageLabel,
   getCurrentStagesInProgress,
 } from "@/lib/client-project-stage-status";
 import type { ClientProjectDraftSection } from "@/lib/client-project-draft";
+import { buildClientProjectDraftBaselineKey } from "@/lib/draft-section-baseline";
 import { CLIENT_STAGE_STATUS_OPTIONS } from "@/lib/client-stage-status";
 
 const TICKET_STATUS_OPTIONS = [
@@ -271,9 +276,15 @@ export function ClientProjectAdminForm({
     ]
   );
 
+  const draftBaselineKey = useMemo(
+    () => buildClientProjectDraftBaselineKey(projectId, initial),
+    [projectId, initial]
+  );
+
   const { getUiState, getErrorMessage, saveDraftSection, markMediaSectionDirty } =
     useAdminDraftSectionSave({
       projectId,
+      baselineKey: draftBaselineKey,
       buildDraftPayload,
       router,
       setGlobalErr: setErr,
@@ -492,19 +503,38 @@ export function ClientProjectAdminForm({
               {sectionSaveControl("stages")}
               <button
                 type="button"
-                onClick={() =>
+                onClick={() => {
+                  const order = stages.filter((x) => !x.parentClientKey).length;
+                  const template = standardTopLevelStageTemplate(order);
                   setStages((s) => [
                     ...s,
                     createAdminStageRow({
-                      title: "",
-                      order: s.filter((x) => !x.parentClientKey).length,
-                      iconKey: "foundation",
+                      title: template?.title ?? "",
+                      order,
+                      iconKey: template?.iconKey,
                     }),
-                  ])
-                }
+                  ]);
+                }}
                 className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400"
               >
                 <Plus size={14} /> Этап
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (
+                    stages.length > 0 &&
+                    !window.confirm(
+                      "Заменить все этапы на типовые 8 этапов с подэтапами инженерии и благоустройства?"
+                    )
+                  ) {
+                    return;
+                  }
+                  setStages(buildDefaultAdminStageRows());
+                }}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-white/55 hover:text-white/80"
+              >
+                Типовые 8 этапов
               </button>
             </>
           }

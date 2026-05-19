@@ -10,25 +10,53 @@ export type ClientPaymentScheduleItem = {
   order: number;
 };
 
-const UNPAID: ClientPaymentStatus[] = ["EXPECTED", "NOT_ISSUED"];
-
-export function isUnpaidPayment(status: ClientPaymentStatus): boolean {
-  return UNPAID.includes(status);
+/** Статус «Ожидает оплаты» — единственный, что попадает в блок «Ближайший платёж». */
+export function isAwaitingPayment(status: ClientPaymentStatus): boolean {
+  return status === "EXPECTED";
 }
 
-/** Ближайший неоплаченный платёж (п. 10 ТЗ). */
+/** @deprecated Используйте isAwaitingPayment */
+export function isUnpaidPayment(status: ClientPaymentStatus): boolean {
+  return isAwaitingPayment(status);
+}
+
+export type UpcomingPaymentSummary = {
+  totalAmountKopeks: number;
+  payments: ClientPaymentScheduleItem[];
+};
+
+function sortAwaitingPayments(
+  payments: ClientPaymentScheduleItem[]
+): ClientPaymentScheduleItem[] {
+  return [...payments].sort((a, b) => {
+    if (a.order !== b.order) return a.order - b.order;
+    const ad = a.dueDate?.getTime() ?? Number.MAX_SAFE_INTEGER;
+    const bd = b.dueDate?.getTime() ?? Number.MAX_SAFE_INTEGER;
+    return ad - bd;
+  });
+}
+
+/**
+ * Сводка для блока «Ближайший платёж»: только EXPECTED.
+ * Несколько платежей суммируются; порядок — по order / дате.
+ */
+export function buildUpcomingPaymentSummary(
+  payments: ClientPaymentScheduleItem[]
+): UpcomingPaymentSummary | null {
+  const awaiting = sortAwaitingPayments(payments.filter((p) => isAwaitingPayment(p.status)));
+  if (awaiting.length === 0) return null;
+
+  return {
+    totalAmountKopeks: awaiting.reduce((sum, p) => sum + p.amountKopeks, 0),
+    payments: awaiting,
+  };
+}
+
+/** @deprecated Используйте buildUpcomingPaymentSummary */
 export function pickNextUnpaidPayment(
   payments: ClientPaymentScheduleItem[]
 ): ClientPaymentScheduleItem | null {
-  const open = payments.filter((p) => isUnpaidPayment(p.status));
-  if (open.length === 0) return null;
-
-  const withDue = open
-    .filter((p) => p.dueDate)
-    .sort((a, b) => a.dueDate!.getTime() - b.dueDate!.getTime());
-  if (withDue.length > 0) return withDue[0]!;
-
-  return [...open].sort((a, b) => a.order - b.order)[0] ?? null;
+  return buildUpcomingPaymentSummary(payments)?.payments[0] ?? null;
 }
 
 function sortPaymentsSchedule(payments: ClientPaymentScheduleItem[]): ClientPaymentScheduleItem[] {

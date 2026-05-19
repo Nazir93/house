@@ -21,7 +21,6 @@ import {
   Fence,
   Map,
 } from "lucide-react";
-import { resolveStageIconAssetUrl } from "@/lib/client-stage-icon-assets";
 import { cn } from "@/lib/utils";
 
 const LUCIDE_MAP: Record<string, LucideIcon> = {
@@ -52,7 +51,7 @@ const LUCIDE_MAP: Record<string, LucideIcon> = {
   default: Circle,
 };
 
-/** Цвета иконок этапов: light / dark (п. 4–5 ТЗ). */
+/** Цвета иконок этапов: light / dark (globals.css .stage-icon-tint--*). */
 const COLORED_CLASS: Record<string, string> = {
   foundation: "stage-icon-tint stage-icon-tint--foundation",
   walls: "stage-icon-tint stage-icon-tint--walls",
@@ -86,26 +85,18 @@ export function StageIcon({
 }: {
   iconKey: string;
   className?: string;
-  /** Маленькие цветные иконки для ленты на главной ЛК */
+  /** Цветные иконки для карточек этапов (адаптация под light / dark). */
   colored?: boolean;
 }) {
-  const assetUrl = resolveStageIconAssetUrl(iconKey);
-  const tint = COLORED_CLASS[iconKey in COLORED_CLASS ? iconKey : "default"] ?? COLORED_CLASS.default;
-
-  if (assetUrl) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element -- локальные PNG из public/icons/stages
-      <img
-        src={assetUrl}
-        alt=""
-        aria-hidden
-        draggable={false}
-        className={cn("inline-block shrink-0 object-contain", className)}
-      />
-    );
-  }
-
   const key = iconKey in LUCIDE_MAP ? iconKey : "default";
-  const I = LUCIDE_MAP[key] ?? LUCIDE_MAP.default;
-  return <I className={cn(className, colored && tint)} aria-hidden />;
+  const Icon = LUCIDE_MAP[key] ?? LUCIDE_MAP.default;
+  const tint = COLORED_CLASS[key] ?? COLORED_CLASS.default;
+
+  return (
+    <Icon
+      className={cn(className, colored && tint)}
+      strokeWidth={1.75}
+      aria-hidden
+    />
+  );
 }

@@ -13,13 +13,23 @@ describe("buildDefaultClientProjectStagesPayload", () => {
     expect(stages).toHaveLength(DEFAULT_CLIENT_PROJECT_STAGE_COUNT);
     expect(top.map((s) => s.title)).toEqual([
       "Фундамент",
-      "Стены 1–2-й этажи",
+      "Стены",
       "Кровля",
       "Окна",
       "Инженерные сети",
       "Отделка фасада",
-      "Отделка внутренняя",
+      "Внутренняя отделка",
       "Благоустройство участка и въездная группа",
+    ]);
+    expect(top.map((s) => s.iconKey)).toEqual([
+      "foundation",
+      "walls",
+      "roof",
+      "windows",
+      "engineering",
+      "facade",
+      "interior",
+      "landscaping",
     ]);
   });
 

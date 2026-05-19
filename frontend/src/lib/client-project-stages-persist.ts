@@ -1,6 +1,7 @@
 import type { ClientStageStatus, Prisma } from "@prisma/client";
 import { parseClientStageStatus } from "@/lib/client-stage-status";
 import { computeOverallProgressFromStages, type StageForProgress } from "@/lib/client-project-progress";
+import { resolveStageIconKeyForPersist } from "@/lib/client-project-stage-icons";
 
 export type AdminStagePayload = {
   clientKey?: unknown;
@@ -34,7 +35,10 @@ export function normalizeAdminStagesPayload(raw: AdminStagePayload[]): {
       parentClientKey,
       order: typeof s.order === "number" && s.order >= 0 ? s.order : i,
       title: String(s.title || `Этап ${i + 1}`),
-      iconKey: String(s.iconKey || "circle"),
+      iconKey: resolveStageIconKeyForPersist(
+        String(s.title || `Этап ${i + 1}`),
+        String(s.iconKey || "circle")
+      ),
       status: parseClientStageStatus(s.status),
     };
   });

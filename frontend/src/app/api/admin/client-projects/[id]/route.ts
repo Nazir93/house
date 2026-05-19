@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import {
@@ -9,6 +10,7 @@ import {
   parseClientProjectDraftData,
   parseClientProjectDraftSection,
 } from "@/lib/client-project-draft";
+import { publishDraftMediaToCabinet } from "@/lib/client-project-draft-media";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
@@ -53,6 +55,27 @@ export async function PUT(
     }
 
     const section = parseClientProjectDraftSection(body.draftSection) ?? "main";
+
+    if (section === "documents" || section === "photos") {
+      await publishDraftMediaToCabinet(id);
+      const updated = await prisma.clientConstructionProject.findUniqueOrThrow({
+        where: { id },
+        select: {
+          id: true,
+          draftSavedAt: true,
+          cabinetPublishedAt: true,
+          draftData: true,
+        },
+      });
+      return NextResponse.json({
+        ok: true,
+        draftSavedAt: updated.draftSavedAt?.toISOString(),
+        hasUnpublishedDraft: hasUnpublishedDraft(updated),
+        savedSection: section,
+        message: "Изменения сохранены и опубликованы в личном кабинете.",
+      });
+    }
+
     const existingDraft = parseClientProjectDraftData(exists.draftData);
     const patch = buildDraftDataFromAdminBody(body);
     const draft = mergeClientProjectDraft(existingDraft, patch, section);
@@ -66,10 +89,11 @@ export async function PUT(
       }
     }
 
+    const draftJson = parseClientProjectDraftData(draft);
     const updated = await prisma.clientConstructionProject.update({
       where: { id },
       data: {
-        draftData: draftDataToJson(draft),
+        ...(draftJson ? { draftData: draftDataToJson(draftJson) } : { draftData: Prisma.DbNull }),
         draftSavedAt: new Date(),
       },
       select: {

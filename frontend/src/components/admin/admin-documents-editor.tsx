@@ -113,6 +113,9 @@ export function AdminDocumentsEditor({
   const [docFilename, setDocFilename] = useState("");
   const [docUrl, setDocUrl] = useState("");
   const dragIndex = useRef<number | null>(null);
+  const orderDirtyRef = useRef(false);
+  const documentsRef = useRef(documents);
+  documentsRef.current = documents;
 
   useEffect(() => {
     const sorted = sortDocuments(initialDocuments);
@@ -173,12 +176,11 @@ export function AdminDocumentsEditor({
         if (Array.isArray(rows)) {
           setDocuments(normalizeDocumentRows(rows));
         }
-        onSectionDirty?.();
       } finally {
         setSavingOrder(false);
       }
     },
-    [projectId, onError, onSectionDirty]
+    [projectId, onError]
   );
 
   const addDocuments = useCallback(
@@ -316,14 +318,16 @@ export function AdminDocumentsEditor({
     }
     const next = documents.filter((d) => d.id !== id);
     setDocuments(next);
-    await persistOrder(next.map((d) => d.id));
-    onError("");
     onSectionDirty?.();
-    router.refresh();
+    onError("");
+    if (next.length > 0) {
+      await persistOrder(next.map((d) => d.id));
+    }
   }
 
   function handleDragStart(index: number) {
     dragIndex.current = index;
+    orderDirtyRef.current = false;
   }
 
   function handleDragOver(e: React.DragEvent, index: number) {
@@ -335,14 +339,17 @@ export function AdminDocumentsEditor({
       dragIndex.current = index;
       return reordered;
     });
+    if (!orderDirtyRef.current) {
+      orderDirtyRef.current = true;
+      onSectionDirty?.();
+    }
   }
 
   async function handleDragEnd() {
     dragIndex.current = null;
-    setDocuments((prev) => {
-      void persistOrder(prev.map((d) => d.id));
-      return prev;
-    });
+    if (!orderDirtyRef.current) return;
+    orderDirtyRef.current = false;
+    await persistOrder(documentsRef.current.map((d) => d.id));
   }
 
   return (

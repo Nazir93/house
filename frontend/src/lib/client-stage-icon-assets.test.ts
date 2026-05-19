@@ -1,18 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { resolveStageIconAssetKey, resolveStageIconAssetUrl } from "./client-stage-icon-assets";
+import { resolveStageIconPickerKey } from "./client-stage-icon-assets";
 
 describe("client-stage-icon-assets", () => {
-  it("resolveStageIconAssetUrl — основные этапы", () => {
-    expect(resolveStageIconAssetUrl("foundation")).toBe("/icons/stages/foundation.png");
-    expect(resolveStageIconAssetUrl("walls")).toBe("/icons/stages/walls.png");
+  it("resolveStageIconPickerKey — сохраняет ключ из пикера", () => {
+    expect(resolveStageIconPickerKey("foundation")).toBe("foundation");
+    expect(resolveStageIconPickerKey("electric")).toBe("electric");
+    expect(resolveStageIconPickerKey("driveway")).toBe("driveway");
   });
 
-  it("resolveStageIconAssetUrl — подэтапы наследуют родителя", () => {
-    expect(resolveStageIconAssetKey("electric")).toBe("engineering");
-    expect(resolveStageIconAssetUrl("driveway")).toBe("/icons/stages/landscaping.png");
+  it("resolveStageIconPickerKey — legacy alias", () => {
+    expect(resolveStageIconPickerKey("circle")).toBe("foundation");
+    expect(resolveStageIconPickerKey("finish")).toBe("interior");
+    expect(resolveStageIconPickerKey("house")).toBe("facade");
   });
 
-  it("resolveStageIconAssetUrl — legacy circle → foundation", () => {
-    expect(resolveStageIconAssetUrl("circle")).toBe("/icons/stages/foundation.png");
+  it("resolveStageIconPickerKey — неизвестный ключ → foundation", () => {
+    expect(resolveStageIconPickerKey("unknown-stage")).toBe("foundation");
   });
 });

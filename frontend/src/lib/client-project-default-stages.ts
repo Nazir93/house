@@ -1,4 +1,51 @@
 import type { AdminStagePayload } from "@/lib/client-project-stages-persist";
+import type { StageIconPickerKey } from "@/lib/client-stage-icon-assets";
+
+/** 8 стандартных верхнеуровневых этапов (п. ТЗ) — заголовок и иконка закреплены. */
+export const STANDARD_TOP_LEVEL_STAGES = [
+  { clientKey: "stage-foundation", order: 0, title: "Фундамент", iconKey: "foundation" },
+  { clientKey: "stage-walls", order: 1, title: "Стены", iconKey: "walls" },
+  { clientKey: "stage-roof", order: 2, title: "Кровля", iconKey: "roof" },
+  { clientKey: "stage-windows", order: 3, title: "Окна", iconKey: "windows" },
+  { clientKey: "stage-engineering", order: 4, title: "Инженерные сети", iconKey: "engineering" },
+  { clientKey: "stage-facade", order: 5, title: "Отделка фасада", iconKey: "facade" },
+  { clientKey: "stage-interior", order: 6, title: "Внутренняя отделка", iconKey: "interior" },
+  {
+    clientKey: "stage-landscaping",
+    order: 7,
+    title: "Благоустройство участка и въездная группа",
+    iconKey: "landscaping",
+  },
+] as const satisfies ReadonlyArray<{
+  clientKey: string;
+  order: number;
+  title: string;
+  iconKey: StageIconPickerKey;
+}>;
+
+export const ENGINEERING_SUB_STAGES: ReadonlyArray<{
+  order: number;
+  title: string;
+  iconKey: StageIconPickerKey;
+}> = [
+  { order: 0, title: "Электроснабжение", iconKey: "electric" },
+  { order: 1, title: "Водоснабжение", iconKey: "water" },
+  { order: 2, title: "Тёплый пол", iconKey: "floor-heating" },
+  { order: 3, title: "Радиаторы", iconKey: "radiators" },
+  { order: 4, title: "Котельная", iconKey: "boiler" },
+  { order: 5, title: "Септик", iconKey: "septic" },
+  { order: 6, title: "Колодец", iconKey: "well" },
+];
+
+export const LANDSCAPING_SUB_STAGES: ReadonlyArray<{
+  order: number;
+  title: string;
+  iconKey: StageIconPickerKey;
+}> = [
+  { order: 0, title: "Устройство заезда на участок", iconKey: "driveway" },
+  { order: 1, title: "Устройство подпорной стены", iconKey: "retaining-wall" },
+  { order: 2, title: "Планировка и благоустройство территории", iconKey: "landscape-plan" },
+];
 
 /**
  * Типовые этапы нового объекта ЛК (п. 5 ТЗ).
@@ -7,52 +54,42 @@ import type { AdminStagePayload } from "@/lib/client-project-stages-persist";
 export function buildDefaultClientProjectStagesPayload(): AdminStagePayload[] {
   const rows: AdminStagePayload[] = [];
 
-  const top = (clientKey: string, order: number, title: string, iconKey: string) => {
+  for (const stage of STANDARD_TOP_LEVEL_STAGES) {
     rows.push({
-      clientKey,
+      clientKey: stage.clientKey,
       parentClientKey: null,
-      order,
-      title,
-      iconKey,
+      order: stage.order,
+      title: stage.title,
+      iconKey: stage.iconKey,
       status: "NOT_STARTED",
     });
-  };
+  }
 
-  const sub = (parentClientKey: string, order: number, title: string, iconKey: string) => {
+  for (const sub of ENGINEERING_SUB_STAGES) {
     rows.push({
-      clientKey: `${parentClientKey}-sub-${order}`,
-      parentClientKey,
-      order,
-      title,
-      iconKey,
+      clientKey: `stage-engineering-sub-${sub.order}`,
+      parentClientKey: "stage-engineering",
+      order: sub.order,
+      title: sub.title,
+      iconKey: sub.iconKey,
       status: "NOT_STARTED",
     });
-  };
+  }
 
-  top("stage-foundation", 0, "Фундамент", "foundation");
-  top("stage-walls", 1, "Стены 1–2-й этажи", "walls");
-  top("stage-roof", 2, "Кровля", "roof");
-  top("stage-windows", 3, "Окна", "windows");
-
-  top("stage-engineering", 4, "Инженерные сети", "engineering");
-  sub("stage-engineering", 0, "Электроснабжение", "electric");
-  sub("stage-engineering", 1, "Водоснабжение", "water");
-  sub("stage-engineering", 2, "Тёплый пол", "floor-heating");
-  sub("stage-engineering", 3, "Радиаторы", "radiators");
-  sub("stage-engineering", 4, "Котельная", "boiler");
-  sub("stage-engineering", 5, "Септик", "septic");
-  sub("stage-engineering", 6, "Колодец", "well");
-
-  top("stage-facade", 5, "Отделка фасада", "facade");
-  top("stage-interior", 6, "Отделка внутренняя", "interior");
-  top("stage-landscaping", 7, "Благоустройство участка и въездная группа", "landscaping");
-  sub("stage-landscaping", 0, "Устройство заезда на участок", "driveway");
-  sub("stage-landscaping", 1, "Устройство подпорной стены", "retaining-wall");
-  sub("stage-landscaping", 2, "Планировка и благоустройство территории", "landscape-plan");
+  for (const sub of LANDSCAPING_SUB_STAGES) {
+    rows.push({
+      clientKey: `stage-landscaping-sub-${sub.order}`,
+      parentClientKey: "stage-landscaping",
+      order: sub.order,
+      title: sub.title,
+      iconKey: sub.iconKey,
+      status: "NOT_STARTED",
+    });
+  }
 
   return rows;
 }
 
-export const DEFAULT_CLIENT_PROJECT_TOP_LEVEL_COUNT = 8;
+export const DEFAULT_CLIENT_PROJECT_TOP_LEVEL_COUNT = STANDARD_TOP_LEVEL_STAGES.length;
 
 export const DEFAULT_CLIENT_PROJECT_STAGE_COUNT = buildDefaultClientProjectStagesPayload().length;

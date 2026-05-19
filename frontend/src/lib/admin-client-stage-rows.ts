@@ -1,3 +1,5 @@
+import { resolveDefaultIconKeyForStageTitle } from "@/lib/client-project-stage-icons";
+
 export type AdminStageRow = {
   clientKey: string;
   parentClientKey: string | null;
@@ -22,7 +24,10 @@ export function createAdminStageRow(
     parentClientKey: partial.parentClientKey ?? null,
     order: partial.order ?? 0,
     title: partial.title,
-    iconKey: partial.iconKey ?? "foundation",
+    iconKey:
+      partial.iconKey ??
+      resolveDefaultIconKeyForStageTitle(partial.title) ??
+      "foundation",
     status: partial.status ?? "NOT_STARTED",
   };
 }

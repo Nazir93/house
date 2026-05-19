@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { GripVertical, Trash2, Upload } from "lucide-react";
 import { CmsImage } from "@/components/ui/cms-image";
 import { moveItemInArray } from "@/lib/reorder-list";
@@ -47,10 +47,22 @@ export function AdminPhotoReportsEditor({
   onSectionDirty?: () => void;
 }) {
   const [photos, setPhotos] = useState(() => sortPhotos(initialPhotos));
+  const photosRef = useRef(photos);
   const [uploading, setUploading] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
   const [photoUrlInput, setPhotoUrlInput] = useState("");
   const dragIndex = useRef<number | null>(null);
+  const orderDirtyRef = useRef(false);
+
+  photosRef.current = photos;
+
+  useEffect(() => {
+    setPhotos(sortPhotos(initialPhotos));
+  }, [initialPhotos]);
+
+  const markDirty = useCallback(() => {
+    onSectionDirty?.();
+  }, [onSectionDirty]);
 
   const uploadFile = useCallback(
     async (file: File): Promise<string | null> => {
@@ -69,6 +81,7 @@ export function AdminPhotoReportsEditor({
 
   const persistOrder = useCallback(
     async (ids: string[]) => {
+      if (ids.length === 0) return;
       setSavingOrder(true);
       try {
         const res = await fetch(`/api/admin/client-projects/${projectId}/photos`, {
@@ -79,17 +92,17 @@ export function AdminPhotoReportsEditor({
         const rows = await res.json().catch(() => null);
         if (!res.ok) {
           onError(rows?.error || "Не удалось сохранить порядок фото");
-          return;
+          return false;
         }
         if (Array.isArray(rows)) {
           setPhotos(normalizePhotoRows(rows));
         }
-        onSectionDirty?.();
+        return true;
       } finally {
         setSavingOrder(false);
       }
     },
-    [projectId, onError, onSectionDirty]
+    [projectId, onError]
   );
 
   const addPhotosByUrls = useCallback(
@@ -118,9 +131,9 @@ export function AdminPhotoReportsEditor({
         ])
       );
       onError("");
-      onSectionDirty?.();
+      markDirty();
     },
-    [projectId, onError, onSectionDirty]
+    [projectId, onError, markDirty]
   );
 
   async function onPhotoFiles(e: React.ChangeEvent<HTMLInputElement>) {
@@ -158,14 +171,17 @@ export function AdminPhotoReportsEditor({
       onError("Не удалось удалить фото");
       return;
     }
-    const next = photos.filter((p) => p.id !== id);
+    const next = photosRef.current.filter((p) => p.id !== id);
     setPhotos(next);
-    await persistOrder(next.map((p) => p.id));
-    onSectionDirty?.();
+    markDirty();
+    if (next.length > 0) {
+      await persistOrder(next.map((p) => p.id));
+    }
   }
 
   function handleDragStart(index: number) {
     dragIndex.current = index;
+    orderDirtyRef.current = false;
   }
 
   function handleDragOver(e: React.DragEvent, index: number) {
@@ -177,14 +193,18 @@ export function AdminPhotoReportsEditor({
       dragIndex.current = index;
       return reordered;
     });
+    if (!orderDirtyRef.current) {
+      orderDirtyRef.current = true;
+      markDirty();
+    }
   }
 
   async function handleDragEnd() {
     dragIndex.current = null;
-    setPhotos((prev) => {
-      void persistOrder(prev.map((p) => p.id));
-      return prev;
-    });
+    if (!orderDirtyRef.current) return;
+    orderDirtyRef.current = false;
+    const ids = photosRef.current.map((p) => p.id);
+    await persistOrder(ids);
   }
 
   return (
@@ -244,7 +264,7 @@ export function AdminPhotoReportsEditor({
               draggable
               onDragStart={() => handleDragStart(index)}
               onDragOver={(e) => handleDragOver(e, index)}
-              onDragEnd={handleDragEnd}
+              onDragEnd={() => void handleDragEnd()}
               className="relative group rounded-lg overflow-hidden border border-white/[0.08] aspect-square cursor-grab active:cursor-grabbing"
             >
               <CmsImage src={p.url} alt="" fill className="object-cover pointer-events-none" sizes="160px" />
@@ -255,7 +275,7 @@ export function AdminPhotoReportsEditor({
               <button
                 type="button"
                 className="absolute top-1 right-1 p-1 bg-black/60 rounded text-red-300 opacity-0 group-hover:opacity-100 transition"
-                onClick={() => delPhoto(p.id)}
+                onClick={() => void delPhoto(p.id)}
                 aria-label="Удалить фото"
               >
                 <Trash2 size={14} />
