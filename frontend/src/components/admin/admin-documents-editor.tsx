@@ -114,11 +114,11 @@ export function AdminDocumentsEditor({
   const [docUrl, setDocUrl] = useState("");
   const dragIndex = useRef<number | null>(null);
   const orderDirtyRef = useRef(false);
-  const documentsRef = useRef(documents);
-  documentsRef.current = documents;
+  const orderIdsRef = useRef<string[]>(documents.map((d) => d.id));
 
   useEffect(() => {
     const sorted = sortDocuments(initialDocuments);
+    orderIdsRef.current = sorted.map((d) => d.id);
     setDocuments(sorted);
     setSignDates((prev) => {
       const next = { ...prev };
@@ -337,6 +337,7 @@ export function AdminDocumentsEditor({
     setDocuments((prev) => {
       const reordered = moveItemInArray(prev, from, index).map((d, i) => ({ ...d, order: i }));
       dragIndex.current = index;
+      orderIdsRef.current = reordered.map((d) => d.id);
       return reordered;
     });
     if (!orderDirtyRef.current) {
@@ -349,7 +350,7 @@ export function AdminDocumentsEditor({
     dragIndex.current = null;
     if (!orderDirtyRef.current) return;
     orderDirtyRef.current = false;
-    await persistOrder(documentsRef.current.map((d) => d.id));
+    await persistOrder(orderIdsRef.current);
   }
 
   return (

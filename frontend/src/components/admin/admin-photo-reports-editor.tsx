@@ -47,17 +47,17 @@ export function AdminPhotoReportsEditor({
   onSectionDirty?: () => void;
 }) {
   const [photos, setPhotos] = useState(() => sortPhotos(initialPhotos));
-  const photosRef = useRef(photos);
   const [uploading, setUploading] = useState(false);
   const [savingOrder, setSavingOrder] = useState(false);
   const [photoUrlInput, setPhotoUrlInput] = useState("");
   const dragIndex = useRef<number | null>(null);
   const orderDirtyRef = useRef(false);
-
-  photosRef.current = photos;
+  const orderIdsRef = useRef<string[]>(initialPhotos.map((p) => p.id));
 
   useEffect(() => {
-    setPhotos(sortPhotos(initialPhotos));
+    const sorted = sortPhotos(initialPhotos);
+    setPhotos(sorted);
+    orderIdsRef.current = sorted.map((p) => p.id);
   }, [initialPhotos]);
 
   const markDirty = useCallback(() => {
@@ -171,11 +171,13 @@ export function AdminPhotoReportsEditor({
       onError("Не удалось удалить фото");
       return;
     }
-    const next = photosRef.current.filter((p) => p.id !== id);
+    const next = photos.filter((p) => p.id !== id);
+    orderIdsRef.current = next.map((p) => p.id);
     setPhotos(next);
     markDirty();
+    onError("");
     if (next.length > 0) {
-      await persistOrder(next.map((p) => p.id));
+      await persistOrder(orderIdsRef.current);
     }
   }
 
@@ -191,6 +193,7 @@ export function AdminPhotoReportsEditor({
     setPhotos((prev) => {
       const reordered = moveItemInArray(prev, from, index).map((p, i) => ({ ...p, order: i }));
       dragIndex.current = index;
+      orderIdsRef.current = reordered.map((p) => p.id);
       return reordered;
     });
     if (!orderDirtyRef.current) {
@@ -203,8 +206,7 @@ export function AdminPhotoReportsEditor({
     dragIndex.current = null;
     if (!orderDirtyRef.current) return;
     orderDirtyRef.current = false;
-    const ids = photosRef.current.map((p) => p.id);
-    await persistOrder(ids);
+    await persistOrder(orderIdsRef.current);
   }
 
   return (
