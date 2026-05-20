@@ -15,6 +15,7 @@ import {
   Maximize2,
   Send,
   Share2,
+  ZoomIn,
 } from "lucide-react";
 import {
   derivePartOfSoulHeroTiers,
@@ -36,6 +37,9 @@ import {
   resolveProjectRoofPitch,
   type PartOfSoulRoofPitch,
 } from "@/lib/part-of-soul-pricing";
+import { cn } from "@/lib/utils";
+
+const heroSoftRing = "ring-1 ring-[color-mix(in_srgb,var(--text)_6%,transparent)]";
 
 export function HouseProjectDetailContent({
   project,
@@ -248,120 +252,141 @@ export function HouseProjectDetailContent({
             </div>
 
             <aside
-              className="rounded-[28px] border bg-[var(--bg)] p-5 shadow-sm md:p-6 dark:bg-[var(--bg-secondary)]"
-              style={{ borderColor: "var(--border)" }}
+              className={cn(
+                "rounded-[28px] bg-[var(--bg)] p-5 md:p-6 shadow-[0_16px_48px_rgb(var(--accent-rgb)/0.08)]",
+                heroSoftRing
+              )}
             >
-              <p className="text-sm font-semibold" style={{ color: accentColor }}>
-                Характеристики
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--accent)]">
+                Параметры проекта
               </p>
-              <div className="mt-4 grid grid-cols-2 gap-3">
+              <dl className="mt-4 grid grid-cols-2 gap-2">
                 {[
-                  {
-                    label: "Площадь",
-                    value: `${project.area} м²`,
-                    Icon: Maximize2,
-                  },
-                  {
-                    label: "Этажность",
-                    value: `${project.floors} эт.`,
-                    Icon: Building2,
-                  },
-                  {
-                    label: "Количество спален",
-                    value: `${project.rooms} шт.`,
-                    Icon: Bed,
-                  },
-                  {
-                    label: "Количество санузлов",
-                    value: `${project.bathrooms} шт.`,
-                    Icon: Bath,
-                  },
+                  { label: "Площадь", value: `${project.area} м²`, Icon: Maximize2 },
+                  { label: "Этажность", value: `${project.floors} эт.`, Icon: Building2 },
+                  { label: "Спальни", value: `${project.rooms} шт.`, Icon: Bed },
+                  { label: "Санузлы", value: `${project.bathrooms} шт.`, Icon: Bath },
                 ].map(({ label, value, Icon }) => (
-                  <div key={label} className="flex gap-3 rounded-2xl border p-3 sm:p-4" style={{ borderColor: "var(--border)" }}>
+                  <div
+                    key={label}
+                    className="flex gap-2.5 rounded-xl bg-[color-mix(in_srgb,var(--bg-secondary)_55%,var(--bg))] p-3"
+                  >
                     <span
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.06]"
-                      style={{ color: accentColor }}
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] text-[var(--accent)]"
                     >
-                      <Icon className="h-5 w-5" strokeWidth={1.85} aria-hidden />
+                      <Icon className="h-4 w-4" strokeWidth={2} aria-hidden />
                     </span>
                     <div className="min-w-0">
-                      <p className="text-[11px] font-medium leading-snug sm:text-xs" style={{ color: "var(--text-muted)" }}>
+                      <dt className="text-[10px] font-medium uppercase tracking-wide text-[var(--text-muted)]">
                         {label}
-                      </p>
-                      <p className="truncate text-sm font-bold tabular-nums sm:text-base">{value}</p>
+                      </dt>
+                      <dd className="mt-0.5 text-sm font-bold tabular-nums text-[var(--text)]">{value}</dd>
                     </div>
                   </div>
                 ))}
-              </div>
+              </dl>
 
-              <div className="mt-5 flex flex-col gap-2">
-                <div className="rounded-xl px-4 py-3 text-center text-sm font-semibold text-white" style={{ backgroundColor: accentColor }}>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <span className="inline-flex rounded-full bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] px-3 py-1.5 text-xs font-semibold text-[var(--accent)]">
                   Гарантия {heroResolved.warrantyYears} лет
-                </div>
-                <div className="rounded-xl px-4 py-3 text-center text-sm font-semibold text-white" style={{ backgroundColor: accentColor }}>
-                  Срок изготовления от {heroResolved.productionMonthsMin} мес.
-                </div>
+                </span>
+                <span className="inline-flex rounded-full bg-[color-mix(in_srgb,var(--text)_5%,transparent)] px-3 py-1.5 text-xs font-medium text-[var(--text-muted)]">
+                  Срок от {heroResolved.productionMonthsMin} мес.
+                </span>
               </div>
 
-              <p className="mt-8 text-sm font-semibold" style={{ color: accentColor }}>
-                Цена строительства
-              </p>
-              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                {effectiveHeroTiers.map((t, i) => {
-                  const activeTier = i === tierIdx;
-                  return (
-                    <button
-                      key={t.id}
-                      type="button"
-                      aria-pressed={activeTier}
-                      aria-label={`${t.label}, ${formatRub(t.price)}`}
-                      onClick={() => setMaterialTierIndex(i)}
-                      className={`flex flex-col rounded-2xl border-2 px-3 py-4 text-center transition ${
-                        activeTier ? "text-white shadow-sm" : "bg-[var(--bg-secondary)] hover:opacity-95 dark:bg-[var(--bg)]"
-                      }`}
-                      style={
-                        activeTier
-                          ? { borderColor: accentColor, backgroundColor: accentColor }
-                          : { borderColor: "var(--border)" }
-                      }
-                    >
-                      <span className="mx-auto flex h-10 w-12 items-center justify-center rounded-lg bg-white/20">
-                        <span className="block h-7 w-10 rounded-sm bg-white/90 shadow-inner" aria-hidden />
-                      </span>
-                      <span className="mt-2 text-xs font-bold leading-tight sm:text-[13px]">{t.label}</span>
-                      <span className={`mt-2 text-[11px] font-semibold tabular-nums leading-tight sm:text-xs ${activeTier ? "text-white/95" : ""}`}>
-                        {formatRub(t.price)}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
-              {project.pricePromo ? <p className="mt-4 text-sm font-medium leading-snug text-[var(--accent)]">{project.pricePromo}</p> : null}
-
-              <button
-                type="button"
-                onClick={scrollToCompletion}
-                className="mt-5 w-full rounded-2xl px-4 py-4 text-center text-sm font-bold uppercase tracking-[0.1em] text-white shadow-sm transition hover:opacity-[0.94]"
-                style={{ backgroundColor: accentColor }}
-              >
-                Получить смету
-              </button>
-              <button
-                type="button"
-                onClick={openModalToEstimate}
-                className="mt-2 w-full rounded-2xl border-2 py-3 text-center text-xs font-semibold transition hover:bg-black/[0.03] dark:hover:bg-white/[0.06]"
-                style={{ borderColor: accentColor, color: accentColor }}
-              >
-                Ориентировочный расчёт в один клик
-              </button>
-
-              <div className="mt-5 text-sm" style={{ color: "var(--text-muted)" }}>
-                <p>
-                  Материал стен (по желанию):{" "}
-                  <Link href="/technology/materials" className="font-semibold text-[var(--accent)] underline-offset-2 hover:underline">
-                    {project.materials.join(", ") || "на выбор"}
-                  </Link>
+              <div className="mt-6 pt-6 border-t border-[color-mix(in_srgb,var(--text)_7%,transparent)]">
+                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">
+                  Цена строительства
                 </p>
+                {project.pricePromo ? (
+                  <p className="mt-2 inline-flex rounded-lg bg-[color-mix(in_srgb,var(--sale)_12%,transparent)] px-2.5 py-1 text-xs font-semibold text-[var(--sale)]">
+                    {project.pricePromo}
+                  </p>
+                ) : null}
+
+                <div
+                  className="mt-3 space-y-1.5 rounded-2xl bg-[color-mix(in_srgb,var(--stone)_40%,var(--bg-secondary))] p-1.5"
+                  role="radiogroup"
+                  aria-label="Материал стен и цена"
+                >
+                  {effectiveHeroTiers.map((t, i) => {
+                    const activeTier = i === tierIdx;
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        aria-pressed={activeTier}
+                        onClick={() => setMaterialTierIndex(i)}
+                        className={cn(
+                          "flex w-full items-center justify-between gap-3 rounded-xl px-3 py-3 text-left transition",
+                          activeTier
+                            ? "bg-[var(--accent)] text-[var(--accent-contrast)] shadow-[0_4px_16px_rgb(var(--accent-rgb)/0.28)]"
+                            : "bg-[var(--bg)] hover:bg-[color-mix(in_srgb,var(--accent)_5%,var(--bg))]"
+                        )}
+                      >
+                        <span className="flex items-center gap-2.5 min-w-0">
+                          <span
+                            className={cn(
+                              "flex h-4 w-4 shrink-0 items-center justify-center rounded-full ring-2",
+                              activeTier
+                                ? "ring-[var(--accent-contrast)] bg-[var(--accent-contrast)]"
+                                : "ring-[color-mix(in_srgb,var(--text)_15%,transparent)]"
+                            )}
+                            aria-hidden
+                          >
+                            {activeTier ? (
+                              <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
+                            ) : null}
+                          </span>
+                          <span className={cn("text-sm font-semibold truncate", activeTier && "text-[var(--accent-contrast)]")}>
+                            {t.label}
+                          </span>
+                        </span>
+                        <span
+                          className={cn(
+                            "shrink-0 text-sm font-bold tabular-nums",
+                            activeTier ? "text-[var(--accent-contrast)]" : "text-[var(--text)]"
+                          )}
+                        >
+                          {formatRub(t.price)}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <p className="mt-3 text-xs leading-relaxed text-[var(--text-muted)]">
+                  Материал на выбор:{" "}
+                  <Link
+                    href="/technology/materials"
+                    className="font-semibold text-[var(--accent)] underline-offset-2 hover:underline"
+                  >
+                    {project.materials.join(", ") || "уточняем при замере"}
+                  </Link>
+                  . Выбранный вариант синхронизируется с калькулятором ниже.
+                </p>
+              </div>
+
+              <div className="mt-6 space-y-2">
+                <button
+                  type="button"
+                  onClick={scrollToCompletion}
+                  className="w-full rounded-2xl bg-[var(--accent)] px-4 py-4 text-sm font-bold text-[var(--accent-contrast)] shadow-[0_8px_24px_rgb(var(--accent-rgb)/0.3)] transition hover:bg-[var(--accent-hover)]"
+                >
+                  Получить смету
+                </button>
+                <button
+                  type="button"
+                  onClick={openModalToEstimate}
+                  className={cn(
+                    "w-full rounded-2xl px-4 py-3 text-sm font-semibold text-[var(--accent)] transition",
+                    "ring-1 ring-[color-mix(in_srgb,var(--accent)_35%,transparent)]",
+                    "hover:bg-[color-mix(in_srgb,var(--accent)_8%,transparent)]"
+                  )}
+                >
+                  Ориентировочный расчёт в один клик
+                </button>
               </div>
             </aside>
           </div>
@@ -429,75 +454,139 @@ export function HouseProjectDetailContent({
         </nav>
 
         <section id="plans" className="scroll-mt-[8.5rem] md:scroll-mt-[9rem]">
-          <div className="container mx-auto px-5 py-14">
-            <h2 className="font-heading text-3xl text-[#1d3557] md:text-4xl dark:text-[var(--text)]">Планировки и фасады</h2>
-            <p className="mt-3 max-w-3xl text-sm md:text-base" style={{ color: "var(--text-muted)" }}>
-              План этажа и виды дома снаружи. Нажмите изображение, чтобы открыть полноразмерный просмотр.
-              {sortedPlans.length >= 2 ? " На широком экране несколько планов показываются рядом." : ""}
+          <div className="container mx-auto max-w-6xl px-5 py-10 md:py-12">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--accent)]">Чертежи проекта</p>
+            <h2 className="mt-2 font-heading text-2xl md:text-3xl lg:text-[2rem] text-[var(--graphite)]">
+              Планировки и фасады
+            </h2>
+            <p className="mt-2 max-w-xl text-sm text-[var(--text-muted)] leading-relaxed">
+              План этажа и виды снаружи — нажмите для полноразмерного просмотра.
             </p>
-            <div className="mt-10 grid gap-12 lg:grid-cols-2 lg:items-start lg:gap-14">
+
+            <div
+              className={cn(
+                "mt-6 md:mt-8 grid gap-5 lg:grid-cols-2 lg:gap-6",
+                "rounded-[24px] bg-[color-mix(in_srgb,var(--bg-secondary)_50%,var(--bg))] p-4 md:p-5",
+                heroSoftRing
+              )}
+            >
               <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-muted)" }}>
-                  Планировки
-                </p>
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-bold text-[var(--text)]">Планировки</h3>
+                  {sortedPlans.length > 0 ? (
+                    <span className="rounded-full bg-[color-mix(in_srgb,var(--text)_6%,transparent)] px-2 py-0.5 text-[10px] font-semibold tabular-nums text-[var(--text-muted)]">
+                      {sortedPlans.length}
+                    </span>
+                  ) : null}
+                </div>
                 {sortedPlans.length === 0 ? (
-                  <p className="mt-4 text-sm" style={{ color: "var(--text-muted)" }}>
+                  <p className="mt-3 text-sm text-[var(--text-muted)]">
                     Планировки появятся после загрузки в карточке проекта.
                   </p>
                 ) : (
-                  <div className={`mt-4 grid gap-4 ${sortedPlans.length >= 2 ? "sm:grid-cols-2" : ""}`}>
-                    {sortedPlans.map((plan) => (
-                      <button
-                        key={plan.id}
-                        type="button"
-                        onClick={() => openMedia(planSlideIndex(plan.id))}
-                        className="group overflow-hidden rounded-[24px] border bg-[var(--bg)] text-left shadow-sm transition hover:border-[#778da9]"
-                        style={{ borderColor: "var(--border)" }}
-                      >
-                        <div className="relative flex max-h-[min(70vh,560px)] min-h-[220px] w-full items-center justify-center bg-[var(--stone)] p-3 sm:min-h-[260px]">
-                          <div className="relative h-[min(68vh,520px)] w-full">
+                  <div
+                    className={cn(
+                      "mt-3 grid gap-2.5",
+                      sortedPlans.length >= 2 ? "sm:grid-cols-2" : "grid-cols-1"
+                    )}
+                  >
+                    {sortedPlans.map((plan) => {
+                      const planTitle =
+                        plan.label || (plan.floor != null ? `${plan.floor} этаж` : "Планировка");
+                      return (
+                        <button
+                          key={plan.id}
+                          type="button"
+                          onClick={() => openMedia(planSlideIndex(plan.id))}
+                          className={cn(
+                            "group relative overflow-hidden rounded-2xl text-left transition",
+                            "bg-[var(--stone)] ring-1 ring-[color-mix(in_srgb,var(--text)_5%,transparent)]",
+                            "hover:ring-[color-mix(in_srgb,var(--accent)_25%,transparent)]",
+                            "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+                          )}
+                        >
+                          <div className="relative aspect-[4/3] max-h-[280px] w-full sm:max-h-[240px]">
                             <CmsImage
                               src={plan.url}
-                              alt={plan.alt || plan.label || project.title}
+                              alt={plan.alt || planTitle}
                               fill
-                              className="object-contain transition duration-300 group-hover:scale-[1.02]"
-                              sizes="(max-width: 1024px) 100vw, 480px"
+                              className="object-contain p-2 transition duration-300 group-hover:scale-[1.03]"
+                              sizes="(max-width: 1024px) 100vw, 360px"
                             />
+                            <span
+                              className={cn(
+                                "pointer-events-none absolute inset-0 flex items-center justify-center",
+                                "bg-[color-mix(in_srgb,var(--graphite)_18%,transparent)] opacity-0 transition",
+                                "group-hover:opacity-100"
+                              )}
+                              aria-hidden
+                            >
+                              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--bg)]/95 text-[var(--accent)] shadow-lg">
+                                <ZoomIn className="h-5 w-5" strokeWidth={2} />
+                              </span>
+                            </span>
                           </div>
-                        </div>
-                        <div className="border-t p-4 font-semibold" style={{ borderColor: "var(--border)" }}>
-                          {plan.label || (plan.floor != null ? `${plan.floor} этаж` : "Планировка")}
-                        </div>
-                      </button>
-                    ))}
+                          <span className="absolute bottom-2 left-2 rounded-lg bg-[var(--bg)]/92 px-2.5 py-1 text-xs font-semibold text-[var(--text)] shadow-sm backdrop-blur-sm ring-1 ring-[color-mix(in_srgb,var(--text)_6%,transparent)]">
+                            {planTitle}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>
-              <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-muted)" }}>
-                  Фасады
-                </p>
+
+              <div className="min-w-0 lg:border-l lg:border-[color-mix(in_srgb,var(--text)_7%,transparent)] lg:pl-5">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-bold text-[var(--text)]">Фасады</h3>
+                  {renders.length > 0 ? (
+                    <span className="rounded-full bg-[color-mix(in_srgb,var(--text)_6%,transparent)] px-2 py-0.5 text-[10px] font-semibold tabular-nums text-[var(--text-muted)]">
+                      {renders.length}
+                    </span>
+                  ) : null}
+                </div>
                 {renders.length === 0 ? (
-                  <p className="mt-4 text-sm" style={{ color: "var(--text-muted)" }}>
+                  <p className="mt-3 text-sm text-[var(--text-muted)]">
                     Визуализации появятся после загрузки рендеров в карточке проекта.
                   </p>
                 ) : (
-                  <div className="mt-4 grid grid-cols-2 gap-4">
+                  <div className="mt-3 grid grid-cols-2 gap-2.5">
                     {renders.map((r, i) => (
                       <button
                         key={r.id}
                         type="button"
                         onClick={() => openMedia(i)}
-                        className="group relative aspect-[4/3] overflow-hidden rounded-2xl border bg-[var(--stone)] shadow-sm transition hover:border-[#778da9]"
-                        style={{ borderColor: "var(--border)" }}
+                        className={cn(
+                          "group relative aspect-[5/4] overflow-hidden rounded-2xl",
+                          "bg-[var(--stone)] ring-1 ring-[color-mix(in_srgb,var(--text)_5%,transparent)]",
+                          "hover:ring-[color-mix(in_srgb,var(--accent)_25%,transparent)]",
+                          "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+                        )}
                       >
                         <CmsImage
                           src={r.url}
                           alt={r.alt || `${project.title}, фасад ${i + 1}`}
                           fill
-                          className="object-cover transition duration-300 group-hover:scale-[1.02]"
-                          sizes="(max-width: 1024px) 45vw, 320px"
+                          className="object-cover transition duration-300 group-hover:scale-[1.04]"
+                          sizes="(max-width: 1024px) 45vw, 280px"
                         />
+                        <span
+                          className={cn(
+                            "pointer-events-none absolute inset-0 flex items-center justify-center",
+                            "bg-[color-mix(in_srgb,var(--graphite)_22%,transparent)] opacity-0 transition",
+                            "group-hover:opacity-100"
+                          )}
+                          aria-hidden
+                        >
+                          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--bg)]/95 text-[var(--accent)] shadow-lg">
+                            <ZoomIn className="h-4 w-4" strokeWidth={2} />
+                          </span>
+                        </span>
+                        {renders.length > 1 ? (
+                          <span className="absolute bottom-1.5 left-1.5 rounded-md bg-[var(--bg)]/88 px-1.5 py-0.5 text-[10px] font-semibold text-[var(--text-muted)] backdrop-blur-sm">
+                            {i + 1}
+                          </span>
+                        ) : null}
                       </button>
                     ))}
                   </div>
@@ -507,10 +596,20 @@ export function HouseProjectDetailContent({
           </div>
         </section>
 
-        <section id="completion" className="scroll-mt-[8.5rem] md:scroll-mt-[9rem] py-16" style={{ backgroundColor: "var(--bg-secondary)" }}>
-          <div className="container mx-auto px-5">
-            <h2 className="font-heading text-3xl md:text-4xl">Комплектация</h2>
-            <div className="mt-8">
+        <section
+          id="completion"
+          className="scroll-mt-[8.5rem] md:scroll-mt-[9rem] py-16 md:py-20"
+          style={{ backgroundColor: "var(--bg-secondary)" }}
+        >
+          <div className="container mx-auto px-5 max-w-6xl">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--accent)]">Интерактивный расчёт</p>
+            <h2 className="mt-2 font-heading text-3xl md:text-4xl lg:text-[2.75rem] text-[var(--graphite)]">
+              Комплектация и бюджет
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm md:text-base text-[var(--text-muted)] leading-relaxed">
+              Соберите ориентир стоимости дома «{project.title}»: материал стен, этапы работ, дополнительные опции и транспорт.
+            </p>
+            <div className="mt-10 md:mt-12">
               <HouseProjectCompletionSection
                 project={project}
                 calculatorUi={calculatorUi}

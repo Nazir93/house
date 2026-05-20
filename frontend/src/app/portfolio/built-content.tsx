@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
 import { LayoutGrid, MapPinned } from "lucide-react";
-import { PortfolioExcursionFab } from "@/components/portfolio/portfolio-excursion-fab";
 import { builtObjectMaterialLabel, getBuiltObjectCover, type BuiltObjectItem } from "@/lib/construction-shared";
 import { effectiveBuiltObjectRegionSlug } from "@/lib/built-object-map-taxonomy";
 import { cn } from "@/lib/utils";
@@ -121,8 +120,6 @@ export function BuiltPortfolioContent({
 
   return (
     <>
-      <PortfolioExcursionFab />
-
       <section className="pb-24 pt-28" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
         <div className="container mx-auto max-w-[1320px] px-5">
           <nav className="text-[12px] tracking-[0.02em] text-[var(--text-muted)] sm:text-[13px]" aria-label="Навигация по разделу">
@@ -142,7 +139,7 @@ export function BuiltPortfolioContent({
                 Портфолио
               </h1>
               <p className="mt-3 text-[13px] leading-relaxed text-[var(--text-muted)] sm:text-sm md:text-[15px]">
-                Фильтр по материалу, этажности и площади. На карте — география объектов. Запишитесь на экскурсию — круглая кнопка справа внизу.
+                Фильтр по материалу, этажности и площади. На карте — география объектов.
               </p>
             </div>
           </div>
@@ -303,13 +300,19 @@ export function BuiltPortfolioContent({
                           <Link href={`/portfolio/${object.slug}`} className="group block">
                             <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-[var(--stone)] ring-1 ring-[var(--border)] transition-shadow duration-300 group-hover:ring-[var(--accent)]/40">
                               {cover ? (
-                                <CmsImage
-                                  src={cover.url}
-                                  alt={cover.alt || object.title}
-                                  fill
-                                  className="object-cover transition-[filter,transform] duration-700 ease-out [filter:grayscale(1)_brightness(0.88)_contrast(1.05)] group-hover:scale-[1.03] group-hover:[filter:grayscale(0)_brightness(1)_contrast(1)]"
-                                  sizes="(max-width: 768px) 50vw, 360px"
-                                />
+                                <>
+                                  <CmsImage
+                                    src={cover.url}
+                                    alt={cover.alt || object.title}
+                                    fill
+                                    className="object-cover transition-[filter,transform] duration-700 ease-out [filter:saturate(0.72)_sepia(0.22)_hue-rotate(108deg)_brightness(0.92)] group-hover:scale-[1.03] group-hover:[filter:saturate(1)_sepia(0)_hue-rotate(0deg)_brightness(1)]"
+                                    sizes="(max-width: 768px) 50vw, 360px"
+                                  />
+                                  <span
+                                    className="pointer-events-none absolute inset-0 z-[1] bg-[color-mix(in_srgb,var(--accent)_28%,transparent)] mix-blend-multiply opacity-70 transition-opacity duration-700 ease-out group-hover:opacity-0"
+                                    aria-hidden
+                                  />
+                                </>
                               ) : (
                                 <div className="flex h-full items-center justify-center text-xs text-[var(--text-muted)]">Нет фото</div>
                               )}

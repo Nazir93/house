@@ -8,20 +8,23 @@ import { cn } from "@/lib/utils";
 export type AdminSelectItem = { value: string; label: React.ReactNode };
 
 const defaultTrigger =
-  "flex w-full min-w-0 items-center justify-between gap-3 px-4 py-2.5 rounded-xl border border-white/[0.08] text-sm text-left " +
-  "bg-white/[0.05] text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0F3D2E]/45 focus-visible:border-[#0F3D2E]/50 " +
+  "flex w-full min-w-0 items-center justify-between gap-3 px-4 py-2.5 rounded-xl border text-sm text-left " +
+  "border-[var(--adm-field-border)] bg-[var(--adm-field-bg)] text-[var(--adm-field-fg)] " +
+  "focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0F3D2E]/45 focus-visible:border-[#0F3D2E]/50 " +
   "transition-colors disabled:cursor-not-allowed disabled:opacity-50";
 
 const listBox =
-  "max-h-[min(18rem,70vh)] overflow-auto rounded-xl border border-white/[0.12] py-1 " +
-  "bg-white/[0.08] shadow-[0_16px_48px_rgba(0,0,0,0.42)] backdrop-blur-md " +
-  "outline-none";
+  "admin-select-dropdown max-h-[min(18rem,70vh)] overflow-auto rounded-xl border py-1 outline-none " +
+  "border-[var(--adm-card-border)] bg-[var(--adm-select-panel-bg)] text-[var(--adm-main-fg)] " +
+  "shadow-[var(--adm-select-shadow,0_16px_48px_rgba(0,0,0,0.42))]";
 
 const optionBase =
-  "w-full cursor-pointer px-4 py-2.5 text-left text-sm text-white transition-colors " +
-  "hover:bg-[#0F3D2E]/22 focus:bg-[#0F3D2E]/22 focus:outline-none";
+  "w-full cursor-pointer px-4 py-2.5 text-left text-sm transition-colors " +
+  "text-[var(--adm-main-fg)] hover:bg-[var(--adm-select-option-hover)] " +
+  "focus:bg-[var(--adm-select-option-hover)] focus:outline-none";
 
-const optionSelected = "bg-[#0F3D2E]/28 text-emerald-200 font-medium";
+const optionSelected =
+  "bg-[var(--adm-select-option-active-bg)] text-[var(--adm-select-option-active-fg)] font-medium";
 
 export type AdminSelectProps = {
   value: string;
@@ -118,7 +121,7 @@ export function AdminSelect({
       <ul
         id={listId}
         role="listbox"
-        className={cn(listBox, "admin-select-dropdown")}
+        className={listBox}
         style={{
           position: "fixed",
           top: panelStyle.top,
@@ -141,7 +144,7 @@ export function AdminSelect({
           </li>
         ))}
         {listFooter ? (
-          <li role="presentation" className="border-t border-white/[0.08]">
+          <li role="presentation" className="border-t border-[var(--adm-card-border)]">
             {listFooter}
           </li>
         ) : null}
@@ -161,10 +164,15 @@ export function AdminSelect({
         onClick={toggle}
         className={cn(defaultTrigger, triggerClassName)}
       >
-        <span className={cn("truncate", !selected && "text-white/40")}>{display}</span>
+        <span className={cn("truncate", !selected && "text-[var(--adm-main-fg-faint)]")}>
+          {display}
+        </span>
         <ChevronDown
           size={18}
-          className={cn("shrink-0 text-white/45 transition-transform", open && "rotate-180")}
+          className={cn(
+            "shrink-0 text-[var(--adm-main-fg-subtle)] transition-transform",
+            open && "rotate-180"
+          )}
           aria-hidden
         />
       </button>

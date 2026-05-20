@@ -640,6 +640,11 @@
   --adm-theme-toggle-bg: rgba(255, 255, 255, 0.06);
   --adm-theme-toggle-border: rgba(255, 255, 255, 0.12);
   --adm-theme-toggle-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  --adm-select-panel-bg: #181c19;
+  --adm-select-shadow: 0 16px 48px rgba(0, 0, 0, 0.42);
+  --adm-select-option-hover: rgba(15, 61, 46, 0.22);
+  --adm-select-option-active-bg: rgba(15, 61, 46, 0.28);
+  --adm-select-option-active-fg: #a7f3d0;
 }
 
 .admin-sidebar-fallback {
@@ -675,6 +680,11 @@
   --adm-theme-toggle-bg: rgba(255, 255, 255, 0.92);
   --adm-theme-toggle-border: rgba(22, 26, 25, 0.12);
   --adm-theme-toggle-shadow: 0 10px 32px rgba(15, 61, 46, 0.12);
+  --adm-select-panel-bg: #ffffff;
+  --adm-select-shadow: 0 12px 40px rgba(22, 26, 25, 0.14);
+  --adm-select-option-hover: rgba(15, 61, 46, 0.08);
+  --adm-select-option-active-bg: rgba(15, 61, 46, 0.12);
+  --adm-select-option-active-fg: #063a2c;
 }
 
 .admin-main-surface {
@@ -791,7 +801,22 @@
   border-color: rgb(22 26 25 / 0.14) !important;
 }
 [data-theme="light"] .admin-main-surface .admin-select-dropdown {
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.1) !important;
+  background-color: var(--adm-select-panel-bg) !important;
+  border-color: var(--adm-card-border) !important;
+  color: var(--adm-main-fg) !important;
+  box-shadow: var(--adm-select-shadow) !important;
+}
+[data-theme="light"] .admin-main-surface .admin-select-dropdown button {
+  color: var(--adm-main-fg) !important;
+}
+[data-theme="light"] .admin-main-surface .admin-select-dropdown button[aria-selected="true"] {
+  color: var(--adm-select-option-active-fg) !important;
+  background-color: var(--adm-select-option-active-bg) !important;
+}
+[data-theme="light"] .admin-main-surface .admin-select-dropdown button:hover,
+[data-theme="light"] .admin-main-surface .admin-select-dropdown button:focus {
+  color: var(--adm-main-fg-heading) !important;
+  background-color: var(--adm-select-option-hover) !important;
 }
 [data-theme="light"] .admin-main-surface .bg-white\/5 {
   background-color: rgb(22 26 25 / 0.05) !important;
