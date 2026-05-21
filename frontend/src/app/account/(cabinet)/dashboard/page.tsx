@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { AccountPhotoGallery } from "@/components/account/account-photo-gallery";
 import { redirect } from "next/navigation";
 import { FileText } from "lucide-react";
 import { getClientProjectIdFromSession } from "@/lib/client-session";
@@ -210,29 +211,15 @@ export default async function AccountDashboardPage() {
               </Link>
             </div>
           </div>
-          {project.photoReports.length === 0 ? (
-            <p className="text-sm opacity-60">—</p>
-          ) : (
-            <div className="grid grid-cols-3 gap-2">
-              {project.photoReports.map((ph) => (
-                <figure
-                  key={ph.id}
-                  className="rounded-lg overflow-hidden border bg-black/5 flex flex-col"
-                  style={{ borderColor: "var(--border)" }}
-                >
-                  <Link href="/account/photos" className="relative block aspect-square">
-                    <Image src={ph.url} alt={ph.caption || "Фото объекта"} fill className="object-cover" sizes="120px" />
-                  </Link>
-                  {(ph.caption || ph.shotAt) ? (
-                    <figcaption className="p-1.5 text-[10px] leading-snug flex-1" style={{ color: "var(--text-muted)" }}>
-                      {ph.caption ? <span className="line-clamp-2">{ph.caption}</span> : null}
-                      {ph.shotAt ? <span className="block mt-0.5 tabular-nums">{formatDateRu(ph.shotAt)}</span> : null}
-                    </figcaption>
-                  ) : null}
-                </figure>
-              ))}
-            </div>
-          )}
+          <AccountPhotoGallery
+            variant="preview"
+            photos={project.photoReports.map((ph) => ({
+              id: ph.id,
+              url: ph.url,
+              caption: ph.caption,
+              shotAt: ph.shotAt,
+            }))}
+          />
         </section>
       </div>
 

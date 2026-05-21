@@ -313,9 +313,10 @@ export function PortfolioCaseStudy({
   );
 
   useEffect(() => {
+    const timerMap = phaseHoverPrefetchTimers.current;
     return () => {
-      for (const timer of phaseHoverPrefetchTimers.current.values()) window.clearTimeout(timer);
-      phaseHoverPrefetchTimers.current.clear();
+      for (const timer of timerMap.values()) window.clearTimeout(timer);
+      timerMap.clear();
     };
   }, []);
 

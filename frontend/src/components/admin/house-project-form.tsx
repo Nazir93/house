@@ -121,6 +121,7 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
   const [form, setForm] = useState<HouseProjectFormState>(() => mapHouseProjectToForm(initial));
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<"render" | "plan" | null>(null);
+  const [uploadProgress, setUploadProgress] = useState("");
   const [error, setError] = useState("");
 
   const jsonValid = useMemo(
@@ -137,17 +138,44 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
-  async function upload(type: "render" | "plan", file: File) {
+  async function uploadMany(type: "render" | "plan", files: File[]) {
+    if (files.length === 0) return;
     setUploading(type);
+    setUploadProgress("");
     setError("");
-    const { url, error: uploadError } = await uploadAdminMedia(file);
-    setUploading(null);
-    if (uploadError || !url) {
-      setError(uploadError || "Не удалось загрузить файл.");
-      return;
+    const errors: string[] = [];
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]!;
+        if (files.length > 1) setUploadProgress(`${i + 1} / ${files.length}`);
+        const { url, error: uploadError } = await uploadAdminMedia(file);
+        if (uploadError || !url) {
+          errors.push(
+            uploadError
+              ? `${uploadError} (файл ${i + 1}${file.name ? `: ${file.name}` : ""})`
+              : `Не удалось загрузить файл ${i + 1}${file.name ? `: ${file.name}` : ""}.`
+          );
+          continue;
+        }
+        if (type === "render") {
+          setForm((prev) => ({ ...prev, renders: [...prev.renders, url] }));
+        } else {
+          setForm((prev) => ({
+            ...prev,
+            plans: [...prev.plans, { url, label: "", floor: "" }],
+          }));
+        }
+      }
+    } finally {
+      setUploading(null);
+      setUploadProgress("");
     }
-    if (type === "render") set("renders", [...form.renders, url]);
-    if (type === "plan") set("plans", [...form.plans, { url, label: "", floor: "" }]);
+    if (errors.length) setError(errors.join(" "));
+  }
+
+  function onMediaFiles(type: "render" | "plan", list: FileList | null) {
+    const files = Array.from(list ?? []);
+    if (files.length) void uploadMany(type, files);
   }
 
   async function save() {
@@ -289,8 +317,23 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold text-white">Рендеры ({form.renders.length})</p>
             <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] text-white/70 text-xs cursor-pointer">
-              <Plus size={14} /> {uploading === "render" ? "Загрузка..." : "Добавить"}
-              <input type="file" accept="image/*" className="hidden" onChange={(e) => Array.from(e.target.files || []).forEach((file) => upload("render", file))} />
+              <Plus size={14} />{" "}
+              {uploading === "render"
+                ? uploadProgress
+                  ? `Загрузка ${uploadProgress}…`
+                  : "Загрузка…"
+                : "Добавить"}
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                disabled={uploading === "render"}
+                onChange={(e) => {
+                  onMediaFiles("render", e.target.files);
+                  e.target.value = "";
+                }}
+              />
             </label>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -306,8 +349,19 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
           <div className="flex items-center justify-between">
             <p className="text-sm font-semibold text-white">Планировки ({form.plans.length})</p>
             <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.06] text-white/70 text-xs cursor-pointer">
-              <Plus size={14} /> {uploading === "plan" ? "Загрузка..." : "Добавить"}
-              <input type="file" accept="image/*" className="hidden" onChange={(e) => Array.from(e.target.files || []).forEach((file) => upload("plan", file))} />
+              <Plus size={14} />{" "}
+              {uploading === "plan" ? (uploadProgress ? `Загрузка ${uploadProgress}…` : "Загрузка…") : "Добавить"}
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                disabled={uploading === "plan"}
+                onChange={(e) => {
+                  onMediaFiles("plan", e.target.files);
+                  e.target.value = "";
+                }}
+              />
             </label>
           </div>
           <div className="space-y-2">
