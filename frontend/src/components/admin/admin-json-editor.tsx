@@ -141,7 +141,8 @@ export function summarizeJsonForAdmin(
     }
     const addons = o.addons;
     if (Array.isArray(addons)) lines.push(`addons: ${addons.length} групп доп. опций с позициями и ценами.`);
-    if (lines.length === 0) lines.push("Пустой объект { } — для типового проекта подставится пресет «Аврора».");
+    if (lines.length === 0)
+      lines.push("Пустой объект { } — на сайте полный пресет калькулятора «Аврора»; здесь можно задать только отличия.");
     return { ok: true, lines };
   }
 

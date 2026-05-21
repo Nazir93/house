@@ -8,6 +8,7 @@ import { AdminFormSection } from "@/components/admin/admin-form-section";
 import { AdminSelect } from "@/components/admin/admin-select";
 import { RichEditor } from "@/components/admin/rich-editor";
 import { uploadAdminMedia } from "@/lib/admin-upload";
+import { auroraCalculatorPresetJson } from "@/lib/project-calculator-aurora-defaults";
 import { CmsImage } from "@/components/ui/cms-image";
 import { AdminJsonEditor } from "@/components/admin/admin-json-editor";
 
@@ -404,16 +405,28 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
               </>
             }
           />
+          <div className="flex flex-wrap items-center gap-2 -mt-2 mb-1">
+            <button
+              type="button"
+              onClick={() => set("calculatorJson", auroraCalculatorPresetJson())}
+              className="inline-flex items-center rounded-lg border border-white/15 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1]"
+            >
+              Вставить полный пресет «Аврора» в JSON
+            </button>
+            <p className="text-[11px] text-white/40 max-w-xl">
+              На сайте пресет и так действует при пустом {"{}"}; кнопка нужна, чтобы увидеть и отредактировать поля в админке.
+            </p>
+          </div>
           <AdminJsonEditor
             label="Калькулятор (calculatorJson)"
-            hint="Пустой объект { } — подставится пресет «Аврора». Для своей матрицы этапов и допов скопируйте структуру из рабочего проекта или документации."
+            hint="Пустой { } — на карточке /projects/slug работает полный калькулятор как у «Аврора». Заполняйте JSON только если нужны свои этапы, допы или отключение формулы (partOfSoul.enabled: false)."
             value={form.calculatorJson}
             onChange={(v) => set("calculatorJson", v)}
             rows={12}
             kind="calculator"
             guide={
               <>
-                <p className="text-white/70">Основные блоки объекта:</p>
+                <p className="text-white/70">Основные блоки объекта (переопределяют пресет «Аврора» на сайте):</p>
                 <ul className="list-disc space-y-1 pl-4 marker:text-white/35">
                   <li>
                     <code className="text-emerald-300/90">consultation</code> — карточка специалиста: имя, роль, фото, телефон и т.п.

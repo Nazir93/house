@@ -1,5 +1,10 @@
 import type { ProjectCalculatorUi } from "@/lib/project-calculator-types";
 
+/** Сериализованный пресет для вставки в админке (calculatorJson). */
+export function auroraCalculatorPresetJson(pretty = true): string {
+  return JSON.stringify(AURORA_PROJECT_CALCULATOR_UI, null, pretty ? 2 : 0);
+}
+
 const IMG = "/images/banner/banner-hero-01.png";
 
 /** Тексты этапов из PDF «Для сайта / калькулятор» (типовой авторский проект, уровни газоблок / керамоблок / кирпич). */

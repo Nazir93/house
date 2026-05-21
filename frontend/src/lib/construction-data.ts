@@ -455,16 +455,6 @@ export function derivePartOfSoulHeroTiers(
   });
 }
 
-const MINIMAL_CALCULATOR_UI: ProjectCalculatorUi = {
-  transportBands: [
-    { id: "unk", label: "Неизвестно (индивид. расчёт в смете)", surcharge: 0 },
-    { id: "30", label: "до 30 км", surcharge: 0 },
-    { id: "40", label: "до 40 км", surcharge: 0 },
-    { id: "50", label: "до 50 км", surcharge: 0 },
-    { id: "100", label: "до 100 км", surcharge: 0 },
-  ],
-};
-
 function mergeCalculatorUi(base: ProjectCalculatorUi, over: Partial<ProjectCalculatorUi>): ProjectCalculatorUi {
   return {
     ...base,
@@ -482,12 +472,13 @@ export function normalizeCalculatorJson(raw: unknown): ProjectCalculatorUi | nul
   return raw as ProjectCalculatorUi;
 }
 
-/** Калькулятор для карточки: из БД поверх пресета или минимума; для «Аврора» — полный набор по PDF. */
+/**
+ * Калькулятор комплектации на карточке проекта.
+ * База — пресет «Аврора» (PDF); calculatorJson в админке только переопределяет поля.
+ * Пустой {} в админке = полный пресет на сайте.
+ */
 export function getEffectiveCalculatorUi(project: HouseProjectItem): ProjectCalculatorUi {
-  const db = project.calculatorUi;
-  if (project.slug === "aurora") return mergeCalculatorUi(AURORA_PROJECT_CALCULATOR_UI, db ?? {});
-  if (db) return mergeCalculatorUi(MINIMAL_CALCULATOR_UI, db);
-  return MINIMAL_CALCULATOR_UI;
+  return mergeCalculatorUi(AURORA_PROJECT_CALCULATOR_UI, project.calculatorUi ?? {});
 }
 
 function mapHouseProject(row: any): HouseProjectItem {
