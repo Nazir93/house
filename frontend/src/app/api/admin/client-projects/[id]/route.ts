@@ -38,7 +38,7 @@ export async function GET(
   }
 }
 
-/** Сохранение черновика: не публикует в ЛК и не создаёт уведомления клиенту. */
+/** Сохранение черновика; разделы documents/photos сразу публикуют медиа и шлют уведомления. */
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

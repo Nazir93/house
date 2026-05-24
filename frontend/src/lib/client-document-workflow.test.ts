@@ -55,6 +55,13 @@ describe("client-document-workflow (TZ manual signing)", () => {
     expect(buildDocumentNewNotification({ filename }).payload.signingMode).toBe("manual");
   });
 
+  it("п.3–4: сохранение раздела «Документы» → уведомление клиенту", async () => {
+    const { collectMediaPublishNotifications } = await import("@/lib/client-project-draft-media");
+    const specs = collectMediaPublishNotifications([], [{ url, filename }], [], []);
+    expect(specs[0]?.type).toBe("DOCUMENT_NEW");
+    expect(specs[0]?.title).toBe(DOCUMENT_NEW_NOTIFICATION_TITLE);
+  });
+
   it("п.5: скачивание → «Ожидает подписания»", () => {
     expect(signatureStatusAfterClientDownload("AWAITING_REVIEW")).toBe("AWAITING_SIGNATURE");
     const update = clientDocumentDownloadUpdate({

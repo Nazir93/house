@@ -1,55 +1,8 @@
-import type { LucideIcon } from "lucide-react";
-import {
-  Circle,
-  Landmark,
-  Layers,
-  Home,
-  Zap,
-  PaintBucket,
-  Hammer,
-  CheckCircle2,
-  Square,
-  Grid2x2,
-  Trees,
-  Wind,
-  Droplets,
-  Flame,
-  Thermometer,
-  Factory,
-  CircleDot,
-  Route,
-  Fence,
-  Map,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const LUCIDE_MAP: Record<string, LucideIcon> = {
-  circle: Circle,
-  foundation: Landmark,
-  walls: Layers,
-  roof: Home,
-  engineering: Zap,
-  finish: PaintBucket,
-  house: Home,
-  hammer: Hammer,
-  check: CheckCircle2,
-  windows: Square,
-  facade: Grid2x2,
-  landscaping: Trees,
-  ventilation: Wind,
-  interior: PaintBucket,
-  electric: Zap,
-  water: Droplets,
-  "floor-heating": Flame,
-  radiators: Thermometer,
-  boiler: Factory,
-  septic: CircleDot,
-  well: Landmark,
-  driveway: Route,
-  "retaining-wall": Fence,
-  "landscape-plan": Map,
-  default: Circle,
-};
+import {
+  CONSTRUCTION_STAGE_GLYPHS,
+  resolveConstructionStageGlyphKey,
+} from "@/components/account/construction-stage-glyphs";
 
 /** Цвета иконок этапов: light / dark (globals.css .stage-icon-tint--*). */
 const COLORED_CLASS: Record<string, string> = {
@@ -64,6 +17,7 @@ const COLORED_CLASS: Record<string, string> = {
   interior: "stage-icon-tint stage-icon-tint--finish",
   electric: "stage-icon-tint stage-icon-tint--engineering",
   water: "stage-icon-tint stage-icon-tint--engineering",
+  ventilation: "stage-icon-tint stage-icon-tint--engineering",
   "floor-heating": "stage-icon-tint stage-icon-tint--engineering",
   radiators: "stage-icon-tint stage-icon-tint--engineering",
   boiler: "stage-icon-tint stage-icon-tint--engineering",
@@ -72,7 +26,7 @@ const COLORED_CLASS: Record<string, string> = {
   driveway: "stage-icon-tint stage-icon-tint--landscaping",
   "retaining-wall": "stage-icon-tint stage-icon-tint--landscaping",
   "landscape-plan": "stage-icon-tint stage-icon-tint--landscaping",
-  house: "stage-icon-tint stage-icon-tint--roof",
+  house: "stage-icon-tint stage-icon-tint--facade",
   hammer: "stage-icon-tint stage-icon-tint--engineering",
   circle: "stage-icon-tint stage-icon-tint--default",
   default: "stage-icon-tint stage-icon-tint--default",
@@ -85,18 +39,12 @@ export function StageIcon({
 }: {
   iconKey: string;
   className?: string;
-  /** Цветные иконки для карточек этапов (адаптация под light / dark). */
+  /** Цветные контурные иконки для карточек этапов (light / dark). */
   colored?: boolean;
 }) {
-  const key = iconKey in LUCIDE_MAP ? iconKey : "default";
-  const Icon = LUCIDE_MAP[key] ?? LUCIDE_MAP.default;
+  const key = resolveConstructionStageGlyphKey(iconKey);
+  const Glyph = CONSTRUCTION_STAGE_GLYPHS[key];
   const tint = COLORED_CLASS[key] ?? COLORED_CLASS.default;
 
-  return (
-    <Icon
-      className={cn(className, colored && tint)}
-      strokeWidth={1.75}
-      aria-hidden
-    />
-  );
+  return <Glyph className={cn(className, colored && tint)} />;
 }

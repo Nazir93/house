@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { paymentAmountKopeksFromAdminPayload } from "@/lib/client-payment-amount";
 import { collectNotificationsForPublish } from "@/lib/client-notification-sync";
 import { createClientNotifications } from "@/lib/client-notifications";
-import { publishDraftMedia } from "@/lib/client-project-draft-media";
+import { publishDraftMediaWithNotifications } from "@/lib/client-project-draft-media";
 import { parseClientProjectDraftData, type ClientProjectDraftData } from "@/lib/client-project-draft";
 import { formatCurrentStageLabel } from "@/lib/client-project-stage-status";
 import { replaceClientProjectStages } from "@/lib/client-project-stages-persist";
@@ -12,27 +12,6 @@ import { hashPassword } from "@/lib/password";
 
 function parsePaymentStatus(v: unknown): ClientPaymentStatus {
   return v === "PAID" || v === "EXPECTED" || v === "NOT_ISSUED" ? v : "EXPECTED";
-}
-
-function documentsChanged(
-  oldDocs: { url: string }[],
-  newDocs: { url: string }[]
-): boolean {
-  if (oldDocs.length !== newDocs.length) return true;
-  const oldUrls = new Set(oldDocs.map((d) => d.url));
-  return newDocs.some((d) => !oldUrls.has(d.url));
-}
-
-function photosChanged(
-  oldPhotos: { url: string; order: number }[],
-  newPhotos: { url: string; order: number }[]
-): boolean {
-  if (oldPhotos.length !== newPhotos.length) return true;
-  const seq = (rows: { url: string; order: number }[]) =>
-    [...rows].sort((a, b) => a.order - b.order).map((p) => p.url);
-  const oldSeq = seq(oldPhotos);
-  const newSeq = seq(newPhotos);
-  return oldSeq.some((url, i) => url !== newSeq[i]);
 }
 
 /** Применяет черновик к опубликованным данным ЛК и шлёт уведомления только по изменённым блокам. */
@@ -44,7 +23,7 @@ export async function publishClientProjectToCabinet(projectId: string): Promise<
   const paymentsInDraft = draft?.payments !== undefined;
   const stagesInDraft = draft?.stages !== undefined;
 
-  const [oldPayments, oldStages, oldPublishedDocuments, oldPublishedPhotos] = await Promise.all([
+  const [oldPayments, oldStages] = await Promise.all([
     prisma.clientPayment.findMany({
       where: { projectId },
       select: { order: true, label: true, status: true },
@@ -52,14 +31,6 @@ export async function publishClientProjectToCabinet(projectId: string): Promise<
     prisma.clientProjectStage.findMany({
       where: { projectId },
       select: { id: true, parentId: true, order: true, title: true, status: true },
-    }),
-    prisma.clientDocument.findMany({
-      where: { projectId, isDraft: false },
-      select: { url: true, filename: true },
-    }),
-    prisma.clientPhotoReport.findMany({
-      where: { projectId, isDraft: false },
-      select: { url: true, caption: true, order: true },
     }),
   ]);
 
@@ -115,31 +86,13 @@ export async function publishClientProjectToCabinet(projectId: string): Promise<
       });
     }
 
-    await publishDraftMedia(tx, projectId);
-
-    const [newPublishedDocuments, newPublishedPhotos] = await Promise.all([
-      tx.clientDocument.findMany({
-        where: { projectId, isDraft: false },
-        select: { url: true, filename: true },
-      }),
-      tx.clientPhotoReport.findMany({
-        where: { projectId, isDraft: false },
-        select: { url: true, caption: true, order: true },
-      }),
-    ]);
-
-    const mediaDocsChanged = documentsChanged(oldPublishedDocuments, newPublishedDocuments);
-    const mediaPhotosChanged = photosChanged(oldPublishedPhotos, newPublishedPhotos);
+    await publishDraftMediaWithNotifications(tx, projectId);
 
     const notificationSpecs = collectNotificationsForPublish({
       oldPayments,
       newPayments: paymentsInDraft ? newPaymentsAfterPublish : undefined,
       oldStages,
       draftStages: stagesInDraft ? draft!.stages : undefined,
-      oldDocuments: oldPublishedDocuments,
-      newDocuments: mediaDocsChanged ? newPublishedDocuments : undefined,
-      oldPhotos: oldPublishedPhotos,
-      newPhotos: mediaPhotosChanged ? newPublishedPhotos : undefined,
     });
 
     if (notificationSpecs.length > 0) {

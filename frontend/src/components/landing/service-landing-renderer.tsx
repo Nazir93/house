@@ -1,4 +1,7 @@
 import { LandingHero } from "@/components/landing/landing-hero";
+import { LandingHeroCinematic } from "@/components/landing/landing-hero-cinematic";
+import { ServiceStoryScrollTrack } from "@/components/landing/service-story-scroll-track";
+import { ServiceStoryTimeline } from "@/components/landing/service-story-timeline";
 import { LandingShowcase } from "@/components/landing/landing-showcase";
 import { LandingPain } from "@/components/landing/landing-pain";
 import { LandingAdvantages } from "@/components/landing/landing-advantages";
@@ -24,7 +27,7 @@ export async function ServiceLandingRenderer({
   const heroH1ByIndex = new Map<number, string>();
   for (let i = 0; i < document.sections.length; i++) {
     const s = document.sections[i];
-    if (s.type === "hero") {
+    if (s.type === "hero" || s.type === "heroCinematic") {
       heroH1ByIndex.set(i, await getPageH1(pagePath, s.title));
     }
   }
@@ -32,6 +35,27 @@ export async function ServiceLandingRenderer({
   return (
     <article>
       {document.sections.map((section, i) => {
+        const next = document.sections[i + 1];
+        if (section.type === "heroCinematic" && next?.type === "storyTimeline") {
+          return (
+            <ServiceStoryScrollTrack
+              key={i}
+              hero={{
+                title: heroH1ByIndex.get(i) ?? section.title,
+                subtitle: section.subtitle,
+                tag: section.tag,
+                features: section.features,
+                bannerImageDesktop: section.bannerImageDesktop,
+                bannerImageMobile: section.bannerImageMobile,
+              }}
+              timelineItems={next.items}
+            />
+          );
+        }
+        if (i > 0 && document.sections[i - 1]?.type === "heroCinematic" && section.type === "storyTimeline") {
+          return null;
+        }
+
         switch (section.type) {
           case "schema":
             return (
@@ -44,6 +68,20 @@ export async function ServiceLandingRenderer({
                 telephone={telephone}
               />
             );
+          case "heroCinematic":
+            return (
+              <LandingHeroCinematic
+                key={i}
+                title={heroH1ByIndex.get(i) ?? section.title}
+                subtitle={section.subtitle}
+                tag={section.tag}
+                features={section.features}
+                bannerImageDesktop={section.bannerImageDesktop}
+                bannerImageMobile={section.bannerImageMobile}
+              />
+            );
+          case "storyTimeline":
+            return <ServiceStoryTimeline key={i} items={section.items} />;
           case "hero":
             return (
               <LandingHero

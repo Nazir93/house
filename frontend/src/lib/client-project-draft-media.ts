@@ -1,5 +1,10 @@
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { createClientNotifications } from "@/lib/client-notifications";
+import {
+  detectNewDocumentNotifications,
+  detectNewPhotoNotifications,
+} from "@/lib/client-notification-sync";
 
 /** Если черновых медиа нет — копируем опубликованные в черновик для редактирования. */
 export async function ensureDraftMediaWorkspace(projectId: string): Promise<void> {
@@ -92,10 +97,64 @@ export async function touchDraftSavedAt(projectId: string): Promise<void> {
   });
 }
 
+/** Уведомления клиенту о новых опубликованных фото/документах. */
+export function collectMediaPublishNotifications(
+  oldDocuments: { url: string; filename: string }[],
+  newDocuments: { url: string; filename: string }[],
+  oldPhotos: { url: string; caption: string | null }[],
+  newPhotos: { url: string; caption: string | null }[]
+) {
+  return [
+    ...detectNewDocumentNotifications(oldDocuments, newDocuments),
+    ...detectNewPhotoNotifications(oldPhotos, newPhotos),
+  ];
+}
+
+/** Публикует черновые медиа и шлёт DOCUMENT_NEW / PHOTO_NEW по новым файлам. */
+export async function publishDraftMediaWithNotifications(
+  tx: Prisma.TransactionClient,
+  projectId: string
+): Promise<void> {
+  const [oldPublishedDocuments, oldPublishedPhotos] = await Promise.all([
+    tx.clientDocument.findMany({
+      where: { projectId, isDraft: false },
+      select: { url: true, filename: true },
+    }),
+    tx.clientPhotoReport.findMany({
+      where: { projectId, isDraft: false },
+      select: { url: true, caption: true },
+    }),
+  ]);
+
+  await publishDraftMedia(tx, projectId);
+
+  const [newPublishedDocuments, newPublishedPhotos] = await Promise.all([
+    tx.clientDocument.findMany({
+      where: { projectId, isDraft: false },
+      select: { url: true, filename: true },
+    }),
+    tx.clientPhotoReport.findMany({
+      where: { projectId, isDraft: false },
+      select: { url: true, caption: true },
+    }),
+  ]);
+
+  const notificationSpecs = collectMediaPublishNotifications(
+    oldPublishedDocuments,
+    newPublishedDocuments,
+    oldPublishedPhotos,
+    newPublishedPhotos
+  );
+
+  if (notificationSpecs.length > 0) {
+    await createClientNotifications(tx, projectId, notificationSpecs);
+  }
+}
+
 /** Публикует черновые фото/документы в личный кабинет (без сброса остального черновика). */
 export async function publishDraftMediaToCabinet(projectId: string): Promise<void> {
   await prisma.$transaction(async (tx) => {
-    await publishDraftMedia(tx, projectId);
+    await publishDraftMediaWithNotifications(tx, projectId);
     await tx.clientConstructionProject.update({
       where: { id: projectId },
       data: { draftSavedAt: new Date() },

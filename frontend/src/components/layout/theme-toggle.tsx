@@ -1,8 +1,53 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { useTheme } from "@/lib/theme-context";
+import { useTheme, themePreferenceLabel } from "@/lib/theme-context";
+import type { ThemePreference } from "@/lib/theme-preference";
 import { cn } from "@/lib/utils";
+
+function ThemeToggleIcon({
+  preference,
+  strokeWidth,
+  className,
+}: {
+  preference: ThemePreference;
+  strokeWidth: number;
+  className?: string;
+}) {
+  const common = {
+    className,
+    fill: "none" as const,
+    viewBox: "0 0 24 24",
+    stroke: "currentColor",
+    strokeWidth,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true as const,
+  };
+
+  if (preference === "light") {
+    return (
+      <svg {...common}>
+        <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+      </svg>
+    );
+  }
+
+  if (preference === "dark") {
+    return (
+      <svg {...common}>
+        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg {...common}>
+      <rect x="3" y="4" width="18" height="12" rx="2" />
+      <path d="M8 20h8M12 16v4" />
+    </svg>
+  );
+}
 
 export function ThemeToggle({
   className,
@@ -12,8 +57,7 @@ export function ThemeToggle({
   /** `header` — как кнопки поиска/кабинета в шапке сайта (круг, бордер, те же переменные). */
   variant?: "ghost" | "outline" | "header";
 }) {
-  const { theme, toggleTheme } = useTheme();
-  const isDark = theme === "dark";
+  const { themePreference, toggleTheme } = useTheme();
 
   const base =
     variant === "outline"
@@ -27,6 +71,10 @@ export function ThemeToggle({
       ? { borderColor: "var(--header-bar-border)", color: "var(--header-bar-text)" }
       : undefined;
 
+  const iconClass =
+    variant === "header" ? "h-3.5 w-3.5 lg:h-3 lg:w-3" : "h-4 w-4";
+  const strokeWidth = variant === "header" ? 2 : 1.75;
+
   return (
     <button
       type="button"
@@ -39,46 +87,14 @@ export function ThemeToggle({
         base,
         className,
       )}
-      aria-label={isDark ? "Включить светлую тему" : "Включить тёмную тему"}
-      title="Тема оформления"
+      aria-label={`${themePreferenceLabel(themePreference)}. Нажмите для смены режима.`}
+      title={`${themePreferenceLabel(themePreference)} (светлая → тёмная → системная)`}
     >
-      <span
-        className={cn(
-          "relative flex shrink-0 items-center justify-center",
-          variant === "header" ? "h-3.5 w-3.5 lg:h-3 lg:w-3" : "h-4 w-4",
-        )}
-        aria-hidden
-      >
-        {isDark ? (
-          <svg
-            className={variant === "header" ? "h-3.5 w-3.5 lg:h-3 lg:w-3" : "h-4 w-4"}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={variant === "header" ? 2 : 1.75}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"
-            />
-          </svg>
-        ) : (
-          <svg
-            className={variant === "header" ? "h-3.5 w-3.5 lg:h-3 lg:w-3" : "h-4 w-4"}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={variant === "header" ? 2 : 1.75}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-            />
-          </svg>
-        )}
-      </span>
+      <ThemeToggleIcon
+        preference={themePreference}
+        strokeWidth={strokeWidth}
+        className={iconClass}
+      />
     </button>
   );
 }

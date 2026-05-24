@@ -9,82 +9,125 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  cycleThemePreference,
+  normalizeThemePreference,
+  resolveSiteTheme,
+  THEME_STORAGE_KEY,
+  themePreferenceLabel,
+  type ResolvedSiteTheme,
+  type ThemePreference,
+} from "@/lib/theme-preference";
 
-export type SiteTheme = "light" | "dark";
+/** @deprecated Используйте ResolvedSiteTheme — фактическая тема на странице. */
+export type SiteTheme = ResolvedSiteTheme;
 
-const STORAGE_KEY = "house-theme";
-
-function readThemeFromDom(): SiteTheme {
-  if (typeof window === "undefined") return "light";
-  const a = document.documentElement.getAttribute("data-theme");
-  return a === "dark" ? "dark" : "light";
+function readStoredPreference(): ThemePreference {
+  if (typeof window === "undefined") return "system";
+  try {
+    return normalizeThemePreference(localStorage.getItem(THEME_STORAGE_KEY));
+  } catch {
+    return "system";
+  }
 }
 
-function applyDomTheme(theme: SiteTheme) {
-  document.documentElement.setAttribute("data-theme", theme);
-  document.documentElement.style.colorScheme = theme === "dark" ? "dark" : "light";
+function readSystemIsDark(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+function applyDomTheme(resolved: ResolvedSiteTheme) {
+  document.documentElement.setAttribute("data-theme", resolved);
+  document.documentElement.style.colorScheme = resolved === "dark" ? "dark" : "light";
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) {
-    meta.setAttribute("content", theme === "dark" ? "#121816" : "#F6F6F4");
+    meta.setAttribute("content", resolved === "dark" ? "#121816" : "#F6F6F4");
   }
 }
 
 interface ThemeContextType {
-  theme: SiteTheme;
+  /** Фактическая тема на странице (light/dark). */
+  theme: ResolvedSiteTheme;
+  resolvedTheme: ResolvedSiteTheme;
+  /** Выбор в переключателе: светлая / тёмная / системная. */
+  themePreference: ThemePreference;
   toggleTheme: () => void;
-  setTheme: (t: SiteTheme) => void;
+  setTheme: (preference: ThemePreference) => void;
+  setThemePreference: (preference: ThemePreference) => void;
   isDark: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
   theme: "light",
+  resolvedTheme: "light",
+  themePreference: "system",
   toggleTheme: () => {},
   setTheme: () => {},
+  setThemePreference: () => {},
   isDark: false,
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  /** До клиента совпадает с SSR («light»); после mount подтягивается DOM/localStorage из inline-скрипта. */
-  const [theme, setThemeState] = useState<SiteTheme>("light");
+  const [themePreference, setThemePreferenceState] = useState<ThemePreference>("system");
+  const [systemIsDark, setSystemIsDark] = useState(false);
   const hydratedRef = useRef(false);
+
+  const resolvedTheme = useMemo(
+    () => resolveSiteTheme(themePreference, systemIsDark),
+    [themePreference, systemIsDark]
+  );
 
   useLayoutEffect(() => {
     if (!hydratedRef.current) {
       hydratedRef.current = true;
-      const t = readThemeFromDom();
-      setThemeState(t);
-      applyDomTheme(t);
+      const pref = readStoredPreference();
+      const sysDark = readSystemIsDark();
+      setThemePreferenceState(pref);
+      setSystemIsDark(sysDark);
+      applyDomTheme(resolveSiteTheme(pref, sysDark));
       return;
     }
-    applyDomTheme(theme);
-  }, [theme]);
+    applyDomTheme(resolvedTheme);
+  }, [resolvedTheme]);
 
-  const setTheme = useCallback((t: SiteTheme) => {
+  useLayoutEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = (e: MediaQueryListEvent) => setSystemIsDark(e.matches);
+    setSystemIsDark(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  const setThemePreference = useCallback((preference: ThemePreference) => {
     try {
-      localStorage.setItem(STORAGE_KEY, t);
+      localStorage.setItem(THEME_STORAGE_KEY, preference);
     } catch {
       /* ignore */
     }
-    setThemeState(t);
+    setThemePreferenceState(preference);
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setTheme(theme === "light" ? "dark" : "light");
-  }, [theme, setTheme]);
+    setThemePreference(cycleThemePreference(themePreference));
+  }, [themePreference, setThemePreference]);
 
   const value = useMemo(
     () => ({
-      theme,
+      theme: resolvedTheme,
+      resolvedTheme,
+      themePreference,
       toggleTheme,
-      setTheme,
-      isDark: theme === "dark",
+      setTheme: setThemePreference,
+      setThemePreference,
+      isDark: resolvedTheme === "dark",
     }),
-    [theme, toggleTheme, setTheme]
+    [resolvedTheme, themePreference, toggleTheme, setThemePreference]
   );
 
-  return (
-    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
 export const useTheme = () => useContext(ThemeContext);
+
+export { themePreferenceLabel };

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Eye, EyeOff, MapPinned, Pencil, Plus, Trash2 } from "lucide-react";
 import { builtObjectMaterialLabel } from "@/lib/construction-shared";
 import { CmsImage } from "@/components/ui/cms-image";
+import { PortfolioFilterOptionsEditor } from "@/components/admin/portfolio-filter-options-editor";
 
 interface BuiltObjectAdminItem {
   id: string;
@@ -60,6 +61,8 @@ export default function AdminBuiltObjectsPage() {
           <Plus size={16} /> Добавить
         </Link>
       </div>
+
+      <PortfolioFilterOptionsEditor />
 
       {error ? (
         <div className="rounded-xl bg-amber-500/10 border border-amber-500/30 p-4 text-sm text-amber-200">{error}</div>

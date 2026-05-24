@@ -8,8 +8,9 @@ export type ClientNotificationCreateInput = {
 };
 
 /**
- * Создаёт уведомления в кабинете. Вызывать только из publishClientProjectToCabinet,
- * не при сохранении черновика в админке. В перспективе — SMS / мессенджер.
+ * Создаёт уведомления в кабинете. Вызывать при публикации в ЛК
+ * (полная публикация или раздел «Документы» / «Фото»), не при сохранении черновика.
+ * В перспективе — SMS / мессенджер.
  */
 export async function createClientNotifications(
   db: Prisma.TransactionClient | typeof import("@/lib/db").prisma,

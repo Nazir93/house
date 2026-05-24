@@ -5,6 +5,7 @@ import { CMS_SERVICE_SLUG_TO_SERVICE_TYPE } from "@/lib/service-slug-routes";
 import { SERVICE_TYPE_LABEL_BY_VALUE } from "@/lib/service-type-admin-options";
 import { resolveServiceLandingDocument, stripShowcaseSections } from "@/lib/service-landing-defaults";
 import type { ServiceLandingDocument } from "@/lib/service-landing-schema";
+import { enrichProektirovanieLandingDocument } from "@/lib/service-proektirovanie-landing";
 import { getServiceLandingHeroBannerFields } from "@/lib/service-card-media";
 
 function mergeHeroBannersFromDb(
@@ -17,7 +18,7 @@ function mergeHeroBannersFromDb(
   if (!d && !m) return document;
   return {
     sections: document.sections.map((section) => {
-      if (section.type !== "hero") return section;
+      if (section.type !== "hero" && section.type !== "heroCinematic") return section;
       return {
         ...section,
         bannerImageDesktop: section.bannerImageDesktop ?? d,
@@ -33,7 +34,7 @@ function fillMissingHeroBannersFromSiteAssets(slug: string, document: ServiceLan
   if (!fallback) return document;
   return {
     sections: document.sections.map((section) => {
-      if (section.type !== "hero") return section;
+      if (section.type !== "hero" && section.type !== "heroCinematic") return section;
       const has =
         Boolean(section.bannerImageDesktop?.trim()) || Boolean(section.bannerImageMobile?.trim());
       if (has) return section;
@@ -56,6 +57,19 @@ type ServiceRowPick = {
   serviceType: ServiceType;
 };
 
+/** Шаблон лендинга, если в БД нет строки или PostgreSQL недоступен (как fallback в getServicesList). */
+export function cmsServiceSlugFallbackRow(slug: string): ServiceRowPick | null {
+  const fallbackType = CMS_SERVICE_SLUG_TO_SERVICE_TYPE[slug];
+  if (!fallbackType) return null;
+  return {
+    published: true,
+    landingJson: null,
+    bannerImageDesktop: null,
+    bannerImageMobile: null,
+    serviceType: fallbackType,
+  };
+}
+
 async function loadServiceRowForSlug(slug: string): Promise<ServiceRowPick | null> {
   try {
     const bySlug = await prisma.service.findUnique({
@@ -70,18 +84,10 @@ async function loadServiceRowForSlug(slug: string): Promise<ServiceRowPick | nul
     });
     if (bySlug) return bySlug;
   } catch {
-    return null;
+    // БД недоступна — шаблон ниже
   }
 
-  const fallbackType = CMS_SERVICE_SLUG_TO_SERVICE_TYPE[slug];
-  if (!fallbackType) return null;
-  return {
-    published: true,
-    landingJson: null,
-    bannerImageDesktop: null,
-    bannerImageMobile: null,
-    serviceType: fallbackType,
-  };
+  return cmsServiceSlugFallbackRow(slug);
 }
 
 /**
@@ -141,5 +147,6 @@ export async function getServiceLandingPageData(slug: string): Promise<ServiceLa
   document = mergeHeroBannersFromDb(document, row.bannerImageDesktop, row.bannerImageMobile);
   document = fillMissingHeroBannersFromSiteAssets(slug, document);
   document = stripShowcaseSections(document);
+  document = enrichProektirovanieLandingDocument(slug, document);
   return { serviceType: row.serviceType, published: row.published, document };
 }

@@ -1,5 +1,6 @@
 import { getPageMeta, getPageMetaFields } from "@/lib/get-page-meta";
 import { getBuiltObjects } from "@/lib/construction-data";
+import { loadPortfolioFilterOptionsCached } from "@/lib/portfolio-filter-options";
 import { SITE_NAME } from "@/lib/constants";
 import { BuiltPortfolioContent } from "./built-content";
 
@@ -18,6 +19,7 @@ export default async function PortfolioPage(props: { searchParams?: Promise<{ vi
   const searchParams = await props.searchParams;
   await getPageMetaFields("/portfolio");
   const objects = await getBuiltObjects();
+  const filterConfig = await loadPortfolioFilterOptionsCached();
   const initialView = searchParams?.view === "map" ? ("map" as const) : ("grid" as const);
-  return <BuiltPortfolioContent objects={objects} initialView={initialView} />;
+  return <BuiltPortfolioContent objects={objects} filterConfig={filterConfig} initialView={initialView} />;
 }

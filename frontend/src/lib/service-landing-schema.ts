@@ -1,7 +1,34 @@
 import { z } from "zod";
 
 /** Один блок лендинга услуги (порядок = порядок на странице). */
+export const storyTimelineItemSchema = z.object({
+  id: z.string(),
+  side: z.enum(["left", "right"]),
+  eyebrow: z.string().optional(),
+  title: z.string(),
+  body: z.string(),
+  imageUrl: z.string().optional(),
+  href: z.string().optional(),
+});
+
+export type StoryTimelineItem = z.infer<typeof storyTimelineItemSchema>;
+
 export const serviceLandingSectionSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("heroCinematic"),
+    title: z.string(),
+    subtitle: z.string(),
+    serviceKey: z.string().optional(),
+    tag: z.string().optional(),
+    features: z.array(z.string()).optional(),
+    goals: z.string().optional(),
+    bannerImageDesktop: z.string().optional(),
+    bannerImageMobile: z.string().optional(),
+  }),
+  z.object({
+    type: z.literal("storyTimeline"),
+    items: z.array(storyTimelineItemSchema).min(1),
+  }),
   z.object({
     type: z.literal("schema"),
     serviceName: z.string(),
