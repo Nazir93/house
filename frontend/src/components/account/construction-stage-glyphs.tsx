@@ -1,4 +1,4 @@
-import type { SVGProps } from "react";
+import type { ReactElement, SVGProps } from "react";
 import { cn } from "@/lib/utils";
 
 type GlyphProps = SVGProps<SVGSVGElement>;
@@ -280,7 +280,7 @@ export type ConstructionStageGlyphKey =
 
 export const CONSTRUCTION_STAGE_GLYPHS: Record<
   ConstructionStageGlyphKey,
-  (props: GlyphProps) => JSX.Element
+  (props: GlyphProps) => ReactElement
 > = {
   foundation: FoundationGlyph,
   walls: WallsGlyph,
