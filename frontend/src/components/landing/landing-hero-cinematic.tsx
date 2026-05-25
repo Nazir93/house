@@ -12,6 +12,7 @@ export function LandingHeroCinematic({
   bannerImageDesktop,
   bannerImageMobile,
   spineOriginRef,
+  fullBleed = false,
 }: {
   title: string;
   subtitle: string;
@@ -21,6 +22,8 @@ export function LandingHeroCinematic({
   bannerImageMobile?: string;
   /** Якорь оси timeline — нижняя граница hero-карточки */
   spineOriginRef?: RefObject<HTMLDivElement | null>;
+  /** Баннер на всю ширину экрана без скруглений (страница проектирования) */
+  fullBleed?: boolean;
 }) {
   const [visible, setVisible] = useState(false);
   const image = bannerImageDesktop || bannerImageMobile || "/images/hero/hero-01.png";
@@ -31,14 +34,18 @@ export function LandingHeroCinematic({
 
   return (
     <section
-      className="relative isolate -mt-[var(--site-header-banner-overlap)] scroll-mt-[var(--site-header-sticky-offset)]"
-      style={{ backgroundColor: "var(--bg)" }}
+      className={cn(
+        "relative isolate -mt-[var(--site-header-banner-overlap)] scroll-mt-[var(--site-header-sticky-offset)]",
+        fullBleed && "bg-black"
+      )}
+      style={fullBleed ? undefined : { backgroundColor: "var(--bg)" }}
     >
       <div
         className={cn(
-          "relative mx-auto w-full max-w-[1440px] overflow-hidden rounded-b-[1.75rem] md:rounded-b-[2.25rem] lg:rounded-b-[2.75rem]",
-          "min-h-[min(72vh,760px)] md:min-h-[min(78vh,820px)]",
-          "transition-all duration-700 ease-out",
+          "relative w-full overflow-hidden transition-all duration-700 ease-out",
+          fullBleed
+            ? "min-h-[min(52vh,580px)] sm:min-h-[min(58vh,640px)] md:min-h-[min(62vh,720px)]"
+            : "mx-auto max-w-[1440px] min-h-[min(72vh,760px)] md:min-h-[min(78vh,820px)] rounded-b-[1.75rem] md:rounded-b-[2.25rem] lg:rounded-b-[2.75rem]"
         )}
         style={{
           opacity: visible ? 1 : 0,
@@ -52,7 +59,7 @@ export function LandingHeroCinematic({
               alt=""
               fill
               priority
-              className="hidden object-cover md:block"
+              className={cn("object-cover object-center", bannerImageMobile ? "hidden md:block" : "")}
               sizes="100vw"
             />
           ) : null}
@@ -61,66 +68,90 @@ export function LandingHeroCinematic({
             alt=""
             fill
             priority
-            className={cn("object-cover", bannerImageDesktop ? "md:hidden" : "")}
+            className={cn("object-cover object-center", bannerImageDesktop ? "md:hidden" : "")}
             sizes="100vw"
           />
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(to top, color-mix(in srgb, var(--bg) 92%, transparent) 0%, color-mix(in srgb, var(--bg) 35%, transparent) 42%, transparent 72%)",
-            }}
-            aria-hidden
-          />
-          <div
-            className="absolute inset-0 hidden md:block"
-            style={{
-              background:
-                "linear-gradient(to right, color-mix(in srgb, var(--bg) 88%, transparent) 0%, transparent 55%)",
-            }}
-            aria-hidden
-          />
+          {!fullBleed ? (
+            <>
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(to top, color-mix(in srgb, var(--bg) 92%, transparent) 0%, color-mix(in srgb, var(--bg) 35%, transparent) 42%, transparent 72%)",
+                }}
+                aria-hidden
+              />
+              <div
+                className="absolute inset-0 hidden md:block"
+                style={{
+                  background:
+                    "linear-gradient(to right, color-mix(in srgb, var(--bg) 88%, transparent) 0%, transparent 55%)",
+                }}
+                aria-hidden
+              />
+            </>
+          ) : (
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.12) 38%, transparent 62%), linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 42%, transparent 68%)",
+              }}
+              aria-hidden
+            />
+          )}
         </div>
 
-        <div className="relative z-[1] flex min-h-[inherit] flex-col justify-end px-5 pb-14 pt-[calc(var(--site-header-sticky-offset)+2.5rem)] md:px-10 md:pb-16 lg:px-14 lg:pb-20">
-          {tag ? (
-            <span
-              className="mb-4 inline-block max-w-xl text-[10px] font-semibold uppercase tracking-[0.14em] sm:text-[11px]"
-              style={{ color: "color-mix(in srgb, var(--text) 72%, transparent)" }}
+        <div
+          className={cn(
+            "relative z-[1] flex min-h-[inherit] flex-col justify-end",
+            fullBleed
+              ? "px-5 pb-10 pt-[calc(var(--site-header-sticky-offset)+2rem)] md:px-10 md:pb-12 lg:px-16 lg:pb-14"
+              : "px-5 pb-14 pt-[calc(var(--site-header-sticky-offset)+2.5rem)] md:px-10 md:pb-16 lg:px-14 lg:pb-20"
+          )}
+        >
+          <div className={cn(fullBleed && "container mx-auto w-full max-w-[1320px]")}>
+            {tag ? (
+              <span
+                className="mb-4 inline-block max-w-xl text-[10px] font-semibold uppercase tracking-[0.14em] sm:text-[11px]"
+                style={{ color: fullBleed ? "rgba(255,255,255,0.72)" : "color-mix(in srgb, var(--text) 72%, transparent)" }}
+              >
+                {tag}
+              </span>
+            ) : null}
+            <h1
+              className="font-heading max-w-3xl text-[clamp(1.65rem,4.5vw,3.15rem)] font-bold leading-[1.08] tracking-tight"
+              style={{ color: fullBleed ? "#fff" : "var(--text)" }}
             >
-              {tag}
-            </span>
-          ) : null}
-          <h1
-            className="font-heading max-w-3xl text-[clamp(1.65rem,4.5vw,3.15rem)] font-bold leading-[1.08] tracking-tight"
-            style={{ color: "var(--text)" }}
-          >
-            {title}
-          </h1>
-          <p
-            className="mt-4 max-w-2xl text-sm leading-relaxed sm:text-base md:mt-5"
-            style={{ color: "color-mix(in srgb, var(--text) 78%, transparent)" }}
-          >
-            {subtitle}
-          </p>
-          {features.length > 0 ? (
-            <ul className="mt-6 flex max-w-2xl flex-col gap-2 sm:mt-8">
-              {features.map((f) => (
-                <li
-                  key={f}
-                  className="flex items-start gap-2.5 text-sm leading-snug"
-                  style={{ color: "color-mix(in srgb, var(--text) 70%, transparent)" }}
-                >
-                  <span
-                    className="mt-2 h-1 w-1 shrink-0 rounded-full"
-                    style={{ backgroundColor: "var(--accent)" }}
-                    aria-hidden
-                  />
-                  {f}
-                </li>
-              ))}
-            </ul>
-          ) : null}
+              {title}
+            </h1>
+            {subtitle ? (
+              <p
+                className="mt-4 max-w-2xl text-sm leading-relaxed sm:text-base md:mt-5"
+                style={{ color: fullBleed ? "rgba(255,255,255,0.82)" : "color-mix(in srgb, var(--text) 78%, transparent)" }}
+              >
+                {subtitle}
+              </p>
+            ) : null}
+            {features.length > 0 ? (
+              <ul className="mt-6 flex max-w-2xl flex-col gap-2 sm:mt-8">
+                {features.map((f) => (
+                  <li
+                    key={f}
+                    className="flex items-start gap-2.5 text-sm leading-snug"
+                    style={{ color: fullBleed ? "rgba(255,255,255,0.78)" : "color-mix(in srgb, var(--text) 70%, transparent)" }}
+                  >
+                    <span
+                      className="mt-2 h-1 w-1 shrink-0 rounded-full"
+                      style={{ backgroundColor: fullBleed ? "#fff" : "var(--accent)" }}
+                      aria-hidden
+                    />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
         </div>
         <div
           ref={spineOriginRef}

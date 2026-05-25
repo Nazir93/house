@@ -1,5 +1,7 @@
 import type { ServiceLandingDocument, StoryTimelineItem } from "@/lib/service-landing-schema";
 
+export const PROEKTROVANIE_HERO_BANNER = "/images/banner/proektirovanie-hero.png";
+
 /** Заглушки блоков timeline — тексты замените в админке или пришлите нам. */
 export const PROEKTROVANIE_TIMELINE_PLACEHOLDERS: StoryTimelineItem[] = [
   {
@@ -45,7 +47,6 @@ export function enrichProektirovanieLandingDocument(
 ): ServiceLandingDocument {
   if (slug !== "proektirovanie") return document;
 
-  const hasTimeline = document.sections.some((s) => s.type === "storyTimeline");
   const heroSection = document.sections.find((s) => s.type === "hero" || s.type === "heroCinematic");
   const rest = document.sections.filter(
     (s) => s.type !== "hero" && s.type !== "heroCinematic" && s.type !== "storyTimeline"
@@ -53,7 +54,11 @@ export function enrichProektirovanieLandingDocument(
 
   const cinematic =
     heroSection?.type === "heroCinematic"
-      ? heroSection
+      ? {
+          ...heroSection,
+          bannerImageDesktop: PROEKTROVANIE_HERO_BANNER,
+          bannerImageMobile: PROEKTROVANIE_HERO_BANNER,
+        }
       : heroSection?.type === "hero"
         ? {
             type: "heroCinematic" as const,
@@ -63,16 +68,22 @@ export function enrichProektirovanieLandingDocument(
             tag: heroSection.tag,
             features: heroSection.features,
             goals: heroSection.goals,
-            bannerImageDesktop: heroSection.bannerImageDesktop,
-            bannerImageMobile: heroSection.bannerImageMobile,
+            bannerImageDesktop: PROEKTROVANIE_HERO_BANNER,
+            bannerImageMobile: PROEKTROVANIE_HERO_BANNER,
           }
-        : null;
+        : {
+            type: "heroCinematic" as const,
+            title: "Проектирование",
+            subtitle: "",
+            bannerImageDesktop: PROEKTROVANIE_HERO_BANNER,
+            bannerImageMobile: PROEKTROVANIE_HERO_BANNER,
+          };
 
   const timelineSection = document.sections.find((s) => s.type === "storyTimeline");
 
   return {
     sections: [
-      ...(cinematic ? [cinematic] : []),
+      cinematic,
       timelineSection ?? { type: "storyTimeline" as const, items: PROEKTROVANIE_TIMELINE_PLACEHOLDERS },
       ...rest,
     ],

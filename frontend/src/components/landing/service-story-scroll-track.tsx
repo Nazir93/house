@@ -49,7 +49,9 @@ export function ServiceStoryScrollTrack({
     const vh = window.visualViewport?.height ?? window.innerHeight;
 
     const top = Math.max(0, originRect.bottom - trackRect.top);
-    const progress = reducedMotion ? 1 : computeTrackScrollProgress(trackRect.top, track.offsetHeight, vh);
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+    const rawProgress = reducedMotion ? 1 : computeTrackScrollProgress(trackRect.top, track.offsetHeight, vh);
+    const progress = scrollY < 20 ? 0 : rawProgress;
     const height = computeLineHeightPx(progress, top, track.offsetHeight, STORY_SPINE_LEAD_IN_PX);
 
     setLineLayout({ top, height });
@@ -87,7 +89,7 @@ export function ServiceStoryScrollTrack({
 
   return (
     <div ref={trackRef} className="relative">
-      <LandingHeroCinematic {...hero} spineOriginRef={originRef} />
+      <LandingHeroCinematic {...hero} spineOriginRef={originRef} fullBleed />
 
       {lineLayout.height > 0 ? (
         <div

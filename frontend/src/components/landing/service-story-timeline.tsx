@@ -1,8 +1,10 @@
 "use client";
 
 import {
+  forwardRef,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   type RefObject,
@@ -17,6 +19,8 @@ import {
   computeBeatReveal,
   computeSectionScrollProgress,
   computeTrackScrollProgress,
+  buildBeatBranchPath,
+  type BeatBranchGeometry,
 } from "@/lib/service-story-timeline-progress";
 import { cn } from "@/lib/utils";
 
@@ -60,6 +64,54 @@ function Reveal({
   );
 }
 
+function BeatBranchSvg({
+  geometry,
+  reveal,
+  reducedMotion,
+}: {
+  geometry: BeatBranchGeometry | null;
+  reveal: number;
+  reducedMotion: boolean;
+}) {
+  if (!geometry) return null;
+  const r = reducedMotion ? 1 : reveal;
+  const path = buildBeatBranchPath(geometry, r);
+  if (path.totalLength <= 0 || path.visibleLength <= 0) return null;
+
+  const dashOffset = Math.max(path.totalLength - path.visibleLength, 0);
+
+  return (
+    <svg className="pointer-events-none absolute inset-0 z-[2] hidden overflow-visible lg:block" aria-hidden>
+      <path
+        d={path.d}
+        fill="none"
+        stroke={SPINE}
+        strokeWidth={1}
+        strokeLinecap="square"
+        strokeLinejoin="miter"
+        strokeDasharray={path.totalLength}
+        strokeDashoffset={dashOffset}
+      />
+      <circle
+        cx={path.dotX}
+        cy={path.dotY}
+        r={10}
+        fill="var(--bg)"
+        stroke={SPINE}
+        strokeWidth={1}
+        opacity={Math.min(r * 2, 1)}
+      />
+      <circle
+        cx={path.dotX}
+        cy={path.dotY}
+        r={r > 0.35 ? 4.5 : 0}
+        fill="var(--text)"
+        opacity={r > 0.35 ? 0.9 : 0}
+      />
+    </svg>
+  );
+}
+
 function TimelineBeat({
   item,
   index,
@@ -74,76 +126,79 @@ function TimelineBeat({
   const isRight = item.side === "right";
   const show = reducedMotion || reveal > 0.02;
   const imageSrc = item.imageUrl?.trim() || `/images/banner/banner-hero-0${(index % 6) + 1}.png`;
+  const articleRef = useRef<HTMLElement>(null);
+  const copyRef = useRef<HTMLDivElement>(null);
+  const [branchGeometry, setBranchGeometry] = useState<BeatBranchGeometry | null>(null);
+
+  const measureBranch = useCallback(() => {
+    const article = articleRef.current;
+    const copy = copyRef.current;
+    if (!article || !copy) return;
+
+    const articleRect = article.getBoundingClientRect();
+    const copyRect = copy.getBoundingClientRect();
+    if (articleRect.width <= 0) return;
+
+    const spineX = articleRect.width / 2;
+    const nodeY = copyRect.bottom - articleRect.top + 12;
+    const textEdgeX = isRight ? copyRect.left - articleRect.left - 8 : copyRect.right - articleRect.left + 8;
+
+    setBranchGeometry({
+      spineX,
+      nodeY,
+      textEdgeX,
+      branchToRight: isRight,
+    });
+  }, [isRight]);
+
+  useLayoutEffect(() => {
+    measureBranch();
+    const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(measureBranch) : null;
+    if (articleRef.current) ro?.observe(articleRef.current);
+    if (copyRef.current) ro?.observe(copyRef.current);
+    window.addEventListener("resize", measureBranch);
+    return () => {
+      ro?.disconnect();
+      window.removeEventListener("resize", measureBranch);
+    };
+  }, [measureBranch, item.id, reveal]);
 
   return (
     <article
-      className="relative flex min-h-[65svh] items-center py-12 md:py-16 lg:min-h-[70svh]"
+      ref={articleRef}
+      className="relative flex min-h-[65svh] items-start py-12 md:py-16 lg:min-h-[70svh]"
       aria-labelledby={`story-beat-title-${item.id}`}
     >
-      <div className="grid w-full grid-cols-1 items-center lg:grid-cols-[minmax(0,1fr)_56px_minmax(0,1fr)] lg:gap-x-8 xl:gap-x-12">
+      <BeatBranchSvg geometry={branchGeometry} reveal={reveal} reducedMotion={reducedMotion} />
+
+      <div className="grid w-full grid-cols-1 items-start lg:grid-cols-[minmax(0,1fr)_56px_minmax(0,1fr)] lg:gap-x-8 xl:gap-x-12">
         <Reveal
-          visible={show}
+          visible={show || !isRight}
           className={cn(
-            "hidden min-h-0 w-full lg:flex lg:items-center lg:justify-center",
+            "hidden min-h-0 w-full lg:flex lg:items-start lg:justify-center",
             isRight ? "lg:justify-end lg:pr-2 xl:pr-4" : "lg:justify-end lg:pr-2 xl:pr-6",
           )}
         >
-          {show ? (
-            isRight ? (
-              <BeatMedia imageSrc={imageSrc} title={item.title} reveal={reveal} />
-            ) : (
-              <BeatCopy item={item} reveal={reveal} align="right" />
-            )
-          ) : null}
+          {isRight ? (
+            show ? <BeatMedia imageSrc={imageSrc} title={item.title} reveal={reveal} /> : null
+          ) : (
+            <BeatCopy ref={copyRef} item={item} reveal={reveal} align="right" />
+          )}
         </Reveal>
 
-        <div className="relative z-[2] mx-auto hidden min-h-0 w-full self-center lg:flex lg:w-[56px] lg:flex-col lg:items-center lg:justify-center">
-          <div
-            className="absolute top-1/2 hidden h-px origin-left lg:block"
-            style={{
-              width: "min(30vw, 220px)",
-              left: "50%",
-              backgroundColor: SPINE,
-              opacity: reveal,
-              transform: isRight ? `scaleX(${reveal})` : `scaleX(${reveal}) translateX(-100%)`,
-              transformOrigin: isRight ? "left center" : "right center",
-            }}
-            aria-hidden
-          />
-          <span
-            className="relative z-[1] flex h-[20px] w-[20px] items-center justify-center rounded-full border"
-            style={{
-              opacity: reveal,
-              borderColor: SPINE,
-              backgroundColor:
-                reveal > 0.5 ? "color-mix(in srgb, var(--bg) 88%, var(--text) 12%)" : "var(--bg)",
-            }}
-          >
-            <span
-              className="block rounded-full"
-              style={{
-                width: reveal > 0.35 ? 9 : 0,
-                height: reveal > 0.35 ? 9 : 0,
-                backgroundColor: "var(--text)",
-                opacity: reveal > 0.35 ? 0.9 : 0,
-              }}
-            />
-          </span>
-        </div>
+        <div aria-hidden className="hidden min-h-0 w-[56px] lg:block" />
 
         <Reveal
-          visible={show}
+          visible={show || isRight}
           className={cn(
-            "hidden min-h-0 w-full lg:flex lg:items-center lg:justify-center",
+            "hidden min-h-0 w-full lg:flex lg:items-start lg:justify-center",
             isRight ? "lg:justify-start lg:pl-2 xl:pl-6" : "lg:justify-start lg:pl-2 xl:pl-4",
           )}
         >
-          {show ? (
-            isRight ? (
-              <BeatCopy item={item} reveal={reveal} align="left" />
-            ) : (
-              <BeatMedia imageSrc={imageSrc} title={item.title} reveal={reveal} />
-            )
+          {isRight ? (
+            <BeatCopy ref={copyRef} item={item} reveal={reveal} align="left" />
+          ) : show ? (
+            <BeatMedia imageSrc={imageSrc} title={item.title} reveal={reveal} />
           ) : null}
         </Reveal>
 
@@ -185,17 +240,21 @@ function BeatMedia({ imageSrc, title, reveal }: { imageSrc: string; title: strin
   );
 }
 
-function BeatCopy({
-  item,
-  reveal,
-  align,
-}: {
-  item: StoryTimelineItem;
-  reveal: number;
-  align: "left" | "right";
-}) {
+const BeatCopy = forwardRef(function BeatCopy(
+  {
+    item,
+    reveal,
+    align,
+  }: {
+    item: StoryTimelineItem;
+    reveal: number;
+    align: "left" | "right";
+  },
+  ref: React.ForwardedRef<HTMLDivElement>
+) {
   return (
     <div
+      ref={ref}
       className={cn("w-full max-w-[34rem]", align === "right" ? "ml-auto text-right" : "mr-auto text-left")}
       style={{
         opacity: reveal,
@@ -237,7 +296,7 @@ function BeatCopy({
       ) : null}
     </div>
   );
-}
+});
 
 export function ServiceStoryTimeline({
   items,
