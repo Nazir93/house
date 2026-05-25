@@ -82,11 +82,11 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
           src={config.backgrounds.dark}
           alt=""
           fill
+          unoptimized
           priority={theme === "dark"}
           fetchPriority={theme === "dark" ? "high" : "low"}
           loading={theme === "dark" ? "eager" : "lazy"}
           sizes="100vw"
-          quality={75}
           className={cn(
             "object-cover object-center transition-opacity duration-700 ease-out",
             theme === "dark" ? "opacity-100" : "opacity-0",
@@ -96,11 +96,11 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
           src={config.backgrounds.light}
           alt=""
           fill
+          unoptimized
           priority={theme === "light"}
           fetchPriority={theme === "light" ? "high" : "low"}
           loading={theme === "light" ? "eager" : "lazy"}
           sizes="100vw"
-          quality={75}
           className={cn(
             "object-cover object-center transition-opacity duration-700 ease-out",
             theme === "light" ? "opacity-100" : "opacity-0",

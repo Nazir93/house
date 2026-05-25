@@ -14,6 +14,7 @@ export function AdminMediaUpload({
   onChange,
   multiple = false,
   showHint = true,
+  profile = "default",
   className = "",
 }: {
   label: string;
@@ -23,6 +24,8 @@ export function AdminMediaUpload({
   /** Несколько файлов за один выбор (Ctrl/⌘ + клик); каждый загружается по очереди, URL передаётся в onChange по одному. */
   multiple?: boolean;
   showHint?: boolean;
+  /** hero — до 3840px и выше качество (фоны баннера на весь экран). */
+  profile?: "default" | "hero";
   className?: string;
 }) {
   const [uploading, setUploading] = useState(false);
@@ -34,7 +37,7 @@ export function AdminMediaUpload({
     setError("");
     setBatchHint("");
     setUploading(true);
-    const res = await uploadAdminMedia(file);
+    const res = await uploadAdminMedia(file, { profile });
     setUploading(false);
     if (res.error) setError(res.error);
     else if (res.url) onChange(res.url);
@@ -49,7 +52,7 @@ export function AdminMediaUpload({
     try {
       for (let i = 0; i < list.length; i++) {
         setBatchHint(`${i + 1} / ${list.length}`);
-        const res = await uploadAdminMedia(list[i]!);
+        const res = await uploadAdminMedia(list[i]!, { profile });
         if (res.error) {
           setError(`${res.error} (файл ${i + 1} из ${list.length}: ${list[i]!.name})`);
           break;
@@ -115,7 +118,9 @@ export function AdminMediaUpload({
       {showHint ? (
         <p className="text-[11px] adm-faint mt-1.5">
           {accept === "image"
-            ? `До 30 МБ за файл. JPG, PNG, WebP, GIF, SVG, AVIF — растр по возможности режется до 1920px и сохраняется как WebP (качество 78).${multiple ? " Несколько файлов: Ctrl/⌘ + выбор или Shift + диапазон." : ""}`
+            ? profile === "hero"
+              ? "До 30 МБ. Для фона баннера: до 3840px, WebP качество 88 (без повторного сжатия на сайте)."
+              : `До 30 МБ за файл. JPG, PNG, WebP, GIF, SVG, AVIF — растр по возможности режется до 1920px и сохраняется как WebP (качество 78).${multiple ? " Несколько файлов: Ctrl/⌘ + выбор или Shift + диапазон." : ""}`
             : `До 250 МБ за файл. MP4, WebM, MOV, AVI и др. На прокси может быть свой лимит (часто 25–300 МБ). Файл без расширения — по MIME в браузере.${multiple ? " Несколько роликов: множественный выбор в диалоге." : ""}`}
         </p>
       ) : null}

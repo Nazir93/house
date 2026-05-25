@@ -189,12 +189,13 @@ export default function AdminHomeBannerPage() {
       <section className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-5 space-y-5">
         <h2 className="text-lg font-semibold text-white/90">Фон баннера</h2>
         <p className="text-sm text-white/40 -mt-2">
-          Дневное изображение — при светлой теме сайта, ночное — при тёмной.
+          Дневное изображение — при светлой теме сайта, ночное — при тёмной. Рекомендуемый размер от 2400×1350 px.
         </p>
         <div className="grid gap-6 md:grid-cols-2">
           <AdminMediaUpload
             label="День (светлая тема)"
             accept="image"
+            profile="hero"
             value={data.backgrounds.light}
             onChange={(url) => {
               setData((prev) => ({ ...prev, backgrounds: { ...prev.backgrounds, light: url } }));
@@ -204,6 +205,7 @@ export default function AdminHomeBannerPage() {
           <AdminMediaUpload
             label="Ночь (тёмная тема)"
             accept="image"
+            profile="hero"
             value={data.backgrounds.dark}
             onChange={(url) => {
               setData((prev) => ({ ...prev, backgrounds: { ...prev.backgrounds, dark: url } }));

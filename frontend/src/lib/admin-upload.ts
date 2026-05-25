@@ -1,9 +1,13 @@
 /**
  * Загрузка файла в /public/uploads через защищённый /api/admin/upload
  */
-export async function uploadAdminMedia(file: File): Promise<{ url?: string; error?: string }> {
+export async function uploadAdminMedia(
+  file: File,
+  options?: { profile?: "default" | "hero" },
+): Promise<{ url?: string; error?: string }> {
   const fd = new FormData();
   fd.append("file", file);
+  if (options?.profile === "hero") fd.append("profile", "hero");
   try {
     const res = await fetch("/api/admin/upload", {
       method: "POST",

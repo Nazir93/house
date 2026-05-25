@@ -108,6 +108,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
+    const profile = formData.get("profile") === "hero" ? "hero" : "default";
 
     if (!file) {
       return NextResponse.json({ error: "Файл не передан" }, { status: 400 });
@@ -153,10 +154,16 @@ export async function POST(request: NextRequest) {
     if (useSharp) {
       const webpName = `${fileName}.webp`;
       const webpPath = path.join(uploadsDir, webpName);
+      const heroProfile = profile === "hero";
       try {
         await sharp(buffer)
-          .resize({ width: 1920, height: 1920, fit: "inside", withoutEnlargement: true })
-          .webp({ quality: 78 })
+          .resize({
+            width: heroProfile ? 3840 : 1920,
+            height: heroProfile ? 3840 : 1920,
+            fit: "inside",
+            withoutEnlargement: true,
+          })
+          .webp({ quality: heroProfile ? 88 : 78 })
           .toFile(webpPath);
         savedPath = `/uploads/${webpName}`;
       } catch (sharpError) {
