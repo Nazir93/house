@@ -31,6 +31,35 @@ export function easeOutCubic(t: number): number {
   return 1 - (1 - x) ** 3;
 }
 
+export function easeInOutCubic(t: number): number {
+  const x = Math.max(0, Math.min(t, 1));
+  return x < 0.5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2;
+}
+
+/** Плавное заполнение точки по мере приближения оси (0…1). */
+export function computeDotFillProgress(
+  spineBottomPx: number,
+  nodeTopInTrack: number,
+  fillRangePx = 52
+): number {
+  const start = nodeTopInTrack - fillRangePx;
+  if (spineBottomPx <= start) return 0;
+  if (spineBottomPx >= nodeTopInTrack) return 1;
+  return easeInOutCubic((spineBottomPx - start) / fillRangePx);
+}
+
+/** Горизонтальная ветка после точки — плавно влево/вправо (0…1). */
+export function computeBranchFromSpine(
+  spineBottomPx: number,
+  nodeTopInTrack: number,
+  branchScrollPx = 136
+): number {
+  const past = spineBottomPx - nodeTopInTrack;
+  if (past <= 0) return 0;
+  if (past >= branchScrollPx) return 1;
+  return easeInOutCubic(past / branchScrollPx);
+}
+
 /** Длина вертикальной линии в px: растёт только вместе со скроллом. */
 export function computeLineHeightPx(
   progress: number,
@@ -44,17 +73,40 @@ export function computeLineHeightPx(
 }
 
 /**
- * Появление блока 0…1.
- * Первые ~35% слота — линия доходит, затем открывается раздел.
+ * Появление блока 0…1 (контент).
+ * Ветка и точка — раньше, через computeBeatBranchProgress.
  */
 export function computeBeatReveal(progress: number, index: number, total: number): number {
+  return computeBeatContentReveal(progress, index, total);
+}
+
+/** Контент раздела: после того как линия дошла до точки и пошла в сторону. */
+export function computeBeatContentReveal(progress: number, index: number, total: number): number {
   if (total <= 0) return 0;
   const slot = 1 / total;
-  const revealStart = index * slot + slot * 0.35;
+  const revealStart = index * slot + slot * 0.42;
   const revealEnd = (index + 1) * slot;
   if (progress <= revealStart) return 0;
   if (progress >= revealEnd) return 1;
   return easeOutCubic((progress - revealStart) / (revealEnd - revealStart));
+}
+
+/** Горизонтальная ветка — чуть позже заполнения точки. */
+export function computeBeatBranchProgress(progress: number, index: number, total: number): number {
+  if (total <= 0) return 0;
+  const slot = 1 / total;
+  const branchStart = index * slot + slot * 0.12;
+  const branchEnd = index * slot + slot * 0.45;
+  if (progress <= branchStart) return 0;
+  if (progress >= branchEnd) return 1;
+  return easeInOutCubic((progress - branchStart) / (branchEnd - branchStart));
+}
+
+/** Раздел уже пройден (точка была включена). */
+export function isBeatSpinePassed(progress: number, index: number, total: number): boolean {
+  if (total <= 0) return false;
+  const slot = 1 / total;
+  return progress >= (index + 1) * slot - slot * 0.02;
 }
 
 /** Индекс активного блока. */
@@ -143,8 +195,45 @@ export function computeBeatBranchAcrossProgress(reveal: number): number {
   return easeOutCubic(reveal);
 }
 
-export function buildBeatBranchPath(geo: BeatBranchGeometry, reveal: number): BeatBranchPath {
-  const across = computeBeatBranchAcrossProgress(reveal);
+export function resolveBeatVisualFromSpine(
+  spineBottomPx: number,
+  nodeTopInTrack: number,
+  passed: boolean,
+  reducedMotion: boolean,
+  branchScrollPx = 136
+): { branch: number; showNode: boolean; dotFill: number } {
+  if (reducedMotion) return { branch: 1, showNode: true, dotFill: 1 };
+  const showNode = passed || spineBottomPx >= nodeTopInTrack - 56;
+  const dotFill = passed ? 1 : computeDotFillProgress(spineBottomPx, nodeTopInTrack);
+  let branch = 0;
+  if (passed) branch = 1;
+  else if (dotFill > 0.08) {
+    branch = computeBranchFromSpine(spineBottomPx, nodeTopInTrack, branchScrollPx);
+  }
+  return { branch, showNode, dotFill };
+}
+
+export function resolveBeatBranchDisplayProgress(
+  trackProgress: number,
+  index: number,
+  total: number,
+  reducedMotion: boolean
+): { branch: number; showNode: boolean; dotFill: number } {
+  if (reducedMotion) return { branch: 1, showNode: true, dotFill: 1 };
+  const slot = total > 0 ? 1 / total : 0;
+  const nodeAt = index * slot + slot * 0.02;
+  const nodeApproach = trackProgress >= nodeAt - slot * 0.08;
+  const nodeReached = trackProgress >= nodeAt;
+  const branch = computeBeatBranchProgress(trackProgress, index, total);
+  const passed = isBeatSpinePassed(trackProgress, index, total);
+  const showNode = nodeApproach || passed;
+  const branchDisplay = passed ? 1 : branch;
+  const dotFill = passed ? 1 : nodeReached ? 1 : nodeApproach ? easeInOutCubic((trackProgress - (nodeAt - slot * 0.08)) / (slot * 0.08)) : 0;
+  return { branch: branchDisplay, showNode, dotFill };
+}
+
+export function buildBeatBranchPath(geo: BeatBranchGeometry, branchProgress: number): BeatBranchPath {
+  const across = Math.max(0, Math.min(branchProgress, 1));
   const { spineX, nodeY, textEdgeX } = geo;
 
   const horizontalLen = Math.abs(textEdgeX - spineX);

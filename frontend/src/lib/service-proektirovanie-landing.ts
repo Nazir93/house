@@ -2,43 +2,52 @@ import type { ServiceLandingDocument, StoryTimelineItem } from "@/lib/service-la
 
 export const PROEKTROVANIE_HERO_BANNER = "/images/banner/proektirovanie-hero-v2.png";
 
-/** Заглушки блоков timeline — тексты замените в админке или пришлите нам. */
-export const PROEKTROVANIE_TIMELINE_PLACEHOLDERS: StoryTimelineItem[] = [
+export const PROEKTROVANIE_HERO_TITLE = "Индивидуальное проектирование домов";
+
+export const PROEKTROVANIE_HERO_SUBTITLE =
+  "Мы создаем авторские проекты домов, которые воплощают ваши мечты в жизнь. Наша команда архитекторов работает над каждым проектом с учетом ваших пожеланий, особенностей участка и современных строительных технологий";
+
+/** Этапы проектирования на /services/proektirovanie. */
+export const PROEKTROVANIE_TIMELINE_ITEMS: StoryTimelineItem[] = [
   {
-    id: "typical",
+    id: "contract",
     side: "left",
-    eyebrow: "Раздел 01",
-    title: "Типовые проекты",
-    body: "Здесь будет описание каталога типовых домов, сроков и комплектации. Текст добавите позже.",
+    eyebrow: "Этап 01",
+    title: "Подписание договора",
+    body: "Фиксирование сроков проектирования и стоимости проекта.",
     imageUrl: "/images/banner/banner-hero-02.png",
-    href: "/projects",
   },
   {
-    id: "individual",
+    id: "tech-spec",
     side: "right",
-    eyebrow: "Раздел 02",
-    title: "Индивидуальное проектирование",
-    body: "Здесь будет блок про адаптацию проекта под участок и задачи семьи.",
+    eyebrow: "Этап 02",
+    title: "Техническое задание",
+    body:
+      "Мы тщательно изучаем предоставленные материалы: геологические изыскания и топографическую съемку, схемы инженерных коммуникаций, градостроительные ограничения и особенности землепользования, фотофиксацию территории. На основании этих данных мы разработаем детализированное техническое задание, которое станет надежной основой для будущего проекта.",
     imageUrl: "/images/banner/banner-hero-03.png",
-    href: "/individual-design",
   },
   {
-    id: "docs",
+    id: "design",
     side: "left",
-    eyebrow: "Раздел 03",
-    title: "Документация и смета",
-    body: "Здесь будет описание рабочей документации, согласований и прозрачной сметной логики.",
+    eyebrow: "Этап 03",
+    title: "Разработка проекта",
+    body:
+      "Мы разрабатываем оптимальную архитектурную концепцию дома с учетом ваших пожеланий и особенностей участка, направленную на создание комфортного и функционального пространства.",
     imageUrl: "/images/banner/banner-hero-04.png",
   },
   {
-    id: "team",
+    id: "documentation",
     side: "right",
-    eyebrow: "Раздел 04",
-    title: "Команда проектировщиков",
-    body: "Здесь будет блок про инженерный подход, геологию и контроль решений на всех этапах.",
+    eyebrow: "Этап 04",
+    title: "Подготовка документации",
+    body:
+      "По окончании проектирования мы предоставляем подробный сметный расчет проекта и рабочую документацию в печатном и электронном виде.",
     imageUrl: "/images/banner/banner-hero-05.png",
   },
 ];
+
+/** @deprecated alias */
+export const PROEKTROVANIE_TIMELINE_PLACEHOLDERS = PROEKTROVANIE_TIMELINE_ITEMS;
 
 /** Подключает cinematic hero + scroll timeline для /services/proektirovanie. */
 export function enrichProektirovanieLandingDocument(
@@ -49,21 +58,27 @@ export function enrichProektirovanieLandingDocument(
 
   const heroSection = document.sections.find((s) => s.type === "hero" || s.type === "heroCinematic");
   const rest = document.sections.filter(
-    (s) => s.type !== "hero" && s.type !== "heroCinematic" && s.type !== "storyTimeline"
+    (s) =>
+      s.type !== "hero" &&
+      s.type !== "heroCinematic" &&
+      s.type !== "storyTimeline" &&
+      s.type !== "faq"
   );
 
   const cinematic =
     heroSection?.type === "heroCinematic"
       ? {
           ...heroSection,
+          title: PROEKTROVANIE_HERO_TITLE,
+          subtitle: PROEKTROVANIE_HERO_SUBTITLE,
           bannerImageDesktop: PROEKTROVANIE_HERO_BANNER,
           bannerImageMobile: PROEKTROVANIE_HERO_BANNER,
         }
       : heroSection?.type === "hero"
         ? {
             type: "heroCinematic" as const,
-            title: heroSection.title,
-            subtitle: heroSection.subtitle,
+            title: PROEKTROVANIE_HERO_TITLE,
+            subtitle: PROEKTROVANIE_HERO_SUBTITLE,
             serviceKey: heroSection.serviceKey,
             tag: heroSection.tag,
             features: heroSection.features,
@@ -73,18 +88,17 @@ export function enrichProektirovanieLandingDocument(
           }
         : {
             type: "heroCinematic" as const,
-            title: "Проектирование",
-            subtitle: "",
+            title: PROEKTROVANIE_HERO_TITLE,
+            subtitle: PROEKTROVANIE_HERO_SUBTITLE,
             bannerImageDesktop: PROEKTROVANIE_HERO_BANNER,
             bannerImageMobile: PROEKTROVANIE_HERO_BANNER,
           };
 
-  const timelineSection = document.sections.find((s) => s.type === "storyTimeline");
 
   return {
     sections: [
       cinematic,
-      timelineSection ?? { type: "storyTimeline" as const, items: PROEKTROVANIE_TIMELINE_PLACEHOLDERS },
+      { type: "storyTimeline" as const, items: PROEKTROVANIE_TIMELINE_ITEMS },
       ...rest,
     ],
   };

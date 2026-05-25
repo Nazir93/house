@@ -126,7 +126,7 @@ export function FeaturedHouseProjectsSection({ projects }: { projects: HouseProj
                       : "text-[var(--text-muted)] hover:text-[var(--text)]",
                   )}
                 >
-                  Серийные
+                  Авторские
                 </button>
                 <button
                   type="button"

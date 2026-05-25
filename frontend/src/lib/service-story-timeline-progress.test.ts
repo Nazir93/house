@@ -7,6 +7,7 @@ import {
   computeSectionScrollProgress,
   computeTrackScrollProgress,
   buildBeatBranchPath,
+  resolveBeatVisualFromSpine,
 } from "@/lib/service-story-timeline-progress";
 
 describe("service-story-timeline-progress", () => {
@@ -36,9 +37,9 @@ describe("service-story-timeline-progress", () => {
   it("блоки открываются по очереди", () => {
     const total = 4;
     expect(computeBeatReveal(0.05, 0, total)).toBe(0);
-    expect(computeBeatReveal(0.2, 0, total)).toBeGreaterThan(0);
-    expect(computeBeatReveal(0.2, 1, total)).toBe(0);
-    expect(computeBeatReveal(0.5, 1, total)).toBeGreaterThan(0);
+    expect(computeBeatReveal(0.28, 0, total)).toBeGreaterThan(0);
+    expect(computeBeatReveal(0.28, 1, total)).toBe(0);
+    expect(computeBeatReveal(0.55, 1, total)).toBeGreaterThan(0);
   });
 
   it("ветка: от точки горизонтально влево или вправо", () => {
@@ -59,5 +60,25 @@ describe("service-story-timeline-progress", () => {
     expect(computeActiveBeatIndex(0, 4)).toBe(0);
     expect(computeActiveBeatIndex(0.26, 4)).toBe(1);
     expect(computeActiveBeatIndex(1, 4)).toBe(3);
+  });
+
+  it("точка плавно заполняется когда ось доходит", () => {
+    const before = resolveBeatVisualFromSpine(360, 420, false, false);
+    expect(before.showNode).toBe(false);
+    expect(before.dotFill).toBe(0);
+
+    const mid = resolveBeatVisualFromSpine(400, 420, false, false);
+    expect(mid.showNode).toBe(true);
+    expect(mid.dotFill).toBeGreaterThan(0);
+    expect(mid.dotFill).toBeLessThan(1);
+
+    const at = resolveBeatVisualFromSpine(420, 420, false, false);
+    expect(at.dotFill).toBe(1);
+    expect(at.branch).toBe(0);
+
+    const after = resolveBeatVisualFromSpine(500, 420, false, false);
+    expect(after.dotFill).toBe(1);
+    expect(after.branch).toBeGreaterThan(0);
+    expect(after.branch).toBeLessThanOrEqual(1);
   });
 });

@@ -36,7 +36,7 @@ export function ServiceStoryScrollTrack({
   const trackRef = useRef<HTMLDivElement>(null);
   const originRef = useRef<HTMLDivElement>(null);
   const [trackProgress, setTrackProgress] = useState(0);
-  const [lineLayout, setLineLayout] = useState({ top: 0, height: STORY_SPINE_LEAD_IN_PX });
+  const [lineLayout, setLineLayout] = useState({ top: 0, height: 0, maxHeight: 0 });
   const reducedMotion = usePrefersReducedMotion();
 
   const measure = useCallback(() => {
@@ -52,9 +52,10 @@ export function ServiceStoryScrollTrack({
     const scrollY = window.scrollY || document.documentElement.scrollTop;
     const rawProgress = reducedMotion ? 1 : computeTrackScrollProgress(trackRect.top, track.offsetHeight, vh);
     const progress = scrollY < 20 ? 0 : rawProgress;
+    const maxHeight = Math.max(track.offsetHeight - top, 0);
     const height = computeLineHeightPx(progress, top, track.offsetHeight, STORY_SPINE_LEAD_IN_PX);
 
-    setLineLayout({ top, height });
+    setLineLayout({ top, height, maxHeight });
     setTrackProgress(progress);
   }, [reducedMotion]);
 
@@ -88,18 +89,29 @@ export function ServiceStoryScrollTrack({
   }, [measure]);
 
   return (
-    <div ref={trackRef} className="relative">
+    <div ref={trackRef} className="relative" data-story-scroll-track>
       <LandingHeroCinematic {...hero} spineOriginRef={originRef} fullBleed />
 
-      {lineLayout.height > 0 ? (
+      {lineLayout.maxHeight > 0 && lineLayout.height > 0 ? (
         <div
-          className="pointer-events-none absolute left-1/2 z-[3] hidden w-px -translate-x-1/2 lg:block"
-          style={{ top: lineLayout.top, height: lineLayout.height, backgroundColor: SPINE }}
+          className="pointer-events-none absolute left-1/2 z-[3] hidden w-px will-change-transform lg:block"
+          style={{
+            top: lineLayout.top,
+            height: lineLayout.maxHeight,
+            transform: `translateX(-50%) scaleY(${lineLayout.height / lineLayout.maxHeight})`,
+            transformOrigin: "top center",
+            backgroundColor: SPINE,
+          }}
           aria-hidden
         />
       ) : null}
 
-      <ServiceStoryTimeline items={timelineItems} sectionProgress={trackProgress} embedded />
+      <ServiceStoryTimeline
+        items={timelineItems}
+        sectionProgress={trackProgress}
+        spineBottomPx={lineLayout.top + lineLayout.height}
+        embedded
+      />
     </div>
   );
 }

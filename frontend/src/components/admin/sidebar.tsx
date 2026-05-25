@@ -21,6 +21,7 @@ import {
   HelpCircle,
   Star,
   ContactRound,
+  PanelTop,
 } from "lucide-react";
 import { useState } from "react";
 import { SITE_NAME } from "@/lib/constants";
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
   { href: "/admin", label: "Дашборд", icon: LayoutDashboard, exact: true },
   { href: "/admin/leads", label: "Заявки", icon: Inbox },
   { href: "/admin/house-projects", label: "Проекты домов", icon: Home },
+  { href: "/admin/home-banner", label: "Главный баннер", icon: PanelTop },
   { href: "/admin/built-objects", label: "Портфолио", icon: Images },
   { href: "/admin/client-projects", label: "Клиенты (кабинет)", icon: UserRound },
   { href: "/admin/posts", label: "Новости", icon: FileText },

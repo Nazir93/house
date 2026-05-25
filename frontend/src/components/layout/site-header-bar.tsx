@@ -107,7 +107,7 @@ export function SiteHeaderBar() {
         />
       ) : null}
 
-      <div className="sticky top-0 z-40">
+      <div className="sticky top-0 z-50 isolate pointer-events-auto">
         <div className="relative">
           <div
             data-navbar
@@ -145,17 +145,18 @@ export function SiteHeaderBar() {
           <div className="flex min-w-0 shrink-0 items-center gap-2 xl:gap-3">
             <Link
               href="/"
-              className="flex min-w-0 shrink-0 items-center no-underline"
-              aria-label={SITE_NAME}
+              className="group flex min-w-0 shrink-0 items-center gap-2 rounded-sm no-underline transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 xl:gap-3"
+              style={{ outlineColor: "var(--accent)" }}
+              aria-label={`${SITE_NAME} — на главную`}
             >
               <BrandLogo height={44} className="min-w-0" brightOnBackdrop={heroGlassLightInk} />
+              <p
+                className="hidden max-w-[200px] text-[9px] font-medium uppercase leading-snug tracking-[0.11em] transition-colors min-[1100px]:block xl:max-w-[260px] xl:tracking-[0.12em]"
+                style={{ color: "var(--header-bar-muted)" }}
+              >
+                {HEADER_TAGLINE}
+              </p>
             </Link>
-            <p
-              className="hidden max-w-[200px] text-[9px] font-medium uppercase leading-snug tracking-[0.11em] min-[1100px]:block xl:max-w-[260px] xl:tracking-[0.12em]"
-              style={{ color: "var(--header-bar-muted)" }}
-            >
-              {HEADER_TAGLINE}
-            </p>
           </div>
 
           <nav
@@ -313,8 +314,9 @@ export function SiteHeaderBar() {
       >
         <Link
           href="/"
-          className="flex min-w-0 flex-1 items-center no-underline"
-          aria-label={SITE_NAME}
+          className="flex min-w-0 flex-1 items-center rounded-sm py-1 no-underline transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+          style={{ outlineColor: "var(--accent)" }}
+          aria-label={`${SITE_NAME} — на главную`}
         >
           <BrandLogo height={38} className="min-w-0" brightOnBackdrop={heroGlassLightInk} />
         </Link>

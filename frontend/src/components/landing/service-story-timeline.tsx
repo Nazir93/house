@@ -16,10 +16,13 @@ import Link from "next/link";
 import { CmsImage } from "@/components/ui/cms-image";
 import type { StoryTimelineItem } from "@/lib/service-landing-schema";
 import {
-  computeBeatReveal,
+  computeBeatContentReveal,
   computeSectionScrollProgress,
   computeTrackScrollProgress,
   buildBeatBranchPath,
+  isBeatSpinePassed,
+  resolveBeatBranchDisplayProgress,
+  resolveBeatVisualFromSpine,
   type BeatBranchGeometry,
 } from "@/lib/service-story-timeline-progress";
 import { cn } from "@/lib/utils";
@@ -66,32 +69,36 @@ function Reveal({
 
 function BeatBranchSvg({
   geometry,
-  reveal,
-  reducedMotion,
+  branchProgress,
+  showNode,
+  dotFill,
 }: {
   geometry: BeatBranchGeometry | null;
-  reveal: number;
-  reducedMotion: boolean;
+  branchProgress: number;
+  showNode: boolean;
+  dotFill: number;
 }) {
-  if (!geometry) return null;
-  const r = reducedMotion ? 1 : reveal;
-  const path = buildBeatBranchPath(geometry, r);
-  if (path.totalLength <= 0 || path.visibleLength <= 0) return null;
+  if (!geometry || !showNode) return null;
+  const path = buildBeatBranchPath(geometry, branchProgress);
+  if (path.totalLength <= 0) return null;
 
   const dashOffset = Math.max(path.totalLength - path.visibleLength, 0);
+  const innerR = 4.5 * Math.max(0, Math.min(dotFill, 1));
 
   return (
-    <svg className="pointer-events-none absolute inset-0 z-[2] hidden overflow-visible lg:block" aria-hidden>
-      <path
-        d={path.d}
-        fill="none"
-        stroke={SPINE}
-        strokeWidth={1}
-        strokeLinecap="square"
-        strokeLinejoin="miter"
-        strokeDasharray={path.totalLength}
-        strokeDashoffset={dashOffset}
-      />
+    <svg className="pointer-events-none absolute inset-0 z-[4] hidden overflow-visible lg:block" aria-hidden>
+      {branchProgress > 0.001 ? (
+        <path
+          d={path.d}
+          fill="none"
+          stroke={SPINE}
+          strokeWidth={1}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeDasharray={path.totalLength}
+          strokeDashoffset={dashOffset}
+        />
+      ) : null}
       <circle
         cx={path.dotX}
         cy={path.dotY}
@@ -99,15 +106,9 @@ function BeatBranchSvg({
         fill="var(--bg)"
         stroke={SPINE}
         strokeWidth={1}
-        opacity={Math.min(r * 2, 1)}
+        opacity={Math.min(0.35 + dotFill * 0.65, 1)}
       />
-      <circle
-        cx={path.dotX}
-        cy={path.dotY}
-        r={r > 0.35 ? 4.5 : 0}
-        fill="var(--text)"
-        opacity={r > 0.35 ? 0.9 : 0}
-      />
+      <circle cx={path.dotX} cy={path.dotY} r={innerR} fill="var(--text)" opacity={Math.min(dotFill * 1.05, 1)} />
     </svg>
   );
 }
@@ -115,16 +116,27 @@ function BeatBranchSvg({
 function TimelineBeat({
   item,
   index,
-  reveal,
+  sectionProgress,
+  total,
+  spineBottomPx,
   reducedMotion,
 }: {
   item: StoryTimelineItem;
   index: number;
-  reveal: number;
+  sectionProgress: number;
+  total: number;
+  spineBottomPx?: number;
   reducedMotion: boolean;
 }) {
   const isRight = item.side === "right";
-  const show = reducedMotion || reveal > 0.02;
+  const contentReveal = reducedMotion ? 1 : computeBeatContentReveal(sectionProgress, index, total);
+  const [nodeTopInTrack, setNodeTopInTrack] = useState<number | null>(null);
+  const passed = isBeatSpinePassed(sectionProgress, index, total);
+  const branchState =
+    spineBottomPx != null && nodeTopInTrack != null
+      ? resolveBeatVisualFromSpine(spineBottomPx, nodeTopInTrack, passed, reducedMotion)
+      : resolveBeatBranchDisplayProgress(sectionProgress, index, total, reducedMotion);
+  const show = reducedMotion || contentReveal > 0.02;
   const imageSrc = item.imageUrl?.trim() || `/images/banner/banner-hero-0${(index % 6) + 1}.png`;
   const articleRef = useRef<HTMLElement>(null);
   const copyRef = useRef<HTMLDivElement>(null);
@@ -140,8 +152,17 @@ function TimelineBeat({
     if (articleRect.width <= 0) return;
 
     const spineX = articleRect.width / 2;
-    const nodeY = copyRect.bottom - articleRect.top + 12;
-    const textEdgeX = isRight ? copyRect.left - articleRect.left - 8 : copyRect.right - articleRect.left + 8;
+    const nodeY = articleRect.height / 2;
+    const maxBranch = Math.min(240, articleRect.width * 0.3);
+    const rawEdge = isRight ? copyRect.left - articleRect.left - 12 : copyRect.right - articleRect.left + 12;
+    const branchLen = Math.min(Math.abs(rawEdge - spineX), maxBranch);
+    const textEdgeX = isRight ? spineX + branchLen : spineX - branchLen;
+
+    const track = article.closest("[data-story-scroll-track]");
+    if (track) {
+      const trackRect = track.getBoundingClientRect();
+      setNodeTopInTrack(articleRect.top - trackRect.top + nodeY);
+    }
 
     setBranchGeometry({
       spineX,
@@ -161,7 +182,7 @@ function TimelineBeat({
       ro?.disconnect();
       window.removeEventListener("resize", measureBranch);
     };
-  }, [measureBranch, item.id, reveal]);
+  }, [measureBranch, item.id, sectionProgress]);
 
   return (
     <article
@@ -169,7 +190,12 @@ function TimelineBeat({
       className="relative flex min-h-[65svh] items-start py-12 md:py-16 lg:min-h-[70svh]"
       aria-labelledby={`story-beat-title-${item.id}`}
     >
-      <BeatBranchSvg geometry={branchGeometry} reveal={reveal} reducedMotion={reducedMotion} />
+      <BeatBranchSvg
+        geometry={branchGeometry}
+        branchProgress={branchState.branch}
+        showNode={branchState.showNode}
+        dotFill={branchState.dotFill}
+      />
 
       <div className="grid w-full grid-cols-1 items-start lg:grid-cols-[minmax(0,1fr)_56px_minmax(0,1fr)] lg:gap-x-8 xl:gap-x-12">
         <Reveal
@@ -180,9 +206,9 @@ function TimelineBeat({
           )}
         >
           {isRight ? (
-            show ? <BeatMedia imageSrc={imageSrc} title={item.title} reveal={reveal} /> : null
+            show ? <BeatMedia imageSrc={imageSrc} title={item.title} reveal={contentReveal} /> : null
           ) : (
-            <BeatCopy ref={copyRef} item={item} reveal={reveal} align="right" />
+            <BeatCopy ref={copyRef} item={item} reveal={contentReveal} align="right" />
           )}
         </Reveal>
 
@@ -196,22 +222,22 @@ function TimelineBeat({
           )}
         >
           {isRight ? (
-            <BeatCopy ref={copyRef} item={item} reveal={reveal} align="left" />
+            <BeatCopy ref={copyRef} item={item} reveal={contentReveal} align="left" />
           ) : show ? (
-            <BeatMedia imageSrc={imageSrc} title={item.title} reveal={reveal} />
+            <BeatMedia imageSrc={imageSrc} title={item.title} reveal={contentReveal} />
           ) : null}
         </Reveal>
 
         <div className="col-span-full lg:hidden">
-          <div className="mb-6 flex items-center gap-3" style={{ opacity: reveal }}>
+          <div className="mb-6 flex items-center gap-3" style={{ opacity: contentReveal }}>
             <span className="h-px flex-1 max-w-8" style={{ backgroundColor: SPINE }} aria-hidden />
             <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: "var(--text)", opacity: 0.75 }} aria-hidden />
             <span className="h-px flex-1" style={{ backgroundColor: SPINE }} aria-hidden />
           </div>
           {show ? (
-            <div style={{ opacity: reveal }} className="grid gap-6">
-              <BeatMedia imageSrc={imageSrc} title={item.title} reveal={reveal} />
-              <BeatCopy item={item} reveal={reveal} align="left" />
+            <div style={{ opacity: contentReveal }} className="grid gap-6">
+              <BeatMedia imageSrc={imageSrc} title={item.title} reveal={contentReveal} />
+              <BeatCopy item={item} reveal={contentReveal} align="left" />
             </div>
           ) : null}
         </div>
@@ -301,10 +327,12 @@ const BeatCopy = forwardRef(function BeatCopy(
 export function ServiceStoryTimeline({
   items,
   sectionProgress: externalProgress,
+  spineBottomPx,
   embedded = false,
 }: {
   items: StoryTimelineItem[];
   sectionProgress?: number;
+  spineBottomPx?: number;
   embedded?: boolean;
   /** @deprecated */
   hideGlobalSpine?: boolean;
@@ -381,7 +409,9 @@ export function ServiceStoryTimeline({
             key={item.id}
             item={item}
             index={index}
-            reveal={reducedMotion ? 1 : computeBeatReveal(sectionProgress, index, items.length)}
+            sectionProgress={sectionProgress}
+            total={items.length}
+            spineBottomPx={spineBottomPx}
             reducedMotion={reducedMotion}
           />
         ))}

@@ -22,7 +22,7 @@ export function LandingHeroCinematic({
   bannerImageMobile?: string;
   /** Якорь оси timeline — нижняя граница hero-карточки */
   spineOriginRef?: RefObject<HTMLDivElement | null>;
-  /** Баннер на всю ширину экрана без скруглений (страница проектирования) */
+  /** Баннер на весь экран (страница проектирования) */
   fullBleed?: boolean;
 }) {
   const [visible, setVisible] = useState(false);
@@ -35,7 +35,7 @@ export function LandingHeroCinematic({
   return (
     <section
       className={cn(
-        "relative isolate -mt-[var(--site-header-banner-overlap)] scroll-mt-[var(--site-header-sticky-offset)]",
+        "relative isolate -mt-[var(--site-header-banner-overlap)] scroll-mt-[var(--site-header-sticky-offset)] pointer-events-none",
         fullBleed && "bg-black"
       )}
       style={fullBleed ? undefined : { backgroundColor: "var(--bg)" }}
@@ -44,7 +44,7 @@ export function LandingHeroCinematic({
         className={cn(
           "relative w-full overflow-hidden transition-all duration-700 ease-out",
           fullBleed
-            ? "min-h-[min(52vh,580px)] sm:min-h-[min(58vh,640px)] md:min-h-[min(62vh,720px)]"
+            ? "min-h-[100svh] min-h-[100dvh]"
             : "mx-auto max-w-[1440px] min-h-[min(72vh,760px)] md:min-h-[min(78vh,820px)] rounded-b-[1.75rem] md:rounded-b-[2.25rem] lg:rounded-b-[2.75rem]"
         )}
         style={{
@@ -77,11 +77,11 @@ export function LandingHeroCinematic({
             <>
               <div
                 className="absolute inset-0"
+                aria-hidden
                 style={{
                   background:
                     "linear-gradient(to top, color-mix(in srgb, var(--bg) 92%, transparent) 0%, color-mix(in srgb, var(--bg) 35%, transparent) 42%, transparent 72%)",
                 }}
-                aria-hidden
               />
               <div
                 className="absolute inset-0 hidden md:block"
@@ -97,7 +97,7 @@ export function LandingHeroCinematic({
               className="absolute inset-0"
               style={{
                 background:
-                  "linear-gradient(to top, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.12) 38%, transparent 62%), linear-gradient(to right, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 42%, transparent 68%)",
+                  "linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 32%, rgba(0,0,0,0.06) 55%, transparent 72%), linear-gradient(to right, rgba(0,0,0,0.55) 0%, transparent 55%)",
               }}
               aria-hidden
             />
@@ -106,46 +106,59 @@ export function LandingHeroCinematic({
 
         <div
           className={cn(
-            "relative z-[1] flex min-h-[inherit] flex-col justify-end",
+            "relative z-[1] flex flex-col pointer-events-auto",
             fullBleed
-              ? "px-5 pb-10 pt-[calc(var(--site-header-sticky-offset)+2rem)] md:px-10 md:pb-12 lg:px-16 lg:pb-14"
-              : "px-5 pb-14 pt-[calc(var(--site-header-sticky-offset)+2.5rem)] md:px-10 md:pb-16 lg:px-14 lg:pb-20"
+              ? "min-h-[100svh] min-h-[100dvh] justify-end items-start px-5 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-[calc(var(--site-header-sticky-offset)+1.25rem)] sm:px-8 md:px-12 md:pb-14 lg:px-16 lg:pb-16 xl:px-20 xl:pb-20"
+              : "min-h-[inherit] justify-end px-5 pb-14 pt-[calc(var(--site-header-sticky-offset)+2.5rem)] md:px-10 md:pb-16 lg:px-14 lg:pb-20"
           )}
         >
-          <div className={cn(fullBleed && "container mx-auto w-full max-w-[1320px]")}>
+          <div className={cn(fullBleed ? "max-w-[42rem] text-left" : "container mx-auto w-full max-w-[1320px]")}>
             {tag ? (
               <span
-                className="mb-4 inline-block max-w-xl text-[10px] font-semibold uppercase tracking-[0.14em] sm:text-[11px]"
-                style={{ color: fullBleed ? "rgba(255,255,255,0.72)" : "color-mix(in srgb, var(--text) 72%, transparent)" }}
+                className={cn(
+                  "mb-3 inline-block max-w-xl font-semibold uppercase tracking-[0.14em] sm:mb-4",
+                  fullBleed ? "text-[11px] sm:text-xs" : "text-[10px] sm:text-[11px]"
+                )}
+                style={{ color: fullBleed ? "rgba(255,255,255,0.7)" : "color-mix(in srgb, var(--text) 72%, transparent)" }}
               >
                 {tag}
               </span>
             ) : null}
             <h1
-              className="font-heading max-w-3xl text-[clamp(1.65rem,4.5vw,3.15rem)] font-bold leading-[1.08] tracking-tight"
+              className={cn(
+                "font-heading font-bold leading-[1.02] tracking-tight",
+                fullBleed
+                  ? "max-w-[28rem] text-[clamp(1.5rem,3.2vw,2.35rem)] uppercase tracking-[0.02em] sm:max-w-[32rem] md:max-w-[36rem]"
+                  : "max-w-3xl text-[clamp(1.65rem,4.5vw,3.15rem)]"
+              )}
               style={{ color: fullBleed ? "#fff" : "var(--text)" }}
             >
               {title}
             </h1>
             {subtitle ? (
               <p
-                className="mt-4 max-w-2xl text-sm leading-relaxed sm:text-base md:mt-5"
-                style={{ color: fullBleed ? "rgba(255,255,255,0.82)" : "color-mix(in srgb, var(--text) 78%, transparent)" }}
+                className={cn(
+                  "leading-relaxed",
+                  fullBleed
+                    ? "mt-5 max-w-[36rem] text-[15px] sm:mt-6 sm:text-base md:text-[17px] md:leading-[1.65]"
+                    : "mt-4 max-w-2xl text-sm sm:text-base md:mt-5"
+                )}
+                style={{ color: fullBleed ? "rgba(255,255,255,0.88)" : "color-mix(in srgb, var(--text) 78%, transparent)" }}
               >
                 {subtitle}
               </p>
             ) : null}
-            {features.length > 0 ? (
+            {!fullBleed && features.length > 0 ? (
               <ul className="mt-6 flex max-w-2xl flex-col gap-2 sm:mt-8">
                 {features.map((f) => (
                   <li
                     key={f}
                     className="flex items-start gap-2.5 text-sm leading-snug"
-                    style={{ color: fullBleed ? "rgba(255,255,255,0.78)" : "color-mix(in srgb, var(--text) 70%, transparent)" }}
+                    style={{ color: "color-mix(in srgb, var(--text) 70%, transparent)" }}
                   >
                     <span
                       className="mt-2 h-1 w-1 shrink-0 rounded-full"
-                      style={{ backgroundColor: fullBleed ? "#fff" : "var(--accent)" }}
+                      style={{ backgroundColor: "var(--accent)" }}
                       aria-hidden
                     />
                     {f}

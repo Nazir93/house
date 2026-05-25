@@ -5,6 +5,7 @@ import { getBankMarqueePartners, getHomePartners } from "@/lib/get-home-partners
 import { getHomeBlogPreview } from "@/lib/get-home-blog-preview";
 import { getPublicFaqs } from "@/lib/get-public-faqs";
 import { BannerSection } from "@/components/sections/banner";
+import { getHomeHeroBannerConfig } from "@/lib/home-hero-banner-config";
 import { ProjectsConstructorSection } from "@/components/sections/projects-constructor-section";
 import { FeaturedHouseProjectsSection } from "@/components/sections/featured-house-projects";
 import { ClientsChooseVideoSection } from "@/components/sections/clients-choose-video-section";
@@ -29,7 +30,7 @@ export async function generateMetadata() {
 }
 
 export default async function HomePage() {
-  const [houseProjects, builtPortfolioPreview, partners, bankMarqueePartners, newsPreview, faqItems] =
+  const [houseProjects, builtPortfolioPreview, partners, bankMarqueePartners, newsPreview, faqItems, heroBanner] =
     await Promise.all([
       getHouseProjects(),
       getHomeBuiltPortfolio(),
@@ -37,11 +38,12 @@ export default async function HomePage() {
       getBankMarqueePartners(),
       getHomeBlogPreview(3),
       getPublicFaqs(),
+      getHomeHeroBannerConfig(),
     ]);
 
   return (
     <>
-      <BannerSection />
+      <BannerSection config={heroBanner} />
       <ProjectsConstructorSection />
       <FeaturedHouseProjectsSection projects={houseProjects} />
       <ClientsChooseVideoSection />

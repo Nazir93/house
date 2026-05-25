@@ -1,9 +1,10 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import {
   Calculator,
+  ChevronLeft,
+  ChevronRight,
   Home,
   LayoutGrid,
   MapPinned,
@@ -12,16 +13,12 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { CmsImage } from "@/components/ui/cms-image";
 import { useTheme } from "@/lib/theme-context";
 import { useModal } from "@/lib/modal-context";
 import { HOME_HERO_BANNER_ID } from "@/lib/site-anchors";
+import type { HomeHeroBanner } from "@/lib/home-hero-banner-schema";
 import { cn } from "@/lib/utils";
-
-/** Полноэкранный фон главного баннера: тёмная тема — «ночной» кадр, светлая — дневной */
-const HERO_THEME_BG = {
-  dark: "/images/banner/hero-theme-night.png",
-  light: "/images/banner/hero-theme-day.png",
-} as const;
 
 const BADGES = [
   {
@@ -42,73 +39,35 @@ const BADGES = [
   },
 ] as const;
 
-const HERO_SLIDES = [
-  {
-    image: "/images/banner/banner-hero-01.png",
-    label: "Сумерки",
-    title: "Дом среди деревьев",
-    caption: "Подсветка, панорамные окна и уют террасы в сумерках.",
-    href: "/projects",
-  },
-  {
-    image: "/images/banner/banner-hero-02.png",
-    label: "Современный фасад",
-    title: "Строгие линии и свет",
-    caption: "Крупное остекление, дорожки и ландшафт в единой стилистике.",
-    href: "/projects",
-  },
-  {
-    image: "/images/banner/banner-hero-03.png",
-    label: "Участок и дом",
-    title: "Продуманный облик",
-    caption: "",
-    href: "/projects",
-  },
-  {
-    image: "/images/banner/banner-hero-04.png",
-    label: "Тёплые материалы",
-    title: "Дерево и камень",
-    caption: "Контраст фактур и мягкая подсветка фасада в пасмурный день.",
-    href: "/projects",
-  },
-  {
-    image: "/images/banner/banner-hero-05.png",
-    label: "Вечер на участке",
-    title: "Свет из окон и терраса",
-    caption: "Планировка в форме «Г», зона отдыха и природный антураж.",
-    href: "/projects",
-  },
-  {
-    image: "/images/banner/banner-hero-06.png",
-    label: "Бассейн и лаунж",
-    title: "Загородная жизнь",
-    caption: "Вода у дома, зона отдыха и аккуратный ландшафт до лесной кромки.",
-    href: "/projects",
-  },
-] as const;
-
-/** Три вкладки — по два слайда в каждой (стрелки по-прежнему листают все 6). */
-const HERO_TAB_GROUPS = [
-  { labelShort: "Свет · фасад", labelFull: "Сумерки и фасад" },
-  { labelShort: "Участок", labelFull: "Участок и материалы" },
-  { labelShort: "Вечер · отдых", labelFull: "Вечер и лаунж" },
-] as const;
-
-/** Едва заметная «стеклянная» обводка на тёмном баннере — без жёсткого чёрного/белого контура */
+/** Едва заметная «стеклянная» обводка на тёмном баннере */
 const edgeGlass = "border border-white/[0.07]";
 const edgeGlassStrong = "border border-white/[0.1]";
 
-export function BannerSection() {
+export function BannerSection({ config }: { config: HomeHeroBanner }) {
   const { theme } = useTheme();
   const { openModalToEstimate } = useModal();
+  const promos = config.promos;
   const [activeSlide, setActiveSlide] = useState(0);
-  const slide = HERO_SLIDES[activeSlide] ?? HERO_SLIDES[0];
+  const slideIndex = promos.length > 0 ? activeSlide % promos.length : 0;
+  const slide = promos[slideIndex];
+
+  function goPrev() {
+    if (promos.length <= 1) return;
+    setActiveSlide((i) => (i - 1 + promos.length) % promos.length);
+  }
+
+  function goNext() {
+    if (promos.length <= 1) return;
+    setActiveSlide((i) => (i + 1) % promos.length);
+  }
+
+  if (!slide) return null;
 
   return (
     <section
       id={HOME_HERO_BANNER_ID}
       className={cn(
-        "relative isolate -mt-[var(--site-header-banner-overlap)] min-h-[min(100svh,700px)] w-full overflow-hidden transition-colors duration-500",
+        "relative isolate -mt-[var(--site-header-banner-overlap)] min-h-[100svh] min-h-[100dvh] w-full overflow-hidden transition-colors duration-500 pointer-events-none",
         theme === "dark" ? "bg-[#07110e]" : "bg-[#dfe8e3]",
       )}
     >
@@ -119,8 +78,8 @@ export function BannerSection() {
         )}
         aria-hidden
       >
-        <Image
-          src={HERO_THEME_BG.dark}
+        <CmsImage
+          src={config.backgrounds.dark}
           alt=""
           fill
           priority={theme === "dark"}
@@ -133,8 +92,8 @@ export function BannerSection() {
             theme === "dark" ? "opacity-100" : "opacity-0",
           )}
         />
-        <Image
-          src={HERO_THEME_BG.light}
+        <CmsImage
+          src={config.backgrounds.light}
           alt=""
           fill
           priority={theme === "light"}
@@ -173,9 +132,9 @@ export function BannerSection() {
         />
       </div>
 
-      <div className="section-inline-pad relative z-10 flex w-full min-h-[min(100svh,720px)] flex-col pointer-events-none pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[calc(4.5rem+var(--site-header-banner-overlap)+env(safe-area-inset-top,0px))] sm:min-h-[min(100svh,700px)] md:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] md:pt-[calc(5.25rem+var(--site-header-banner-overlap)+env(safe-area-inset-top,0px))] lg:pt-[calc(5.75rem+var(--site-header-banner-overlap)+env(safe-area-inset-top,0px))]">
-        <div className="pointer-events-auto grid w-full flex-1 gap-4 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(260px,min(520px,40vw))] min-[1100px]:items-stretch min-[1100px]:gap-6 xl:gap-8">
-          <div className="max-w-3xl justify-self-start self-start pt-0 min-[1100px]:pr-4">
+      <div className="section-inline-pad relative z-10 flex w-full min-h-[100svh] min-h-[100dvh] flex-col pointer-events-none pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[calc(var(--site-header-sticky-offset)+var(--site-header-banner-overlap)+0.75rem+env(safe-area-inset-top,0px))] md:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] md:pt-[calc(var(--site-header-sticky-offset)+var(--site-header-banner-overlap)+1rem+env(safe-area-inset-top,0px))]">
+        <div className="pointer-events-auto grid w-full flex-1 gap-4 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(260px,min(520px,40vw))] min-[1100px]:items-end min-[1100px]:gap-6 min-[1100px]:pb-2 xl:gap-8">
+          <div className="max-w-3xl justify-self-start self-end pt-0 min-[1100px]:pr-4">
             <div
               className={cn(
                 "max-w-4xl rounded-2xl bg-black/42 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_12px_48px_rgba(0,0,0,0.55)] backdrop-blur-sm sm:rounded-[1.35rem] sm:px-5 sm:py-4",
@@ -183,13 +142,15 @@ export function BannerSection() {
               )}
             >
               <h1 className="text-balance font-heading text-[clamp(1.35rem,3.35vw,3.05rem)] font-bold uppercase leading-[0.92] tracking-[-0.04em] text-white [text-shadow:0_0_1px_rgba(0,0,0,0.95),0_1px_2px_rgba(0,0,0,0.92),0_2px_16px_rgba(0,0,0,0.72),0_4px_36px_rgba(0,0,0,0.45)]">
-                Строим дома,
-                <span className="block text-white/95 [text-shadow:0_0_1px_rgba(0,0,0,0.95),0_1px_3px_rgba(0,0,0,0.88),0_3px_22px_rgba(0,0,0,0.65)]">
-                  в которые хочется
-                </span>
-                <span className="block text-white/95 [text-shadow:0_0_1px_rgba(0,0,0,0.95),0_1px_3px_rgba(0,0,0,0.88),0_3px_22px_rgba(0,0,0,0.65)]">
-                  возвращаться
-                </span>
+                {config.headlineLines[0]}
+                {config.headlineLines.slice(1).map((line, index) => (
+                  <span
+                    key={`${index}-${line}`}
+                    className="block text-white/95 [text-shadow:0_0_1px_rgba(0,0,0,0.95),0_1px_3px_rgba(0,0,0,0.88),0_3px_22px_rgba(0,0,0,0.65)]"
+                  >
+                    {line}
+                  </span>
+                ))}
               </h1>
             </div>
             <p
@@ -260,11 +221,11 @@ export function BannerSection() {
               onKeyDown={(e) => {
                 if (e.key === "ArrowRight") {
                   e.preventDefault();
-                  setActiveSlide((i) => (i + 1) % HERO_SLIDES.length);
+                  goNext();
                 }
                 if (e.key === "ArrowLeft") {
                   e.preventDefault();
-                  setActiveSlide((i) => (i - 1 + HERO_SLIDES.length) % HERO_SLIDES.length);
+                  goPrev();
                 }
               }}
               className={cn(
@@ -277,7 +238,7 @@ export function BannerSection() {
                   <div className="flex min-w-0 flex-1 flex-col justify-between md:max-w-[240px] md:basis-[46%] md:min-w-0 md:flex-none md:pr-1.5 lg:pr-2">
                     <div>
                       <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-white/45">
-                        {String(activeSlide + 1).padStart(2, "0")} · {slide.label}
+                        {String(slideIndex + 1).padStart(2, "0")} · {slide.label}
                       </p>
                       <h2 className="mt-1 font-heading text-[0.9rem] font-bold leading-[1.2] tracking-tight text-white sm:text-[0.95rem] md:text-[1rem]">
                         {slide.title}
@@ -305,15 +266,15 @@ export function BannerSection() {
                       "border border-white/[0.05]",
                     )}
                   >
-                    <Image
+                    <CmsImage
                       key={slide.image}
                       src={slide.image}
                       alt={slide.label}
                       fill
                       quality={75}
                       sizes="(max-width: 1023px) 96vw, 380px"
-                      priority={activeSlide === 0}
-                      fetchPriority={activeSlide === 0 ? "high" : "low"}
+                      priority={slideIndex === 0}
+                      fetchPriority={slideIndex === 0 ? "high" : "low"}
                       className="object-cover object-center"
                     />
                   </div>
@@ -322,41 +283,36 @@ export function BannerSection() {
             </div>
 
             <nav
-              className="pointer-events-auto mt-3 flex justify-center min-[1100px]:justify-end sm:mt-4"
-              aria-label="Группы слайдов"
+              className="pointer-events-auto mt-3 flex items-center justify-center gap-3 min-[1100px]:justify-end sm:mt-4"
+              aria-label="Промо на баннере"
             >
               <div
                 className={cn(
-                  "flex shrink-0 flex-nowrap items-center justify-center gap-2 rounded-full bg-black/48 px-3.5 py-2 backdrop-blur-sm sm:gap-2 sm:px-4 sm:py-2",
+                  "flex shrink-0 items-center gap-2 rounded-full bg-black/48 px-2 py-1.5 backdrop-blur-sm sm:gap-3 sm:px-3 sm:py-2",
                   edgeGlass,
                 )}
               >
-                {HERO_TAB_GROUPS.map((tab, dotIdx) => {
-                  const groupStart = dotIdx * 2;
-                  const inGroup =
-                    activeSlide >= groupStart && activeSlide < groupStart + 2;
-                  return (
-                    <button
-                      key={tab.labelFull}
-                      type="button"
-                      aria-label={tab.labelFull}
-                      aria-current={inGroup ? "true" : undefined}
-                      onClick={() =>
-                        setActiveSlide((prev) =>
-                          prev === groupStart ? groupStart + 1 : groupStart,
-                        )
-                      }
-                      className="flex min-h-[44px] min-w-[44px] shrink-0 items-center justify-center sm:min-h-0 sm:min-w-0 sm:p-0"
-                    >
-                      <span
-                        className={cn(
-                          "block h-2 w-2 shrink-0 rounded-full transition-[background-color,opacity] duration-200",
-                          inGroup ? "bg-white" : "bg-white/45 hover:bg-white/55",
-                        )}
-                      />
-                    </button>
-                  );
-                })}
+                <button
+                  type="button"
+                  onClick={goPrev}
+                  disabled={promos.length <= 1}
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:bg-white/10 disabled:opacity-35"
+                  aria-label="Предыдущая акция"
+                >
+                  <ChevronLeft className="h-4 w-4" strokeWidth={2} aria-hidden />
+                </button>
+                <span className="min-w-[3.5rem] text-center text-[11px] font-medium tabular-nums text-white/70">
+                  {slideIndex + 1} / {promos.length}
+                </span>
+                <button
+                  type="button"
+                  onClick={goNext}
+                  disabled={promos.length <= 1}
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:bg-white/10 disabled:opacity-35"
+                  aria-label="Следующая акция"
+                >
+                  <ChevronRight className="h-4 w-4" strokeWidth={2} aria-hidden />
+                </button>
               </div>
             </nav>
           </div>
@@ -381,8 +337,6 @@ export function BannerSection() {
           ))}
         </div>
       </div>
-
-      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[var(--bg)] to-transparent" aria-hidden />
     </section>
   );
 }

@@ -6,6 +6,11 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import {
+  getClientsChooseScrollState,
+  resolveClientsChooseSlideVisual,
+  resolveClientsChooseVideoProgress,
+} from "@/lib/clients-choose-scroll-state";
 
 /** Высота скролл-трека на один пункт услуги (vh). */
 const SCROLL_VH_PER_ITEM_MOBILE = 72;
@@ -91,11 +96,66 @@ function ServiceProgressBars({
   );
 }
 
+function ServiceSlideStack({
+  scrollProgress,
+  className,
+}: {
+  scrollProgress: number;
+  className?: string;
+}) {
+  const { baseIndex, localProgress, displayNumber } = getClientsChooseScrollState(
+    scrollProgress,
+    SERVICES.length,
+  );
+
+  return (
+    <div className={cn("relative", className)} aria-live="polite">
+      <p className="mb-4 text-[11px] font-semibold tabular-nums tracking-[0.18em] text-[var(--text-muted)] md:text-xs">
+        {String(displayNumber).padStart(2, "0")} / {String(SERVICES.length).padStart(2, "0")}
+      </p>
+
+      <div className="relative min-h-[5.5rem] overflow-hidden md:min-h-[9.5rem] lg:min-h-[10.5rem]">
+        {SERVICES.map((item, idx) => {
+          const visual = resolveClientsChooseSlideVisual(idx, baseIndex, localProgress, SERVICES.length);
+
+          return (
+            <div
+              key={item.title}
+              className="absolute inset-x-0 top-0 will-change-[opacity,transform]"
+              style={{
+                opacity: visual.opacity,
+                transform: `translateY(${visual.translateY}px)`,
+                pointerEvents: visual.visible ? "auto" : "none",
+                visibility: visual.visible ? "visible" : "hidden",
+                zIndex: visual.zIndex,
+              }}
+              aria-hidden={!visual.visible}
+            >
+              <p className="border-l-[3px] border-[var(--accent)] pl-4 font-heading text-[clamp(1.35rem,2.8vw,2.05rem)] font-bold uppercase leading-[1.08] tracking-[-0.02em] text-[var(--text)] md:border-l-[4px] md:pl-6 md:text-[clamp(1.55rem,2.2vw,2.35rem)]">
+                <Link
+                  href={item.href}
+                  className="rounded-sm underline-offset-4 transition-colors hover:text-[var(--accent)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+                  tabIndex={visual.visible ? 0 : -1}
+                >
+                  {item.title}
+                </Link>
+              </p>
+              <p className="mt-3 max-w-xl pl-[calc(1rem+3px)] text-[14px] leading-relaxed text-[var(--text-muted)] md:mt-4 md:pl-[calc(1.5rem+4px)] md:text-[15px] lg:text-base">
+                {item.description}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function ClientsChooseVideoSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const lastSeekRef = useRef<number>(NaN);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [, setActiveIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
 
   const syncScrollToServices = useCallback(() => {
@@ -108,12 +168,11 @@ export function ClientsChooseVideoSection() {
     const scrolled = -rect.top;
     const scrollRange = Math.max(sectionHeight - viewportH, 1);
     const progress = Math.max(0, Math.min(scrolled / scrollRange, 1));
-    const scaled = progress * SERVICES.length;
-    const idx = Math.min(Math.floor(scaled), SERVICES.length - 1);
+    const { baseIndex } = getClientsChooseScrollState(progress, SERVICES.length);
     setScrollProgress(progress);
     setActiveIndex((prev) => {
-      if (prev !== idx) lastSeekRef.current = NaN;
-      return prev === idx ? prev : idx;
+      if (prev !== baseIndex) lastSeekRef.current = NaN;
+      return prev === baseIndex ? prev : baseIndex;
     });
 
     const video = videoRef.current;
@@ -123,7 +182,8 @@ export function ClientsChooseVideoSection() {
       return;
     }
 
-    let t = progress * video.duration;
+    const videoNorm = resolveClientsChooseVideoProgress(progress, SERVICES.length);
+    let t = videoNorm * video.duration;
     try {
       const sb = video.seekable;
       if (sb && sb.length > 0) {
@@ -221,8 +281,6 @@ export function ClientsChooseVideoSection() {
     };
   }, [syncScrollToServices]);
 
-  const activeService = SERVICES[activeIndex]!;
-
   return (
     <section
       ref={sectionRef}
@@ -241,10 +299,6 @@ export function ClientsChooseVideoSection() {
       }
       aria-labelledby="clients-choose-video-heading"
     >
-      {/*
-        Видео закреплено под шапкой; скролл секции меняет кадр и активную услугу
-        (мобильные, планшет и десктоп).
-      */}
       <div
         className={cn(
           "sticky z-10 overflow-hidden",
@@ -254,7 +308,6 @@ export function ClientsChooseVideoSection() {
         style={{ backgroundColor: "var(--bg)" }}
       >
         <div className="mx-auto flex h-full min-h-0 w-full max-w-[1380px] flex-col md:flex-row md:items-center md:justify-between md:gap-8 md:px-8 lg:gap-10 lg:px-12">
-          {/* Видео — сверху на телефоне/планшете, справа на lg+ */}
           <div className="shrink-0 px-4 pt-3 sm:px-6 md:order-2 md:flex-none md:w-[46%] md:px-0 md:pt-0">
             <div className="mx-auto w-full max-w-[640px] md:max-w-[560px]">
               <VideoPanel videoRef={videoRef} />
@@ -273,60 +326,7 @@ export function ClientsChooseVideoSection() {
               Наши услуги
             </h2>
 
-            {/* Мобильный / узкий планшет: одна активная услуга, меняется при скролле */}
-            <div className="mt-5 min-h-[5.5rem] md:hidden" aria-live="polite">
-              <p className="border-l-[3px] border-[var(--accent)] pl-4 text-[15px] font-semibold leading-snug text-[var(--text)]">
-                <Link
-                  href={activeService.href}
-                  className="rounded-sm underline-offset-4 transition-colors hover:text-[var(--accent)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
-                >
-                  {activeService.title}
-                </Link>
-              </p>
-              <p className="mt-2 pl-[calc(1rem+3px)] text-[14px] leading-relaxed text-[var(--text-muted)]">
-                {activeService.description}
-              </p>
-            </div>
-
-            {/* Десктоп: полный список с подсветкой активного */}
-            <div className="mt-6 hidden md:block">
-              <ul className="max-w-xl space-y-4 text-pretty sm:space-y-5">
-                {SERVICES.map((item, idx) => {
-                  const on = idx === activeIndex;
-                  return (
-                    <li
-                      key={item.title}
-                      className={cn(
-                        "border-l-[4px] pl-6 transition-all duration-500 ease-out",
-                        on ? "border-[var(--accent)] opacity-100" : "border-[var(--border)] opacity-50",
-                      )}
-                    >
-                      <p
-                        className={cn(
-                          "text-[1.05rem] font-semibold leading-snug transition-colors duration-500",
-                          on ? "text-[var(--text)]" : "text-[var(--text-muted)]",
-                        )}
-                      >
-                        <Link
-                          href={item.href}
-                          className="rounded-sm underline-offset-4 transition-colors hover:text-[var(--accent)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
-                        >
-                          {item.title}
-                        </Link>
-                      </p>
-                      <p
-                        className={cn(
-                          "mt-2 text-[15px] leading-relaxed transition-colors duration-500",
-                          on ? "text-[var(--text)]" : "text-[var(--text-muted)]",
-                        )}
-                      >
-                        {item.description}
-                      </p>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+            <ServiceSlideStack scrollProgress={scrollProgress} className="mt-5 md:mt-8" />
 
             <div className="mt-6 md:mt-10">
               <Link
