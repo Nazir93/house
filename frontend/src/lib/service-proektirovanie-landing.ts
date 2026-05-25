@@ -1,6 +1,6 @@
 import type { ServiceLandingDocument, StoryTimelineItem } from "@/lib/service-landing-schema";
 
-export const PROEKTROVANIE_HERO_BANNER = "/images/banner/proektirovanie-hero.png";
+export const PROEKTROVANIE_HERO_BANNER = "/images/banner/proektirovanie-hero-v2.png";
 
 /** Заглушки блоков timeline — тексты замените в админке или пришлите нам. */
 export const PROEKTROVANIE_TIMELINE_PLACEHOLDERS: StoryTimelineItem[] = [

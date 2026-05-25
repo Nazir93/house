@@ -5,7 +5,7 @@ import { CMS_SERVICE_SLUG_TO_SERVICE_TYPE } from "@/lib/service-slug-routes";
 import { SERVICE_TYPE_LABEL_BY_VALUE } from "@/lib/service-type-admin-options";
 import { resolveServiceLandingDocument, stripShowcaseSections } from "@/lib/service-landing-defaults";
 import type { ServiceLandingDocument } from "@/lib/service-landing-schema";
-import { enrichProektirovanieLandingDocument } from "@/lib/service-proektirovanie-landing";
+import { enrichProektirovanieLandingDocument, PROEKTROVANIE_HERO_BANNER } from "@/lib/service-proektirovanie-landing";
 import { getServiceLandingHeroBannerFields } from "@/lib/service-card-media";
 
 function mergeHeroBannersFromDb(
@@ -148,5 +148,18 @@ export async function getServiceLandingPageData(slug: string): Promise<ServiceLa
   document = fillMissingHeroBannersFromSiteAssets(slug, document);
   document = stripShowcaseSections(document);
   document = enrichProektirovanieLandingDocument(slug, document);
+  if (slug === "proektirovanie") {
+    document = {
+      sections: document.sections.map((section) =>
+        section.type === "heroCinematic"
+          ? {
+              ...section,
+              bannerImageDesktop: PROEKTROVANIE_HERO_BANNER,
+              bannerImageMobile: PROEKTROVANIE_HERO_BANNER,
+            }
+          : section
+      ),
+    };
+  }
   return { serviceType: row.serviceType, published: row.published, document };
 }

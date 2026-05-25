@@ -5,8 +5,8 @@ import type { ServiceItem } from "@/lib/get-services";
  * Ключ — путь `/services/{slug}` из CMS.
  */
 const FALLBACK_SIDE_IMAGE_BY_SLUG: Record<string, string> = {
-  "/services/proektirovanie": "/images/banner/proektirovanie-hero.png",
-  "/services/projecting": "/images/banner/proektirovanie-hero.png",
+  "/services/proektirovanie": "/images/banner/proektirovanie-hero-v2.png",
+  "/services/projecting": "/images/banner/proektirovanie-hero-v2.png",
   "/services/fundament": "/images/hero/hero-02.png",
   "/services/foundation": "/images/hero/hero-02.png",
   "/services/karkas": "/images/hero/hero-03.png",

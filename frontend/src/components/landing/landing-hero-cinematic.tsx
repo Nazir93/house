@@ -59,6 +59,7 @@ export function LandingHeroCinematic({
               alt=""
               fill
               priority
+              unoptimized={fullBleed}
               className={cn("object-cover object-center", bannerImageMobile ? "hidden md:block" : "")}
               sizes="100vw"
             />
@@ -68,6 +69,7 @@ export function LandingHeroCinematic({
             alt=""
             fill
             priority
+            unoptimized={fullBleed}
             className={cn("object-cover object-center", bannerImageDesktop ? "md:hidden" : "")}
             sizes="100vw"
           />
