@@ -156,6 +156,12 @@ model HouseProject {
   heroPricingJson     Json?
   /// Калькулятор комплектации: этапы по PDF, опции, транспорт и виджет консультации.
   calculatorJson      Json?
+  /// Категория дома для калькулятора (a–f). Если пусто — выводится из этажности и кровли.
+  calculatorCategory  String?
+  /// Ручная корректировка проекта, % (не показывается на сайте).
+  projectAdjustmentPercent Float                  @default(0)
+  /// Переопределения опций: { "disabledOptionIds": ["stairs", ...] }
+  calculatorOptionOverrides Json?
   anchorsJson         Json?
   createdAt           DateTime                   @default(now())
   updatedAt           DateTime                   @updatedAt
@@ -166,6 +172,76 @@ model HouseProject {
   @@index([published, price])
   @@index([published, area])
   @@index([published, createdAt])
+}
+
+/// Категория дома a–f для калькулятора карточки проекта
+model CalculatorCategory {
+  id              String   @id
+  labelRu         String
+  floors          Float
+  roofType        String
+  facadeCoef      Float
+  perimeterCoef   Float
+  roofCoef        Float
+  soffitCoef      Float
+  gutterCoef      Float
+  overlapCoef     Float
+  insulationCoef  Float
+  crossCoef       Float
+  sortOrder       Int      @default(0)
+  isActive        Boolean  @default(true)
+  shellPrices     CalculatorShellPrice[]
+
+  @@map("calculator_category")
+}
+
+model CalculatorShellPrice {
+  id           String             @id @default(cuid())
+  categoryId   String
+  category     CalculatorCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  wallMaterial String
+  pricePerM2   Int
+
+  @@unique([categoryId, wallMaterial])
+  @@map("calculator_shell_price")
+}
+
+model CalculatorFacadeType {
+  id         String  @id
+  slug       String  @unique
+  name       String
+  pricePerM2 Int
+  sortOrder  Int     @default(0)
+  isActive   Boolean @default(true)
+
+  @@map("calculator_facade_type")
+}
+
+model CalculatorOption {
+  id                String   @id
+  slug              String   @unique
+  name              String
+  groupSlug         String
+  pricingType       String
+  pricePerUnit      Int
+  description       String?  @db.Text
+  imageUrl          String?
+  allowedCategories String[] @default([])
+  sortOrder         Int      @default(0)
+  isActive          Boolean  @default(true)
+
+  @@index([groupSlug, isActive])
+  @@map("calculator_option")
+}
+
+model CalculatorSettings {
+  id                        String @id @default("default")
+  smallAreaThresholdM2      Int    @default(100)
+  smallAreaSurcharge        Float  @default(0.15)
+  addonsSurchargeUnderThreshold Float @default(0.1)
+  blindAreaWidthM           Float  @default(0.8)
+
+  @@map("calculator_settings")
 }
 
 model HouseProjectMedia {

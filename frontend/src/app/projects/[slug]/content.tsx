@@ -18,14 +18,16 @@ import {
   ZoomIn,
 } from "lucide-react";
 import {
-  derivePartOfSoulHeroTiers,
   formatRub,
   getEffectiveCalculatorUi,
   getProjectPlans,
   getProjectRenders,
   resolveProjectHeroPricing,
+  type HeroPricingTier,
   type HouseProjectItem,
 } from "@/lib/construction-data";
+import { resolveProjectCategory } from "@/lib/house-project-calculator-quote";
+import type { HouseCalculatorCategoryId } from "@/lib/house-project-calculator-engine";
 import { HouseProjectCompletionSection } from "@/components/construction/house-project-completion-section";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { CmsImage } from "@/components/ui/cms-image";
@@ -44,9 +46,11 @@ const heroSoftRing = "ring-1 ring-[color-mix(in_srgb,var(--text)_6%,transparent)
 export function HouseProjectDetailContent({
   project,
   similarProjects,
+  heroShellTiers,
 }: {
   project: HouseProjectItem;
   similarProjects: HouseProjectItem[];
+  heroShellTiers: HeroPricingTier[];
 }) {
   const contact = useContactConfig();
   const { openModalToEstimate } = useModal();
@@ -64,18 +68,21 @@ export function HouseProjectDetailContent({
     return resolveProjectRoofPitch(pricingFloors, posCfg.defaultRoof);
   }, [posCfg, pricingFloors]);
 
+  const effectiveHeroTiers = heroShellTiers;
   const heroResolved = useMemo(() => resolveProjectHeroPricing(project), [project]);
-  const effectiveHeroTiers = useMemo(() => {
-    if (!posCfg?.enabled || typeof posCfg.smallHouseThresholdSqm !== "number") return heroResolved.tiers;
-    return derivePartOfSoulHeroTiers(
-      project.area,
+
+  const calculatorCategoryId = useMemo((): HouseCalculatorCategoryId | null => {
+    const explicit =
+      project.calculatorCategory &&
+      ["a", "b", "c", "d", "e", "f"].includes(project.calculatorCategory) ?
+        (project.calculatorCategory as HouseCalculatorCategoryId)
+      : null;
+    return resolveProjectCategory({
+      calculatorCategory: explicit,
       pricingFloors,
       roofPitch,
-      heroResolved.tiers,
-      posCfg.smallHouseThresholdSqm,
-      typeof posCfg.shellSurchargeUnderThreshold === "number" ? posCfg.shellSurchargeUnderThreshold : 0.15
-    );
-  }, [heroResolved.tiers, posCfg, pricingFloors, project.area, roofPitch]);
+    });
+  }, [project.calculatorCategory, pricingFloors, roofPitch]);
   const [materialTierIndex, setMaterialTierIndex] = useState(0);
   const tierMax = Math.max(0, effectiveHeroTiers.length - 1);
   const tierIdx = Math.min(materialTierIndex, tierMax);
@@ -617,9 +624,8 @@ export function HouseProjectDetailContent({
                 tierIndex={tierIdx}
                 onTierIndexChange={setMaterialTierIndex}
                 coverImageUrl={renders[0]?.url}
-                partOfSoulContext={
-                  posCfg?.enabled ? { pricingFloors, roofPitch } : undefined
-                }
+                categoryId={calculatorCategoryId}
+                partOfSoulContext={{ pricingFloors, roofPitch }}
               />
             </div>
           </div>

@@ -184,9 +184,22 @@ export function facadeAddonTotalRub(
   return Math.round(unit * Math.max(areaSqm, 0));
 }
 
+export type PartOfSoulConstructionCode =
+  | "blind_area"
+  | "drainage"
+  | "soffits"
+  | "gutter"
+  | "roof_folding"
+  | "roof_soft"
+  | "roof_insulation_200"
+  | "roof_insulation_250"
+  | "monolithic_stairs"
+  | "monolithic_overlap";
+
 export type PartOfSoulAddonPricingSpec =
   | { kind: "engineering"; code: PartOfSoulEngineeringCode }
   | { kind: "facade"; variant: PartOfSoulFacadeVariant }
+  | { kind: "construction"; code: PartOfSoulConstructionCode }
   | { kind: "fixed"; rub: number };
 
 /** Сумма по строке галереи доп. опций (для таблицы и «Итого»). */
@@ -196,6 +209,9 @@ export function computePartOfSoulAddonRub(
 ): number {
   if (spec.kind === "fixed") return Math.round(spec.rub);
   if (spec.kind === "engineering") return engineeringAddonRub(spec.code, ctx.pf, ctx.areaSqm);
-  const total = facadeAddonTotalRub(spec.variant, ctx.areaSqm, ctx.roof, ctx.pf);
-  return total ?? 0;
+  if (spec.kind === "facade") {
+    const total = facadeAddonTotalRub(spec.variant, ctx.areaSqm, ctx.roof, ctx.pf);
+    return total ?? 0;
+  }
+  return 0;
 }

@@ -109,6 +109,12 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         ...(body.anchorsJson !== undefined && { anchorsJson: jsonOrNull(body.anchorsJson) }),
         ...(body.heroPricingJson !== undefined && { heroPricingJson: jsonOrNull(body.heroPricingJson) }),
         ...(body.calculatorJson !== undefined && { calculatorJson: jsonOrNull(body.calculatorJson) }),
+        ...(body.calculatorCategory !== undefined && {
+          calculatorCategory: body.calculatorCategory?.trim() || null,
+        }),
+        ...(body.projectAdjustmentPercent !== undefined && {
+          projectAdjustmentPercent: numberOr(body.projectAdjustmentPercent, 0),
+        }),
         ...(mediaPatch && { media: mediaPatch }),
       },
     });

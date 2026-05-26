@@ -42,6 +42,8 @@ interface HouseProjectFormState {
   anchorsJson: string;
   heroPricingJson: string;
   calculatorJson: string;
+  calculatorCategory: string;
+  projectAdjustmentPercent: string;
   renders: string[];
   plans: PlanInput[];
 }
@@ -101,6 +103,8 @@ export function mapHouseProjectToForm(data?: any): HouseProjectFormState {
     anchorsJson: JSON.stringify(data?.anchorsJson ?? JSON.parse(defaultAnchors), null, 2),
     heroPricingJson: JSON.stringify(data?.heroPricingJson ?? {}, null, 2),
     calculatorJson: JSON.stringify(data?.calculatorJson ?? {}, null, 2),
+    calculatorCategory: data?.calculatorCategory ?? "",
+    projectAdjustmentPercent: String(data?.projectAdjustmentPercent ?? 0),
     renders: media.filter((item: any) => item.type === "RENDER").map((item: any) => item.url),
     plans: media
       .filter((item: any) => item.type === "PLAN")
@@ -308,6 +312,38 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
               onValueChange={(v) => set("mortgageMode", v as HouseProjectFormState["mortgageMode"])}
               options={[...MORTGAGE_MODE_OPTIONS]}
               triggerClassName="rounded-xl px-3 py-2"
+            />
+          </label>
+        </div>
+      </AdminFormSection>
+
+      <AdminFormSection title="Калькулятор карточки проекта">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label className="space-y-1">
+            <span className="block text-xs font-medium text-white/40">Категория дома (a–f)</span>
+            <AdminSelect
+              value={form.calculatorCategory || "auto"}
+              onValueChange={(v) => set("calculatorCategory", v === "auto" ? "" : v)}
+              options={[
+                { value: "auto", label: "Авто (из этажности и кровли)" },
+                { value: "a", label: "a — 1 эт., двухскатная" },
+                { value: "b", label: "b — 1 эт., трёхскатная" },
+                { value: "c", label: "c — 1 эт., четырёхскатная" },
+                { value: "d", label: "d — мансарда, двухскатная" },
+                { value: "e", label: "e — мансарда, трёхскатная" },
+                { value: "f", label: "f — 2 эт., четырёхскатная" },
+              ]}
+              triggerClassName="rounded-xl px-3 py-2"
+            />
+          </label>
+          <label className="space-y-1">
+            <span className="block text-xs font-medium text-white/40">Корректировка проекта, %</span>
+            <input
+              type="number"
+              step="0.1"
+              value={form.projectAdjustmentPercent}
+              onChange={(e) => set("projectAdjustmentPercent", e.target.value)}
+              className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white"
             />
           </label>
         </div>

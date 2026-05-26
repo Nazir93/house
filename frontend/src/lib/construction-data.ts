@@ -77,6 +77,9 @@ export interface HouseProjectItem {
   builtObjectSlug?: string | null;
   heroPricing?: HeroPricingConfig | null;
   calculatorUi?: ProjectCalculatorUi | null;
+  calculatorCategory?: string | null;
+  projectAdjustmentPercent?: number;
+  calculatorOptionOverrides?: { disabledOptionIds?: string[] } | null;
 }
 
 export type { BuiltObjectItem } from "@/lib/construction-shared";
@@ -509,6 +512,12 @@ function mapHouseProject(row: any): HouseProjectItem {
     builtObjectSlug: row.builtObjects?.[0]?.slug ?? null,
     heroPricing: normalizeHeroPricing(row.heroPricingJson),
     calculatorUi: normalizeCalculatorJson(row.calculatorJson),
+    calculatorCategory: row.calculatorCategory ?? null,
+    projectAdjustmentPercent: Number(row.projectAdjustmentPercent) || 0,
+    calculatorOptionOverrides:
+      row.calculatorOptionOverrides && typeof row.calculatorOptionOverrides === "object" ?
+        (row.calculatorOptionOverrides as { disabledOptionIds?: string[] })
+      : null,
   };
 }
 

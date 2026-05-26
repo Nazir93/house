@@ -13,6 +13,7 @@ import {
   type BuiltObjectMapRegionSlug,
 } from "@/lib/built-object-map-taxonomy";
 import { PortfolioObjectMapDrawer } from "@/components/portfolio/portfolio-object-map-drawer";
+import { SiteSelect } from "@/components/ui/site-select";
 import { cn } from "@/lib/utils";
 
 const PortfolioBuiltMap = dynamic(
@@ -30,14 +31,29 @@ const PortfolioBuiltMap = dynamic(
   }
 );
 
-const selectClass =
-  "min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5 text-[13px] font-medium text-[var(--text)] shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] focus:border-[var(--accent)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] dark:shadow-none sm:text-sm";
-
-function materialOptions(objects: BuiltObjectItem[]): string[] {
-  return ["Все", ...Array.from(new Set(objects.map((o) => o.material)))];
+function materialOptions(objects: BuiltObjectItem[]): { value: string; label: string }[] {
+  return ["Все", ...Array.from(new Set(objects.map((o) => o.material)))].map((m) => ({
+    value: m,
+    label: m,
+  }));
 }
 
 type Layout = "page" | "embedded";
+
+function FilterField({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex min-w-[140px] flex-1 flex-col gap-1.5">
+      <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-subtle)]">{label}</span>
+      {children}
+    </div>
+  );
+}
 
 export function PortfolioObjectMapExplorer({
   objects,
@@ -69,6 +85,16 @@ export function PortfolioObjectMapExplorer({
 
   const districtOpts = useMemo(() => districtOptionsForRegion(region, objects), [region, objects]);
 
+  const regionOptions = useMemo(
+    () => [{ value: "all", label: "Все регионы" }, ...BUILT_OBJECT_MAP_REGIONS.map((r) => ({ value: r.slug, label: r.label }))],
+    []
+  );
+
+  const districtOptions = useMemo(
+    () => [{ value: "all", label: "Все районы" }, ...districtOpts.map((d) => ({ value: d.slug, label: d.label }))],
+    [districtOpts]
+  );
+
   useEffect(() => {
     setDistrict("all");
   }, [region]);
@@ -94,71 +120,57 @@ export function PortfolioObjectMapExplorer({
       ) : null}
 
       <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
-        <label className="flex min-w-[140px] flex-1 flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-subtle)]">Материал</span>
-          <select className={selectClass} value={material} onChange={(e) => setMaterial(e.target.value)}>
-            {materialOptions(objects).map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex min-w-[140px] flex-1 flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-subtle)]">Регион</span>
-          <select
-            className={selectClass}
+        <FilterField label="Материал">
+          <SiteSelect
+            value={material}
+            onValueChange={setMaterial}
+            options={materialOptions(objects)}
+            variant="field"
+            size="md"
+            aria-label="Материал"
+          />
+        </FilterField>
+        <FilterField label="Регион">
+          <SiteSelect
             value={region}
-            onChange={(e) => setRegion(e.target.value as "all" | BuiltObjectMapRegionSlug)}
-          >
-            <option value="all">Все регионы</option>
-            {BUILT_OBJECT_MAP_REGIONS.map((r) => (
-              <option key={r.slug} value={r.slug}>
-                {r.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex min-w-[140px] flex-1 flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-subtle)]">Район</span>
-          <select
-            className={selectClass}
+            onValueChange={(v) => setRegion(v as "all" | BuiltObjectMapRegionSlug)}
+            options={regionOptions}
+            variant="field"
+            size="md"
+            aria-label="Регион"
+          />
+        </FilterField>
+        <FilterField label="Район">
+          <SiteSelect
             value={district}
+            onValueChange={setDistrict}
+            options={districtOptions}
+            variant="field"
+            size="md"
             disabled={region === "all"}
-            onChange={(e) => setDistrict(e.target.value)}
-          >
-            <option value="all">Все районы</option>
-            {districtOpts.map((d) => (
-              <option key={d.slug} value={d.slug}>
-                {d.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex min-w-[120px] flex-1 flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-subtle)]">Площадь</span>
-          <select className={selectClass} value={area} onChange={(e) => setArea(e.target.value as BuiltObjectMapFilterState["area"])}>
-            {MAP_AREA_FILTER_OPTIONS.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="flex min-w-[120px] flex-1 flex-col gap-1">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--text-subtle)]">Этажность</span>
-          <select
-            className={selectClass}
+            aria-label="Район"
+          />
+        </FilterField>
+        <FilterField label="Площадь">
+          <SiteSelect
+            value={area}
+            onValueChange={(v) => setArea(v as BuiltObjectMapFilterState["area"])}
+            options={MAP_AREA_FILTER_OPTIONS.map((o) => ({ value: o.id, label: o.label }))}
+            variant="field"
+            size="md"
+            aria-label="Площадь"
+          />
+        </FilterField>
+        <FilterField label="Этажность">
+          <SiteSelect
             value={floors}
-            onChange={(e) => setFloors(e.target.value as BuiltObjectMapFilterState["floors"])}
-          >
-            {MAP_FLOOR_FILTER_OPTIONS.map((o) => (
-              <option key={o.id} value={o.id}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </label>
+            onValueChange={(v) => setFloors(v as BuiltObjectMapFilterState["floors"])}
+            options={MAP_FLOOR_FILTER_OPTIONS.map((o) => ({ value: o.id, label: o.label }))}
+            variant="field"
+            size="md"
+            aria-label="Этажность"
+          />
+        </FilterField>
       </div>
 
       <p className="text-xs text-[var(--text-muted)]">

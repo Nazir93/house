@@ -21,6 +21,7 @@ import {
   type ProjectsSortKey,
 } from "@/lib/project-filters";
 import { CmsImage } from "@/components/ui/cms-image";
+import { SiteSelect } from "@/components/ui/site-select";
 
 const PAGE_SIZE = 6;
 
@@ -491,30 +492,30 @@ export function ProjectsCatalogContent({ projects }: { projects: HouseProjectIte
                 />
               </div>
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                <label className="flex items-center gap-2 text-sm">
-                  <span className="sr-only">Сортировка</span>
-                  <select
-                    value={sort}
-                    onChange={(e) =>
-                      pushFilters({
-                        areaMin,
-                        areaMax,
-                        priceMinRub,
-                        priceMaxRub,
-                        material,
-                        floors,
-                        q,
-                        sort: e.target.value as ProjectsSortKey,
-                      })
-                    }
-                    className="h-12 min-w-[11rem] rounded-full border px-4 text-sm font-medium"
-                    style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)", color: "var(--text)" }}
-                  >
-                    <option value="price">По цене</option>
-                    <option value="area">По площади</option>
-                    <option value="new">Сначала новинки</option>
-                  </select>
-                </label>
+                <SiteSelect
+                  value={sort}
+                  onValueChange={(next) =>
+                    pushFilters({
+                      areaMin,
+                      areaMax,
+                      priceMinRub,
+                      priceMaxRub,
+                      material,
+                      floors,
+                      q,
+                      sort: next as ProjectsSortKey,
+                    })
+                  }
+                  options={[
+                    { value: "price", label: "По цене" },
+                    { value: "area", label: "По площади" },
+                    { value: "new", label: "Сначала новинки" },
+                  ]}
+                  variant="pill"
+                  size="lg"
+                  className="min-w-[11rem]"
+                  aria-label="Сортировка"
+                />
                 <div
                   className="flex rounded-full border p-1"
                   role="group"

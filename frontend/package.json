@@ -27,6 +27,8 @@
     "db:migrate": "dotenv -e .env.local -- prisma migrate dev",
     "db:studio": "dotenv -e .env.local -- prisma studio",
     "db:verify": "node scripts/verify-db.cjs",
+    "db:seed-calculator": "dotenv -e .env.local -- vitest run src/lib/seed-calculator-catalog.runner.test.ts",
+    "db:migrate-calculator-categories": "node scripts/migrate-calculator-categories.mjs",
     "env:check": "node scripts/check-production-env.cjs",
     "db:tunnel": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/db-tunnel.ps1",
     "postinstall": "prisma generate --schema=prisma/schema.prisma",

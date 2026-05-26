@@ -19,15 +19,10 @@ import {
   type HeroPricingTier,
   type HouseProjectItem,
 } from "@/lib/construction-data";
-import type { CalculatorAddonItem, CalculatorStageId, CalculatorStageTable, ProjectCalculatorUi } from "@/lib/project-calculator-types";
+import type { CalculatorStageId, CalculatorStageTable, ProjectCalculatorUi } from "@/lib/project-calculator-types";
 import { useModal } from "@/lib/modal-context";
 import { CmsImage } from "@/components/ui/cms-image";
-import {
-  computePartOfSoulAddonRub,
-  partOfSoulRoofLabels,
-  type PartOfSoulPricingFloors,
-  type PartOfSoulRoofPitch,
-} from "@/lib/part-of-soul-pricing";
+import { partOfSoulRoofLabels, type PartOfSoulPricingFloors, type PartOfSoulRoofPitch } from "@/lib/part-of-soul-pricing";
 import {
   computeTransportSurchargeRub,
   normalizeTransportBands,
@@ -35,7 +30,12 @@ import {
   transportBandPercentLabel,
 } from "@/lib/project-transport-surcharge";
 import { TransportDistanceSlider } from "@/components/construction/transport-distance-slider";
-import { CalculatorAddonGroups } from "@/components/construction/calculator-addon-groups";
+import { ProjectCalculatorCatalogOptions } from "@/components/construction/project-calculator-catalog-options";
+import { LeadMiniForm } from "@/components/construction/lead-mini-form";
+import type { PublicCalculatorCatalog } from "@/lib/calculator-catalog";
+import type { HouseCalculatorCategoryId } from "@/lib/house-project-calculator-engine";
+import { buildProjectCalculatorLeadPayload } from "@/lib/project-calculator-lead";
+import { useProjectCalculatorQuote } from "@/lib/use-project-calculator-quote";
 import { cn } from "@/lib/utils";
 
 /** Граница без яркой белой обводки в тёмной теме */
@@ -120,6 +120,7 @@ export function HouseProjectCompletionSection({
   onTierIndexChange,
   calculatorUi,
   coverImageUrl,
+  categoryId,
   partOfSoulContext,
 }: {
   project: HouseProjectItem;
@@ -128,7 +129,8 @@ export function HouseProjectCompletionSection({
   onTierIndexChange: (index: number) => void;
   calculatorUi: ProjectCalculatorUi;
   coverImageUrl?: string | null;
-  partOfSoulContext?: {
+  categoryId: HouseCalculatorCategoryId | null;
+  partOfSoulContext: {
     pricingFloors: PartOfSoulPricingFloors;
     roofPitch: PartOfSoulRoofPitch;
   };
@@ -186,60 +188,108 @@ export function HouseProjectCompletionSection({
   const selectedTransportBand = transportBands.find((b) => b.id === transportId);
   const transportPercentLabel = transportBandPercentLabel(selectedTransportBand);
 
-  const addonGroups = useMemo(() => calculatorUi.addons ?? [], [calculatorUi.addons]);
-  const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
-  const toggleAddon = useCallback((id: string) => {
-    setSelectedAddons((prev) => ({ ...prev, [id]: !prev[id] }));
+  const catalogMode = Boolean(categoryId);
+  const [catalog, setCatalog] = useState<PublicCalculatorCatalog | null>(null);
+  const [facadeSlug, setFacadeSlug] = useState<string | null>(null);
+  const [engineeringSlugs, setEngineeringSlugs] = useState<Set<string>>(() => new Set());
+  const [constructionSlugs, setConstructionSlugs] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    if (!categoryId) return;
+    let cancelled = false;
+    void fetch(`/api/calculator-catalog?category=${categoryId}`)
+      .then((r) => r.json())
+      .then((data: PublicCalculatorCatalog) => {
+        if (!cancelled) setCatalog(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [categoryId]);
+
+  const engineeringList = useMemo(() => [...engineeringSlugs], [engineeringSlugs]);
+  const constructionList = useMemo(() => [...constructionSlugs], [constructionSlugs]);
+
+  const { data: quoteData, loading: quoteLoading } = useProjectCalculatorQuote({
+    projectSlug: project.slug,
+    tierId: tier?.id ?? "gas",
+    tierLabel: tier?.label ?? "",
+    facadeSlug,
+    engineeringSlugs: engineeringList,
+    constructionSlugs: constructionList,
+    transportBandId: transportId,
+    enabled: catalogMode,
+  });
+
+  const quoteLineAmounts = useMemo(() => {
+    const map = new Map<string, number>();
+    const q = quoteData?.quote;
+    if (!q) return map;
+    for (const line of [...q.engineeringLines, ...q.constructionLines]) {
+      map.set(line.id, line.amountRub);
+    }
+    if (q.facadeTotalRub > 0 && facadeSlug) {
+      map.set(`facade:${facadeSlug}`, q.facadeTotalRub);
+    }
+    return map;
+  }, [quoteData?.quote, facadeSlug]);
+
+  const shellPrice = catalogMode && quoteData?.quote ? quoteData.quote.shellTotalRub : priced;
+  const facadeTotal = catalogMode && quoteData?.quote ? quoteData.quote.facadeTotalRub : 0;
+  const engTotal = catalogMode && quoteData?.quote ? quoteData.quote.engineeringTotalRub : 0;
+  const conTotal = catalogMode && quoteData?.quote ? quoteData.quote.constructionTotalRub : 0;
+  const surcharge =
+    catalogMode && quoteData?.quote ?
+      quoteData.quote.transportSurchargeRub
+    : computeTransportSurchargeRub(priced, selectedTransportBand);
+
+  const grandTotal =
+    catalogMode && quoteData?.quote ? quoteData.quote.grandTotalRub : priced + surcharge;
+
+  const leadCalcData = useMemo(() => {
+    if (!catalogMode || !quoteData?.quote || !categoryId) return undefined;
+    return buildProjectCalculatorLeadPayload({
+      project,
+      tierLabel: tier?.label ?? "",
+      categoryId,
+      quote: quoteData.quote,
+      facadeSlug,
+      engineeringSlugs: engineeringList,
+      constructionSlugs: constructionList,
+      pricingFloors: partOfSoulContext.pricingFloors,
+      roofPitch: partOfSoulContext.roofPitch,
+    });
+  }, [
+    catalogMode,
+    categoryId,
+    constructionList,
+    engineeringList,
+    facadeSlug,
+    partOfSoulContext.pricingFloors,
+    partOfSoulContext.roofPitch,
+    project,
+    quoteData?.quote,
+    tier?.label,
+  ]);
+
+  const toggleEngineering = useCallback((slug: string) => {
+    setEngineeringSlugs((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
+    });
   }, []);
 
-  const resolveAddonRub = useCallback(
-    (item: CalculatorAddonItem) => {
-      if (calculatorUi.partOfSoul?.enabled && item.partOfSoulAddon && partOfSoulContext) {
-        return computePartOfSoulAddonRub(item.partOfSoulAddon, {
-          areaSqm: project.area,
-          pf: partOfSoulContext.pricingFloors,
-          roof: partOfSoulContext.roofPitch,
-        });
-      }
-      return item.price;
-    },
-    [calculatorUi.partOfSoul?.enabled, partOfSoulContext, project.area]
-  );
-
-  const addonsSumRaw = useMemo(() => {
-    let s = 0;
-    for (const g of addonGroups) {
-      for (const it of g.items) {
-        if (selectedAddons[it.id]) s += resolveAddonRub(it);
-      }
-    }
-    return s;
-  }, [addonGroups, resolveAddonRub, selectedAddons]);
-
-  const addonsSmallHouseMult =
-    calculatorUi.partOfSoul?.enabled &&
-    !!partOfSoulContext &&
-    project.area < calculatorUi.partOfSoul.smallHouseThresholdSqm ?
-      1 + calculatorUi.partOfSoul.addonsSurchargeUnderThreshold
-    : 1;
-
-  const addonsSum = addonsSumRaw * addonsSmallHouseMult;
-
-  const transportBase = priced + addonsSum;
-  const surcharge = computeTransportSurchargeRub(transportBase, selectedTransportBand);
-
-  const grandTotal = priced + addonsSum + surcharge;
-
-  const selectedAddonBreakdown = useMemo(() => {
-    const lines: { id: string; name: string; amount: number }[] = [];
-    for (const g of addonGroups) {
-      for (const it of g.items) {
-        if (!selectedAddons[it.id]) continue;
-        lines.push({ id: it.id, name: it.name, amount: resolveAddonRub(it) });
-      }
-    }
-    return lines;
-  }, [addonGroups, resolveAddonRub, selectedAddons]);
+  const toggleConstruction = useCallback((slug: string) => {
+    setConstructionSlugs((prev) => {
+      const next = new Set(prev);
+      if (next.has(slug)) next.delete(slug);
+      else next.add(slug);
+      return next;
+    });
+  }, []);
 
   function scrollAddons() {
     document.getElementById("completion-addons")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -263,17 +313,6 @@ export function HouseProjectCompletionSection({
               Калькулятор комплектации
             </span>
           </div>
-          {calculatorUi.partOfSoul?.enabled ? (
-            <p className="max-w-3xl text-sm md:text-[15px] leading-relaxed text-[var(--text-muted)]">
-              Ориентир стоимости коробки и опций по проектной матрице: ставка за м² зависит от этажности, кровли и материала стен.
-              При площади менее {calculatorUi.partOfSoul.smallHouseThresholdSqm} м² к коробке +{Math.round(calculatorUi.partOfSoul.shellSurchargeUnderThreshold * 100)}%, к опциям +{Math.round(calculatorUi.partOfSoul.addonsSurchargeUnderThreshold * 100)}%.
-            </p>
-          ) : (
-            <p className="max-w-3xl text-sm md:text-[15px] leading-relaxed text-[var(--text-muted)]">
-              Выберите материал стен, изучите состав работ по этапам и соберите ориентир бюджета с дополнительными опциями.
-            </p>
-          )}
-
           {/* Материал стен — сегментированный переключатель */}
           <div className="mt-6">
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)] mb-3">
@@ -427,12 +466,32 @@ export function HouseProjectCompletionSection({
           </button>
         </div>
 
-        <CalculatorAddonGroups
-          groups={addonGroups}
-          selectedAddons={selectedAddons}
-          onToggle={toggleAddon}
-          resolvePrice={resolveAddonRub}
-        />
+        {catalogMode && catalog ? (
+          <ProjectCalculatorCatalogOptions
+            catalog={catalog}
+            facadeSlug={facadeSlug}
+            onFacadeChange={setFacadeSlug}
+            engineeringSlugs={engineeringSlugs}
+            onToggleEngineering={toggleEngineering}
+            constructionSlugs={constructionSlugs}
+            onToggleConstruction={toggleConstruction}
+            lineAmounts={quoteLineAmounts}
+            quoteLoading={quoteLoading}
+          />
+        ) : null}
+
+        {catalogMode && leadCalcData ? (
+          <div className="rounded-2xl border border-[color-mix(in_srgb,var(--text)_8%,transparent)] bg-[var(--bg)] p-5 md:p-6">
+            <h3 className="font-heading text-lg text-[var(--graphite)]">Зафиксировать расчёт</h3>
+            <div className="mt-4">
+              <LeadMiniForm
+                source="project-calculator"
+                service={`Проект: ${project.title}`}
+                calcData={leadCalcData}
+              />
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {/* Сайдбар итога */}
@@ -472,27 +531,46 @@ export function HouseProjectCompletionSection({
             <ul className="mt-4 space-y-3 text-sm">
               <li className="flex justify-between gap-3">
                 <span className="text-[var(--text-muted)]">Коробка</span>
-                <span className="shrink-0 tabular-nums font-semibold text-[var(--text)]">{formatRub(priced)}</span>
+                <span className="shrink-0 tabular-nums font-semibold text-[var(--text)]">
+                  {quoteLoading && catalogMode ? "…" : formatRub(shellPrice)}
+                </span>
               </li>
-              <li className={cn("pt-2 border-t", softDivide)}>
-                <p className="text-xs font-semibold text-[var(--text)] mb-2">Доп. опции</p>
-                {selectedAddonBreakdown.length === 0 ? (
-                  <p className="text-xs text-[var(--text-muted)]">Не выбраны</p>
-                ) : (
+              {catalogMode && facadeTotal > 0 ? (
+                <li className="flex justify-between gap-3">
+                  <span className="text-[var(--text-muted)]">Фасад</span>
+                  <span className="shrink-0 tabular-nums font-semibold text-[var(--text)]">{formatRub(facadeTotal)}</span>
+                </li>
+              ) : null}
+              {catalogMode && engTotal > 0 ? (
+                <li className={cn("pt-2 border-t", softDivide)}>
+                  <p className="text-xs font-semibold text-[var(--text)] mb-2">Инженерия</p>
                   <ul className="space-y-1.5">
-                    {selectedAddonBreakdown.map((row) => (
+                    {quoteData?.quote.engineeringLines.map((row) => (
                       <li key={row.id} className="flex justify-between gap-2 text-xs">
-                        <span className="min-w-0 text-[var(--text-muted)] truncate">+ {row.name}</span>
-                        <span className="tabular-nums font-medium text-[var(--text)]">{formatRub(row.amount)}</span>
+                        <span className="min-w-0 text-[var(--text-muted)] truncate">{row.label}</span>
+                        <span className="tabular-nums font-medium text-[var(--text)]">{formatRub(row.amountRub)}</span>
                       </li>
                     ))}
-                    <li className={cn("flex justify-between gap-2 pt-2 border-t font-semibold text-xs", softDivide)}>
-                      <span className="text-[var(--text-muted)]">Итого опции</span>
-                      <span className="tabular-nums text-[var(--text)]">{formatRub(addonsSum)}</span>
-                    </li>
                   </ul>
-                )}
-              </li>
+                </li>
+              ) : null}
+              {catalogMode && conTotal > 0 ? (
+                <li className={cn("pt-2 border-t", softDivide)}>
+                  <p className="text-xs font-semibold text-[var(--text)] mb-2">Доп. опции</p>
+                  <ul className="space-y-1.5">
+                    {quoteData?.quote.constructionLines.map((row) => (
+                      <li key={row.id} className="flex justify-between gap-2 text-xs">
+                        <span className="min-w-0 text-[var(--text-muted)] truncate">{row.label}</span>
+                        <span className="tabular-nums font-medium text-[var(--text)]">{formatRub(row.amountRub)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ) : catalogMode ? (
+                <li className={cn("pt-2 border-t", softDivide)}>
+                  <p className="text-xs text-[var(--text-muted)]">Доп. опции не выбраны</p>
+                </li>
+              ) : null}
               <li className={cn("pt-3 border-t", softDivide)}>
                 <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--text-muted)] mb-3">
                   Расстояние до объекта
@@ -523,10 +601,14 @@ export function HouseProjectCompletionSection({
           <div className="mx-6 mb-6 rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[color-mix(in_srgb,var(--accent)_75%,#1a5c45)] p-5 text-[var(--accent-contrast)] shadow-[0_12px_36px_rgb(var(--accent-rgb)/0.35)]">
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/80">Ориентир итого</p>
             <p className="mt-2 font-heading text-3xl md:text-[2rem] font-bold tabular-nums tracking-tight">
-              {formatRub(grandTotal)}
+              {quoteLoading && catalogMode ? "…" : formatRub(grandTotal)}
             </p>
             <p className="mt-2 text-[11px] leading-snug text-white/75">
-              {formatRub(priced)} + {formatRub(addonsSum)} опции + {formatRub(surcharge)} транспорт
+              {formatRub(shellPrice)} коробка
+              {catalogMode ?
+                ` + ${formatRub(facadeTotal + engTotal + conTotal)} опции`
+              : ""}
+              {` + ${formatRub(surcharge)} транспорт`}
             </p>
           </div>
 

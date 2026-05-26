@@ -77,6 +77,27 @@ export type HouseConstructionCalcDisplayRow = { label: string; value: string };
 export function houseConstructionCalcDisplayRows(calc: unknown): HouseConstructionCalcDisplayRow[] | null {
   if (!calc || typeof calc !== "object") return null;
   const h = calc as Record<string, unknown>;
+
+  if (h.kind === "house-project-quote") {
+    const rows: HouseConstructionCalcDisplayRow[] = [];
+    if (typeof h.projectTitle === "string") rows.push({ label: "Проект", value: h.projectTitle });
+    if (h.area != null) rows.push({ label: "Площадь", value: `${h.area} м²` });
+    if (h.categoryId != null) rows.push({ label: "Категория", value: String(h.categoryId) });
+    if (typeof h.tierLabel === "string") rows.push({ label: "Материал стен", value: h.tierLabel });
+    if (h.facadeSlug != null) rows.push({ label: "Фасад", value: String(h.facadeSlug) });
+    if (typeof h.shellTotalRub === "number")
+      rows.push({ label: "Коробка", value: `${h.shellTotalRub.toLocaleString("ru-RU")} ₽` });
+    if (typeof h.facadeTotalRub === "number" && h.facadeTotalRub > 0)
+      rows.push({ label: "Сумма фасада", value: `${h.facadeTotalRub.toLocaleString("ru-RU")} ₽` });
+    if (typeof h.engineeringTotalRub === "number" && h.engineeringTotalRub > 0)
+      rows.push({ label: "Инженерия", value: `${h.engineeringTotalRub.toLocaleString("ru-RU")} ₽` });
+    if (typeof h.constructionTotalRub === "number" && h.constructionTotalRub > 0)
+      rows.push({ label: "Доп. опции", value: `${h.constructionTotalRub.toLocaleString("ru-RU")} ₽` });
+    if (typeof h.grandTotalRub === "number")
+      rows.push({ label: "Итого ориентир", value: `${h.grandTotalRub.toLocaleString("ru-RU")} ₽` });
+    return rows;
+  }
+
   if (h.kind !== "house-construction-quote") return null;
 
   const rows: HouseConstructionCalcDisplayRow[] = [];

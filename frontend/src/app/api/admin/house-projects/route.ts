@@ -82,6 +82,8 @@ export async function POST(request: NextRequest) {
         anchorsJson: jsonOrNull(body.anchorsJson),
         heroPricingJson: body.heroPricingJson !== undefined ? jsonOrNull(body.heroPricingJson) : null,
         calculatorJson: body.calculatorJson !== undefined ? jsonOrNull(body.calculatorJson) : null,
+        calculatorCategory: body.calculatorCategory?.trim() || null,
+        projectAdjustmentPercent: numberOr(body.projectAdjustmentPercent, 0),
         media: {
           create: [
             ...renders.filter(Boolean).map((url: string, index: number) => ({

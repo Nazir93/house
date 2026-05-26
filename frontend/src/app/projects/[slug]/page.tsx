@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getPageMeta } from "@/lib/get-page-meta";
 import { SITE_NAME } from "@/lib/constants";
 import { getHouseProjectBySlug, getSimilarHouseProjects } from "@/lib/construction-data";
+import { getHeroShellTiersForProject } from "@/lib/project-hero-shell-tiers";
 import { getProjectRenders } from "@/lib/construction-shared";
 import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 import { HouseProjectDetailContent } from "./content";
@@ -28,6 +29,7 @@ export default async function HouseProjectPage(props: { params: Promise<{ slug: 
   const project = await getHouseProjectBySlug(params.slug);
   if (!project) notFound();
   const similarProjects = await getSimilarHouseProjects(project);
+  const heroShellTiers = await getHeroShellTiersForProject(project);
   return (
     <>
       <BreadcrumbJsonLd
@@ -37,7 +39,7 @@ export default async function HouseProjectPage(props: { params: Promise<{ slug: 
           { name: project.title, path: `/projects/${project.slug}` },
         ]}
       />
-      <HouseProjectDetailContent project={project} similarProjects={similarProjects} />
+      <HouseProjectDetailContent project={project} similarProjects={similarProjects} heroShellTiers={heroShellTiers} />
     </>
   );
 }

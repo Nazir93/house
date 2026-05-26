@@ -30,8 +30,10 @@ export interface CalculatorAddonItem {
   description?: string;
   price: number;
   imageUrl?: string;
-  /** Если задано и включён режим калькулятора PDF — сумма считается по матрице и площади. */
+  /** @deprecated используйте calculatorAddon */
   partOfSoulAddon?: CalculatorAddonPartOfSoulKind;
+  /** Формула расчёта на сервере (калькулятор карточки проекта). */
+  calculatorAddon?: CalculatorAddonPartOfSoulKind;
 }
 
 /** Настройка формульного калькулятора на карточке проекта. */
