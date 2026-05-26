@@ -4,12 +4,13 @@ import { useState, useEffect, useCallback } from "react";
 import {
   Plus,
   Trash2,
-  Eye,
   EyeOff,
   Star,
   Save,
   X,
   MessageSquare,
+  Check,
+  Clock,
 } from "lucide-react";
 import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
 import { AdminSelect } from "@/components/admin/admin-select";
@@ -117,6 +118,108 @@ export default function AdminReviewsPage() {
     setReviews((prev) => prev.map((r) => r.id === id ? { ...r, visible: !visible } : r));
   }
 
+  async function approve(id: string) {
+    const res = await fetch(`/api/admin/reviews/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ visible: true }),
+    });
+    if (res.ok) {
+      setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, visible: true } : r)));
+    }
+  }
+
+  async function reject(id: string) {
+    if (!confirm("Отклонить и удалить отзыв?")) return;
+    await remove(id);
+  }
+
+  const pending = reviews.filter((r) => !r.visible);
+  const published = reviews.filter((r) => r.visible);
+
+  function ReviewRow({
+    r,
+    pending: isPending,
+  }: {
+    r: ReviewItem;
+    pending?: boolean;
+  }) {
+    return (
+      <div
+        key={r.id}
+        className={`rounded-xl bg-white/[0.03] border p-4 ${
+          isPending ? "border-amber-500/30 bg-amber-500/[0.04]" : "border-white/[0.08]"
+        } ${!r.visible && !isPending ? "opacity-50" : ""}`}
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-1">
+              <span className="font-semibold text-sm text-white">{r.authorName}</span>
+              <div className="flex gap-0.5">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <Star
+                    key={n}
+                    size={12}
+                    className={n <= r.rating ? "text-emerald-300" : "text-white/10"}
+                    fill={n <= r.rating ? "currentColor" : "none"}
+                  />
+                ))}
+              </div>
+              {r.objectName ? <span className="text-xs text-white/30">· {r.objectName}</span> : null}
+              {isPending ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-200/90">
+                  <Clock size={10} /> На модерации
+                </span>
+              ) : null}
+            </div>
+            <p className="text-sm text-white/60 whitespace-pre-line">{isPending ? r.text : `${r.text.slice(0, 200)}${r.text.length > 200 ? "…" : ""}`}</p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 flex-shrink-0">
+            {isPending ? (
+              <>
+                <button
+                  onClick={() => approve(r.id)}
+                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600/90 hover:bg-emerald-600 text-xs font-semibold text-white transition-colors"
+                >
+                  <Check size={14} /> Принять
+                </button>
+                <button
+                  onClick={() => reject(r.id)}
+                  className="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-white/[0.06] text-xs text-red-300/80 hover:text-red-300 transition-colors"
+                >
+                  <X size={14} /> Отклонить
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => startEdit(r)}
+                  className="px-2 py-1.5 rounded-lg bg-white/[0.06] text-xs text-white/60 hover:text-white transition-colors"
+                >
+                  Изм.
+                </button>
+                <button
+                  onClick={() => toggleVisible(r.id, r.visible)}
+                  className="p-1.5 rounded-lg text-white/30 hover:text-white transition-colors"
+                  title="Скрыть с сайта"
+                >
+                  <EyeOff size={14} />
+                </button>
+              </>
+            )}
+            <button
+              onClick={() => remove(r.id)}
+              className="p-1.5 rounded-lg text-red-400/40 hover:text-red-400 transition-colors"
+              title="Удалить"
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   async function remove(id: string) {
     if (!confirm("Удалить отзыв?")) return;
     await fetch(`/api/admin/reviews/${id}`, { method: "DELETE" });
@@ -130,7 +233,14 @@ export default function AdminReviewsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Отзывы</h1>
-          <p className="text-sm text-white/40 mt-1">{reviews.length} отзывов</p>
+          <p className="text-sm text-white/40 mt-1">
+            {published.length} на сайте
+            {pending.length > 0 ? (
+              <span className="ml-2 inline-flex items-center rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-semibold text-amber-200">
+                {pending.length} на модерации
+              </span>
+            ) : null}
+          </p>
         </div>
         <button onClick={startNew} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#0F3D2E] hover:bg-[#174d3b] text-[#F6F6F4] text-sm font-semibold transition-colors">
           <Plus size={16} /> Добавить
@@ -216,34 +326,30 @@ export default function AdminReviewsPage() {
           <p className="text-white/30 text-sm">Нет отзывов</p>
         </div>
       ) : (
-        <div className="space-y-2">
-          {reviews.map((r) => (
-            <div key={r.id} className={`rounded-xl bg-white/[0.03] border border-white/[0.08] p-4 ${!r.visible ? "opacity-50" : ""}`}>
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-sm text-white">{r.authorName}</span>
-                    <div className="flex gap-0.5">
-                      {[1, 2, 3, 4, 5].map((n) => (
-                        <Star key={n} size={12} className={n <= r.rating ? "text-emerald-300" : "text-white/10"} fill={n <= r.rating ? "currentColor" : "none"} />
-                      ))}
-                    </div>
-                    {r.objectName && <span className="text-xs text-white/30">· {r.objectName}</span>}
-                  </div>
-                  <p className="text-sm text-white/60 line-clamp-2">{r.text}</p>
-                </div>
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  <button onClick={() => startEdit(r)} className="px-2 py-1.5 rounded-lg bg-white/[0.06] text-xs text-white/60 hover:text-white transition-colors">Изм.</button>
-                  <button onClick={() => toggleVisible(r.id, r.visible)} className="p-1.5 rounded-lg text-white/30 hover:text-white transition-colors">
-                    {r.visible ? <EyeOff size={14} /> : <Eye size={14} />}
-                  </button>
-                  <button onClick={() => remove(r.id)} className="p-1.5 rounded-lg text-red-400/40 hover:text-red-400 transition-colors">
-                    <Trash2 size={14} />
-                  </button>
-                </div>
+        <div className="space-y-8">
+          {pending.length > 0 ? (
+            <div className="space-y-3">
+              <h2 className="text-sm font-semibold text-amber-200/90 flex items-center gap-2">
+                <Clock size={16} /> На модерации ({pending.length})
+              </h2>
+              <div className="space-y-2">
+                {pending.map((r) => (
+                  <ReviewRow key={r.id} r={r} pending />
+                ))}
               </div>
             </div>
-          ))}
+          ) : null}
+
+          {published.length > 0 ? (
+            <div className="space-y-3">
+              <h2 className="text-sm font-semibold text-white/50">Опубликованные ({published.length})</h2>
+              <div className="space-y-2">
+                {published.map((r) => (
+                  <ReviewRow key={r.id} r={r} />
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
       )}
     </div>

@@ -56,7 +56,10 @@ export interface CalculatorAddonGroup {
 export interface CalculatorTransportBand {
   id: string;
   label: string;
-  surcharge: number;
+  /** Фиксированная надбавка, ₽ (если не задан percent). */
+  surcharge?: number;
+  /** Доля от базы (коробка + опции), %. */
+  percent?: number;
 }
 
 export interface CalculatorConsultationCfg {

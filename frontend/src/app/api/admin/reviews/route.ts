@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { revalidatePublicReviews } from "@/lib/revalidate-public-content";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
+import { sanitizeReviewAdminFields } from "@/lib/review-content";
 
 export const dynamic = "force-dynamic";
 
@@ -23,18 +24,19 @@ export async function POST(request: NextRequest) {
   if (!gate.ok) return gate.response;
 
   try {
-    const body = await request.json();
+    const body = (await request.json()) as Record<string, unknown>;
+    const safe = sanitizeReviewAdminFields(body);
     const review = await prisma.review.create({
       data: {
-        authorName: body.authorName,
-        authorPhoto: body.authorPhoto || null,
-        objectName: body.objectName || null,
-        service: body.service || null,
-        rating: body.rating ?? 5,
-        text: body.text,
-        videoUrl: body.videoUrl || null,
-        visible: body.visible ?? true,
-        order: body.order ?? 0,
+        authorName: safe.authorName as string,
+        authorPhoto: (safe.authorPhoto as string) || null,
+        objectName: (safe.objectName as string) || null,
+        service: (safe.service as string) || null,
+        rating: (safe.rating as number) ?? 5,
+        text: safe.text as string,
+        videoUrl: (safe.videoUrl as string) || null,
+        visible: body.visible !== false,
+        order: (safe.order as number) ?? 0,
       },
     });
     revalidatePublicReviews();

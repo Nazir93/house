@@ -11,9 +11,16 @@ export function CompanyPageHeader({
   breadcrumbCurrent: string;
 }) {
   return (
-    <header className="border-b pb-10 pt-28" style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}>
-      <div className="container mx-auto max-w-[1200px] px-5">
-        <nav className="text-[12px] tracking-[0.02em] sm:text-[13px]" style={{ color: "var(--text-muted)" }} aria-label="Навигация по разделу">
+    <header
+      className="border-b pb-8 pt-24 sm:pb-10 sm:pt-28"
+      style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
+    >
+      <div className="container mx-auto max-w-[1200px] min-w-0 px-4 sm:px-5 lg:px-6">
+        <nav
+          className="text-[11px] tracking-[0.02em] sm:text-[12px] md:text-[13px]"
+          style={{ color: "var(--text-muted)" }}
+          aria-label="Навигация по разделу"
+        >
           <Link href="/" className="transition-colors hover:text-[var(--accent)]">
             Главная
           </Link>
@@ -27,11 +34,17 @@ export function CompanyPageHeader({
           <span style={{ color: "var(--text)" }}>{breadcrumbCurrent}</span>
         </nav>
         <CompanySubnav />
-        <h1 className="mt-8 font-heading text-[1.85rem] font-bold leading-tight tracking-tight md:text-4xl lg:text-[2.5rem]" style={{ color: "var(--text)" }}>
+        <h1
+          className="mt-6 break-words font-heading text-[1.5rem] font-bold leading-tight tracking-tight sm:mt-8 sm:text-[1.85rem] md:text-4xl lg:text-[2.5rem]"
+          style={{ color: "var(--text)" }}
+        >
           {title}
         </h1>
         {description ? (
-          <p className="mt-4 max-w-3xl text-[15px] leading-relaxed md:text-base" style={{ color: "var(--text-muted)" }}>
+          <p
+            className="mt-3 max-w-3xl text-sm leading-relaxed sm:mt-4 sm:text-[15px] md:text-base"
+            style={{ color: "var(--text-muted)" }}
+          >
             {description}
           </p>
         ) : null}

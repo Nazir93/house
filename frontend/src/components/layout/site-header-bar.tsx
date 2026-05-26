@@ -107,7 +107,7 @@ export function SiteHeaderBar() {
         />
       ) : null}
 
-      <div className="sticky top-0 z-50 isolate pointer-events-auto">
+      <div className="sticky top-0 z-[60] isolate pointer-events-auto">
         <div className="relative">
           <div
             data-navbar
@@ -142,14 +142,14 @@ export function SiteHeaderBar() {
       {/* ——— Desktop ——— */}
       <div className="hidden lg:block">
         <div className="mx-auto flex max-w-[1440px] items-center gap-x-2 overflow-visible py-1 pl-4 pr-3 xl:gap-x-3 xl:pl-8 xl:pr-5">
-          <div className="flex min-w-0 shrink-0 items-center gap-2 xl:gap-3">
+          <div className="flex min-w-0 shrink-0 items-stretch">
             <Link
               href="/"
-              className="group flex min-w-0 shrink-0 items-center gap-2 rounded-sm no-underline transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 xl:gap-3"
+              className="group relative z-[2] flex min-w-0 shrink-0 items-center gap-2 rounded-sm py-0.5 no-underline transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 xl:gap-3"
               style={{ outlineColor: "var(--accent)" }}
               aria-label={`${SITE_NAME} — на главную`}
             >
-              <BrandLogo height={44} className="min-w-0" brightOnBackdrop={heroGlassLightInk} />
+              <BrandLogo height={44} className="min-w-0 shrink-0" brightOnBackdrop={heroGlassLightInk} />
               <p
                 className="hidden max-w-[200px] text-[9px] font-medium uppercase leading-snug tracking-[0.11em] transition-colors min-[1100px]:block xl:max-w-[260px] xl:tracking-[0.12em]"
                 style={{ color: "var(--header-bar-muted)" }}

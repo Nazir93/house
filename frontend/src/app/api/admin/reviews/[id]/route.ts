@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { revalidatePublicReviews } from "@/lib/revalidate-public-content";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
+import { sanitizeReviewAdminFields } from "@/lib/review-content";
 
 export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -9,19 +10,20 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
   if (!gate.ok) return gate.response;
 
   try {
-    const body = await request.json();
+    const body = (await request.json()) as Record<string, unknown>;
+    const safe = sanitizeReviewAdminFields(body);
     const review = await prisma.review.update({
       where: { id: params.id },
       data: {
-        ...(body.authorName !== undefined && { authorName: body.authorName }),
-        ...(body.authorPhoto !== undefined && { authorPhoto: body.authorPhoto || null }),
-        ...(body.objectName !== undefined && { objectName: body.objectName || null }),
-        ...(body.service !== undefined && { service: body.service || null }),
-        ...(body.rating !== undefined && { rating: body.rating }),
-        ...(body.text !== undefined && { text: body.text }),
-        ...(body.videoUrl !== undefined && { videoUrl: body.videoUrl || null }),
-        ...(body.visible !== undefined && { visible: body.visible }),
-        ...(body.order !== undefined && { order: body.order }),
+        ...(safe.authorName !== undefined && { authorName: safe.authorName as string }),
+        ...(safe.authorPhoto !== undefined && { authorPhoto: (safe.authorPhoto as string) || null }),
+        ...(safe.objectName !== undefined && { objectName: (safe.objectName as string) || null }),
+        ...(safe.service !== undefined && { service: (safe.service as string) || null }),
+        ...(safe.rating !== undefined && { rating: safe.rating as number }),
+        ...(safe.text !== undefined && { text: safe.text as string }),
+        ...(safe.videoUrl !== undefined && { videoUrl: (safe.videoUrl as string) || null }),
+        ...(body.visible !== undefined && { visible: Boolean(body.visible) }),
+        ...(safe.order !== undefined && { order: safe.order as number }),
       },
     });
     revalidatePublicReviews();

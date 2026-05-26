@@ -4,15 +4,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AppWindow,
   BrickWall,
-  Check,
-  ChevronDown,
   DoorOpen,
   Hammer,
   Home,
   LayoutGrid,
   Layers,
   Minus,
-  Plus,
   Sparkles,
   type LucideIcon,
 } from "lucide-react";
@@ -31,7 +28,14 @@ import {
   type PartOfSoulPricingFloors,
   type PartOfSoulRoofPitch,
 } from "@/lib/part-of-soul-pricing";
-import { cn } from "@/lib/utils";
+import {
+  computeTransportSurchargeRub,
+  normalizeTransportBands,
+  transportBandIndex,
+  transportBandPercentLabel,
+} from "@/lib/project-transport-surcharge";
+import { TransportDistanceSlider } from "@/components/construction/transport-distance-slider";
+import { CalculatorAddonGroups } from "@/components/construction/calculator-addon-groups";
 
 /** Граница без яркой белой обводки в тёмной теме */
 const softBorder = "border border-[color-mix(in_srgb,var(--text)_7%,transparent)]";
@@ -167,11 +171,10 @@ export function HouseProjectCompletionSection({
 
   const imgSrc = table.imageUrl || coverImageUrl || "/images/banner/banner-hero-01.png";
 
-  const transportBands = useMemo(() => {
-    return calculatorUi.transportBands?.length ?
-        calculatorUi.transportBands
-      : [{ id: "unk", label: "Неизвестно", surcharge: 0 }];
-  }, [calculatorUi.transportBands]);
+  const transportBands = useMemo(
+    () => normalizeTransportBands(calculatorUi.transportBands),
+    [calculatorUi.transportBands],
+  );
 
   const [transportId, setTransportId] = useState(transportBands[0]?.id ?? "unk");
   useEffect(() => {
@@ -179,7 +182,8 @@ export function HouseProjectCompletionSection({
     if (!ids.has(transportId)) setTransportId(transportBands[0]?.id ?? "unk");
   }, [transportBands, transportId]);
 
-  const surcharge = transportBands.find((b) => b.id === transportId)?.surcharge ?? 0;
+  const selectedTransportBand = transportBands.find((b) => b.id === transportId);
+  const transportPercentLabel = transportBandPercentLabel(selectedTransportBand);
 
   const addonGroups = useMemo(() => calculatorUi.addons ?? [], [calculatorUi.addons]);
   const [selectedAddons, setSelectedAddons] = useState<Record<string, boolean>>({});
@@ -220,7 +224,10 @@ export function HouseProjectCompletionSection({
 
   const addonsSum = addonsSumRaw * addonsSmallHouseMult;
 
-  const grandTotal = priced + surcharge + addonsSum;
+  const transportBase = priced + addonsSum;
+  const surcharge = computeTransportSurchargeRub(transportBase, selectedTransportBand);
+
+  const grandTotal = priced + addonsSum + surcharge;
 
   const selectedAddonBreakdown = useMemo(() => {
     const lines: { id: string; name: string; amount: number }[] = [];
@@ -232,8 +239,6 @@ export function HouseProjectCompletionSection({
     }
     return lines;
   }, [addonGroups, resolveAddonRub, selectedAddons]);
-
-  const [accordionOpen, setAccordionOpen] = useState<number | null>(0);
 
   function scrollAddons() {
     document.getElementById("completion-addons")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -421,138 +426,12 @@ export function HouseProjectCompletionSection({
           </button>
         </div>
 
-        {/* Доп. опции */}
-        <div id="completion-addons" className="scroll-mt-28">
-          <div className="flex items-end justify-between gap-4 mb-5">
-            <div>
-              <h3 className="font-heading text-xl md:text-2xl text-[var(--graphite)]">Дополнительные опции</h3>
-              <p className="mt-1 text-sm text-[var(--text-muted)]">Отметьте нужные позиции — сумма обновится в блоке справа.</p>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {addonGroups.map((group, gi) => {
-              const open = accordionOpen === gi;
-              const hasRows = group.items.length > 0;
-              const selectedInGroup = group.items.filter((it) => selectedAddons[it.id]).length;
-              return (
-                <div
-                  key={group.title}
-                  className={cn(
-                    "rounded-2xl overflow-hidden transition-shadow duration-200 bg-[var(--bg)]",
-                    softBorder,
-                    open && "ring-1 ring-[color-mix(in_srgb,var(--accent)_30%,transparent)] shadow-[0_8px_32px_rgb(var(--accent-rgb)/0.08)]"
-                  )}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setAccordionOpen((v) => (v === gi ? null : gi))}
-                    className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left bg-[var(--bg)] hover:bg-[color-mix(in_srgb,var(--bg-secondary)_50%,var(--bg))] transition"
-                  >
-                    <div className="min-w-0">
-                      <span className="font-semibold text-[var(--text)] md:text-base">{group.title}</span>
-                      {selectedInGroup > 0 ? (
-                        <span className="mt-1 block text-xs text-[var(--accent)] font-medium">
-                          Выбрано: {selectedInGroup}
-                        </span>
-                      ) : null}
-                    </div>
-                    <span
-                      className={cn(
-                        "flex h-9 w-9 shrink-0 items-center justify-center rounded-full ring-1 ring-[color-mix(in_srgb,var(--text)_8%,transparent)] transition",
-                        open && "rotate-180 bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] ring-[color-mix(in_srgb,var(--accent)_25%,transparent)]"
-                      )}
-                    >
-                      <ChevronDown className="h-5 w-5 text-[var(--text-muted)]" aria-hidden />
-                    </span>
-                  </button>
-                  {open ? (
-                    <div
-                      className={cn(
-                        "border-t bg-[color-mix(in_srgb,var(--bg-secondary)_40%,var(--bg))] px-4 py-5 sm:px-6",
-                        softDivide
-                      )}
-                    >
-                      {!hasRows ? (
-                        <p className="text-sm text-[var(--text-muted)]">
-                          Наполнение этой группы согласуется индивидуально и выгружается в смету.
-                        </p>
-                      ) : (
-                        <ul className="flex flex-col gap-3">
-                          {group.items.map((item) => {
-                            const sel = !!selectedAddons[item.id];
-                            const linePrice = resolveAddonRub(item);
-                            return (
-                              <li key={item.id}>
-                                <article
-                                  className={cn(
-                                    "flex flex-col gap-4 rounded-2xl p-4 sm:p-5 md:flex-row md:items-center md:gap-6 transition-all",
-                                    sel
-                                      ? "bg-[var(--bg)] ring-2 ring-[var(--sale)] shadow-[0_8px_24px_rgb(var(--sale-rgb)/0.12)]"
-                                      : "bg-[var(--bg)] ring-1 ring-[color-mix(in_srgb,var(--text)_6%,transparent)] hover:ring-[color-mix(in_srgb,var(--accent)_25%,transparent)]"
-                                  )}
-                                >
-                                  <div className="flex gap-4 min-w-0 flex-1 md:items-center">
-                                    {item.imageUrl ? (
-                                      <CmsImage
-                                        src={item.imageUrl}
-                                        alt=""
-                                        width={72}
-                                        height={72}
-                                        className="h-[72px] w-[72px] shrink-0 rounded-xl object-cover"
-                                        sizes="72px"
-                                      />
-                                    ) : (
-                                      <div className="h-[72px] w-[72px] shrink-0 rounded-xl bg-[var(--stone)]" />
-                                    )}
-                                    <div className="min-w-0">
-                                      <p className="font-semibold leading-snug text-[var(--text)]">{item.name}</p>
-                                      {item.description ? (
-                                        <p className="mt-1.5 text-sm leading-relaxed text-[var(--text-muted)] line-clamp-3">
-                                          {item.description}
-                                        </p>
-                                      ) : null}
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center justify-between gap-4 md:flex-col md:items-end md:shrink-0 md:min-w-[140px]">
-                                    <p className="text-lg font-bold tabular-nums text-[var(--text)]">{formatRub(linePrice)}</p>
-                                    <button
-                                      type="button"
-                                      aria-pressed={sel}
-                                      className={cn(
-                                        "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition min-w-[130px]",
-                                        sel
-                                          ? "bg-[var(--sale)] text-[var(--on-sale)]"
-                                          : "bg-[var(--accent)] text-[var(--accent-contrast)] hover:bg-[var(--accent-hover)]"
-                                      )}
-                                      onClick={() => toggleAddon(item.id)}
-                                    >
-                                      {sel ? (
-                                        <>
-                                          <Check className="h-4 w-4" aria-hidden />
-                                          В расчёте
-                                        </>
-                                      ) : (
-                                        <>
-                                          <Plus className="h-4 w-4" aria-hidden />
-                                          Добавить
-                                        </>
-                                      )}
-                                    </button>
-                                  </div>
-                                </article>
-                              </li>
-                            );
-                          })}
-                        </ul>
-                      )}
-                    </div>
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <CalculatorAddonGroups
+          groups={addonGroups}
+          selectedAddons={selectedAddons}
+          onToggle={toggleAddon}
+          resolvePrice={resolveAddonRub}
+        />
       </div>
 
       {/* Сайдбар итога */}
@@ -617,53 +496,23 @@ export function HouseProjectCompletionSection({
                 <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--text-muted)] mb-3">
                   Расстояние до объекта
                 </p>
-                <div className="space-y-2" role="radiogroup" aria-label="Расстояние до объекта">
-                  {transportBands.map((b) => {
-                    const selected = transportId === b.id;
-                    return (
-                      <label
-                        key={b.id}
-                        className={cn(
-                          "flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2.5 transition",
-                          selected
-                            ? "bg-[color-mix(in_srgb,var(--accent)_12%,var(--bg))] ring-1 ring-[color-mix(in_srgb,var(--accent)_45%,transparent)]"
-                            : "bg-[color-mix(in_srgb,var(--bg-secondary)_45%,var(--bg))] ring-1 ring-[color-mix(in_srgb,var(--text)_5%,transparent)] hover:ring-[color-mix(in_srgb,var(--accent)_22%,transparent)]"
-                        )}
-                      >
-                        <input
-                          type="radio"
-                          className="sr-only"
-                          name={`transport-${project.slug}`}
-                          checked={selected}
-                          onChange={() => setTransportId(b.id)}
-                        />
-                        <span
-                          className={cn(
-                            "flex h-4 w-4 shrink-0 items-center justify-center rounded-full ring-2 transition",
-                            selected
-                              ? "ring-[var(--accent)] bg-[color-mix(in_srgb,var(--accent)_15%,transparent)]"
-                              : "ring-[color-mix(in_srgb,var(--text)_18%,transparent)] bg-transparent"
-                          )}
-                          aria-hidden
-                        >
-                          {selected ? (
-                            <span className="h-2 w-2 rounded-full bg-[var(--accent)]" />
-                          ) : null}
-                        </span>
-                        <span
-                          className={cn(
-                            "text-sm leading-snug",
-                            selected ? "font-medium text-[var(--text)]" : "text-[var(--text-muted)]"
-                          )}
-                        >
-                          {b.label}
-                        </span>
-                      </label>
-                    );
-                  })}
-                </div>
+                <TransportDistanceSlider
+                  bands={transportBands}
+                  valueIndex={transportBandIndex(transportBands, transportId)}
+                  onChangeIndex={(index) => {
+                    const band = transportBands[index];
+                    if (band) setTransportId(band.id);
+                  }}
+                />
                 <div className="mt-3 flex justify-between gap-3 text-sm">
-                  <span className="text-[var(--text-muted)]">Транспорт</span>
+                  <span className="text-[var(--text-muted)]">
+                    Транспорт
+                    {transportPercentLabel ? (
+                      <span className="ml-1 text-[11px] tabular-nums text-[var(--text-muted)]">
+                        ({transportPercentLabel})
+                      </span>
+                    ) : null}
+                  </span>
                   <span className="tabular-nums font-semibold text-[var(--text)]">{formatRub(surcharge)}</span>
                 </div>
               </li>

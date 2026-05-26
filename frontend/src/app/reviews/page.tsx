@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Star } from "lucide-react";
 import { getPageMeta } from "@/lib/get-page-meta";
 import { SITE_NAME, CITY } from "@/lib/constants";
@@ -6,6 +5,9 @@ import { CompanyPageHeader } from "@/components/company/company-page-header";
 import { getPublicReviews } from "@/lib/get-public-reviews";
 import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 import { RoundAvatar } from "@/components/ui/round-avatar";
+import { ReviewSubmitForm } from "@/components/reviews/review-submit-form";
+import { YandexReviewsCta } from "@/components/reviews/yandex-reviews-cta";
+import type { PublicReviewItem } from "@/lib/get-public-reviews";
 
 export const revalidate = 60;
 
@@ -23,9 +25,74 @@ function StarsRow({ rating }: { rating: number }) {
   return (
     <div className="flex gap-0.5 text-[var(--accent)]" aria-label={`Оценка ${n} из 5`}>
       {Array.from({ length: n }, (_, i) => (
-        <Star key={i} className="h-4 w-4 fill-current" strokeWidth={0} aria-hidden />
+        <Star key={i} className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-current" strokeWidth={0} aria-hidden />
       ))}
     </div>
+  );
+}
+
+function ReviewCard({ r }: { r: PublicReviewItem }) {
+  const initial = r.authorName.trim().charAt(0).toUpperCase();
+  const meta = [r.objectName, r.serviceLabel].filter(Boolean).join(" · ");
+
+  return (
+    <article
+      className="flex h-full min-w-0 flex-col rounded-xl border p-4 sm:rounded-[1.25rem] sm:p-6 md:p-8"
+      style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-secondary)" }}
+    >
+      <div className="flex items-start gap-3 sm:gap-4">
+        {r.authorPhoto ? (
+          <RoundAvatar src={r.authorPhoto} alt={`Фото: ${r.authorName}`} size={56} />
+        ) : (
+          <div
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-base font-heading font-bold sm:h-14 sm:w-14 sm:text-lg"
+            style={{
+              backgroundColor: "color-mix(in srgb, var(--accent) 15%, var(--bg))",
+              color: "var(--accent)",
+            }}
+            aria-hidden
+          >
+            {initial}
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <StarsRow rating={r.rating} />
+          <p
+            className="mt-1.5 break-words text-[15px] font-semibold leading-snug sm:mt-2 sm:text-base"
+            style={{ color: "var(--text)" }}
+          >
+            {r.authorName}
+          </p>
+          {meta ? (
+            <p
+              className="mt-0.5 break-words text-[11px] leading-snug sm:mt-1 sm:text-xs"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {meta}
+            </p>
+          ) : null}
+        </div>
+      </div>
+      <p
+        className="mt-3 flex-1 break-words text-[13px] leading-relaxed whitespace-pre-line sm:mt-4 sm:text-sm"
+        style={{ color: "var(--text-muted)" }}
+      >
+        {r.text}
+      </p>
+      {r.videoUrl ? (
+        <p className="mt-3 sm:mt-4">
+          <a
+            href={r.videoUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-[44px] items-center text-sm font-medium underline-offset-4 hover:underline"
+            style={{ color: "var(--accent)" }}
+          >
+            Видеоотзыв
+          </a>
+        </p>
+      ) : null}
+    </article>
   );
 }
 
@@ -40,79 +107,31 @@ export default async function ReviewsPage() {
           { name: "Отзывы", path: "/reviews" },
         ]}
       />
-      <div style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
+      <div className="min-w-0 overflow-x-hidden" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
         <CompanyPageHeader
           breadcrumbCurrent="Отзывы"
           title="Отзывы клиентов"
           description="Мнения тех, кто уже прошёл путь от проекта до готового дома."
         />
-        <section className="pb-20 pt-4 md:pb-28" aria-labelledby="reviews-grid-heading">
+        <section
+          className="pb-[max(4rem,env(safe-area-inset-bottom,0px))] pt-2 sm:pb-20 sm:pt-4 md:pb-28"
+          aria-labelledby="reviews-grid-heading"
+        >
           <h2 id="reviews-grid-heading" className="sr-only">
             Список отзывов
           </h2>
-          <div className="container mx-auto max-w-[1200px] px-5">
-            <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+          <div className="container mx-auto max-w-[1200px] min-w-0 px-4 sm:px-5 lg:px-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
               {reviews.map((r) => (
-                <article
-                  key={r.id}
-                  className="rounded-[1.25rem] border p-6 md:p-8 flex flex-col h-full"
-                  style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-secondary)" }}
-                >
-                  <div className="flex items-start gap-4">
-                    {r.authorPhoto ? (
-                      <RoundAvatar src={r.authorPhoto} alt={`Фото: ${r.authorName}`} size={56} />
-                    ) : (
-                      <div
-                        className="h-14 w-14 shrink-0 rounded-full flex items-center justify-center text-lg font-heading font-bold"
-                        style={{
-                          backgroundColor: "color-mix(in srgb, var(--accent) 15%, var(--bg))",
-                          color: "var(--accent)",
-                        }}
-                        aria-hidden
-                      >
-                        {r.authorName.trim().charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <div className="min-w-0 flex-1">
-                      <StarsRow rating={r.rating} />
-                      <p className="mt-2 font-semibold leading-snug" style={{ color: "var(--text)" }}>
-                        {r.authorName}
-                      </p>
-                      {(r.objectName || r.serviceLabel) && (
-                        <p className="mt-1 text-xs leading-snug" style={{ color: "var(--text-muted)" }}>
-                          {[r.objectName, r.serviceLabel].filter(Boolean).join(" · ")}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <p
-                    className="mt-4 text-sm leading-relaxed flex-1 whitespace-pre-line"
-                    style={{ color: "var(--text-muted)" }}
-                  >
-                    {r.text}
-                  </p>
-                  {r.videoUrl ? (
-                    <p className="mt-4">
-                      <a
-                        href={r.videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-medium underline-offset-4 hover:underline"
-                        style={{ color: "var(--accent)" }}
-                      >
-                        Видеоотзыв
-                      </a>
-                    </p>
-                  ) : null}
-                </article>
+                <ReviewCard key={r.id} r={r} />
               ))}
             </div>
-            <p className="mt-12 text-center text-sm" style={{ color: "var(--text-muted)" }}>
-              Ещё оценки и публикации — в карточке компании на Яндексе или по запросу менеджера.{" "}
-              <Link href="/contacts" className="font-medium underline-offset-4 hover:underline" style={{ color: "var(--accent)" }}>
-                Связаться
-              </Link>
-            </p>
+
+            <YandexReviewsCta />
+
+            <div className="mt-10 sm:mt-12 lg:mt-14">
+              <ReviewSubmitForm />
+            </div>
           </div>
         </section>
       </div>

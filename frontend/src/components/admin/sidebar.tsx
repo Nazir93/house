@@ -22,6 +22,7 @@ import {
   Star,
   ContactRound,
   PanelTop,
+  ExternalLink,
 } from "lucide-react";
 import { useState } from "react";
 import { SITE_NAME } from "@/lib/constants";
@@ -195,6 +196,17 @@ export function AdminSidebar({ collapsed: collapsedProp, onCollapsedChange }: Ad
 
         {/* Footer */}
         <div className="p-2 border-t space-y-1.5" style={{ borderColor: "var(--adm-sidebar-border)" }}>
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-150 hover:bg-[color:var(--adm-nav-hover-bg)] hover:text-[color:var(--adm-nav-fg-hover)]"
+            style={{ color: "var(--adm-nav-fg)" }}
+            title={collapsed ? "На сайт" : undefined}
+          >
+            <ExternalLink size={18} className="flex-shrink-0" />
+            {!collapsed && <span>На сайт</span>}
+          </a>
           <button
             onClick={() => signOut({ callbackUrl: "/admin/login" })}
             className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-150 hover:text-red-400 hover:bg-red-500/[0.08]"

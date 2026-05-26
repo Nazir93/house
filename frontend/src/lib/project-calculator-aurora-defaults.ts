@@ -22,11 +22,11 @@ export const AURORA_PROJECT_CALCULATOR_UI: ProjectCalculatorUi = {
     online: true,
   },
   transportBands: [
-    { id: "unk", label: "Неизвестно (индивид. расчёт в смете)", surcharge: 0 },
-    { id: "30", label: "до 30 км", surcharge: 0 },
-    { id: "40", label: "до 40 км", surcharge: 0 },
-    { id: "50", label: "до 50 км", surcharge: 0 },
-    { id: "100", label: "до 100 км", surcharge: 0 },
+    { id: "unk", label: "Неизвестно (индивид. расчёт в смете)", percent: 0 },
+    { id: "30", label: "до 30 км", percent: 1.5 },
+    { id: "40", label: "до 40 км", percent: 2.25 },
+    { id: "50", label: "до 50 км", percent: 3 },
+    { id: "100", label: "до 100 км", percent: 6.5 },
   ],
   stages: {
     prep: {

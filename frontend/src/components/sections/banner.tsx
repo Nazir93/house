@@ -11,7 +11,7 @@ import {
   Percent,
   ShieldCheck,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CmsImage } from "@/components/ui/cms-image";
 import { useTheme } from "@/lib/theme-context";
@@ -43,23 +43,50 @@ const BADGES = [
 const edgeGlass = "border border-white/[0.07]";
 const edgeGlassStrong = "border border-white/[0.1]";
 
+/** Интервал автопрокрутки промо-карусели на баннере. */
+const PROMO_AUTO_ADVANCE_MS = 6000;
+
 export function BannerSection({ config }: { config: HomeHeroBanner }) {
   const { theme } = useTheme();
   const { openModalToEstimate } = useModal();
   const promos = config.promos;
   const [activeSlide, setActiveSlide] = useState(0);
+  const [carouselPaused, setCarouselPaused] = useState(false);
+  const [autoCycleKey, setAutoCycleKey] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
   const slideIndex = promos.length > 0 ? activeSlide % promos.length : 0;
   const slide = promos[slideIndex];
 
-  function goPrev() {
-    if (promos.length <= 1) return;
-    setActiveSlide((i) => (i - 1 + promos.length) % promos.length);
-  }
+  const bumpAutoCycle = useCallback(() => {
+    setAutoCycleKey((k) => k + 1);
+  }, []);
 
-  function goNext() {
-    if (promos.length <= 1) return;
-    setActiveSlide((i) => (i + 1) % promos.length);
-  }
+  const goPrev = useCallback(
+    (manual = false) => {
+      if (promos.length <= 1) return;
+      setActiveSlide((i) => (i - 1 + promos.length) % promos.length);
+      if (manual) bumpAutoCycle();
+    },
+    [bumpAutoCycle, promos.length],
+  );
+
+  const goNext = useCallback(
+    (manual = false) => {
+      if (promos.length <= 1) return;
+      setActiveSlide((i) => (i + 1) % promos.length);
+      if (manual) bumpAutoCycle();
+    },
+    [bumpAutoCycle, promos.length],
+  );
+
+  useEffect(() => {
+    if (promos.length <= 1 || carouselPaused) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+
+    const id = window.setInterval(() => goNext(false), PROMO_AUTO_ADVANCE_MS);
+    return () => window.clearInterval(id);
+  }, [carouselPaused, goNext, promos.length, autoCycleKey]);
 
   if (!slide) return null;
 
@@ -67,7 +94,7 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
     <section
       id={HOME_HERO_BANNER_ID}
       className={cn(
-        "relative isolate -mt-[var(--site-header-banner-overlap)] min-h-[100svh] min-h-[100dvh] w-full overflow-hidden transition-colors duration-500 pointer-events-none",
+        "relative isolate z-0 -mt-[var(--site-header-banner-overlap)] min-h-[100svh] min-h-[100dvh] w-full overflow-hidden transition-colors duration-500 pointer-events-none",
         theme === "dark" ? "bg-[#07110e]" : "bg-[#dfe8e3]",
       )}
     >
@@ -133,8 +160,8 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
       </div>
 
       <div className="section-inline-pad relative z-10 flex w-full min-h-[100svh] min-h-[100dvh] flex-col pointer-events-none pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[calc(var(--site-header-sticky-offset)+var(--site-header-banner-overlap)+0.75rem+env(safe-area-inset-top,0px))] md:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] md:pt-[calc(var(--site-header-sticky-offset)+var(--site-header-banner-overlap)+1rem+env(safe-area-inset-top,0px))]">
-        <div className="pointer-events-auto grid w-full flex-1 gap-4 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(260px,min(520px,40vw))] min-[1100px]:items-end min-[1100px]:gap-6 min-[1100px]:pb-2 xl:gap-8">
-          <div className="max-w-3xl justify-self-start self-end pt-0 min-[1100px]:pr-4">
+        <div className="grid w-full flex-1 gap-4 pointer-events-none min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(260px,min(520px,40vw))] min-[1100px]:items-end min-[1100px]:gap-6 min-[1100px]:pb-2 xl:gap-8">
+          <div className="pointer-events-auto max-w-3xl justify-self-start self-end pt-0 min-[1100px]:pr-4">
             <div
               className={cn(
                 "max-w-4xl rounded-2xl bg-black/42 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_12px_48px_rgba(0,0,0,0.55)] backdrop-blur-sm sm:rounded-[1.35rem] sm:px-5 sm:py-4",
@@ -212,20 +239,30 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
             </div>
           </div>
 
-          <div className="w-full min-w-0 min-[1100px]:w-full min-[1100px]:max-w-[min(520px,40vw)] min-[1100px]:justify-self-end min-[1100px]:self-end">
+          <div className="pointer-events-auto w-full min-w-0 min-[1100px]:w-full min-[1100px]:max-w-[min(520px,40vw)] min-[1100px]:justify-self-end min-[1100px]:self-end">
             <div
+              ref={carouselRef}
               role="region"
               aria-roledescription="карусель"
               aria-label="Подборка образов домов и участков"
+              aria-live="polite"
               tabIndex={0}
+              onMouseEnter={() => setCarouselPaused(true)}
+              onMouseLeave={() => setCarouselPaused(false)}
+              onFocus={() => setCarouselPaused(true)}
+              onBlur={(e) => {
+                if (!carouselRef.current?.contains(e.relatedTarget as Node | null)) {
+                  setCarouselPaused(false);
+                }
+              }}
               onKeyDown={(e) => {
                 if (e.key === "ArrowRight") {
                   e.preventDefault();
-                  goNext();
+                  goNext(true);
                 }
                 if (e.key === "ArrowLeft") {
                   e.preventDefault();
-                  goPrev();
+                  goPrev(true);
                 }
               }}
               className={cn(
@@ -236,7 +273,7 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
               <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-4 md:pr-5 lg:pr-6">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4 lg:gap-5">
                   <div className="flex min-w-0 flex-1 flex-col justify-between md:max-w-[240px] md:basis-[46%] md:min-w-0 md:flex-none md:pr-1.5 lg:pr-2">
-                    <div>
+                    <div key={`copy-${slideIndex}`}>
                       <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-white/45">
                         {String(slideIndex + 1).padStart(2, "0")} · {slide.label}
                       </p>
@@ -275,7 +312,7 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                       sizes="(max-width: 1023px) 96vw, 380px"
                       priority={slideIndex === 0}
                       fetchPriority={slideIndex === 0 ? "high" : "low"}
-                      className="object-cover object-center"
+                      className="object-cover object-center transition-opacity duration-500"
                     />
                   </div>
                 </div>
@@ -283,7 +320,7 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
             </div>
 
             <nav
-              className="pointer-events-auto mt-3 flex items-center justify-center gap-3 min-[1100px]:justify-end sm:mt-4"
+              className="mt-3 flex items-center justify-center gap-3 min-[1100px]:justify-end sm:mt-4"
               aria-label="Промо на баннере"
             >
               <div
@@ -294,7 +331,7 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
               >
                 <button
                   type="button"
-                  onClick={goPrev}
+                  onClick={() => goPrev(true)}
                   disabled={promos.length <= 1}
                   className="flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:bg-white/10 disabled:opacity-35"
                   aria-label="Предыдущая акция"
@@ -306,7 +343,7 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                 </span>
                 <button
                   type="button"
-                  onClick={goNext}
+                  onClick={() => goNext(true)}
                   disabled={promos.length <= 1}
                   className="flex h-9 w-9 items-center justify-center rounded-full text-white transition hover:bg-white/10 disabled:opacity-35"
                   aria-label="Следующая акция"
