@@ -11,6 +11,19 @@ import { uploadAdminMedia } from "@/lib/admin-upload";
 import { auroraCalculatorPresetJson } from "@/lib/project-calculator-aurora-defaults";
 import { CmsImage } from "@/components/ui/cms-image";
 import { AdminJsonEditor } from "@/components/admin/admin-json-editor";
+import { HouseProjectBlocksEditor } from "@/components/admin/house-project-blocks-editor";
+import type { CompletionGroup, ConstructionStep } from "@/lib/construction-shared";
+import {
+  buildHeroPricingJson,
+  parseAnchorsFromDb,
+  parseCompletionFromDb,
+  parseHeroPricingFormFromDb,
+  parseScheduleFromDb,
+  serializeAnchors,
+  serializeCompletion,
+  serializeSchedule,
+  type HeroPricingFormState,
+} from "@/lib/house-project-form-blocks";
 
 const MORTGAGE_MODE_OPTIONS = [
   { value: "CALCULATOR", label: "Калькулятор на карточке + заявка" },
@@ -37,10 +50,10 @@ interface HouseProjectFormState {
   mortgageMode: "CALCULATOR" | "LEAD";
   published: boolean;
   order: string;
-  completionJson: string;
-  constructionJson: string;
-  anchorsJson: string;
-  heroPricingJson: string;
+  completionGroups: CompletionGroup[];
+  scheduleSteps: ConstructionStep[];
+  anchorButtons: { id: string; label: string }[];
+  heroPricing: HeroPricingFormState;
   calculatorJson: string;
   calculatorCategory: string;
   projectAdjustmentPercent: string;
@@ -48,37 +61,8 @@ interface HouseProjectFormState {
   plans: PlanInput[];
 }
 
-const defaultCompletion = JSON.stringify(
-  [
-    { title: "Теплый контур", items: ["Фундамент", "Стены", "Кровля", "Окна"] },
-    { title: "Дополнительные опции", items: ["3D-моделирование", "Инженерные сети", "Отделка"] },
-  ],
-  null,
-  2
-);
-
-const defaultSchedule = JSON.stringify(
-  [
-    { title: "Подготовка участка", term: "1-2 недели", description: "Разметка и подготовительные работы." },
-    { title: "Фундамент", term: "3-4 недели", description: "Армирование, бетонные работы и набор прочности." },
-    { title: "Коробка и кровля", term: "6-10 недель", description: "Стены, перекрытия и кровельный контур." },
-  ],
-  null,
-  2
-);
-
-const defaultAnchors = JSON.stringify(
-  [
-    { id: "plans", label: "Планировки и фасады" },
-    { id: "completion", label: "Комплектация" },
-    { id: "schedule", label: "График строительства" },
-    { id: "mortgage", label: "Ипотека" },
-  ],
-  null,
-  2
-);
-
 export function mapHouseProjectToForm(data?: any): HouseProjectFormState {
+  const fallbackPrice = Number(data?.price) || 0;
   const media = Array.isArray(data?.media) ? data.media : [];
   return {
     id: data?.id,
@@ -98,10 +82,10 @@ export function mapHouseProjectToForm(data?: any): HouseProjectFormState {
     mortgageMode: data?.mortgageMode === "CALCULATOR" ? "CALCULATOR" : "LEAD",
     published: Boolean(data?.published),
     order: String(data?.order ?? 0),
-    completionJson: JSON.stringify(data?.completionJson ?? JSON.parse(defaultCompletion), null, 2),
-    constructionJson: JSON.stringify(data?.constructionJson ?? JSON.parse(defaultSchedule), null, 2),
-    anchorsJson: JSON.stringify(data?.anchorsJson ?? JSON.parse(defaultAnchors), null, 2),
-    heroPricingJson: JSON.stringify(data?.heroPricingJson ?? {}, null, 2),
+    completionGroups: parseCompletionFromDb(data?.completionJson),
+    scheduleSteps: parseScheduleFromDb(data?.constructionJson),
+    anchorButtons: parseAnchorsFromDb(data?.anchorsJson),
+    heroPricing: parseHeroPricingFormFromDb(data?.heroPricingJson, fallbackPrice),
     calculatorJson: JSON.stringify(data?.calculatorJson ?? {}, null, 2),
     calculatorCategory: data?.calculatorCategory ?? "",
     projectAdjustmentPercent: String(data?.projectAdjustmentPercent ?? 0),
@@ -129,15 +113,7 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
   const [uploadProgress, setUploadProgress] = useState("");
   const [error, setError] = useState("");
 
-  const jsonValid = useMemo(
-    () =>
-      isValidJson(form.completionJson) &&
-      isValidJson(form.constructionJson) &&
-      isValidJson(form.anchorsJson) &&
-      isValidJson(form.heroPricingJson) &&
-      isValidJson(form.calculatorJson),
-    [form.anchorsJson, form.calculatorJson, form.completionJson, form.constructionJson, form.heroPricingJson]
-  );
+  const jsonValid = useMemo(() => isValidJson(form.calculatorJson), [form.calculatorJson]);
 
   function set<K extends keyof HouseProjectFormState>(field: K, value: HouseProjectFormState[K]) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -191,15 +167,10 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
       ...form,
       mortgageMode: form.mortgageMode,
       materials: form.materials,
-      completionJson: JSON.parse(form.completionJson),
-      constructionJson: JSON.parse(form.constructionJson),
-      anchorsJson: JSON.parse(form.anchorsJson),
-      heroPricingJson: (() => {
-        const v = JSON.parse(form.heroPricingJson) as Record<string, unknown>;
-        if (!v || typeof v !== "object") return null;
-        if (Array.isArray(v.tiers) && v.tiers.length === 0) return null;
-        return v;
-      })(),
+      completionJson: serializeCompletion(form.completionGroups),
+      constructionJson: serializeSchedule(form.scheduleSteps),
+      anchorsJson: serializeAnchors(form.anchorButtons),
+      heroPricingJson: buildHeroPricingJson(form.heroPricing),
       calculatorJson: (() => {
         try {
           const v = JSON.parse(form.calculatorJson) as Record<string, unknown>;
@@ -414,138 +385,41 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
         </div>
       </AdminFormSection>
 
-      <AdminFormSection title="Структурные блоки" subtitle="JSON задаёт цены в герое, калькулятор, комплектацию, график и якоря. Ниже — краткая структура и справка; сырой JSON можно править внизу каждого блока.">
-        <div className="space-y-6">
+      <AdminFormSection
+        title="Блоки на карточке проекта"
+        subtitle="Цены в шапке, комплектация, график и кнопки навигации — обычные поля, сохраняются вместе с проектом."
+      >
+        <HouseProjectBlocksEditor
+          completionGroups={form.completionGroups}
+          onCompletionChange={(completionGroups) => set("completionGroups", completionGroups)}
+          scheduleSteps={form.scheduleSteps}
+          onScheduleChange={(scheduleSteps) => set("scheduleSteps", scheduleSteps)}
+          anchorButtons={form.anchorButtons}
+          onAnchorsChange={(anchorButtons) => set("anchorButtons", anchorButtons)}
+          heroPricing={form.heroPricing}
+          onHeroPricingChange={(heroPricing) => set("heroPricing", heroPricing)}
+        />
+
+        <div className="mt-8 pt-6 border-t border-white/[0.08]">
           <AdminJsonEditor
-            label="Герой карточки: цены по материалу (heroPricingJson)"
-            hint="Пустой объект или без tiers — на сайте подставятся цена из поля «Цена, ₽» и типовые коэффициенты по материалам."
-            value={form.heroPricingJson}
-            onChange={(v) => set("heroPricingJson", v)}
-            rows={10}
-            kind="hero"
-            guide={
-              <>
-                <p className="text-white/70">Объект с полями верхнего уровня (все необязательны, кроме смысла блока):</p>
-                <ul className="list-disc space-y-1 pl-4 marker:text-white/35">
-                  <li>
-                    <code className="text-emerald-300/90">tiers</code> — массив уровней цены: у каждого элемента <code className="text-emerald-300/90">id</code> (например gas, ceramic, brick),{" "}
-                    <code className="text-emerald-300/90">label</code> — подпись на сайте, <code className="text-emerald-300/90">price</code> — число в рублях.
-                  </li>
-                  <li>
-                    <code className="text-emerald-300/90">warrantyYears</code> — гарантия в годах для подписи в герое.
-                  </li>
-                  <li>
-                    <code className="text-emerald-300/90">productionMonthsMin</code> — минимальный срок производства (месяцы), если показываете срок в блоке.
-                  </li>
-                </ul>
-              </>
-            }
-          />
-          <div className="flex flex-wrap items-center gap-2 -mt-2 mb-1">
-            <button
-              type="button"
-              onClick={() => set("calculatorJson", auroraCalculatorPresetJson())}
-              className="inline-flex items-center rounded-lg border border-white/15 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1]"
-            >
-              Вставить полный пресет «Аврора» в JSON
-            </button>
-            <p className="text-[11px] text-white/40 max-w-xl">
-              На сайте пресет и так действует при пустом {"{}"}; кнопка нужна, чтобы увидеть и отредактировать поля в админке.
-            </p>
-          </div>
-          <AdminJsonEditor
-            label="Калькулятор (calculatorJson)"
-            hint="Пустой { } — на карточке /projects/slug работает полный калькулятор как у «Аврора». Заполняйте JSON только если нужны свои этапы, допы или отключение формулы (partOfSoul.enabled: false)."
+            label="Расширенный калькулятор (только для опытных)"
+            technicalName="calculatorJson"
+            hint="Таблицы этапов, карточка менеджера, транспорт. Цены коробки и опций — в блоке «Калькулятор карточки проекта» и в меню «Калькулятор проектов»."
             value={form.calculatorJson}
             onChange={(v) => set("calculatorJson", v)}
             rows={12}
             kind="calculator"
             guide={
               <>
-                <p className="text-white/70">Основные блоки объекта (переопределяют пресет «Аврора» на сайте):</p>
-                <ul className="list-disc space-y-1 pl-4 marker:text-white/35">
-                  <li>
-                    <code className="text-emerald-300/90">consultation</code> — карточка специалиста: имя, роль, фото, телефон и т.п.
-                  </li>
-                  <li>
-                    <code className="text-emerald-300/90">partOfSoul</code> — формульный расчёт: <code className="text-emerald-300/90">enabled</code>,{" "}
-                    <code className="text-emerald-300/90">defaultRoof</code> — тип кровли для матрицы на карточке: только <code className="text-emerald-300/90">dual</code>,{" "}
-                    <code className="text-emerald-300/90">triple</code> или <code className="text-emerald-300/90">quad</code> (посетитель на карточке кровлю не переключает).
-                  </li>
-                  <li>
-                    <code className="text-emerald-300/90">transportBands</code> — массив зон/надбавок за доставку или логистику.
-                  </li>
-                  <li>
-                    <code className="text-emerald-300/90">stages</code> — объект с таблицами этапов (ключи — идентификаторы сценариев).
-                  </li>
-                  <li>
-                    <code className="text-emerald-300/90">stagesByTier</code> — при необходимости разные таблицы этапов по уровню цены (gas/ceramic/brick и т.д.).
-                  </li>
-                  <li>
-                    <code className="text-emerald-300/90">addons</code> — группы дополнительных опций с позициями и ценами.
-                  </li>
-                </ul>
+                <p>Оставьте пустым — на сайте всё работает без правок.</p>
+                <button
+                  type="button"
+                  onClick={() => set("calculatorJson", auroraCalculatorPresetJson())}
+                  className="mt-2 inline-flex items-center rounded-lg border border-white/15 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1]"
+                >
+                  Показать шаблон «Аврора»
+                </button>
               </>
-            }
-          />
-          <AdminJsonEditor
-            label="Комплектация (completionJson)"
-            hint="Массив групп: у каждой группы заголовок и список строк пунктов."
-            value={form.completionJson}
-            onChange={(v) => set("completionJson", v)}
-            rows={8}
-            kind="completionList"
-            guide={
-              <ul className="list-disc space-y-1 pl-4 marker:text-white/35">
-                <li>
-                  Корень — <strong>массив</strong> <code className="text-emerald-300/90">[ ]</code>.
-                </li>
-                <li>
-                  Каждый элемент: <code className="text-emerald-300/90">title</code> (строка — заголовок группы), <code className="text-emerald-300/90">items</code> — массив строк (пункты списка).
-                </li>
-              </ul>
-            }
-          />
-          <AdminJsonEditor
-            label="График строительства (constructionJson)"
-            hint="Массив этапов по порядку: название, срок и короткое описание для карточки проекта."
-            value={form.constructionJson}
-            onChange={(v) => set("constructionJson", v)}
-            rows={8}
-            kind="scheduleList"
-            guide={
-              <ul className="list-disc space-y-1 pl-4 marker:text-white/35">
-                <li>
-                  Корень — <strong>массив</strong> <code className="text-emerald-300/90">[ ]</code>.
-                </li>
-                <li>
-                  Поля элемента: <code className="text-emerald-300/90">title</code>, <code className="text-emerald-300/90">term</code> (например «3–4 недели»),{" "}
-                  <code className="text-emerald-300/90">description</code> — текст под сроком.
-                </li>
-              </ul>
-            }
-          />
-          <AdminJsonEditor
-            label="Кнопки якорной навигации (anchorsJson)"
-            hint="Кнопки над контентом карточки: прокрутка к секциям с соответствующим id на странице."
-            value={form.anchorsJson}
-            onChange={(v) => set("anchorsJson", v)}
-            rows={5}
-            kind="anchorsList"
-            guide={
-              <ul className="list-disc space-y-1 pl-4 marker:text-white/35">
-                <li>
-                  Корень — <strong>массив</strong> <code className="text-emerald-300/90">[ ]</code>.
-                </li>
-                <li>
-                  У каждой кнопки: <code className="text-emerald-300/90">id</code> — якорь (должен совпадать с <code className="text-emerald-300/90">id</code> секции на странице),{" "}
-                  <code className="text-emerald-300/90">label</code> — текст на кнопке.
-                </li>
-                <li>
-                  Типовые id из шаблона: <code className="text-emerald-300/90">plans</code>, <code className="text-emerald-300/90">completion</code>,{" "}
-                  <code className="text-emerald-300/90">schedule</code>, <code className="text-emerald-300/90">mortgage</code>.
-                </li>
-              </ul>
             }
           />
         </div>
