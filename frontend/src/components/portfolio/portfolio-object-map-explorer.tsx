@@ -42,16 +42,23 @@ type Layout = "page" | "embedded";
 export function PortfolioObjectMapExplorer({
   objects,
   layout = "page",
+  initialObjectSlug,
 }: {
   objects: BuiltObjectItem[];
   layout?: Layout;
+  /** Slug объекта — открыть маркер и карточку при загрузке (/portfolio/map?object=…) */
+  initialObjectSlug?: string | null;
 }) {
   const [material, setMaterial] = useState("Все");
   const [region, setRegion] = useState<"all" | BuiltObjectMapRegionSlug>("all");
   const [district, setDistrict] = useState("all");
   const [area, setArea] = useState<BuiltObjectMapFilterState["area"]>("all");
   const [floors, setFloors] = useState<BuiltObjectMapFilterState["floors"]>("all");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const initialId =
+    initialObjectSlug?.trim()
+      ? objects.find((o) => o.slug === initialObjectSlug.trim())?.id ?? null
+      : null;
+  const [selectedId, setSelectedId] = useState<string | null>(initialId);
 
   const filters = useMemo<BuiltObjectMapFilterState>(
     () => ({ material, region, district, area, floors }),

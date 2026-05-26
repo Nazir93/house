@@ -18,9 +18,19 @@ if (typeof window !== "undefined") {
   });
 }
 
-function FitBounds({ positions }: { positions: [number, number][] }) {
+function FitBounds({
+  positions,
+  selectedPosition,
+}: {
+  positions: [number, number][];
+  selectedPosition: [number, number] | null;
+}) {
   const map = useMap();
   useEffect(() => {
+    if (selectedPosition) {
+      map.setView(selectedPosition, 13, { animate: true });
+      return;
+    }
     if (positions.length === 0) return;
     if (positions.length === 1) {
       map.setView(positions[0], 10);
@@ -28,7 +38,7 @@ function FitBounds({ positions }: { positions: [number, number][] }) {
     }
     const b = L.latLngBounds(positions.map((p) => L.latLng(p[0], p[1])));
     map.fitBounds(b, { padding: [48, 48], maxZoom: 11 });
-  }, [map, positions]);
+  }, [map, positions, selectedPosition]);
   return null;
 }
 
@@ -87,6 +97,13 @@ export function PortfolioBuiltMap({
   );
   const center: [number, number] = positions[0] ?? DEFAULT_MAP_CENTER;
 
+  const selectedPosition = useMemo((): [number, number] | null => {
+    if (!selectedId) return null;
+    const o = withCoords.find((item) => item.id === selectedId);
+    if (!o || o.latitude == null || o.longitude == null) return null;
+    return [o.latitude, o.longitude];
+  }, [selectedId, withCoords]);
+
   const iconsById = useMemo(() => {
     const m = new Map<string, L.DivIcon>();
     for (const o of withCoords) {
@@ -122,7 +139,7 @@ export function PortfolioBuiltMap({
         <PortfolioMapTileLayer />
         <LeafletAttributionClean />
         <MapBackgroundClicks onClear={onMapBackgroundClick} />
-        <FitBounds positions={positions} />
+        <FitBounds positions={positions} selectedPosition={selectedPosition} />
         {withCoords.map((o) => (
           <Marker
             key={o.id}

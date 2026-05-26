@@ -29,12 +29,10 @@ function parseNumParam(v: string | null, fallback: number): number {
   return Number.isFinite(n) ? n : fallback;
 }
 
-const panelClass =
-  "rounded-2xl border px-4 py-4 md:px-5 md:py-5";
-const panelStyle = {
-  borderColor: "rgba(43, 47, 45, 0.09)",
-  backgroundColor: "rgba(237, 235, 229, 0.55)",
-} as const;
+const filterShellClass =
+  "overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--text)_8%,transparent)] bg-[color-mix(in_srgb,var(--bg-secondary)_55%,var(--bg))] shadow-[0_8px_32px_rgb(0_0_0/0.04)]";
+const filterSectionClass =
+  "border-b border-[color-mix(in_srgb,var(--text)_7%,transparent)] px-4 py-4 last:border-b-0 md:px-5 md:py-5";
 
 export function ProjectsCatalogContent({ projects }: { projects: HouseProjectItem[] }) {
   const router = useRouter();
@@ -111,9 +109,19 @@ export function ProjectsCatalogContent({ projects }: { projects: HouseProjectIte
 
   function chip(active: boolean) {
     return {
-      backgroundColor: active ? "var(--accent)" : "transparent",
-      borderColor: active ? "var(--accent)" : "var(--border)",
-      color: active ? "var(--accent-contrast)" : "var(--text)",
+      backgroundColor: active
+        ? "var(--accent)"
+        : "color-mix(in srgb, var(--bg) 70%, var(--bg-secondary))",
+      borderColor: active ? "var(--accent)" : "color-mix(in srgb, var(--text) 12%, transparent)",
+      color: active ? "var(--accent-contrast)" : "var(--text-muted)",
+    };
+  }
+
+  function presetChipStyle() {
+    return {
+      borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
+      backgroundColor: "color-mix(in srgb, var(--bg) 80%, var(--bg-secondary))",
+      color: "var(--text-muted)",
     };
   }
 
@@ -188,7 +196,7 @@ export function ProjectsCatalogContent({ projects }: { projects: HouseProjectIte
             sort,
           })
         }
-        className={`flex min-h-11 items-center justify-center rounded-full border px-3 text-sm font-semibold transition-colors ${id === "all" ? "min-w-[3.25rem]" : "h-11 w-11 p-0"}`}
+        className={`flex min-h-11 items-center justify-center rounded-full border px-3 text-sm font-semibold transition-colors hover:border-[color-mix(in_srgb,var(--accent)_40%,transparent)] ${id === "all" ? "min-w-[3.25rem]" : "h-11 w-11 p-0"}`}
         style={chip(active)}
         aria-pressed={active}
       >
@@ -214,210 +222,228 @@ export function ProjectsCatalogContent({ projects }: { projects: HouseProjectIte
               ) : null}
             </div>
 
-            <div className={panelClass} style={panelStyle}>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-subtle)" }}>
-                Технология / материал
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {MATERIAL_OPTIONS.map((o) => {
-                  const active = material === o.id;
-                  return (
-                    <button
-                      key={o.id}
-                      type="button"
-                      onClick={() =>
-                        pushFilters({
-                          areaMin,
+            <div className={filterShellClass}>
+              <div className={filterSectionClass}>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-subtle)" }}>
+                  Технология / материал
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {MATERIAL_OPTIONS.map((o) => {
+                    const active = material === o.id;
+                    return (
+                      <button
+                        key={o.id}
+                        type="button"
+                        onClick={() =>
+                          pushFilters({
+                            areaMin,
+                            areaMax,
+                            priceMinRub,
+                            priceMaxRub,
+                            material: o.id,
+                            floors,
+                            q,
+                            sort,
+                          })
+                        }
+                        className="rounded-full border px-3 py-2 text-left text-[13px] font-medium leading-snug transition-colors hover:border-[color-mix(in_srgb,var(--accent)_40%,transparent)]"
+                        style={chip(active)}
+                      >
+                        {o.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className={filterSectionClass}>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-subtle)" }}>
+                  Этажность
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {floorsBtn("all")}
+                  {floorsBtn("1")}
+                  {floorsBtn("1.5")}
+                  {floorsBtn("2")}
+                </div>
+              </div>
+
+              <div className={filterSectionClass}>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-subtle)" }}>
+                  Площадь, м²
+                </p>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <label className="space-y-1">
+                    <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                      от
+                    </span>
+                    <input
+                      type="number"
+                      min={bounds.minArea}
+                      max={bounds.maxArea}
+                      value={areaMin}
+                      onChange={(e) => {
+                        const v = Number(e.target.value);
+                        if (!Number.isFinite(v)) return;
+                        applyRange({
+                          areaMin: Math.min(Math.max(v, bounds.minArea), areaMax),
                           areaMax,
                           priceMinRub,
                           priceMaxRub,
-                          material: o.id,
-                          floors,
-                          q,
-                          sort,
+                        });
+                      }}
+                      className="w-full rounded-xl border px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                      style={{
+                        borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
+                        backgroundColor: "var(--bg)",
+                        color: "var(--text)",
+                      }}
+                    />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                      до
+                    </span>
+                    <input
+                      type="number"
+                      min={bounds.minArea}
+                      max={bounds.maxArea}
+                      value={areaMax}
+                      onChange={(e) => {
+                        const v = Number(e.target.value);
+                        if (!Number.isFinite(v)) return;
+                        applyRange({
+                          areaMin,
+                          areaMax: Math.max(Math.min(v, bounds.maxArea), areaMin),
+                          priceMinRub,
+                          priceMaxRub,
+                        });
+                      }}
+                      className="w-full rounded-xl border px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                      style={{
+                        borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
+                        backgroundColor: "var(--bg)",
+                        color: "var(--text)",
+                      }}
+                    />
+                  </label>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {[
+                    { label: "до 150 м²", aMin: bounds.minArea, aMax: Math.min(150, bounds.maxArea) },
+                    { label: "150–220 м²", aMin: Math.max(bounds.minArea, 150), aMax: Math.min(220, bounds.maxArea) },
+                    { label: "от 220 м²", aMin: Math.max(bounds.minArea, 220), aMax: bounds.maxArea },
+                  ].map((preset) => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() =>
+                        applyRange({
+                          areaMin: preset.aMin,
+                          areaMax: Math.max(preset.aMax, preset.aMin),
+                          priceMinRub,
+                          priceMaxRub,
                         })
                       }
-                      className="rounded-full border px-3 py-2 text-left text-[13px] font-medium leading-snug transition-colors"
-                      style={chip(active)}
+                      className="rounded-full border px-3 py-1.5 text-[12px] font-medium transition-colors hover:border-[color-mix(in_srgb,var(--accent)_35%,transparent)] hover:text-[var(--text)]"
+                      style={presetChipStyle()}
                     >
-                      {o.label}
+                      {preset.label}
                     </button>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
-            </div>
 
-            <div className={panelClass} style={panelStyle}>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-subtle)" }}>
-                Этажность
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {floorsBtn("all")}
-                {floorsBtn("1")}
-                {floorsBtn("1.5")}
-                {floorsBtn("2")}
-              </div>
-            </div>
-
-            <div className={panelClass} style={panelStyle}>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-subtle)" }}>
-                Площадь, м²
-              </p>
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                <label className="space-y-1">
-                  <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-                    от
-                  </span>
-                  <input
-                    type="number"
-                    min={bounds.minArea}
-                    max={bounds.maxArea}
-                    value={areaMin}
-                    onChange={(e) => {
-                      const v = Number(e.target.value);
-                      if (!Number.isFinite(v)) return;
-                      applyRange({
-                        areaMin: Math.min(Math.max(v, bounds.minArea), areaMax),
-                        areaMax,
-                        priceMinRub,
-                        priceMaxRub,
-                      });
-                    }}
-                    className="w-full rounded-xl border px-3 py-2 text-sm"
-                    style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)", color: "var(--text)" }}
-                  />
-                </label>
-                <label className="space-y-1">
-                  <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-                    до
-                  </span>
-                  <input
-                    type="number"
-                    min={bounds.minArea}
-                    max={bounds.maxArea}
-                    value={areaMax}
-                    onChange={(e) => {
-                      const v = Number(e.target.value);
-                      if (!Number.isFinite(v)) return;
-                      applyRange({
-                        areaMin,
-                        areaMax: Math.max(Math.min(v, bounds.maxArea), areaMin),
-                        priceMinRub,
-                        priceMaxRub,
-                      });
-                    }}
-                    className="w-full rounded-xl border px-3 py-2 text-sm"
-                    style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)", color: "var(--text)" }}
-                  />
-                </label>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {[
-                  { label: "до 150 м²", aMin: bounds.minArea, aMax: Math.min(150, bounds.maxArea) },
-                  { label: "150–220 м²", aMin: Math.max(bounds.minArea, 150), aMax: Math.min(220, bounds.maxArea) },
-                  { label: "от 220 м²", aMin: Math.max(bounds.minArea, 220), aMax: bounds.maxArea },
-                ].map((preset) => (
-                  <button
-                    key={preset.label}
-                    type="button"
-                    onClick={() =>
-                      applyRange({
-                        areaMin: preset.aMin,
-                        areaMax: Math.max(preset.aMax, preset.aMin),
-                        priceMinRub,
-                        priceMaxRub,
-                      })
-                    }
-                    className="rounded-full border px-3 py-1.5 text-[12px] font-medium"
-                    style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className={panelClass} style={panelStyle}>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-subtle)" }}>
-                Стоимость, ₽
-              </p>
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                <label className="space-y-1">
-                  <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-                    от (млн)
-                  </span>
-                  <input
-                    type="number"
-                    step={0.5}
-                    min={bounds.minPriceRub / 1_000_000}
-                    max={bounds.maxPriceRub / 1_000_000}
-                    value={priceMinRub / 1_000_000}
-                    onChange={(e) => {
-                      const v = Number(e.target.value.replace(",", ".")) * 1_000_000;
-                      if (!Number.isFinite(v)) return;
-                      applyRange({
-                        areaMin,
-                        areaMax,
-                        priceMinRub: Math.min(Math.max(v, bounds.minPriceRub), priceMaxRub),
-                        priceMaxRub,
-                      });
-                    }}
-                    className="w-full rounded-xl border px-3 py-2 text-sm"
-                    style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)", color: "var(--text)" }}
-                  />
-                </label>
-                <label className="space-y-1">
-                  <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-                    до (млн)
-                  </span>
-                  <input
-                    type="number"
-                    step={0.5}
-                    min={bounds.minPriceRub / 1_000_000}
-                    max={bounds.maxPriceRub / 1_000_000}
-                    value={priceMaxRub / 1_000_000}
-                    onChange={(e) => {
-                      const v = Number(e.target.value.replace(",", ".")) * 1_000_000;
-                      if (!Number.isFinite(v)) return;
-                      applyRange({
-                        areaMin,
-                        areaMax,
-                        priceMinRub,
-                        priceMaxRub: Math.max(Math.min(v, bounds.maxPriceRub), priceMinRub),
-                      });
-                    }}
-                    className="w-full rounded-xl border px-3 py-2 text-sm"
-                    style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)", color: "var(--text)" }}
-                  />
-                </label>
-              </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {[
-                  { label: "до 10 млн", pMin: bounds.minPriceRub, pMax: Math.min(10_000_000, bounds.maxPriceRub) },
-                  {
-                    label: "10–15 млн",
-                    pMin: Math.max(bounds.minPriceRub, 10_000_000),
-                    pMax: Math.min(15_000_000, bounds.maxPriceRub),
-                  },
-                  { label: "от 15 млн", pMin: Math.max(bounds.minPriceRub, 15_000_000), pMax: bounds.maxPriceRub },
-                ].map((preset) => (
-                  <button
-                    key={preset.label}
-                    type="button"
-                    onClick={() =>
-                      applyRange({
-                        areaMin,
-                        areaMax,
-                        priceMinRub: preset.pMin,
-                        priceMaxRub: preset.pMax,
-                      })
-                    }
-                    className="rounded-full border px-3 py-1.5 text-[12px] font-medium"
-                    style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
+              <div className={filterSectionClass}>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-subtle)" }}>
+                  Стоимость, ₽
+                </p>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <label className="space-y-1">
+                    <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                      от (млн)
+                    </span>
+                    <input
+                      type="number"
+                      step={0.5}
+                      min={bounds.minPriceRub / 1_000_000}
+                      max={bounds.maxPriceRub / 1_000_000}
+                      value={priceMinRub / 1_000_000}
+                      onChange={(e) => {
+                        const v = Number(e.target.value.replace(",", ".")) * 1_000_000;
+                        if (!Number.isFinite(v)) return;
+                        applyRange({
+                          areaMin,
+                          areaMax,
+                          priceMinRub: Math.min(Math.max(v, bounds.minPriceRub), priceMaxRub),
+                          priceMaxRub,
+                        });
+                      }}
+                      className="w-full rounded-xl border px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                      style={{
+                        borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
+                        backgroundColor: "var(--bg)",
+                        color: "var(--text)",
+                      }}
+                    />
+                  </label>
+                  <label className="space-y-1">
+                    <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                      до (млн)
+                    </span>
+                    <input
+                      type="number"
+                      step={0.5}
+                      min={bounds.minPriceRub / 1_000_000}
+                      max={bounds.maxPriceRub / 1_000_000}
+                      value={priceMaxRub / 1_000_000}
+                      onChange={(e) => {
+                        const v = Number(e.target.value.replace(",", ".")) * 1_000_000;
+                        if (!Number.isFinite(v)) return;
+                        applyRange({
+                          areaMin,
+                          areaMax,
+                          priceMinRub,
+                          priceMaxRub: Math.max(Math.min(v, bounds.maxPriceRub), priceMinRub),
+                        });
+                      }}
+                      className="w-full rounded-xl border px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+                      style={{
+                        borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
+                        backgroundColor: "var(--bg)",
+                        color: "var(--text)",
+                      }}
+                    />
+                  </label>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {[
+                    { label: "до 10 млн", pMin: bounds.minPriceRub, pMax: Math.min(10_000_000, bounds.maxPriceRub) },
+                    {
+                      label: "10–15 млн",
+                      pMin: Math.max(bounds.minPriceRub, 10_000_000),
+                      pMax: Math.min(15_000_000, bounds.maxPriceRub),
+                    },
+                    { label: "от 15 млн", pMin: Math.max(bounds.minPriceRub, 15_000_000), pMax: bounds.maxPriceRub },
+                  ].map((preset) => (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() =>
+                        applyRange({
+                          areaMin,
+                          areaMax,
+                          priceMinRub: preset.pMin,
+                          priceMaxRub: preset.pMax,
+                        })
+                      }
+                      className="rounded-full border px-3 py-1.5 text-[12px] font-medium transition-colors hover:border-[color-mix(in_srgb,var(--accent)_35%,transparent)] hover:text-[var(--text)]"
+                      style={presetChipStyle()}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -493,7 +519,10 @@ export function ProjectsCatalogContent({ projects }: { projects: HouseProjectIte
                   className="flex rounded-full border p-1"
                   role="group"
                   aria-label="Вид списка"
-                  style={{ borderColor: "var(--border)", backgroundColor: "rgba(237, 235, 229, 0.5)" }}
+                  style={{
+                    borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
+                    backgroundColor: "color-mix(in srgb, var(--bg-secondary) 50%, var(--bg))",
+                  }}
                 >
                   <button
                     type="button"
@@ -573,8 +602,12 @@ export function ProjectsCatalogContent({ projects }: { projects: HouseProjectIte
                   key={preset.label}
                   type="button"
                   onClick={preset.fn}
-                  className="rounded-full border px-4 py-2 text-[13px] font-medium transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                  style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+                  className="rounded-full border px-4 py-2 text-[13px] font-medium transition-colors hover:border-[color-mix(in_srgb,var(--accent)_40%,transparent)] hover:text-[var(--text)]"
+                  style={{
+                    borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
+                    backgroundColor: "color-mix(in srgb, var(--bg) 75%, var(--bg-secondary))",
+                    color: "var(--text-muted)",
+                  }}
                 >
                   {preset.label}
                 </button>

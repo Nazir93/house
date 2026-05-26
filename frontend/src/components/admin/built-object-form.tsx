@@ -161,7 +161,7 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
           <AdminSelect value={form.material} onValueChange={(v) => set("material", v)} options={MATERIAL_OPTIONS} />
           <input value={form.area} onChange={(e) => set("area", e.target.value)} placeholder="Площадь" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
           <input value={form.floors} onChange={(e) => set("floors", e.target.value)} placeholder="Этажность (1, 1.5, 2…)" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
-          <input value={form.buildTerm} onChange={(e) => set("buildTerm", e.target.value)} placeholder="Срок строительства" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
+          <input value={form.buildTerm} onChange={(e) => set("buildTerm", e.target.value)} placeholder="211 или 211 дней" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <input value={form.foundation} onChange={(e) => set("foundation", e.target.value)} placeholder="Фундамент" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />

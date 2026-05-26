@@ -15,9 +15,11 @@ export async function generateMetadata() {
   });
 }
 
-export default async function PortfolioMapPage() {
+export default async function PortfolioMapPage(props: { searchParams?: Promise<{ object?: string }> }) {
+  const searchParams = await props.searchParams;
   await getPageMetaFields("/portfolio/map");
   const objects = await getBuiltObjects();
+  const initialObjectSlug = searchParams?.object?.trim() || null;
 
   return (
     <>
@@ -40,7 +42,7 @@ export default async function PortfolioMapPage() {
           </nav>
 
           <div className="mt-8">
-            <PortfolioObjectMapExplorer objects={objects} layout="page" />
+            <PortfolioObjectMapExplorer objects={objects} layout="page" initialObjectSlug={initialObjectSlug} />
           </div>
         </div>
       </section>
