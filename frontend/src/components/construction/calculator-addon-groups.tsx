@@ -6,6 +6,10 @@ import { ChevronDown, HelpCircle } from "lucide-react";
 import { CmsImage } from "@/components/ui/cms-image";
 import { formatRub } from "@/lib/construction-data";
 import { calculatorAddonGroupSum } from "@/lib/calculator-addon-group-sum";
+import type { CalculatorAddonGroup, CalculatorAddonItem } from "@/lib/project-calculator-types";
+import { cn } from "@/lib/utils";
+
+const rowDivide = "border-[color-mix(in_srgb,var(--text)_7%,transparent)]";
 
 type Props = {
   groups: CalculatorAddonGroup[];

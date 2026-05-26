@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { revalidatePublicReviews } from "@/lib/revalidate-public-content";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 import { sanitizeReviewAdminFields } from "@/lib/review-content";
+import type { ServiceType } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
         authorName: safe.authorName as string,
         authorPhoto: (safe.authorPhoto as string) || null,
         objectName: (safe.objectName as string) || null,
-        service: (safe.service as string) || null,
+        service: (safe.service as ServiceType | null) ?? null,
         rating: (safe.rating as number) ?? 5,
         text: safe.text as string,
         videoUrl: (safe.videoUrl as string) || null,

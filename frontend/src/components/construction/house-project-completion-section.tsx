@@ -36,6 +36,7 @@ import {
 } from "@/lib/project-transport-surcharge";
 import { TransportDistanceSlider } from "@/components/construction/transport-distance-slider";
 import { CalculatorAddonGroups } from "@/components/construction/calculator-addon-groups";
+import { cn } from "@/lib/utils";
 
 /** Граница без яркой белой обводки в тёмной теме */
 const softBorder = "border border-[color-mix(in_srgb,var(--text)_7%,transparent)]";

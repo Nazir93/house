@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { revalidatePublicReviews } from "@/lib/revalidate-public-content";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 import { sanitizeReviewAdminFields } from "@/lib/review-content";
+import type { ServiceType } from "@prisma/client";
 
 export async function PUT(request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -18,7 +19,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         ...(safe.authorName !== undefined && { authorName: safe.authorName as string }),
         ...(safe.authorPhoto !== undefined && { authorPhoto: (safe.authorPhoto as string) || null }),
         ...(safe.objectName !== undefined && { objectName: (safe.objectName as string) || null }),
-        ...(safe.service !== undefined && { service: (safe.service as string) || null }),
+        ...(safe.service !== undefined && { service: (safe.service as ServiceType | null) ?? null }),
         ...(safe.rating !== undefined && { rating: safe.rating as number }),
         ...(safe.text !== undefined && { text: safe.text as string }),
         ...(safe.videoUrl !== undefined && { videoUrl: (safe.videoUrl as string) || null }),

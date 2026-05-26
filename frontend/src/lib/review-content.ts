@@ -1,4 +1,7 @@
 import { z } from "zod";
+import type { ServiceType } from "@prisma/client";
+
+import { FULL_SERVICE_TYPE_DROPDOWN_OPTIONS } from "@/lib/service-type-admin-options";
 
 const CONTROL_CHARS = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g;
 const TAG_RE = /<[^>]*>/g;
@@ -57,5 +60,20 @@ export function sanitizeReviewAdminFields(body: Record<string, unknown>): Record
   if (typeof body.text === "string") {
     out.text = sanitizeReviewPlainText(body.text, 5000);
   }
+  if (body.service !== undefined) {
+    out.service = parseReviewServiceType(body.service);
+  }
   return out;
+}
+
+const SERVICE_TYPE_VALUES = new Set(
+  FULL_SERVICE_TYPE_DROPDOWN_OPTIONS.map((o) => o.value),
+);
+
+/** Приводит строку из админки к Prisma ServiceType или null. */
+export function parseReviewServiceType(raw: unknown): ServiceType | null {
+  if (raw == null || raw === "") return null;
+  const value = String(raw).trim();
+  if (!SERVICE_TYPE_VALUES.has(value)) return null;
+  return value as ServiceType;
 }
