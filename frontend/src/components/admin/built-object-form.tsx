@@ -12,6 +12,8 @@ import { CASE_STUDY_CONSTRUCTION_PHASES } from "@/lib/portfolio-case-study-phase
 import { initialPhaseMediaForm, mediaUrlsForForm } from "@/lib/built-object-admin-media";
 import { BUILT_OBJECT_MAP_DISTRICTS, BUILT_OBJECT_MAP_REGIONS } from "@/lib/built-object-map-taxonomy";
 import { BuiltObjectMapPicker } from "@/components/admin/built-object-map-picker";
+import { BuiltObjectHistoryEditor } from "@/components/admin/built-object-history-editor";
+import { historyStagesForAdmin, serializeConstructionHistory } from "@/lib/built-object-detail";
 
 const MATERIALS = [
   ["GAS_BLOCK", "Газобетон"],
@@ -70,10 +72,15 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
     phaseMedia: initialPhaseMediaForm(initial?.media),
     stages: mediaUrlsForForm(initial?.media, "BUILD_STAGE", null),
     videos: urls(initial?.media, "VIDEO"),
+    historyStages: historyStagesForAdmin(initial ?? {}),
   });
 
   function set(field: string, value: string | boolean) {
     setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function setHistoryStages(stages: typeof form.historyStages) {
+    setForm((prev) => ({ ...prev, historyStages: stages }));
   }
 
   const districtOptions = useMemo(() => {
@@ -124,7 +131,10 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
       const res = await fetch(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          constructionHistoryJson: serializeConstructionHistory(form.historyStages),
+        }),
       });
       const data = await res.json();
       if (!res.ok) setError(data?.error || "Не удалось сохранить объект.");
@@ -198,6 +208,10 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
           <label className="inline-flex items-center gap-2"><input type="checkbox" checked={form.published} onChange={(e) => set("published", e.target.checked)} /> Опубликован</label>
           <input value={form.order} onChange={(e) => set("order", e.target.value)} placeholder="Порядок" className="w-28 px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
         </div>
+      </AdminFormSection>
+
+      <AdminFormSection title="История строительства на сайте">
+        <BuiltObjectHistoryEditor stages={form.historyStages} onChange={setHistoryStages} />
       </AdminFormSection>
 
       <AdminFormSection title="Кейс на сайте — медиа по разделам">

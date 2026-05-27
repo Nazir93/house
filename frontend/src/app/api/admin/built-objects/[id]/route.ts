@@ -65,6 +65,9 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         ...(coords != null && { latitude: coords.latitude, longitude: coords.longitude }),
         ...(body.description !== undefined && { description: body.description }),
         ...(body.worksDescription !== undefined && { worksDescription: body.worksDescription || null }),
+        ...(body.constructionHistoryJson !== undefined && {
+          constructionHistoryJson: Array.isArray(body.constructionHistoryJson) ? body.constructionHistoryJson : null,
+        }),
         ...(body.telegramUrl !== undefined && { telegramUrl: body.telegramUrl || null }),
         ...(body.vkUrl !== undefined && { vkUrl: body.vkUrl || null }),
         ...(body.houseProjectId !== undefined && { houseProjectId: body.houseProjectId || null }),

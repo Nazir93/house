@@ -279,6 +279,8 @@ model BuiltObject {
   longitude           Float?
   description         String              @db.Text
   worksDescription    String?             @db.Text
+  /// Этапы «История строительства» на публичной карточке: [{ id, title, description }]
+  constructionHistoryJson Json?
   telegramUrl         String?
   vkUrl               String?
   houseProjectId      String?

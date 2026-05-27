@@ -31,11 +31,13 @@ import {
   houseTypeSubtitle,
   type BuiltObjectNavSectionId,
 } from "@/lib/built-object-detail";
+import { BuiltObjectHistoryCards } from "@/components/portfolio/built-object-history-cards";
 import { formatArticleBody } from "@/lib/html-content";
 import type { BuiltObjectItem } from "@/lib/construction-shared";
 import { cn } from "@/lib/utils";
 
-const CONSTRUCTION_GRID_LIMIT = 25;
+/** Сетка 5×3 на странице; остальное — «Смотреть все». */
+const CONSTRUCTION_GRID_LIMIT = 15;
 const HIGHLIGHT_MS = 1400;
 
 const CHAR_ICONS = [Ruler, Home, Layers, BedDouble, Bath, CalendarDays] as const;
@@ -187,7 +189,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
               </p>
 
               {characteristics.length > 0 ? (
-                <dl className="mt-5 grid grid-cols-2 gap-2.5 sm:gap-3">
+                <dl className="mt-5 grid grid-cols-3 gap-2 sm:gap-2.5">
                   {characteristics.map((row, i) => {
                     const Icon = CHAR_ICONS[i % CHAR_ICONS.length];
                     return (
@@ -291,11 +293,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                     {plainDescription}
                   </p>
                 )
-              ) : (
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                  Описание объекта скоро появится.
-                </p>
-              ),
+              ) : null,
               descriptionHtml && plainDescription.length > 90 ? (
                 <button
                   type="button"
@@ -343,11 +341,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                     </figure>
                   ))}
                 </div>
-              ) : (
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                  Планировки скоро появятся.
-                </p>
-              ),
+              ) : null,
             )}
 
             {sectionShell(
@@ -355,7 +349,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
               "Фото строительства",
               constructionPhotos.length > 0 ? (
                 <>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 lg:gap-2.5">
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-5 md:gap-2.5">
                     {visiblePhotos.map((photo, index) => (
                       <button
                         key={photo.id}
@@ -392,53 +386,10 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                     </button>
                   ) : null}
                 </>
-              ) : (
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-                  Фото хода строительства скоро появятся.
-                </p>
-              ),
+              ) : null,
             )}
 
-            {sectionShell(
-              "history",
-              "История строительства",
-              <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {historyCards.map((card) => (
-                  <article
-                    key={card.id}
-                    className="w-[min(100%,280px)] shrink-0 snap-start rounded-2xl border p-4"
-                    style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
-                  >
-                    <div className="flex items-start gap-2">
-                      <span
-                        className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold text-[var(--accent-contrast)]"
-                        style={{ backgroundColor: "var(--accent)" }}
-                        aria-hidden
-                      >
-                        ✓
-                      </span>
-                      <h3 className="text-sm font-bold leading-snug">{card.title}</h3>
-                    </div>
-                    {card.description ? (
-                      <p className="mt-3 text-[13px] leading-relaxed whitespace-pre-line" style={{ color: "var(--text-muted)" }}>
-                        {card.description}
-                      </p>
-                    ) : null}
-                    {card.imageUrls[0] ? (
-                      <div className="relative mt-3 aspect-[4/3] overflow-hidden rounded-xl bg-[var(--stone)]">
-                        <CmsImage
-                          src={card.imageUrls[0]}
-                          alt=""
-                          fill
-                          className="object-cover"
-                          sizes="280px"
-                        />
-                      </div>
-                    ) : null}
-                  </article>
-                ))}
-              </div>,
-            )}
+            {sectionShell("history", "История строительства", <BuiltObjectHistoryCards cards={historyCards} />)}
 
             {primaryVideo
               ? sectionShell(
@@ -463,9 +414,6 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                       <h3 className="font-heading text-lg font-bold md:text-xl">
                         {primaryVideo.label?.trim() || `Видеообзор дома «${object.title}»`}
                       </h3>
-                      <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                        Короткий обзор готового объекта: этапы, детали и результат строительства.
-                      </p>
                       <a
                         href={primaryVideo.url}
                         target="_blank"

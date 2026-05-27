@@ -83,6 +83,7 @@ export interface BuiltObjectItem {
   longitude?: number | null;
   description: string;
   worksDescription?: string | null;
+  constructionHistoryJson?: { id?: string; title: string; description: string }[] | null;
   telegramUrl?: string | null;
   vkUrl?: string | null;
   houseProjectSlug?: string | null;

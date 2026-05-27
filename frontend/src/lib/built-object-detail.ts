@@ -72,6 +72,64 @@ export type BuiltObjectHistoryCard = {
   imageUrls: string[];
 };
 
+export type BuiltObjectHistoryStageInput = {
+  id: string;
+  title: string;
+  description: string;
+};
+
+export function parseConstructionHistoryJson(raw: unknown): BuiltObjectHistoryStageInput[] | null {
+  if (!Array.isArray(raw) || raw.length === 0) return null;
+  const out: BuiltObjectHistoryStageInput[] = [];
+  for (let i = 0; i < raw.length; i++) {
+    const item = raw[i];
+    if (!item || typeof item !== "object" || Array.isArray(item)) continue;
+    const o = item as Record<string, unknown>;
+    const title = String(o.title ?? "").trim();
+    if (!title) continue;
+    const id = String(o.id ?? `stage-${i + 1}`).trim() || `stage-${i + 1}`;
+    const description = String(o.description ?? "").trim();
+    out.push({ id, title, description });
+  }
+  return out.length ? out : null;
+}
+
+export function defaultHistoryStagesFromObject(object: BuiltObjectItem): BuiltObjectHistoryStageInput[] {
+  return BUILT_OBJECT_HISTORY_SECTIONS.map((section) => ({
+    id: section.id,
+    title: section.title,
+    description: sectionDescription(object, section),
+  }));
+}
+
+export function historyStagesForAdmin(initial: {
+  constructionHistoryJson?: unknown;
+  foundation?: string | null;
+  walls?: string | null;
+  roof?: string | null;
+}): BuiltObjectHistoryStageInput[] {
+  const custom = parseConstructionHistoryJson(initial.constructionHistoryJson);
+  if (custom?.length) return custom;
+  return BUILT_OBJECT_HISTORY_SECTIONS.map((section) => {
+    const field = "textField" in section ? section.textField : undefined;
+    let description = "";
+    if (field === "foundation" && initial.foundation?.trim()) description = initial.foundation.trim();
+    if (field === "walls" && initial.walls?.trim()) description = initial.walls.trim();
+    if (field === "roof" && initial.roof?.trim()) description = initial.roof.trim();
+    return { id: section.id, title: section.title, description };
+  });
+}
+
+export function serializeConstructionHistory(stages: BuiltObjectHistoryStageInput[]) {
+  return stages
+    .map((s, i) => ({
+      id: s.id.trim() || `stage-${i + 1}`,
+      title: s.title.trim(),
+      description: s.description.trim(),
+    }))
+    .filter((s) => s.title.length > 0);
+}
+
 const NAV_LABELS: Record<BuiltObjectNavSectionId, string> = {
   description: "Описание",
   plans: "Планировки",
@@ -154,13 +212,15 @@ function sectionImages(object: BuiltObjectItem, phaseKeys: readonly string[]): s
 }
 
 export function getBuiltObjectHistoryCards(object: BuiltObjectItem): BuiltObjectHistoryCard[] {
-  return BUILT_OBJECT_HISTORY_SECTIONS.map((section) => {
-    const description = sectionDescription(object, section);
-    const imageUrls = sectionImages(object, section.phaseKeys);
+  const custom = parseConstructionHistoryJson(object.constructionHistoryJson);
+  const stages = custom?.length ? custom : defaultHistoryStagesFromObject(object);
+  return stages.map((stage, index) => {
+    const section = BUILT_OBJECT_HISTORY_SECTIONS.find((s) => s.id === stage.id);
+    const imageUrls = section ? sectionImages(object, section.phaseKeys) : [];
     return {
-      id: section.id,
-      title: section.title,
-      description,
+      id: stage.id || `stage-${index + 1}`,
+      title: stage.title,
+      description: stage.description,
       imageUrls,
     };
   });
@@ -188,8 +248,9 @@ export function getBuiltObjectVideos(object: BuiltObjectItem) {
 }
 
 export function builtObjectMapHref(object: BuiltObjectItem): string | null {
-  if (object.latitude == null || object.longitude == null) return null;
-  return `/portfolio/map?object=${encodeURIComponent(object.slug)}`;
+  const slug = object.slug?.trim();
+  if (!slug) return null;
+  return `/portfolio/map?object=${encodeURIComponent(slug)}`;
 }
 
 export function builtObjectCharacteristics(object: BuiltObjectItem) {

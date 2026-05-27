@@ -547,6 +547,9 @@ function mapBuiltObject(row: any): BuiltObjectItem {
     longitude: row.longitude,
     description: row.description,
     worksDescription: row.worksDescription,
+    constructionHistoryJson: Array.isArray(row.constructionHistoryJson)
+      ? (row.constructionHistoryJson as { id?: string; title: string; description: string }[])
+      : null,
     telegramUrl: row.telegramUrl,
     vkUrl: row.vkUrl,
     houseProjectSlug: row.houseProject?.slug ?? null,

@@ -83,24 +83,15 @@ function HeroPricingBlock({
           {state.tiers.map((tier, index) => (
             <li
               key={`${tier.id}-${index}`}
-              className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_140px_auto] gap-2 items-end"
+              className="grid grid-cols-1 sm:grid-cols-[1fr_160px_auto] gap-2 items-end"
             >
               <label className="min-w-0">
-                <span className={fieldLabel}>Материал</span>
+                <span className={fieldLabel}>Материал стен</span>
                 <input
                   value={tier.label}
                   onChange={(e) => setTier(index, { label: e.target.value })}
                   className={houseProjectBlockInputClass}
                   placeholder="Газоблок"
-                />
-              </label>
-              <label className="min-w-0">
-                <span className={fieldLabel}>Код (для системы)</span>
-                <input
-                  value={tier.id}
-                  onChange={(e) => setTier(index, { id: e.target.value })}
-                  className={houseProjectBlockInputClass}
-                  placeholder="gas"
                 />
               </label>
               <label className="min-w-0">

@@ -106,6 +106,26 @@
     -webkit-backdrop-filter: blur(16px) saturate(1.12);
   }
 
+  /* Слоган у логотипа: всегда одна строка, размер плавно уменьшается на узких экранах */
+  .header-tagline {
+    font-size: clamp(5.75px, 0.28vw + 4.75px, 10px);
+    letter-spacing: clamp(0.035em, 0.015em + 0.05vw, 0.11em);
+  }
+
+  @media (min-width: 1280px) {
+    .header-tagline {
+      font-size: clamp(7px, 0.22vw + 5.5px, 10px);
+      letter-spacing: 0.1em;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    .header-tagline {
+      font-size: 10px;
+      letter-spacing: 0.11em;
+    }
+  }
+
   [data-theme="light"] {
     color-scheme: light;
     --bg: #f6f6f4;

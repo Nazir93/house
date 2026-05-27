@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
         longitude: coords?.longitude ?? n(body.longitude),
         description: body.description || "",
         worksDescription: body.worksDescription || null,
+        constructionHistoryJson: Array.isArray(body.constructionHistoryJson) ? body.constructionHistoryJson : null,
         telegramUrl: body.telegramUrl || null,
         vkUrl: body.vkUrl || null,
         houseProjectId: body.houseProjectId || null,

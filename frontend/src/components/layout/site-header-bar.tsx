@@ -145,13 +145,13 @@ export function SiteHeaderBar() {
           <div className="flex min-w-0 shrink-0 items-stretch">
             <Link
               href="/"
-              className="group relative z-[2] flex min-w-0 shrink-0 items-center gap-2 rounded-sm py-0.5 no-underline transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 xl:gap-3"
+              className="group relative z-[2] flex min-w-0 max-w-[min(100%,38vw)] shrink items-center gap-2 rounded-sm py-0.5 no-underline transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 xl:max-w-[min(100%,32rem)] xl:gap-3"
               style={{ outlineColor: "var(--accent)" }}
               aria-label={`${SITE_NAME} — на главную`}
             >
-              <BrandLogo height={44} className="min-w-0 shrink-0" brightOnBackdrop={heroGlassLightInk} />
+              <BrandLogo height={44} className="shrink-0" brightOnBackdrop={heroGlassLightInk} />
               <p
-                className="hidden max-w-[200px] text-[9px] font-medium uppercase leading-snug tracking-[0.11em] transition-colors min-[1100px]:block xl:max-w-[260px] xl:tracking-[0.12em]"
+                className="header-tagline hidden min-w-0 font-medium uppercase leading-none whitespace-nowrap transition-colors min-[1100px]:block"
                 style={{ color: "var(--header-bar-muted)" }}
               >
                 {HEADER_TAGLINE}

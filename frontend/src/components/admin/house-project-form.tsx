@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react";
@@ -112,6 +113,7 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
   const [uploading, setUploading] = useState<"render" | "plan" | null>(null);
   const [uploadProgress, setUploadProgress] = useState("");
   const [error, setError] = useState("");
+  const [showAdvancedCalculator, setShowAdvancedCalculator] = useState(false);
 
   const jsonValid = useMemo(() => isValidJson(form.calculatorJson), [form.calculatorJson]);
 
@@ -288,7 +290,10 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
         </div>
       </AdminFormSection>
 
-      <AdminFormSection title="Калькулятор карточки проекта">
+      <AdminFormSection
+        title="Калькулятор на сайте"
+        subtitle="Категория дома и корректировка цены. Остальное считается автоматически по площади и прайсу."
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="space-y-1">
             <span className="block text-xs font-medium text-white/40">Категория дома (a–f)</span>
@@ -386,9 +391,12 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
       </AdminFormSection>
 
       <AdminFormSection
-        title="Блоки на карточке проекта"
-        subtitle="Цены в шапке, комплектация, график и кнопки навигации — обычные поля, сохраняются вместе с проектом."
+        title="Тексты и цены на странице проекта"
+        subtitle="Заполняйте как в обычной форме: списки, этапы, кнопки. Ничего вручную в JSON вводить не нужно."
       >
+        <p className="mb-5 rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-white/60 leading-relaxed">
+          Ниже — готовые шаблоны. Можно только поправить текст и цифры. Пустые поля на сайте не сломают страницу.
+        </p>
         <HouseProjectBlocksEditor
           completionGroups={form.completionGroups}
           onCompletionChange={(completionGroups) => set("completionGroups", completionGroups)}
@@ -401,27 +409,38 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
         />
 
         <div className="mt-8 pt-6 border-t border-white/[0.08]">
-          <AdminJsonEditor
-            label="Расширенный калькулятор (только для опытных)"
-            technicalName="calculatorJson"
-            hint="Таблицы этапов, карточка менеджера, транспорт. Цены коробки и опций — в блоке «Калькулятор карточки проекта» и в меню «Калькулятор проектов»."
-            value={form.calculatorJson}
-            onChange={(v) => set("calculatorJson", v)}
-            rows={12}
-            kind="calculator"
-            guide={
-              <>
-                <p>Оставьте пустым — на сайте всё работает без правок.</p>
-                <button
-                  type="button"
-                  onClick={() => set("calculatorJson", auroraCalculatorPresetJson())}
-                  className="mt-2 inline-flex items-center rounded-lg border border-white/15 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1]"
-                >
-                  Показать шаблон «Аврора»
-                </button>
-              </>
-            }
-          />
+          <button
+            type="button"
+            onClick={() => setShowAdvancedCalculator((v) => !v)}
+            className="flex items-center gap-2 text-sm font-medium text-white/50 hover:text-white/75"
+          >
+            {showAdvancedCalculator ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+            Расширенные настройки (для разработчика, обычно не нужны)
+          </button>
+          {showAdvancedCalculator ? (
+            <div className="mt-4">
+              <AdminJsonEditor
+                label="Технический JSON калькулятора"
+                hint="Не трогайте, если не уверены. Цены коробки и опций — в разделе «Калькулятор на сайте» и в меню «Калькулятор проектов»."
+                value={form.calculatorJson}
+                onChange={(v) => set("calculatorJson", v)}
+                rows={12}
+                kind="calculator"
+                guide={
+                  <>
+                    <p>Оставьте пустым — на сайте всё работает без правок.</p>
+                    <button
+                      type="button"
+                      onClick={() => set("calculatorJson", auroraCalculatorPresetJson())}
+                      className="mt-2 inline-flex items-center rounded-lg border border-white/15 bg-white/[0.06] px-3 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/[0.1]"
+                    >
+                      Показать шаблон «Аврора»
+                    </button>
+                  </>
+                }
+              />
+            </div>
+          ) : null}
         </div>
       </AdminFormSection>
     </div>
