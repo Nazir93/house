@@ -4,6 +4,12 @@ import Link from "next/link";
 import { Home, MapPin, X } from "lucide-react";
 import type { BuiltObjectItem } from "@/lib/construction-shared";
 import { getBuiltObjectCover } from "@/lib/construction-shared";
+import {
+  formatImplementationDays,
+  resolveBuiltObjectArea,
+  resolveBuiltObjectBathrooms,
+  resolveBuiltObjectRooms,
+} from "@/lib/built-object-detail";
 import { CmsImage } from "@/components/ui/cms-image";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +19,7 @@ function fmtCount(n: number | null | undefined): string {
 }
 
 function fmtFloors(f: number | null | undefined): string {
-  if (f == null || !Number.isFinite(f)) return "—";
+  if (f == null || !Number.isFinite(f) || f <= 0) return "—";
   if (Math.abs(f - 1.5) < 0.06) return "1,5 эт.";
   if (Math.abs(f - Math.round(f)) < 0.06) return `${Math.round(f)} эт.`;
   return `${String(f).replace(".", ",")} эт.`;
@@ -45,9 +51,9 @@ export function PortfolioObjectMapDrawer({ object, onClose }: Props) {
         aria-modal="true"
         aria-labelledby="map-drawer-title"
       >
-        {object.buildTerm ? (
+        {buildTermLabel ? (
           <div className="shrink-0 bg-[var(--accent)] px-4 py-2.5 text-center text-[12px] font-semibold text-white sm:text-sm">
-            Срок работ: {object.buildTerm}
+            Срок работ: {buildTermLabel}
           </div>
         ) : null}
 
@@ -94,22 +100,22 @@ export function PortfolioObjectMapDrawer({ object, onClose }: Props) {
             </div>
           )}
 
-          <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5">
+          <dl className="mt-5 grid grid-cols-2 gap-2.5 text-sm sm:gap-3">
+            <div className="min-w-0 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5">
               <dt className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-muted)]">Площадь</dt>
-              <dd className="mt-0.5 font-semibold text-[var(--text)]">{object.area != null ? `${object.area} м²` : "—"}</dd>
+              <dd className="mt-0.5 font-semibold text-[var(--text)]">{area != null ? `${area} м²` : "—"}</dd>
             </div>
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5">
+            <div className="min-w-0 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5">
               <dt className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-muted)]">Этажность</dt>
               <dd className="mt-0.5 font-semibold text-[var(--text)]">{fmtFloors(object.floors)}</dd>
             </div>
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5">
+            <div className="min-w-0 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5">
               <dt className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-muted)]">Спальни</dt>
-              <dd className="mt-0.5 font-semibold text-[var(--text)]">{fmtCount(object.linkedProjectRooms)}</dd>
+              <dd className="mt-0.5 font-semibold text-[var(--text)]">{fmtCount(rooms)}</dd>
             </div>
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5">
+            <div className="min-w-0 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5">
               <dt className="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--text-muted)]">Санузлы</dt>
-              <dd className="mt-0.5 font-semibold text-[var(--text)]">{fmtCount(object.linkedProjectBathrooms)}</dd>
+              <dd className="mt-0.5 font-semibold text-[var(--text)]">{fmtCount(bathrooms)}</dd>
             </div>
           </dl>
 
@@ -124,14 +130,6 @@ export function PortfolioObjectMapDrawer({ object, onClose }: Props) {
               Открыть проект в портфолио
             </Link>
           </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="mt-5 w-full text-center text-xs font-medium text-[var(--text-muted)] underline-offset-2 hover:text-[var(--text)] hover:underline"
-          >
-            Закрыть окно
-          </button>
         </div>
       </aside>
     </>

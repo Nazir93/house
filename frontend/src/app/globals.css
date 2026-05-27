@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  body {
+    overflow-x: clip;
+  }
+
   html {
     scroll-behavior: auto; /* Lenis handles smooth scroll */
     -webkit-font-smoothing: antialiased;

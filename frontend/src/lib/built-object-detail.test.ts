@@ -23,6 +23,7 @@ describe("built-object-detail", () => {
   it("formatFloorsLabel", () => {
     expect(formatFloorsLabel(1.5)).toBe("1,5 этажа");
     expect(formatFloorsLabel(2)).toBe("2 этажа");
+    expect(formatFloorsLabel(0)).toBeNull();
   });
 
   it("houseTypeSubtitle", () => {
@@ -64,6 +65,23 @@ describe("built-object-detail", () => {
     ]);
     expect(rows[5]?.value).toBe("211 дней");
     expect(rows.some((r) => /под ключ/i.test(r.label + r.value))).toBe(false);
+  });
+
+  it("builtObjectCharacteristics — всегда 6 полей, пустые как «—»", () => {
+    const rows = builtObjectCharacteristics({
+      id: "1",
+      slug: "m",
+      title: "Марьино",
+      material: "Кирпич",
+      buildTerm: "232",
+      description: "",
+      published: true,
+      order: 0,
+      media: [],
+    } as BuiltObjectItem);
+    expect(rows).toHaveLength(6);
+    expect(rows[0]?.value).toBe("—");
+    expect(rows[5]?.value).toBe("232 дня");
   });
 
   it("builtObjectCharacteristics — подтягивает площадь и комнаты из проекта", () => {

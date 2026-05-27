@@ -147,7 +147,7 @@ export function houseTypeSubtitle(material: string): string {
 }
 
 export function formatFloorsLabel(floors: number | null | undefined): string | null {
-  if (floors == null || !Number.isFinite(floors)) return null;
+  if (floors == null || !Number.isFinite(floors) || floors <= 0) return null;
   if (floors === 1) return "1 этаж";
   if (floors === 1.5) return "1,5 этажа";
   if (floors === 2) return "2 этажа";
@@ -253,19 +253,19 @@ export function builtObjectMapHref(object: BuiltObjectItem): string | null {
   return `/portfolio/map?object=${encodeURIComponent(slug)}`;
 }
 
-function resolveBuiltObjectArea(object: BuiltObjectItem): number | null {
+export function resolveBuiltObjectArea(object: BuiltObjectItem): number | null {
   if (object.area != null && object.area > 0) return object.area;
   if (object.linkedProjectArea != null && object.linkedProjectArea > 0) return object.linkedProjectArea;
   return null;
 }
 
-function resolveBuiltObjectRooms(object: BuiltObjectItem): number | null {
+export function resolveBuiltObjectRooms(object: BuiltObjectItem): number | null {
   if (object.rooms != null && object.rooms > 0) return object.rooms;
   if (object.linkedProjectRooms != null && object.linkedProjectRooms > 0) return object.linkedProjectRooms;
   return null;
 }
 
-function resolveBuiltObjectBathrooms(object: BuiltObjectItem): number | null {
+export function resolveBuiltObjectBathrooms(object: BuiltObjectItem): number | null {
   if (object.bathrooms != null && object.bathrooms > 0) return object.bathrooms;
   if (object.linkedProjectBathrooms != null && object.linkedProjectBathrooms > 0) return object.linkedProjectBathrooms;
   return null;
@@ -280,19 +280,23 @@ export function builtObjectCharacteristics(object: BuiltObjectItem) {
   const area = resolveBuiltObjectArea(object);
   const rooms = resolveBuiltObjectRooms(object);
   const bathrooms = resolveBuiltObjectBathrooms(object);
+  const floorsLabel = formatFloorsLabel(object.floors);
+  const implementationLabel = formatImplementationDays(object.buildTerm);
 
   return [
-    area != null ? { label: "Площадь дома", value: `${area} м²` } : null,
-    materialLabel ? { label: "Материал стен", value: materialLabel } : null,
-    formatFloorsLabel(object.floors) ? { label: "Этажность", value: formatFloorsLabel(object.floors)! } : null,
-    rooms != null ? { label: "Спальни", value: roomCountLabel(rooms, "спальня", "спальни", "спален") } : null,
-    bathrooms != null
-      ? { label: "Санузлы", value: roomCountLabel(bathrooms, "санузел", "санузла", "санузлов") }
-      : null,
-    formatImplementationDays(object.buildTerm)
-      ? { label: "Реализация проекта", value: formatImplementationDays(object.buildTerm)! }
-      : null,
-  ].filter((row): row is { label: string; value: string } => Boolean(row));
+    { label: "Площадь дома", value: area != null ? `${area} м²` : "—" },
+    { label: "Материал стен", value: materialLabel || "—" },
+    { label: "Этажность", value: floorsLabel || "—" },
+    {
+      label: "Спальни",
+      value: rooms != null ? roomCountLabel(rooms, "спальня", "спальни", "спален") : "—",
+    },
+    {
+      label: "Санузлы",
+      value: bathrooms != null ? roomCountLabel(bathrooms, "санузел", "санузла", "санузлов") : "—",
+    },
+    { label: "Реализация проекта", value: implementationLabel || "—" },
+  ];
 }
 
 export function getBuiltObjectNavItems(object: BuiltObjectItem): BuiltObjectNavItem[] {

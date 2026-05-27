@@ -162,9 +162,9 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
 
       <article className="pb-20 pt-[calc(var(--site-header-sticky-offset)+0.75rem)]" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
         <div className="container mx-auto max-w-[1320px] px-4 sm:px-5">
-          {/* Верхний блок */}
-          <div className="grid gap-8 lg:grid-cols-[minmax(280px,340px)_minmax(0,1fr)] lg:items-start lg:gap-10">
-            <aside className="lg:sticky lg:top-[calc(var(--site-header-sticky-offset)+0.75rem)]">
+          {/* Верхний блок: на мобиле сначала фото, затем инфо */}
+          <div className="grid gap-6 sm:gap-8 lg:grid-cols-[minmax(280px,340px)_minmax(0,1fr)] lg:items-start lg:gap-10">
+            <aside className="order-2 min-w-0 lg:order-1 lg:sticky lg:top-[calc(var(--site-header-sticky-offset)+0.75rem)]">
               <nav className="text-[11px] tracking-[0.02em] sm:text-[12px]" style={{ color: "var(--text-muted)" }} aria-label="Хлебные крошки">
                 <Link href="/" className="hover:text-[var(--accent)]">
                   Главная
@@ -188,33 +188,34 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                 {houseTypeSubtitle(object.material)}
               </p>
 
-              {characteristics.length > 0 ? (
-                <dl className="mt-5 grid grid-cols-3 gap-2 sm:gap-2.5">
-                  {characteristics.map((row, i) => {
-                    const Icon = CHAR_ICONS[i % CHAR_ICONS.length];
-                    return (
-                      <div
-                        key={row.label}
-                        className="rounded-xl border px-3 py-2.5"
-                        style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
+              <dl className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2.5">
+                {characteristics.map((row, i) => {
+                  const Icon = CHAR_ICONS[i % CHAR_ICONS.length];
+                  return (
+                    <div
+                      key={row.label}
+                      className="min-w-0 rounded-xl border px-2.5 py-2.5 sm:px-3"
+                      style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
+                    >
+                      <dt
+                        className="flex items-start gap-1 text-[9px] font-semibold uppercase leading-tight tracking-[0.08em] sm:items-center sm:gap-1.5 sm:text-[10px] sm:tracking-[0.1em]"
+                        style={{ color: "var(--text-muted)" }}
                       >
-                        <dt className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.1em]" style={{ color: "var(--text-muted)" }}>
-                          <Icon className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
-                          {row.label}
-                        </dt>
-                        <dd className="mt-1 text-sm font-semibold leading-snug">{row.value}</dd>
-                      </div>
-                    );
-                  })}
-                </dl>
-              ) : null}
+                        <Icon className="mt-0.5 h-3 w-3 shrink-0 opacity-70 sm:mt-0 sm:h-3.5 sm:w-3.5" aria-hidden />
+                        <span className="min-w-0 break-words">{row.label}</span>
+                      </dt>
+                      <dd className="mt-1 text-xs font-semibold leading-snug sm:text-sm">{row.value}</dd>
+                    </div>
+                  );
+                })}
+              </dl>
 
               <div className="mt-5 flex flex-col gap-2.5">
                 {object.houseProjectSlug ? (
                   <Link
                     href={`/projects/${object.houseProjectSlug}`}
-                    className="inline-flex min-h-[46px] items-center justify-center rounded-xl px-4 py-3 text-center text-sm font-bold text-[var(--accent-contrast)] transition hover:opacity-95"
-                    style={{ backgroundColor: "var(--graphite)" }}
+                    className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl px-4 py-3 text-center text-sm font-bold text-[var(--accent-contrast)] transition hover:opacity-95"
+                    style={{ backgroundColor: "var(--accent)" }}
                   >
                     Хочу такой дом
                   </Link>
@@ -222,7 +223,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                 {mapHref ? (
                   <Link
                     href={mapHref}
-                    className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border px-4 py-3 text-center text-sm font-semibold transition hover:border-[var(--accent)]"
+                    className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-center text-sm font-semibold transition hover:border-[var(--accent)]"
                     style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
                   >
                     <MapPinned className="h-4 w-4 shrink-0" aria-hidden />
@@ -231,7 +232,10 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                 ) : null}
               </div>
 
-              <nav className="mt-6 space-y-1" aria-label="Разделы объекта">
+              <nav
+                className="mt-6 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-col lg:gap-0 lg:space-y-1 lg:overflow-visible lg:pb-0"
+                aria-label="Разделы объекта"
+              >
                 {navItems.map((item) => {
                   const active = activeNav === item.id;
                   return (
@@ -240,7 +244,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                       type="button"
                       onClick={() => scrollToSection(item.id)}
                       className={cn(
-                        "flex w-full items-center justify-between gap-2 rounded-xl px-3.5 py-2.5 text-left text-sm font-medium transition-colors",
+                        "flex shrink-0 items-center justify-between gap-2 rounded-xl px-3.5 py-2.5 text-left text-sm font-medium transition-colors lg:w-full",
                         active ? "text-[var(--accent)]" : "text-[var(--text-muted)] hover:text-[var(--text)]",
                       )}
                       style={{
@@ -257,8 +261,8 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
               </nav>
             </aside>
 
-            <div className="min-w-0">
-              <div className="relative aspect-[16/10] overflow-hidden rounded-[1.35rem] bg-[var(--stone)] sm:aspect-[16/9] lg:min-h-[420px] lg:aspect-auto lg:h-[min(520px,58vh)]">
+            <div className="order-1 min-w-0 lg:order-2">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-[1.25rem] bg-[var(--stone)] sm:aspect-[16/10] sm:rounded-[1.35rem] md:aspect-[16/9] lg:min-h-[420px] lg:aspect-auto lg:h-[min(520px,58vh)]">
                 {hero ? (
                   <CmsImage
                     src={hero.url}
