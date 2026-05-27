@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AppWindow,
   BrickWall,
@@ -244,16 +244,17 @@ export function HouseProjectCompletionSection({
       quoteData.quote.transportSurchargeRub
     : computeTransportSurchargeRub(priced, selectedTransportBand);
 
-  const grandTotal =
-    catalogMode && quoteData?.quote ? quoteData.quote.grandTotalRub : priced + surcharge;
+  const catalogQuote = quoteData?.quote;
+
+  const grandTotal = catalogMode && catalogQuote ? catalogQuote.grandTotalRub : priced + surcharge;
 
   const leadCalcData = useMemo(() => {
-    if (!catalogMode || !quoteData?.quote || !categoryId) return undefined;
+    if (!catalogMode || !catalogQuote || !categoryId) return undefined;
     return buildProjectCalculatorLeadPayload({
       project,
       tierLabel: tier?.label ?? "",
       categoryId,
-      quote: quoteData.quote,
+      quote: catalogQuote,
       facadeSlug,
       engineeringSlugs: engineeringList,
       constructionSlugs: constructionList,
@@ -262,6 +263,7 @@ export function HouseProjectCompletionSection({
     });
   }, [
     catalogMode,
+    catalogQuote,
     categoryId,
     constructionList,
     engineeringList,
@@ -269,27 +271,26 @@ export function HouseProjectCompletionSection({
     partOfSoulContext.pricingFloors,
     partOfSoulContext.roofPitch,
     project,
-    quoteData?.quote,
     tier?.label,
   ]);
 
-  const toggleEngineering = useCallback((slug: string) => {
+  function toggleEngineering(slug: string) {
     setEngineeringSlugs((prev) => {
       const next = new Set(prev);
       if (next.has(slug)) next.delete(slug);
       else next.add(slug);
       return next;
     });
-  }, []);
+  }
 
-  const toggleConstruction = useCallback((slug: string) => {
+  function toggleConstruction(slug: string) {
     setConstructionSlugs((prev) => {
       const next = new Set(prev);
       if (next.has(slug)) next.delete(slug);
       else next.add(slug);
       return next;
     });
-  }, []);
+  }
 
   function scrollAddons() {
     document.getElementById("completion-addons")?.scrollIntoView({ behavior: "smooth", block: "start" });
