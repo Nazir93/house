@@ -1,11 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Loader2, RefreshCw, Save } from "lucide-react";
 import { AdminFormCollapsible, AdminFormSection } from "@/components/admin/admin-form-section";
 import {
-  ADMIN_CALCULATOR_HELP,
   CALCULATOR_GROUP_LABELS,
   CALCULATOR_WALL_LABELS,
   calculatorCategoryTitle,
@@ -350,25 +348,6 @@ export function AdminCalculatorEditor() {
       ) : null}
 
       <AdminFormSection
-        title="Как это устроено"
-        subtitle="Краткая инструкция — что менять здесь, а что в карточке проекта."
-      >
-        <ol className="list-decimal list-inside space-y-2 text-sm text-white/70 leading-relaxed">
-          {ADMIN_CALCULATOR_HELP.map((line) => (
-            <li key={line}>{line}</li>
-          ))}
-        </ol>
-        <p className="text-sm text-white/50 pt-2">
-          Привязка к проекту:{" "}
-          <Link href="/admin/house-projects" className="text-emerald-400/90 underline hover:text-emerald-300">
-            Проекты домов
-          </Link>
-          {" → "}
-          блок «Калькулятор на сайте» (категория a–f и корректировка %).
-        </p>
-      </AdminFormSection>
-
-      <AdminFormSection
         title="Общие настройки"
         subtitle="Влияют на надбавку за малую площадь и отмостку в формулах калькулятора."
       >
@@ -610,9 +589,8 @@ function OptionsTable({
         <tbody>
           {rows.map((o) => (
             <tr key={o.id} className="border-t border-white/5">
-              <td className="py-2 pr-3 align-middle">
-                <span className="text-white/90">{o.name}</span>
-                <span className="block text-[10px] text-white/30 font-mono">{o.slug}</span>
+              <td className="py-2 pr-3 align-middle text-white/90">
+                {o.name}
               </td>
               <td className="py-2 pr-3 align-middle">
                 <input

@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  ADMIN_CALCULATOR_HELP,
   calculatorCategoryTitle,
   CALCULATOR_GROUP_LABELS,
   CALCULATOR_WALL_LABELS,
@@ -26,10 +25,5 @@ describe("admin-calculator-ui (админка калькулятора)", () => 
     expect(calculatorCategoryTitle("a")).toContain("Категория a");
     expect(calculatorCategoryTitle("a")).toContain("двухскатная");
     expect(calculatorCategoryTitle("f", "2 этажа")).toContain("2 этажа");
-  });
-
-  it("инструкция для админки не пустая", () => {
-    expect(ADMIN_CALCULATOR_HELP.length).toBeGreaterThanOrEqual(3);
-    expect(ADMIN_CALCULATOR_HELP[0]).toContain("прайс");
   });
 });
