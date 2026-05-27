@@ -25,8 +25,8 @@ export default async function AccountPaymentsPage() {
   const upcoming = buildUpcomingPaymentSummary(payments);
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <h1 className="font-heading text-2xl font-bold">Платежи</h1>
+    <div className="space-y-5 sm:space-y-6 w-full min-w-0">
+      <h1 className="font-heading text-xl font-bold sm:text-2xl">Платежи</h1>
 
       {upcoming ? (
         <AccountPaymentsNextCard summary={upcoming} />
@@ -35,9 +35,12 @@ export default async function AccountPaymentsPage() {
       )}
 
       <div
-        className="rounded-2xl border overflow-hidden"
+        className="rounded-xl sm:rounded-2xl border overflow-hidden min-w-0"
         style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)" }}
       >
+        <div className="border-b px-4 py-3 sm:px-5" style={{ borderColor: "var(--border)" }}>
+          <h2 className="text-sm font-semibold sm:text-base">График платежей</h2>
+        </div>
         <ClientPaymentsScheduleTable payments={payments} variant="full" />
       </div>
     </div>

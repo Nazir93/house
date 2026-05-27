@@ -14,6 +14,7 @@ import {
   LogOut,
   Menu,
   Bell,
+  Globe,
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
@@ -195,6 +196,19 @@ export function AccountShell({
           </button>
         </div>
 
+        <div className="px-2 pb-2">
+          <Link
+            href="/"
+            onClick={() => setMobileOpen(false)}
+            title={sidebarWide ? undefined : "На сайт"}
+            className="account-nav-link flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-[13px] font-medium transition-colors hover:bg-[color-mix(in_srgb,var(--text)_6%,transparent)] dark:hover:bg-white/[0.06]"
+            style={{ color: "var(--text-muted)" }}
+          >
+            <Globe className="h-[17px] w-[17px] shrink-0 opacity-90" aria-hidden />
+            <span className="account-sidebar-label flex-1 text-left truncate">На сайт</span>
+          </Link>
+        </div>
+
         <div
           className="account-sidebar-support-text p-3 text-[11px] border-t space-y-0.5"
           style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
@@ -230,6 +244,16 @@ export function AccountShell({
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 rounded-xl p-2 sm:px-3 sm:py-2 text-xs font-semibold border transition hover:opacity-90"
+              style={{ borderColor: "var(--border)", color: "var(--text)" }}
+              title="На сайт"
+              aria-label="На сайт"
+            >
+              <Globe className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+              <span className="hidden sm:inline">На сайт</span>
+            </Link>
             <ThemeToggle variant="outline" />
             <Link
               href={bellHref}

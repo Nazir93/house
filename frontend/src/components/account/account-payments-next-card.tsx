@@ -26,18 +26,22 @@ export function AccountPaymentsNextCard({
       >
         {compact ? "Ближайший платёж" : "Следующий платёж"}
       </p>
-      <p className={`font-bold mt-1 ${compact ? "text-2xl" : "text-3xl mt-2"}`}>
+      <p className={`font-bold mt-1 break-words ${compact ? "text-xl sm:text-2xl" : "text-2xl sm:text-3xl mt-2"}`}>
         {formatRub(kopeksToRubles(totalAmountKopeks))}
       </p>
-      <ul className={`${compact ? "mt-2 space-y-1" : "mt-3 space-y-1.5"} list-none p-0 m-0`}>
+      <ul className={`${compact ? "mt-2 space-y-1.5" : "mt-3 space-y-2"} list-none p-0 m-0`}>
         {payments.map((payment) => (
           <li
             key={payment.id}
-            className={compact ? "text-sm" : "text-base"}
+            className={`${compact ? "text-sm" : "text-sm sm:text-base"} leading-snug text-pretty`}
             style={{ color: "var(--text-muted)" }}
           >
-            {payment.label}
-            {payment.dueDate ? ` · до ${formatDateRu(payment.dueDate)}` : ""}
+            <span className="font-medium text-[var(--text)]">{payment.label}</span>
+            {payment.dueDate ? (
+              <span className="block sm:inline sm:before:content-['·'] sm:before:mx-1">
+                до {formatDateRu(payment.dueDate)}
+              </span>
+            ) : null}
           </li>
         ))}
       </ul>

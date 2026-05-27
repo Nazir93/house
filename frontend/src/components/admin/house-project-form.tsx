@@ -292,7 +292,7 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
 
       <AdminFormSection
         title="Калькулятор на сайте"
-        subtitle="Категория дома и корректировка цены. Остальное считается автоматически по площади и прайсу."
+        subtitle="Категория дома (a–f) и корректировка цены в %. Цены коробки, фасадов и опций — в разделе админки «Калькулятор проектов»."
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="space-y-1">

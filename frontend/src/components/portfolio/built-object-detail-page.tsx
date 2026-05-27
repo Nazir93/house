@@ -390,7 +390,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                     <button
                       type="button"
                       onClick={() => window.open(primaryVideo.url, "_blank", "noopener,noreferrer")}
-                      className="group relative aspect-video overflow-hidden rounded-2xl bg-black/80 ring-1 ring-[color-mix(in_srgb,var(--text)_8%,transparent)]"
+                      className="group relative aspect-video overflow-hidden rounded-2xl bg-black/80"
                     >
                       {hero ? (
                         <CmsImage src={hero.url} alt="" fill className="object-cover opacity-80 transition group-hover:opacity-90" sizes="560px" />
