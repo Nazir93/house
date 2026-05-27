@@ -14,6 +14,7 @@ import { BUILT_OBJECT_MAP_DISTRICTS, BUILT_OBJECT_MAP_REGIONS } from "@/lib/buil
 import { BuiltObjectMapPicker } from "@/components/admin/built-object-map-picker";
 import { BuiltObjectHistoryEditor } from "@/components/admin/built-object-history-editor";
 import { historyStagesForAdmin, serializeConstructionHistory } from "@/lib/built-object-detail";
+import type { AdminHouseProjectOption } from "@/lib/load-admin-house-project-options";
 
 const MATERIALS = [
   ["GAS_BLOCK", "Газобетон"],
@@ -39,7 +40,13 @@ function urls(media: any[] | undefined, type: string) {
   return mediaUrlsForForm(media, type);
 }
 
-export function BuiltObjectForm({ initial }: { initial?: any }) {
+export function BuiltObjectForm({
+  initial,
+  houseProjects = [],
+}: {
+  initial?: any;
+  houseProjects?: AdminHouseProjectOption[];
+}) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -49,6 +56,8 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
     slug: initial?.slug || "",
     material: initial?.material || "GAS_BLOCK",
     area: String(initial?.area ?? ""),
+    rooms: String(initial?.rooms ?? ""),
+    bathrooms: String(initial?.bathrooms ?? ""),
     buildTerm: initial?.buildTerm || "",
     foundation: initial?.foundation || "",
     walls: initial?.walls || "",
@@ -81,6 +90,29 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
 
   function setHistoryStages(stages: typeof form.historyStages) {
     setForm((prev) => ({ ...prev, historyStages: stages }));
+  }
+
+  const houseProjectOptions = useMemo(
+    () => [
+      { value: "", label: "Без привязки к проекту" },
+      ...houseProjects.map((p) => ({
+        value: p.id,
+        label: `${p.title} — /projects/${p.slug}${p.published ? "" : " (не опубликован)"}`,
+      })),
+    ],
+    [houseProjects],
+  );
+
+  function applyHouseProjectLink(projectId: string) {
+    const project = houseProjects.find((p) => p.id === projectId);
+    setForm((prev) => {
+      const next = { ...prev, houseProjectId: projectId };
+      if (!project) return next;
+      if (!prev.area.trim()) next.area = String(project.area);
+      if (!prev.rooms.trim()) next.rooms = String(project.rooms);
+      if (!prev.bathrooms.trim()) next.bathrooms = String(project.bathrooms);
+      return next;
+    });
   }
 
   const districtOptions = useMemo(() => {
@@ -167,9 +199,21 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
           <input value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Дом в д. Вырица" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
           <input value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="slug" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label className="block">
+            <span className="mb-1 block text-xs font-medium text-white/45">Типовой проект (кнопка «Хочу такой дом»)</span>
+            <AdminSelect
+              value={form.houseProjectId}
+              onValueChange={applyHouseProjectLink}
+              options={houseProjectOptions}
+            />
+          </label>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           <AdminSelect value={form.material} onValueChange={(v) => set("material", v)} options={MATERIAL_OPTIONS} />
-          <input value={form.area} onChange={(e) => set("area", e.target.value)} placeholder="Площадь" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
+          <input value={form.area} onChange={(e) => set("area", e.target.value)} placeholder="Площадь, м²" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
+          <input value={form.rooms} onChange={(e) => set("rooms", e.target.value)} placeholder="Спальни" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
+          <input value={form.bathrooms} onChange={(e) => set("bathrooms", e.target.value)} placeholder="Санузлы" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
           <input value={form.floors} onChange={(e) => set("floors", e.target.value)} placeholder="Этажность (1, 1.5, 2…)" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
           <input value={form.buildTerm} onChange={(e) => set("buildTerm", e.target.value)} placeholder="211 или 211 дней" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
         </div>
@@ -290,8 +334,7 @@ export function BuiltObjectForm({ initial }: { initial?: any }) {
           />
           <textarea value={form.videos} onChange={(e) => set("videos", e.target.value)} rows={4} placeholder="Видео / reels — по одному URL на строку" className="w-full min-h-[96px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input value={form.houseProjectId} onChange={(e) => set("houseProjectId", e.target.value)} placeholder="ID типового проекта" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input value={form.telegramUrl} onChange={(e) => set("telegramUrl", e.target.value)} placeholder="Telegram" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
           <input value={form.vkUrl} onChange={(e) => set("vkUrl", e.target.value)} placeholder="VK" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
         </div>

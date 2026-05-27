@@ -45,14 +45,14 @@ describe("built-object-detail", () => {
       title: "Марьино",
       material: "Кирпич",
       area: 142,
+      rooms: 3,
+      bathrooms: 2,
       floors: 2,
       buildTerm: "211",
       description: "",
       published: true,
       order: 0,
       media: [],
-      linkedProjectRooms: 3,
-      linkedProjectBathrooms: 2,
     } as BuiltObjectItem);
     expect(rows.map((r) => r.label)).toEqual([
       "Площадь дома",
@@ -64,6 +64,24 @@ describe("built-object-detail", () => {
     ]);
     expect(rows[5]?.value).toBe("211 дней");
     expect(rows.some((r) => /под ключ/i.test(r.label + r.value))).toBe(false);
+  });
+
+  it("builtObjectCharacteristics — подтягивает площадь и комнаты из проекта", () => {
+    const rows = builtObjectCharacteristics({
+      id: "1",
+      slug: "m",
+      title: "Марьино",
+      material: "Кирпич",
+      description: "",
+      published: true,
+      order: 0,
+      media: [],
+      linkedProjectArea: 142,
+      linkedProjectRooms: 3,
+      linkedProjectBathrooms: 2,
+    } as BuiltObjectItem);
+    expect(rows.find((r) => r.label === "Площадь дома")?.value).toBe("142 м²");
+    expect(rows.find((r) => r.label === "Спальни")?.value).toContain("3");
   });
 
   it("по умолчанию 8 этапов истории", () => {

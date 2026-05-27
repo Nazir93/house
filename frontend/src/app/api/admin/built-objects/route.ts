@@ -20,6 +20,12 @@ function nf(value: unknown): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function ni(value: unknown): number | null {
+  if (value === "" || value == null) return null;
+  const parsed = parseInt(String(value), 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
 export async function GET(request: NextRequest) {
   const gate = await requireAdminApiSession();
   if (!gate.ok) return gate.response;
@@ -51,6 +57,8 @@ export async function POST(request: NextRequest) {
         title: body.title || "Построенный дом",
         material: body.material || "GAS_BLOCK",
         area: n(body.area),
+        rooms: ni(body.rooms),
+        bathrooms: ni(body.bathrooms),
         buildTerm: body.buildTerm || null,
         foundation: body.foundation || null,
         walls: body.walls || null,

@@ -264,6 +264,8 @@ model BuiltObject {
   title               String
   material            BuiltObjectMaterial @default(GAS_BLOCK)
   area                Int?
+  rooms               Int?
+  bathrooms           Int?
   buildTerm           String?
   foundation          String?
   walls               String?

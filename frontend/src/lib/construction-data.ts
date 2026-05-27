@@ -534,6 +534,8 @@ function mapBuiltObject(row: any): BuiltObjectItem {
     title: row.title,
     material: builtObjectMaterialLabel(row.material),
     area: row.area,
+    rooms: row.rooms ?? null,
+    bathrooms: row.bathrooms ?? null,
     buildTerm: row.buildTerm,
     foundation: row.foundation,
     walls: row.walls,
@@ -552,7 +554,9 @@ function mapBuiltObject(row: any): BuiltObjectItem {
       : null,
     telegramUrl: row.telegramUrl,
     vkUrl: row.vkUrl,
-    houseProjectSlug: row.houseProject?.slug ?? null,
+    houseProjectSlug:
+      row.houseProject?.published && row.houseProject?.slug ? row.houseProject.slug : null,
+    linkedProjectArea: row.houseProject?.area ?? null,
     linkedProjectRooms: row.houseProject?.rooms ?? null,
     linkedProjectBathrooms: row.houseProject?.bathrooms ?? null,
     published: row.published,
@@ -692,7 +696,9 @@ const getBuiltObjectsCached = unstable_cache(
         orderBy: [{ order: "asc" }, { createdAt: "desc" }],
         include: {
           media: { orderBy: [{ type: "asc" }, { order: "asc" }] },
-          houseProject: { select: { slug: true, rooms: true, bathrooms: true } },
+          houseProject: {
+            select: { slug: true, rooms: true, bathrooms: true, area: true, published: true },
+          },
         },
       });
       if (rows.length > 0) return rows.map(mapBuiltObject);
@@ -725,7 +731,9 @@ const getBuiltObjectBySlugCached = unstable_cache(
         where: { slug },
         include: {
           media: { orderBy: [{ type: "asc" }, { order: "asc" }] },
-          houseProject: { select: { slug: true, rooms: true, bathrooms: true } },
+          houseProject: {
+            select: { slug: true, rooms: true, bathrooms: true, area: true, published: true },
+          },
         },
       });
       if (row?.published) return mapBuiltObject(row);

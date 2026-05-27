@@ -17,6 +17,12 @@ function nf(value: unknown): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function ni(value: unknown): number | null {
+  if (value === "" || value == null) return null;
+  const parsed = parseInt(String(value), 10);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
 export async function GET(_request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const gate = await requireAdminApiSession();
@@ -51,6 +57,8 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         ...(body.title !== undefined && { title: body.title }),
         ...(body.material !== undefined && { material: body.material }),
         ...(body.area !== undefined && { area: n(body.area) }),
+        ...(body.rooms !== undefined && { rooms: ni(body.rooms) }),
+        ...(body.bathrooms !== undefined && { bathrooms: ni(body.bathrooms) }),
         ...(body.buildTerm !== undefined && { buildTerm: body.buildTerm || null }),
         ...(body.foundation !== undefined && { foundation: body.foundation || null }),
         ...(body.walls !== undefined && { walls: body.walls || null }),

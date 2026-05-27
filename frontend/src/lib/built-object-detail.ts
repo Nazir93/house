@@ -253,24 +253,41 @@ export function builtObjectMapHref(object: BuiltObjectItem): string | null {
   return `/portfolio/map?object=${encodeURIComponent(slug)}`;
 }
 
+function resolveBuiltObjectArea(object: BuiltObjectItem): number | null {
+  if (object.area != null && object.area > 0) return object.area;
+  if (object.linkedProjectArea != null && object.linkedProjectArea > 0) return object.linkedProjectArea;
+  return null;
+}
+
+function resolveBuiltObjectRooms(object: BuiltObjectItem): number | null {
+  if (object.rooms != null && object.rooms > 0) return object.rooms;
+  if (object.linkedProjectRooms != null && object.linkedProjectRooms > 0) return object.linkedProjectRooms;
+  return null;
+}
+
+function resolveBuiltObjectBathrooms(object: BuiltObjectItem): number | null {
+  if (object.bathrooms != null && object.bathrooms > 0) return object.bathrooms;
+  if (object.linkedProjectBathrooms != null && object.linkedProjectBathrooms > 0) return object.linkedProjectBathrooms;
+  return null;
+}
+
+function roomCountLabel(count: number, one: string, few: string, many: string): string {
+  return `${count} ${count === 1 ? one : count < 5 ? few : many}`;
+}
+
 export function builtObjectCharacteristics(object: BuiltObjectItem) {
   const materialLabel = object.material?.trim() || null;
+  const area = resolveBuiltObjectArea(object);
+  const rooms = resolveBuiltObjectRooms(object);
+  const bathrooms = resolveBuiltObjectBathrooms(object);
 
   return [
-    object.area ? { label: "Площадь дома", value: `${object.area} м²` } : null,
+    area != null ? { label: "Площадь дома", value: `${area} м²` } : null,
     materialLabel ? { label: "Материал стен", value: materialLabel } : null,
     formatFloorsLabel(object.floors) ? { label: "Этажность", value: formatFloorsLabel(object.floors)! } : null,
-    object.linkedProjectRooms != null
-      ? {
-          label: "Спальни",
-          value: `${object.linkedProjectRooms} ${object.linkedProjectRooms === 1 ? "спальня" : object.linkedProjectRooms < 5 ? "спальни" : "спален"}`,
-        }
-      : null,
-    object.linkedProjectBathrooms != null
-      ? {
-          label: "Санузлы",
-          value: `${object.linkedProjectBathrooms} ${object.linkedProjectBathrooms === 1 ? "санузел" : object.linkedProjectBathrooms < 5 ? "санузла" : "санузлов"}`,
-        }
+    rooms != null ? { label: "Спальни", value: roomCountLabel(rooms, "спальня", "спальни", "спален") } : null,
+    bathrooms != null
+      ? { label: "Санузлы", value: roomCountLabel(bathrooms, "санузел", "санузла", "санузлов") }
       : null,
     formatImplementationDays(object.buildTerm)
       ? { label: "Реализация проекта", value: formatImplementationDays(object.buildTerm)! }

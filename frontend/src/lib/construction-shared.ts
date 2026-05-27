@@ -68,6 +68,8 @@ export interface BuiltObjectItem {
   title: string;
   material: string;
   area?: number | null;
+  rooms?: number | null;
+  bathrooms?: number | null;
   buildTerm?: string | null;
   foundation?: string | null;
   walls?: string | null;
@@ -87,7 +89,8 @@ export interface BuiltObjectItem {
   telegramUrl?: string | null;
   vkUrl?: string | null;
   houseProjectSlug?: string | null;
-  /** Комнаты/санузлы из привязанного типового проекта (для превью на карте). */
+  /** Площадь / комнаты из привязанного типового проекта (если на объекте не заданы). */
+  linkedProjectArea?: number | null;
   linkedProjectRooms?: number | null;
   linkedProjectBathrooms?: number | null;
   published: boolean;
