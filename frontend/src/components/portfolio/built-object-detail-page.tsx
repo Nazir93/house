@@ -188,23 +188,24 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                 {houseTypeSubtitle(object.material)}
               </p>
 
-              <dl className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2.5">
+              <dl className="mt-5 grid grid-cols-2 gap-2 min-[400px]:grid-cols-3 min-[400px]:gap-2.5">
                 {characteristics.map((row, i) => {
                   const Icon = CHAR_ICONS[i % CHAR_ICONS.length];
                   return (
                     <div
                       key={row.label}
-                      className="min-w-0 rounded-xl border px-2.5 py-2.5 sm:px-3"
+                      className="min-w-0 rounded-xl border px-2 py-2 min-[400px]:px-2.5 min-[400px]:py-2.5"
                       style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
                     >
-                      <dt
-                        className="flex items-start gap-1 text-[9px] font-semibold uppercase leading-tight tracking-[0.08em] sm:items-center sm:gap-1.5 sm:text-[10px] sm:tracking-[0.1em]"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        <Icon className="mt-0.5 h-3 w-3 shrink-0 opacity-70 sm:mt-0 sm:h-3.5 sm:w-3.5" aria-hidden />
-                        <span className="min-w-0 break-words">{row.label}</span>
+                      <dt className="flex flex-col gap-1" style={{ color: "var(--text-muted)" }}>
+                        <Icon className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
+                        <span className="text-[8px] font-medium leading-[1.25] min-[400px]:text-[9px] lg:text-[10px] lg:font-semibold lg:uppercase lg:tracking-[0.08em]">
+                          {row.label}
+                        </span>
                       </dt>
-                      <dd className="mt-1 text-xs font-semibold leading-snug sm:text-sm">{row.value}</dd>
+                      <dd className="mt-1 text-[11px] font-semibold leading-snug min-[400px]:text-xs lg:text-sm">
+                        {row.value}
+                      </dd>
                     </div>
                   );
                 })}

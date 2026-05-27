@@ -34,7 +34,7 @@ export function BuiltObjectHistoryCards({ cards }: { cards: BuiltObjectHistoryCa
           <article
             key={card.id}
             className={cn(
-              "flex w-[min(82vw,272px)] shrink-0 snap-start flex-col rounded-xl border p-4 transition-shadow duration-200",
+              "flex w-[min(82vw,248px)] shrink-0 snap-start flex-col rounded-xl border p-3 transition-shadow duration-200 lg:p-4",
               "lg:w-auto lg:min-w-0 lg:self-start",
               isOpen && hasBody && "shadow-[0_6px_24px_rgb(var(--accent-rgb)/0.07)]",
             )}
@@ -46,36 +46,42 @@ export function BuiltObjectHistoryCards({ cards }: { cards: BuiltObjectHistoryCa
               disabled={!hasBody}
               aria-expanded={isOpen}
               className={cn(
-                "flex w-full items-center gap-3 text-left",
+                "flex w-full items-start gap-2 text-left",
                 !hasBody && "cursor-default",
               )}
             >
               <span
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[11px] font-bold tabular-nums leading-none text-[var(--accent-contrast)]"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-[10px] font-bold tabular-nums leading-none text-[var(--accent-contrast)] lg:h-8 lg:w-8 lg:rounded-lg lg:text-[11px]"
                 style={{ backgroundColor: "var(--accent)" }}
                 aria-hidden
               >
                 {String(index + 1).padStart(2, "0")}
               </span>
-              <span className="min-w-0 flex-1 font-heading text-sm font-bold leading-snug" style={{ color: "var(--text)" }}>
+              <span
+                className={cn(
+                  "min-w-0 flex-1 font-heading text-[11px] font-bold leading-[1.3] lg:text-xs",
+                  !isOpen && "line-clamp-2",
+                )}
+                style={{ color: "var(--text)" }}
+              >
                 {card.title}
               </span>
               {hasBody ? (
                 <ChevronDown
                   className={cn(
-                    "h-5 w-5 shrink-0 text-[var(--accent)] transition-transform duration-200",
+                    "mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)] transition-transform duration-200 lg:h-5 lg:w-5",
                     isOpen && "rotate-180",
                   )}
                   strokeWidth={2.25}
                   aria-hidden
                 />
               ) : (
-                <span className="h-5 w-5 shrink-0" aria-hidden />
+                <span className="mt-0.5 h-4 w-4 shrink-0 lg:h-5 lg:w-5" aria-hidden />
               )}
             </button>
             {isOpen && hasBody ? (
               <p
-                className="mt-3 border-t pt-3 text-[13px] leading-[1.55] whitespace-pre-line"
+                className="mt-3 border-t pt-3 text-xs leading-[1.55] whitespace-pre-line lg:text-[13px]"
                 style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
               >
                 {card.description}
