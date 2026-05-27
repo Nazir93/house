@@ -34,7 +34,7 @@ const SERVICES = [
   {
     title: "Фундамент",
     href: "/services/fundament" as const,
-    description: "Надёжное основание под тип грунта и проект вашего дома.",
+    description: "Надежное основание под тип грунта и проект вашего дома.",
   },
   {
     title: "Кровля",
@@ -55,28 +55,18 @@ const SERVICES = [
 
 function VideoPanel({ videoRef }: { videoRef: Ref<HTMLVideoElement> }) {
   return (
-    <div className="relative w-full">
-      <div
-        className="pointer-events-none absolute -inset-3 rounded-[2rem] opacity-60 md:-inset-5 md:rounded-[2.5rem]"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 70% at 50% 40%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%)",
-        }}
-        aria-hidden
-      />
-      <div className="relative overflow-hidden rounded-[1.5rem] shadow-[0_24px_64px_rgb(var(--accent-rgb)/0.12)] md:rounded-[2rem]">
-        <div className="relative aspect-[4/3] min-h-[min(52vw,320px)] w-full overflow-hidden rounded-[inherit] sm:min-h-[340px] md:aspect-[3/4] md:min-h-[420px] lg:min-h-[480px]">
-          <video
-            ref={videoRef}
-            src={SERVICES_VIDEO_SRC}
-            muted
-            playsInline
-            preload="auto"
-            className="absolute inset-0 h-full w-full object-cover object-center"
-            style={{ pointerEvents: "none" }}
-            aria-hidden="true"
-          />
-        </div>
+    <div className="relative w-full overflow-hidden rounded-[22px] shadow-[0_20px_56px_rgba(0,0,0,0.08)] md:rounded-[30px]">
+      <div className="relative aspect-[16/10] max-h-[min(38vh,260px)] w-full overflow-hidden rounded-[inherit] md:aspect-[4/3] md:max-h-none">
+        <video
+          ref={videoRef}
+          src={SERVICES_VIDEO_SRC}
+          muted
+          playsInline
+          preload="auto"
+          className="absolute inset-0 h-full w-full object-cover object-center"
+          style={{ pointerEvents: "none" }}
+          aria-hidden="true"
+        />
       </div>
     </div>
   );
@@ -90,16 +80,13 @@ function ServiceProgressBars({
   className?: string;
 }) {
   return (
-    <div className={cn("flex items-center gap-2", className)} aria-hidden>
+    <div className={cn("flex items-center gap-1.5 md:gap-2", className)} aria-hidden>
       {SERVICES.map((_, i) => {
         const fill = Math.max(0, Math.min(scrollProgress * SERVICES.length - i, 1));
         return (
-          <div
-            key={i}
-            className="h-1 flex-1 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--text)_8%,transparent)] md:h-1.5"
-          >
+          <div key={i} className="h-0.5 flex-1 overflow-hidden rounded-full bg-[var(--border)]/65 md:h-1">
             <div
-              className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-200 ease-linear"
+              className="h-full bg-[var(--accent)] transition-[width] duration-200 ease-linear"
               style={{ width: `${fill * 100}%` }}
             />
           </div>
@@ -123,22 +110,11 @@ function ServiceSlideStack({
 
   return (
     <div className={cn("relative", className)} aria-live="polite">
-      <div className="mb-5 flex items-end justify-between gap-4 md:mb-8">
-        <p
-          className="font-heading text-[clamp(3.5rem,14vw,6.5rem)] font-bold leading-[0.85] tabular-nums tracking-[-0.04em]"
-          style={{ color: "color-mix(in srgb, var(--accent) 22%, var(--text))" }}
-          aria-hidden
-        >
-          {String(displayNumber).padStart(2, "0")}
-        </p>
-        <p className="pb-1 text-right text-[11px] font-semibold tabular-nums tracking-[0.2em] text-[var(--text-muted)] md:text-xs">
-          <span className="text-[var(--text)]">{String(displayNumber).padStart(2, "0")}</span>
-          <span className="mx-1.5 opacity-40">/</span>
-          {String(SERVICES.length).padStart(2, "0")}
-        </p>
-      </div>
+      <p className="mb-4 text-[11px] font-semibold tabular-nums tracking-[0.18em] text-[var(--text-muted)] md:text-xs">
+        {String(displayNumber).padStart(2, "0")} / {String(SERVICES.length).padStart(2, "0")}
+      </p>
 
-      <div className="relative min-h-[8.5rem] overflow-hidden md:min-h-[11rem] lg:min-h-[12rem]">
+      <div className="relative min-h-[5.5rem] overflow-hidden md:min-h-[9.5rem] lg:min-h-[10.5rem]">
         {SERVICES.map((item, idx) => {
           const visual = resolveClientsChooseSlideVisual(idx, baseIndex, localProgress, SERVICES.length);
 
@@ -155,16 +131,16 @@ function ServiceSlideStack({
               }}
               aria-hidden={!visual.visible}
             >
-              <h3 className="font-heading text-[clamp(1.75rem,5.5vw,3.25rem)] font-bold leading-[1.05] tracking-[-0.03em] text-[var(--text)]">
+              <p className="border-l-[3px] border-[var(--accent)] pl-4 font-heading text-[clamp(1.35rem,2.8vw,2.05rem)] font-bold uppercase leading-[1.08] tracking-[-0.02em] text-[var(--text)] md:border-l-[4px] md:pl-6 md:text-[clamp(1.55rem,2.2vw,2.35rem)]">
                 <Link
                   href={item.href}
-                  className="inline-block rounded-sm underline-offset-[6px] transition-colors hover:text-[var(--accent)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]"
+                  className="rounded-sm underline-offset-4 transition-colors hover:text-[var(--accent)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
                   tabIndex={visual.visible ? 0 : -1}
                 >
                   {item.title}
                 </Link>
-              </h3>
-              <p className="mt-4 max-w-[36ch] text-[15px] leading-[1.55] text-[var(--text-muted)] md:mt-5 md:text-lg md:leading-relaxed lg:max-w-[42ch]">
+              </p>
+              <p className="mt-3 max-w-xl pl-[calc(1rem+3px)] text-[14px] leading-relaxed text-[var(--text-muted)] md:mt-4 md:pl-[calc(1.5rem+4px)] md:text-[15px] lg:text-base">
                 {item.description}
               </p>
             </div>
@@ -309,7 +285,7 @@ export function ClientsChooseVideoSection() {
     <section
       ref={sectionRef}
       className={cn(
-        "relative touch-pan-y scroll-mt-[var(--site-header-sticky-offset)]",
+        "relative touch-pan-y scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)]",
         "h-[calc(var(--clients-choose-scroll-vh-mobile)*1vh*var(--clients-choose-count))]",
         "md:h-[calc(var(--clients-choose-scroll-vh-desktop)*1vh*var(--clients-choose-count))]",
       )}
@@ -318,7 +294,7 @@ export function ClientsChooseVideoSection() {
           "--clients-choose-count": SERVICES.length,
           "--clients-choose-scroll-vh-mobile": SCROLL_VH_PER_ITEM_MOBILE,
           "--clients-choose-scroll-vh-desktop": SCROLL_VH_PER_ITEM_DESKTOP,
-          backgroundColor: "var(--bg-secondary)",
+          backgroundColor: "var(--bg)",
         } as CSSProperties
       }
       aria-labelledby="clients-choose-video-heading"
@@ -329,37 +305,37 @@ export function ClientsChooseVideoSection() {
           "top-[var(--site-header-sticky-offset)]",
           "h-[calc(100dvh-var(--site-header-sticky-offset))]",
         )}
-        style={{ backgroundColor: "var(--bg-secondary)" }}
+        style={{ backgroundColor: "var(--bg)" }}
       >
-        <div className="mx-auto flex h-full min-h-0 w-full max-w-[1440px] flex-col lg:flex-row lg:items-center lg:justify-between lg:gap-12 lg:px-10 xl:gap-16 xl:px-14">
-          <div className="order-2 flex min-h-0 min-w-0 flex-1 flex-col justify-center px-5 pb-8 pt-5 sm:px-8 md:px-10 lg:order-1 lg:max-w-[52%] lg:px-0 lg:py-10">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[var(--accent)] md:text-xs">
+        <div className="mx-auto flex h-full min-h-0 w-full max-w-[1380px] flex-col md:flex-row md:items-center md:justify-between md:gap-8 md:px-8 lg:gap-10 lg:px-12">
+          <div className="shrink-0 px-4 pt-3 sm:px-6 md:order-2 md:flex-none md:w-[46%] md:px-0 md:pt-0">
+            <div className="mx-auto w-full max-w-[640px] md:max-w-[560px]">
+              <VideoPanel videoRef={videoRef} />
+              <ServiceProgressBars scrollProgress={scrollProgress} className="mt-3 md:mt-4" />
+            </div>
+          </div>
+
+          <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center px-4 pb-6 pt-4 sm:px-6 md:order-1 md:max-w-[560px] md:px-0 md:pb-0 md:pt-0">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)] md:text-xs">
               Что мы делаем
             </p>
             <h2
               id="clients-choose-video-heading"
-              className="mt-2 text-balance font-heading text-[clamp(1.75rem,5vw,3rem)] font-bold leading-[1.08] tracking-[-0.03em] text-[var(--text)] md:mt-3"
+              className="mt-2 text-balance font-heading text-[clamp(1.25rem,3.8vw,2rem)] font-bold uppercase leading-[1.14] tracking-[-0.02em] text-[var(--text)] md:mt-3 md:text-[clamp(1.5rem,2.5vw,2.35rem)]"
             >
               Наши услуги
             </h2>
 
-            <ServiceSlideStack scrollProgress={scrollProgress} className="mt-6 md:mt-10" />
+            <ServiceSlideStack scrollProgress={scrollProgress} className="mt-5 md:mt-8" />
 
-            <div className="mt-8 md:mt-12">
+            <div className="mt-6 md:mt-10">
               <Link
                 href="/services"
-                className="inline-flex min-h-[48px] items-center gap-2 rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-bold text-[var(--accent-contrast)] transition hover:opacity-95 md:min-h-[52px] md:px-8 md:text-base"
+                className="inline-flex w-fit items-center gap-1.5 text-[13px] font-semibold text-[var(--text)] underline-offset-4 transition hover:text-[var(--accent)] hover:underline sm:text-sm"
               >
                 Все услуги
-                <ArrowUpRight className="h-5 w-5 shrink-0" strokeWidth={2.25} aria-hidden />
+                <ArrowUpRight className="h-4 w-4 shrink-0 opacity-80" strokeWidth={2} aria-hidden />
               </Link>
-            </div>
-          </div>
-
-          <div className="order-1 shrink-0 px-5 pb-4 pt-2 sm:px-8 md:px-10 lg:order-2 lg:flex-none lg:w-[44%] lg:px-0 lg:pb-8 lg:pt-0 lg:py-10 xl:w-[42%]">
-            <div className="mx-auto w-full lg:max-w-[560px]">
-              <VideoPanel videoRef={videoRef} />
-              <ServiceProgressBars scrollProgress={scrollProgress} className="mt-4 md:mt-5" />
             </div>
           </div>
         </div>

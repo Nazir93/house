@@ -182,18 +182,18 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                 {houseTypeSubtitle(object.material)}
               </p>
 
-              <dl className="mt-5 grid grid-cols-2 gap-2 min-[400px]:grid-cols-3 min-[400px]:gap-2.5">
+              <dl className="mt-5 grid grid-cols-2 gap-x-2.5 gap-y-2 sm:gap-x-3">
                 {characteristics.map((row, i) => {
                   const Icon = CHAR_ICONS[i % CHAR_ICONS.length];
                   return (
-                    <div key={row.label} className="min-w-0 py-1">
-                      <dt className="flex flex-col gap-1" style={{ color: "var(--text-muted)" }}>
+                    <div key={row.label} className="min-w-0">
+                      <dt className="flex flex-col gap-0.5" style={{ color: "var(--text-muted)" }}>
                         <Icon className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
-                        <span className="text-[8px] font-medium leading-[1.25] min-[400px]:text-[9px] lg:text-[10px] lg:font-semibold lg:uppercase lg:tracking-[0.08em]">
+                        <span className="text-[9px] font-medium leading-[1.2] text-balance sm:text-[10px] lg:text-[11px]">
                           {row.label}
                         </span>
                       </dt>
-                      <dd className="mt-1 text-[11px] font-semibold leading-snug min-[400px]:text-xs lg:text-sm">
+                      <dd className="mt-0.5 text-[11px] font-semibold leading-snug sm:text-xs">
                         {row.value}
                       </dd>
                     </div>
