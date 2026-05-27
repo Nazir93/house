@@ -33,6 +33,10 @@ type Props = {
 export function PortfolioObjectMapDrawer({ object, onClose }: Props) {
   const cover = getBuiltObjectCover(object);
   const isConstruction = object.siteStatus === "UNDER_CONSTRUCTION";
+  const area = resolveBuiltObjectArea(object);
+  const rooms = resolveBuiltObjectRooms(object);
+  const bathrooms = resolveBuiltObjectBathrooms(object);
+  const buildTermLabel = formatImplementationDays(object.buildTerm) ?? object.buildTerm?.trim() ?? null;
 
   return (
     <>
