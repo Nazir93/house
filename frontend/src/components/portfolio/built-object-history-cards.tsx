@@ -34,11 +34,11 @@ export function BuiltObjectHistoryCards({ cards }: { cards: BuiltObjectHistoryCa
           <article
             key={card.id}
             className={cn(
-              "flex w-[min(82vw,248px)] shrink-0 snap-start flex-col rounded-xl border p-3 transition-shadow duration-200 lg:p-4",
+              "flex w-[min(82vw,248px)] shrink-0 snap-start flex-col rounded-xl p-3 transition-shadow duration-200 lg:p-4",
               "lg:w-auto lg:min-w-0 lg:self-start",
-              isOpen && hasBody && "shadow-[0_6px_24px_rgb(var(--accent-rgb)/0.07)]",
+              isOpen && hasBody && "shadow-[0_4px_20px_rgb(var(--accent-rgb)/0.06)]",
             )}
-            style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
+            style={{ backgroundColor: "var(--stone)" }}
           >
             <button
               type="button"
@@ -81,8 +81,8 @@ export function BuiltObjectHistoryCards({ cards }: { cards: BuiltObjectHistoryCa
             </button>
             {isOpen && hasBody ? (
               <p
-                className="mt-3 border-t pt-3 text-xs leading-[1.55] whitespace-pre-line lg:text-[13px]"
-                style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+                className="mt-3 pt-1 text-xs leading-[1.55] whitespace-pre-line lg:text-[13px]"
+                style={{ color: "var(--text-muted)" }}
               >
                 {card.description}
               </p>

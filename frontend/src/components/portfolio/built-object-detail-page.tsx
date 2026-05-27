@@ -126,15 +126,9 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
       <section
         id={sectionDomId(id)}
         className={cn(
-          "scroll-mt-[calc(var(--site-header-sticky-offset)+1rem)] rounded-[1.25rem] border p-5 transition-[box-shadow,background-color] duration-500 md:p-7",
-          highlighted && "ring-2 ring-[color-mix(in_srgb,var(--accent)_45%,transparent)]",
+          "scroll-mt-[calc(var(--site-header-sticky-offset)+1rem)] transition-[box-shadow] duration-500",
+          highlighted && "rounded-[1.25rem] ring-2 ring-[color-mix(in_srgb,var(--accent)_35%,transparent)]",
         )}
-        style={{
-          borderColor: "var(--border)",
-          backgroundColor: highlighted
-            ? "color-mix(in srgb, var(--accent) 8%, var(--bg-secondary))"
-            : "var(--bg-secondary)",
-        }}
       >
         <div className="flex items-start justify-between gap-3">
           <h2 className="font-heading text-lg font-bold md:text-xl" style={{ color: "var(--text)" }}>
@@ -192,11 +186,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                 {characteristics.map((row, i) => {
                   const Icon = CHAR_ICONS[i % CHAR_ICONS.length];
                   return (
-                    <div
-                      key={row.label}
-                      className="min-w-0 rounded-xl border px-2 py-2 min-[400px]:px-2.5 min-[400px]:py-2.5"
-                      style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
-                    >
+                    <div key={row.label} className="min-w-0 py-1">
                       <dt className="flex flex-col gap-1" style={{ color: "var(--text-muted)" }}>
                         <Icon className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
                         <span className="text-[8px] font-medium leading-[1.25] min-[400px]:text-[9px] lg:text-[10px] lg:font-semibold lg:uppercase lg:tracking-[0.08em]">
@@ -224,8 +214,8 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                 {mapHref ? (
                   <Link
                     href={mapHref}
-                    className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-center text-sm font-semibold transition hover:border-[var(--accent)]"
-                    style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
+                    className="inline-flex min-h-[46px] w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-center text-sm font-semibold transition hover:opacity-90"
+                    style={{ backgroundColor: "var(--stone)" }}
                   >
                     <MapPinned className="h-4 w-4 shrink-0" aria-hidden />
                     Объект на карте
@@ -318,11 +308,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
               plans.length > 0 ? (
                 <div className={cn("grid gap-4", plans.length > 1 ? "md:grid-cols-2" : "max-w-2xl")}>
                   {plans.map((plan, index) => (
-                    <figure
-                      key={plan.id}
-                      className="group relative overflow-hidden rounded-2xl border bg-[var(--bg)]"
-                      style={{ borderColor: "var(--border)" }}
-                    >
+                    <figure key={plan.id} className="group relative overflow-hidden rounded-2xl bg-[var(--stone)]">
                       <div className="relative aspect-[4/3] min-h-[240px] sm:min-h-[280px] md:min-h-[320px]">
                         <CmsImage
                           src={plan.url}
@@ -340,7 +326,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                           <Maximize2 className="h-4 w-4" aria-hidden />
                         </button>
                       </div>
-                      <figcaption className="border-t px-4 py-3 text-sm font-semibold" style={{ borderColor: "var(--border)" }}>
+                      <figcaption className="px-1 py-3 text-sm font-semibold">
                         {plan.label?.trim() || (index === 0 ? "План 1-го этажа" : `План ${index + 1}-го этажа`)}
                       </figcaption>
                     </figure>
@@ -367,7 +353,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                             index,
                           )
                         }
-                        className="relative aspect-square overflow-hidden rounded-lg bg-[var(--stone)] ring-1 ring-[color-mix(in_srgb,var(--text)_6%,transparent)] transition hover:ring-[var(--accent)]"
+                        className="relative aspect-square overflow-hidden rounded-lg bg-[var(--stone)] transition-opacity hover:opacity-90"
                       >
                         <CmsImage
                           src={photo.url}
@@ -383,8 +369,8 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                     <button
                       type="button"
                       onClick={() => setShowAllPhotos(true)}
-                      className="mt-5 inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-semibold transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                      style={{ borderColor: "var(--border)" }}
+                      className="mt-5 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition hover:text-[var(--accent)]"
+                      style={{ backgroundColor: "var(--stone)" }}
                     >
                       <Expand className="h-4 w-4" aria-hidden />
                       Смотреть все ({constructionPhotos.length})
