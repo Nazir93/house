@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import { getPageMeta } from "@/lib/get-page-meta";
 import { SITE_NAME } from "@/lib/constants";
 import { getHouseProjects } from "@/lib/construction-data";
@@ -15,17 +14,11 @@ export async function generateMetadata() {
   });
 }
 
-export default async function ProjectsPage() {
-  const projects = await getHouseProjects();
-  return (
-    <Suspense
-      fallback={
-        <section className="min-h-[40vh] pt-28 pb-20" style={{ backgroundColor: "var(--bg)" }}>
-          <p className="container mx-auto px-5 text-center text-[var(--text-muted)]">Загрузка каталога…</p>
-        </section>
-      }
-    >
-      <ProjectsCatalogContent projects={projects} />
-    </Suspense>
-  );
+export default async function ProjectsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const [projects, sp] = await Promise.all([getHouseProjects(), searchParams]);
+  return <ProjectsCatalogContent projects={projects} searchParams={sp} />;
 }

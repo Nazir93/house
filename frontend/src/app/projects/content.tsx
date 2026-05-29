@@ -2,16 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { ArrowRight, LayoutGrid, LayoutList, Search, SlidersHorizontal } from "lucide-react";
 import { formatRub, getProjectRenders, type HouseProjectItem } from "@/lib/construction-data";
 import {
   buildProjectsSearchParams,
+  hasCustomProjectsCatalogFilters,
   MATERIAL_OPTIONS,
-  parseFloorsParam,
-  parseMaterialParam,
-  parseSortParam,
+  parseProjectsCatalogSearchParams,
   projectMatchesAreaPrice,
+  projectMatchesCatalogFiltersExceptRange,
   projectMatchesFloors,
   projectMatchesMaterial,
   projectMatchesQuery,
@@ -25,7 +25,8 @@ import { SiteSelect } from "@/components/ui/site-select";
 
 const PAGE_SIZE = 6;
 
-function parseNumParam(v: string | null, fallback: number): number {
+function parseNumParam(v: string | null | undefined, fallback: number): number {
+  if (v == null || String(v).trim() === "") return fallback;
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
 }
@@ -35,19 +36,21 @@ const filterShellClass =
 const filterSectionClass =
   "border-b border-[color-mix(in_srgb,var(--text)_7%,transparent)] px-4 py-4 last:border-b-0 md:px-5 md:py-5";
 
-export function ProjectsCatalogContent({ projects }: { projects: HouseProjectItem[] }) {
+export function ProjectsCatalogContent({
+  projects,
+  searchParams,
+}: {
+  projects: HouseProjectItem[];
+  searchParams: Record<string, string | string[] | undefined>;
+}) {
   const router = useRouter();
-  const sp = useSearchParams();
   const bounds = useMemo(() => getPublishedProjectBounds(projects), [projects]);
+  const filters = useMemo(
+    () => parseProjectsCatalogSearchParams(searchParams, bounds),
+    [searchParams, bounds],
+  );
 
-  const areaMin = parseNumParam(sp.get("areaMin"), bounds.minArea);
-  const areaMax = parseNumParam(sp.get("areaMax"), bounds.maxArea);
-  const priceMinRub = parseNumParam(sp.get("priceMin"), bounds.minPriceRub);
-  const priceMaxRub = parseNumParam(sp.get("priceMax"), bounds.maxPriceRub);
-  const material = parseMaterialParam(sp.get("material"));
-  const floors = parseFloorsParam(sp.get("floors"));
-  const sort = parseSortParam(sp.get("sort"));
-  const q = sp.get("q")?.trim() ?? "";
+  const { areaMin, areaMax, priceMinRub, priceMaxRub, material, floors, sort, q } = filters;
 
   const [page, setPage] = useState(1);
   const [queryInput, setQueryInput] = useState(q);
@@ -57,15 +60,7 @@ export function ProjectsCatalogContent({ projects }: { projects: HouseProjectIte
     setQueryInput(q);
   }, [q]);
 
-  const hasCustomFilters =
-    sp.get("areaMin") != null ||
-    sp.get("areaMax") != null ||
-    sp.get("priceMin") != null ||
-    sp.get("priceMax") != null ||
-    sp.get("material") != null ||
-    sp.get("floors") != null ||
-    sp.get("q") != null ||
-    sp.get("sort") != null;
+  const hasCustomFilters = hasCustomProjectsCatalogFilters(searchParams);
 
   const pushFilters = useCallback(
     (next: {
@@ -83,11 +78,12 @@ export function ProjectsCatalogContent({ projects }: { projects: HouseProjectIte
         priceMinRub: next.priceMinRub,
         priceMaxRub: next.priceMaxRub,
         sort: next.sort,
+        bounds,
       });
-      router.push(`/projects?${qs}`);
+      router.push(qs ? `/projects?${qs}` : "/projects");
       setPage(1);
     },
-    [router]
+    [router, bounds],
   );
 
   const filtered = useMemo(() => {
@@ -105,6 +101,50 @@ export function ProjectsCatalogContent({ projects }: { projects: HouseProjectIte
       return a.price - b.price;
     });
   }, [areaMax, areaMin, floors, material, priceMaxRub, priceMinRub, projects, q, sort]);
+
+  /** Старый URL с зафиксированным areaMax/priceMax скрывал новые проекты — сбрасываем только диапазон. */
+  useEffect(() => {
+    const published = projects.filter((p) => p.published);
+    if (published.length === 0 || filtered.length > 0) return;
+
+    const hasRangeInUrl =
+      searchParams.areaMin != null ||
+      searchParams.areaMax != null ||
+      searchParams.priceMin != null ||
+      searchParams.priceMax != null;
+    if (!hasRangeInUrl) return;
+
+    const matchesWithoutRange = published.some((p) =>
+      projectMatchesCatalogFiltersExceptRange(p, { material, floors, q }),
+    );
+    if (!matchesWithoutRange) return;
+
+    const qs = buildProjectsSearchParams({
+      areaMin: bounds.minArea,
+      areaMax: bounds.maxArea,
+      priceMinRub: bounds.minPriceRub,
+      priceMaxRub: bounds.maxPriceRub,
+      material,
+      floors,
+      q,
+      sort,
+      bounds,
+    });
+    router.replace(qs ? `/projects?${qs}` : "/projects");
+  }, [
+    bounds,
+    filtered.length,
+    floors,
+    material,
+    projects,
+    q,
+    router,
+    searchParams.areaMax,
+    searchParams.areaMin,
+    searchParams.priceMax,
+    searchParams.priceMin,
+    sort,
+  ]);
 
   const visible = filtered.slice(0, page * PAGE_SIZE);
 

@@ -97,6 +97,80 @@ export function getPublishedProjectBounds(projects: HouseProjectItem[]) {
   };
 }
 
+export type ProjectsCatalogBounds = ReturnType<typeof getPublishedProjectBounds>;
+
+export type ProjectsCatalogFilters = {
+  areaMin: number;
+  areaMax: number;
+  priceMinRub: number;
+  priceMaxRub: number;
+  material: MaterialFilterId;
+  floors: FloorsFilterId;
+  q: string;
+  sort: ProjectsSortKey;
+};
+
+type SearchParamsRecord = Record<string, string | string[] | undefined>;
+
+function readSearchParam(sp: SearchParamsRecord, key: string): string | null {
+  const v = sp[key];
+  if (v == null) return null;
+  return Array.isArray(v) ? v[0] ?? null : v;
+}
+
+function parseNumParam(v: string | null, fallback: number): number {
+  if (v == null || v.trim() === "") return fallback;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+/** Читает фильтры каталога из query; без параметра — полный диапазон текущего каталога. */
+export function parseProjectsCatalogSearchParams(
+  sp: SearchParamsRecord,
+  bounds: ProjectsCatalogBounds,
+): ProjectsCatalogFilters {
+  const areaMin = parseNumParam(readSearchParam(sp, "areaMin"), bounds.minArea);
+  const areaMax = parseNumParam(readSearchParam(sp, "areaMax"), bounds.maxArea);
+  const priceMinRub = parseNumParam(readSearchParam(sp, "priceMin"), bounds.minPriceRub);
+  const priceMaxRub = parseNumParam(readSearchParam(sp, "priceMax"), bounds.maxPriceRub);
+
+  return {
+    areaMin: Math.min(areaMin, areaMax),
+    areaMax: Math.max(areaMin, areaMax),
+    priceMinRub: Math.min(priceMinRub, priceMaxRub),
+    priceMaxRub: Math.max(priceMinRub, priceMaxRub),
+    material: parseMaterialParam(readSearchParam(sp, "material")),
+    floors: parseFloorsParam(readSearchParam(sp, "floors")),
+    sort: parseSortParam(readSearchParam(sp, "sort")),
+    q: readSearchParam(sp, "q")?.trim() ?? "",
+  };
+}
+
+export function hasCustomProjectsCatalogFilters(sp: SearchParamsRecord): boolean {
+  return (
+    readSearchParam(sp, "areaMin") != null ||
+    readSearchParam(sp, "areaMax") != null ||
+    readSearchParam(sp, "priceMin") != null ||
+    readSearchParam(sp, "priceMax") != null ||
+    readSearchParam(sp, "material") != null ||
+    readSearchParam(sp, "floors") != null ||
+    readSearchParam(sp, "q") != null ||
+    readSearchParam(sp, "sort") != null
+  );
+}
+
+/** Проходит ли проект по фильтрам, кроме диапазона площади/цены. */
+export function projectMatchesCatalogFiltersExceptRange(
+  p: HouseProjectItem,
+  filters: Pick<ProjectsCatalogFilters, "material" | "floors" | "q">,
+): boolean {
+  if (!p.published) return false;
+  if (!projectMatchesMaterial(p, filters.material)) return false;
+  if (!projectMatchesFloors(p, filters.floors)) return false;
+  if (!projectMatchesQuery(p, filters.q)) return false;
+  return true;
+}
+
 export function buildProjectsSearchParams(opts: {
   areaMin: number;
   areaMax: number;
@@ -106,12 +180,13 @@ export function buildProjectsSearchParams(opts: {
   floors: FloorsFilterId;
   q: string;
   sort?: ProjectsSortKey;
+  bounds: ProjectsCatalogBounds;
 }): string {
   const p = new URLSearchParams();
-  p.set("areaMin", String(opts.areaMin));
-  p.set("areaMax", String(opts.areaMax));
-  p.set("priceMin", String(opts.priceMinRub));
-  p.set("priceMax", String(opts.priceMaxRub));
+  if (opts.areaMin > opts.bounds.minArea) p.set("areaMin", String(opts.areaMin));
+  if (opts.areaMax < opts.bounds.maxArea) p.set("areaMax", String(opts.areaMax));
+  if (opts.priceMinRub > opts.bounds.minPriceRub) p.set("priceMin", String(opts.priceMinRub));
+  if (opts.priceMaxRub < opts.bounds.maxPriceRub) p.set("priceMax", String(opts.priceMaxRub));
   if (opts.material !== "all") p.set("material", opts.material);
   if (opts.floors !== "all") p.set("floors", opts.floors);
   if (opts.q.trim()) p.set("q", opts.q.trim());
