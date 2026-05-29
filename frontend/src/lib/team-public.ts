@@ -3,8 +3,8 @@
 export function normalizeTeamMemberInput(input: {
   name?: string;
   position?: string;
-  photoUrl?: string;
-  description?: string;
+  photoUrl?: string | null;
+  description?: string | null;
   visible?: boolean;
   order?: number;
 }) {

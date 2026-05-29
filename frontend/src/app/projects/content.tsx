@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowRight, LayoutGrid, LayoutList, Search, SlidersHorizontal } from "lucide-react";
-import { formatRub, getProjectRenders, type HouseProjectItem } from "@/lib/construction-shared";
+import { formatRub, getProjectRenders, type HouseProjectItem } from "@/lib/construction-data";
 import {
   buildProjectsSearchParams,
   MATERIAL_OPTIONS,
