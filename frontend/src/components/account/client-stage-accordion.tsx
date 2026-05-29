@@ -82,11 +82,12 @@ export function ClientStageAccordion({ stages }: { stages: ClientStageAccordionI
               >
                 {idx + 1}
               </span>
-              {complete ? (
-                <CheckCircle2 className="h-7 w-7 text-emerald-500 shrink-0" aria-hidden />
-              ) : (
-                <StageIcon iconKey={parent.iconKey} className="h-7 w-7 shrink-0" colored />
-              )}
+              <StageIcon
+                iconKey={parent.iconKey}
+                title={parent.title}
+                className="h-7 w-7 shrink-0"
+                colored
+              />
               <span className="min-w-0 flex-1">
                 <span className="block font-semibold text-base leading-snug">{parent.title}</span>
                 <span className="block text-sm mt-0.5" style={{ color: "var(--text-muted)" }}>
