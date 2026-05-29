@@ -44,7 +44,12 @@ export function AccountObjectCardProgress({
                   className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium border w-full min-w-0"
                   style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
                 >
-                  <StageIcon iconKey={stage.iconKey} className="h-4 w-4 shrink-0 opacity-90" colored />
+                  <StageIcon
+                    iconKey={stage.iconKey}
+                    title={stage.title}
+                    className="h-4 w-4 shrink-0 opacity-90"
+                    colored
+                  />
                   <span className="min-w-0 leading-snug">{stage.title}</span>
                 </div>
               </li>

@@ -13,6 +13,7 @@ import {
   MessageCircle,
   LogOut,
   Menu,
+  X,
   Bell,
   Globe,
   PanelLeftClose,
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { SITE_NAME } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import type { AccountHeaderSignals } from "@/lib/account-header-signals";
@@ -122,7 +124,8 @@ export function AccountShell({
         <div className="p-3 border-b flex items-center gap-2 min-h-[3.25rem]" style={{ borderColor: "var(--border)" }}>
           <Link
             href="/account/dashboard"
-            className="min-w-0 flex items-center gap-2.5 transition-opacity hover:opacity-90"
+            onClick={() => setMobileOpen(false)}
+            className="min-w-0 flex flex-1 items-center gap-2.5 transition-opacity hover:opacity-90"
             title={SITE_NAME}
             aria-label={SITE_NAME}
           >
@@ -131,6 +134,15 @@ export function AccountShell({
               {SITE_NAME}
             </span>
           </Link>
+          <button
+            type="button"
+            className="lg:hidden shrink-0 p-2 rounded-lg border"
+            style={{ borderColor: "var(--border)" }}
+            onClick={() => setMobileOpen(false)}
+            aria-label="Закрыть меню"
+          >
+            <X className="h-5 w-5" aria-hidden />
+          </button>
         </div>
         <nav className="flex-1 overflow-y-auto px-2 py-1 space-y-0.5 mt-1">
           {NAV.map(({ href, label, icon: Icon }) => {
@@ -223,7 +235,10 @@ export function AccountShell({
 
       <div className="flex-1 flex flex-col min-w-0 min-h-screen">
         <header
-          className="sticky top-0 z-[60] flex items-center justify-between gap-3 px-3 sm:px-4 py-2.5 border-b backdrop-blur-xl supports-[backdrop-filter]:bg-[color-mix(in_srgb,var(--bg)_82%,transparent)]"
+          className={cn(
+            "sticky top-0 z-[60] flex items-center justify-between gap-3 px-3 sm:px-4 py-2.5 border-b backdrop-blur-xl supports-[backdrop-filter]:bg-[color-mix(in_srgb,var(--bg)_82%,transparent)]",
+            mobileOpen && "max-lg:hidden",
+          )}
           style={{
             borderColor: "var(--border)",
             backgroundColor: "color-mix(in srgb, var(--bg) 90%, transparent)",

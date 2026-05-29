@@ -89,8 +89,11 @@ export function SiteSearchPanel({
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-[38] overflow-hidden overscroll-none"
-      style={{ top: "calc(var(--site-header-sticky-offset, 3rem) - 1px)" }}
+      className="fixed inset-x-0 z-[56] flex flex-col overflow-hidden overscroll-none"
+      style={{
+        top: "var(--site-header-sticky-offset)",
+        height: "calc(100dvh - var(--site-header-sticky-offset))",
+      }}
       role="presentation"
     >
       {/* Фон страницы: светлый — как у body / дневного баннера; тёмный — атмосфера hero */}
@@ -135,7 +138,7 @@ export function SiteSearchPanel({
         aria-modal="true"
         aria-label="Поиск и разделы сайта"
       >
-        <div className="mx-auto flex h-full min-h-0 w-full max-w-[1440px] flex-1 flex-col px-4 pt-4 pb-4 md:px-8 md:pt-5 md:pb-5 lg:px-12">
+        <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 flex-col px-4 pt-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] md:px-8 md:pt-5 md:pb-5 lg:px-12">
           {/* Как блок заголовка на баннере: одно «окно» */}
           <div className={cn(glassPane, "shrink-0 px-4 py-3 sm:px-5 sm:py-3.5")}>
             <div className="flex items-start justify-between gap-3">
@@ -198,12 +201,76 @@ export function SiteSearchPanel({
             </div>
           </div>
 
-          {/* Слева колонки разделов, справа «окно» как превью баннера — личный кабинет + заявка.
-              На мобилке вторая строка сетки должна иметь minmax(0,1fr), иначе строки auto и список
-              растёт по контенту — без ограничения высоты overflow-y не скроллится. */}
-          <div className="mt-4 grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_minmax(0,1fr)] gap-4 pb-2 lg:mt-5 lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] lg:grid-rows-1 lg:items-stretch lg:gap-8">
+          <div
+            className={cn(
+              "mt-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] lg:grid-rows-1 lg:items-stretch lg:gap-8 lg:overflow-hidden lg:overscroll-auto lg:pb-2",
+            )}
+            style={{ scrollbarGutter: "stable" }}
+          >
+            <div className="order-1 flex min-h-0 min-w-0 flex-col lg:order-1 lg:min-h-0 lg:overflow-hidden">
+              {sections.length === 0 ? (
+                <div
+                  className={cn(
+                    glassPane,
+                    "flex min-h-[12rem] items-center justify-center px-6 py-10 text-center text-sm lg:min-h-0 lg:flex-1",
+                    isLight ? "text-[color:var(--text-subtle)]" : "text-neutral-300",
+                  )}
+                >
+                  Ничего не найдено. Измените запрос.
+                </div>
+              ) : (
+                <div
+                  className={cn(
+                    "grid auto-rows-max content-start gap-2.5 sm:grid-cols-2 lg:max-h-full lg:min-h-0 lg:flex-1 lg:grid-cols-3 lg:gap-3 lg:overflow-y-auto lg:overscroll-contain lg:touch-pan-y lg:pr-1 lg:[-webkit-overflow-scrolling:touch] xl:grid-cols-3",
+                  )}
+                  style={{ scrollbarGutter: "stable" }}
+                >
+                  {sections.map(([sectionTitle, links]) => (
+                    <div key={sectionTitle} className={cn(glassCard, "p-3 md:p-3.5")}>
+                      <p
+                        className={cn(
+                          "mb-2 truncate text-[10px] font-bold uppercase tracking-[0.14em]",
+                          isLight ? "text-[color:var(--accent)]" : "text-emerald-300/85",
+                        )}
+                      >
+                        {sectionTitle}
+                      </p>
+                      <ul className="space-y-0.5">
+                        {links.map((row) => (
+                          <li key={`${row.href}-${row.label}`}>
+                            <Link
+                              href={row.href}
+                              onClick={onClose}
+                              className={cn(
+                                "group flex items-center justify-between gap-2 rounded-xl px-2 py-1.5 text-sm transition",
+                                isLight
+                                  ? "text-[var(--text)] hover:bg-black/[0.06]"
+                                  : "text-white/95 hover:bg-black/35",
+                              )}
+                            >
+                              <span className="min-w-0 leading-snug">{row.label}</span>
+                              <ArrowRight
+                                className={cn(
+                                  "h-4 w-4 shrink-0 opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-90",
+                                  isLight ? "text-[var(--text-subtle)]" : "text-white/30",
+                                )}
+                                aria-hidden
+                              />
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <aside
-              className={cn(glassPane, "order-1 flex shrink-0 flex-col justify-between gap-4 p-4 sm:p-5 lg:order-2 lg:col-start-2 lg:h-full lg:min-h-0")}
+              className={cn(
+                glassPane,
+                "order-2 flex shrink-0 flex-col justify-between gap-4 p-4 sm:p-5 lg:order-2 lg:col-start-2 lg:max-h-full lg:min-h-0 lg:shrink",
+              )}
             >
               <div className="min-w-0">
                 <div
@@ -285,67 +352,6 @@ export function SiteSearchPanel({
                 </button>
               </div>
             </aside>
-
-            <div className="order-2 flex min-h-0 flex-col overflow-hidden lg:order-1 lg:col-start-1 lg:row-start-1">
-              {sections.length === 0 ? (
-                <div
-                  className={cn(
-                    glassPane,
-                    "flex flex-1 items-center justify-center px-6 py-10 text-center text-sm",
-                    isLight ? "text-[color:var(--text-subtle)]" : "text-neutral-300",
-                  )}
-                >
-                  Ничего не найдено. Измените запрос.
-                </div>
-              ) : (
-                <div
-                  className={cn(
-                    "grid min-h-0 flex-1 touch-pan-y auto-rows-max content-start gap-2.5 overflow-y-auto overscroll-contain pr-1 [-webkit-overflow-scrolling:touch] sm:grid-cols-2 lg:grid-cols-3 lg:gap-3 xl:grid-cols-3",
-                  )}
-                  style={{
-                    scrollbarGutter: "stable",
-                  }}
-                >
-                  {sections.map(([sectionTitle, links]) => (
-                    <div key={sectionTitle} className={cn(glassCard, "p-3 md:p-3.5")}>
-                      <p
-                        className={cn(
-                          "mb-2 truncate text-[10px] font-bold uppercase tracking-[0.14em]",
-                          isLight ? "text-[color:var(--accent)]" : "text-emerald-300/85",
-                        )}
-                      >
-                        {sectionTitle}
-                      </p>
-                      <ul className="space-y-0.5">
-                        {links.map((row) => (
-                          <li key={`${row.href}-${row.label}`}>
-                            <Link
-                              href={row.href}
-                              onClick={onClose}
-                              className={cn(
-                                "group flex items-center justify-between gap-2 rounded-xl px-2 py-1.5 text-sm transition",
-                                isLight
-                                  ? "text-[var(--text)] hover:bg-black/[0.06]"
-                                  : "text-white/95 hover:bg-black/35",
-                              )}
-                            >
-                              <span className="min-w-0 leading-snug">{row.label}</span>
-                              <ArrowRight
-                                className={cn(
-                                  "h-4 w-4 shrink-0 opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-90",
-                                  isLight ? "text-[var(--text-subtle)]" : "text-white/30",
-                                )}
-                                aria-hidden
-                              />
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
           </div>
         </div>
       </div>

@@ -94,6 +94,11 @@
     }
   }
 
+  body.site-search-open nav[aria-label="Основные разделы"] {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   [data-theme="light"] .site-header-bar:not(.site-header-bar--glass) {
     box-shadow: 0 1px 0 rgba(15, 61, 46, 0.06);
     backdrop-filter: none;

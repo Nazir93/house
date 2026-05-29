@@ -6,6 +6,7 @@ import {
   CACHE_TAG_PUBLIC_HOUSE_PROJECTS,
   CACHE_TAG_PUBLIC_REVIEWS,
   CACHE_TAG_PUBLIC_TEAM,
+  CACHE_TAG_PUBLIC_VACANCIES,
 } from "@/lib/cache-tags-public";
 
 /** После изменений FAQ в админке: сброс кэша данных и страниц, где блок FAQ показывается. */
@@ -27,6 +28,12 @@ export function revalidatePublicReviews(): void {
 export function revalidatePublicTeam(): void {
   revalidateTagWithProfile(CACHE_TAG_PUBLIC_TEAM);
   revalidatePath("/team");
+}
+
+/** После изменений вакансий. */
+export function revalidatePublicVacancies(): void {
+  revalidateTagWithProfile(CACHE_TAG_PUBLIC_VACANCIES);
+  revalidatePath("/partners/vacancies");
 }
 
 /**

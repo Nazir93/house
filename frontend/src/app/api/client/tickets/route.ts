@@ -12,7 +12,7 @@ export async function GET() {
   const session = await getServerSession(authOptions);
   const projectId = projectIdFromSession(session);
   if (!projectId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Требуется вход в личный кабинет" }, { status: 401 });
   }
 
   const tickets = await prisma.clientSupportTicket.findMany({
@@ -44,20 +44,20 @@ export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
   const projectId = projectIdFromSession(session);
   if (!projectId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Требуется вход в личный кабинет" }, { status: 401 });
   }
 
   let body: { subject?: string; message?: string };
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json({ error: "Некорректный запрос" }, { status: 400 });
   }
 
   const subject = body.subject?.trim() ?? "";
   const message = body.message?.trim() ?? "";
   if (!subject || !message) {
-    return NextResponse.json({ error: "subject and message required" }, { status: 400 });
+    return NextResponse.json({ error: "Укажите тему и текст сообщения" }, { status: 400 });
   }
 
   const ticket = await prisma.clientSupportTicket.create({

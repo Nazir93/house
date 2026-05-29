@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
 import { StageIcon } from "@/components/account/stage-icon";
 import { stageStatusLabel } from "@/lib/client-portal-labels";
 import type { ClientStageStatus } from "@prisma/client";
@@ -41,11 +40,12 @@ export function DashboardStagesStrip({ stages }: { stages: DashboardStageCard[] 
               {idx + 1}
             </span>
             <span className="flex justify-center mb-1 h-6 w-6 items-center">
-              {stage.complete ? (
-                <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" aria-hidden />
-              ) : (
-                <StageIcon iconKey={stage.iconKey} className="h-5 w-5 shrink-0" colored />
-              )}
+              <StageIcon
+                iconKey={stage.iconKey}
+                title={stage.title}
+                className="h-5 w-5 shrink-0"
+                colored
+              />
             </span>
             <p className="text-[10px] sm:text-[11px] font-semibold leading-tight line-clamp-2 w-full min-h-[2.2em]">
               {stage.title}

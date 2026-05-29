@@ -8,10 +8,9 @@ import {
   ArrowUpRight,
   Bath,
   Bed,
-  Eye,
-  Flame,
   Maximize2,
 } from "lucide-react";
+import { ProjectEngagementBadges } from "@/components/projects/project-engagement-badges";
 
 import type { HouseProjectItem } from "@/lib/construction-data";
 import { getProjectRenders } from "@/lib/construction-shared";
@@ -190,16 +189,12 @@ export function FeaturedHouseProjectsSection({ projects }: { projects: HouseProj
                         />
                       </Link>
 
-                      <div className="pointer-events-none absolute inset-x-0 top-3 flex justify-end gap-2 px-3">
-                        <span className="pointer-events-none inline-flex items-center gap-1 rounded-full bg-black/48 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
-                          <Eye className="h-3 w-3 opacity-95" aria-hidden />
-                          {views}
-                        </span>
-                        <span className="pointer-events-none inline-flex items-center gap-1 rounded-full bg-black/48 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
-                          <Flame className="h-3 w-3 opacity-95" aria-hidden />
-                          {hot}
-                        </span>
-                      </div>
+                      <ProjectEngagementBadges
+                        slug={p.slug}
+                        initialViewCount={p.viewCount}
+                        initialLikeCount={p.likeCount}
+                        className="absolute inset-x-0 top-3 z-[2] px-3"
+                      />
 
                       <div className="absolute bottom-2 left-2 right-2 z-[1] sm:bottom-3 sm:left-auto sm:right-3">
                         <Link

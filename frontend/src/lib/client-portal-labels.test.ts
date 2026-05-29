@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   formatDateRu,
+  formatDateTimeRu,
   kopeksToRubles,
   paymentStatusLabel,
   stageStatusLabel,
@@ -34,7 +35,15 @@ describe("client-portal-labels", () => {
 
   it("ticketStatusLabel", () => {
     expect(ticketStatusLabel("OPEN")).toBe("Открыт");
+    expect(ticketStatusLabel("IN_PROGRESS")).toBe("В работе");
     expect(ticketStatusLabel("CLOSED")).toBe("Закрыт");
-    expect(ticketStatusLabel("UNKNOWN")).toBe("UNKNOWN");
+    expect(ticketStatusLabel("UNKNOWN")).toBe("Неизвестный статус");
+  });
+
+  it("formatDateTimeRu", () => {
+    expect(formatDateTimeRu(null)).toBe("—");
+    const s = formatDateTimeRu(new Date(2025, 2, 12, 14, 30));
+    expect(s).toMatch(/2025/);
+    expect(s).toMatch(/14/);
   });
 });

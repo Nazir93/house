@@ -87,8 +87,7 @@ export function ThemeToggle({
         base,
         className,
       )}
-      aria-label={`${themePreferenceLabel(themePreference)}. Нажмите для смены режима.`}
-      title={`${themePreferenceLabel(themePreference)} (светлая → тёмная → системная)`}
+      aria-label={themePreferenceLabel(themePreference)}
     >
       <ThemeToggleIcon
         preference={themePreference}

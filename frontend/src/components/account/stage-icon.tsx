@@ -3,6 +3,7 @@ import {
   CONSTRUCTION_STAGE_GLYPHS,
   resolveConstructionStageGlyphKey,
 } from "@/components/account/construction-stage-glyphs";
+import { resolveStageIconKeyForDisplay } from "@/lib/client-project-stage-icons";
 
 /** Цвета иконок этапов: light / dark (globals.css .stage-icon-tint--*). */
 const COLORED_CLASS: Record<string, string> = {
@@ -34,15 +35,19 @@ const COLORED_CLASS: Record<string, string> = {
 
 export function StageIcon({
   iconKey,
+  title,
   className,
   colored = false,
 }: {
   iconKey: string;
+  /** Название этапа — для подстановки иконки, если в БД legacy-ключ (circle и т.п.). */
+  title?: string;
   className?: string;
   /** Цветные контурные иконки для карточек этапов (light / dark). */
   colored?: boolean;
 }) {
-  const key = resolveConstructionStageGlyphKey(iconKey);
+  const resolvedIconKey = title ? resolveStageIconKeyForDisplay(title, iconKey) : iconKey;
+  const key = resolveConstructionStageGlyphKey(resolvedIconKey);
   const Glyph = CONSTRUCTION_STAGE_GLYPHS[key];
   const tint = COLORED_CLASS[key] ?? COLORED_CLASS.default;
 

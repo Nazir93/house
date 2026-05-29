@@ -22,6 +22,7 @@ import {
   HelpCircle,
   Star,
   ContactRound,
+  ClipboardList,
   PanelTop,
   ExternalLink,
 } from "lucide-react";
@@ -45,6 +46,7 @@ const NAV_ITEMS = [
   { href: "/admin/faq", label: "FAQ", icon: HelpCircle },
   { href: "/admin/reviews", label: "Отзывы", icon: Star },
   { href: "/admin/team", label: "Команда", icon: ContactRound },
+  { href: "/admin/vacancies", label: "Вакансии", icon: ClipboardList },
   { href: "/admin/mortgage", label: "Ипотека", icon: Landmark },
   { href: "/admin/seo", label: "SEO", icon: Globe },
   { href: "/admin/settings", label: "Настройки", icon: Settings },
@@ -65,21 +67,30 @@ export function AdminSidebar({ collapsed: collapsedProp, onCollapsedChange }: Ad
     else setCollapsedLocal(next);
   };
   const [mobileOpen, setMobileOpen] = useState(false);
-  const { highlight: leadsHighlight, badgeCount: leadsBadge } = useAdminNewLeadsNotify();
+  const { newCount: leadsNewCount, highlight: leadsHighlight } = useAdminNewLeadsNotify();
 
   return (
     <>
       {/* Mobile toggle */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-3 left-3 z-[60] p-2 rounded-xl shadow-lg transition-colors"
+        className="lg:hidden fixed top-3 left-3 z-[60] relative p-2 rounded-xl shadow-lg transition-colors"
         style={{
           backgroundColor: "var(--adm-sidebar-bg)",
           color: "var(--adm-mobile-btn-fg)",
           boxShadow: "var(--adm-sidebar-glow)",
         }}
+        aria-label={leadsNewCount > 0 ? `Меню, ${leadsNewCount} новых заявок` : "Меню"}
       >
         <Menu size={20} />
+        {leadsNewCount > 0 ? (
+          <span
+            className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center tabular-nums ring-2 ring-[var(--adm-sidebar-bg)]"
+            aria-hidden
+          >
+            {leadsNewCount > 99 ? "99+" : leadsNewCount}
+          </span>
+        ) : null}
       </button>
 
       {/* Overlay for mobile */}
@@ -148,47 +159,58 @@ export function AdminSidebar({ collapsed: collapsedProp, onCollapsedChange }: Ad
                 key={item.href}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className={`
-                  relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium
-                  transition-all duration-150
-                  ${isActive ? "" : "hover:bg-[color:var(--adm-nav-hover-bg)] hover:text-[color:var(--adm-nav-fg-hover)]"}
-                  ${isLeads && leadsHighlight ? "ring-2 ring-[#0F3D2E]/50 shadow-[0_0_18px_rgba(15,61,46,0.12)] motion-safe:animate-pulse" : ""}
-                `}
+                className={cn(
+                  "relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-150",
+                  !isActive && "hover:bg-[color:var(--adm-nav-hover-bg)] hover:text-[color:var(--adm-nav-fg-hover)]",
+                  isLeads && leadsNewCount > 0 && !isActive && "bg-red-500/[0.08]",
+                  isLeads &&
+                    leadsHighlight &&
+                    "ring-2 ring-red-500/70 shadow-[0_0_20px_rgba(239,68,68,0.35)] motion-safe:animate-pulse",
+                )}
                 style={
                   isActive
                     ? {
                         backgroundColor: "var(--adm-nav-active-bg)",
                         color: "var(--adm-nav-active-fg)",
                       }
-                    : { color: "var(--adm-nav-fg)" }
+                    : isLeads && leadsNewCount > 0
+                      ? { color: "var(--adm-nav-fg)" }
+                      : { color: "var(--adm-nav-fg)" }
                 }
                 title={
                   collapsed
-                    ? isLeads && leadsBadge > 0
-                      ? `${item.label}: ${leadsBadge} новых`
+                    ? isLeads && leadsNewCount > 0
+                      ? `${item.label}: ${leadsNewCount} новых`
                       : item.label
-                    : undefined
+                    : isLeads && leadsNewCount > 0
+                      ? `${leadsNewCount} новых заявок`
+                      : undefined
                 }
               >
                 <span className="relative flex-shrink-0">
-                  <Icon size={18} />
-                  {isLeads && collapsed && leadsBadge > 0 && (
+                  <Icon size={18} className={isLeads && leadsNewCount > 0 && !isActive ? "text-red-400" : undefined} />
+                  {isLeads && leadsNewCount > 0 ? (
                     <span
-                      className="absolute -top-1 -right-1 min-w-[16px] h-4 px-0.5 rounded-full bg-red-500 text-[9px] font-bold text-white flex items-center justify-center tabular-nums"
+                      className={cn(
+                        "absolute -top-1.5 -right-2 min-w-[17px] h-[17px] px-0.5 rounded-full bg-red-500 text-[9px] font-bold text-white flex items-center justify-center tabular-nums shadow-[0_0_10px_rgba(239,68,68,0.55)]",
+                        collapsed ? "" : "-top-1 -right-2",
+                      )}
                       aria-hidden
                     >
-                      {leadsBadge > 99 ? "99+" : leadsBadge}
+                      {leadsNewCount > 99 ? "99+" : leadsNewCount}
                     </span>
-                  )}
+                  ) : null}
                 </span>
                 {!collapsed && (
-                  <span className="flex items-center gap-2 min-w-0">
-                    <span>{item.label}</span>
-                    {isLeads && leadsBadge > 0 && (
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-red-400 shrink-0">
-                        +{leadsBadge > 99 ? "99+" : leadsBadge}
+                  <span className="flex flex-1 items-center justify-between gap-2 min-w-0">
+                    <span className={isLeads && leadsNewCount > 0 && !isActive ? "text-red-300 font-semibold" : undefined}>
+                      {item.label}
+                    </span>
+                    {isLeads && leadsNewCount > 0 ? (
+                      <span className="shrink-0 rounded-md bg-red-500 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white tabular-nums">
+                        {leadsNewCount > 99 ? "99+" : leadsNewCount}
                       </span>
-                    )}
+                    ) : null}
                   </span>
                 )}
               </Link>

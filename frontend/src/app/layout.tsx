@@ -85,7 +85,7 @@ export default async function RootLayout({
       </head>
       <body className="font-body antialiased theme-bg theme-text transition-colors duration-500">
         <Script id="house-theme-init" strategy="beforeInteractive">
-          {`(function(){try{var k="house-theme";var t=localStorage.getItem(k);var pref=(t==="light"||t==="dark"||t==="system")?t:"system";var sys=window.matchMedia("(prefers-color-scheme: dark)").matches;var resolved=pref==="system"?(sys?"dark":"light"):pref;document.documentElement.setAttribute("data-theme",resolved);document.documentElement.style.colorScheme=resolved;}catch(e){document.documentElement.setAttribute("data-theme","light");document.documentElement.style.colorScheme="light";}})();`}
+          {`(function(){try{var k="house-theme";var t=localStorage.getItem(k);var pref=(t==="light"||t==="dark"||t==="system")?t:"system";var sys=window.matchMedia("(prefers-color-scheme: dark)").matches;var resolved=pref==="system"?(sys?"dark":"light"):pref;document.documentElement.setAttribute("data-theme",resolved);document.documentElement.style.colorScheme=resolved;}catch(e){var sys=window.matchMedia("(prefers-color-scheme: dark)").matches;var resolved=sys?"dark":"light";document.documentElement.setAttribute("data-theme",resolved);document.documentElement.style.colorScheme=resolved;}})();`}
         </Script>
         <ThemeProvider>
           <SessionProvider>

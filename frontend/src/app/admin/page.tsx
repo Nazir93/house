@@ -7,6 +7,7 @@ import {
   HelpCircle,
   Star,
   ContactRound,
+  ClipboardList,
   UserRound,
   Users,
   Briefcase,
@@ -27,6 +28,7 @@ type ContentStats = {
   faqs: number;
   reviews: number;
   teamMembers: number;
+  vacancies: number;
   builtObjects: number;
   clientProjects: number;
   partners: number;
@@ -44,6 +46,7 @@ async function getStats(): Promise<ContentStats> {
       faqs,
       reviews,
       teamMembers,
+      vacancies,
       builtObjects,
       clientProjects,
       partners,
@@ -56,6 +59,7 @@ async function getStats(): Promise<ContentStats> {
       prisma.faq.count(),
       prisma.review.count(),
       prisma.teamMember.count(),
+      prisma.vacancy.count(),
       prisma.builtObject.count(),
       prisma.clientConstructionProject.count(),
       prisma.partner.count(),
@@ -69,6 +73,7 @@ async function getStats(): Promise<ContentStats> {
       faqs,
       reviews,
       teamMembers,
+      vacancies,
       builtObjects,
       clientProjects,
       partners,
@@ -84,6 +89,7 @@ async function getStats(): Promise<ContentStats> {
       faqs: 0,
       reviews: 0,
       teamMembers: 0,
+      vacancies: 0,
       builtObjects: 0,
       clientProjects: 0,
       partners: 0,
@@ -288,6 +294,14 @@ export default async function AdminDashboard() {
             icon={ContactRound}
             accent="text-rose-400"
             bg="bg-rose-500/10"
+          />
+          <CompactStatCard
+            href="/admin/vacancies"
+            label="Вакансии"
+            value={stats.vacancies}
+            icon={ClipboardList}
+            accent="text-orange-400"
+            bg="bg-orange-500/10"
           />
         </div>
       </section>

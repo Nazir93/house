@@ -2,14 +2,13 @@
 
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
-import { X, ChevronDown, Send } from "lucide-react";
+import { ChevronDown, Send } from "lucide-react";
 import { SiteHeaderBar } from "./site-header-bar";
 import { SITE_NAME } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { NAV_SECTIONS, isNavGroup, type NavSection } from "@/lib/nav-sections";
 import { useModal } from "@/lib/modal-context";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { maxChatUrlFromRawPhone, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
 
 function buildGridPath(
@@ -248,8 +247,13 @@ export function Header() {
 
   useEffect(() => {
     const handleOpenMenu = () => setIsOpen(true);
+    const handleCloseMenu = () => setIsOpen(false);
     window.addEventListener("open-mobile-menu", handleOpenMenu);
-    return () => window.removeEventListener("open-mobile-menu", handleOpenMenu);
+    window.addEventListener("close-mobile-menu", handleCloseMenu);
+    return () => {
+      window.removeEventListener("open-mobile-menu", handleOpenMenu);
+      window.removeEventListener("close-mobile-menu", handleCloseMenu);
+    };
   }, []);
 
   useEffect(() => {
@@ -259,7 +263,9 @@ export function Header() {
       document.body.style.overflow = "";
       setExpandedMenuSection(null);
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isOpen]);
 
   return (
@@ -268,7 +274,7 @@ export function Header() {
       {/* Fullscreen menu overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-[60] flex flex-col overflow-hidden"
+          className="fixed inset-0 z-[80] flex flex-col overflow-hidden"
           style={{ backgroundColor: "var(--bg)" }}
         >
           {/* Blueprint background */}
@@ -342,34 +348,11 @@ export function Header() {
             </svg>
           </div>
 
-          {/* Top bar */}
-          <div className="fixed top-0 left-0 right-0 z-[70] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-            <Link
-              href="/"
-              onClick={() => setIsOpen(false)}
-              className="font-heading text-sm tracking-[0.12em] uppercase select-none sm:text-base md:text-lg"
-              style={{ color: "var(--text)" }}
-            >
-              Часть души
-            </Link>
-            <div className="flex items-center gap-2">
-              <ThemeToggle variant="outline" />
-              <button
-                onClick={() => setIsOpen(false)}
-                className="w-9 h-9 rounded-full flex items-center justify-center border transition-colors"
-                style={{ borderColor: "var(--border)" }}
-                aria-label="Закрыть меню"
-              >
-                <X size={16} style={{ color: "var(--text)" }} />
-              </button>
-            </div>
-          </div>
-
           {/* Один экран: без внутреннего скролла, контент уплотнён под viewport */}
           <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden">
             <div className="flex min-h-0 w-full flex-1 flex-row items-stretch">
             {/* Nav area — на мобильном крупнее шрифты и зоны нажатия */}
-            <nav className="flex min-h-0 w-full min-w-0 flex-1 flex-col justify-between px-4 sm:px-8 md:px-10 lg:px-16 pt-14 sm:pt-16 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
+            <nav className="flex min-h-0 w-full min-w-0 flex-1 flex-col justify-between px-4 sm:px-8 md:px-10 lg:px-16 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
               {/* Экраны до lg: аккордеон */}
               <div className="flex min-h-0 flex-1 flex-col lg:hidden">
               <div className="scrollbar-none grid min-h-0 w-full flex-1 grid-cols-1 content-start gap-x-4 gap-y-1.5 overflow-y-auto overscroll-contain sm:gap-y-6 md:grid-cols-2 md:gap-x-10 md:gap-y-6 lg:grid-cols-4 lg:gap-x-12 lg:gap-y-6 [@media(max-height:700px)]:gap-y-2 [@media(max-height:700px)]:gap-x-3">

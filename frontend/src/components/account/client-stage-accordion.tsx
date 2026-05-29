@@ -1,13 +1,12 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CheckCircle2, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { StageIcon } from "@/components/account/stage-icon";
 import {
   getChildStages,
   getEffectiveStageStatus,
   getTopLevelStages,
-  isStageSubtreeComplete,
   type ClientStageNode,
 } from "@/lib/client-project-stage-status";
 import { stageStatusLabel } from "@/lib/client-portal-labels";
@@ -64,7 +63,6 @@ export function ClientStageAccordion({ stages }: { stages: ClientStageAccordionI
         const hasChildren = children.length > 0;
         const isOpen = expanded.has(parent.id);
         const effective = getEffectiveStageStatus(parent, all);
-        const complete = isStageSubtreeComplete(parent.id, all);
 
         return (
           <section
@@ -120,15 +118,10 @@ export function ClientStageAccordion({ stages }: { stages: ClientStageAccordionI
 }
 
 function SubStageRow({ stage, status }: { stage: ClientStageAccordionItem; status: ClientStageStatus }) {
-  const done = status === "DONE";
   return (
     <li className="flex items-center gap-3 rounded-xl px-3 py-2.5" style={{ backgroundColor: "var(--bg)" }}>
       <span className="w-5 text-center text-xs opacity-40">•</span>
-      {done ? (
-        <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" aria-hidden />
-      ) : (
-        <StageIcon iconKey={stage.iconKey} className="h-5 w-5 shrink-0" colored />
-      )}
+      <StageIcon iconKey={stage.iconKey} title={stage.title} className="h-5 w-5 shrink-0" colored />
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-medium">{stage.title}</span>
         <span className="block text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>

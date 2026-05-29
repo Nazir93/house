@@ -22,14 +22,14 @@ export async function POST(
     const body = await request.json();
     const text = String(body.body || body.message || "").trim();
     if (!text) {
-      return NextResponse.json({ error: "body required" }, { status: 400 });
+      return NextResponse.json({ error: "Введите текст ответа" }, { status: 400 });
     }
 
     const ticket = await prisma.clientSupportTicket.findFirst({
       where: { id: ticketId, projectId },
     });
     if (!ticket) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ error: "Обращение не найдено" }, { status: 404 });
     }
 
     const nextStatus = parseTicketStatus(body.status);
@@ -58,6 +58,6 @@ export async function POST(
     return NextResponse.json(updated);
   } catch (e) {
     console.error("[ADMIN TICKET REPLY]", e);
-    return NextResponse.json({ error: "DB error" }, { status: 500 });
+    return NextResponse.json({ error: "Не удалось сохранить. Попробуйте позже" }, { status: 500 });
   }
 }

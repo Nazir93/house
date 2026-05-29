@@ -22,7 +22,7 @@ export async function GET(
   const session = await getServerSession(authOptions);
   const projectId = projectIdFromSession(session);
   if (!projectId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Требуется вход в личный кабинет" }, { status: 401 });
   }
 
   const { id } = await params;
@@ -32,7 +32,7 @@ export async function GET(
   });
 
   if (!ticket) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: "Обращение не найдено" }, { status: 404 });
   }
 
   return NextResponse.json({
@@ -59,29 +59,32 @@ export async function POST(
   const session = await getServerSession(authOptions);
   const projectId = projectIdFromSession(session);
   if (!projectId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Требуется вход в личный кабинет" }, { status: 401 });
   }
 
   const { id } = await params;
   const ticket = await assertTicketAccess(id, projectId);
   if (!ticket) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json({ error: "Обращение не найдено" }, { status: 404 });
   }
 
   if (ticket.status === "CLOSED") {
-    return NextResponse.json({ error: "Ticket closed" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Обращение закрыто — новые сообщения не принимаются" },
+      { status: 400 }
+    );
   }
 
   let body: { message?: string };
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return NextResponse.json({ error: "Некорректный запрос" }, { status: 400 });
   }
 
   const message = body.message?.trim() ?? "";
   if (!message) {
-    return NextResponse.json({ error: "message required" }, { status: 400 });
+    return NextResponse.json({ error: "Введите текст сообщения" }, { status: 400 });
   }
 
   await prisma.$transaction([

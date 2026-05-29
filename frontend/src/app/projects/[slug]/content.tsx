@@ -10,8 +10,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Home,
-  Layers2,
-  Mail,
   Maximize2,
   Send,
   Share2,
@@ -32,16 +30,27 @@ import { HouseProjectCompletionSection } from "@/components/construction/house-p
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { CmsImage } from "@/components/ui/cms-image";
 import { SITE_URL } from "@/lib/constants";
+import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { useModal } from "@/lib/modal-context";
+import { maxChatUrlFromRawPhone } from "@/lib/messenger-links";
 import {
   inferPartOfSoulFloors,
   resolveProjectRoofPitch,
   type PartOfSoulRoofPitch,
 } from "@/lib/part-of-soul-pricing";
 import { cn } from "@/lib/utils";
+import { ProjectEngagementBadges } from "@/components/projects/project-engagement-badges";
 
 const heroSoftRing = "ring-1 ring-[color-mix(in_srgb,var(--text)_6%,transparent)]";
+
+const carouselArrowClass =
+  "absolute top-1/2 z-10 flex -translate-y-1/2 items-center justify-center p-1 text-white transition hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/90";
+
+const carouselArrowGlow = {
+  filter:
+    "drop-shadow(0 0 10px rgba(0,0,0,0.9)) drop-shadow(0 0 4px rgba(255,255,255,0.45)) drop-shadow(0 2px 8px rgba(0,0,0,0.75))",
+} as const;
 
 export function HouseProjectDetailContent({
   project,
@@ -106,13 +115,8 @@ export function HouseProjectDetailContent({
     return `https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(project.title)}`;
   }, [project.slug, project.title]);
 
-  const mailtoProjectHref = useMemo(() => {
-    const email = contact.email.trim();
-    if (!email) return null;
-    const subject = `Проект «${project.title}»`;
-    const body = `Здравствуйте!\n\nИнтересует проект «${project.title}».\n\nСтраница проекта: ${SITE_URL.replace(/\/$/, "")}/projects/${project.slug}\n`;
-    return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  }, [contact.email, project.slug, project.title]);
+  const maxMessengerHref =
+    contact.social.max?.trim() || maxChatUrlFromRawPhone(contact.phone2Raw) || null;
 
   const sortedPlans = useMemo(
     () => [...plans].sort((a, b) => (a.floor ?? 999) - (b.floor ?? 999)),
@@ -187,8 +191,15 @@ export function HouseProjectDetailContent({
             </p>
           ) : null}
 
-          <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,400px)] lg:items-start">
+          <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,400px)] lg:items-stretch">
             <div className="relative min-h-0 overflow-hidden rounded-[32px] bg-[var(--stone)] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
+              <ProjectEngagementBadges
+                slug={project.slug}
+                initialViewCount={project.viewCount}
+                initialLikeCount={project.likeCount}
+                recordView
+                className="absolute right-3 top-3 z-[15]"
+              />
               {active ? (
                 <button
                   type="button"
@@ -213,19 +224,19 @@ export function HouseProjectDetailContent({
                     type="button"
                     aria-label="Предыдущий рендер"
                     onClick={() => setActiveRender((value) => (value - 1 + renders.length) % renders.length)}
-                    className="absolute left-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border-2 bg-white/95 text-[var(--accent)] shadow-md transition hover:bg-white"
-                    style={{ borderColor: "var(--accent)" }}
+                    className={cn(carouselArrowClass, "left-2 sm:left-4")}
+                    style={carouselArrowGlow}
                   >
-                    <ChevronLeft size={22} strokeWidth={2.25} />
+                    <ChevronLeft size={36} strokeWidth={2} aria-hidden />
                   </button>
                   <button
                     type="button"
                     aria-label="Следующий рендер"
                     onClick={() => setActiveRender((value) => (value + 1) % renders.length)}
-                    className="absolute right-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full border-2 bg-white/95 text-[var(--accent)] shadow-md transition hover:bg-white"
-                    style={{ borderColor: "var(--accent)" }}
+                    className={cn(carouselArrowClass, "right-2 sm:right-4")}
+                    style={carouselArrowGlow}
                   >
-                    <ChevronRight size={22} strokeWidth={2.25} />
+                    <ChevronRight size={36} strokeWidth={2} aria-hidden />
                   </button>
                   <div className="pointer-events-none absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2">
                     {renders.map((_, i) => (
@@ -260,7 +271,7 @@ export function HouseProjectDetailContent({
 
             <aside
               className={cn(
-                "rounded-[28px] bg-[var(--bg)] p-5 md:p-6 shadow-[0_16px_48px_rgb(var(--accent-rgb)/0.08)]",
+                "flex flex-col rounded-[28px] bg-[var(--bg)] p-5 md:p-6 shadow-[0_16px_48px_rgb(var(--accent-rgb)/0.08)]",
                 heroSoftRing
               )}
             >
@@ -395,49 +406,51 @@ export function HouseProjectDetailContent({
                   Ориентировочный расчёт в один клик
                 </button>
               </div>
-            </aside>
-          </div>
 
-          <div
-            className="mt-10 flex flex-col gap-4 border-t pt-8 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
-            style={{ borderColor: "var(--border)" }}
-          >
-            <div className="flex flex-wrap gap-2">
-              <a
-                href={telegramShareUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white transition hover:opacity-[0.96] min-[480px]:flex-none"
-                style={{ backgroundColor: "var(--accent)" }}
+              <div
+                className="mt-auto border-t border-[color-mix(in_srgb,var(--text)_7%,transparent)] pt-5 space-y-3"
               >
-                <Send size={18} strokeWidth={2} aria-hidden />
-                В Telegram
-                <Share2 size={16} className="opacity-90" aria-hidden />
-              </a>
-              {mailtoProjectHref ? (
-                <a
-                  href={mailtoProjectHref}
-                  className="inline-flex min-h-[48px] flex-1 items-center justify-center gap-2 rounded-2xl border-2 px-4 py-3 text-sm font-semibold transition hover:bg-black/[0.03] min-[480px]:flex-none dark:hover:bg-white/[0.06]"
-                  style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
+                <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                  <a
+                    href={telegramShareUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-[0.96]"
+                    style={{ backgroundColor: "var(--accent)" }}
+                  >
+                    <Send size={17} strokeWidth={2} aria-hidden />
+                    В Telegram
+                    <Share2 size={15} className="opacity-90" aria-hidden />
+                  </a>
+                  {maxMessengerHref ? (
+                    <a
+                      href={maxMessengerHref}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-2xl border-2 px-4 py-2.5 text-sm font-semibold transition hover:bg-black/[0.03] dark:hover:bg-white/[0.06]"
+                      style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
+                    >
+                      <MaxMessengerIcon className="h-4 w-4 opacity-95" aria-hidden />
+                      Max
+                    </a>
+                  ) : null}
+                </div>
+                <Link
+                  href="/individual-design"
+                  className="flex w-full items-center justify-center rounded-full border px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-[0.12em] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                  style={{ borderColor: "var(--border)", color: "var(--text)" }}
                 >
-                  <Mail size={18} strokeWidth={2} aria-hidden />
-                  На почту
-                  <Layers2 size={16} className="opacity-80" aria-hidden />
-                </a>
-              ) : null}
-            </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-              <Link
-                href="/individual-design"
-                className="inline-flex w-full justify-center rounded-full border px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.12em] sm:w-auto"
-                style={{ borderColor: "var(--border)", color: "var(--text)" }}
-              >
-                Создать свой проект
-              </Link>
-              <Link href="/technology/house-area" className="inline-flex items-center justify-center gap-2 text-sm font-semibold text-[var(--accent)] sm:justify-start">
-                Как считается площадь дома <ArrowRight size={15} />
-              </Link>
-            </div>
+                  Создать свой проект
+                </Link>
+                <Link
+                  href="/technology/house-area"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl py-2 text-sm font-semibold text-[var(--accent)] transition hover:bg-[color-mix(in_srgb,var(--accent)_6%,transparent)]"
+                >
+                  Как считается площадь дома
+                  <ArrowRight size={15} aria-hidden />
+                </Link>
+              </div>
+            </aside>
           </div>
         </section>
 

@@ -49,7 +49,7 @@ interface ThemeContextType {
   /** Фактическая тема на странице (light/dark). */
   theme: ResolvedSiteTheme;
   resolvedTheme: ResolvedSiteTheme;
-  /** Выбор в переключателе: светлая / тёмная / системная. */
+  /** Выбор в переключателе: светлая / тёмная / как в браузере. */
   themePreference: ThemePreference;
   toggleTheme: () => void;
   setTheme: (preference: ThemePreference) => void;

@@ -16,6 +16,7 @@ import { BrandLogo } from "@/components/brand/brand-logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { SiteSearchPanel } from "@/components/layout/site-search-panel";
 import { YandexMapsRatingChip } from "@/components/layout/yandex-maps-rating-chip";
+import { lockBodyScroll, unlockBodyScroll } from "@/lib/body-scroll-lock";
 import { cn } from "@/lib/utils";
 
 export function SiteHeaderBar() {
@@ -31,7 +32,22 @@ export function SiteHeaderBar() {
   const { openModal } = useModal();
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const onOpenMenu = () => {
+      setMobileMenuOpen(true);
+      setSearchOpen(false);
+    };
+    const onCloseMenu = () => setMobileMenuOpen(false);
+    window.addEventListener("open-mobile-menu", onOpenMenu);
+    window.addEventListener("close-mobile-menu", onCloseMenu);
+    return () => {
+      window.removeEventListener("open-mobile-menu", onOpenMenu);
+      window.removeEventListener("close-mobile-menu", onCloseMenu);
+    };
+  }, []);
 
   /** Плотный фон только вне главной или при поиске/меню — на баннере шапка остаётся «стеклом». */
   const headerOpaqueChrome =
@@ -65,15 +81,15 @@ export function SiteHeaderBar() {
 
   useEffect(() => {
     if (searchOpen) {
-      document.body.style.overflow = "hidden";
-      window.__lenis?.stop();
+      lockBodyScroll();
+      document.body.classList.add("site-search-open");
     } else {
-      document.body.style.overflow = "";
-      window.__lenis?.start();
+      unlockBodyScroll();
+      document.body.classList.remove("site-search-open");
     }
     return () => {
-      document.body.style.overflow = "";
-      window.__lenis?.start();
+      unlockBodyScroll();
+      document.body.classList.remove("site-search-open");
     };
   }, [searchOpen]);
 
@@ -88,7 +104,10 @@ export function SiteHeaderBar() {
 
   function toggleSearch() {
     setOpenSection(null);
-    setSearchOpen((v) => !v);
+    setSearchOpen((v) => {
+      if (!v) window.dispatchEvent(new Event("close-mobile-menu"));
+      return !v;
+    });
   }
 
   const closeSearch = useCallback(() => setSearchOpen(false), []);
@@ -99,7 +118,7 @@ export function SiteHeaderBar() {
         <div
           role="presentation"
           className={cn(
-            "fixed inset-0 z-[30]",
+            "fixed inset-0 z-[55]",
             theme === "light" ? "bg-[#1a1e1d]/28" : "bg-black/50",
           )}
           onClick={closeSearch}
@@ -386,9 +405,16 @@ export function SiteHeaderBar() {
           </div>
           <button
             type="button"
-            onClick={() => window.dispatchEvent(new Event("open-mobile-menu"))}
+            onClick={() => {
+              if (mobileMenuOpen) {
+                window.dispatchEvent(new Event("close-mobile-menu"));
+              } else {
+                window.dispatchEvent(new Event("open-mobile-menu"));
+              }
+            }}
             className="flex h-8 w-8 shrink-0 flex-col items-center justify-center gap-[3px] pl-0.5 sm:pl-1"
-            aria-label="Открыть меню"
+            aria-label={mobileMenuOpen ? "Закрыть меню" : "Открыть меню"}
+            aria-expanded={mobileMenuOpen}
           >
             <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
             <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />

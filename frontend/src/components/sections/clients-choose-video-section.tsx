@@ -56,7 +56,7 @@ const SERVICES = [
 function VideoPanel({ videoRef }: { videoRef: Ref<HTMLVideoElement> }) {
   return (
     <div className="relative w-full overflow-hidden rounded-[22px] shadow-[0_20px_56px_rgba(0,0,0,0.08)] md:rounded-[30px]">
-      <div className="relative aspect-[16/10] max-h-[min(38vh,260px)] w-full overflow-hidden rounded-[inherit] md:aspect-[4/3] md:max-h-none">
+      <div className="relative aspect-[16/10] max-h-[min(46vh,320px)] w-full overflow-hidden rounded-[inherit] md:aspect-[4/3] md:max-h-[min(52vh,480px)] lg:max-h-none">
         <video
           ref={videoRef}
           src={SERVICES_VIDEO_SRC}
@@ -110,11 +110,11 @@ function ServiceSlideStack({
 
   return (
     <div className={cn("relative", className)} aria-live="polite">
-      <p className="mb-4 text-[11px] font-semibold tabular-nums tracking-[0.18em] text-[var(--text-muted)] md:text-xs">
+      <p className="mb-4 text-xs font-semibold tabular-nums tracking-[0.18em] text-[var(--text-muted)] md:text-sm">
         {String(displayNumber).padStart(2, "0")} / {String(SERVICES.length).padStart(2, "0")}
       </p>
 
-      <div className="relative min-h-[5.5rem] overflow-hidden md:min-h-[9.5rem] lg:min-h-[10.5rem]">
+      <div className="relative min-h-[6.25rem] overflow-hidden md:min-h-[10.5rem] lg:min-h-[11.5rem]">
         {SERVICES.map((item, idx) => {
           const visual = resolveClientsChooseSlideVisual(idx, baseIndex, localProgress, SERVICES.length);
 
@@ -131,7 +131,7 @@ function ServiceSlideStack({
               }}
               aria-hidden={!visual.visible}
             >
-              <p className="border-l-[3px] border-[var(--accent)] pl-4 font-heading text-[clamp(1.35rem,2.8vw,2.05rem)] font-bold uppercase leading-[1.08] tracking-[-0.02em] text-[var(--text)] md:border-l-[4px] md:pl-6 md:text-[clamp(1.55rem,2.2vw,2.35rem)]">
+              <p className="border-l-[3px] border-[var(--accent)] pl-4 font-heading text-[clamp(1.45rem,3.2vw,2.35rem)] font-bold uppercase leading-[1.08] tracking-[-0.02em] text-[var(--text)] md:border-l-[4px] md:pl-6 md:text-[clamp(1.65rem,2.6vw,2.65rem)]">
                 <Link
                   href={item.href}
                   className="rounded-sm underline-offset-4 transition-colors hover:text-[var(--accent)] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
@@ -140,7 +140,7 @@ function ServiceSlideStack({
                   {item.title}
                 </Link>
               </p>
-              <p className="mt-3 max-w-xl pl-[calc(1rem+3px)] text-[14px] leading-relaxed text-[var(--text-muted)] md:mt-4 md:pl-[calc(1.5rem+4px)] md:text-[15px] lg:text-base">
+              <p className="mt-3 max-w-xl pl-[calc(1rem+3px)] text-[15px] leading-relaxed text-[var(--text-muted)] md:mt-4 md:pl-[calc(1.5rem+4px)] md:text-base lg:text-[17px] lg:leading-relaxed">
                 {item.description}
               </p>
             </div>
@@ -308,20 +308,20 @@ export function ClientsChooseVideoSection() {
         style={{ backgroundColor: "var(--bg)" }}
       >
         <div className="mx-auto flex h-full min-h-0 w-full max-w-[1380px] flex-col md:flex-row md:items-center md:justify-between md:gap-8 md:px-8 lg:gap-10 lg:px-12">
-          <div className="shrink-0 px-4 pt-3 sm:px-6 md:order-2 md:flex-none md:w-[46%] md:px-0 md:pt-0">
-            <div className="mx-auto w-full max-w-[640px] md:max-w-[560px]">
+          <div className="shrink-0 px-4 pt-3 sm:px-6 md:order-2 md:flex-none md:w-[50%] md:px-0 md:pt-0 lg:w-[52%]">
+            <div className="mx-auto w-full max-w-[680px] md:max-w-[620px] lg:max-w-[680px]">
               <VideoPanel videoRef={videoRef} />
               <ServiceProgressBars scrollProgress={scrollProgress} className="mt-3 md:mt-4" />
             </div>
           </div>
 
           <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center px-4 pb-6 pt-4 sm:px-6 md:order-1 md:max-w-[560px] md:px-0 md:pb-0 md:pt-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)] md:text-xs">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)] md:text-[13px]">
               Что мы делаем
             </p>
             <h2
               id="clients-choose-video-heading"
-              className="mt-2 text-balance font-heading text-[clamp(1.25rem,3.8vw,2rem)] font-bold uppercase leading-[1.14] tracking-[-0.02em] text-[var(--text)] md:mt-3 md:text-[clamp(1.5rem,2.5vw,2.35rem)]"
+              className="mt-2 text-balance font-heading text-[clamp(1.35rem,4vw,2.2rem)] font-bold uppercase leading-[1.14] tracking-[-0.02em] text-[var(--text)] md:mt-3 md:text-[clamp(1.65rem,2.8vw,2.55rem)]"
             >
               Наши услуги
             </h2>
@@ -331,7 +331,7 @@ export function ClientsChooseVideoSection() {
             <div className="mt-6 md:mt-10">
               <Link
                 href="/services"
-                className="inline-flex w-fit items-center gap-1.5 text-[13px] font-semibold text-[var(--text)] underline-offset-4 transition hover:text-[var(--accent)] hover:underline sm:text-sm"
+                className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-[var(--text)] underline-offset-4 transition hover:text-[var(--accent)] hover:underline sm:text-[15px]"
               >
                 Все услуги
                 <ArrowUpRight className="h-4 w-4 shrink-0 opacity-80" strokeWidth={2} aria-hidden />

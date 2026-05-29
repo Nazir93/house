@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   resolveDefaultIconKeyForStageTitle,
+  resolveStageIconKeyForDisplay,
   resolveStageIconKeyForPersist,
 } from "./client-project-stage-icons";
 
@@ -22,6 +23,11 @@ describe("client-project-stage-icons", () => {
   it("resolveStageIconKeyForPersist — circle + название → правильная иконка", () => {
     expect(resolveStageIconKeyForPersist("Кровля", "circle")).toBe("roof");
     expect(resolveStageIconKeyForPersist("Электроснабжение", "circle")).toBe("electric");
+  });
+
+  it("resolveStageIconKeyForDisplay — alias для отображения в ЛК", () => {
+    expect(resolveStageIconKeyForDisplay("Фундамент", "circle")).toBe("foundation");
+    expect(resolveStageIconKeyForDisplay("Инженерные сети", "f")).toBe("engineering");
   });
 
   it("произвольный этап без шаблона", () => {

@@ -150,6 +150,8 @@ model HouseProject {
   mortgageMode        String                     @default("LEAD")
   published           Boolean                    @default(false)
   order               Int                        @default(0)
+  viewCount           Int                        @default(0)
+  likeCount           Int                        @default(0)
   completionJson      Json?
   constructionJson    Json?
   /// Герой карточки проекта (уровни цен по материалу, гарантия, срок).
@@ -394,6 +396,21 @@ model Faq {
   service  ServiceType?
   visible  Boolean      @default(true)
   order    Int          @default(0)
+}
+
+/// Вакансии — раздел «Партнёры → Вакансии» на сайте
+model Vacancy {
+  id           String   @id @default(cuid())
+  title        String
+  location     String?
+  schedule     String?
+  salaryLabel  String?
+  description  String   @db.Text
+  requirements String?  @db.Text
+  visible      Boolean  @default(true)
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model AdminUser {

@@ -279,27 +279,35 @@ export default async function AccountDashboardPage() {
               Вся история
             </Link>
           </div>
-          <div className="mb-5">
-            <SupportNewTicketForm />
+          <div className="mb-4">
+            <SupportNewTicketForm variant="compact" />
           </div>
           <ul className="space-y-2">
             {project.tickets.map((t) => (
-              <li key={t.id} className="flex flex-wrap items-center gap-2 text-sm">
-                <span className="truncate flex-1 min-w-[120px]">{t.subject}</span>
-                <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                  {formatDateRu(t.createdAt)}
-                </span>
-                <span
-                  className="text-[10px] uppercase font-bold px-2 py-0.5 rounded border"
+              <li key={t.id}>
+                <Link
+                  href="/account/support"
+                  className="flex flex-wrap items-center gap-2 text-sm rounded-xl border px-3 py-2.5 transition-colors hover:bg-[color-mix(in_srgb,var(--text)_4%,transparent)]"
                   style={{ borderColor: "var(--border)" }}
                 >
-                  {ticketStatusLabel(t.status)}
-                </span>
+                  <span className="truncate flex-1 min-w-[120px] font-medium">{t.subject}</span>
+                  <span className="text-xs tabular-nums" style={{ color: "var(--text-muted)" }}>
+                    {formatDateRu(t.createdAt)}
+                  </span>
+                  <span
+                    className="text-[10px] uppercase font-bold px-2 py-0.5 rounded border shrink-0"
+                    style={{ borderColor: "var(--border)" }}
+                  >
+                    {ticketStatusLabel(t.status)}
+                  </span>
+                </Link>
               </li>
             ))}
           </ul>
           {project.tickets.length === 0 ? (
-            <p className="text-sm opacity-60">—</p>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+              Обращений пока нет — отправьте вопрос через форму выше.
+            </p>
           ) : null}
         </section>
       </div>

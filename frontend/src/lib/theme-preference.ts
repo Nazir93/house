@@ -12,7 +12,7 @@ export function isThemePreference(value: string | null | undefined): value is Th
   return value === "light" || value === "dark" || value === "system";
 }
 
-/** По умолчанию — системная (как в ОС/браузере). */
+/** По умолчанию — как в браузере (`prefers-color-scheme`). */
 export function normalizeThemePreference(stored: string | null | undefined): ThemePreference {
   return isThemePreference(stored) ? stored : "system";
 }
@@ -37,7 +37,7 @@ export function themePreferenceLabel(preference: ThemePreference): string {
     case "dark":
       return "Тёмная тема";
     case "system":
-      return "Системная тема";
+      return "Как в браузере";
   }
 }
 
@@ -48,6 +48,6 @@ export function themePreferenceShortLabel(preference: ThemePreference): string {
     case "dark":
       return "Тёмная";
     case "system":
-      return "Системная";
+      return "Браузер";
   }
 }

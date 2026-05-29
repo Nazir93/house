@@ -1,4 +1,5 @@
 import { unstable_cache } from "next/cache";
+import { resolveHouseProjectEngagement } from "@/lib/house-project-engagement";
 import { prisma } from "@/lib/db";
 import { CACHE_TAG_PUBLIC_BUILT_OBJECTS, CACHE_TAG_PUBLIC_HOUSE_PROJECTS } from "@/lib/cache-tags-public";
 import { AURORA_PROJECT_CALCULATOR_UI } from "@/lib/project-calculator-aurora-defaults";
@@ -68,6 +69,8 @@ export interface HouseProjectItem {
   mortgageMode: "CALCULATOR" | "LEAD";
   published: boolean;
   order: number;
+  viewCount: number;
+  likeCount: number;
   createdAt?: Date;
   updatedAt?: Date;
   media: ConstructionMedia[];
@@ -130,6 +133,8 @@ export const FALLBACK_HOUSE_PROJECTS: HouseProjectItem[] = [
     mortgageMode: "CALCULATOR",
     published: true,
     order: 1,
+    viewCount: 315,
+    likeCount: 43,
     media: [
       { id: "aurora-render-1", type: "RENDER", url: "/images/banner/banner-hero-01.png", alt: "Проект Аврора", order: 0 },
       { id: "aurora-plan-1", type: "PLAN", url: "/images/banner/banner-hero-03.png", alt: "Планировка Аврора", label: "1 этаж", floor: 1, order: 0 },
@@ -158,6 +163,8 @@ export const FALLBACK_HOUSE_PROJECTS: HouseProjectItem[] = [
     mortgageMode: "LEAD",
     published: true,
     order: 2,
+    viewCount: 358,
+    likeCount: 18,
     media: [
       { id: "duet-render-1", type: "RENDER", url: "/images/banner/banner-hero-02.png", alt: "Проект Дуэт", order: 0 },
       { id: "duet-plan-1", type: "PLAN", url: "/images/banner/banner-hero-04.png", alt: "План 1 этажа Дуэт", label: "1 этаж", floor: 1, order: 0 },
@@ -186,6 +193,8 @@ export const FALLBACK_HOUSE_PROJECTS: HouseProjectItem[] = [
     mortgageMode: "LEAD",
     published: true,
     order: 3,
+    viewCount: 297,
+    likeCount: 21,
     media: [
       { id: "line-render-1", type: "RENDER", url: "/images/banner/banner-hero-06.png", alt: "Проект Линия", order: 0 },
     ],
@@ -212,6 +221,8 @@ export const FALLBACK_HOUSE_PROJECTS: HouseProjectItem[] = [
     mortgageMode: "CALCULATOR",
     published: true,
     order: 4,
+    viewCount: 350,
+    likeCount: 24,
     media: [
       { id: "horizon-render-1", type: "RENDER", url: "/images/banner/banner-hero-04.png", alt: "Проект Горизонт", order: 0 },
     ],
@@ -485,6 +496,13 @@ export function getEffectiveCalculatorUi(project: HouseProjectItem): ProjectCalc
 }
 
 function mapHouseProject(row: any): HouseProjectItem {
+  const engagement = resolveHouseProjectEngagement({
+    area: row.area,
+    order: row.order,
+    isNew: row.isNew,
+    viewCount: row.viewCount,
+    likeCount: row.likeCount,
+  });
   return {
     id: row.id,
     slug: row.slug,
@@ -503,6 +521,8 @@ function mapHouseProject(row: any): HouseProjectItem {
     mortgageMode: normalizeMortgageMode(row.mortgageMode),
     published: row.published,
     order: row.order,
+    viewCount: engagement.viewCount,
+    likeCount: engagement.likeCount,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     media: row.media ?? [],

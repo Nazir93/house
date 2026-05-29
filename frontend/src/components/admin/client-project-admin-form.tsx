@@ -39,6 +39,8 @@ import {
 import type { ClientProjectDraftSection } from "@/lib/client-project-draft";
 import { buildClientProjectDraftBaselineKey } from "@/lib/draft-section-baseline";
 import { CLIENT_STAGE_STATUS_OPTIONS } from "@/lib/client-stage-status";
+import { formatDateTimeRu, ticketStatusLabel } from "@/lib/client-portal-labels";
+import { localizeTicketApiError, ticketAuthorLabel } from "@/lib/client-ticket-labels";
 
 const TICKET_STATUS_OPTIONS = [
   { value: "OPEN", label: "Открыт" },
@@ -350,7 +352,7 @@ export function ClientProjectAdminForm({
     });
     const updated = await res.json().catch(() => null);
     if (!res.ok) {
-      setErr(updated?.error || "Ответ не отправлен");
+      setErr(localizeTicketApiError(updated?.error, "Ответ не отправлен"));
       return;
     }
     setTicketReplies((r) => ({ ...r, [ticketId]: "" }));
@@ -580,45 +582,79 @@ export function ClientProjectAdminForm({
       />
 
       <section className="space-y-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
-        <h2 className="text-lg font-bold">Обращения</h2>
+        <div>
+          <h2 className="text-lg font-bold">Обращения</h2>
+          <p className="text-sm text-white/45 mt-1">
+            Сообщения клиента из личного кабинета. Ответ увидит клиент в разделе «Обращения».
+          </p>
+        </div>
         {tickets.map((t) => (
-          <div key={t.id} className="border border-white/[0.06] rounded-xl p-3 space-y-2">
-            <div className="flex justify-between gap-2">
-              <span className="font-medium">{t.subject}</span>
-              <span className="text-xs text-white/40">{t.status}</span>
+          <div key={t.id} className="border border-white/[0.06] rounded-xl p-4 space-y-3">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="font-medium">{t.subject}</p>
+                <p className="text-xs text-white/40 mt-0.5">
+                  Создано {formatDateTimeRu(t.messages[0]?.createdAt ?? null)}
+                </p>
+              </div>
+              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded border border-white/10 text-white/70 shrink-0">
+                {ticketStatusLabel(t.status)}
+              </span>
             </div>
-            <ul className="text-sm space-y-1 text-white/70">
+            <ul className="space-y-2 border-t border-white/[0.06] pt-3">
               {t.messages.map((m, i) => (
-                <li key={i}>
-                  <span className="text-white/40">{m.authorType}:</span> {m.body}
+                <li
+                  key={i}
+                  className={`text-sm rounded-lg px-3 py-2 ${
+                    m.authorType === "STAFF" ? "bg-[#0F3D2E]/20 ml-4" : "bg-white/[0.04] mr-4"
+                  }`}
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">
+                    {ticketAuthorLabel(m.authorType, "admin")}
+                  </p>
+                  <p className="mt-1 text-white/85 whitespace-pre-wrap">{m.body}</p>
+                  <p className="text-[10px] mt-1.5 text-white/35">{formatDateTimeRu(m.createdAt)}</p>
                 </li>
               ))}
             </ul>
-            <div className="flex flex-wrap gap-2 items-end">
-              <AdminSelect
-                className="w-40 shrink-0"
-                triggerClassName={ADMIN_COMPACT_SELECT_TRIGGER}
-                value={ticketStatus[t.id] ?? t.status}
-                onValueChange={(v) => setTicketStatus((s) => ({ ...s, [t.id]: v }))}
-                options={TICKET_STATUS_OPTIONS}
-              />
-              <input
-                className={inp + " flex-1 min-w-[200px]"}
-                value={ticketReplies[t.id] ?? ""}
-                onChange={(e) => setTicketReplies((s) => ({ ...s, [t.id]: e.target.value }))}
-                placeholder="Ответ клиенту"
-              />
+            <div className="flex flex-wrap gap-2 items-end border-t border-white/[0.06] pt-3">
+              <div className="w-full sm:w-auto">
+                <label className="block text-[10px] uppercase tracking-wider text-white/40 mb-1">
+                  Статус
+                </label>
+                <AdminSelect
+                  className="w-40 shrink-0"
+                  triggerClassName={ADMIN_COMPACT_SELECT_TRIGGER}
+                  value={ticketStatus[t.id] ?? t.status}
+                  onValueChange={(v) => setTicketStatus((s) => ({ ...s, [t.id]: v }))}
+                  options={TICKET_STATUS_OPTIONS}
+                />
+              </div>
+              <div className="flex-1 min-w-[200px]">
+                <label className="block text-[10px] uppercase tracking-wider text-white/40 mb-1">
+                  Ответ
+                </label>
+                <textarea
+                  className={inp + " min-h-[72px] resize-y"}
+                  value={ticketReplies[t.id] ?? ""}
+                  onChange={(e) => setTicketReplies((s) => ({ ...s, [t.id]: e.target.value }))}
+                  placeholder="Текст ответа клиенту…"
+                  rows={2}
+                />
+              </div>
               <button
                 type="button"
                 onClick={() => sendReply(t.id)}
-                className="px-3 py-2 rounded-lg bg-[#0F3D2E] text-sm font-semibold"
+                className="px-3 py-2 rounded-lg bg-[#0F3D2E] text-sm font-semibold shrink-0"
               >
                 Отправить
               </button>
             </div>
           </div>
         ))}
-        {tickets.length === 0 ? <p className="text-white/40 text-sm">Нет обращений</p> : null}
+        {tickets.length === 0 ? (
+          <p className="text-white/40 text-sm">Клиент ещё не писал — обращения появятся здесь после отправки из личного кабинета.</p>
+        ) : null}
       </section>
 
     </div>

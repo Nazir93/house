@@ -3,85 +3,69 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useCallback } from "react";
 
-const POLL_MS = 18_000;
+const POLL_MS = 12_000;
 
 /**
- * Опрос количества заявок со статусом NEW; при росте — подсветка и бейдж.
- * На странице /admin/leads считаем «просмотрено» и сбрасываем.
+ * Опрос количества заявок со статусом NEW.
+ * Красный бейдж — пока есть необработанные; пульс — при росте счётчика.
+ * На странице /admin/leads пульс гаснет, бейдж остаётся до смены статусов.
  */
 export function useAdminNewLeadsNotify() {
   const pathname = usePathname();
-  const baselineRef = useRef<number | null>(null);
-  const [highlight, setHighlight] = useState(false);
-  const [badgeCount, setBadgeCount] = useState(0);
+  const prevCountRef = useRef<number | null>(null);
+  const [newCount, setNewCount] = useState(0);
+  const [pulse, setPulse] = useState(false);
 
-  const syncBaselineFromServer = useCallback(() => {
-    return fetch("/api/admin/leads/new-count")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d: { count?: number } | null) => {
-        if (d && typeof d.count === "number") baselineRef.current = d.count;
-      })
-      .catch(() => {});
-  }, []);
+  const onLeadsSection = pathname.startsWith("/admin/leads");
 
-  const acknowledge = useCallback(() => {
-    setHighlight(false);
-    setBadgeCount(0);
-    void syncBaselineFromServer();
-  }, [syncBaselineFromServer]);
+  const fetchCount = useCallback(async () => {
+    try {
+      const r = await fetch("/api/admin/leads/new-count", { cache: "no-store" });
+      if (!r.ok) return;
+      const { count } = (await r.json()) as { count: number };
+      const safe = typeof count === "number" && count >= 0 ? count : 0;
 
-  useEffect(() => {
-    if (pathname.startsWith("/admin/leads")) {
-      acknowledge();
-    }
-  }, [pathname, acknowledge]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const tick = async () => {
-      try {
-        const r = await fetch("/api/admin/leads/new-count");
-        if (!r.ok || cancelled) return;
-        const { count } = (await r.json()) as { count: number };
-        if (baselineRef.current === null) {
-          baselineRef.current = count;
-          return;
-        }
-        if (count > baselineRef.current) {
-          const delta = count - baselineRef.current;
-          baselineRef.current = count;
-          setBadgeCount((b) => b + delta);
-          setHighlight(true);
-          if (typeof window !== "undefined" && document.hidden && Notification.permission === "granted") {
-            try {
-              new Notification("Новая заявка", {
-                body:
-                  delta === 1
-                    ? "Поступила новая заявка — откройте раздел «Заявки»"
-                    : `Поступило ${delta} новых заявок`,
-                icon: "/icon.png",
-                tag: "admin-new-lead",
-              });
-            } catch {
-              /* */
-            }
+      if (prevCountRef.current !== null && safe > prevCountRef.current) {
+        const delta = safe - prevCountRef.current;
+        setPulse(true);
+        if (
+          typeof window !== "undefined" &&
+          document.hidden &&
+          Notification.permission === "granted"
+        ) {
+          try {
+            new Notification("Новая заявка", {
+              body:
+                delta === 1
+                  ? "Поступила новая заявка — откройте раздел «Заявки»"
+                  : `Поступило ${delta} новых заявок`,
+              icon: "/icon.png",
+              tag: "admin-new-lead",
+            });
+          } catch {
+            /* */
           }
-        } else if (count < baselineRef.current) {
-          baselineRef.current = count;
         }
-      } catch {
-        /* сеть */
       }
-    };
 
-    void tick();
-    const id = setInterval(tick, POLL_MS);
-    return () => {
-      cancelled = true;
-      clearInterval(id);
-    };
+      prevCountRef.current = safe;
+      setNewCount(safe);
+    } catch {
+      /* сеть */
+    }
   }, []);
 
-  return { highlight, badgeCount };
+  useEffect(() => {
+    if (onLeadsSection) setPulse(false);
+  }, [onLeadsSection]);
+
+  useEffect(() => {
+    void fetchCount();
+    const id = setInterval(() => void fetchCount(), POLL_MS);
+    return () => clearInterval(id);
+  }, [fetchCount]);
+
+  const highlight = newCount > 0 && (pulse || !onLeadsSection);
+
+  return { newCount, highlight, pulse };
 }

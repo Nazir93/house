@@ -9,8 +9,11 @@ export const metadata: Metadata = {
 
 function ThankYouFallback() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <p className="text-sm" style={{ color: "var(--text-muted)" }}>Загрузка...</p>
+    <div
+      className="flex min-h-[50vh] items-center justify-center"
+      style={{ backgroundColor: "var(--bg)", color: "var(--text-muted)" }}
+    >
+      <p className="text-sm">Загрузка…</p>
     </div>
   );
 }

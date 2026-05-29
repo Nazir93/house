@@ -74,6 +74,9 @@ export function resolveStageIconKeyForPersist(title: string, iconKey: string): S
   return resolveDefaultIconKeyForStageTitle(title) ?? resolveStageIconPickerKey(iconKey);
 }
 
+/** Иконка в личном кабинете: те же правила, что при сохранении (название + legacy iconKey). */
+export const resolveStageIconKeyForDisplay = resolveStageIconKeyForPersist;
+
 export function isStandardStageTitle(title: string): boolean {
   return resolveDefaultIconKeyForStageTitle(title) !== null;
 }
