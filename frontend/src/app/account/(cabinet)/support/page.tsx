@@ -96,10 +96,6 @@ export default async function AccountSupportPage() {
           </ul>
         )}
       </div>
-
-      <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-        Телефон и часы работы поддержки — в боковом меню кабинета.
-      </p>
     </div>
   );
 }
