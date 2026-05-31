@@ -12,6 +12,7 @@ import {
 
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { SITE_NAME } from "@/lib/constants";
+import { publicFormFieldClass, publicFormFieldStyle } from "@/lib/public-form-field";
 import { ShowcaseCarouselNav } from "@/components/ui/showcase-carousel-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { cn } from "@/lib/utils";
@@ -94,7 +95,7 @@ function AdminLoginForm() {
     }
 
     if (result?.error) {
-      setError("Неверный email или пароль (проверьте совпадение с ADMIN_EMAIL и ADMIN_SECRET на сервере).");
+      setError("Неверный email или пароль");
       setLoading(false);
       return;
     }
@@ -118,29 +119,36 @@ function AdminLoginForm() {
       return;
     }
 
-    setError(
-      "Вход не завершён (CSRF или несовпадение cookie с HTTPS). На сервере: NEXTAUTH_URL и NEXT_PUBLIC_SITE_URL как в адресной строке; за nginx — X-Forwarded-Proto и AUTH_TRUST_HOST=true; после правок — git pull, npm run build, pm2 reload.",
-    );
+    setError("Не удалось войти. Попробуйте ещё раз или обратитесь к администратору сайта.");
     setLoading(false);
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {error && (
-        <div className="rounded-xl border border-red-500/25 bg-red-500/[0.08] px-4 py-3 text-sm text-red-700 dark:text-red-300">
+      {error ? (
+        <div
+          className="rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-800 dark:text-red-200"
+          role="alert"
+        >
           {error}
         </div>
-      )}
+      ) : null}
 
-      <div className="inline-flex rounded-full border border-[#0f3d2e]/12 bg-[#0f3d2e]/[0.04] p-1">
+      <div
+        className="inline-flex rounded-full border p-1"
+        style={{
+          borderColor: "var(--border)",
+          backgroundColor: "color-mix(in srgb, var(--card-bg) 88%, var(--accent) 12%)",
+        }}
+      >
         <button
           type="button"
           onClick={() => setTab("email")}
           className={cn(
             "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-all duration-300",
             tab === "email"
-              ? "bg-white text-[#0f3d2e] shadow-sm shadow-[#0f3d2e]/10"
-              : "text-[#0f3d2e]/55 hover:text-[#0f3d2e]/85",
+              ? "bg-[var(--accent)] text-[var(--on-accent)] shadow-sm"
+              : "text-[var(--text-muted)] hover:text-[var(--text)]",
           )}
         >
           Email
@@ -151,8 +159,8 @@ function AdminLoginForm() {
           className={cn(
             "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-wide transition-all duration-300",
             tab === "login"
-              ? "bg-white text-[#0f3d2e] shadow-sm shadow-[#0f3d2e]/10"
-              : "text-[#0f3d2e]/55 hover:text-[#0f3d2e]/85",
+              ? "bg-[var(--accent)] text-[var(--on-accent)] shadow-sm"
+              : "text-[var(--text-muted)] hover:text-[var(--text)]",
           )}
         >
           Логин
@@ -160,7 +168,7 @@ function AdminLoginForm() {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-[#0f3d2e]/55">
+        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-subtle)]">
           {tab === "email" ? "Email" : "Логин"}
         </label>
         <input
@@ -170,13 +178,14 @@ function AdminLoginForm() {
           required
           autoComplete="username"
           autoFocus
-          className="w-full rounded-xl border border-[#0f3d2e]/12 bg-white px-4 py-3 text-sm text-[#1a1d1c] shadow-inner shadow-black/[0.02] placeholder:text-[#0f3d2e]/30 focus:border-[#0f3d2e]/35 focus:outline-none focus:ring-2 focus:ring-[#0f3d2e]/15"
+          className={cn(publicFormFieldClass, "!rounded-2xl")}
+          style={publicFormFieldStyle}
           placeholder={tab === "email" ? "admin@example.com" : "Введите логин"}
         />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-[#0f3d2e]/55">
+        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.12em] text-[var(--text-subtle)]">
           Пароль
         </label>
         <div className="relative">
@@ -186,14 +195,15 @@ function AdminLoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             autoComplete="current-password"
-            className="w-full rounded-xl border border-[#0f3d2e]/12 bg-white py-3 pl-4 pr-12 text-sm text-[#1a1d1c] shadow-inner shadow-black/[0.02] placeholder:text-[#0f3d2e]/30 focus:border-[#0f3d2e]/35 focus:outline-none focus:ring-2 focus:ring-[#0f3d2e]/15"
+            className={cn(publicFormFieldClass, "!rounded-2xl pr-12")}
+            style={publicFormFieldStyle}
             placeholder="••••••••"
           />
           <button
             type="button"
             tabIndex={-1}
             onClick={() => setShowPw((v) => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-[#0f3d2e]/40 transition hover:bg-[#0f3d2e]/5 hover:text-[#0f3d2e]/70"
+            className="absolute right-3 top-1/2 -translate-y-1/2 rounded-xl p-1.5 text-[var(--text-subtle)] transition hover:bg-[color-mix(in_srgb,var(--text)_8%,transparent)] hover:text-[var(--text)]"
             aria-label={showPw ? "Скрыть пароль" : "Показать пароль"}
           >
             {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -204,7 +214,7 @@ function AdminLoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="group relative w-full overflow-hidden rounded-2xl bg-[#0f3d2e] py-3.5 text-sm font-bold uppercase tracking-[0.14em] text-[#f6f6f4] shadow-[0_12px_40px_rgba(15,61,46,0.28)] transition hover:bg-[#174d3b] disabled:cursor-not-allowed disabled:opacity-45"
+        className="group relative w-full overflow-hidden rounded-2xl bg-[var(--accent)] py-3.5 text-sm font-bold uppercase tracking-[0.14em] text-[var(--on-accent)] shadow-[0_12px_40px_color-mix(in_srgb,var(--accent)_35%,transparent)] transition hover:bg-[var(--accent-hover)] disabled:cursor-not-allowed disabled:opacity-45"
       >
         <span className="relative z-10">{loading ? "Вход…" : "Войти"}</span>
         <span
@@ -213,7 +223,7 @@ function AdminLoginForm() {
         />
       </button>
 
-      <p className="text-center text-[11px] leading-relaxed text-[#0f3d2e]/40">
+      <p className="text-center text-[11px] leading-relaxed text-[var(--text-subtle)]">
         Нажимая «Войти», вы подтверждаете доступ к закрытому разделу сайта.
       </p>
     </form>
@@ -281,67 +291,51 @@ function AdminShowcaseCarousel() {
 
 export function AdminLoginExperience() {
   return (
-    <div className="app-branded-surface relative min-h-screen bg-[#e8ebe9] text-[#1a1d1c] dark:bg-[#0d1210] dark:text-[#e8ebe9]">
+    <div
+      className="app-branded-surface relative min-h-screen"
+      style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}
+    >
       <div className="pointer-events-none absolute right-4 top-4 z-50 sm:right-6 sm:top-6">
-        <span className="pointer-events-auto inline-block rounded-xl bg-[color-mix(in_srgb,var(--bg)_85%,transparent)] p-0.5 shadow-sm backdrop-blur-sm dark:bg-[color-mix(in_srgb,#0d1210_88%,transparent)]">
+        <span className="pointer-events-auto inline-block rounded-xl bg-[color-mix(in_srgb,var(--card-bg)_92%,transparent)] p-0.5 shadow-sm backdrop-blur-sm">
           <ThemeToggle variant="outline" />
         </span>
       </div>
       <div className="flex min-h-screen min-w-0 flex-col lg:flex-row">
         <div className="relative z-10 flex flex-1 flex-col justify-center px-5 py-12 sm:px-10 lg:w-[min(100%,46rem)] lg:max-w-[46%] lg:flex-none lg:px-14 xl:px-20">
           <div
-            className="pointer-events-none absolute -left-24 top-1/4 h-72 w-72 rounded-full bg-[#0f3d2e]/[0.06] blur-3xl"
+            className="pointer-events-none absolute -left-24 top-1/4 h-72 w-72 rounded-full bg-[color-mix(in_srgb,var(--accent)_8%,transparent)] blur-3xl"
             aria-hidden
           />
           <div className="relative mx-auto w-full max-w-[400px]">
             <div className="mb-10 flex items-start gap-3">
               <BrandLogo height={40} variant="app" className="shrink-0" />
               <div>
-                <h1 className="font-heading text-xl font-bold uppercase tracking-tight text-[#0f3d2e] sm:text-2xl">
+                <h1 className="font-heading text-xl font-bold uppercase tracking-tight text-[var(--text)] sm:text-2xl">
                   {SITE_NAME}
                 </h1>
-                <p className="mt-1 flex items-center gap-1 text-[13px] text-[#0f3d2e]/55">
+                <p className="mt-1 flex items-center gap-1 text-[13px] text-[var(--text-muted)]">
                   Вход в админ-панель
                   <ChevronRight className="h-3.5 w-3.5 opacity-50" aria-hidden />
                 </p>
               </div>
             </div>
 
-            <p className="mb-6 text-sm leading-relaxed text-[#0f3d2e]/70">
-              Введите данные из переменных окружения сервера:{" "}
-              <code className="rounded bg-[#0f3d2e]/8 px-1.5 py-0.5 text-[12px] text-[#0f3d2e]/90">ADMIN_EMAIL</code> и
-              пароль <code className="rounded bg-[#0f3d2e]/8 px-1.5 py-0.5 text-[12px]">ADMIN_SECRET</code>. Вкладки
-              Email и Логин отправляют одно и то же поле — администраторский email.
-            </p>
-
-            <Suspense fallback={<div className="py-10 text-center text-sm text-[#0f3d2e]/40">Загрузка…</div>}>
+            <Suspense
+              fallback={
+                <div className="py-10 text-center text-sm text-[var(--text-muted)]">Загрузка…</div>
+              }
+            >
               <AdminLoginForm />
             </Suspense>
-
-            <div
-              className="mt-8 rounded-2xl border p-4 text-[11px] leading-relaxed"
-              style={{
-                borderColor: "rgba(15, 61, 46, 0.2)",
-                backgroundColor: "rgba(15, 61, 46, 0.04)",
-                color: "rgba(26, 29, 28, 0.75)",
-              }}
-            >
-              <strong className="text-[#0f3d2e]">Входили по IP, а по домену не пускает?</strong>
-              <br />
-              Задайте <code className="text-[#0f3d2e]/90">NEXTAUTH_URL</code> на тот же хост, что в браузере, перезапустите
-              приложение. Попробуйте окно инкогнито.
-            </div>
-
-            <p className="mt-6 text-[11px] leading-relaxed text-[#0f3d2e]/38">
-              Env: <span className="text-[#0f3d2e]/55">NEXTAUTH_SECRET</span>,{" "}
-              <span className="text-[#0f3d2e]/55">NEXTAUTH_URL</span>
-            </p>
           </div>
         </div>
 
-        <div className="relative flex min-h-[420px] min-w-0 flex-1 flex-col border-t border-[#0f3d2e]/10 bg-[#0a1210] lg:min-h-screen lg:border-l lg:border-t-0">
+        <div
+          className="relative flex min-h-[420px] min-w-0 flex-1 flex-col border-t bg-[#0a1210] lg:min-h-screen lg:border-l lg:border-t-0"
+          style={{ borderColor: "var(--border)" }}
+        >
           <div
-            className="pointer-events-none absolute -left-px top-0 hidden h-full w-20 bg-gradient-to-r from-[#e8ebe9] to-transparent lg:block"
+            className="pointer-events-none absolute -left-px top-0 hidden h-full w-20 bg-gradient-to-r from-[var(--bg)] to-transparent lg:block"
             aria-hidden
           />
           <div className="relative flex min-h-[420px] min-w-0 flex-1 flex-col p-4 sm:p-6 lg:min-h-0 lg:flex-1 lg:p-8 lg:pl-12">
