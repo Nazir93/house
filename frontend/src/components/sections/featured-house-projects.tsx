@@ -14,6 +14,7 @@ import { ProjectEngagementBadges } from "@/components/projects/project-engagemen
 
 import type { HouseProjectItem } from "@/lib/construction-data";
 import { getProjectRenders } from "@/lib/construction-shared";
+import { revealDelayStyle } from "@/lib/reveal-animation";
 import { cn } from "@/lib/utils";
 
 const INITIAL_VISIBLE = 4;
@@ -88,6 +89,7 @@ export function FeaturedHouseProjectsSection({ projects }: { projects: HouseProj
   return (
     <section
       id="catalog-preview"
+      data-reveal="section"
       className="overflow-hidden py-11 sm:py-14 md:py-[4.25rem]"
       style={{ backgroundColor: "var(--bg)" }}
     >
@@ -176,15 +178,15 @@ export function FeaturedHouseProjectsSection({ projects }: { projects: HouseProj
                 const mats = materialsLine(p.materials);
 
                 return (
-                  <article key={p.id} className="flex flex-col">
-                    <div className="relative aspect-[16/11] w-full overflow-hidden rounded-[22px] bg-[var(--stone)] shadow-[0_12px_40px_rgba(15,61,46,0.08)]">
+                  <article key={p.id} data-reveal="card" style={revealDelayStyle(idx)} className="flex flex-col">
+                    <div className="relative aspect-[16/11] w-full overflow-hidden rounded-[22px] bg-[var(--stone)] shadow-[0_12px_40px_rgba(15,61,46,0.08)] transition-[box-shadow,transform] duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_52px_rgba(15,61,46,0.14)]">
                       <Link href={href} className="absolute inset-0 z-0">
                         <Image
                           src={cover}
                           alt={p.title}
                           fill
                           quality={78}
-                          className="object-cover transition duration-500 hover:scale-[1.02]"
+                          className="object-cover transition duration-700 ease-out hover:scale-[1.035]"
                           sizes="(max-width: 768px) 100vw, 50vw"
                         />
                       </Link>

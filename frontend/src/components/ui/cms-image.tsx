@@ -1,19 +1,39 @@
+"use client";
+
 import Image, { type ImageProps } from "next/image";
+import { useState } from "react";
+
+import { shouldUseBrowserImageDirectly } from "@/lib/image-loading";
+import { cn } from "@/lib/utils";
 
 export type CmsImageProps = Omit<ImageProps, "src" | "alt"> & {
   src?: string | null;
   alt: string;
 };
 
-function shouldUnoptimize(src: string): boolean {
-  const t = src.trim();
-  /** SVG не гоняем через `/_next/image` — быстрее и без сюрпризов с вектором. */
-  return t.startsWith("data:") || /\.(gif|svg)($|\?)/i.test(t);
-}
+/** Картинки из CMS/загрузок: уже сжатые uploads отдаём напрямую, остальное через next/image. */
+export function CmsImage({ src, alt, unoptimized, quality, decoding, className, onLoad, ...rest }: CmsImageProps) {
+  const [loaded, setLoaded] = useState(false);
 
-/** Картинки из CMS/загрузок: локальные пути и разрешённые remote; GIF и data URI без оптимизации. */
-export function CmsImage({ src, alt, unoptimized, ...rest }: CmsImageProps) {
   if (!src?.trim()) return null;
-  const uo = unoptimized ?? shouldUnoptimize(src);
-  return <Image src={src} alt={alt} unoptimized={uo} {...rest} />;
+  const uo = unoptimized ?? shouldUseBrowserImageDirectly(src);
+  return (
+    <Image
+      src={src}
+      alt={alt}
+      unoptimized={uo}
+      quality={quality ?? 78}
+      decoding={decoding ?? "async"}
+      className={cn(
+        "transition-[opacity,filter,transform] duration-700 ease-out",
+        loaded ? "opacity-100 blur-0" : "opacity-0 blur-sm",
+        className
+      )}
+      onLoad={(event) => {
+        setLoaded(true);
+        onLoad?.(event);
+      }}
+      {...rest}
+    />
+  );
 }

@@ -88,6 +88,20 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
     return () => window.clearInterval(id);
   }, [carouselPaused, goNext, promos.length, autoCycleKey]);
 
+  useEffect(() => {
+    if (!slide) return;
+    const preload = (src: string) => {
+      if (!src.trim()) return;
+      const img = new window.Image();
+      img.decoding = "async";
+      img.fetchPriority = "high";
+      img.src = src;
+    };
+
+    preload(theme === "dark" ? config.backgrounds.dark : config.backgrounds.light);
+    preload(slide.image);
+  }, [config.backgrounds.dark, config.backgrounds.light, slide, theme]);
+
   if (!slide) return null;
 
   return (

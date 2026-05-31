@@ -6,6 +6,7 @@ import type { ProjectListItem } from "@/lib/get-projects";
 import type { BuiltObjectItem } from "@/lib/construction-shared";
 import { PortfolioProjectListCard } from "@/components/portfolio/portfolio-project-list-card";
 import { HomeCasesAccordion } from "@/components/sections/home-cases-accordion";
+import { revealDelayStyle } from "@/lib/reveal-animation";
 
 export type PortfolioSectionProps = {
   projects?: ProjectListItem[];
@@ -30,6 +31,7 @@ export function PortfolioSection({
   return (
     <section
       id={sectionId}
+      data-reveal="section"
       className="overflow-hidden py-11 sm:py-14 md:py-[4.25rem]"
       style={{ backgroundColor: "var(--bg)", borderTop: "1px solid var(--border)" }}
     >
@@ -54,8 +56,8 @@ export function PortfolioSection({
           <HomeCasesAccordion objects={builtObjects!} />
         ) : (
           <div className="flex max-w-5xl flex-col gap-4">
-            {items.map((project) => (
-              <PortfolioProjectListCard key={project.id} project={project} />
+            {items.map((project, index) => (
+              <PortfolioProjectListCard key={project.id} project={project} revealStyle={revealDelayStyle(index)} />
             ))}
           </div>
         )}

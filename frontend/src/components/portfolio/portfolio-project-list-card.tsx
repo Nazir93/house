@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import type { CSSProperties } from "react";
 import { ArrowRight } from "lucide-react";
 import type { ProjectListItem } from "@/lib/get-projects";
 import { isGifUrl } from "@/components/editorial/editorial-banner";
@@ -21,14 +22,15 @@ function thumbUnoptimized(src: string): boolean {
 }
 
 /** Карточка списка портфолио (дизайн страницы «Наши проекты» / старый формат Гарант Монтаж). */
-export function PortfolioProjectListCard({ project }: { project: ProjectListItem }) {
+export function PortfolioProjectListCard({ project, revealStyle }: { project: ProjectListItem; revealStyle?: CSSProperties }) {
   const thumbSrc = listCardThumbSrc(project);
 
   return (
     <Link
       href={`/portfolio/${project.slug}`}
-      className="group rounded-2xl overflow-hidden transition-all duration-300 cursor-pointer hover:shadow-lg block"
-      style={{ border: "1px solid var(--border)" }}
+      data-reveal="card"
+      className="group block cursor-pointer overflow-hidden rounded-2xl transition-all duration-500 hover:-translate-y-0.5 hover:shadow-lg"
+      style={{ border: "1px solid var(--border)", ...revealStyle }}
     >
       <div className="flex items-center gap-5 md:gap-8 p-4 md:p-6">
         <div
@@ -40,7 +42,7 @@ export function PortfolioProjectListCard({ project }: { project: ProjectListItem
               src={thumbSrc}
               alt={project.title}
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]"
               sizes="160px"
               unoptimized={thumbUnoptimized(thumbSrc)}
             />

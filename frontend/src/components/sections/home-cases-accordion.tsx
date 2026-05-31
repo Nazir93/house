@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { getBuiltObjectCover, type BuiltObjectItem } from "@/lib/construction-shared";
+import { revealDelayStyle } from "@/lib/reveal-animation";
 import { cn } from "@/lib/utils";
 
 function caseCategory(object: BuiltObjectItem): string {
@@ -25,10 +26,12 @@ function expandBodyText(object: BuiltObjectItem): string {
 
 function CaseRow({
   object,
+  index,
   isOpen,
   onToggle,
 }: {
   object: BuiltObjectItem;
+  index: number;
   isOpen: boolean;
   onToggle: () => void;
 }) {
@@ -54,7 +57,7 @@ function CaseRow({
   }, [isOpen]);
 
   return (
-    <div className="border-b" style={{ borderColor: "var(--border)" }}>
+    <div data-reveal="card" className="group border-b" style={{ borderColor: "var(--border)", ...revealDelayStyle(index) }}>
       <button
         type="button"
         onClick={onToggle}
@@ -109,7 +112,7 @@ function CaseRow({
                   src={imgUrl}
                   alt={cover?.alt ? cover.alt : object.title}
                   fill
-                  className="object-cover"
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                   sizes="(max-width: 768px) 100vw, 540px"
                   unoptimized={imgUrl.startsWith("/uploads/")}
                 />
@@ -138,6 +141,7 @@ export function HomeCasesAccordion({ objects }: { objects: BuiltObjectItem[] }) 
           <CaseRow
             key={object.id}
             object={object}
+            index={index}
             isOpen={openIndex === index}
             onToggle={() => setOpenIndex(openIndex === index ? -1 : index)}
           />

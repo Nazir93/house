@@ -9,6 +9,7 @@ import { FixedStatsBar } from "./fixed-stats-bar";
 import { SmoothScroll } from "./smooth-scroll";
 import { RouteScrollReset } from "./route-scroll-reset";
 import { PageTransition } from "./page-transition";
+import { RevealObserver } from "./reveal-observer";
 import { CustomCursor } from "../ui/custom-cursor";
 import { ContactModal } from "../ui/contact-modal";
 import { CookieBanner } from "../ui/cookie-banner";
@@ -29,6 +30,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     <>
       <SmoothScroll />
       <RouteScrollReset />
+      <RevealObserver />
       <CustomCursor />
       <ContactModal />
       <DiscussProjectFab />

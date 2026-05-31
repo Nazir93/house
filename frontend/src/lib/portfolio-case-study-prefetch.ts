@@ -1,12 +1,8 @@
 import type { CaseStudyPhase } from "@/lib/portfolio-case-study";
+import { buildImagePrefetchSrc, buildNextImagePrefetchHref, shouldUseBrowserImageDirectly } from "@/lib/image-loading";
 
 const DEFAULT_W = 828;
 const DEFAULT_Q = 78;
-
-function isUnoptimizedSrc(src: string): boolean {
-  const t = src.trim();
-  return t.startsWith("data:") || /\.(gif|svg)($|\?)/i.test(t);
-}
 
 /** Тот же URL, что запрашивает `next/image` с дефолтным лоадером (совпадает с `CmsImage` quality={78}). */
 export function caseStudyNextImagePrefetchHref(
@@ -14,8 +10,10 @@ export function caseStudyNextImagePrefetchHref(
   width: number = DEFAULT_W,
   quality: number = DEFAULT_Q
 ): string {
-  return `/_next/image?url=${encodeURIComponent(src.trim())}&w=${width}&q=${quality}`;
+  return buildNextImagePrefetchHref(src, width, quality);
 }
+
+export { shouldUseBrowserImageDirectly as isCaseStudyDirectImageSrc };
 
 export function collectCaseStudyImagesForPhase(phase: CaseStudyPhase): string[] {
   const out: string[] = [];
@@ -74,7 +72,7 @@ export function prefetchCaseStudyImageUrls(
     const img = new Image();
     img.decoding = "async";
     img.fetchPriority = "low";
-    img.src = isUnoptimizedSrc(s) ? s : caseStudyNextImagePrefetchHref(s, width, quality);
+    img.src = buildImagePrefetchSrc(s, width, quality);
     n += 1;
   }
 }
