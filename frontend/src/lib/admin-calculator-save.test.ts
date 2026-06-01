@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyBulkPricePercent,
   fractionToPercentInput,
   normalizeSettingsInput,
   parsePositiveFloat,
@@ -31,6 +32,11 @@ describe("admin-calculator-save (админка калькулятора)", () =
 
     it("отрицательный процент → 0", () => {
       expect(percentInputToFraction(-5)).toBe(0);
+    });
+
+    it("коэффициент удорожания домов меньше 100 м² редактируется как процент", () => {
+      expect(percentInputToFraction(15)).toBe(0.15);
+      expect(fractionToPercentInput(0.15)).toBe(15);
     });
   });
 
@@ -69,6 +75,17 @@ describe("admin-calculator-save (админка калькулятора)", () =
         smallAreaSurcharge: 0.2,
         blindAreaWidthM: 0.5,
       });
+    });
+  });
+
+  describe("applyBulkPricePercent", () => {
+    it("массово повышает и снижает цены без программиста", () => {
+      expect(applyBulkPricePercent(1000, 5)).toBe(1050);
+      expect(applyBulkPricePercent(1000, -3)).toBe(970);
+    });
+
+    it("не уводит цену ниже нуля", () => {
+      expect(applyBulkPricePercent(1000, -150)).toBe(0);
     });
   });
 });

@@ -88,6 +88,7 @@ export interface HouseProjectCalculatorConfig {
 export interface DerivedMetrics {
   buildingArea: number;
   roofArea: number;
+  insulationArea: number;
   facadeArea: number;
   perimeter: number;
   blindArea: number;
@@ -144,8 +145,6 @@ const CATEGORY_FLOOR_ROOF: Record<
 
 const LADDER_CATEGORIES = new Set<HouseCalculatorCategoryId>(["d", "e", "f"]);
 const OVERLAP_CATEGORIES = new Set<HouseCalculatorCategoryId>(["d", "e", "f"]);
-const MANSARD_CATEGORIES = new Set<HouseCalculatorCategoryId>(["d", "e"]);
-
 export function resolveHouseCalculatorCategory(params: {
   explicit?: HouseCalculatorCategoryId | null;
   floors: 1 | 1.5 | 2;
@@ -174,6 +173,7 @@ export function deriveMetrics(
   return {
     buildingArea: area,
     roofArea: area * coefficients.roof,
+    insulationArea: area * coefficients.roof * coefficients.insulation,
     facadeArea: area * coefficients.facade,
     perimeter,
     blindArea: perimeter * blindAreaWidthM,
@@ -225,13 +225,6 @@ function isConstructionAllowed(
   return true;
 }
 
-function roofAreaForInsulation(
-  metrics: DerivedMetrics,
-  categoryId: HouseCalculatorCategoryId
-): number {
-  return MANSARD_CATEGORIES.has(categoryId) ? metrics.roofArea : metrics.roofArea;
-}
-
 export function computeConstructionOptionRub(
   code: ConstructionOptionCode,
   option: PricedOptionDef,
@@ -270,8 +263,7 @@ export function computeRoofInsulationRub(
   categoryId: HouseCalculatorCategoryId
 ): number {
   if (!option.enabled) return 0;
-  const area = roofAreaForInsulation(metrics, categoryId);
-  return Math.round(area * option.price);
+  return Math.round(metrics.roofArea * option.price);
 }
 
 export function computeEngineeringOptionRub(

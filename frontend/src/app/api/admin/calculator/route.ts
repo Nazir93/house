@@ -5,6 +5,7 @@ import { getCalculatorConfig } from "@/lib/calculator-catalog";
 import { seedCalculatorCatalog } from "@/lib/seed-calculator-catalog";
 import { revalidateTagWithProfile } from "@/lib/revalidate-tag";
 import {
+  applyBulkPricePercent,
   normalizeSettingsInput,
   parsePositiveFloat,
   parsePositiveInt,
@@ -57,14 +58,13 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     if (body.action === "seed") {
-      const result = await seedCalculatorCatalog();
+      const result = await seedCalculatorCatalog({ resetPrices: true });
       revalidateCalculator();
       return NextResponse.json({ ok: true, ...result });
     }
 
     if (body.action === "bulk_update" && typeof body.percent === "number") {
       const percent = body.percent;
-      const factor = 1 + percent / 100;
       const group = typeof body.groupSlug === "string" ? body.groupSlug : null;
 
       if (group === "construction" || group === "engineering") {
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
           opts.map((o: (typeof opts)[number]) =>
             prisma.calculatorOption.update({
               where: { id: o.id },
-              data: { pricePerUnit: Math.round(o.pricePerUnit * factor) },
+              data: { pricePerUnit: applyBulkPricePercent(o.pricePerUnit, percent) },
             })
           )
         );
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
           facades.map((f: (typeof facades)[number]) =>
             prisma.calculatorFacadeType.update({
               where: { id: f.id },
-              data: { pricePerM2: Math.round(f.pricePerM2 * factor) },
+              data: { pricePerM2: applyBulkPricePercent(f.pricePerM2, percent) },
             })
           )
         );
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
           prices.map((p: (typeof prices)[number]) =>
             prisma.calculatorShellPrice.update({
               where: { id: p.id },
-              data: { pricePerM2: Math.round(p.pricePerM2 * factor) },
+              data: { pricePerM2: applyBulkPricePercent(p.pricePerM2, percent) },
             })
           )
         );
@@ -143,7 +143,13 @@ export async function PATCH(request: NextRequest) {
           where: { id: raw.id },
           data: {
             facadeCoef: parsePositiveFloat(raw.facadeCoef, 1),
+            perimeterCoef: parsePositiveFloat(raw.perimeterCoef, 1),
             roofCoef: parsePositiveFloat(raw.roofCoef, 1),
+            insulationCoef: parsePositiveFloat(raw.insulationCoef, 1),
+            gutterCoef: parsePositiveFloat(raw.gutterCoef, 1),
+            soffitCoef: parsePositiveFloat(raw.soffitCoef, 1),
+            overlapCoef: parsePositiveFloat(raw.overlapCoef, 0),
+            crossCoef: parsePositiveFloat(raw.crossCoef, 1),
           },
         });
         const shell = raw.shellPrices;

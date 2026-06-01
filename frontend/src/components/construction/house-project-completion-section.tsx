@@ -24,10 +24,8 @@ import { useModal } from "@/lib/modal-context";
 import { CmsImage } from "@/components/ui/cms-image";
 import { partOfSoulRoofLabels, type PartOfSoulPricingFloors, type PartOfSoulRoofPitch } from "@/lib/part-of-soul-pricing";
 import {
-  computeTransportSurchargeRub,
   normalizeTransportBands,
   transportBandIndex,
-  transportBandPercentLabel,
 } from "@/lib/project-transport-surcharge";
 import { TransportDistanceSlider } from "@/components/construction/transport-distance-slider";
 import { ProjectCalculatorCatalogOptions } from "@/components/construction/project-calculator-catalog-options";
@@ -42,13 +40,13 @@ import { cn } from "@/lib/utils";
 const softBorder = "border border-[color-mix(in_srgb,var(--text)_7%,transparent)]";
 const softDivide = "border-[color-mix(in_srgb,var(--text)_7%,transparent)]";
 
-type Tier = { id: string; label: string; multiplier: number };
+type Tier = { id: string; label: string };
 
 const DEFAULT_TIERS: Tier[] = [
-  { id: "gas", label: "Газоблок", multiplier: 1 },
-  { id: "keramzit", label: "Керамзитоблок", multiplier: 1.034 },
-  { id: "ceramic", label: "Керамический блок", multiplier: 1.034 },
-  { id: "brick", label: "Кирпич", multiplier: 1.086 },
+  { id: "gas", label: "Газоблок" },
+  { id: "keramzit", label: "Керамзитоблок" },
+  { id: "ceramic", label: "Керамический блок" },
+  { id: "brick", label: "Кирпич" },
 ];
 
 function tiersFromMaterials(materials: string[]): Tier[] {
@@ -153,9 +151,9 @@ export function HouseProjectCompletionSection({
     return defaultTierDefs.map((t) => ({
       id: t.id,
       label: t.label,
-      price: Math.round(project.price * t.multiplier),
+      price: 0,
     }));
-  }, [defaultTierDefs, heroTiers, project.price]);
+  }, [defaultTierDefs, heroTiers]);
 
   const tierIdx = Math.min(tierIndex, Math.max(0, tabSpecs.length - 1));
   const tier = tabSpecs[tierIdx] ?? tabSpecs[0];
@@ -186,7 +184,6 @@ export function HouseProjectCompletionSection({
   }, [transportBands, transportId]);
 
   const selectedTransportBand = transportBands.find((b) => b.id === transportId);
-  const transportPercentLabel = transportBandPercentLabel(selectedTransportBand);
 
   const catalogMode = Boolean(categoryId);
   const [catalog, setCatalog] = useState<PublicCalculatorCatalog | null>(null);
@@ -239,14 +236,11 @@ export function HouseProjectCompletionSection({
   const facadeTotal = catalogMode && quoteData?.quote ? quoteData.quote.facadeTotalRub : 0;
   const engTotal = catalogMode && quoteData?.quote ? quoteData.quote.engineeringTotalRub : 0;
   const conTotal = catalogMode && quoteData?.quote ? quoteData.quote.constructionTotalRub : 0;
-  const surcharge =
-    catalogMode && quoteData?.quote ?
-      quoteData.quote.transportSurchargeRub
-    : computeTransportSurchargeRub(priced, selectedTransportBand);
+  const surcharge = catalogMode && quoteData?.quote ? quoteData.quote.transportSurchargeRub : 0;
 
   const catalogQuote = quoteData?.quote;
 
-  const grandTotal = catalogMode && catalogQuote ? catalogQuote.grandTotalRub : priced + surcharge;
+  const grandTotal = catalogMode && catalogQuote ? catalogQuote.grandTotalRub : 0;
 
   const leadCalcData = useMemo(() => {
     if (!catalogMode || !catalogQuote || !categoryId) return undefined;
@@ -587,11 +581,6 @@ export function HouseProjectCompletionSection({
                 <div className="mt-3 flex justify-between gap-3 text-sm">
                   <span className="text-[var(--text-muted)]">
                     Транспорт
-                    {transportPercentLabel ? (
-                      <span className="ml-1 text-[11px] tabular-nums text-[var(--text-muted)]">
-                        ({transportPercentLabel})
-                      </span>
-                    ) : null}
                   </span>
                   <span className="tabular-nums font-semibold text-[var(--text)]">{formatRub(surcharge)}</span>
                 </div>

@@ -10,7 +10,13 @@ export type AdminCalculatorSettingsInput = {
 export type AdminCalculatorCategoryPatch = {
   id: string;
   facadeCoef: number;
+  perimeterCoef: number;
   roofCoef: number;
+  insulationCoef: number;
+  gutterCoef: number;
+  soffitCoef: number;
+  overlapCoef: number;
+  crossCoef: number;
   shellPrices: { gas: number; ceramic: number; brick: number };
 };
 
@@ -63,4 +69,10 @@ export function normalizeSettingsInput(raw: {
     smallAreaSurcharge: percentInputToFraction(surchargePercent),
     blindAreaWidthM: blind,
   };
+}
+
+export function applyBulkPricePercent(price: number, percent: number): number {
+  if (!Number.isFinite(price) || price < 0) return 0;
+  if (!Number.isFinite(percent)) return Math.round(price);
+  return Math.max(0, Math.round(price * (1 + percent / 100)));
 }

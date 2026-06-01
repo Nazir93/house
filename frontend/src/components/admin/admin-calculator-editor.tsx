@@ -13,11 +13,28 @@ import { fractionToPercentInput } from "@/lib/admin-calculator-save";
 const inp =
   "w-full rounded-lg border border-white/[0.1] bg-white/[0.05] px-2.5 py-1.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-[#0F3D2E]";
 
+const CATEGORY_COEFFICIENT_FIELDS = [
+  { key: "facadeCoef", label: "Коэф. фасада" },
+  { key: "roofCoef", label: "Коэф. кровли" },
+  { key: "perimeterCoef", label: "Коэф. периметра" },
+  { key: "insulationCoef", label: "Коэф. утепления" },
+  { key: "gutterCoef", label: "Коэф. водосточки" },
+  { key: "soffitCoef", label: "Коэф. софитов" },
+  { key: "overlapCoef", label: "Коэф. перекрытия" },
+  { key: "crossCoef", label: "Коэф. перекрестного" },
+] as const satisfies ReadonlyArray<{ key: keyof CategoryForm; label: string }>;
+
 type ApiCategory = {
   id: string;
   labelRu: string;
   facadeCoef: number;
+  perimeterCoef: number;
   roofCoef: number;
+  insulationCoef: number;
+  gutterCoef: number;
+  soffitCoef: number;
+  overlapCoef: number;
+  crossCoef: number;
   shellPrices: { wallMaterial: string; pricePerM2: number }[];
 };
 
@@ -54,7 +71,13 @@ type CategoryForm = {
   id: string;
   labelRu: string;
   facadeCoef: string;
+  perimeterCoef: string;
   roofCoef: string;
+  insulationCoef: string;
+  gutterCoef: string;
+  soffitCoef: string;
+  overlapCoef: string;
+  crossCoef: string;
   gas: string;
   ceramic: string;
   brick: string;
@@ -80,7 +103,13 @@ function mapPayloadToForms(data: ApiPayload) {
     id: c.id,
     labelRu: c.labelRu,
     facadeCoef: String(c.facadeCoef),
+    perimeterCoef: String(c.perimeterCoef),
     roofCoef: String(c.roofCoef),
+    insulationCoef: String(c.insulationCoef),
+    gutterCoef: String(c.gutterCoef),
+    soffitCoef: String(c.soffitCoef),
+    overlapCoef: String(c.overlapCoef),
+    crossCoef: String(c.crossCoef),
     gas: shellPrice(c, "gas"),
     ceramic: shellPrice(c, "ceramic"),
     brick: shellPrice(c, "brick"),
@@ -183,7 +212,13 @@ export function AdminCalculatorEditor() {
         categories: categories.map((c) => ({
           id: c.id,
           facadeCoef: Number(c.facadeCoef),
+          perimeterCoef: Number(c.perimeterCoef),
           roofCoef: Number(c.roofCoef),
+          insulationCoef: Number(c.insulationCoef),
+          gutterCoef: Number(c.gutterCoef),
+          soffitCoef: Number(c.soffitCoef),
+          overlapCoef: Number(c.overlapCoef),
+          crossCoef: Number(c.crossCoef),
           shellPrices: {
             gas: Number(c.gas),
             ceramic: Number(c.ceramic),
@@ -388,7 +423,7 @@ export function AdminCalculatorEditor() {
 
       <AdminFormSection
         title="Категории домов и цены коробки"
-        subtitle="Категории a–f: коэффициенты фасада/кровли и цена коробки ₽/м² по материалу стен."
+        subtitle="Категории a–f: цена коробки и все коэффициенты, влияющие на расчёт фасада, кровли, периметра и опций."
       >
         <div className="space-y-6">
           {categories.map((c) => (
@@ -400,26 +435,18 @@ export function AdminCalculatorEditor() {
                 {calculatorCategoryTitle(c.id, c.labelRu)}
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <label className="space-y-1">
-                  <span className="text-xs text-white/40">Коэф. фасада</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    className={inp}
-                    value={c.facadeCoef}
-                    onChange={(e) => updateCategory(c.id, { facadeCoef: e.target.value })}
-                  />
-                </label>
-                <label className="space-y-1">
-                  <span className="text-xs text-white/40">Коэф. кровли</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    className={inp}
-                    value={c.roofCoef}
-                    onChange={(e) => updateCategory(c.id, { roofCoef: e.target.value })}
-                  />
-                </label>
+                {CATEGORY_COEFFICIENT_FIELDS.map((field) => (
+                  <label key={field.key} className="space-y-1">
+                    <span className="text-xs text-white/40">{field.label}</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      className={inp}
+                      value={c[field.key]}
+                      onChange={(e) => updateCategory(c.id, { [field.key]: e.target.value })}
+                    />
+                  </label>
+                ))}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {(["gas", "ceramic", "brick"] as const).map((wall) => (
