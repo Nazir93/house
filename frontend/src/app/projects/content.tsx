@@ -664,13 +664,13 @@ export function ProjectsCatalogContent({
                 if (view === "grid") {
                   return (
                     <article key={project.id} className="group relative overflow-hidden rounded-[1.25rem] border" style={{ borderColor: "var(--border)" }}>
-                      <Link href={`/projects/${project.slug}`} className="relative block aspect-[4/3] overflow-hidden bg-[var(--stone)]">
+                      <Link href={`/projects/${project.slug}`} className="relative block aspect-[16/9] overflow-hidden bg-[var(--stone)]">
                         {cover ? (
                           <CmsImage
                             src={cover.url}
                             alt={cover.alt || project.title}
                             fill
-                            className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                            className="scale-[1.06] object-cover object-[center_38%] transition-transform duration-700 group-hover:scale-[1.1]"
                             sizes="(max-width: 1280px) 50vw, 400px"
                           />
                         ) : null}
@@ -715,7 +715,7 @@ export function ProjectsCatalogContent({
                           src={cover.url}
                           alt={cover.alt || project.title}
                           fill
-                          className="object-cover transition-transform duration-700 group-hover:scale-105"
+                          className="scale-[1.06] object-cover object-[center_38%] transition-transform duration-700 group-hover:scale-[1.1]"
                           sizes="(max-width: 768px) 100vw, 420px"
                         />
                       ) : null}

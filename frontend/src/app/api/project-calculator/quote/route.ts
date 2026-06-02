@@ -10,6 +10,7 @@ const LEGACY_ID_MAP: Record<string, { group: "engineering" | "construction" | "f
   rad: { group: "engineering", slug: "radiators" },
   floor: { group: "engineering", slug: "heatedFloor" },
   boiler: { group: "engineering", slug: "boiler" },
+  interior_plaster: { group: "construction", slug: "interior_plaster" },
   blind: { group: "construction", slug: "blind_area" },
   drain: { group: "construction", slug: "drainage" },
   soffit: { group: "construction", slug: "soffits" },

@@ -30,6 +30,51 @@ export type AdminCalculatorOptionPatch = {
   id: string;
   pricePerUnit: number;
   isActive: boolean;
+  description?: string | null;
+  imageUrl?: string | null;
+};
+
+export type AdminCalculatorOptionCreateInput = {
+  name: string;
+  groupSlug: "engineering" | "construction";
+  pricingType: "per_area" | "fixed";
+  pricePerUnit: number;
+};
+
+const CYRILLIC_TO_LATIN: Record<string, string> = {
+  а: "a",
+  б: "b",
+  в: "v",
+  г: "g",
+  д: "d",
+  е: "e",
+  ё: "e",
+  ж: "zh",
+  з: "z",
+  и: "i",
+  й: "y",
+  к: "k",
+  л: "l",
+  м: "m",
+  н: "n",
+  о: "o",
+  п: "p",
+  р: "r",
+  с: "s",
+  т: "t",
+  у: "u",
+  ф: "f",
+  х: "h",
+  ц: "c",
+  ч: "ch",
+  ш: "sh",
+  щ: "sch",
+  ъ: "",
+  ы: "y",
+  ь: "",
+  э: "e",
+  ю: "yu",
+  я: "ya",
 };
 
 export function parsePositiveInt(value: unknown, fallback: number): number {
@@ -75,4 +120,18 @@ export function applyBulkPricePercent(price: number, percent: number): number {
   if (!Number.isFinite(price) || price < 0) return 0;
   if (!Number.isFinite(percent)) return Math.round(price);
   return Math.max(0, Math.round(price * (1 + percent / 100)));
+}
+
+export function slugifyCalculatorOptionName(name: string): string {
+  const transliterated = name
+    .trim()
+    .toLowerCase()
+    .split("")
+    .map((char) => CYRILLIC_TO_LATIN[char] ?? char)
+    .join("");
+  const slug = transliterated
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .replace(/_{2,}/g, "_");
+  return slug || "option";
 }

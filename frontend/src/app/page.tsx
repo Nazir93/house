@@ -1,6 +1,7 @@
 import { SITE_NAME, CITY, getDefaultSiteGeoDescription } from "@/lib/constants";
 import { getPageMeta } from "@/lib/get-page-meta";
 import { getHouseProjects, getHomeBuiltPortfolio } from "@/lib/construction-data";
+import { getHeroShellTiersForProject } from "@/lib/project-hero-shell-tiers";
 import { getBankMarqueePartners, getHomePartners } from "@/lib/get-home-partners";
 import { getHomeBlogPreview } from "@/lib/get-home-blog-preview";
 import { getPublicFaqs } from "@/lib/get-public-faqs";
@@ -10,6 +11,7 @@ import { ProjectsConstructorSection } from "@/components/sections/projects-const
 import { FeaturedHouseProjectsSection } from "@/components/sections/featured-house-projects";
 import { ClientsChooseVideoSection } from "@/components/sections/clients-choose-video-section";
 import { HomePartnersSection } from "@/components/sections/home-partners-section";
+import { AccountShowcaseSection } from "@/components/sections/account-showcase-section";
 import { PortfolioSection } from "@/components/sections/portfolio";
 import { HomeNewsFeed } from "@/components/sections/home-news-feed";
 import {
@@ -40,14 +42,23 @@ export default async function HomePage() {
       getPublicFaqs(),
       getHomeHeroBannerConfig(),
     ]);
+  const projectHeroTiers = Object.fromEntries(
+    await Promise.all(
+      houseProjects.map(async (project) => [
+        project.id,
+        await getHeroShellTiersForProject(project),
+      ])
+    )
+  );
 
   return (
     <>
       <BannerSection config={heroBanner} />
       <ProjectsConstructorSection />
-      <FeaturedHouseProjectsSection projects={houseProjects} />
+      <FeaturedHouseProjectsSection projects={houseProjects} projectHeroTiers={projectHeroTiers} />
       <ClientsChooseVideoSection />
       <HomePartnersSection partners={partners} />
+      <AccountShowcaseSection />
       <PortfolioSection
         builtObjects={builtPortfolioPreview}
         sectionTitle="Наши работы"

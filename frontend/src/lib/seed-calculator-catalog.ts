@@ -38,6 +38,7 @@ const TZ_ENGINEERING_PRICES: Record<EngineeringOptionCode, number> = {
 };
 
 const TZ_CONSTRUCTION_PRICES: Partial<Record<ConstructionOptionCode, number>> = {
+  interior_plaster: 0,
   blind_area: 7_428,
   drainage: 6_063,
   soffits: 3_750,
@@ -48,6 +49,18 @@ const TZ_CONSTRUCTION_PRICES: Partial<Record<ConstructionOptionCode, number>> = 
   roof_insulation_250: 5_622,
   monolithic_stairs: 228_000,
 };
+
+function knownEngineeringPrice(slug: string, fallback: number): number {
+  return slug in TZ_ENGINEERING_PRICES ?
+      TZ_ENGINEERING_PRICES[slug as EngineeringOptionCode]
+    : fallback;
+}
+
+function knownConstructionPrice(slug: string, fallback: number): number {
+  return slug in TZ_CONSTRUCTION_PRICES ?
+      TZ_CONSTRUCTION_PRICES[slug as ConstructionOptionCode] ?? fallback
+    : fallback;
+}
 
 /** Заполняет справочник калькулятора стартовыми значениями ТЗ для дальнейшего редактирования в админке. */
 export async function seedCalculatorCatalog(
@@ -149,7 +162,7 @@ export async function seedCalculatorCatalog(
   let oi = 0;
   for (const slug of Object.keys(C.engineering) as (keyof typeof C.engineering)[]) {
     const o = C.engineering[slug];
-    const pricePerUnit = TZ_ENGINEERING_PRICES[slug];
+    const pricePerUnit = knownEngineeringPrice(slug, o.price);
     await prisma.calculatorOption.upsert({
       where: { slug },
       create: {
@@ -182,7 +195,7 @@ export async function seedCalculatorCatalog(
 
   for (const slug of Object.keys(C.construction) as (keyof typeof C.construction)[]) {
     const o = C.construction[slug];
-    const pricePerUnit = TZ_CONSTRUCTION_PRICES[slug] ?? o.price;
+    const pricePerUnit = knownConstructionPrice(slug, o.price);
     const allowed: string[] =
       slug === "monolithic_stairs" || slug === "monolithic_overlap" ? ["d", "e", "f"] : [];
     await prisma.calculatorOption.upsert({

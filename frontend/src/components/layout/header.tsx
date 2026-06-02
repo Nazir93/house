@@ -11,6 +11,8 @@ import { NAV_SECTIONS, isNavGroup, type NavSection } from "@/lib/nav-sections";
 import { useModal } from "@/lib/modal-context";
 import { maxChatUrlFromRawPhone, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
 
+const MESSENGER_CHAT_PHONE = "+79046000099";
+
 function buildGridPath(
   cols: number, rows: number, cellW: number, cellH: number,
   startCol: number, startRow: number, seed: number
@@ -240,10 +242,8 @@ export function Header() {
   const [expandedMenuSection, setExpandedMenuSection] = useState<string | null>(null);
   const { openModal } = useModal();
   const contact = useContactConfig();
-  const telegramMessengerHref =
-    telegramChatUrlFromRawPhone(contact.phone2Raw) ?? contact.social.telegram?.trim() ?? "";
-  const maxMessengerHref =
-    contact.social.max?.trim() || maxChatUrlFromRawPhone(contact.phone2Raw) || "";
+  const telegramMessengerHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE) ?? "";
+  const maxMessengerHref = maxChatUrlFromRawPhone(MESSENGER_CHAT_PHONE) ?? "";
 
   useEffect(() => {
     const handleOpenMenu = () => setIsOpen(true);

@@ -9,8 +9,10 @@ import {
   normalizeSettingsInput,
   parsePositiveFloat,
   parsePositiveInt,
+  slugifyCalculatorOptionName,
   type AdminCalculatorCategoryPatch,
   type AdminCalculatorFacadePatch,
+  type AdminCalculatorOptionCreateInput,
   type AdminCalculatorOptionPatch,
 } from "@/lib/admin-calculator-save";
 
@@ -101,6 +103,45 @@ export async function POST(request: NextRequest) {
 
       revalidateCalculator();
       return NextResponse.json({ ok: true });
+    }
+
+    if (body.action === "create_option") {
+      const input = body.option as Partial<AdminCalculatorOptionCreateInput> | undefined;
+      const groupSlug = input?.groupSlug === "engineering" || input?.groupSlug === "construction" ? input.groupSlug : null;
+      const name = typeof input?.name === "string" ? input.name.trim() : "";
+      const pricingType = input?.pricingType === "fixed" ? "fixed" : "per_area";
+
+      if (!groupSlug || !name) {
+        return NextResponse.json({ error: "Invalid option" }, { status: 400 });
+      }
+
+      const baseSlug = slugifyCalculatorOptionName(name);
+      const slugPrefix = `custom_${groupSlug}_${baseSlug}`;
+      let slug = slugPrefix;
+      for (let i = 2; await prisma.calculatorOption.findUnique({ where: { slug } }); i += 1) {
+        slug = `${slugPrefix}_${i}`;
+      }
+
+      const last = await prisma.calculatorOption.findFirst({
+        where: { groupSlug },
+        orderBy: { sortOrder: "desc" },
+        select: { sortOrder: true },
+      });
+      const option = await prisma.calculatorOption.create({
+        data: {
+          id: slug,
+          slug,
+          name,
+          groupSlug,
+          pricingType,
+          pricePerUnit: parsePositiveInt(input?.pricePerUnit, 0),
+          sortOrder: (last?.sortOrder ?? 0) + 10,
+          isActive: true,
+        },
+      });
+
+      revalidateCalculator();
+      return NextResponse.json({ ok: true, option });
     }
 
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
@@ -194,6 +235,14 @@ export async function PATCH(request: NextRequest) {
           data: {
             pricePerUnit: parsePositiveInt(raw.pricePerUnit, 0),
             isActive: Boolean(raw.isActive),
+            description:
+              typeof raw.description === "string" && raw.description.trim() ?
+                raw.description.trim()
+              : null,
+            imageUrl:
+              typeof raw.imageUrl === "string" && raw.imageUrl.trim() ?
+                raw.imageUrl.trim()
+              : null,
           },
         });
       }

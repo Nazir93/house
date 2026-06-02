@@ -19,14 +19,13 @@ import { YandexMapsRatingChip } from "@/components/layout/yandex-maps-rating-chi
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/body-scroll-lock";
 import { cn } from "@/lib/utils";
 
+const MESSENGER_CHAT_PHONE = "+79046000099";
+
 export function SiteHeaderBar() {
   const pathname = usePathname();
   const contact = useContactConfig();
-  const telegramHref =
-    telegramChatUrlFromRawPhone(contact.phone2Raw) ?? contact.social.telegram?.trim() ?? null;
-  /** Ссылка из настроек (канал Max) надёжнее веб-добавления по номеру — номер используем если профиль не задан */
-  const maxHref =
-    contact.social.max?.trim() || maxChatUrlFromRawPhone(contact.phone2Raw) || null;
+  const telegramHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE);
+  const maxHref = maxChatUrlFromRawPhone(MESSENGER_CHAT_PHONE);
   const { theme } = useTheme();
   const isHomeBanner = pathname === "/";
   const { openModal } = useModal();

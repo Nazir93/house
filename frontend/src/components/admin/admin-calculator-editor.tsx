@@ -46,6 +46,8 @@ type ApiOption = {
   groupSlug: string;
   pricePerUnit: number;
   isActive: boolean;
+  description?: string | null;
+  imageUrl?: string | null;
 };
 
 type ApiSettings = {
@@ -84,7 +86,17 @@ type CategoryForm = {
 };
 
 type FacadeForm = { id: string; slug: string; name: string; pricePerM2: string };
-type OptionForm = { id: string; slug: string; name: string; groupSlug: string; pricePerUnit: string; isActive: boolean };
+type OptionForm = {
+  id: string;
+  slug: string;
+  name: string;
+  groupSlug: string;
+  pricePerUnit: string;
+  isActive: boolean;
+  description: string;
+  imageUrl: string;
+};
+type NewOptionForm = { name: string; pricePerUnit: string; pricingType: "per_area" | "fixed" };
 
 function shellPrice(cat: ApiCategory, wall: string): string {
   const row = cat.shellPrices.find((p) => p.wallMaterial === wall);
@@ -127,6 +139,8 @@ function mapPayloadToForms(data: ApiPayload) {
     groupSlug: o.groupSlug,
     pricePerUnit: String(o.pricePerUnit),
     isActive: o.isActive,
+    description: o.description ?? "",
+    imageUrl: o.imageUrl ?? "",
   }));
   return { settings, categories, facades, options };
 }
@@ -143,6 +157,25 @@ async function patchCalculator(body: Record<string, unknown>) {
   }
 }
 
+function categoryPatch(c: CategoryForm) {
+  return {
+    id: c.id,
+    facadeCoef: Number(c.facadeCoef),
+    perimeterCoef: Number(c.perimeterCoef),
+    roofCoef: Number(c.roofCoef),
+    insulationCoef: Number(c.insulationCoef),
+    gutterCoef: Number(c.gutterCoef),
+    soffitCoef: Number(c.soffitCoef),
+    overlapCoef: Number(c.overlapCoef),
+    crossCoef: Number(c.crossCoef),
+    shellPrices: {
+      gas: Number(c.gas),
+      ceramic: Number(c.ceramic),
+      brick: Number(c.brick),
+    },
+  };
+}
+
 export function AdminCalculatorEditor() {
   const [data, setData] = useState<ApiPayload | null>(null);
   const [settings, setSettings] = useState<SettingsForm | null>(null);
@@ -154,6 +187,12 @@ export function AdminCalculatorEditor() {
   const [bulkPercent, setBulkPercent] = useState("5");
   const [bulkGroup, setBulkGroup] = useState("construction");
   const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [savedCategoryId, setSavedCategoryId] = useState<string | null>(null);
+  const [savedSection, setSavedSection] = useState<string | null>(null);
+  const [newOptions, setNewOptions] = useState<Record<"engineering" | "construction", NewOptionForm>>({
+    engineering: { name: "", pricePerUnit: "0", pricingType: "per_area" },
+    construction: { name: "", pricePerUnit: "0", pricingType: "per_area" },
+  });
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -196,6 +235,7 @@ export function AdminCalculatorEditor() {
     try {
       await patchCalculator({ settings });
       setMessage({ type: "ok", text: "Общие настройки сохранены" });
+      setSavedSection("settings");
       await load();
     } catch {
       setMessage({ type: "err", text: "Не удалось сохранить настройки" });
@@ -204,32 +244,18 @@ export function AdminCalculatorEditor() {
     }
   }
 
-  async function saveCategories() {
-    setSaving("categories");
+  async function saveCategory(category: CategoryForm) {
+    setSaving(`category:${category.id}`);
+    setSavedCategoryId(null);
+    setSavedSection(null);
     setMessage(null);
     try {
-      await patchCalculator({
-        categories: categories.map((c) => ({
-          id: c.id,
-          facadeCoef: Number(c.facadeCoef),
-          perimeterCoef: Number(c.perimeterCoef),
-          roofCoef: Number(c.roofCoef),
-          insulationCoef: Number(c.insulationCoef),
-          gutterCoef: Number(c.gutterCoef),
-          soffitCoef: Number(c.soffitCoef),
-          overlapCoef: Number(c.overlapCoef),
-          crossCoef: Number(c.crossCoef),
-          shellPrices: {
-            gas: Number(c.gas),
-            ceramic: Number(c.ceramic),
-            brick: Number(c.brick),
-          },
-        })),
-      });
-      setMessage({ type: "ok", text: "Категории и коробка сохранены" });
+      await patchCalculator({ categories: [categoryPatch(category)] });
+      setSavedCategoryId(category.id);
+      setMessage({ type: "ok", text: `${calculatorCategoryTitle(category.id, category.labelRu)} сохранена` });
       await load();
     } catch {
-      setMessage({ type: "err", text: "Не удалось сохранить категории" });
+      setMessage({ type: "err", text: "Не удалось сохранить категорию" });
     } finally {
       setSaving(null);
     }
@@ -247,6 +273,7 @@ export function AdminCalculatorEditor() {
         })),
       });
       setMessage({ type: "ok", text: "Фасады сохранены" });
+      setSavedSection("facades");
       await load();
     } catch {
       setMessage({ type: "err", text: "Не удалось сохранить фасады" });
@@ -265,15 +292,55 @@ export function AdminCalculatorEditor() {
           id: o.id,
           pricePerUnit: Number(o.pricePerUnit),
           isActive: o.isActive,
+          description: o.description,
+          imageUrl: o.imageUrl,
         })),
       });
       setMessage({
         type: "ok",
         text: group === "engineering" ? "Инженерия сохранена" : "Стройопции сохранены",
       });
+      setSavedSection(group);
       await load();
     } catch {
       setMessage({ type: "err", text: "Не удалось сохранить опции" });
+    } finally {
+      setSaving(null);
+    }
+  }
+
+  async function addOption(group: "engineering" | "construction") {
+    const draft = newOptions[group];
+    if (!draft.name.trim()) {
+      setMessage({ type: "err", text: "Введите название новой опции" });
+      return;
+    }
+    setSaving(`add:${group}`);
+    setMessage(null);
+    try {
+      const res = await fetch("/api/admin/calculator", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create_option",
+          option: {
+            name: draft.name,
+            groupSlug: group,
+            pricingType: draft.pricingType,
+            pricePerUnit: Number(draft.pricePerUnit),
+          },
+        }),
+      });
+      if (!res.ok) throw new Error();
+      setNewOptions((prev) => ({
+        ...prev,
+        [group]: { name: "", pricePerUnit: "0", pricingType: "per_area" },
+      }));
+      setSavedSection(group);
+      setMessage({ type: "ok", text: "Новая опция добавлена" });
+      await load();
+    } catch {
+      setMessage({ type: "err", text: "Не удалось добавить опцию" });
     } finally {
       setSaving(null);
     }
@@ -329,15 +396,29 @@ export function AdminCalculatorEditor() {
   }
 
   function updateCategory(id: string, patch: Partial<CategoryForm>) {
+    if (savedCategoryId === id) setSavedCategoryId(null);
     setCategories((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   }
 
+  function updateSettings(patch: Partial<SettingsForm>) {
+    if (savedSection === "settings") setSavedSection(null);
+    if (!settings) return;
+    setSettings({ ...settings, ...patch });
+  }
+
   function updateFacade(id: string, patch: Partial<FacadeForm>) {
+    if (savedSection === "facades") setSavedSection(null);
     setFacades((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } : r)));
   }
 
   function updateOption(id: string, patch: Partial<OptionForm>) {
+    const row = options.find((o) => o.id === id);
+    if (row?.groupSlug === savedSection) setSavedSection(null);
     setOptions((rows) => rows.map((r) => (r.id === id ? { ...r, ...patch } : r)));
+  }
+
+  function updateNewOption(group: "engineering" | "construction", patch: Partial<NewOptionForm>) {
+    setNewOptions((prev) => ({ ...prev, [group]: { ...prev[group], ...patch } }));
   }
 
   if (loading) {
@@ -393,7 +474,7 @@ export function AdminCalculatorEditor() {
               type="number"
               className={inp}
               value={settings.smallAreaThresholdM2}
-              onChange={(e) => setSettings({ ...settings, smallAreaThresholdM2: e.target.value })}
+              onChange={(e) => updateSettings({ smallAreaThresholdM2: e.target.value })}
             />
             <span className="text-[11px] text-white/30">Ниже — надбавка на коробку</span>
           </label>
@@ -404,7 +485,7 @@ export function AdminCalculatorEditor() {
               step="0.1"
               className={inp}
               value={settings.smallAreaSurchargePercent}
-              onChange={(e) => setSettings({ ...settings, smallAreaSurchargePercent: e.target.value })}
+              onChange={(e) => updateSettings({ smallAreaSurchargePercent: e.target.value })}
             />
           </label>
           <label className="space-y-1">
@@ -414,11 +495,16 @@ export function AdminCalculatorEditor() {
               step="0.1"
               className={inp}
               value={settings.blindAreaWidthM}
-              onChange={(e) => setSettings({ ...settings, blindAreaWidthM: e.target.value })}
+              onChange={(e) => updateSettings({ blindAreaWidthM: e.target.value })}
             />
           </label>
         </div>
-        <SaveBar onSave={() => void saveSettings()} saving={saving === "settings"} disabled={busy} />
+        <SaveBar
+          onSave={() => void saveSettings()}
+          saving={saving === "settings"}
+          disabled={busy}
+          saved={savedSection === "settings"}
+        />
       </AdminFormSection>
 
       <AdminFormSection
@@ -463,10 +549,29 @@ export function AdminCalculatorEditor() {
                   </label>
                 ))}
               </div>
+              <div className="flex items-center justify-end gap-3 border-t border-white/[0.06] pt-3">
+                {savedCategoryId === c.id ? (
+                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                    Сохранено
+                  </span>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => void saveCategory(c)}
+                  disabled={busy}
+                  className="inline-flex items-center gap-2 rounded-xl bg-[#0F3D2E] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                >
+                  {saving === `category:${c.id}` ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Save size={16} />
+                  )}
+                  Сохранить категорию
+                </button>
+              </div>
             </div>
           ))}
         </div>
-        <SaveBar onSave={() => void saveCategories()} saving={saving === "categories"} disabled={busy} />
       </AdminFormSection>
 
       <AdminFormSection title="Типы фасада" subtitle="Цена отделки фасада за м² — выбор на карточке проекта.">
@@ -496,7 +601,12 @@ export function AdminCalculatorEditor() {
             </li>
           ))}
         </ul>
-        <SaveBar onSave={() => void saveFacades()} saving={saving === "facades"} disabled={busy} />
+        <SaveBar
+          onSave={() => void saveFacades()}
+          saving={saving === "facades"}
+          disabled={busy}
+          saved={savedSection === "facades"}
+        />
       </AdminFormSection>
 
       <AdminFormSection
@@ -504,10 +614,18 @@ export function AdminCalculatorEditor() {
         subtitle="Электрика, отопление, вода и т.д. — цена за единицу расчёта (обычно за м² дома)."
       >
         <OptionsTable rows={engineeringOptions} onChange={updateOption} />
+        <NewOptionPanel
+          value={newOptions.engineering}
+          onChange={(patch) => updateNewOption("engineering", patch)}
+          onAdd={() => void addOption("engineering")}
+          saving={saving === "add:engineering"}
+          disabled={busy}
+        />
         <SaveBar
           onSave={() => void saveOptions("engineering")}
           saving={saving === "engineering"}
           disabled={busy}
+          saved={savedSection === "engineering"}
         />
       </AdminFormSection>
 
@@ -516,10 +634,18 @@ export function AdminCalculatorEditor() {
         subtitle="Фундамент, кровля, лестницы и прочие опции. Снимите галочку, чтобы скрыть с сайта."
       >
         <OptionsTable rows={constructionOptions} onChange={updateOption} showActive />
+        <NewOptionPanel
+          value={newOptions.construction}
+          onChange={(patch) => updateNewOption("construction", patch)}
+          onAdd={() => void addOption("construction")}
+          saving={saving === "add:construction"}
+          disabled={busy}
+        />
         <SaveBar
           onSave={() => void saveOptions("construction")}
           saving={saving === "construction"}
           disabled={busy}
+          saved={savedSection === "construction"}
         />
       </AdminFormSection>
 
@@ -571,13 +697,20 @@ function SaveBar({
   onSave,
   saving,
   disabled,
+  saved,
 }: {
   onSave: () => void;
   saving: boolean;
   disabled: boolean;
+  saved?: boolean;
 }) {
   return (
-    <div className="pt-4 flex justify-end border-t border-white/[0.06] mt-4">
+    <div className="pt-4 flex items-center justify-end gap-3 border-t border-white/[0.06] mt-4">
+      {saved ? (
+        <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-300">
+          Сохранено
+        </span>
+      ) : null}
       <button
         type="button"
         onClick={onSave}
@@ -587,6 +720,68 @@ function SaveBar({
         {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
         Сохранить
       </button>
+    </div>
+  );
+}
+
+function NewOptionPanel({
+  value,
+  onChange,
+  onAdd,
+  saving,
+  disabled,
+}: {
+  value: NewOptionForm;
+  onChange: (patch: Partial<NewOptionForm>) => void;
+  onAdd: () => void;
+  saving: boolean;
+  disabled: boolean;
+}) {
+  return (
+    <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/45">
+        Добавить новую опцию
+      </p>
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_9rem_12rem_auto] sm:items-end">
+        <label className="space-y-1">
+          <span className="text-xs text-white/40">Название</span>
+          <input
+            className={inp}
+            value={value.name}
+            placeholder="Например: Черновая отделка"
+            onChange={(e) => onChange({ name: e.target.value })}
+          />
+        </label>
+        <label className="space-y-1">
+          <span className="text-xs text-white/40">Цена</span>
+          <input
+            type="number"
+            className={inp}
+            value={value.pricePerUnit}
+            onChange={(e) => onChange({ pricePerUnit: e.target.value })}
+          />
+        </label>
+        <label className="space-y-1">
+          <span className="text-xs text-white/40">Как считать</span>
+          <select
+            className={inp}
+            value={value.pricingType}
+            onChange={(e) => onChange({ pricingType: e.target.value as NewOptionForm["pricingType"] })}
+          >
+            <option value="per_area">За м² дома</option>
+            <option value="fixed">Фиксированно</option>
+          </select>
+        </label>
+        <button
+          type="button"
+          onClick={onAdd}
+          disabled={disabled}
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F3D2E] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
+        >
+          {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+          Добавить
+        </button>
+      </div>
     </div>
   );
 }
@@ -604,46 +799,54 @@ function OptionsTable({
     return <p className="text-sm text-white/40">Нет позиций</p>;
   }
   return (
-    <div className="overflow-x-auto -mx-1">
-      <table className="w-full min-w-[28rem] text-sm text-left">
-        <thead className="text-white/40 text-xs uppercase">
-          <tr>
-            <th className="py-2 pr-3 font-medium">Название</th>
-            <th className="py-2 pr-3 font-medium w-32">Цена</th>
-            {showActive ? <th className="py-2 font-medium w-24">На сайте</th> : null}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((o) => (
-            <tr key={o.id} className="border-t border-white/5">
-              <td className="py-2 pr-3 align-middle text-white/90">
-                {o.name}
-              </td>
-              <td className="py-2 pr-3 align-middle">
+    <div className="space-y-3">
+      {rows.map((o) => (
+        <div key={o.id} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_8rem_auto] sm:items-end">
+            <div className="text-sm font-medium text-white/90">{o.name}</div>
+            <label className="space-y-1">
+              <span className="text-xs text-white/40">Цена</span>
+              <input
+                type="number"
+                className={inp}
+                value={o.pricePerUnit}
+                onChange={(e) => onChange(o.id, { pricePerUnit: e.target.value })}
+              />
+            </label>
+            {showActive ? (
+              <label className="inline-flex items-center gap-2 cursor-pointer pb-2">
                 <input
-                  type="number"
-                  className={inp}
-                  value={o.pricePerUnit}
-                  onChange={(e) => onChange(o.id, { pricePerUnit: e.target.value })}
+                  type="checkbox"
+                  checked={o.isActive}
+                  onChange={(e) => onChange(o.id, { isActive: e.target.checked })}
+                  className="rounded border-white/20"
                 />
-              </td>
-              {showActive ? (
-                <td className="py-2 align-middle">
-                  <label className="inline-flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={o.isActive}
-                      onChange={(e) => onChange(o.id, { isActive: e.target.checked })}
-                      className="rounded border-white/20"
-                    />
-                    <span className="text-xs text-white/50">{o.isActive ? "Да" : "Нет"}</span>
-                  </label>
-                </td>
-              ) : null}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                <span className="text-xs text-white/50">{o.isActive ? "На сайте" : "Скрыто"}</span>
+              </label>
+            ) : null}
+          </div>
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <label className="space-y-1">
+              <span className="text-xs text-white/40">Описание сноски</span>
+              <textarea
+                className={`${inp} min-h-20 resize-y`}
+                value={o.description}
+                onChange={(e) => onChange(o.id, { description: e.target.value })}
+                placeholder="Коротко опишите, что входит в узел"
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="text-xs text-white/40">Картинка сноски, URL</span>
+              <input
+                className={inp}
+                value={o.imageUrl}
+                onChange={(e) => onChange(o.id, { imageUrl: e.target.value })}
+                placeholder="/uploads/... или https://..."
+              />
+            </label>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

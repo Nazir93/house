@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { ProjectEngagementBadges } from "@/components/projects/project-engagement-badges";
 
-import type { HouseProjectItem } from "@/lib/construction-data";
+import type { HeroPricingTier, HouseProjectItem } from "@/lib/construction-data";
 import { getProjectRenders } from "@/lib/construction-shared";
 import { revealDelayStyle } from "@/lib/reveal-animation";
 import { cn } from "@/lib/utils";
@@ -71,7 +71,13 @@ function ruBathroomsLabel(n: number): string {
   return `${n} ${word}`;
 }
 
-export function FeaturedHouseProjectsSection({ projects }: { projects: HouseProjectItem[] }) {
+export function FeaturedHouseProjectsSection({
+  projects,
+  projectHeroTiers = {},
+}: {
+  projects: HouseProjectItem[];
+  projectHeroTiers?: Record<string, HeroPricingTier[]>;
+}) {
   const list = useMemo(() => {
     return [...projects]
       .filter((p) => p.published)
@@ -175,18 +181,22 @@ export function FeaturedHouseProjectsSection({ projects }: { projects: HouseProj
                 const href = `/projects/${p.slug}`;
                 const views = 180 + p.area + p.order * 7;
                 const hot = 12 + (p.isNew ? 28 : 0) + p.order * 3;
-                const mats = materialsLine(p.materials);
+                const tiers = projectHeroTiers[p.id] ?? [];
+                const standardPrice = tiers.length ?
+                  Math.min(...tiers.map((tier) => tier.price).filter((price) => price > 0))
+                : p.price;
+                const mats = materialsLine(tiers.length ? tiers.map((tier) => tier.label) : p.materials);
 
                 return (
                   <article key={p.id} data-reveal="card" style={revealDelayStyle(idx)} className="flex flex-col">
-                    <div className="relative aspect-[16/11] w-full overflow-hidden rounded-[22px] bg-[var(--stone)] shadow-[0_12px_40px_rgba(15,61,46,0.08)] transition-[box-shadow,transform] duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_52px_rgba(15,61,46,0.14)]">
+                    <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[22px] bg-[var(--stone)] shadow-[0_12px_40px_rgba(15,61,46,0.08)] transition-[box-shadow,transform] duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_52px_rgba(15,61,46,0.14)]">
                       <Link href={href} className="absolute inset-0 z-0">
                         <Image
                           src={cover}
                           alt={p.title}
                           fill
                           quality={78}
-                          className="object-cover transition duration-700 ease-out hover:scale-[1.035]"
+                          className="scale-[1.06] object-cover object-[center_38%] transition duration-700 ease-out hover:scale-[1.1]"
                           sizes="(max-width: 768px) 100vw, 50vw"
                         />
                       </Link>
@@ -219,7 +229,7 @@ export function FeaturedHouseProjectsSection({ projects }: { projects: HouseProj
                           {p.title}
                         </Link>
                         <span className="shrink-0 font-heading text-[15px] font-bold tabular-nums leading-none text-[var(--text)] sm:text-base">
-                          от {formatPriceMln(p.price)}
+                          от {formatPriceMln(standardPrice)}
                         </span>
                       </div>
 

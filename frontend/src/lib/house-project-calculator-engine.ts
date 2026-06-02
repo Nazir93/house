@@ -43,6 +43,7 @@ export type EngineeringOptionCode =
   | "bio";
 
 export type ConstructionOptionCode =
+  | "interior_plaster"
   | "blind_area"
   | "drainage"
   | "soffits"
@@ -69,6 +70,8 @@ export interface PricedOptionDef {
   pricingType: PricingType;
   price: number;
   enabled: boolean;
+  description?: string | null;
+  imageUrl?: string | null;
 }
 
 export interface HouseProjectCalculatorSettings {
@@ -80,8 +83,8 @@ export interface HouseProjectCalculatorSettings {
 export interface HouseProjectCalculatorConfig {
   categories: Record<HouseCalculatorCategoryId, HouseCalculatorCategoryDef>;
   facades: Record<PartOfSoulFacadeVariant, { label: string; pricePerM2: number }>;
-  engineering: Record<EngineeringOptionCode, PricedOptionDef>;
-  construction: Record<ConstructionOptionCode, PricedOptionDef>;
+  engineering: Record<string, PricedOptionDef>;
+  construction: Record<string, PricedOptionDef>;
   settings: HouseProjectCalculatorSettings;
 }
 
@@ -109,8 +112,8 @@ export interface HouseProjectQuoteInput {
   categoryId: HouseCalculatorCategoryId;
   wallMaterial: PartOfSoulWallMaterial;
   facadeVariant?: PartOfSoulFacadeVariant | null;
-  engineeringCodes: EngineeringOptionCode[];
-  constructionCodes: ConstructionOptionCode[];
+  engineeringCodes: string[];
+  constructionCodes: string[];
   projectAdjustmentPercent?: number;
   transportSurchargeRub?: number;
 }
@@ -145,6 +148,13 @@ const CATEGORY_FLOOR_ROOF: Record<
 
 const LADDER_CATEGORIES = new Set<HouseCalculatorCategoryId>(["d", "e", "f"]);
 const OVERLAP_CATEGORIES = new Set<HouseCalculatorCategoryId>(["d", "e", "f"]);
+
+export function getHouseCalculatorCategoryParams(
+  categoryId: HouseCalculatorCategoryId
+): { floors: 1 | 1.5 | 2; roof: PartOfSoulRoofPitch } {
+  return CATEGORY_FLOOR_ROOF[categoryId];
+}
+
 export function resolveHouseCalculatorCategory(params: {
   explicit?: HouseCalculatorCategoryId | null;
   floors: 1 | 1.5 | 2;
@@ -217,7 +227,7 @@ export function computeFacadeTotalRub(params: {
 }
 
 function isConstructionAllowed(
-  code: ConstructionOptionCode,
+  code: string,
   categoryId: HouseCalculatorCategoryId
 ): boolean {
   if (code === "monolithic_stairs") return LADDER_CATEGORIES.has(categoryId);
@@ -226,7 +236,7 @@ function isConstructionAllowed(
 }
 
 export function computeConstructionOptionRub(
-  code: ConstructionOptionCode,
+  code: string,
   option: PricedOptionDef,
   metrics: DerivedMetrics,
   categoryId: HouseCalculatorCategoryId
@@ -267,7 +277,7 @@ export function computeRoofInsulationRub(
 }
 
 export function computeEngineeringOptionRub(
-  code: EngineeringOptionCode,
+  code: string,
   option: PricedOptionDef,
   buildingArea: number
 ): number {

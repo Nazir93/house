@@ -13,6 +13,7 @@ const FAB_RIGHT =
   "right-[max(1rem,env(safe-area-inset-right))] lg:right-[max(1.5rem,env(safe-area-inset-right))]";
 const FAB_BOTTOM =
   "bottom-[calc(4.5rem+env(safe-area-inset-bottom))] lg:bottom-10";
+const MESSENGER_CHAT_PHONE = "+79046000099";
 
 const fabBtnClass =
   "flex h-12 w-12 touch-manipulation items-center justify-center rounded-full text-white shadow-[0_4px_20px_rgba(0,0,0,0.28)] transition-transform duration-200 hover:scale-[1.06] active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/80";
@@ -74,10 +75,8 @@ export function DiscussProjectFab() {
   const contact = useContactConfig();
   const [contactOpen, setContactOpen] = useState(false);
 
-  const telegramHref =
-    telegramChatUrlFromRawPhone(contact.phone2Raw) ?? contact.social.telegram?.trim() ?? null;
-  const maxHref =
-    contact.social.max?.trim() || maxChatUrlFromRawPhone(contact.phone2Raw) || null;
+  const telegramHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE);
+  const maxHref = maxChatUrlFromRawPhone(MESSENGER_CHAT_PHONE);
   const phoneHref =
     contact.phone.trim() && contact.phoneRaw.trim() ? `tel:${contact.phoneRaw}` : null;
 

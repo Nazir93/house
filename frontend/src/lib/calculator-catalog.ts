@@ -14,6 +14,11 @@ import type {
 import type { PartOfSoulFacadeVariant, PartOfSoulRoofPitch } from "@/lib/part-of-soul-pricing";
 import { isConstructionOptionAllowed } from "@/lib/house-project-calculator-engine";
 
+const CATEGORY_LIMITED_CONSTRUCTION_SLUGS = new Set<string>([
+  "monolithic_stairs",
+  "monolithic_overlap",
+]);
+
 export type PublicCatalogFacade = {
   slug: PartOfSoulFacadeVariant;
   name: string;
@@ -33,16 +38,6 @@ export type PublicCalculatorCatalog = {
   engineering: PublicCatalogOption[];
   construction: PublicCatalogOption[];
 };
-
-const ENGINEERING_SLUGS = new Set<string>([
-  "electric",
-  "radiators",
-  "water",
-  "heatedFloor",
-  "sewer",
-  "boiler",
-  "bio",
-]);
 
 type CategoryWithShellPrices = Prisma.CalculatorCategoryGetPayload<{
   include: { shellPrices: true };
@@ -102,12 +97,14 @@ function mapDbToConfig(rows: {
       pricingType: o.pricingType as import("@/lib/house-project-calculator-engine").PricingType,
       price: o.pricePerUnit,
       enabled: true,
+      description: o.description,
+      imageUrl: o.imageUrl,
     };
-    if (o.groupSlug === "engineering" && ENGINEERING_SLUGS.has(o.slug)) {
-      engineering[o.slug as EngineeringOptionCode] = def;
+    if (o.groupSlug === "engineering") {
+      engineering[o.slug] = def;
     }
     if (o.groupSlug === "construction") {
-      construction[o.slug as ConstructionOptionCode] = def;
+      construction[o.slug] = def;
     }
   }
 
@@ -186,22 +183,28 @@ export function buildPublicCatalog(
     name: config.facades[slug].label,
   }));
 
-  const engineering = (Object.keys(config.engineering) as EngineeringOptionCode[])
+  const engineering = Object.keys(config.engineering)
     .filter((slug) => config.engineering[slug]?.enabled)
     .map((slug) => ({
       slug,
       name: config.engineering[slug].label,
+      description: config.engineering[slug].description,
+      imageUrl: config.engineering[slug].imageUrl,
       groupSlug: "engineering" as const,
       allowed: !disabled.has(slug),
     }));
 
-  const construction = (Object.keys(config.construction) as ConstructionOptionCode[])
+  const construction = Object.keys(config.construction)
     .filter((slug) => config.construction[slug]?.enabled)
     .map((slug) => {
-      const allowedByCategory = isConstructionOptionAllowed(slug, categoryId);
+      const allowedByCategory =
+        !CATEGORY_LIMITED_CONSTRUCTION_SLUGS.has(slug) ||
+        isConstructionOptionAllowed(slug as ConstructionOptionCode, categoryId);
       return {
         slug,
         name: config.construction[slug].label,
+        description: config.construction[slug].description,
+        imageUrl: config.construction[slug].imageUrl,
         groupSlug: "construction" as const,
         allowed: allowedByCategory && !disabled.has(slug),
       };

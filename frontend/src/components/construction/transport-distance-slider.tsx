@@ -1,7 +1,6 @@
 "use client";
 
 import type { CalculatorTransportBand } from "@/lib/project-calculator-types";
-import { transportBandPercentLabel } from "@/lib/project-transport-surcharge";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -15,15 +14,12 @@ export function TransportDistanceSlider({ bands, valueIndex, onChangeIndex, clas
   const max = Math.max(0, bands.length - 1);
   const safeIndex = Math.min(Math.max(0, valueIndex), max);
   const band = bands[safeIndex];
-  const percentLabel = transportBandPercentLabel(band);
 
   return (
     <div className={cn("space-y-3", className)}>
       <div className="flex items-baseline justify-between gap-3">
         <p className="text-sm font-medium leading-snug text-[var(--text)]">{band?.label ?? "—"}</p>
-        {percentLabel ? (
-          <span className="shrink-0 text-xs font-semibold tabular-nums text-[var(--accent)]">{percentLabel}</span>
-        ) : band?.id === "unk" ? (
+        {band?.id === "unk" ? (
           <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-[var(--text-muted)]">
             в смете
           </span>

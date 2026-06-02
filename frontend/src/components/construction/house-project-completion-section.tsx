@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AppWindow,
   BrickWall,
@@ -33,6 +33,7 @@ import { LeadMiniForm } from "@/components/construction/lead-mini-form";
 import type { PublicCalculatorCatalog } from "@/lib/calculator-catalog";
 import type { HouseCalculatorCategoryId } from "@/lib/house-project-calculator-engine";
 import { buildProjectCalculatorLeadPayload } from "@/lib/project-calculator-lead";
+import { toggleConstructionOptionSelection } from "@/lib/project-calculator-option-selection";
 import { useProjectCalculatorQuote } from "@/lib/use-project-calculator-quote";
 import { cn } from "@/lib/utils";
 
@@ -134,6 +135,7 @@ export function HouseProjectCompletionSection({
   };
 }) {
   const { openModalToEstimate } = useModal();
+  const detailLeadFormRef = useRef<HTMLFormElement | null>(null);
 
   const defaultTierDefs = useMemo(
     () => tiersFromMaterials(project.materials.length ? project.materials : DEFAULT_TIERS.map((t) => t.label)),
@@ -279,15 +281,24 @@ export function HouseProjectCompletionSection({
 
   function toggleConstruction(slug: string) {
     setConstructionSlugs((prev) => {
-      const next = new Set(prev);
-      if (next.has(slug)) next.delete(slug);
-      else next.add(slug);
-      return next;
+      return toggleConstructionOptionSelection(prev, slug);
     });
   }
 
   function scrollAddons() {
     document.getElementById("completion-addons")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function scrollDetailLeadForm() {
+    const form = detailLeadFormRef.current;
+    if (!form) {
+      openModalToEstimate();
+      return;
+    }
+    form.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => {
+      form.querySelector<HTMLInputElement>("input")?.focus();
+    }, 350);
   }
 
   const StageIcon = stage.Icon;
@@ -480,9 +491,11 @@ export function HouseProjectCompletionSection({
             <h3 className="font-heading text-lg text-[var(--graphite)]">Зафиксировать расчёт</h3>
             <div className="mt-4">
               <LeadMiniForm
+                ref={detailLeadFormRef}
                 source="project-calculator"
                 service={`Проект: ${project.title}`}
                 calcData={leadCalcData}
+                submitLabel="Отправить заявку"
               />
             </div>
           </div>
@@ -606,7 +619,7 @@ export function HouseProjectCompletionSection({
             <button
               type="button"
               className="w-full rounded-2xl bg-[var(--graphite)] py-4 text-sm font-bold text-[var(--bg)] transition hover:opacity-90 dark:bg-[var(--accent-contrast)] dark:text-[var(--graphite)]"
-              onClick={() => openModalToEstimate()}
+              onClick={scrollDetailLeadForm}
             >
               Получить детальную смету
             </button>

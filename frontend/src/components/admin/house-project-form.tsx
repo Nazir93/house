@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Plus, Save, Trash2 } from "lucide-react";
 import { AdminFormSection } from "@/components/admin/admin-form-section";
 import { AdminSelect } from "@/components/admin/admin-select";
 import { RichEditor } from "@/components/admin/rich-editor";
@@ -13,6 +13,7 @@ import { auroraCalculatorPresetJson } from "@/lib/project-calculator-aurora-defa
 import { CmsImage } from "@/components/ui/cms-image";
 import { AdminJsonEditor } from "@/components/admin/admin-json-editor";
 import { HouseProjectBlocksEditor } from "@/components/admin/house-project-blocks-editor";
+import { moveListItem } from "@/lib/reorder-list";
 import type { CompletionGroup, ConstructionStep } from "@/lib/construction-shared";
 import {
   buildHeroPricingJson,
@@ -161,6 +162,20 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
     if (files.length) void uploadMany(type, files);
   }
 
+  function moveRender(index: number, direction: -1 | 1) {
+    setForm((prev) => ({
+      ...prev,
+      renders: moveListItem(prev.renders, index, index + direction),
+    }));
+  }
+
+  function movePlan(index: number, direction: -1 | 1) {
+    setForm((prev) => ({
+      ...prev,
+      plans: moveListItem(prev.plans, index, index + direction),
+    }));
+  }
+
   async function save() {
     if (!form.title.trim() || !jsonValid) return;
     setSaving(true);
@@ -260,6 +275,11 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
             <label key={field} className="space-y-1">
               <span className="block text-xs font-medium text-white/40">{label}</span>
               <input type="number" value={form[field as keyof HouseProjectFormState] as string} onChange={(e) => set(field as keyof HouseProjectFormState, e.target.value as any)} className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
+              {field === "price" ? (
+                <span className="block text-[11px] leading-snug text-white/35">
+                  Если ниже расчетной цены коробки, на сайте покажется как скидка.
+                </span>
+              ) : null}
             </label>
           ))}
         </div>
@@ -353,7 +373,27 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
             {form.renders.map((url, index) => (
               <div key={`${url}-${index}`} className="relative rounded-xl overflow-hidden bg-white/[0.04] border border-white/[0.08]">
                 <CmsImage src={url} alt="" width={320} height={112} className="h-28 w-full object-cover" sizes="320px" />
-                <button onClick={() => set("renders", form.renders.filter((_, i) => i !== index))} className="absolute top-2 right-2 rounded-lg bg-black/60 p-1 text-white/70"><Trash2 size={14} /></button>
+                <div className="absolute bottom-2 left-2 flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => moveRender(index, -1)}
+                    disabled={index === 0}
+                    className="rounded-lg bg-black/60 p-1 text-white/80 disabled:opacity-35"
+                    aria-label="Переместить рендер левее"
+                  >
+                    <ArrowLeft size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveRender(index, 1)}
+                    disabled={index === form.renders.length - 1}
+                    className="rounded-lg bg-black/60 p-1 text-white/80 disabled:opacity-35"
+                    aria-label="Переместить рендер правее"
+                  >
+                    <ArrowRight size={14} />
+                  </button>
+                </div>
+                <button type="button" onClick={() => set("renders", form.renders.filter((_, i) => i !== index))} className="absolute top-2 right-2 rounded-lg bg-black/60 p-1 text-white/70"><Trash2 size={14} /></button>
               </div>
             ))}
           </div>
@@ -379,11 +419,31 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
           </div>
           <div className="space-y-2">
             {form.plans.map((plan, index) => (
-              <div key={`${plan.url}-${index}`} className="grid grid-cols-[72px_1fr_90px_auto] gap-3 items-center rounded-xl bg-white/[0.03] border border-white/[0.08] p-2">
+              <div key={`${plan.url}-${index}`} className="grid grid-cols-[72px_1fr_90px_auto_auto] gap-3 items-center rounded-xl bg-white/[0.03] border border-white/[0.08] p-2">
                 <CmsImage src={plan.url} alt="" width={64} height={56} className="h-14 w-16 object-cover rounded-lg" sizes="64px" />
                 <input value={plan.label} onChange={(e) => set("plans", form.plans.map((p, i) => i === index ? { ...p, label: e.target.value } : p))} placeholder="1 этаж" className="px-3 py-2 rounded-lg bg-white/[0.05] text-sm text-white" />
                 <input value={plan.floor} onChange={(e) => set("plans", form.plans.map((p, i) => i === index ? { ...p, floor: e.target.value } : p))} placeholder="Этаж" className="px-3 py-2 rounded-lg bg-white/[0.05] text-sm text-white" />
-                <button onClick={() => set("plans", form.plans.filter((_, i) => i !== index))} className="p-2 text-red-300/70"><Trash2 size={16} /></button>
+                <div className="flex gap-1">
+                  <button
+                    type="button"
+                    onClick={() => movePlan(index, -1)}
+                    disabled={index === 0}
+                    className="rounded-lg bg-white/[0.06] p-2 text-white/70 disabled:opacity-35"
+                    aria-label="Переместить планировку выше"
+                  >
+                    <ArrowUp size={14} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => movePlan(index, 1)}
+                    disabled={index === form.plans.length - 1}
+                    className="rounded-lg bg-white/[0.06] p-2 text-white/70 disabled:opacity-35"
+                    aria-label="Переместить планировку ниже"
+                  >
+                    <ArrowDown size={14} />
+                  </button>
+                </div>
+                <button type="button" onClick={() => set("plans", form.plans.filter((_, i) => i !== index))} className="p-2 text-red-300/70"><Trash2 size={16} /></button>
               </div>
             ))}
           </div>

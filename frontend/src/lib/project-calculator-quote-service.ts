@@ -14,10 +14,11 @@ import {
   type PartOfSoulFacadeVariant,
 } from "@/lib/part-of-soul-pricing";
 import { computeTransportSurchargeRub, normalizeTransportBands } from "@/lib/project-transport-surcharge";
-import type {
-  ConstructionOptionCode,
-  EngineeringOptionCode,
-  HouseCalculatorCategoryId,
+import {
+  getHouseCalculatorCategoryParams,
+  type ConstructionOptionCode,
+  type EngineeringOptionCode,
+  type HouseCalculatorCategoryId,
 } from "@/lib/house-project-calculator-engine";
 
 export type ProjectQuoteRequest = {
@@ -60,17 +61,19 @@ export async function computeProjectQuoteForSlug(projectSlug: string, body: Proj
     calculatorUi: normalizeCalculatorJson(project.calculatorJson),
   } as never);
 
-  const pricingFloors = inferPartOfSoulFloors(
-    project.floors,
-    calculatorUi.partOfSoul?.pricingFloors
-  );
-  const roofPitch = resolveProjectRoofPitch(pricingFloors, calculatorUi.partOfSoul?.defaultRoof);
-
   const explicitCategory =
     project.calculatorCategory &&
     ["a", "b", "c", "d", "e", "f"].includes(project.calculatorCategory) ?
       (project.calculatorCategory as HouseCalculatorCategoryId)
     : null;
+
+  const explicitCategoryParams = explicitCategory ? getHouseCalculatorCategoryParams(explicitCategory) : null;
+  const pricingFloors =
+    explicitCategoryParams?.floors ??
+    inferPartOfSoulFloors(project.floors, calculatorUi.partOfSoul?.pricingFloors);
+  const roofPitch =
+    explicitCategoryParams?.roof ??
+    resolveProjectRoofPitch(pricingFloors, calculatorUi.partOfSoul?.defaultRoof);
 
   const categoryId = resolveProjectCategory({
     calculatorCategory: explicitCategory,
@@ -107,8 +110,8 @@ export async function computeProjectQuoteForSlug(projectSlug: string, body: Proj
       categoryId,
       wallMaterial: tierIdToWallMaterial(body.tierId, body.tierLabel),
       facadeVariant: (body.facadeSlug as PartOfSoulFacadeVariant) || null,
-      engineeringCodes: body.engineeringSlugs as EngineeringOptionCode[],
-      constructionCodes: body.constructionSlugs as ConstructionOptionCode[],
+      engineeringCodes: body.engineeringSlugs,
+      constructionCodes: body.constructionSlugs,
       projectAdjustmentPercent: 0,
       transportSurchargeRub: 0,
     },

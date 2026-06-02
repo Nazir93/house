@@ -79,7 +79,7 @@ export const DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG: HouseProjectCalculatorConf
   categories: buildDefaultCategories(),
   facades: {
     brick: { label: "Облицовка кирпичом", pricePerM2: 0 },
-    plaster: { label: "Штукатурка с утеплением", pricePerM2: 0 },
+    plaster: { label: "Фасадная штукатурка с утеплением", pricePerM2: 0 },
     thermo: { label: "Термопанели", pricePerM2: 0 },
     brick_insulated: { label: "Облицовка кирпичом с утеплением", pricePerM2: 0 },
   },
@@ -93,6 +93,7 @@ export const DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG: HouseProjectCalculatorConf
     bio: eng("bio", "Станция биоочистки", "fixed", 0),
   },
   construction: {
+    interior_plaster: con("Внутренняя штукатурка", "per_area", 0),
     blind_area: con("Отмостка", "per_blind_area", 0),
     drainage: con("Дренаж", "per_perimeter", 0),
     soffits: con("Софиты", "per_soffit_length", 0),

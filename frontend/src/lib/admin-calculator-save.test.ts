@@ -6,6 +6,7 @@ import {
   parsePositiveFloat,
   parsePositiveInt,
   percentInputToFraction,
+  slugifyCalculatorOptionName,
 } from "./admin-calculator-save";
 
 describe("admin-calculator-save (админка калькулятора)", () => {
@@ -86,6 +87,16 @@ describe("admin-calculator-save (админка калькулятора)", () =
 
     it("не уводит цену ниже нуля", () => {
       expect(applyBulkPricePercent(1000, -150)).toBe(0);
+    });
+  });
+
+  describe("slugifyCalculatorOptionName", () => {
+    it("делает безопасный slug для новой опции из русского названия", () => {
+      expect(slugifyCalculatorOptionName("Внутренняя отделка 2")).toBe("vnutrennyaya_otdelka_2");
+    });
+
+    it("не возвращает пустой slug", () => {
+      expect(slugifyCalculatorOptionName("!!!")).toBe("option");
     });
   });
 });

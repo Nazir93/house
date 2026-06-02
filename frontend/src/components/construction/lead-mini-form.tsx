@@ -1,15 +1,8 @@
 "use client";
 
-import { useState, type CSSProperties, type FormEvent } from "react";
+import { forwardRef, useState, type CSSProperties, type FormEvent } from "react";
 
-export function LeadMiniForm({
-  source,
-  service,
-  calcData,
-  variant = "light",
-  submitLabel,
-  bare,
-}: {
+export const LeadMiniForm = forwardRef<HTMLFormElement, {
   source: string;
   service?: string;
   calcData?: unknown;
@@ -18,7 +11,14 @@ export function LeadMiniForm({
   submitLabel?: string;
   /** Без обводки карточки — для встраивания в блок калькулятора */
   bare?: boolean;
-}) {
+}>(function LeadMiniForm({
+  source,
+  service,
+  calcData,
+  variant = "light",
+  submitLabel,
+  bare,
+}, ref) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState("");
@@ -57,6 +57,7 @@ export function LeadMiniForm({
 
   return (
     <form
+      ref={ref}
       onSubmit={submit}
       className={`grid gap-4 ${dark ? "mt-8 max-w-md" : bare ? "gap-3" : "gap-3 rounded-[28px] p-5"}`}
       style={dark ? undefined : bare ? undefined : { backgroundColor: "var(--bg-secondary)" }}
@@ -93,4 +94,4 @@ export function LeadMiniForm({
       ) : null}
     </form>
   );
-}
+});

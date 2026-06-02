@@ -12,7 +12,6 @@ import {
   Home,
   Maximize2,
   Send,
-  Share2,
   ZoomIn,
 } from "lucide-react";
 import {
@@ -25,15 +24,16 @@ import {
   type HouseProjectItem,
 } from "@/lib/construction-data";
 import { resolveProjectCategory } from "@/lib/house-project-calculator-quote";
-import type { HouseCalculatorCategoryId } from "@/lib/house-project-calculator-engine";
+import {
+  getHouseCalculatorCategoryParams,
+  type HouseCalculatorCategoryId,
+} from "@/lib/house-project-calculator-engine";
+import { resolveProjectPriceOffer } from "@/lib/project-price-offer";
 import { HouseProjectCompletionSection } from "@/components/construction/house-project-completion-section";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { CmsImage } from "@/components/ui/cms-image";
-import { SITE_URL } from "@/lib/constants";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
-import { useContactConfig } from "@/lib/contact-config-context";
-import { useModal } from "@/lib/modal-context";
-import { maxChatUrlFromRawPhone } from "@/lib/messenger-links";
+import { maxChatUrlFromRawPhone, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
 import {
   inferPartOfSoulFloors,
   resolveProjectRoofPitch,
@@ -43,6 +43,7 @@ import { cn } from "@/lib/utils";
 import { ProjectEngagementBadges } from "@/components/projects/project-engagement-badges";
 
 const heroSoftRing = "ring-1 ring-[color-mix(in_srgb,var(--text)_6%,transparent)]";
+const PROJECT_MESSENGER_PHONE = "+79046000099";
 
 const carouselArrowClass =
   "absolute top-1/2 z-10 flex -translate-y-1/2 items-center justify-center p-1 text-white transition hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/90";
@@ -61,24 +62,44 @@ export function HouseProjectDetailContent({
   similarProjects: HouseProjectItem[];
   heroShellTiers: HeroPricingTier[];
 }) {
-  const contact = useContactConfig();
-  const { openModalToEstimate } = useModal();
   const renders = getProjectRenders(project);
   const plans = getProjectPlans(project);
   const calculatorUi = useMemo(() => getEffectiveCalculatorUi(project), [project]);
   const posCfg = calculatorUi.partOfSoul;
   const pricingFloors = useMemo(
-    () => inferPartOfSoulFloors(project.floors, posCfg?.pricingFloors),
-    [project.floors, posCfg?.pricingFloors]
+    () => {
+      if (
+        project.calculatorCategory &&
+        ["a", "b", "c", "d", "e", "f"].includes(project.calculatorCategory)
+      ) {
+        return getHouseCalculatorCategoryParams(project.calculatorCategory as HouseCalculatorCategoryId).floors;
+      }
+      return inferPartOfSoulFloors(project.floors, posCfg?.pricingFloors);
+    },
+    [project.calculatorCategory, project.floors, posCfg?.pricingFloors]
   );
-  /** Кровля фиксируется данными проекта (calculatorJson.partOfSoul.defaultRoof), без переключателя на странице */
+  /** Явная категория a–f важнее старого calculatorJson.partOfSoul.defaultRoof. */
   const roofPitch = useMemo<PartOfSoulRoofPitch>(() => {
+    if (
+      project.calculatorCategory &&
+      ["a", "b", "c", "d", "e", "f"].includes(project.calculatorCategory)
+    ) {
+      return getHouseCalculatorCategoryParams(project.calculatorCategory as HouseCalculatorCategoryId).roof;
+    }
     if (!posCfg?.enabled) return "dual";
     return resolveProjectRoofPitch(pricingFloors, posCfg.defaultRoof);
-  }, [posCfg, pricingFloors]);
+  }, [posCfg, pricingFloors, project.calculatorCategory]);
 
   const effectiveHeroTiers = heroShellTiers;
   const heroResolved = useMemo(() => resolveProjectHeroPricing(project), [project]);
+  const priceOffer = useMemo(
+    () =>
+      resolveProjectPriceOffer({
+        manualPriceRub: project.price,
+        standardPricesRub: effectiveHeroTiers.map((tier) => tier.price),
+      }),
+    [effectiveHeroTiers, project.price]
+  );
 
   const calculatorCategoryId = useMemo((): HouseCalculatorCategoryId | null => {
     const explicit =
@@ -110,13 +131,8 @@ export function HouseProjectDetailContent({
 
   const active = renders[activeRender] ?? renders[0];
 
-  const telegramShareUrl = useMemo(() => {
-    const pageUrl = `${SITE_URL.replace(/\/$/, "")}/projects/${project.slug}`;
-    return `https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(project.title)}`;
-  }, [project.slug, project.title]);
-
-  const maxMessengerHref =
-    contact.social.max?.trim() || maxChatUrlFromRawPhone(contact.phone2Raw) || null;
+  const telegramHref = telegramChatUrlFromRawPhone(PROJECT_MESSENGER_PHONE);
+  const maxMessengerHref = maxChatUrlFromRawPhone(PROJECT_MESSENGER_PHONE);
 
   const sortedPlans = useMemo(
     () => [...plans].sort((a, b) => (a.floor ?? 999) - (b.floor ?? 999)),
@@ -317,6 +333,21 @@ export function HouseProjectDetailContent({
                 <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">
                   Цена строительства
                 </p>
+                <div className="mt-2 flex flex-wrap items-end gap-x-3 gap-y-1">
+                  <p className="font-heading text-2xl font-bold tabular-nums text-[var(--sale)]">
+                    {formatRub(priceOffer.currentRub)}
+                  </p>
+                  {priceOffer.hasDiscount && priceOffer.standardRub ? (
+                    <>
+                      <p className="text-sm font-semibold tabular-nums text-[var(--text-muted)] line-through">
+                        {formatRub(priceOffer.standardRub)}
+                      </p>
+                      <p className="rounded-full bg-[color-mix(in_srgb,var(--sale)_12%,transparent)] px-2.5 py-1 text-xs font-semibold text-[var(--sale)]">
+                        Выгода {formatRub(priceOffer.discountRub)}
+                      </p>
+                    </>
+                  ) : null}
+                </div>
                 {project.pricePromo ? (
                   <p className="mt-2 inline-flex rounded-lg bg-[color-mix(in_srgb,var(--sale)_12%,transparent)] px-2.5 py-1 text-xs font-semibold text-[var(--sale)]">
                     {project.pricePromo}
@@ -394,17 +425,6 @@ export function HouseProjectDetailContent({
                 >
                   Получить смету
                 </button>
-                <button
-                  type="button"
-                  onClick={openModalToEstimate}
-                  className={cn(
-                    "w-full rounded-2xl px-4 py-3 text-sm font-semibold text-[var(--accent)] transition",
-                    "ring-1 ring-[color-mix(in_srgb,var(--accent)_35%,transparent)]",
-                    "hover:bg-[color-mix(in_srgb,var(--accent)_8%,transparent)]"
-                  )}
-                >
-                  Ориентировочный расчёт в один клик
-                </button>
               </div>
 
               <div
@@ -412,7 +432,7 @@ export function HouseProjectDetailContent({
               >
                 <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                   <a
-                    href={telegramShareUrl}
+                    href={telegramHref ?? "#"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex min-h-[44px] flex-1 items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-[0.96]"
@@ -420,7 +440,6 @@ export function HouseProjectDetailContent({
                   >
                     <Send size={17} strokeWidth={2} aria-hidden />
                     В Telegram
-                    <Share2 size={15} className="opacity-90" aria-hidden />
                   </a>
                   {maxMessengerHref ? (
                     <a
@@ -663,13 +682,37 @@ export function HouseProjectDetailContent({
             ) : null}
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-3">
-            {similarProjects.map((item) => (
-              <Link key={item.id} href={`/projects/${item.slug}`} className="rounded-[24px] border p-5 transition-colors hover:bg-[var(--bg-secondary)]" style={{ borderColor: "var(--border)" }}>
-                <Home className="mb-4 text-[var(--accent)]" />
-                <h3 className="font-heading text-2xl">{item.title}</h3>
-                <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>{item.area} м² - {formatRub(item.price)}</p>
-              </Link>
-            ))}
+            {similarProjects.map((item) => {
+              const cover = getProjectRenders(item)[0];
+              return (
+                <Link
+                  key={item.id}
+                  href={`/projects/${item.slug}`}
+                  className="group overflow-hidden rounded-[24px] border transition-colors hover:bg-[var(--bg-secondary)]"
+                  style={{ borderColor: "var(--border)" }}
+                >
+                  {cover ? (
+                    <div className="relative aspect-[16/10] overflow-hidden bg-[var(--stone)]">
+                      <CmsImage
+                        src={cover.url}
+                        alt={cover.alt || item.title}
+                        fill
+                        className="scale-[1.03] object-cover object-[center_38%] transition-transform duration-700 group-hover:scale-[1.08]"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex aspect-[16/10] items-center justify-center bg-[var(--stone)]">
+                      <Home className="text-[var(--accent)]" />
+                    </div>
+                  )}
+                  <div className="p-5">
+                    <h3 className="font-heading text-2xl">{item.title}</h3>
+                    <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>{item.area} м² - {formatRub(item.price)}</p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </section>
       </article>

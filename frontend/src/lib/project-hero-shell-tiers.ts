@@ -6,22 +6,26 @@ import {
 import { getEffectiveCalculatorUi, normalizeCalculatorJson, resolveProjectHeroPricing } from "@/lib/construction-data";
 import type { HeroPricingTier, HouseProjectItem } from "@/lib/construction-data";
 import { inferPartOfSoulFloors, resolveProjectRoofPitch } from "@/lib/part-of-soul-pricing";
-import type { HouseCalculatorCategoryId } from "@/lib/house-project-calculator-engine";
+import {
+  getHouseCalculatorCategoryParams,
+  type HouseCalculatorCategoryId,
+} from "@/lib/house-project-calculator-engine";
 
 export async function getHeroShellTiersForProject(project: HouseProjectItem): Promise<HeroPricingTier[]> {
   const heroResolved = resolveProjectHeroPricing(project);
   const calculatorUi = getEffectiveCalculatorUi(project);
-  const pricingFloors = inferPartOfSoulFloors(
-    project.floors,
-    calculatorUi.partOfSoul?.pricingFloors
-  );
-  const roofPitch = resolveProjectRoofPitch(pricingFloors, calculatorUi.partOfSoul?.defaultRoof);
-
   const explicitCategory =
     project.calculatorCategory &&
     ["a", "b", "c", "d", "e", "f"].includes(project.calculatorCategory) ?
       (project.calculatorCategory as HouseCalculatorCategoryId)
     : null;
+  const explicitCategoryParams = explicitCategory ? getHouseCalculatorCategoryParams(explicitCategory) : null;
+  const pricingFloors =
+    explicitCategoryParams?.floors ??
+    inferPartOfSoulFloors(project.floors, calculatorUi.partOfSoul?.pricingFloors);
+  const roofPitch =
+    explicitCategoryParams?.roof ??
+    resolveProjectRoofPitch(pricingFloors, calculatorUi.partOfSoul?.defaultRoof);
 
   const categoryId = resolveProjectCategory({
     calculatorCategory: explicitCategory,

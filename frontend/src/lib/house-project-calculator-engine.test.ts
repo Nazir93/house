@@ -4,6 +4,7 @@ import {
   computeHouseProjectQuote,
   computeShellTotalRub,
   deriveMetrics,
+  getHouseCalculatorCategoryParams,
   resolveHouseCalculatorCategory,
   toPublicQuoteResult,
 } from "./house-project-calculator-engine";
@@ -126,6 +127,10 @@ const C = {
     roof_soft: {
       ...DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG.construction.roof_soft,
       price: 12_242,
+    },
+    interior_plaster: {
+      ...DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG.construction.interior_plaster,
+      price: 1_000,
     },
   },
 };
@@ -350,8 +355,65 @@ describe("house-project-calculator-engine (TZ)", () => {
     );
   });
 
+  it("внутренняя штукатурка считается как площадь дома × цена из админки", () => {
+    const quote = computeHouseProjectQuote(
+      {
+        buildingArea: 120,
+        categoryId: "a",
+        wallMaterial: "gas",
+        engineeringCodes: [],
+        constructionCodes: ["interior_plaster"],
+      },
+      C
+    );
+    expect(quote?.constructionLines[0]).toMatchObject({
+      id: "interior_plaster",
+      label: "Внутренняя штукатурка",
+      amountRub: 120_000,
+    });
+  });
+
+  it("новые опции из админки считаются без доработки кода", () => {
+    const config = structuredClone(C);
+    config.engineering.custom_engineering_signal = {
+      label: "Слаботочка",
+      pricingType: "per_area",
+      price: 1_000,
+      enabled: true,
+    };
+    config.construction.custom_construction_finish = {
+      label: "Черновая отделка",
+      pricingType: "fixed",
+      price: 50_000,
+      enabled: true,
+    };
+
+    const quote = computeHouseProjectQuote(
+      {
+        buildingArea: 120,
+        categoryId: "a",
+        wallMaterial: "gas",
+        engineeringCodes: ["custom_engineering_signal"],
+        constructionCodes: ["custom_construction_finish"],
+      },
+      config
+    );
+
+    expect(quote?.engineeringLines[0]).toMatchObject({
+      id: "custom_engineering_signal",
+      label: "Слаботочка",
+      amountRub: 120_000,
+    });
+    expect(quote?.constructionLines[0]).toMatchObject({
+      id: "custom_construction_finish",
+      label: "Черновая отделка",
+      amountRub: 50_000,
+    });
+  });
+
   it("§11 дополнительные строительные опции соответствуют таблице ТЗ", () => {
     expect(C.construction).toMatchObject({
+      interior_plaster: { pricingType: "per_area", price: 1_000 },
       blind_area: { pricingType: "per_blind_area", price: 7_428 },
       drainage: { pricingType: "per_perimeter", price: 6_063 },
       soffits: { pricingType: "per_soffit_length", price: 3_750 },
@@ -447,6 +509,10 @@ describe("house-project-calculator-engine (TZ)", () => {
   it("resolveHouseCalculatorCategory из этажности и кровли", () => {
     expect(resolveHouseCalculatorCategory({ floors: 1, roof: "dual" })).toBe("a");
     expect(resolveHouseCalculatorCategory({ floors: 2, roof: "quad" })).toBe("f");
+  });
+
+  it("явная категория b задаёт трёхскатную кровлю для отображения и расчёта", () => {
+    expect(getHouseCalculatorCategoryParams("b")).toEqual({ floors: 1, roof: "triple" });
   });
 
   it("§8 матрица цен коробки (6 категорий × газобетон)", () => {

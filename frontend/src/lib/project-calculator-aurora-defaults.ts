@@ -235,7 +235,7 @@ export const AURORA_PROJECT_CALCULATOR_UI: ProjectCalculatorUi = {
         },
         {
           id: "fac_plaster",
-          name: "Штукатурка с утеплением",
+          name: "Фасадная штукатурка с утеплением",
           description: "Ставка за м² строительной площади (PDF, 1 этаж).",
           price: 0,
           partOfSoulAddon: { kind: "facade", variant: "plaster" },
