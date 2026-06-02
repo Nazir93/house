@@ -11,7 +11,6 @@ import { ProjectsConstructorSection } from "@/components/sections/projects-const
 import { FeaturedHouseProjectsSection } from "@/components/sections/featured-house-projects";
 import { ClientsChooseVideoSection } from "@/components/sections/clients-choose-video-section";
 import { HomePartnersSection } from "@/components/sections/home-partners-section";
-import { AccountShowcaseSection } from "@/components/sections/account-showcase-section";
 import { PortfolioSection } from "@/components/sections/portfolio";
 import { HomeNewsFeed } from "@/components/sections/home-news-feed";
 import {
@@ -58,7 +57,6 @@ export default async function HomePage() {
       <FeaturedHouseProjectsSection projects={houseProjects} projectHeroTiers={projectHeroTiers} />
       <ClientsChooseVideoSection />
       <HomePartnersSection partners={partners} />
-      <AccountShowcaseSection />
       <PortfolioSection
         builtObjects={builtPortfolioPreview}
         sectionTitle="Наши работы"
