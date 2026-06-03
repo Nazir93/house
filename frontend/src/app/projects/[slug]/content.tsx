@@ -207,8 +207,8 @@ export function HouseProjectDetailContent({
             </p>
           ) : null}
 
-          <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,400px)] lg:items-stretch">
-            <div className="relative min-h-0 overflow-hidden rounded-[32px] bg-[var(--stone)] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
+          <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,400px)]">
+            <div className="relative min-h-0 self-start overflow-hidden rounded-[32px] bg-[var(--stone)] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
               <ProjectEngagementBadges
                 slug={project.slug}
                 initialViewCount={project.viewCount}

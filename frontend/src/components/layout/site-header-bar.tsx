@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Percent, Search, Send, UserRound } from "lucide-react";
+import { ChevronDown, Percent, Search, Send, UserRound, X } from "lucide-react";
 import { SITE_NAME, HEADER_TAGLINE, ACCOUNT_PORTAL_PATH, YANDEX_REVIEWS_URL } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
@@ -415,9 +415,15 @@ export function SiteHeaderBar() {
             aria-label={mobileMenuOpen ? "Закрыть меню" : "Открыть меню"}
             aria-expanded={mobileMenuOpen}
           >
-            <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
-            <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
-            <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
+            {mobileMenuOpen ? (
+              <X className="h-5 w-5" strokeWidth={2.25} aria-hidden />
+            ) : (
+              <>
+                <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
+                <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
+                <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
+              </>
+            )}
           </button>
         </div>
       </div>

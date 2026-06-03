@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
-import { ChevronDown, Send } from "lucide-react";
+import { ChevronDown, Send, X } from "lucide-react";
 import { SiteHeaderBar } from "./site-header-bar";
 import { SITE_NAME } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
@@ -350,6 +350,15 @@ export function Header() {
 
           {/* Один экран: без внутреннего скролла, контент уплотнён под viewport */}
           <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="absolute right-4 top-[max(0.75rem,env(safe-area-inset-top,0px))] z-20 flex h-11 w-11 items-center justify-center rounded-full border bg-[var(--bg)]/90 shadow-lg backdrop-blur-md transition hover:border-[var(--accent)] hover:text-[var(--accent)] lg:right-6 lg:top-6"
+              style={{ borderColor: "var(--border)", color: "var(--text)" }}
+              aria-label="Закрыть меню"
+            >
+              <X className="h-5 w-5" strokeWidth={2.25} aria-hidden />
+            </button>
             <div className="flex min-h-0 w-full flex-1 flex-row items-stretch">
             {/* Nav area — на мобильном крупнее шрифты и зоны нажатия */}
             <nav className="flex min-h-0 w-full min-w-0 flex-1 flex-col justify-between px-4 sm:px-8 md:px-10 lg:px-16 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
