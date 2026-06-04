@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AppWindow,
   BrickWall,
+  ChevronDown,
   DoorOpen,
   Hammer,
   Home,
@@ -38,8 +39,8 @@ import { useProjectCalculatorQuote } from "@/lib/use-project-calculator-quote";
 import { cn } from "@/lib/utils";
 
 /** Граница без яркой белой обводки в тёмной теме */
-const softBorder = "border border-[color-mix(in_srgb,var(--text)_7%,transparent)]";
-const softDivide = "border-[color-mix(in_srgb,var(--text)_7%,transparent)]";
+const softBorder = "border border-[var(--border)]";
+const softDivide = "border-[var(--border)]";
 
 type Tier = { id: string; label: string };
 
@@ -192,6 +193,7 @@ export function HouseProjectCompletionSection({
   const [facadeSlug, setFacadeSlug] = useState<string | null>(null);
   const [engineeringSlugs, setEngineeringSlugs] = useState<Set<string>>(() => new Set());
   const [constructionSlugs, setConstructionSlugs] = useState<Set<string>>(() => new Set());
+  const [constructionSummaryOpen, setConstructionSummaryOpen] = useState(true);
 
   useEffect(() => {
     if (!categoryId) return;
@@ -506,11 +508,11 @@ export function HouseProjectCompletionSection({
       <aside className="mt-10 lg:mt-0 lg:sticky lg:top-28 lg:self-start">
         <div
           className={cn(
-            "rounded-[28px] bg-[var(--bg)] overflow-hidden shadow-[0_20px_50px_rgb(0_0_0/0.08)]",
+            "overflow-hidden rounded-[28px] bg-[var(--bg)] shadow-[0_20px_50px_rgb(0_0_0/0.08)] lg:flex lg:max-h-[calc(100dvh_-_8rem)] lg:flex-col",
             softBorder
           )}
         >
-          <div className={cn("p-6 border-b", softDivide)}>
+          <div className={cn("shrink-0 p-6 border-b", softDivide)}>
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">Проект</p>
             <h3 className="mt-1 font-heading text-xl text-[var(--graphite)]">{project.title}</h3>
             <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
@@ -534,7 +536,7 @@ export function HouseProjectCompletionSection({
             </dl>
           </div>
 
-          <div className="px-6 py-5">
+          <div className="min-h-0 px-6 py-5 lg:overflow-y-auto lg:overscroll-contain lg:[-webkit-overflow-scrolling:touch]">
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">Смета ориентир</p>
             <ul className="mt-4 space-y-3 text-sm">
               <li className="flex justify-between gap-3">
@@ -564,15 +566,37 @@ export function HouseProjectCompletionSection({
               ) : null}
               {catalogMode && conTotal > 0 ? (
                 <li className={cn("pt-2 border-t", softDivide)}>
-                  <p className="text-xs font-semibold text-[var(--text)] mb-2">Доп. опции</p>
-                  <ul className="space-y-1.5">
-                    {quoteData?.quote.constructionLines.map((row) => (
-                      <li key={row.id} className="flex justify-between gap-2 text-xs">
-                        <span className="min-w-0 text-[var(--text-muted)] truncate">{row.label}</span>
-                        <span className="tabular-nums font-medium text-[var(--text)]">{formatRub(row.amountRub)}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  <button
+                    type="button"
+                    className="mb-2 flex w-full items-center justify-between gap-2 text-left text-xs font-semibold text-[var(--text)]"
+                    onClick={() => setConstructionSummaryOpen((value) => !value)}
+                    aria-expanded={constructionSummaryOpen}
+                  >
+                    <span>
+                      Доп. опции
+                      <span className="ml-1 font-medium text-[var(--text-muted)]">
+                        ({quoteData?.quote.constructionLines.length ?? 0})
+                      </span>
+                    </span>
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 shrink-0 text-[var(--text-muted)] transition-transform",
+                        constructionSummaryOpen && "rotate-180"
+                      )}
+                      strokeWidth={2}
+                      aria-hidden
+                    />
+                  </button>
+                  {constructionSummaryOpen ? (
+                    <ul className="space-y-1.5">
+                      {quoteData?.quote.constructionLines.map((row) => (
+                        <li key={row.id} className="flex justify-between gap-2 text-xs">
+                          <span className="min-w-0 text-[var(--text-muted)] truncate">{row.label}</span>
+                          <span className="tabular-nums font-medium text-[var(--text)]">{formatRub(row.amountRub)}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                 </li>
               ) : catalogMode ? (
                 <li className={cn("pt-2 border-t", softDivide)}>
@@ -601,24 +625,24 @@ export function HouseProjectCompletionSection({
             </ul>
           </div>
 
-          <div className="mx-6 mb-6 rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[color-mix(in_srgb,var(--accent)_75%,#1a5c45)] p-5 text-[var(--accent-contrast)] shadow-[0_12px_36px_rgb(var(--accent-rgb)/0.35)]">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/80">Ориентир итого</p>
-            <p className="mt-2 font-heading text-3xl md:text-[2rem] font-bold tabular-nums tracking-tight">
-              {quoteLoading && catalogMode ? "…" : formatRub(grandTotal)}
-            </p>
-            <p className="mt-2 text-[11px] leading-snug text-white/75">
-              {formatRub(shellPrice)} коробка
-              {catalogMode ?
-                ` + ${formatRub(facadeTotal + engTotal + conTotal)} опции`
-              : ""}
-              {` + ${formatRub(surcharge)} транспорт`}
-            </p>
-          </div>
+          <div className={cn("shrink-0 border-t px-6 pb-6 pt-5", softDivide)}>
+            <div className="rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[color-mix(in_srgb,var(--accent)_75%,#1a5c45)] p-5 text-[var(--accent-contrast)] shadow-[0_12px_36px_rgb(var(--accent-rgb)/0.35)]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/80">Ориентир итого</p>
+              <p className="mt-2 font-heading text-3xl md:text-[2rem] font-bold tabular-nums tracking-tight">
+                {quoteLoading && catalogMode ? "…" : formatRub(grandTotal)}
+              </p>
+              <p className="mt-2 text-[11px] leading-snug text-white/75">
+                {formatRub(shellPrice)} коробка
+                {catalogMode ?
+                  ` + ${formatRub(facadeTotal + engTotal + conTotal)} опции`
+                : ""}
+                {` + ${formatRub(surcharge)} транспорт`}
+              </p>
+            </div>
 
-          <div className="px-6 pb-6">
             <button
               type="button"
-              className="w-full rounded-2xl bg-[var(--graphite)] py-4 text-sm font-bold text-[var(--bg)] transition hover:opacity-90 dark:bg-[var(--accent-contrast)] dark:text-[var(--graphite)]"
+              className="mt-4 w-full rounded-2xl bg-[var(--graphite)] py-4 text-sm font-bold text-[var(--bg)] transition hover:opacity-90 dark:bg-[var(--accent-contrast)] dark:text-[var(--graphite)]"
               onClick={scrollDetailLeadForm}
             >
               Получить детальную смету

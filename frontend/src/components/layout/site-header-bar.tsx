@@ -327,7 +327,7 @@ export function SiteHeaderBar() {
 
       {/* ——— Mobile ——— */}
       <div
-        className="flex items-center justify-between gap-2 border-b-0 py-1 pl-4 pr-3 lg:hidden"
+        className="flex items-center justify-between gap-1 border-b-0 py-1 pl-2 pr-2 min-[380px]:gap-2 min-[380px]:pl-4 min-[380px]:pr-3 lg:hidden"
         style={{ color: "var(--header-bar-text)" }}
       >
         <Link
@@ -336,15 +336,15 @@ export function SiteHeaderBar() {
           style={{ outlineColor: "var(--accent)" }}
           aria-label={`${SITE_NAME} — на главную`}
         >
-          <BrandLogo height={38} className="min-w-0" brightOnBackdrop={heroGlassLightInk} />
+          <BrandLogo height={34} className="min-w-0 min-[380px]:h-[38px]" brightOnBackdrop={heroGlassLightInk} />
         </Link>
-        <div className="flex min-w-0 shrink-0 items-center justify-end gap-1 sm:gap-1.5">
+        <div className="flex min-w-0 shrink-0 items-center justify-end gap-0.5 min-[380px]:gap-1 sm:gap-1.5">
           {telegramHref ? (
             <a
               href={telegramHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98] lg:hidden"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98] min-[380px]:h-8 min-[380px]:w-8 lg:hidden"
               style={{
                 borderColor: "var(--header-bar-border)",
                 color: "var(--header-bar-text)",
@@ -352,7 +352,7 @@ export function SiteHeaderBar() {
               aria-label="Написать в Telegram"
               title="Telegram"
             >
-              <Send className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+              <Send className="h-3 w-3 min-[380px]:h-3.5 min-[380px]:w-3.5" strokeWidth={2} aria-hidden />
             </a>
           ) : null}
           {maxHref ? (
@@ -360,7 +360,7 @@ export function SiteHeaderBar() {
               href={maxHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98] lg:hidden"
+              className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98] min-[380px]:flex min-[380px]:h-8 min-[380px]:w-8 lg:hidden"
               style={{
                 borderColor: "var(--header-bar-border)",
                 color: "var(--header-bar-text)",
@@ -368,18 +368,18 @@ export function SiteHeaderBar() {
               aria-label="Написать в Max"
               title="Max"
             >
-              <MaxMessengerIcon className="h-4 w-4 opacity-95" aria-hidden />
+              <MaxMessengerIcon className="h-3.5 w-3.5 opacity-95 min-[380px]:h-4 min-[380px]:w-4" aria-hidden />
             </a>
           ) : null}
-          <YandexMapsRatingChip compact />
+          <YandexMapsRatingChip compact className="h-7 px-1.5 min-[380px]:h-8 min-[380px]:px-2" />
           <div
-            className="ml-0.5 flex shrink-0 items-center gap-1 border-l pl-1.5 sm:gap-1.5 sm:pl-2"
+            className="ml-0.5 flex shrink-0 items-center gap-0.5 border-l pl-1 min-[380px]:gap-1 min-[380px]:pl-1.5 sm:gap-1.5 sm:pl-2"
             style={{ borderColor: "var(--header-bar-border)" }}
           >
             <button
               type="button"
               onClick={toggleSearch}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98]"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98] min-[380px]:h-8 min-[380px]:w-8"
               style={{
                 borderColor: "var(--header-bar-border)",
                 color: "var(--header-bar-text)",
@@ -387,19 +387,19 @@ export function SiteHeaderBar() {
               aria-label={searchOpen ? "Закрыть поиск" : "Поиск по сайту"}
               aria-expanded={searchOpen}
             >
-              <Search className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+              <Search className="h-3 w-3 min-[380px]:h-3.5 min-[380px]:w-3.5" strokeWidth={2} aria-hidden />
             </button>
-            <ThemeToggle variant="header" />
+            <ThemeToggle variant="header" className="h-7 w-7 min-[380px]:h-8 min-[380px]:w-8" />
             <Link
               href={ACCOUNT_PORTAL_PATH}
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98]"
+              className="hidden h-7 w-7 shrink-0 items-center justify-center rounded-full border transition active:scale-[0.98] min-[380px]:flex min-[380px]:h-8 min-[380px]:w-8"
               style={{
                 borderColor: "var(--header-bar-border)",
                 color: "var(--header-bar-text)",
               }}
               aria-label="Личный кабинет"
             >
-              <UserRound className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+              <UserRound className="h-3 w-3 min-[380px]:h-3.5 min-[380px]:w-3.5" strokeWidth={2} aria-hidden />
             </Link>
           </div>
           <button
@@ -411,7 +411,7 @@ export function SiteHeaderBar() {
                 window.dispatchEvent(new Event("open-mobile-menu"));
               }
             }}
-            className="flex h-8 w-8 shrink-0 flex-col items-center justify-center gap-[3px] pl-0.5 sm:pl-1"
+            className="flex h-7 w-7 shrink-0 flex-col items-center justify-center gap-[3px] pl-0.5 min-[380px]:h-8 min-[380px]:w-8 sm:pl-1"
             aria-label={mobileMenuOpen ? "Закрыть меню" : "Открыть меню"}
             aria-expanded={mobileMenuOpen}
           >
@@ -419,9 +419,9 @@ export function SiteHeaderBar() {
               <X className="h-5 w-5" strokeWidth={2.25} aria-hidden />
             ) : (
               <>
-                <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
-                <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
-                <span className="block h-[2px] w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
+                <span className="block h-[2px] w-4 min-[380px]:w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
+                <span className="block h-[2px] w-4 min-[380px]:w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
+                <span className="block h-[2px] w-4 min-[380px]:w-5" style={{ backgroundColor: "var(--header-bar-text)" }} />
               </>
             )}
           </button>

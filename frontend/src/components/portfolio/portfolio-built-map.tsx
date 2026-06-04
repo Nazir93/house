@@ -1,73 +1,86 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
-import L from "leaflet";
-import { MapContainer, Marker, useMap, useMapEvents } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { BuiltObjectItem, BuiltObjectSiteStatus } from "@/lib/construction-shared";
-import { LeafletAttributionClean } from "@/components/map/leaflet-attribution-clean";
-import { PortfolioMapTileLayer } from "@/components/map/portfolio-map-tile-layer";
-import { DEFAULT_MAP_CENTER } from "@/lib/map-tiles";
+import {
+  DEFAULT_MAP_CENTER,
+  YANDEX_MAPS_API_KEY,
+  YANDEX_MAPS_API_LANG,
+  yandexMapsPointUrl,
+} from "@/lib/map-tiles";
 
-if (typeof window !== "undefined") {
-  delete (L.Icon.Default.prototype as unknown as { _getIconUrl?: string })._getIconUrl;
-  L.Icon.Default.mergeOptions({
-    iconRetinaUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png",
-    iconUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png",
-    shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
-  });
+type YandexMap = {
+  destroy: () => void;
+  setCenter: (coords: [number, number], zoom?: number, options?: Record<string, unknown>) => void;
+  setBounds: (bounds: unknown, options?: Record<string, unknown>) => void;
+  geoObjects: {
+    add: (object: YandexPlacemark) => void;
+    remove: (object: YandexPlacemark) => void;
+  };
+  events: {
+    add: (eventName: string, handler: () => void) => void;
+  };
+};
+
+type YandexPlacemark = {
+  events: {
+    add: (eventName: string, handler: () => void) => void;
+  };
+};
+
+type YMapsApi = {
+  ready: (callback: () => void) => void;
+  Map: new (
+    node: HTMLElement,
+    state: { center: [number, number]; zoom: number; controls: string[] }
+  ) => YandexMap;
+  Placemark: new (
+    coords: [number, number],
+    properties: Record<string, string>,
+    options: Record<string, string>
+  ) => YandexPlacemark;
+  util: {
+    bounds: {
+      fromPoints: (points: [number, number][]) => unknown;
+    };
+  };
+};
+
+declare global {
+  interface Window {
+    ymaps?: YMapsApi;
+    __yandexMapsPromise?: Promise<YMapsApi>;
+  }
 }
 
-function FitBounds({
-  positions,
-  selectedPosition,
-}: {
-  positions: [number, number][];
-  selectedPosition: [number, number] | null;
-}) {
-  const map = useMap();
-  useEffect(() => {
-    if (selectedPosition) {
-      map.setView(selectedPosition, 13, { animate: true });
-      return;
-    }
-    if (positions.length === 0) return;
-    if (positions.length === 1) {
-      map.setView(positions[0], 10);
-      return;
-    }
-    const b = L.latLngBounds(positions.map((p) => L.latLng(p[0], p[1])));
-    map.fitBounds(b, { padding: [48, 48], maxZoom: 11 });
-  }, [map, positions, selectedPosition]);
-  return null;
+function loadYandexMaps(): Promise<YMapsApi> {
+  if (typeof window === "undefined") return Promise.reject(new Error("window_unavailable"));
+  if (!YANDEX_MAPS_API_KEY) return Promise.reject(new Error("yandex_maps_api_key_missing"));
+  if (window.ymaps) return Promise.resolve(window.ymaps);
+  if (window.__yandexMapsPromise) return window.__yandexMapsPromise;
+  const params = new URLSearchParams({ lang: YANDEX_MAPS_API_LANG });
+  params.set("apikey", YANDEX_MAPS_API_KEY);
+  window.__yandexMapsPromise = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = `https://api-maps.yandex.ru/2.1/?${params.toString()}`;
+    script.async = true;
+    script.onload = () => {
+      if (!window.ymaps) {
+        reject(new Error("yandex_maps_unavailable"));
+        return;
+      }
+      const ymaps = window.ymaps;
+      ymaps.ready(() => resolve(ymaps));
+    };
+    script.onerror = () => reject(new Error("yandex_maps_load_failed"));
+    document.head.appendChild(script);
+  });
+  return window.__yandexMapsPromise;
 }
 
-function buildMarkerIcon(status: BuiltObjectSiteStatus | undefined, selected: boolean): L.DivIcon {
-  const kind = status === "UNDER_CONSTRUCTION" ? "UNDER_CONSTRUCTION" : "COMPLETED";
-  const bg = kind === "UNDER_CONSTRUCTION" ? "#e07018" : "#0F3D2E";
-  const ring = selected ? "0 0 0 4px rgba(61,143,110,0.45)" : "0 4px 16px rgba(0,0,0,0.28)";
-  const svgHouse =
-    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 10.5L12 4l8 6.5V20h-5v-6H9v6H4V10.5z" fill="white" fill-opacity="0.95"/></svg>';
-  const svgBuild =
-    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 20h16M7 8h10M10 8V4h4v4M9 16v4h6v-4M6 12h12" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  const inner = kind === "UNDER_CONSTRUCTION" ? svgBuild : svgHouse;
-  return L.divIcon({
-    className: "everhouse-map-pin",
-    html: `<div style="width:42px;height:42px;border-radius:14px;background:${bg};box-shadow:${ring};display:flex;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.95);transform:translateY(-6px)">${inner}</div>`,
-    iconSize: [42, 50],
-    iconAnchor: [21, 50],
-  });
-}
-
-function MapBackgroundClicks({ onClear }: { onClear: () => void }) {
-  useMapEvents({
-    click(e) {
-      const t = e.originalEvent?.target as HTMLElement | undefined;
-      if (t?.closest?.(".leaflet-marker-icon, .everhouse-map-pin")) return;
-      onClear();
-    },
-  });
-  return null;
+function markerPreset(status: BuiltObjectSiteStatus | undefined, selected: boolean): string {
+  if (selected) return "islands#darkGreenCircleIcon";
+  return status === "UNDER_CONSTRUCTION" ? "islands#orangeCircleIcon" : "islands#darkGreenCircleIcon";
 }
 
 export type PortfolioBuiltMapProps = {
@@ -96,6 +109,10 @@ export function PortfolioBuiltMap({
     [withCoords]
   );
   const center: [number, number] = positions[0] ?? DEFAULT_MAP_CENTER;
+  const mapId = useId().replace(/:/g, "");
+  const mapRef = useRef<YandexMap | null>(null);
+  const placemarkRefs = useRef<YandexPlacemark[]>([]);
+  const [loadError, setLoadError] = useState(false);
 
   const selectedPosition = useMemo((): [number, number] | null => {
     if (!selectedId) return null;
@@ -104,13 +121,78 @@ export function PortfolioBuiltMap({
     return [o.latitude, o.longitude];
   }, [selectedId, withCoords]);
 
-  const iconsById = useMemo(() => {
-    const m = new Map<string, L.DivIcon>();
-    for (const o of withCoords) {
-      m.set(o.id, buildMarkerIcon(o.siteStatus, selectedId === o.id));
-    }
-    return m;
-  }, [withCoords, selectedId]);
+  useEffect(() => {
+    let cancelled = false;
+    setLoadError(false);
+
+    loadYandexMaps()
+      .then((ymaps) => {
+        if (cancelled) return;
+        const node = document.getElementById(mapId);
+        if (!node) return;
+
+        if (!mapRef.current) {
+          mapRef.current = new ymaps.Map(node, {
+            center,
+            zoom: 8,
+            controls: ["zoomControl", "fullscreenControl", "geolocationControl", "typeSelector"],
+          });
+          mapRef.current.events.add("click", () => onMapBackgroundClick());
+        }
+
+        const map = mapRef.current;
+        if (!map) return;
+        placemarkRefs.current.forEach((placemark) => map.geoObjects.remove(placemark));
+        placemarkRefs.current = [];
+
+        withCoords.forEach((object) => {
+          const selected = object.id === selectedId;
+          const placemark = new ymaps.Placemark(
+            [object.latitude!, object.longitude!],
+            {
+              hintContent: object.title,
+              balloonContentHeader: object.title,
+              balloonContentBody: object.location ?? "",
+            },
+            {
+              preset: markerPreset(object.siteStatus, selected),
+              iconColor: selected ? "#0F3D2E" : object.siteStatus === "UNDER_CONSTRUCTION" ? "#e07018" : "#0F3D2E",
+            }
+          );
+          placemark.events.add("click", () => onSelectMarker(object.id));
+          map.geoObjects.add(placemark);
+          placemarkRefs.current.push(placemark);
+        });
+
+        if (selectedPosition) {
+          map.setCenter(selectedPosition, 13, { duration: 250 });
+        } else if (positions.length === 1) {
+          map.setCenter(positions[0], 10);
+        } else if (positions.length > 1) {
+          map.setBounds(ymaps.util.bounds.fromPoints(positions), {
+            checkZoomRange: true,
+            zoomMargin: 48,
+            duration: 250,
+          });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setLoadError(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [center, mapId, onMapBackgroundClick, onSelectMarker, positions, selectedId, selectedPosition, withCoords]);
+
+  useEffect(() => {
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.destroy();
+        mapRef.current = null;
+      }
+    };
+  }, []);
 
   if (withCoords.length === 0) {
     return (
@@ -123,37 +205,34 @@ export function PortfolioBuiltMap({
     );
   }
 
+  if (loadError) {
+    return (
+      <p
+        className="rounded-2xl border p-6 text-sm"
+        style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+      >
+        Яндекс.Карта не загрузилась. Проверьте бесплатный API-ключ в NEXT_PUBLIC_YANDEX_MAPS_API_KEY.
+      </p>
+    );
+  }
+
   const frame = frameless
     ? "overflow-hidden rounded-none border-0"
     : "overflow-hidden rounded-[1.35rem] border border-[rgba(43,47,45,0.09)]";
 
   return (
     <div className={frame}>
-      <MapContainer
-        center={center}
-        zoom={8}
-        scrollWheelZoom
-        className={`z-0 w-full ${mapHeightClass} [&_.leaflet-control-attribution]:text-[10px]`}
-        style={{ background: "var(--stone)" }}
-      >
-        <PortfolioMapTileLayer />
-        <LeafletAttributionClean />
-        <MapBackgroundClicks onClear={onMapBackgroundClick} />
-        <FitBounds positions={positions} selectedPosition={selectedPosition} />
-        {withCoords.map((o) => (
-          <Marker
-            key={o.id}
-            position={[o.latitude!, o.longitude!]}
-            icon={iconsById.get(o.id)}
-            eventHandlers={{
-              click: (e) => {
-                L.DomEvent.stopPropagation(e);
-                onSelectMarker(o.id);
-              },
-            }}
-          />
-        ))}
-      </MapContainer>
+      <div id={mapId} className={`z-0 w-full ${mapHeightClass}`} style={{ background: "var(--stone)" }} />
+      <div className="flex items-center justify-end border-t bg-[var(--bg)] px-3 py-2 text-xs" style={{ borderColor: "var(--border)" }}>
+        <a
+          href={selectedPosition ? yandexMapsPointUrl(selectedPosition[0], selectedPosition[1], 13) : "https://yandex.ru/maps/"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-semibold text-[var(--accent)] underline-offset-4 hover:underline"
+        >
+          Открыть в Яндекс Картах
+        </a>
+      </div>
     </div>
   );
 }

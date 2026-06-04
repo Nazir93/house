@@ -56,7 +56,7 @@ export function ServicesHub({
 
   const cardTitle = hub?.navTitle ?? current?.service.title ?? "Услуга";
   const cardDescription = hub?.cardDescription ?? current?.service.shortDescription ?? "";
-  const sectionParagraphs = hub?.sectionParagraphs ?? [];
+  const sectionParagraphs = hub?.sectionParagraphs.slice(0, 2) ?? [];
   const features = hub?.features ?? [];
   const ctaLabel = hub?.ctaLabel ?? "Подробнее об услуге";
   const centerSrc = hub?.centerImageSrc;
@@ -116,17 +116,17 @@ export function ServicesHub({
             </div>
           </nav>
 
-          {/* Слева изображение, справа заголовок и весь текст раздела; ниже — акценты и кнопка */}
+          {/* Слева изображение, справа компактное описание; ниже — явный состав выбранной услуги. */}
           <div
-            className="mt-0 border border-t-0 border-[var(--border)] bg-[var(--bg)] p-5 sm:p-6 md:p-8 lg:p-10"
+            className="mt-0 border border-t-0 border-[var(--border)] bg-[var(--bg)] p-4 sm:p-5 md:p-6 lg:p-7"
             role="tabpanel"
             aria-labelledby={`services-hub-heading-${active}`}
           >
-            <div className="grid gap-8 lg:grid-cols-2 lg:items-start lg:gap-10 xl:gap-12">
+            <div className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-8 xl:gap-10">
               <div
                 className={cn(
                   "relative w-full overflow-hidden rounded-[22px] border border-[var(--border)] bg-white shadow-[0_20px_56px_rgba(0,0,0,0.06)]",
-                  "aspect-[1024/682] min-h-[220px] sm:min-h-[280px] lg:min-h-[300px]",
+                  "aspect-[1024/682] min-h-[220px] sm:min-h-[260px] lg:min-h-[280px]",
                 )}
               >
                 {centerSrc ? (
@@ -159,23 +159,23 @@ export function ServicesHub({
                 )}
               </div>
 
-              <div className="min-w-0 lg:pt-1">
+              <div className="min-w-0 lg:pt-0">
                 <header>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-subtle)]">
                     {String(active + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
                   </p>
                   <h3
                     id={`services-hub-heading-${active}`}
-                    className="mt-3 font-heading text-[clamp(1.35rem,2.5vw,1.85rem)] font-semibold leading-[1.12] tracking-tight text-[var(--text)] lg:mt-4"
+                    className="mt-2.5 font-heading text-[clamp(1.25rem,2.2vw,1.7rem)] font-semibold leading-[1.12] tracking-tight text-[var(--text)] lg:mt-3"
                   >
                     {cardTitle}
                   </h3>
                 </header>
 
-                <p className="mt-5 text-[15px] font-medium leading-relaxed text-[var(--text)] md:text-[16px]">{cardDescription}</p>
+                <p className="mt-4 text-[14px] font-medium leading-[1.55] text-[var(--text)] md:text-[15px]">{cardDescription}</p>
 
                 {sectionParagraphs.length > 0 ? (
-                  <div className="mt-5 space-y-4 text-[14px] leading-[1.65] text-[var(--text-muted)] md:text-[15px]">
+                  <div className="mt-4 space-y-3 text-[13px] leading-[1.55] text-[var(--text-muted)] md:text-[14px]">
                     {sectionParagraphs.map((para, i) => (
                       <p key={`${active}-${i}`}>{para}</p>
                     ))}
@@ -184,25 +184,46 @@ export function ServicesHub({
               </div>
             </div>
 
-            <div className="mt-10 border-t border-[var(--border)] pt-10">
+            <div className="mt-6 border-t border-[var(--border)] pt-6">
               {features.length > 0 ? (
-                <ul className="max-w-2xl space-y-4">
-                  {features.map(({ Icon, label }) => (
-                    <li key={label} className="flex gap-3">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--bg-secondary)] text-[var(--accent)]">
-                        <Icon className="h-4 w-4" strokeWidth={1.75} aria-hidden />
-                      </span>
-                      <span className="pt-1 text-[13px] leading-snug text-[var(--text)] md:text-[14px]">{label}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div>
+                  <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
+                        Что входит в услугу
+                      </p>
+                      <h4 className="mt-1 font-heading text-lg font-semibold leading-tight text-[var(--text)] md:text-xl">
+                        Состав выбранного направления
+                      </h4>
+                    </div>
+                    <p className="text-xs text-[var(--text-muted)]">
+                      {features.length} {features.length === 1 ? "пункт" : features.length < 5 ? "пункта" : "пунктов"}
+                    </p>
+                  </div>
+
+                  <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+                    {features.map(({ Icon, label }) => (
+                      <li
+                        key={label}
+                        className="flex min-h-[104px] flex-col rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4 shadow-sm"
+                      >
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--bg)] text-[var(--accent)]">
+                          <Icon className="h-4.5 w-4.5" strokeWidth={1.75} aria-hidden />
+                        </span>
+                        <span className="mt-3 text-[13px] font-semibold leading-snug text-[var(--text)] md:text-[14px]">
+                          {label}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ) : null}
 
               <Link
                 href={href}
                 className={cn(
                   "inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-5 py-3.5 text-sm font-semibold text-[var(--on-accent)] transition-colors hover:bg-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] sm:w-auto sm:min-w-[240px]",
-                  features.length > 0 ? "mt-8" : "",
+                  features.length > 0 ? "mt-6" : "",
                 )}
               >
                 {ctaLabel}

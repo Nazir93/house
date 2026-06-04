@@ -4,7 +4,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 import { signIn } from "next-auth/react";
-import { ArrowLeft, ChevronRight, Eye, EyeOff, Home } from "lucide-react";
+import {
+  ArrowLeft,
+  CalendarCheck,
+  CheckCircle2,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  FileText,
+  Home,
+  Images,
+  MessageCircle,
+} from "lucide-react";
 
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { SITE_NAME } from "@/lib/constants";
@@ -18,21 +29,29 @@ const CLIENT_SLIDES = [
     title: "Этапы и сроки",
     text: "Видно, на чём идёт стройка: этапы, график и статусы — без лишних звонков вам.",
     image: "/images/banner/banner-hero-05.png",
+    Icon: CalendarCheck,
+    features: ["График работ", "Статусы этапов", "План ближайших задач"],
   },
   {
     title: "Документы и оплаты",
     text: "Договор, акты, график платежей — в одном месте, когда удобно вам.",
     image: "/images/banner/banner-hero-03.png",
+    Icon: FileText,
+    features: ["Договор и акты", "График платежей", "История оплат"],
   },
   {
-    title: "Фото и онлайн-камера",
-    text: "Фотоотчёты и камера на объекте — смотрите ход работ в реальном времени.",
+    title: "Фотоотчёты и история работ",
+    text: "Смотрите, как продвигается строительство: новые фото, подписи к этапам и вся история объекта в одном месте.",
     image: "/images/banner/banner-hero-06.png",
+    Icon: Images,
+    features: ["Фото по этапам", "Подписи прораба", "Архив прогресса"],
   },
   {
     title: "Вопросы и поддержка",
     text: "Напишите нам из кабинета — ответ по обращению уйдёт в ту же цепочку, что и с сайта.",
     image: "/images/banner/banner-hero-02.png",
+    Icon: MessageCircle,
+    features: ["Обращения", "Ответы в одной цепочке", "Уведомления"],
   },
 ] as const;
 
@@ -164,6 +183,7 @@ function ClientShowcaseCarousel() {
   );
 
   const slide = CLIENT_SLIDES[i]!;
+  const Icon = slide.Icon;
 
   return (
     <div className="relative flex min-h-[300px] min-w-0 flex-1 flex-col justify-end lg:min-h-0">
@@ -189,11 +209,25 @@ function ClientShowcaseCarousel() {
 
       <div className="relative z-10 flex min-h-[300px] min-w-0 flex-1 flex-col justify-between p-6 sm:min-h-[380px] sm:p-8 lg:min-h-0 lg:flex-1 lg:p-10">
         <div className="max-w-lg">
-          <p className="text-[10px] font-bold uppercase tracking-[0.28em] text-emerald-200/75">Личный кабинет</p>
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.08] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-100/85 shadow-[0_12px_36px_rgba(0,0,0,0.22)] backdrop-blur-md">
+            <Icon className="h-3.5 w-3.5 text-emerald-200" strokeWidth={2.1} aria-hidden />
+            Личный кабинет
+          </div>
           <h2 className="mt-2 font-heading text-2xl font-bold leading-[1.15] tracking-tight text-white sm:text-3xl">
             {slide.title}
           </h2>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-white/[0.82] sm:text-[15px]">{slide.text}</p>
+          <div className="mt-5 grid max-w-md gap-2 sm:grid-cols-3">
+            {slide.features.map((feature) => (
+              <span
+                key={feature}
+                className="inline-flex min-h-[2.75rem] items-center gap-2 rounded-2xl border border-white/10 bg-black/24 px-3 py-2 text-[11px] font-semibold leading-snug text-white/86 shadow-[0_10px_30px_rgba(0,0,0,0.2)] backdrop-blur-md"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-200" strokeWidth={2.1} aria-hidden />
+                {feature}
+              </span>
+            ))}
+          </div>
         </div>
 
         <ShowcaseCarouselNav

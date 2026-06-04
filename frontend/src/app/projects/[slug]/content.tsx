@@ -254,25 +254,6 @@ export function HouseProjectDetailContent({
                   >
                     <ChevronRight size={36} strokeWidth={2} aria-hidden />
                   </button>
-                  <div className="pointer-events-none absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-2">
-                    {renders.map((_, i) => (
-                      <button
-                        key={i}
-                        type="button"
-                        aria-label={`Слайд ${i + 1}`}
-                        aria-current={i === activeRender}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveRender(i);
-                        }}
-                        className="pointer-events-auto h-2.5 w-2.5 rounded-full transition-all"
-                        style={{
-                          backgroundColor: i === activeRender ? "var(--accent)" : "rgba(255,255,255,0.55)",
-                          boxShadow: i === activeRender ? "0 0 0 2px rgba(255,255,255,0.9)" : "0 0 0 1px rgba(0,0,0,0.12)",
-                        }}
-                      />
-                    ))}
-                  </div>
                 </>
               ) : null}
               {renders.length > 0 ? (
@@ -281,6 +262,33 @@ export function HouseProjectDetailContent({
                   style={{ backgroundColor: "rgba(15, 20, 18, 0.55)" }}
                 >
                   <span className="opacity-90">{renders.length} фото</span>
+                </div>
+              ) : null}
+              {renders.length > 1 ? (
+                <div className="grid grid-cols-4 gap-2 bg-[var(--bg)] p-2 sm:gap-3 sm:p-3">
+                  {renders.map((render, i) => (
+                    <button
+                      key={render.id ?? `${render.url}-${i}`}
+                      type="button"
+                      aria-label={`Показать фото ${i + 1}`}
+                      aria-current={i === activeRender}
+                      onClick={() => setActiveRender(i)}
+                      className={cn(
+                        "relative aspect-[4/3] overflow-hidden rounded-2xl transition duration-200",
+                        i === activeRender
+                          ? "ring-2 ring-[var(--accent)] ring-offset-2 ring-offset-[var(--bg)]"
+                          : "opacity-78 hover:opacity-100"
+                      )}
+                    >
+                      <CmsImage
+                        src={render.url}
+                        alt={render.alt || `${project.title}, фото ${i + 1}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 1024px) 25vw, 220px"
+                      />
+                    </button>
+                  ))}
                 </div>
               ) : null}
             </div>
@@ -667,9 +675,6 @@ export function HouseProjectDetailContent({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <h2 className="font-heading text-3xl md:text-4xl">Похожие проекты</h2>
-              <p className="mt-2 max-w-2xl text-sm" style={{ color: "var(--text-muted)" }}>
-                Подбираем по площади и цене. Если по проекту уже есть готовый объект — ссылка на него вверху страницы и ниже.
-              </p>
             </div>
             {project.builtObjectSlug ? (
               <Link

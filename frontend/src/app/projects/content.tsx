@@ -663,39 +663,55 @@ export function ProjectsCatalogContent({
 
                 if (view === "grid") {
                   return (
-                    <article key={project.id} className="group relative overflow-hidden rounded-[1.25rem] border" style={{ borderColor: "var(--border)" }}>
-                      <Link href={`/projects/${project.slug}`} className="relative block aspect-[16/9] overflow-hidden bg-[var(--stone)]">
-                        {cover ? (
-                          <CmsImage
-                            src={cover.url}
-                            alt={cover.alt || project.title}
-                            fill
-                            className="scale-[1.06] object-cover object-[center_38%] transition-transform duration-700 group-hover:scale-[1.1]"
-                            sizes="(max-width: 1280px) 50vw, 400px"
-                          />
-                        ) : null}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" aria-hidden />
-                        <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-                          <span className="rounded-full bg-black/50 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
-                            {project.floors} {project.floors === 1 ? "этаж" : "этажа"}
-                          </span>
-                          <span className="max-w-[11rem] truncate rounded-full bg-black/45 px-3 py-1 text-[11px] font-medium text-white/95 backdrop-blur-sm">{matLabel}</span>
+                    <article
+                      key={project.id}
+                      className="group overflow-hidden rounded-[1.35rem] border bg-[var(--card-bg)] shadow-[0_16px_40px_rgba(15,61,46,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_56px_rgba(15,61,46,0.14)]"
+                      style={{ borderColor: "color-mix(in srgb, var(--text) 9%, transparent)" }}
+                    >
+                      <Link href={`/projects/${project.slug}`} className="block">
+                        <div className="relative aspect-[16/10] overflow-hidden bg-[var(--stone)]">
+                          {cover ? (
+                            <CmsImage
+                              src={cover.url}
+                              alt={cover.alt || project.title}
+                              fill
+                              className="scale-[1.03] object-cover object-[center_38%] transition-transform duration-700 group-hover:scale-[1.08]"
+                              sizes="(max-width: 1280px) 50vw, 400px"
+                            />
+                          ) : null}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/18 via-transparent to-white/8" aria-hidden />
+                          <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+                            <span className="rounded-full bg-white/88 px-3 py-1 text-[11px] font-semibold text-[var(--text)] shadow-sm backdrop-blur-md">
+                              {project.floors} {project.floors === 1 ? "этаж" : "этажа"}
+                            </span>
+                            <span className="max-w-[11rem] truncate rounded-full bg-white/82 px-3 py-1 text-[11px] font-medium text-[var(--text-muted)] shadow-sm backdrop-blur-md">
+                              {matLabel}
+                            </span>
+                          </div>
                         </div>
-                        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-5">
-                          <p className="font-heading text-lg font-bold text-white drop-shadow md:text-xl">{project.title}</p>
-                          <div className="mt-2 flex flex-wrap items-end justify-between gap-2">
-                            <div className="flex flex-wrap gap-3 text-[12px] text-white/90">
-                              <span>{project.area} м²</span>
-                              <span>·</span>
-                              <span>
-                                {project.rooms} комн.
+                        <div className="p-4 md:p-5">
+                          <div className="flex items-start justify-between gap-3">
+                            <p className="font-heading text-lg font-bold text-[var(--text)] transition-colors group-hover:text-[var(--accent)] md:text-xl">
+                              {project.title}
+                            </p>
+                            <p className="shrink-0 rounded-full bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] px-3 py-1 text-sm font-bold tabular-nums text-[var(--accent)] md:text-[15px]">
+                              {formatRub(project.price)}
+                            </p>
+                          </div>
+                          <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                            {[
+                              [`${project.area} м²`, "площадь"],
+                              [`${project.rooms}`, "комн."],
+                              [`${project.bathrooms}`, "с/у"],
+                            ].map(([value, label]) => (
+                              <span
+                                key={label}
+                                className="rounded-2xl bg-[color-mix(in_srgb,var(--bg-secondary)_78%,var(--bg))] px-2 py-2"
+                              >
+                                <span className="block text-sm font-bold leading-none text-[var(--text)]">{value}</span>
+                                <span className="mt-1 block text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-subtle)]">{label}</span>
                               </span>
-                              <span>·</span>
-                              <span>
-                                {project.bathrooms} с/у
-                              </span>
-                            </div>
-                            <p className="text-lg font-bold tabular-nums text-white md:text-xl">{formatRub(project.price)}</p>
+                            ))}
                           </div>
                         </div>
                       </Link>

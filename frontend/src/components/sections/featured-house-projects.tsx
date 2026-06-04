@@ -188,15 +188,15 @@ export function FeaturedHouseProjectsSection({
                 const mats = materialsLine(tiers.length ? tiers.map((tier) => tier.label) : p.materials);
 
                 return (
-                  <article key={p.id} data-reveal="card" style={revealDelayStyle(idx)} className="flex flex-col">
-                    <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[22px] bg-[var(--stone)] shadow-[0_12px_40px_rgba(15,61,46,0.08)] transition-[box-shadow,transform] duration-500 hover:-translate-y-0.5 hover:shadow-[0_18px_52px_rgba(15,61,46,0.14)]">
-                      <Link href={href} className="absolute inset-0 z-0">
+                  <article key={p.id} data-reveal="card" style={revealDelayStyle(idx)} className="group flex flex-col">
+                    <div className="relative isolate aspect-[16/9] w-full overflow-hidden rounded-[22px] bg-[var(--stone)] shadow-[0_12px_40px_rgba(15,61,46,0.08)] transition-[box-shadow,transform] duration-500 group-hover:-translate-y-0.5 group-hover:shadow-[0_18px_52px_rgba(15,61,46,0.14)]">
+                      <Link href={href} className="absolute inset-0 z-0 block overflow-hidden rounded-[inherit]">
                         <Image
                           src={cover}
                           alt={p.title}
                           fill
                           quality={78}
-                          className="scale-[1.06] object-cover object-[center_38%] transition duration-700 ease-out hover:scale-[1.1]"
+                          className="scale-[1.06] object-cover object-[center_38%] transition duration-700 ease-out group-hover:scale-[1.1]"
                           sizes="(max-width: 768px) 100vw, 50vw"
                         />
                       </Link>
