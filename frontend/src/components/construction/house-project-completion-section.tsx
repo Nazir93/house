@@ -30,7 +30,6 @@ import {
 } from "@/lib/project-transport-surcharge";
 import { TransportDistanceSlider } from "@/components/construction/transport-distance-slider";
 import { ProjectCalculatorCatalogOptions } from "@/components/construction/project-calculator-catalog-options";
-import { LeadMiniForm } from "@/components/construction/lead-mini-form";
 import type { PublicCalculatorCatalog } from "@/lib/calculator-catalog";
 import type { HouseCalculatorCategoryId } from "@/lib/house-project-calculator-engine";
 import { buildProjectCalculatorLeadPayload } from "@/lib/project-calculator-lead";
@@ -136,7 +135,7 @@ export function HouseProjectCompletionSection({
   };
 }) {
   const { openModalToEstimate } = useModal();
-  const detailLeadFormRef = useRef<HTMLFormElement | null>(null);
+  const summaryScrollRef = useRef<HTMLDivElement | null>(null);
 
   const defaultTierDefs = useMemo(
     () => tiersFromMaterials(project.materials.length ? project.materials : DEFAULT_TIERS.map((t) => t.label)),
@@ -292,15 +291,25 @@ export function HouseProjectCompletionSection({
   }
 
   function scrollDetailLeadForm() {
-    const form = detailLeadFormRef.current;
-    if (!form) {
-      openModalToEstimate();
-      return;
-    }
-    form.scrollIntoView({ behavior: "smooth", block: "center" });
-    window.setTimeout(() => {
-      form.querySelector<HTMLInputElement>("input")?.focus();
-    }, 350);
+    openModalToEstimate({
+      source: "project-calculator",
+      service: `Проект: ${project.title}`,
+      calcData: leadCalcData,
+    });
+  }
+
+  function scrollSummaryFromCard(event: React.WheelEvent<HTMLElement>) {
+    const scrollArea = summaryScrollRef.current;
+    if (!scrollArea || event.deltaY === 0) return;
+
+    const maxScrollTop = scrollArea.scrollHeight - scrollArea.clientHeight;
+    if (maxScrollTop <= 0) return;
+
+    const nextScrollTop = Math.min(Math.max(scrollArea.scrollTop + event.deltaY, 0), maxScrollTop);
+    if (nextScrollTop === scrollArea.scrollTop) return;
+
+    event.preventDefault();
+    scrollArea.scrollTop = nextScrollTop;
   }
 
   const StageIcon = stage.Icon;
@@ -488,25 +497,12 @@ export function HouseProjectCompletionSection({
           />
         ) : null}
 
-        {catalogMode && leadCalcData ? (
-          <div className="rounded-2xl border border-[color-mix(in_srgb,var(--text)_8%,transparent)] bg-[var(--bg)] p-5 md:p-6">
-            <h3 className="font-heading text-lg text-[var(--graphite)]">Зафиксировать расчёт</h3>
-            <div className="mt-4">
-              <LeadMiniForm
-                ref={detailLeadFormRef}
-                source="project-calculator"
-                service={`Проект: ${project.title}`}
-                calcData={leadCalcData}
-                submitLabel="Отправить заявку"
-              />
-            </div>
-          </div>
-        ) : null}
       </div>
 
       {/* Сайдбар итога */}
       <aside className="mt-10 lg:mt-0 lg:sticky lg:top-28 lg:self-start">
         <div
+          onWheel={scrollSummaryFromCard}
           className={cn(
             "overflow-hidden rounded-[28px] bg-[var(--bg)] shadow-[0_20px_50px_rgb(0_0_0/0.08)] lg:flex lg:max-h-[calc(100dvh_-_8rem)] lg:flex-col",
             softBorder
@@ -536,7 +532,10 @@ export function HouseProjectCompletionSection({
             </dl>
           </div>
 
-          <div className="min-h-0 px-6 py-5 lg:overflow-y-auto lg:overscroll-contain lg:[-webkit-overflow-scrolling:touch]">
+          <div
+            ref={summaryScrollRef}
+            className="min-h-0 px-6 py-5 lg:overflow-y-auto lg:overscroll-contain lg:[-webkit-overflow-scrolling:touch]"
+          >
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">Смета ориентир</p>
             <ul className="mt-4 space-y-3 text-sm">
               <li className="flex justify-between gap-3">
@@ -568,14 +567,22 @@ export function HouseProjectCompletionSection({
                 <li className={cn("pt-2 border-t", softDivide)}>
                   <button
                     type="button"
-                    className="mb-2 flex w-full items-center justify-between gap-2 text-left text-xs font-semibold text-[var(--text)]"
+                    className={cn(
+                      "flex w-full items-center justify-between gap-2 rounded-xl px-2 py-2 text-left text-xs font-semibold text-[var(--text)] transition",
+                      "hover:bg-[color-mix(in_srgb,var(--accent)_7%,transparent)]"
+                    )}
                     onClick={() => setConstructionSummaryOpen((value) => !value)}
                     aria-expanded={constructionSummaryOpen}
                   >
-                    <span>
-                      Доп. опции
-                      <span className="ml-1 font-medium text-[var(--text-muted)]">
-                        ({quoteData?.quote.constructionLines.length ?? 0})
+                    <span className="min-w-0">
+                      <span>
+                        Доп. опции
+                        <span className="ml-1 font-medium text-[var(--text-muted)]">
+                          ({quoteData?.quote.constructionLines.length ?? 0})
+                        </span>
+                      </span>
+                      <span className="mt-0.5 block text-[11px] font-medium tabular-nums text-[var(--text-muted)]">
+                        {formatRub(conTotal)}
                       </span>
                     </span>
                     <ChevronDown
@@ -588,7 +595,7 @@ export function HouseProjectCompletionSection({
                     />
                   </button>
                   {constructionSummaryOpen ? (
-                    <ul className="space-y-1.5">
+                    <ul className="mt-2 space-y-1.5">
                       {quoteData?.quote.constructionLines.map((row) => (
                         <li key={row.id} className="flex justify-between gap-2 text-xs">
                           <span className="min-w-0 text-[var(--text-muted)] truncate">{row.label}</span>

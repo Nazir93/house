@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { formatRub } from "@/lib/construction-data";
 import type { PublicCalculatorCatalog } from "@/lib/calculator-catalog";
 import { cn } from "@/lib/utils";
 import { CmsImage } from "@/components/ui/cms-image";
 
-const softBorder = "border border-[color-mix(in_srgb,var(--text)_7%,transparent)]";
+const softBorder = "border border-[var(--border)]";
 
 const CONSTRUCTION_OPTION_HINTS: Record<string, string> = {
   roof_folding: "Нельзя выбрать одновременно с мягкой кровлей.",
@@ -69,10 +70,10 @@ export function ProjectCalculatorCatalogOptions({
               <label
                 key={f.slug}
                 className={cn(
-                  "flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-colors",
+                  "flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-colors",
                   active
-                    ? "border-[color-mix(in_srgb,var(--accent)_45%,transparent)] bg-[color-mix(in_srgb,var(--accent)_8%,var(--bg))]"
-                    : "border-[color-mix(in_srgb,var(--text)_8%,transparent)] hover:border-[color-mix(in_srgb,var(--accent)_25%,transparent)]"
+                    ? "bg-[color-mix(in_srgb,var(--accent)_10%,var(--bg))] text-[var(--accent)]"
+                    : "bg-[color-mix(in_srgb,var(--bg-secondary)_72%,var(--bg))] hover:bg-[color-mix(in_srgb,var(--accent)_6%,var(--bg))]"
                 )}
               >
                 <input
@@ -88,10 +89,10 @@ export function ProjectCalculatorCatalogOptions({
           })}
           <label
             className={cn(
-              "flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 transition-colors",
+              "flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-colors",
               !facadeSlug
-                ? "border-[color-mix(in_srgb,var(--accent)_45%,transparent)] bg-[color-mix(in_srgb,var(--accent)_8%,var(--bg))]"
-                : "border-[color-mix(in_srgb,var(--text)_8%,transparent)]"
+                ? "bg-[color-mix(in_srgb,var(--accent)_10%,var(--bg))] text-[var(--accent)]"
+                : "bg-[color-mix(in_srgb,var(--bg-secondary)_72%,var(--bg))]"
             )}
           >
             <input
@@ -194,9 +195,9 @@ function OptionRow({
   return (
     <li
       className={cn(
-        "rounded-xl border px-4 py-3",
+        "rounded-xl bg-[color-mix(in_srgb,var(--bg-secondary)_72%,var(--bg))] px-4 py-3 transition-colors",
         disabled && "opacity-50",
-        checked && !disabled && "border-[color-mix(in_srgb,var(--accent)_35%,transparent)] bg-[color-mix(in_srgb,var(--accent)_6%,var(--bg))]"
+        checked && !disabled && "bg-[color-mix(in_srgb,var(--accent)_9%,var(--bg))]"
       )}
       title={disabled ? disabledHint : undefined}
     >
@@ -212,28 +213,31 @@ function OptionRow({
           <span className="min-w-0">
             <span className="flex items-center gap-2 text-sm text-[var(--text)]">
               {name}
-              {hasFootnote ? (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setOpen((v) => !v);
-                  }}
-                  className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-[var(--border)] text-[11px] font-bold text-[var(--text-muted)] transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                  aria-label={`Подробнее: ${name}`}
-                  aria-expanded={open}
-                >
-                  i
-                </button>
-              ) : null}
             </span>
             {hint ? <span className="mt-0.5 block text-[11px] text-[var(--text-muted)]">{hint}</span> : null}
           </span>
         </label>
-        {checked && amount != null ? (
-          <span className="text-sm font-bold tabular-nums text-[var(--text)]">{loading ? "…" : formatRub(amount)}</span>
-        ) : null}
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          {checked && amount != null ? (
+            <span className="text-sm font-bold tabular-nums text-[var(--text)]">{loading ? "…" : formatRub(amount)}</span>
+          ) : null}
+          {hasFootnote ? (
+            <button
+              type="button"
+              onClick={() => setOpen((v) => !v)}
+              className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[color-mix(in_srgb,var(--text)_5%,transparent)] px-2.5 text-[11px] font-semibold text-[var(--text-muted)] transition hover:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] hover:text-[var(--accent)]"
+              aria-label={`Подробнее: ${name}`}
+              aria-expanded={open}
+            >
+              Подробнее
+              <ChevronDown
+                className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")}
+                strokeWidth={2}
+                aria-hidden
+              />
+            </button>
+          ) : null}
+        </div>
       </div>
       {open && hasFootnote ? (
         <div className="mt-3 grid gap-3 rounded-xl bg-[var(--bg-secondary)] p-3 sm:grid-cols-[minmax(0,1fr)_9rem]">

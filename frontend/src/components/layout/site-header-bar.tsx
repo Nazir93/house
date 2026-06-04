@@ -181,34 +181,46 @@ export function SiteHeaderBar() {
             className="ml-4 flex shrink-0 flex-nowrap items-center gap-x-2 overflow-visible sm:ml-5 xl:ml-7 xl:gap-x-3.5"
             aria-label="Основное меню"
           >
-            {orderedNav.map((section) => (
-              <div
-                key={section.label}
-                className="relative shrink-0 overflow-visible"
-                onMouseEnter={() => handleEnter(section.label)}
-                onMouseLeave={handleLeave}
-              >
-                <button
-                  type="button"
-                  className="flex items-center gap-0.5 whitespace-nowrap py-0.5 text-left text-[9px] font-semibold uppercase tracking-[0.06em] xl:gap-1 xl:text-[10px]"
-                  style={{
-                    color:
-                      openSection === section.label
-                        ? "var(--header-bar-text)"
-                        : "var(--header-bar-muted)",
-                  }}
+            {orderedNav.map((section) =>
+              section.label === "Проекты" ? (
+                <Link
+                  key={section.label}
+                  href="/projects"
+                  onMouseEnter={() => setOpenSection(null)}
+                  className="shrink-0 whitespace-nowrap py-0.5 text-[9px] font-semibold uppercase tracking-[0.06em] transition-colors xl:text-[10px]"
+                  style={{ color: "var(--header-bar-muted)" }}
                 >
                   {section.label}
-                  <ChevronDown className="h-3 w-3 opacity-70 xl:h-3.5 xl:w-3.5" strokeWidth={2} />
-                </button>
-                <NavDropdownPanel
-                  sectionLabel={section.label}
-                  open={openSection === section.label}
-                  onClose={() => setOpenSection(null)}
-                  openModal={openModal}
-                />
-              </div>
-            ))}
+                </Link>
+              ) : (
+                <div
+                  key={section.label}
+                  className="relative shrink-0 overflow-visible"
+                  onMouseEnter={() => handleEnter(section.label)}
+                  onMouseLeave={handleLeave}
+                >
+                  <button
+                    type="button"
+                    className="flex items-center gap-0.5 whitespace-nowrap py-0.5 text-left text-[9px] font-semibold uppercase tracking-[0.06em] xl:gap-1 xl:text-[10px]"
+                    style={{
+                      color:
+                        openSection === section.label
+                          ? "var(--header-bar-text)"
+                          : "var(--header-bar-muted)",
+                    }}
+                  >
+                    {section.label}
+                    <ChevronDown className="h-3 w-3 opacity-70 xl:h-3.5 xl:w-3.5" strokeWidth={2} />
+                  </button>
+                  <NavDropdownPanel
+                    sectionLabel={section.label}
+                    open={openSection === section.label}
+                    onClose={() => setOpenSection(null)}
+                    openModal={openModal}
+                  />
+                </div>
+              )
+            )}
           </nav>
 
           <div className="ml-auto flex min-w-0 shrink-0 flex-nowrap items-center justify-end gap-1 xl:gap-1.5">

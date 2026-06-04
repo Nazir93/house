@@ -117,7 +117,7 @@ export function BuiltPortfolioContent({
           <span className="text-[var(--text)]">Наши проекты</span>
         </nav>
 
-        <div className="mt-5 rounded-[2rem] border border-[var(--border)] bg-[var(--bg-secondary)] px-5 py-6 shadow-[0_16px_50px_rgba(15,61,46,0.06)] sm:px-7 md:px-8 md:py-8">
+        <div className="mt-5 rounded-[2rem] bg-[var(--bg-secondary)] px-5 py-6 shadow-[0_16px_50px_rgba(15,61,46,0.06)] sm:px-7 md:px-8 md:py-8">
           <div className="max-w-3xl">
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">Построенные дома</p>
             <h1 className="mt-2 font-heading text-3xl font-bold tracking-tight text-[var(--accent)] md:text-[2.75rem] md:leading-[1.06] lg:text-[3.15rem] dark:text-[var(--text)]">
@@ -131,8 +131,8 @@ export function BuiltPortfolioContent({
 
         <div ref={explorerRef} id="portfolio-explorer" className="mt-8 scroll-mt-24 space-y-8 md:scroll-mt-28">
           {view === "map" ? (
-            <div className="space-y-6 rounded-[2rem] border border-[var(--border)] bg-[var(--bg-secondary)] p-4 shadow-[0_16px_50px_rgba(15,61,46,0.06)] sm:p-5 md:p-6">
-              <div className="flex w-full flex-wrap items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--bg)] p-3">
+            <div className="space-y-6 rounded-[2rem] bg-[var(--bg-secondary)] p-4 shadow-[0_16px_50px_rgba(15,61,46,0.06)] sm:p-5 md:p-6">
+              <div className="flex w-full flex-wrap items-center gap-2 rounded-2xl bg-[var(--bg)] p-3">
                 <button type="button" onClick={() => setView("grid")} className={chipClass(true)}>
                   <LayoutGrid size={15} strokeWidth={2} aria-hidden />
                   К сетке
@@ -145,13 +145,13 @@ export function BuiltPortfolioContent({
                   Открыть страницу карты
                 </Link>
               </div>
-              <div className="overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-[var(--bg)] p-2">
+              <div className="overflow-hidden rounded-[1.5rem] bg-[var(--bg)] p-2">
                 <PortfolioObjectMapExplorer objects={objects} layout="embedded" />
               </div>
             </div>
           ) : (
             <>
-              <div className="rounded-[1.75rem] border border-[var(--border)] bg-[var(--bg-secondary)] p-4 shadow-[0_14px_42px_rgba(15,61,46,0.05)] sm:p-5">
+              <div className="rounded-[1.75rem] bg-[var(--bg-secondary)] p-4 shadow-[0_14px_42px_rgba(15,61,46,0.05)] sm:p-5">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
                     Фильтры портфолио
@@ -209,14 +209,14 @@ export function BuiltPortfolioContent({
               ) : filtered.length === 0 ? (
                 <p className="py-16 text-center text-sm text-[var(--text-muted)]">Нет объектов с выбранными фильтрами.</p>
               ) : (
-                <ul className="grid list-none grid-cols-1 gap-5 rounded-[2rem] border border-[var(--border)] bg-[var(--bg-secondary)] p-4 shadow-[0_18px_58px_rgba(15,61,46,0.06)] sm:grid-cols-2 sm:p-5 lg:grid-cols-3 lg:gap-6 lg:p-6">
+                <ul className="grid list-none grid-cols-1 gap-5 rounded-[2rem] bg-[var(--bg-secondary)] p-4 shadow-[0_18px_58px_rgba(15,61,46,0.06)] sm:grid-cols-2 sm:p-5 lg:grid-cols-3 lg:gap-6 lg:p-6">
                   {filtered.map((object) => {
                     const cover = getBuiltObjectCover(object);
                     return (
                       <li key={object.id}>
                         <Link
                           href={`/portfolio/${object.slug}`}
-                          className="group block overflow-hidden rounded-[1.35rem] border border-[var(--border)] bg-[var(--bg)] p-3 shadow-[0_10px_34px_rgba(15,61,46,0.06)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_46px_rgba(15,61,46,0.12)]"
+                          className="group block overflow-hidden rounded-[1.35rem] bg-[var(--bg)] p-3 shadow-[0_10px_34px_rgba(15,61,46,0.06)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_46px_rgba(15,61,46,0.12)]"
                         >
                           <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-[var(--stone)]">
                             {cover ? (

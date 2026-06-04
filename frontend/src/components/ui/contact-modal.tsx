@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, type FormEvent } from "react";
 import { X, CheckCircle } from "lucide-react";
 import { useModal } from "@/lib/modal-context";
 import { useContactConfig } from "@/lib/contact-config-context";
@@ -52,8 +52,107 @@ function SuccessScreen({ onClose }: { onClose: () => void }) {
   );
 }
 
+function ProjectEstimateLeadForm({
+  onSuccess,
+  getRecaptchaToken,
+}: {
+  onSuccess: () => void;
+  getRecaptchaToken: ((action?: string) => Promise<string>) | null;
+}) {
+  const { estimatePayload } = useModal();
+  const contact = useContactConfig();
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [status, setStatus] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    setStatus("");
+    setLoading(true);
+
+    try {
+      const recaptchaToken = getRecaptchaToken ? await getRecaptchaToken("submit") : "";
+      const params = new URLSearchParams(window.location.search);
+      const response = await fetch("/api/leads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          phone,
+          service: estimatePayload?.service ?? "Детальная смета проекта",
+          source: estimatePayload?.source ?? "project-calculator",
+          pageUrl: window.location.href,
+          recaptchaToken: recaptchaToken || undefined,
+          utmSource: params.get("utm_source"),
+          utmMedium: params.get("utm_medium"),
+          utmCampaign: params.get("utm_campaign"),
+          calcData: estimatePayload?.calcData ?? null,
+        }),
+      });
+
+      if (response.ok) {
+        onSuccess();
+        return;
+      }
+
+      const data = await response.json().catch(() => null);
+      setStatus(data?.error || "Не удалось отправить заявку.");
+    } catch {
+      setStatus(`Нет связи с сервером. Позвоните нам: ${contact.phone}`);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex items-center px-4 py-20">
+      <div className="mx-auto w-full max-w-xl rounded-[28px] bg-[var(--bg-secondary)] p-6 md:p-8">
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">
+          Детальная смета
+        </p>
+        <h2 className="mt-3 font-heading text-3xl leading-tight text-[var(--graphite)]">
+          Оставьте контакты
+        </h2>
+        <p className="mt-3 text-sm leading-relaxed text-[var(--text-muted)]">
+          Выбранные материалы, инженерия, доп. опции и сумма уже прикреплены к заявке.
+        </p>
+
+        <form onSubmit={submit} className="mt-7 grid gap-4">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            placeholder="Ваше имя"
+            className="rounded-2xl border bg-[var(--bg)] px-4 py-3 text-base outline-none focus:border-[var(--accent)]"
+            style={{ borderColor: "var(--border)", color: "var(--text)" }}
+            autoComplete="name"
+          />
+          <input
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            required
+            placeholder="Телефон"
+            className="rounded-2xl border bg-[var(--bg)] px-4 py-3 text-base outline-none focus:border-[var(--accent)]"
+            style={{ borderColor: "var(--border)", color: "var(--text)" }}
+            autoComplete="tel"
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="rounded-2xl bg-[var(--accent)] px-5 py-4 text-sm font-bold text-[var(--accent-contrast)] transition hover:bg-[var(--accent-hover)] disabled:cursor-wait disabled:opacity-70"
+          >
+            {loading ? "Отправляем..." : "Отправить заявку"}
+          </button>
+          {status ? <p className="text-sm text-[var(--text-muted)]">{status}</p> : null}
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export function ContactModal() {
-  const { isOpen, closeModal } = useModal();
+  const { isOpen, closeModal, estimatePayload } = useModal();
   const [step, setStep] = useState<Step>("form-calculator");
   const getSmartCaptchaToken = useSmartCaptchaToken();
 
@@ -111,14 +210,23 @@ export function ContactModal() {
 
       {step === "form-calculator" && (
         <>
-          <BackNavButton
-            className="fixed top-[max(1rem,env(safe-area-inset-top))] left-[max(1rem,env(safe-area-inset-left))] z-[110] md:top-6 md:left-6 touch-manipulation"
-            onClick={handleClose}
-          />
-          <HouseConstructionCalculatorForm
-            onSuccess={() => setStep("success")}
-            getRecaptchaToken={getSmartCaptchaToken}
-          />
+          {estimatePayload ? (
+            <ProjectEstimateLeadForm
+              onSuccess={() => setStep("success")}
+              getRecaptchaToken={getSmartCaptchaToken}
+            />
+          ) : (
+            <>
+              <BackNavButton
+                className="fixed top-[max(1rem,env(safe-area-inset-top))] left-[max(1rem,env(safe-area-inset-left))] z-[110] md:top-6 md:left-6 touch-manipulation"
+                onClick={handleClose}
+              />
+              <HouseConstructionCalculatorForm
+                onSuccess={() => setStep("success")}
+                getRecaptchaToken={getSmartCaptchaToken}
+              />
+            </>
+          )}
         </>
       )}
       {step === "success" && <SuccessScreen onClose={handleClose} />}
