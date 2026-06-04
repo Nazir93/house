@@ -295,7 +295,7 @@ export function HouseProjectDetailContent({
 
             <aside
               className={cn(
-                "flex flex-col rounded-[28px] bg-[var(--bg)] p-5 md:p-6 shadow-[0_16px_48px_rgb(var(--accent-rgb)/0.08)]",
+                "self-start flex flex-col rounded-[28px] bg-[var(--bg)] p-5 md:p-6 shadow-[0_16px_48px_rgb(var(--accent-rgb)/0.08)]",
                 heroSoftRing
               )}
             >
@@ -436,7 +436,7 @@ export function HouseProjectDetailContent({
               </div>
 
               <div
-                className="mt-auto border-t border-[color-mix(in_srgb,var(--text)_7%,transparent)] pt-5 space-y-3"
+                className="mt-6 border-t border-[color-mix(in_srgb,var(--text)_7%,transparent)] pt-5 space-y-3"
               >
                 <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                   <a

@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Plus, Save, Trash2 } from "lucide-react";
 import { AdminFormSection } from "@/components/admin/admin-form-section";
@@ -109,17 +110,50 @@ function isValidJson(value: string) {
 
 export function HouseProjectForm({ initial }: { initial?: any }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [form, setForm] = useState<HouseProjectFormState>(() => mapHouseProjectToForm(initial));
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState<"render" | "plan" | null>(null);
   const [uploadProgress, setUploadProgress] = useState("");
   const [error, setError] = useState("");
   const [showAdvancedCalculator, setShowAdvancedCalculator] = useState(false);
 
   const jsonValid = useMemo(() => isValidJson(form.calculatorJson), [form.calculatorJson]);
+  const saveDisabled = saving || !form.title.trim() || !jsonValid;
+
+  useEffect(() => {
+    if (searchParams.get("saved") === "1") {
+      setSaved(true);
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!saved) return;
+    const timer = window.setTimeout(() => setSaved(false), 3500);
+    return () => window.clearTimeout(timer);
+  }, [saved]);
 
   function set<K extends keyof HouseProjectFormState>(field: K, value: HouseProjectFormState[K]) {
+    setSaved(false);
     setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function SaveButton({ className }: { className?: string }) {
+    return (
+      <button
+        type="button"
+        onClick={save}
+        disabled={saveDisabled}
+        className={
+          className ??
+          "inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0F3D2E] hover:bg-[#143f32] text-white text-sm font-semibold transition-colors disabled:opacity-50"
+        }
+      >
+        <Save size={16} /> {saving ? "Сохранение..." : saved ? "Сохранено" : "Сохранить"}
+      </button>
+    );
   }
 
   async function uploadMany(type: "render" | "plan", files: File[]) {
@@ -180,6 +214,7 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
     if (!form.title.trim() || !jsonValid) return;
     setSaving(true);
     setError("");
+    setSaved(false);
     const payload = {
       ...form,
       mortgageMode: form.mortgageMode,
@@ -211,7 +246,13 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
       if (!res.ok) {
         setError(data?.error || "Не удалось сохранить проект.");
       } else {
-        router.push(`/admin/house-projects/${data.id || form.id}`);
+        setSaved(true);
+        const id = data.id || form.id;
+        if (id && id !== form.id) {
+          router.push(`/admin/house-projects/${id}?saved=1`);
+        } else if (id) {
+          router.refresh();
+        }
       }
     } catch {
       setError("Не удалось отправить данные.");
@@ -230,15 +271,14 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
           <h1 className="text-2xl font-bold tracking-tight">{form.id ? "Проект дома" : "Новый проект дома"}</h1>
           <p className="text-sm text-white/40 mt-1">Каталог типовых домов, фильтры и карточка проекта.</p>
         </div>
-        <button
-          onClick={save}
-          disabled={saving || !form.title.trim() || !jsonValid}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0F3D2E] hover:bg-[#143f32] text-white text-sm font-semibold transition-colors disabled:opacity-50"
-        >
-          <Save size={16} /> {saving ? "Сохранение..." : "Сохранить"}
-        </button>
+        <SaveButton />
       </div>
 
+      {saved ? (
+        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm font-medium text-emerald-200">
+          Сохранено. Изменения применены в админке.
+        </div>
+      ) : null}
       {error ? <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">{error}</div> : null}
       {!jsonValid ? <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-200">Проверьте JSON в комплектации, графике или якорях.</div> : null}
 
@@ -503,6 +543,16 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
           ) : null}
         </div>
       </AdminFormSection>
+
+      <div className="sticky bottom-4 z-20 rounded-2xl border border-white/[0.08] bg-[#101614]/95 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-white">Готово к сохранению?</p>
+            <p className="mt-1 text-xs text-white/45">Дубль кнопки для длинной формы, чтобы не подниматься наверх.</p>
+          </div>
+          <SaveButton className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F3D2E] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#143f32] disabled:opacity-50" />
+        </div>
+      </div>
     </div>
   );
 }

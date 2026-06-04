@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { formatRub } from "@/lib/construction-data";
 import type { PublicCalculatorCatalog } from "@/lib/calculator-catalog";
@@ -8,13 +8,6 @@ import { cn } from "@/lib/utils";
 import { CmsImage } from "@/components/ui/cms-image";
 
 const softBorder = "border border-[var(--border)]";
-
-const CONSTRUCTION_OPTION_HINTS: Record<string, string> = {
-  roof_folding: "Нельзя выбрать одновременно с мягкой кровлей.",
-  roof_soft: "Нельзя выбрать одновременно с фальцевой кровлей.",
-  roof_insulation_200: "Нельзя выбрать одновременно с утеплением 250 мм.",
-  roof_insulation_250: "Нельзя выбрать одновременно с утеплением 200 мм.",
-};
 
 type Props = {
   catalog: PublicCalculatorCatalog;
@@ -39,6 +32,9 @@ export function ProjectCalculatorCatalogOptions({
   lineAmounts,
   quoteLoading,
 }: Props) {
+  const [facadeOpen, setFacadeOpen] = useState(true);
+  const [engineeringOpen, setEngineeringOpen] = useState(true);
+  const [constructionOpen, setConstructionOpen] = useState(true);
   const facadePrice = facadeSlug ? lineAmounts.get(`facade:${facadeSlug}`) : undefined;
 
   const engTotal = useMemo(() => {
@@ -59,11 +55,8 @@ export function ProjectCalculatorCatalogOptions({
 
   return (
     <div id="completion-addons" className="scroll-mt-28 space-y-8">
-      <section className={cn("rounded-2xl bg-[var(--bg)] p-5 md:p-6", softBorder)}>
-        <h3 className="font-heading text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">
-          Отделка фасада
-        </h3>
-        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+      <OptionSection title="Отделка фасада" open={facadeOpen} onToggle={() => setFacadeOpen((value) => !value)}>
+        <div className="grid gap-2 sm:grid-cols-2">
           {catalog.facades.map((f) => {
             const active = facadeSlug === f.slug;
             return (
@@ -110,13 +103,14 @@ export function ProjectCalculatorCatalogOptions({
             {quoteLoading ? "…" : formatRub(facadePrice)}
           </p>
         ) : null}
-      </section>
+      </OptionSection>
 
-      <section className={cn("rounded-2xl bg-[var(--bg)] p-5 md:p-6", softBorder)}>
-        <h3 className="font-heading text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">
-          Инженерные коммуникации
-        </h3>
-        <ul className="mt-4 space-y-2">
+      <OptionSection
+        title="Инженерные коммуникации"
+        open={engineeringOpen}
+        onToggle={() => setEngineeringOpen((value) => !value)}
+      >
+        <ul className="space-y-2">
           {catalog.engineering.map((o) => (
             <OptionRow
               key={o.slug}
@@ -135,13 +129,14 @@ export function ProjectCalculatorCatalogOptions({
         <p className="mt-3 text-xs font-semibold tabular-nums text-[var(--text-muted)]">
           Итого инженерия: {quoteLoading ? "…" : formatRub(engTotal)}
         </p>
-      </section>
+      </OptionSection>
 
-      <section className={cn("rounded-2xl bg-[var(--bg)] p-5 md:p-6", softBorder)}>
-        <h3 className="font-heading text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">
-          Дополнительные строительные опции
-        </h3>
-        <ul className="mt-4 space-y-2">
+      <OptionSection
+        title="Дополнительные строительные опции"
+        open={constructionOpen}
+        onToggle={() => setConstructionOpen((value) => !value)}
+      >
+        <ul className="space-y-2">
           {catalog.construction.map((o) => (
             <OptionRow
               key={o.slug}
@@ -151,7 +146,6 @@ export function ProjectCalculatorCatalogOptions({
               checked={constructionSlugs.has(o.slug)}
               disabled={!o.allowed}
               disabledHint="Недоступно"
-              hint={CONSTRUCTION_OPTION_HINTS[o.slug]}
               amount={lineAmounts.get(o.slug)}
               loading={quoteLoading}
               onToggle={() => onToggleConstruction(o.slug)}
@@ -161,8 +155,41 @@ export function ProjectCalculatorCatalogOptions({
         <p className="mt-3 text-xs font-semibold tabular-nums text-[var(--text-muted)]">
           Итого опции: {quoteLoading ? "…" : formatRub(conTotal)}
         </p>
-      </section>
+      </OptionSection>
     </div>
+  );
+}
+
+function OptionSection({
+  title,
+  open,
+  onToggle,
+  children,
+}: {
+  title: string;
+  open: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <section className={cn("rounded-2xl bg-[var(--bg)] p-5 md:p-6", softBorder)}>
+      <button
+        type="button"
+        className="flex w-full items-center justify-between gap-3 text-left"
+        onClick={onToggle}
+        aria-expanded={open}
+      >
+        <h3 className="font-heading text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">
+          {title}
+        </h3>
+        <ChevronDown
+          className={cn("h-4 w-4 shrink-0 text-[var(--text-muted)] transition-transform", open && "rotate-180")}
+          strokeWidth={2}
+          aria-hidden
+        />
+      </button>
+      {open ? <div className="mt-4">{children}</div> : null}
+    </section>
   );
 }
 
@@ -173,7 +200,6 @@ function OptionRow({
   checked,
   disabled,
   disabledHint,
-  hint,
   amount,
   loading,
   onToggle,
@@ -184,7 +210,6 @@ function OptionRow({
   checked: boolean;
   disabled?: boolean;
   disabledHint?: string;
-  hint?: string;
   amount?: number;
   loading?: boolean;
   onToggle: () => void;
@@ -214,7 +239,6 @@ function OptionRow({
             <span className="flex items-center gap-2 text-sm text-[var(--text)]">
               {name}
             </span>
-            {hint ? <span className="mt-0.5 block text-[11px] text-[var(--text-muted)]">{hint}</span> : null}
           </span>
         </label>
         <div className="ml-auto flex shrink-0 items-center gap-2">
@@ -225,11 +249,10 @@ function OptionRow({
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
-              className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[color-mix(in_srgb,var(--text)_5%,transparent)] px-2.5 text-[11px] font-semibold text-[var(--text-muted)] transition hover:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] hover:text-[var(--accent)]"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--text)_5%,transparent)] text-[var(--text-muted)] transition hover:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] hover:text-[var(--accent)]"
               aria-label={`Подробнее: ${name}`}
               aria-expanded={open}
             >
-              Подробнее
               <ChevronDown
                 className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")}
                 strokeWidth={2}
