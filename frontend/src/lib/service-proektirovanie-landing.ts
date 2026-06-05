@@ -1,6 +1,7 @@
 import type { ServiceLandingDocument, StoryTimelineItem } from "@/lib/service-landing-schema";
 
 export const PROEKTROVANIE_HERO_BANNER = "/images/banner/proektirovanie-hero-v2.png";
+export const PROEKTROVANIE_HERO_FALLBACK_BANNER = "/proektirovanie/hero.png";
 
 export const PROEKTROVANIE_HERO_TITLE = "Индивидуальное проектирование домов";
 
@@ -15,7 +16,7 @@ export const PROEKTROVANIE_TIMELINE_ITEMS: StoryTimelineItem[] = [
     eyebrow: "Этап 01",
     title: "Подписание договора",
     body: "Фиксирование сроков проектирования и стоимости проекта.",
-    imageUrl: "/images/banner/banner-hero-02.png",
+    imageUrl: "/proektirovanie/step-contract.png",
   },
   {
     id: "tech-spec",
@@ -24,7 +25,7 @@ export const PROEKTROVANIE_TIMELINE_ITEMS: StoryTimelineItem[] = [
     title: "Техническое задание",
     body:
       "Мы тщательно изучаем предоставленные материалы: геологические изыскания и топографическую съемку, схемы инженерных коммуникаций, градостроительные ограничения и особенности землепользования, фотофиксацию территории. На основании этих данных мы разработаем детализированное техническое задание, которое станет надежной основой для будущего проекта.",
-    imageUrl: "/images/banner/banner-hero-03.png",
+    imageUrl: "/proektirovanie/step-brief.png",
   },
   {
     id: "design",
@@ -33,7 +34,7 @@ export const PROEKTROVANIE_TIMELINE_ITEMS: StoryTimelineItem[] = [
     title: "Разработка проекта",
     body:
       "Мы разрабатываем оптимальную архитектурную концепцию дома с учетом ваших пожеланий и особенностей участка, направленную на создание комфортного и функционального пространства.",
-    imageUrl: "/images/banner/banner-hero-04.png",
+    imageUrl: "/proektirovanie/step-development.png",
   },
   {
     id: "documentation",
@@ -42,7 +43,7 @@ export const PROEKTROVANIE_TIMELINE_ITEMS: StoryTimelineItem[] = [
     title: "Подготовка документации",
     body:
       "По окончании проектирования мы предоставляем подробный сметный расчет проекта и рабочую документацию в печатном и электронном виде.",
-    imageUrl: "/images/banner/banner-hero-05.png",
+    imageUrl: "/proektirovanie/step-development.png",
   },
 ];
 
@@ -62,6 +63,8 @@ export function enrichProektirovanieLandingDocument(
       s.type !== "hero" &&
       s.type !== "heroCinematic" &&
       s.type !== "storyTimeline" &&
+      s.type !== "designCalculator" &&
+      s.type !== "projectTemplateViewer" &&
       s.type !== "faq"
   );
 
@@ -71,8 +74,14 @@ export function enrichProektirovanieLandingDocument(
           ...heroSection,
           title: PROEKTROVANIE_HERO_TITLE,
           subtitle: PROEKTROVANIE_HERO_SUBTITLE,
-          bannerImageDesktop: PROEKTROVANIE_HERO_BANNER,
-          bannerImageMobile: PROEKTROVANIE_HERO_BANNER,
+          bannerImageDesktop:
+            !heroSection.bannerImageDesktop || heroSection.bannerImageDesktop === PROEKTROVANIE_HERO_BANNER
+              ? PROEKTROVANIE_HERO_FALLBACK_BANNER
+              : heroSection.bannerImageDesktop,
+          bannerImageMobile:
+            !heroSection.bannerImageMobile || heroSection.bannerImageMobile === PROEKTROVANIE_HERO_BANNER
+              ? heroSection.bannerImageDesktop ?? PROEKTROVANIE_HERO_FALLBACK_BANNER
+              : heroSection.bannerImageMobile,
         }
       : heroSection?.type === "hero"
         ? {
@@ -83,22 +92,30 @@ export function enrichProektirovanieLandingDocument(
             tag: heroSection.tag,
             features: heroSection.features,
             goals: heroSection.goals,
-            bannerImageDesktop: PROEKTROVANIE_HERO_BANNER,
-            bannerImageMobile: PROEKTROVANIE_HERO_BANNER,
+            bannerImageDesktop:
+              !heroSection.bannerImageDesktop || heroSection.bannerImageDesktop === PROEKTROVANIE_HERO_BANNER
+                ? PROEKTROVANIE_HERO_FALLBACK_BANNER
+                : heroSection.bannerImageDesktop,
+            bannerImageMobile:
+              !heroSection.bannerImageMobile || heroSection.bannerImageMobile === PROEKTROVANIE_HERO_BANNER
+                ? heroSection.bannerImageDesktop ?? PROEKTROVANIE_HERO_FALLBACK_BANNER
+                : heroSection.bannerImageMobile,
           }
         : {
             type: "heroCinematic" as const,
             title: PROEKTROVANIE_HERO_TITLE,
             subtitle: PROEKTROVANIE_HERO_SUBTITLE,
-            bannerImageDesktop: PROEKTROVANIE_HERO_BANNER,
-            bannerImageMobile: PROEKTROVANIE_HERO_BANNER,
+            bannerImageDesktop: PROEKTROVANIE_HERO_FALLBACK_BANNER,
+            bannerImageMobile: PROEKTROVANIE_HERO_FALLBACK_BANNER,
           };
 
 
   return {
     sections: [
       cinematic,
+      { type: "designCalculator" as const },
       { type: "storyTimeline" as const, items: PROEKTROVANIE_TIMELINE_ITEMS },
+      { type: "projectTemplateViewer" as const },
       ...rest,
     ],
   };

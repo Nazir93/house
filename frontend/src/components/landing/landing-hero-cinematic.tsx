@@ -36,7 +36,7 @@ export function LandingHeroCinematic({
     <section
       className={cn(
         "relative isolate -mt-[var(--site-header-banner-overlap)] scroll-mt-[var(--site-header-sticky-offset)] pointer-events-none",
-        fullBleed && "bg-black"
+        fullBleed && "bg-[#f5f2ec]"
       )}
       style={fullBleed ? undefined : { backgroundColor: "var(--bg)" }}
     >
@@ -44,7 +44,7 @@ export function LandingHeroCinematic({
         className={cn(
           "relative w-full overflow-hidden transition-all duration-700 ease-out",
           fullBleed
-            ? "min-h-[100svh] min-h-[100dvh]"
+            ? "min-h-[min(74svh,720px)]"
             : "mx-auto max-w-[1440px] min-h-[min(72vh,760px)] md:min-h-[min(78vh,820px)] rounded-b-[1.75rem] md:rounded-b-[2.25rem] lg:rounded-b-[2.75rem]"
         )}
         style={{
@@ -93,14 +93,32 @@ export function LandingHeroCinematic({
               />
             </>
           ) : (
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.28) 32%, rgba(0,0,0,0.06) 55%, transparent 72%), linear-gradient(to right, rgba(0,0,0,0.55) 0%, transparent 55%)",
-              }}
-              aria-hidden
-            />
+            <>
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(to right, #f5f2ec 0%, rgba(245,242,236,0.96) 18%, rgba(245,242,236,0.72) 38%, rgba(245,242,236,0.20) 58%, transparent 76%)",
+                }}
+                aria-hidden
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(to bottom, rgba(245,242,236,0.58) 0%, transparent 22%, transparent 76%, #f5f2ec 100%)",
+                }}
+                aria-hidden
+              />
+              <div
+                className="absolute inset-y-0 left-0 w-[55%]"
+                style={{
+                  background:
+                    "radial-gradient(circle at 18% 42%, rgba(255,255,255,0.76) 0%, rgba(245,242,236,0.88) 34%, rgba(245,242,236,0) 72%)",
+                }}
+                aria-hidden
+              />
+            </>
           )}
         </div>
 
@@ -108,18 +126,18 @@ export function LandingHeroCinematic({
           className={cn(
             "relative z-[1] flex flex-col pointer-events-auto",
             fullBleed
-              ? "min-h-[100svh] min-h-[100dvh] justify-end items-start px-5 pb-[max(2.5rem,env(safe-area-inset-bottom))] pt-[calc(var(--site-header-sticky-offset)+1.25rem)] sm:px-8 md:px-12 md:pb-14 lg:px-16 lg:pb-16 xl:px-20 xl:pb-20"
+              ? "min-h-[min(74svh,720px)] justify-center items-start px-5 pt-[calc(var(--site-header-sticky-offset)+2rem)] pb-12 sm:px-8 md:px-12 lg:px-16 xl:px-20"
               : "min-h-[inherit] justify-end px-5 pb-14 pt-[calc(var(--site-header-sticky-offset)+2.5rem)] md:px-10 md:pb-16 lg:px-14 lg:pb-20"
           )}
         >
-          <div className={cn(fullBleed ? "max-w-[42rem] text-left" : "container mx-auto w-full max-w-[1320px]")}>
+          <div className={cn(fullBleed ? "w-full max-w-[1320px] text-left" : "container mx-auto w-full max-w-[1320px]")}>
             {tag ? (
               <span
                 className={cn(
                   "mb-3 inline-block max-w-xl font-semibold uppercase tracking-[0.14em] sm:mb-4",
                   fullBleed ? "text-[11px] sm:text-xs" : "text-[10px] sm:text-[11px]"
                 )}
-                style={{ color: fullBleed ? "rgba(255,255,255,0.7)" : "color-mix(in srgb, var(--text) 72%, transparent)" }}
+                style={{ color: fullBleed ? "rgba(31,42,39,0.36)" : "color-mix(in srgb, var(--text) 72%, transparent)" }}
               >
                 {tag}
               </span>
@@ -128,10 +146,10 @@ export function LandingHeroCinematic({
               className={cn(
                 "font-heading font-bold leading-[1.02] tracking-tight",
                 fullBleed
-                  ? "max-w-[28rem] text-[clamp(1.5rem,3.2vw,2.35rem)] uppercase tracking-[0.02em] sm:max-w-[32rem] md:max-w-[36rem]"
+                  ? "max-w-[25rem] text-[clamp(2.2rem,5.2vw,4.6rem)] font-medium tracking-[-0.04em]"
                   : "max-w-3xl text-[clamp(1.65rem,4.5vw,3.15rem)]"
               )}
-              style={{ color: fullBleed ? "#fff" : "var(--text)" }}
+              style={{ color: fullBleed ? "#1d2926" : "var(--text)" }}
             >
               {title}
             </h1>
@@ -140,14 +158,15 @@ export function LandingHeroCinematic({
                 className={cn(
                   "leading-relaxed",
                   fullBleed
-                    ? "mt-5 max-w-[36rem] text-[15px] sm:mt-6 sm:text-base md:text-[17px] md:leading-[1.65]"
+                    ? "mt-14 max-w-[18rem] text-sm sm:text-[15px] md:leading-[1.7]"
                     : "mt-4 max-w-2xl text-sm sm:text-base md:mt-5"
                 )}
-                style={{ color: fullBleed ? "rgba(255,255,255,0.88)" : "color-mix(in srgb, var(--text) 78%, transparent)" }}
+                style={{ color: fullBleed ? "rgba(31,42,39,0.72)" : "color-mix(in srgb, var(--text) 78%, transparent)" }}
               >
                 {subtitle}
               </p>
             ) : null}
+            {fullBleed ? <div className="mt-10 h-px w-14 bg-[#1d2926]/55" aria-hidden /> : null}
             {!fullBleed && features.length > 0 ? (
               <ul className="mt-6 flex max-w-2xl flex-col gap-2 sm:mt-8">
                 {features.map((f) => (

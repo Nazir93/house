@@ -289,7 +289,7 @@ export function formatLeadMessage(lead: {
       total?: number;
       projectTitle?: string;
       projectSlug?: string;
-      extras?: { model3d?: boolean; constructive?: boolean; audit?: boolean };
+      extras?: { model3d?: boolean; constructive?: boolean; audit?: boolean; engineering?: boolean };
     };
     lines.push(``, `<b>Калькулятор проектирования</b>`);
     if (q.projectTitle) lines.push(`<b>Проект:</b> ${escapeHtml(q.projectTitle)}`);
@@ -303,6 +303,7 @@ export function formatLeadMessage(lead: {
         q.extras.model3d ? "3D" : null,
         q.extras.constructive ? "конструктив" : null,
         q.extras.audit ? "аудит участка" : null,
+        q.extras.engineering ? "инженерные системы" : null,
       ].filter(Boolean);
       if (bits.length) lines.push(`<b>Опции:</b> ${escapeHtml(bits.join(", "))}`);
     }

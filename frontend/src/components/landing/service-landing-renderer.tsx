@@ -12,6 +12,9 @@ import { LandingServiceSchema } from "@/components/landing/landing-service-schem
 import type { ServiceLandingDocument } from "@/lib/service-landing-schema";
 import { getPageH1 } from "@/lib/get-page-meta";
 import { loadContactConfig } from "@/lib/load-contact-config";
+import { ProjectDesignCostCalculator } from "@/components/construction/project-design-cost-calculator";
+import { ProjectTemplateViewer } from "@/components/construction/project-template-viewer";
+import { getDesignProjectPricingSettings } from "@/lib/design-project-pricing-config";
 
 export async function ServiceLandingRenderer({
   document,
@@ -22,6 +25,7 @@ export async function ServiceLandingRenderer({
   pagePath: string;
 }) {
   const contact = await loadContactConfig();
+  const designPricing = await getDesignProjectPricingSettings();
   const telephone = [contact.phoneRaw, contact.phone2Raw].filter((t) => t?.trim());
 
   const heroH1ByIndex = new Map<number, string>();
@@ -52,8 +56,32 @@ export async function ServiceLandingRenderer({
             />
           );
         }
+        if (
+          section.type === "heroCinematic" &&
+          next?.type === "designCalculator" &&
+          document.sections[i + 2]?.type === "storyTimeline"
+        ) {
+          return <LandingHeroCinematic
+            key={i}
+            title={heroH1ByIndex.get(i) ?? section.title}
+            subtitle={section.subtitle}
+            tag={section.tag}
+            features={section.features}
+            bannerImageDesktop={section.bannerImageDesktop}
+            bannerImageMobile={section.bannerImageMobile}
+            fullBleed
+          />;
+        }
         if (i > 0 && document.sections[i - 1]?.type === "heroCinematic" && section.type === "storyTimeline") {
           return null;
+        }
+        if (
+          i > 1 &&
+          document.sections[i - 2]?.type === "heroCinematic" &&
+          document.sections[i - 1]?.type === "designCalculator" &&
+          section.type === "storyTimeline"
+        ) {
+          return <ServiceStoryTimeline key={i} items={section.items} />;
         }
 
         switch (section.type) {
@@ -82,6 +110,19 @@ export async function ServiceLandingRenderer({
             );
           case "storyTimeline":
             return <ServiceStoryTimeline key={i} items={section.items} />;
+          case "designCalculator":
+            return (
+              <ProjectDesignCostCalculator
+                key={i}
+                source="individual-design"
+                defaultArea={150}
+                layout="banner"
+                showPromoLink={false}
+                pricingSettings={designPricing}
+              />
+            );
+          case "projectTemplateViewer":
+            return <ProjectTemplateViewer key={i} />;
           case "hero":
             return (
               <LandingHero

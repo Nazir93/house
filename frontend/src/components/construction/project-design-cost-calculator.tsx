@@ -2,13 +2,15 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { Check, ArrowRight } from "lucide-react";
 import { LeadMiniForm } from "@/components/construction/lead-mini-form";
 import {
   DESIGN_MAIN_DOCUMENTATION_ITEMS,
   calculateDesignProjectQuote,
   clampDesignArea,
+  DEFAULT_DESIGN_PROJECT_PRICING_SETTINGS,
   type DesignProjectExtras,
+  type DesignProjectPricingSettings,
 } from "@/lib/design-project-pricing";
 import { formatRub } from "@/lib/construction-shared";
 
@@ -22,6 +24,17 @@ const innerSurface = {
   backgroundColor: "var(--bg)",
 } as const;
 
+const EXTRA_OPTIONS = [
+  { key: "model3d", label: "3D-моделирование", priceKind: "fixed" },
+  { key: "constructive", label: "Конструктивный проект", priceKind: "area" },
+  { key: "audit", label: "Аудит участка", priceKind: "fixed" },
+  { key: "engineering", label: "Проект инженерных систем", priceKind: "area" },
+] as const satisfies ReadonlyArray<{
+  key: keyof DesignProjectExtras;
+  label: string;
+  priceKind: "fixed" | "area";
+}>;
+
 export function ProjectDesignCostCalculator({
   source,
   defaultArea = 100,
@@ -29,23 +42,28 @@ export function ProjectDesignCostCalculator({
   projectTitle,
   layout = "embed",
   showPromoLink = true,
+  pricingSettings = DEFAULT_DESIGN_PROJECT_PRICING_SETTINGS,
 }: {
   source: "individual-design" | "house-project-design";
   defaultArea?: number;
   projectSlug?: string;
   projectTitle?: string;
-  /** page — полноценный блок на /individual-design; embed — встраивание в другие страницы */
-  layout?: "page" | "embed";
+  /** banner — блок на /services/proektirovanie; page/embed — прежние встраивания */
+  layout?: "page" | "embed" | "banner";
   showPromoLink?: boolean;
+  pricingSettings?: DesignProjectPricingSettings;
 }) {
-  const [area, setArea] = useState(() => clampDesignArea(defaultArea));
+  const [areaText, setAreaText] = useState(() => String(clampDesignArea(defaultArea, pricingSettings)));
   const [extras, setExtras] = useState<DesignProjectExtras>({
-    model3d: true,
-    constructive: true,
+    model3d: false,
+    constructive: false,
     audit: false,
+    engineering: false,
   });
+  const [showLeadForm, setShowLeadForm] = useState(false);
 
-  const quote = useMemo(() => calculateDesignProjectQuote(area, extras), [area, extras]);
+  const area = useMemo(() => clampDesignArea(Number(areaText), pricingSettings), [areaText, pricingSettings]);
+  const quote = useMemo(() => calculateDesignProjectQuote(area, extras, pricingSettings), [area, extras, pricingSettings]);
 
   const calcData = useMemo(
     () => ({
@@ -58,7 +76,9 @@ export function ProjectDesignCostCalculator({
         model3d: extras.model3d,
         constructive: extras.constructive,
         audit: extras.audit,
+        engineering: extras.engineering,
       },
+      selectedExtras: EXTRA_OPTIONS.filter((option) => extras[option.key]).map((option) => option.label),
       breakdown: quote.breakdown,
       ...(projectSlug ? { projectSlug } : {}),
       ...(projectTitle ? { projectTitle } : {}),
@@ -72,7 +92,131 @@ export function ProjectDesignCostCalculator({
       : "Индивидуальное проектирование";
 
   const isPage = layout === "page";
+  const isBanner = layout === "banner";
   const optionHover = "transition hover:bg-[color-mix(in_srgb,var(--text)_5%,transparent)]";
+  const rangeProgress =
+    ((quote.area - pricingSettings.areaMin) / Math.max(pricingSettings.areaMax - pricingSettings.areaMin, 1)) * 100;
+
+  function normalizeAreaInput() {
+    setAreaText(String(clampDesignArea(Number(areaText), pricingSettings)));
+  }
+
+  if (isBanner) {
+    return (
+      <section className="bg-[#f5f2ec] px-4 py-8 sm:px-6 md:py-10">
+        <div className="mx-auto max-w-[1320px] overflow-hidden rounded-[2px] bg-[#071f1b] text-white shadow-[0_24px_80px_rgba(7,31,27,0.24)]">
+          <div className="grid min-h-[250px] grid-cols-1 divide-y divide-white/10 lg:grid-cols-[1.08fr_0.72fr_0.9fr_1fr] lg:divide-x lg:divide-y-0">
+            <div className="p-6 sm:p-8 lg:p-10">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/30">
+                Калькулятор проектирования
+              </p>
+              <h2 className="mt-7 max-w-[18rem] font-heading text-2xl font-medium leading-tight sm:text-3xl">
+                Рассчитайте стоимость проектирования
+              </h2>
+              <p className="mt-8 max-w-[16rem] text-sm leading-relaxed text-white/52">
+                Ответьте на несколько вопросов и получите предварительный расчёт стоимости проекта.
+              </p>
+            </div>
+
+            <div className="p-6 sm:p-8 lg:p-10">
+              <StepLabel number="01" title="Укажите площадь дома" />
+              <label className="mt-8 block">
+                <span className="sr-only">Укажите площадь дома</span>
+                <span className="inline-flex min-h-[56px] items-center rounded border border-white/18 bg-white/[0.03] px-4">
+                  <input
+                    type="number"
+                    min={pricingSettings.areaMin}
+                    max={pricingSettings.areaMax}
+                    value={areaText}
+                    onChange={(e) => setAreaText(e.target.value)}
+                    onBlur={normalizeAreaInput}
+                    className="w-20 bg-transparent text-3xl font-light tabular-nums text-white outline-none"
+                  />
+                  <span className="ml-3 border-l border-white/15 pl-3 text-sm text-white/55">м²</span>
+                </span>
+              </label>
+              <div className="mt-8">
+                <div className="h-1 rounded-full bg-white/18">
+                  <div className="h-full rounded-full bg-white" style={{ width: `${rangeProgress}%` }} />
+                </div>
+                <div className="mt-4 flex justify-between text-xs text-white/48">
+                  <span>{pricingSettings.areaMin} м²</span>
+                  <span>{pricingSettings.areaMax} м²</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 sm:p-8 lg:p-10">
+              <StepLabel number="02" title="Основная документация" />
+              <ul className="mt-7 space-y-3">
+                {DESIGN_MAIN_DOCUMENTATION_ITEMS.map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-sm text-white/72">
+                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-[3px] border border-white/35 bg-white/10">
+                      <Check size={12} aria-hidden />
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="p-6 sm:p-8 lg:p-10">
+              <StepLabel number="03" title="Дополнительная документация" />
+              <div className="mt-7 space-y-3">
+                {EXTRA_OPTIONS.map((option) => (
+                  <label key={option.key} className="flex cursor-pointer items-start gap-3 text-sm text-white/72">
+                    <input
+                      type="checkbox"
+                      checked={extras[option.key]}
+                      onChange={(e) => setExtras((x) => ({ ...x, [option.key]: e.target.checked }))}
+                      className="mt-0.5 h-4 w-4 rounded border-white/35 bg-transparent accent-white"
+                    />
+                    <span>
+                      <span className="block">{option.label}</span>
+                      <span className="mt-0.5 block text-xs text-white/36">
+                        {option.priceKind === "area" ? "расчёт от площади" : "фиксированная сумма"}
+                      </span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid divide-y divide-white/10 border-t border-white/10 md:grid-cols-[1fr_1fr_0.8fr_0.75fr] md:divide-x md:divide-y-0">
+            <SummaryCell label="Стоимость основной документации" value={formatRub(quote.mainDocumentation)} />
+            <SummaryCell label="Стоимость дополнительной документации" value={formatRub(quote.additionalDocumentation)} />
+            <SummaryCell label="Итого" value={formatRub(quote.total)} emphasis />
+            <div className="flex items-center justify-center p-5">
+              <button
+                type="button"
+                onClick={() => setShowLeadForm((v) => !v)}
+                className="inline-flex min-h-[46px] items-center justify-center gap-3 rounded bg-[#f4f1eb] px-6 text-sm font-semibold text-[#071f1b] transition hover:bg-white"
+              >
+                Заказать проект <ArrowRight size={16} aria-hidden />
+              </button>
+            </div>
+          </div>
+
+          {showLeadForm ? (
+            <div className="border-t border-white/10 p-6 sm:p-8">
+              <div className="max-w-md">
+                <p className="mb-4 text-sm font-semibold text-white">Заявка на проектирование</p>
+                <LeadMiniForm
+                  source={source}
+                  service={serviceLabel}
+                  calcData={calcData}
+                  submitLabel="Отправить заявку"
+                  variant="dark"
+                  bare
+                />
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <div
@@ -109,16 +253,16 @@ export function ProjectDesignCostCalculator({
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <input
             type="number"
-            min={40}
-            max={600}
+            min={pricingSettings.areaMin}
+            max={pricingSettings.areaMax}
             value={area}
-            onChange={(e) => setArea(clampDesignArea(Number(e.target.value)))}
+            onChange={(e) => setAreaText(String(clampDesignArea(Number(e.target.value), pricingSettings)))}
             className="w-full min-h-[48px] max-w-[220px] rounded-2xl border px-4 py-3 text-lg font-semibold tabular-nums outline-none ring-[var(--accent)] focus:ring-2"
             style={{ ...innerSurface, color: "var(--text)" }}
             aria-describedby="design-area-hint"
           />
           <p id="design-area-hint" className="text-xs" style={{ color: "var(--text-muted)" }}>
-            от 40 до 600 м²
+            от {pricingSettings.areaMin} до {pricingSettings.areaMax} м²
           </p>
         </div>
       </label>
@@ -167,7 +311,7 @@ export function ProjectDesignCostCalculator({
                 <span className="mt-0.5 block text-xs" style={{ color: "var(--text-muted)" }}>
                   {extras.model3d
                     ? `${formatRub(quote.breakdown.model3d)} в сумме`
-                    : `≈ ${formatRub(Math.round(area * 450))} при включении`}
+                    : `${formatRub(pricingSettings.model3dFixed)} при включении`}
                 </span>
               </span>
             </label>
@@ -186,7 +330,7 @@ export function ProjectDesignCostCalculator({
                 <span className="mt-0.5 block text-xs" style={{ color: "var(--text-muted)" }}>
                   {extras.constructive
                     ? `${formatRub(quote.breakdown.constructive)} в сумме`
-                    : `≈ ${formatRub(Math.round(area * 900))} при включении`}
+                    : `≈ ${formatRub(Math.round(area * pricingSettings.constructivePerM2))} при включении`}
                 </span>
               </span>
             </label>
@@ -203,7 +347,7 @@ export function ProjectDesignCostCalculator({
               <span>
                 <span className="font-semibold text-[var(--text)]">Аудит участка</span>
                 <span className="mt-0.5 block text-xs" style={{ color: "var(--text-muted)" }}>
-                  {extras.audit ? `${formatRub(quote.breakdown.audit)} в сумме` : `${formatRub(45_000)} при включении`}
+                  {extras.audit ? `${formatRub(quote.breakdown.audit)} в сумме` : `${formatRub(pricingSettings.auditFixed)} при включении`}
                 </span>
               </span>
             </label>
@@ -243,6 +387,28 @@ export function ProjectDesignCostCalculator({
           />
         </div>
       </div>
+    </div>
+  );
+}
+
+function StepLabel({ number, title }: { number: string; title: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="flex h-5 w-5 items-center justify-center rounded-full border border-white/30 text-[10px] font-semibold text-white/70">
+        {number}
+      </span>
+      <p className="text-xs font-medium text-white/72">{title}</p>
+    </div>
+  );
+}
+
+function SummaryCell({ label, value, emphasis = false }: { label: string; value: string; emphasis?: boolean }) {
+  return (
+    <div className="p-5 sm:p-6">
+      <p className="text-[11px] text-white/36">{label}</p>
+      <p className={`mt-3 font-heading tabular-nums ${emphasis ? "text-3xl text-white" : "text-xl text-white/90"}`}>
+        {value}
+      </p>
     </div>
   );
 }

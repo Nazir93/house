@@ -30,6 +30,12 @@ export const serviceLandingSectionSchema = z.discriminatedUnion("type", [
     items: z.array(storyTimelineItemSchema).min(1),
   }),
   z.object({
+    type: z.literal("designCalculator"),
+  }),
+  z.object({
+    type: z.literal("projectTemplateViewer"),
+  }),
+  z.object({
     type: z.literal("schema"),
     serviceName: z.string(),
     serviceDescription: z.string(),

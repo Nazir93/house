@@ -1,47 +1,79 @@
-/**
- * Ориентировочный расчёт стоимости проектирования (АР).
- * Коэффициенты можно вынести в админку позже; сейчас — константы под типовую политику.
- */
-
 export const DESIGN_MAIN_DOCUMENTATION_ITEMS = [
-  "Привязка объекта к участку (арендный / полученный)",
-  "План фундамента, разрезы и узлы",
-  "Архитектурные планы этажей, фасады, разрезы",
-  "Спецификация основных материалов и объёмов",
-  "Ведомость окон и дверей",
+  "Привязка проекта к участку",
+  "Архитектурный раздел проекта",
 ] as const;
 
 export type DesignProjectExtras = {
   model3d: boolean;
   constructive: boolean;
   audit: boolean;
+  engineering: boolean;
 };
 
-const AREA_MIN = 40;
-const AREA_MAX = 600;
+export type DesignProjectPricingSettings = {
+  areaMin: number;
+  areaMax: number;
+  mainDocumentationPerM2: number;
+  model3dFixed: number;
+  constructivePerM2: number;
+  auditFixed: number;
+  engineeringPerM2: number;
+};
 
-/** Основная документация: ₽/м² (на 100 м² ≈ 140 000 ₽ по ТЗ-примеру) */
-const MAIN_PER_M2 = 1400;
+export const DEFAULT_DESIGN_PROJECT_PRICING_SETTINGS: DesignProjectPricingSettings = {
+  areaMin: 50,
+  areaMax: 600,
+  mainDocumentationPerM2: 1400,
+  model3dFixed: 45_000,
+  constructivePerM2: 900,
+  auditFixed: 45_000,
+  engineeringPerM2: 700,
+};
 
-/** Дополнительные услуги */
-const EXTRA_3D_PER_M2 = 450;
-const EXTRA_CONSTRUCT_PER_M2 = 900;
-const EXTRA_AUDIT_FIXED = 45_000;
+function positiveNumber(raw: unknown, fallback: number): number {
+  return typeof raw === "number" && Number.isFinite(raw) && raw >= 0 ? raw : fallback;
+}
 
-export function clampDesignArea(raw: number): number {
-  if (!Number.isFinite(raw) || raw < AREA_MIN) return AREA_MIN;
-  if (raw > AREA_MAX) return AREA_MAX;
+export function normalizeDesignProjectPricingSettings(raw: unknown): DesignProjectPricingSettings {
+  const fallback = DEFAULT_DESIGN_PROJECT_PRICING_SETTINGS;
+  if (!raw || typeof raw !== "object") return fallback;
+  const data = raw as Partial<DesignProjectPricingSettings>;
+  const areaMin = Math.max(1, Math.round(positiveNumber(data.areaMin, fallback.areaMin)));
+  const areaMax = Math.max(areaMin, Math.round(positiveNumber(data.areaMax, fallback.areaMax)));
+  return {
+    areaMin,
+    areaMax,
+    mainDocumentationPerM2: Math.round(positiveNumber(data.mainDocumentationPerM2, fallback.mainDocumentationPerM2)),
+    model3dFixed: Math.round(positiveNumber(data.model3dFixed, fallback.model3dFixed)),
+    constructivePerM2: Math.round(positiveNumber(data.constructivePerM2, fallback.constructivePerM2)),
+    auditFixed: Math.round(positiveNumber(data.auditFixed, fallback.auditFixed)),
+    engineeringPerM2: Math.round(positiveNumber(data.engineeringPerM2, fallback.engineeringPerM2)),
+  };
+}
+
+export function clampDesignArea(
+  raw: number,
+  settings: DesignProjectPricingSettings = DEFAULT_DESIGN_PROJECT_PRICING_SETTINGS
+): number {
+  if (!Number.isFinite(raw) || raw < settings.areaMin) return settings.areaMin;
+  if (raw > settings.areaMax) return settings.areaMax;
   return Math.round(raw);
 }
 
-export function calculateDesignProjectQuote(areaInput: number, extras: DesignProjectExtras) {
-  const area = clampDesignArea(areaInput);
-  const mainDocumentation = Math.round(area * MAIN_PER_M2);
+export function calculateDesignProjectQuote(
+  areaInput: number,
+  extras: DesignProjectExtras,
+  settings: DesignProjectPricingSettings = DEFAULT_DESIGN_PROJECT_PRICING_SETTINGS
+) {
+  const cfg = normalizeDesignProjectPricingSettings(settings);
+  const area = clampDesignArea(areaInput, cfg);
+  const mainDocumentation = Math.round(area * cfg.mainDocumentationPerM2);
 
-  const additional3d = extras.model3d ? Math.round(area * EXTRA_3D_PER_M2) : 0;
-  const additionalConstructive = extras.constructive ? Math.round(area * EXTRA_CONSTRUCT_PER_M2) : 0;
-  const additionalAudit = extras.audit ? EXTRA_AUDIT_FIXED : 0;
-  const additionalDocumentation = additional3d + additionalConstructive + additionalAudit;
+  const additional3d = extras.model3d ? cfg.model3dFixed : 0;
+  const additionalConstructive = extras.constructive ? Math.round(area * cfg.constructivePerM2) : 0;
+  const additionalAudit = extras.audit ? cfg.auditFixed : 0;
+  const additionalEngineering = extras.engineering ? Math.round(area * cfg.engineeringPerM2) : 0;
+  const additionalDocumentation = additional3d + additionalConstructive + additionalAudit + additionalEngineering;
 
   const total = mainDocumentation + additionalDocumentation;
 
@@ -53,6 +85,7 @@ export function calculateDesignProjectQuote(areaInput: number, extras: DesignPro
       model3d: additional3d,
       constructive: additionalConstructive,
       audit: additionalAudit,
+      engineering: additionalEngineering,
     },
     total,
   };

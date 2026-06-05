@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { enrichProektirovanieLandingDocument, PROEKTROVANIE_HERO_SUBTITLE, PROEKTROVANIE_HERO_TITLE, PROEKTROVANIE_TIMELINE_ITEMS } from "@/lib/service-proektirovanie-landing";
+import {
+  enrichProektirovanieLandingDocument,
+  PROEKTROVANIE_HERO_FALLBACK_BANNER,
+  PROEKTROVANIE_HERO_SUBTITLE,
+  PROEKTROVANIE_HERO_TITLE,
+  PROEKTROVANIE_TIMELINE_ITEMS,
+} from "@/lib/service-proektirovanie-landing";
 import type { ServiceLandingDocument } from "@/lib/service-landing-schema";
 
 describe("enrichProektirovanieLandingDocument", () => {
@@ -10,7 +16,7 @@ describe("enrichProektirovanieLandingDocument", () => {
     expect(enrichProektirovanieLandingDocument("fundament", doc)).toBe(doc);
   });
 
-  it("proektirovanie: hero → cinematic + timeline", () => {
+  it("proektirovanie: hero → cinematic + calculator + timeline + viewer", () => {
     const doc: ServiceLandingDocument = {
       sections: [
         {
@@ -21,6 +27,7 @@ describe("enrichProektirovanieLandingDocument", () => {
           tag: "Тег",
           features: ["a"],
           goals: "g",
+          bannerImageDesktop: "/custom.png",
         },
         { type: "faq", serviceKey: "proektirovanie", items: [] },
       ],
@@ -30,11 +37,25 @@ describe("enrichProektirovanieLandingDocument", () => {
     if (out.sections[0]?.type === "heroCinematic") {
       expect(out.sections[0].title).toBe(PROEKTROVANIE_HERO_TITLE);
       expect(out.sections[0].subtitle).toBe(PROEKTROVANIE_HERO_SUBTITLE);
+      expect(out.sections[0].bannerImageDesktop).toBe("/custom.png");
     }
-    expect(out.sections[1]?.type).toBe("storyTimeline");
-    if (out.sections[1]?.type === "storyTimeline") {
-      expect(out.sections[1].items).toEqual(PROEKTROVANIE_TIMELINE_ITEMS);
+    expect(out.sections[1]?.type).toBe("designCalculator");
+    expect(out.sections[2]?.type).toBe("storyTimeline");
+    if (out.sections[2]?.type === "storyTimeline") {
+      expect(out.sections[2].items).toEqual(PROEKTROVANIE_TIMELINE_ITEMS);
     }
+    expect(out.sections[3]?.type).toBe("projectTemplateViewer");
     expect(out.sections.some((s) => s.type === "faq")).toBe(false);
+  });
+
+  it("proektirovanie: подставляет fallback hero, если изображения нет", () => {
+    const doc: ServiceLandingDocument = {
+      sections: [{ type: "hero", title: "T", subtitle: "S", serviceKey: "proektirovanie", tag: "", features: [], goals: "" }],
+    };
+    const out = enrichProektirovanieLandingDocument("proektirovanie", doc);
+    expect(out.sections[0]?.type).toBe("heroCinematic");
+    if (out.sections[0]?.type === "heroCinematic") {
+      expect(out.sections[0].bannerImageDesktop).toBe(PROEKTROVANIE_HERO_FALLBACK_BANNER);
+    }
   });
 });
