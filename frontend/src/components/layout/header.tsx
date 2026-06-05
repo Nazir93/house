@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { ChevronDown, Send, X } from "lucide-react";
 import { SiteHeaderBar } from "./site-header-bar";
@@ -238,12 +239,15 @@ function CircuitGrid() {
 }
 
 export function Header() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [expandedMenuSection, setExpandedMenuSection] = useState<string | null>(null);
   const { openModal } = useModal();
   const contact = useContactConfig();
   const telegramMessengerHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE) ?? "";
   const maxMessengerHref = maxChatUrlFromRawPhone(MESSENGER_CHAT_PHONE) ?? "";
+
+  const closeMenu = () => window.dispatchEvent(new Event("close-mobile-menu"));
 
   useEffect(() => {
     const handleOpenMenu = () => setIsOpen(true);
@@ -267,6 +271,11 @@ export function Header() {
       document.body.style.overflow = "";
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    setIsOpen(false);
+    setExpandedMenuSection(null);
+  }, [pathname]);
 
   return (
     <>
@@ -352,7 +361,7 @@ export function Header() {
           <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden">
             <button
               type="button"
-              onClick={() => setIsOpen(false)}
+              onClick={closeMenu}
               className="absolute right-4 top-[max(0.75rem,env(safe-area-inset-top,0px))] z-20 flex h-11 w-11 items-center justify-center rounded-full border bg-[var(--bg)]/90 shadow-lg backdrop-blur-md transition hover:border-[var(--accent)] hover:text-[var(--accent)] lg:right-6 lg:top-6"
               style={{ borderColor: "var(--border)", color: "var(--text)" }}
               aria-label="Закрыть меню"
@@ -424,7 +433,7 @@ export function Header() {
                       >
                         <FullscreenOverlayNavItems
                           section={section}
-                          onClose={() => setIsOpen(false)}
+                          onClose={closeMenu}
                           openContactModal={openModal}
                         />
                       </div>
@@ -464,7 +473,7 @@ export function Header() {
                       <div className="col-start-2 flex min-w-0 flex-col gap-2 sm:gap-2 md:gap-2.5 lg:gap-3 [@media(max-height:700px)]:max-lg:gap-1.5">
                         <FullscreenOverlayNavItems
                           section={section}
-                          onClose={() => setIsOpen(false)}
+                          onClose={closeMenu}
                           openContactModal={openModal}
                         />
                       </div>
@@ -503,7 +512,7 @@ export function Header() {
                 </div>
                 <Link
                   href="/contacts"
-                  onClick={() => setIsOpen(false)}
+                  onClick={closeMenu}
                   className="inline-flex min-h-[48px] items-center justify-center rounded-full px-6 py-3 font-heading text-sm uppercase tracking-[0.1em] transition-all duration-500 hover:scale-[1.02] sm:min-h-0 sm:px-7 sm:py-2.5 sm:text-base md:text-lg [@media(max-height:700px)]:max-lg:py-2 [@media(max-height:700px)]:max-lg:px-5"
                   style={{ backgroundColor: "var(--sale)", color: "var(--accent-contrast)" }}
                 >

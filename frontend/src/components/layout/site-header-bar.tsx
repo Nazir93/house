@@ -48,6 +48,11 @@ export function SiteHeaderBar() {
     };
   }, []);
 
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setOpenSection(null);
+  }, [pathname]);
+
   /** Плотный фон только вне главной или при поиске/меню — на баннере шапка остаётся «стеклом». */
   const headerOpaqueChrome =
     !isHomeBanner || searchOpen || openSection !== null;
