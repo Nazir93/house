@@ -36,23 +36,31 @@ fi
 echo "==> git status"
 git status --short --branch
 
-if [[ -n "$(git status --porcelain)" ]]; then
-  echo "ERROR: на VPS есть незакоммиченные изменения. Сначала разберите их, чтобы deploy не перезатёр код."
-  git status --short
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  echo "ERROR: на VPS есть незакоммиченные изменения в отслеживаемых файлах. Сначала разберите их, чтобы deploy не перезатёр код."
+  git status --short --untracked-files=no
   exit 1
 fi
 
 echo "==> git fetch origin ${BRANCH}"
 git fetch origin "$BRANCH"
 
+LOCAL_REV="$(git rev-parse HEAD)"
+REMOTE_REV="$(git rev-parse "origin/${BRANCH}")"
+
 echo "==> текущий коммит: $(git rev-parse --short HEAD)"
 echo "==> origin/${BRANCH}: $(git rev-parse --short "origin/${BRANCH}")"
 
-if [[ "$(git rev-parse HEAD)" == "$(git rev-parse "origin/${BRANCH}")" ]]; then
+if [[ "$LOCAL_REV" == "$REMOTE_REV" ]]; then
   echo "==> код уже актуален"
-else
+elif git merge-base --is-ancestor "$LOCAL_REV" "$REMOTE_REV"; then
   echo "==> git pull --ff-only origin ${BRANCH}"
   git pull --ff-only origin "$BRANCH"
+elif git merge-base --is-ancestor "$REMOTE_REV" "$LOCAL_REV"; then
+  echo "==> текущий код впереди origin/${BRANCH}; деплоим локальный HEAD"
+else
+  echo "ERROR: ветка разошлась с origin/${BRANCH}. Нужен ручной rebase/merge перед деплоем."
+  exit 1
 fi
 
 cd "$ROOT/frontend"
