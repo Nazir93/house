@@ -36,7 +36,7 @@ export function LandingHeroCinematic({
     <section
       className={cn(
         "relative isolate -mt-[var(--site-header-banner-overlap)] scroll-mt-[var(--site-header-sticky-offset)] pointer-events-none",
-        fullBleed && "bg-[#f5f2ec]"
+        fullBleed && "bg-[var(--bg)]"
       )}
       style={fullBleed ? undefined : { backgroundColor: "var(--bg)" }}
     >
@@ -98,7 +98,7 @@ export function LandingHeroCinematic({
                 className="absolute inset-0"
                 style={{
                   background:
-                    "linear-gradient(to right, #f5f2ec 0%, rgba(245,242,236,0.96) 18%, rgba(245,242,236,0.72) 38%, rgba(245,242,236,0.20) 58%, transparent 76%)",
+                    "linear-gradient(to right, var(--bg) 0%, color-mix(in srgb, var(--bg) 96%, transparent) 18%, color-mix(in srgb, var(--bg) 72%, transparent) 38%, color-mix(in srgb, var(--bg) 20%, transparent) 58%, transparent 76%)",
                 }}
                 aria-hidden
               />
@@ -106,7 +106,7 @@ export function LandingHeroCinematic({
                 className="absolute inset-0"
                 style={{
                   background:
-                    "linear-gradient(to bottom, rgba(245,242,236,0.58) 0%, transparent 22%, transparent 76%, #f5f2ec 100%)",
+                    "linear-gradient(to bottom, color-mix(in srgb, var(--bg) 58%, transparent) 0%, transparent 22%, transparent 76%, var(--bg) 100%)",
                 }}
                 aria-hidden
               />
@@ -114,7 +114,7 @@ export function LandingHeroCinematic({
                 className="absolute inset-y-0 left-0 w-[55%]"
                 style={{
                   background:
-                    "radial-gradient(circle at 18% 42%, rgba(255,255,255,0.76) 0%, rgba(245,242,236,0.88) 34%, rgba(245,242,236,0) 72%)",
+                    "radial-gradient(circle at 18% 42%, color-mix(in srgb, var(--bg) 76%, white) 0%, color-mix(in srgb, var(--bg) 88%, transparent) 34%, transparent 72%)",
                 }}
                 aria-hidden
               />
@@ -137,7 +137,7 @@ export function LandingHeroCinematic({
                   "mb-3 inline-block max-w-xl font-semibold uppercase tracking-[0.14em] sm:mb-4",
                   fullBleed ? "text-[11px] sm:text-xs" : "text-[10px] sm:text-[11px]"
                 )}
-                style={{ color: fullBleed ? "rgba(31,42,39,0.36)" : "color-mix(in srgb, var(--text) 72%, transparent)" }}
+                style={{ color: fullBleed ? "color-mix(in srgb, var(--text) 36%, transparent)" : "color-mix(in srgb, var(--text) 72%, transparent)" }}
               >
                 {tag}
               </span>
@@ -149,7 +149,7 @@ export function LandingHeroCinematic({
                   ? "max-w-[25rem] text-[clamp(2.2rem,5.2vw,4.6rem)] font-medium tracking-[-0.04em]"
                   : "max-w-3xl text-[clamp(1.65rem,4.5vw,3.15rem)]"
               )}
-              style={{ color: fullBleed ? "#1d2926" : "var(--text)" }}
+              style={{ color: "var(--text)" }}
             >
               {title}
             </h1>
@@ -161,12 +161,12 @@ export function LandingHeroCinematic({
                     ? "mt-14 max-w-[18rem] text-sm sm:text-[15px] md:leading-[1.7]"
                     : "mt-4 max-w-2xl text-sm sm:text-base md:mt-5"
                 )}
-                style={{ color: fullBleed ? "rgba(31,42,39,0.72)" : "color-mix(in srgb, var(--text) 78%, transparent)" }}
+                style={{ color: fullBleed ? "color-mix(in srgb, var(--text) 72%, transparent)" : "color-mix(in srgb, var(--text) 78%, transparent)" }}
               >
                 {subtitle}
               </p>
             ) : null}
-            {fullBleed ? <div className="mt-10 h-px w-14 bg-[#1d2926]/55" aria-hidden /> : null}
+            {fullBleed ? <div className="mt-10 h-px w-14 bg-[color-mix(in_srgb,var(--text)_55%,transparent)]" aria-hidden /> : null}
             {!fullBleed && features.length > 0 ? (
               <ul className="mt-6 flex max-w-2xl flex-col gap-2 sm:mt-8">
                 {features.map((f) => (

@@ -12,14 +12,16 @@ export function ProjectTemplateViewer() {
   const safePage = Math.min(Math.max(page, 1), TOTAL_PAGES);
 
   return (
-    <section className="bg-[#f5f2ec] px-4 pb-16 pt-8 sm:px-6 md:pb-20" onContextMenu={(e) => e.preventDefault()}>
+    <section className="px-4 pb-16 pt-8 sm:px-6 md:pb-20" style={{ backgroundColor: "var(--bg)" }} onContextMenu={(e) => e.preventDefault()}>
       <div className="mx-auto max-w-[1320px]">
         <div className="mb-6 max-w-2xl">
-          <p className="text-sm uppercase tracking-[0.16em] text-[#1d2926]/45">Шаблон проекта</p>
-          <h2 className="mt-3 font-heading text-3xl font-medium text-[#1d2926] md:text-4xl">
+          <p className="text-sm uppercase tracking-[0.16em]" style={{ color: "color-mix(in srgb, var(--text) 45%, transparent)" }}>
+            Шаблон проекта
+          </p>
+          <h2 className="mt-3 font-heading text-3xl font-medium md:text-4xl" style={{ color: "var(--text)" }}>
             Как выглядит стандартный проект
           </h2>
-          <p className="mt-4 text-sm leading-relaxed text-[#1d2926]/62">
+          <p className="mt-4 text-sm leading-relaxed" style={{ color: "color-mix(in srgb, var(--text) 62%, transparent)" }}>
             Пример альбома проектной документации, который клиент получает после проектирования. Документ можно
             листать и увеличивать прямо на странице.
           </p>
@@ -54,13 +56,12 @@ export function ProjectTemplateViewer() {
                 src={`/proektirovanie/project-template.pdf#page=${safePage}&toolbar=0&navpanes=0&scrollbar=0`}
                 title="Шаблон проекта"
                 className="h-[72vh] w-[min(92vw,920px)] border-0 bg-white"
-                sandbox="allow-same-origin"
               />
             </div>
           </div>
         </div>
 
-        <p className="mt-3 text-xs leading-relaxed text-[#1d2926]/45">
+        <p className="mt-3 text-xs leading-relaxed" style={{ color: "color-mix(in srgb, var(--text) 45%, transparent)" }}>
           Скачивание и копирование скрыты в интерфейсе настолько, насколько это возможно в браузере. Полностью
           запретить снимки экрана технически невозможно.
         </p>

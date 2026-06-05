@@ -187,7 +187,7 @@ function TimelineBeat({
   return (
     <article
       ref={articleRef}
-      className="relative flex min-h-[46svh] items-start py-8 md:py-10 lg:min-h-[360px]"
+      className="relative flex min-h-[65svh] items-start py-12 md:py-16 lg:min-h-[70svh]"
       aria-labelledby={`story-beat-title-${item.id}`}
     >
       <BeatBranchSvg
@@ -197,15 +197,19 @@ function TimelineBeat({
         dotFill={branchState.dotFill}
       />
 
-      <div className="grid w-full grid-cols-1 items-start lg:grid-cols-[minmax(220px,0.48fr)_48px_minmax(0,1.52fr)] lg:gap-x-8 xl:gap-x-10">
+      <div className="grid w-full grid-cols-1 items-start lg:grid-cols-[minmax(0,1fr)_56px_minmax(0,1fr)] lg:gap-x-8 xl:gap-x-12">
         <Reveal
           visible={show || !isRight}
           className={cn(
             "hidden min-h-0 w-full lg:flex lg:items-start lg:justify-center",
-            "lg:justify-end lg:pr-2 xl:pr-4",
+            isRight ? "lg:justify-end lg:pr-2 xl:pr-4" : "lg:justify-end lg:pr-2 xl:pr-6",
           )}
         >
-          <BeatCopy ref={copyRef} item={item} reveal={contentReveal} align="left" />
+          {isRight ? (
+            show ? <BeatMedia imageSrc={imageSrc} title={item.title} reveal={contentReveal} /> : null
+          ) : (
+            <BeatCopy ref={copyRef} item={item} reveal={contentReveal} align="right" />
+          )}
         </Reveal>
 
         <div aria-hidden className="hidden min-h-0 w-[56px] lg:block" />
@@ -214,10 +218,14 @@ function TimelineBeat({
           visible={show || isRight}
           className={cn(
             "hidden min-h-0 w-full lg:flex lg:items-start lg:justify-center",
-            "lg:justify-start lg:pl-2 xl:pl-4",
+            isRight ? "lg:justify-start lg:pl-2 xl:pl-6" : "lg:justify-start lg:pl-2 xl:pl-4",
           )}
         >
-          {show ? <BeatMedia imageSrc={imageSrc} title={item.title} reveal={contentReveal} /> : null}
+          {isRight ? (
+            <BeatCopy ref={copyRef} item={item} reveal={contentReveal} align="left" />
+          ) : show ? (
+            <BeatMedia imageSrc={imageSrc} title={item.title} reveal={contentReveal} />
+          ) : null}
         </Reveal>
 
         <div className="col-span-full lg:hidden">
@@ -228,8 +236,8 @@ function TimelineBeat({
           </div>
           {show ? (
             <div style={{ opacity: contentReveal }} className="grid gap-6">
-              <BeatCopy item={item} reveal={contentReveal} align="left" />
               <BeatMedia imageSrc={imageSrc} title={item.title} reveal={contentReveal} />
+              <BeatCopy item={item} reveal={contentReveal} align="left" />
             </div>
           ) : null}
         </div>
@@ -241,7 +249,7 @@ function TimelineBeat({
 function BeatMedia({ imageSrc, title, reveal }: { imageSrc: string; title: string; reveal: number }) {
   return (
     <div
-      className="relative mx-auto aspect-[3.05/1] w-full max-w-[820px] overflow-hidden rounded-none lg:max-w-none"
+      className="relative mx-auto aspect-[4/3] w-full max-h-[min(44svh,440px)] max-w-[620px] overflow-hidden rounded-[1.5rem] md:rounded-[1.85rem] lg:aspect-[5/4] lg:max-h-[min(48svh,480px)] lg:max-w-none"
       style={{
         opacity: reveal,
         transform: `translateY(${(1 - reveal) * 16}px) scale(${0.97 + reveal * 0.03})`,
@@ -252,7 +260,7 @@ function BeatMedia({ imageSrc, title, reveal }: { imageSrc: string; title: strin
         alt={title}
         fill
         className="object-cover"
-        sizes="(max-width: 1024px) 100vw, (max-width: 1440px) 66vw, 900px"
+        sizes="(max-width: 1024px) 100vw, (max-width: 1440px) 50vw, 640px"
       />
     </div>
   );
@@ -273,7 +281,7 @@ const BeatCopy = forwardRef(function BeatCopy(
   return (
     <div
       ref={ref}
-      className={cn("w-full max-w-[17rem] rounded-sm p-5", align === "right" ? "ml-auto text-right" : "mr-auto text-left")}
+      className={cn("w-full max-w-[34rem]", align === "right" ? "ml-auto text-right" : "mr-auto text-left")}
       style={{
         opacity: reveal,
         transform: `translateY(${(1 - reveal) * 16}px)`,
@@ -281,7 +289,7 @@ const BeatCopy = forwardRef(function BeatCopy(
     >
       {item.eyebrow ? (
         <p
-          className="mb-3 text-[15px] font-medium leading-none sm:text-base"
+          className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] sm:text-xs"
           style={{ color: "color-mix(in srgb, var(--text) 55%, transparent)" }}
         >
           {item.eyebrow}
@@ -289,13 +297,13 @@ const BeatCopy = forwardRef(function BeatCopy(
       ) : null}
       <h2
         id={`story-beat-title-${item.id}`}
-        className="font-heading text-xl font-medium leading-tight"
+        className="font-heading text-[clamp(1.75rem,3.2vw,3rem)] font-bold uppercase leading-[1.08] tracking-[0.03em]"
         style={{ color: "var(--text)" }}
       >
         {item.title}
       </h2>
       <p
-        className="mt-4 text-sm leading-relaxed"
+        className="mt-5 text-base leading-relaxed sm:text-lg md:mt-6 md:leading-[1.65]"
         style={{ color: "color-mix(in srgb, var(--text) 72%, transparent)" }}
       >
         {item.body}
@@ -391,7 +399,7 @@ export function ServiceStoryTimeline({
     <section
       ref={sectionRef}
       data-story-timeline-section
-      className={cn("relative", embedded ? "pb-0" : "-mt-px pb-10 pt-4 md:pb-14")}
+      className={cn("relative", embedded ? "pb-0" : "-mt-px pb-10 md:pb-14")}
       style={{ backgroundColor: "var(--bg)" }}
       aria-label="Этапы и направления"
     >

@@ -103,7 +103,7 @@ export function ProjectDesignCostCalculator({
 
   if (isBanner) {
     return (
-      <section className="bg-[#f5f2ec] px-4 py-8 sm:px-6 md:py-10">
+      <section className="px-4 py-8 sm:px-6 md:py-10" style={{ backgroundColor: "var(--bg)" }}>
         <div className="mx-auto max-w-[1320px] overflow-hidden rounded-[2px] bg-[#071f1b] text-white shadow-[0_24px_80px_rgba(7,31,27,0.24)]">
           <div className="grid min-h-[250px] grid-cols-1 divide-y divide-white/10 lg:grid-cols-[1.08fr_0.72fr_0.9fr_1fr] lg:divide-x lg:divide-y-0">
             <div className="p-6 sm:p-8 lg:p-10">
