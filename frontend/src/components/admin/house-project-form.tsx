@@ -108,6 +108,34 @@ function isValidJson(value: string) {
   }
 }
 
+function SaveButton({
+  className,
+  disabled,
+  onSave,
+  saved,
+  saving,
+}: {
+  className?: string;
+  disabled: boolean;
+  onSave: () => void;
+  saved: boolean;
+  saving: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSave}
+      disabled={disabled}
+      className={
+        className ??
+        "inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0F3D2E] hover:bg-[#143f32] text-white text-sm font-semibold transition-colors disabled:opacity-50"
+      }
+    >
+      <Save size={16} /> {saving ? "Сохранение..." : saved ? "Сохранено" : "Сохранить"}
+    </button>
+  );
+}
+
 export function HouseProjectForm({ initial }: { initial?: any }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -138,22 +166,6 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
   function set<K extends keyof HouseProjectFormState>(field: K, value: HouseProjectFormState[K]) {
     setSaved(false);
     setForm((prev) => ({ ...prev, [field]: value }));
-  }
-
-  function SaveButton({ className }: { className?: string }) {
-    return (
-      <button
-        type="button"
-        onClick={save}
-        disabled={saveDisabled}
-        className={
-          className ??
-          "inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0F3D2E] hover:bg-[#143f32] text-white text-sm font-semibold transition-colors disabled:opacity-50"
-        }
-      >
-        <Save size={16} /> {saving ? "Сохранение..." : saved ? "Сохранено" : "Сохранить"}
-      </button>
-    );
   }
 
   async function uploadMany(type: "render" | "plan", files: File[]) {
@@ -271,7 +283,7 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
           <h1 className="text-2xl font-bold tracking-tight">{form.id ? "Проект дома" : "Новый проект дома"}</h1>
           <p className="text-sm text-white/40 mt-1">Каталог типовых домов, фильтры и карточка проекта.</p>
         </div>
-        <SaveButton />
+        <SaveButton disabled={saveDisabled} onSave={save} saved={saved} saving={saving} />
       </div>
 
       {saved ? (
@@ -550,7 +562,13 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
             <p className="text-sm font-semibold text-white">Готово к сохранению?</p>
             <p className="mt-1 text-xs text-white/45">Дубль кнопки для длинной формы, чтобы не подниматься наверх.</p>
           </div>
-          <SaveButton className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F3D2E] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#143f32] disabled:opacity-50" />
+          <SaveButton
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F3D2E] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#143f32] disabled:opacity-50"
+            disabled={saveDisabled}
+            onSave={save}
+            saved={saved}
+            saving={saving}
+          />
         </div>
       </div>
     </div>

@@ -125,7 +125,7 @@ export function ServicesHub({
             <div className="grid gap-6 lg:grid-cols-2 lg:items-start lg:gap-8 xl:gap-10">
               <div
                 className={cn(
-                  "relative w-full overflow-hidden rounded-[22px] border border-[var(--border)] bg-white shadow-[0_20px_56px_rgba(0,0,0,0.06)]",
+                  "relative w-full overflow-hidden rounded-[22px] shadow-[0_20px_56px_rgba(0,0,0,0.06)]",
                   "aspect-[1024/682] min-h-[220px] sm:min-h-[260px] lg:min-h-[280px]",
                 )}
               >
