@@ -146,7 +146,7 @@ export function LandingHeroCinematic({
               className={cn(
                 "font-heading font-bold leading-[1.02] tracking-tight",
                 fullBleed
-                  ? "max-w-[25rem] text-[clamp(2.2rem,5.2vw,4.6rem)] font-medium tracking-[-0.04em]"
+                  ? "max-w-[25rem] text-[clamp(2.2rem,5.2vw,4.6rem)] font-bold tracking-[-0.04em]"
                   : "max-w-3xl text-[clamp(1.65rem,4.5vw,3.15rem)]"
               )}
               style={{ color: "var(--text)" }}

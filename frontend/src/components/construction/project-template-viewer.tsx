@@ -18,7 +18,7 @@ export function ProjectTemplateViewer() {
           <p className="text-sm uppercase tracking-[0.16em]" style={{ color: "color-mix(in srgb, var(--text) 45%, transparent)" }}>
             Шаблон проекта
           </p>
-          <h2 className="mt-3 font-heading text-3xl font-medium md:text-4xl" style={{ color: "var(--text)" }}>
+          <h2 className="mt-3 font-heading text-3xl font-bold md:text-4xl" style={{ color: "var(--text)" }}>
             Как выглядит стандартный проект
           </h2>
           <p className="mt-4 text-sm leading-relaxed" style={{ color: "color-mix(in srgb, var(--text) 62%, transparent)" }}>
@@ -52,11 +52,26 @@ export function ProjectTemplateViewer() {
 
           <div className="max-h-[78vh] overflow-auto bg-[#0b1412] p-4 sm:p-6">
             <div className="mx-auto w-fit origin-top transition-transform" style={{ transform: `scale(${zoom})` }}>
-              <iframe
-                src={`/proektirovanie/project-template.pdf#page=${safePage}&toolbar=0&navpanes=0&scrollbar=0`}
-                title="Шаблон проекта"
+              <object
+                data={`/proektirovanie/project-template.pdf#page=${safePage}&toolbar=0&navpanes=0&scrollbar=1`}
+                type="application/pdf"
                 className="h-[72vh] w-[min(92vw,920px)] border-0 bg-white"
-              />
+                aria-label="Шаблон проекта"
+              >
+                <div className="flex h-[72vh] w-[min(92vw,920px)] flex-col items-center justify-center gap-4 bg-white p-8 text-center text-[#071f1b]">
+                  <p className="max-w-md text-sm leading-relaxed">
+                    Браузер не смог открыть встроенный просмотр PDF. Откройте шаблон проекта в новой вкладке.
+                  </p>
+                  <a
+                    href="/proektirovanie/project-template.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-2xl bg-[#071f1b] px-5 py-3 text-sm font-semibold text-white"
+                  >
+                    Открыть PDF
+                  </a>
+                </div>
+              </object>
             </div>
           </div>
         </div>

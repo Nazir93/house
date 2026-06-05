@@ -61,18 +61,39 @@ export async function ServiceLandingRenderer({
           next?.type === "designCalculator" &&
           document.sections[i + 2]?.type === "storyTimeline"
         ) {
-          return <LandingHeroCinematic
-            key={i}
-            title={heroH1ByIndex.get(i) ?? section.title}
-            subtitle={section.subtitle}
-            tag={section.tag}
-            features={section.features}
-            bannerImageDesktop={section.bannerImageDesktop}
-            bannerImageMobile={section.bannerImageMobile}
-            fullBleed
-          />;
+          const timeline = document.sections[i + 2];
+          return timeline.type === "storyTimeline" ? (
+            <ServiceStoryScrollTrack
+              key={i}
+              hero={{
+                title: heroH1ByIndex.get(i) ?? section.title,
+                subtitle: section.subtitle,
+                tag: section.tag,
+                features: section.features,
+                bannerImageDesktop: section.bannerImageDesktop,
+                bannerImageMobile: section.bannerImageMobile,
+              }}
+              afterHero={
+                <ProjectDesignCostCalculator
+                  source="individual-design"
+                  defaultArea={150}
+                  layout="banner"
+                  showPromoLink={false}
+                  pricingSettings={designPricing}
+                />
+              }
+              timelineItems={timeline.items}
+            />
+          ) : null;
         }
         if (i > 0 && document.sections[i - 1]?.type === "heroCinematic" && section.type === "storyTimeline") {
+          return null;
+        }
+        if (
+          i > 0 &&
+          document.sections[i - 1]?.type === "heroCinematic" &&
+          section.type === "designCalculator"
+        ) {
           return null;
         }
         if (
@@ -81,7 +102,7 @@ export async function ServiceLandingRenderer({
           document.sections[i - 1]?.type === "designCalculator" &&
           section.type === "storyTimeline"
         ) {
-          return <ServiceStoryTimeline key={i} items={section.items} />;
+          return null;
         }
 
         switch (section.type) {
