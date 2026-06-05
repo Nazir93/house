@@ -104,7 +104,7 @@ export function ProjectDesignCostCalculator({
   if (isBanner) {
     return (
       <section className="px-4 py-8 sm:px-6 md:py-10" style={{ backgroundColor: "var(--bg)" }}>
-        <div className="mx-auto max-w-[1320px] overflow-hidden rounded-[2px] bg-[#071f1b] text-white shadow-[0_24px_80px_rgba(7,31,27,0.24)]">
+        <div className="mx-auto max-w-[1320px] overflow-hidden rounded-[28px] bg-[#071f1b] text-white shadow-[0_24px_80px_rgba(7,31,27,0.24)] md:rounded-[32px]">
           <div className="grid min-h-[250px] grid-cols-1 divide-y divide-white/10 lg:grid-cols-[1.08fr_0.72fr_0.9fr_1fr] lg:divide-x lg:divide-y-0">
             <div className="p-6 sm:p-8 lg:p-10">
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/30">
@@ -122,7 +122,7 @@ export function ProjectDesignCostCalculator({
               <StepLabel number="01" title="Укажите площадь дома" />
               <label className="mt-8 block">
                 <span className="sr-only">Укажите площадь дома</span>
-                <span className="inline-flex min-h-[56px] items-center rounded border border-white/18 bg-white/[0.03] px-4">
+                <span className="inline-flex min-h-[56px] items-center rounded-2xl border border-white/18 bg-white/[0.03] px-4">
                   <input
                     type="number"
                     min={pricingSettings.areaMin}
@@ -151,7 +151,7 @@ export function ProjectDesignCostCalculator({
               <ul className="mt-7 space-y-3">
                 {DESIGN_MAIN_DOCUMENTATION_ITEMS.map((item) => (
                   <li key={item} className="flex items-start gap-3 text-sm text-white/72">
-                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-[3px] border border-white/35 bg-white/10">
+                    <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-md border border-white/35 bg-white/10">
                       <Check size={12} aria-hidden />
                     </span>
                     <span>{item}</span>
@@ -169,7 +169,7 @@ export function ProjectDesignCostCalculator({
                       type="checkbox"
                       checked={extras[option.key]}
                       onChange={(e) => setExtras((x) => ({ ...x, [option.key]: e.target.checked }))}
-                      className="mt-0.5 h-4 w-4 rounded border-white/35 bg-transparent accent-white"
+                      className="mt-0.5 h-4 w-4 rounded-md border-white/35 bg-transparent accent-white"
                     />
                     <span>
                       <span className="block">{option.label}</span>
@@ -191,7 +191,7 @@ export function ProjectDesignCostCalculator({
               <button
                 type="button"
                 onClick={() => setShowLeadForm((v) => !v)}
-                className="inline-flex min-h-[46px] items-center justify-center gap-3 rounded bg-[#f4f1eb] px-6 text-sm font-semibold text-[#071f1b] transition hover:bg-white"
+                className="inline-flex min-h-[46px] items-center justify-center gap-3 rounded-2xl bg-[#f4f1eb] px-6 text-sm font-semibold text-[#071f1b] transition hover:bg-white"
               >
                 Заказать проект <ArrowRight size={16} aria-hidden />
               </button>
