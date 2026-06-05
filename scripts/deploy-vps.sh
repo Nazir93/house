@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Деплой на VPS после git push в main: pull → npm ci → Prisma → build → PM2 reload.
+# Деплой на VPS после git push в main: fetch/pull → npm ci → Prisma → build → PM2 reload.
 #
 # Личный кабинет (/account): все таблицы и enum (документы, уведомления, PHOTO_NEW и др.)
 # накатываются через prisma migrate deploy — отдельный db push не нужен.
@@ -25,10 +25,35 @@
 set -euo pipefail
 
 ROOT="${HOUSE_ROOT:-/var/www/house}"
+BRANCH="${DEPLOY_BRANCH:-main}"
 cd "$ROOT"
 
-echo "==> git pull --ff-only origin main"
-git pull --ff-only origin main
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  echo "ERROR: $ROOT не является git-репозиторием. Проверьте HOUSE_ROOT."
+  exit 1
+fi
+
+echo "==> git status"
+git status --short --branch
+
+if [[ -n "$(git status --porcelain)" ]]; then
+  echo "ERROR: на VPS есть незакоммиченные изменения. Сначала разберите их, чтобы deploy не перезатёр код."
+  git status --short
+  exit 1
+fi
+
+echo "==> git fetch origin ${BRANCH}"
+git fetch origin "$BRANCH"
+
+echo "==> текущий коммит: $(git rev-parse --short HEAD)"
+echo "==> origin/${BRANCH}: $(git rev-parse --short "origin/${BRANCH}")"
+
+if [[ "$(git rev-parse HEAD)" == "$(git rev-parse "origin/${BRANCH}")" ]]; then
+  echo "==> код уже актуален"
+else
+  echo "==> git pull --ff-only origin ${BRANCH}"
+  git pull --ff-only origin "$BRANCH"
+fi
 
 cd "$ROOT/frontend"
 
