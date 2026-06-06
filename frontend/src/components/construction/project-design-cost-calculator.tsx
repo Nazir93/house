@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type RefObject } from "react";
 import Link from "next/link";
 import { Check, ArrowRight } from "lucide-react";
 import { LeadMiniForm } from "@/components/construction/lead-mini-form";
@@ -43,6 +43,7 @@ export function ProjectDesignCostCalculator({
   layout = "embed",
   showPromoLink = true,
   pricingSettings = DEFAULT_DESIGN_PROJECT_PRICING_SETTINGS,
+  spineOriginRef,
 }: {
   source: "individual-design" | "house-project-design";
   defaultArea?: number;
@@ -52,6 +53,7 @@ export function ProjectDesignCostCalculator({
   layout?: "page" | "embed" | "banner";
   showPromoLink?: boolean;
   pricingSettings?: DesignProjectPricingSettings;
+  spineOriginRef?: RefObject<HTMLDivElement | null>;
 }) {
   const [areaText, setAreaText] = useState(() => String(clampDesignArea(defaultArea, pricingSettings)));
   const [extras, setExtras] = useState<DesignProjectExtras>({
@@ -104,7 +106,7 @@ export function ProjectDesignCostCalculator({
   if (isBanner) {
     return (
       <section className="px-4 py-8 sm:px-6 md:py-10" style={{ backgroundColor: "var(--bg)" }}>
-        <div className="mx-auto max-w-[1320px] overflow-hidden rounded-[28px] bg-[#071f1b] text-white shadow-[0_24px_80px_rgba(7,31,27,0.24)] md:rounded-[32px]">
+        <div className="relative mx-auto max-w-[1320px] overflow-hidden rounded-[28px] bg-[#071f1b] text-white shadow-[0_24px_80px_rgba(7,31,27,0.24)] md:rounded-[32px]">
           <div className="grid min-h-[250px] grid-cols-1 divide-y divide-white/10 lg:grid-cols-[1.08fr_0.72fr_0.9fr_1fr] lg:divide-x lg:divide-y-0">
             <div className="p-6 sm:p-8 lg:p-10">
               <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/30">
@@ -199,9 +201,12 @@ export function ProjectDesignCostCalculator({
           </div>
 
           {showLeadForm ? (
-            <div className="border-t border-white/10 p-6 sm:p-8">
-              <div className="max-w-md">
-                <p className="mb-4 text-sm font-semibold text-white">Заявка на проектирование</p>
+            <div className="grid gap-8 border-t border-white/10 p-6 sm:p-8 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.75fr)] lg:items-stretch">
+              <div className="max-w-xl">
+                <p className="text-sm font-semibold text-white">Заявка на проектирование</p>
+                <p className="mt-2 max-w-md text-sm leading-relaxed text-white/48">
+                  Оставьте контакты, и мы уточним задачу, состав проекта и ориентир по срокам.
+                </p>
                 <LeadMiniForm
                   source={source}
                   service={serviceLabel}
@@ -211,8 +216,31 @@ export function ProjectDesignCostCalculator({
                   bare
                 />
               </div>
+
+              <div className="rounded-[24px] border border-white/10 bg-white/[0.035] p-5 sm:p-6">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/36">
+                  Предварительный расчёт
+                </p>
+                <p className="mt-4 font-heading text-4xl font-semibold tabular-nums text-white">
+                  {formatRub(quote.total)}
+                </p>
+                <div className="mt-5 grid gap-3 border-t border-white/10 pt-5 text-sm text-white/62">
+                  <p>Площадь дома: <span className="text-white/86">{quote.area} м²</span></p>
+                  <p>Основная документация: <span className="text-white/86">{formatRub(quote.mainDocumentation)}</span></p>
+                  <p>Дополнительная документация: <span className="text-white/86">{formatRub(quote.additionalDocumentation)}</span></p>
+                </div>
+                <p className="mt-6 max-w-md text-sm leading-relaxed text-white/44">
+                  Финальную стоимость зафиксируем после короткого брифа и проверки состава документации.
+                </p>
+              </div>
             </div>
           ) : null}
+          <div
+            ref={spineOriginRef}
+            data-story-spine-origin
+            className="pointer-events-none absolute bottom-0 left-1/2 h-px w-px -translate-x-1/2"
+            aria-hidden
+          />
         </div>
       </section>
     );

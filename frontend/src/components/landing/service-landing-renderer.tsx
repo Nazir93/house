@@ -73,15 +73,16 @@ export async function ServiceLandingRenderer({
                 bannerImageDesktop: section.bannerImageDesktop,
                 bannerImageMobile: section.bannerImageMobile,
               }}
-              afterHero={
+              afterHero={(spineOriginRef) => (
                 <ProjectDesignCostCalculator
                   source="individual-design"
                   defaultArea={150}
                   layout="banner"
                   showPromoLink={false}
                   pricingSettings={designPricing}
+                  spineOriginRef={spineOriginRef}
                 />
-              }
+              )}
               timelineItems={timeline.items}
             />
           ) : null;

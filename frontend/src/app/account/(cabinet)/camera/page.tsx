@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getClientProjectIdFromSession } from "@/lib/client-session";
 import { prisma } from "@/lib/db";
+import { safeIframeUrl } from "@/lib/safe-iframe-url";
 
 export const metadata = {
   title: "Онлайн камера — личный кабинет",
@@ -16,7 +17,7 @@ export default async function AccountCameraPage() {
     select: { cameraStreamUrl: true },
   });
 
-  const url = project?.cameraStreamUrl;
+  const url = safeIframeUrl(project?.cameraStreamUrl);
 
   return (
     <div className="max-w-4xl space-y-6">

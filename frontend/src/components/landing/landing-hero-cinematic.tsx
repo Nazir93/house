@@ -166,7 +166,6 @@ export function LandingHeroCinematic({
                 {subtitle}
               </p>
             ) : null}
-            {fullBleed ? <div className="mt-10 h-px w-14 bg-[color-mix(in_srgb,var(--text)_55%,transparent)]" aria-hidden /> : null}
             {!fullBleed && features.length > 0 ? (
               <ul className="mt-6 flex max-w-2xl flex-col gap-2 sm:mt-8">
                 {features.map((f) => (

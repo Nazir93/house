@@ -219,7 +219,7 @@ export function formatLeadMessage(lead: {
   if (lead.email) lines.push(`<b>Email:</b> ${escapeHtml(lead.email)}`);
   if (lead.service) lines.push(`<b>Услуга:</b> ${escapeHtml(lead.service)}`);
   if (lead.source) lines.push(`<b>Источник:</b> ${escapeHtml(lead.source)}`);
-  if (lead.pageUrl) lines.push(`<b>Страница:</b> ${lead.pageUrl}`);
+  if (lead.pageUrl) lines.push(`<b>Страница:</b> ${escapeHtml(lead.pageUrl)}`);
 
   const rawCalc = normalizeCalcData(lead.calcData);
   if (
@@ -231,13 +231,13 @@ export function formatLeadMessage(lead: {
     "comment" in rawCalc &&
     typeof (rawCalc as { comment: unknown }).comment === "string"
   ) {
-    const p = rawCalc as { comment: string; previousLeadId?: string; kind?: string };
+    const p = rawCalc as { comment: string; previousLeadToken?: string; kind?: string };
     const label =
       p.kind === "calculator-pizza" ? "Пожелание по пицце (ориентировочный расчёт)" : "Пожелание по пицце (оффер)";
     lines.push(``, `<b>${label}</b>`);
     lines.push(escapeHtml(p.comment.slice(0, 2000)));
-    if (p.previousLeadId) {
-      lines.push(`<i>Первая заявка: ${escapeHtml(p.previousLeadId)}</i>`);
+    if (p.previousLeadToken) {
+      lines.push(`<i>Повторный комментарий к заявке</i>`);
     }
   }
 

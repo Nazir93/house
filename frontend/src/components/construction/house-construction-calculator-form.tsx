@@ -168,7 +168,7 @@ export function HouseConstructionCalculatorForm({
   hideObjectType,
   hideRoofSelector,
 }: {
-  onSuccess: (leadId: string, name: string, phone: string) => void;
+  onSuccess: (followupToken: string, name: string, phone: string) => void;
   getRecaptchaToken?: (action: string) => Promise<string>;
   heading?: ReactNode;
   /** Прайс с сервера; без пропа — загрузка через /api/calculator-config */
@@ -301,7 +301,7 @@ export function HouseConstructionCalculatorForm({
       if (response.ok) {
         const result = await response.json();
         form.reset();
-        onSuccess(result.leadId || "", data.name, data.phone);
+        onSuccess(result.followupToken || "", data.name, data.phone);
       } else {
         setSubmitError(await readLeadError(response));
       }

@@ -3,6 +3,7 @@ import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import sharp from "sharp";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
+import { validateUploadMagicBytes } from "@/lib/upload-file-validation";
 
 const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "webp", "gif", "avif", "svg"]);
 const DOCUMENT_EXT = new Set(["pdf", "xlsx", "xls", "doc", "docx", "txt", "csv", "zip", "rar"]);
@@ -109,6 +110,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const profile = formData.get("profile") === "hero" ? "hero" : "default";
+    const purpose = formData.get("purpose") === "client-document" ? "client-document" : "public";
 
     if (!file) {
       return NextResponse.json({ error: "Файл не передан" }, { status: 400 });
@@ -116,9 +118,6 @@ export async function POST(request: NextRequest) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-
-    const uploadsDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadsDir, { recursive: true });
 
     const resolved = resolveExtAndKind(file);
     if ("error" in resolved) {
@@ -138,6 +137,17 @@ export async function POST(request: NextRequest) {
     if (isDocumentType && buffer.length > MAX_DOCUMENT_BYTES) {
       return NextResponse.json({ error: `Файл слишком большой (макс. ${MAX_DOCUMENT_BYTES / 1024 / 1024} МБ)` }, { status: 400 });
     }
+
+    const magicCheck = validateUploadMagicBytes(buffer, ext, kind);
+    if (!magicCheck.ok) {
+      return NextResponse.json({ error: magicCheck.error }, { status: 400 });
+    }
+
+    const privateDocument = purpose === "client-document" && isDocumentType;
+    const uploadsDir = privateDocument
+      ? path.join(process.cwd(), "storage", "private", "client-documents")
+      : path.join(process.cwd(), "public", "uploads");
+    await mkdir(uploadsDir, { recursive: true });
 
     let baseStem = (file.name || "upload")
       .replace(/\.[^.]+$/, "")
@@ -190,7 +200,7 @@ export async function POST(request: NextRequest) {
       const finalName = `${fileName}.${ext}`;
       const filePath = path.join(uploadsDir, finalName);
       await writeFile(filePath, buffer);
-      savedPath = `/uploads/${finalName}`;
+      savedPath = privateDocument ? `/private-uploads/client-documents/${finalName}` : `/uploads/${finalName}`;
     }
 
     return NextResponse.json({ url: savedPath });

@@ -261,13 +261,13 @@ export function AccountShell({
           <div className="flex items-center gap-2 shrink-0">
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 rounded-xl p-2 sm:px-3 sm:py-2 text-xs font-semibold border transition hover:opacity-90"
+              className="hidden items-center gap-1.5 rounded-xl border p-2 text-xs font-semibold transition hover:opacity-90 lg:inline-flex lg:px-3 lg:py-2"
               style={{ borderColor: "var(--border)", color: "var(--text)" }}
               title="На сайт"
               aria-label="На сайт"
             >
               <Globe className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
-              <span className="hidden sm:inline">На сайт</span>
+              <span>На сайт</span>
             </Link>
             <ThemeToggle variant="outline" />
             <Link

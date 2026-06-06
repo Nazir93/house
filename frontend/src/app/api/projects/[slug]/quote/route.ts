@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { computeProjectQuoteForSlug } from "@/lib/project-calculator-quote-service";
+import { checkPublicApiRateLimit, rateLimitKeyFromHeaders } from "@/lib/public-api-rate-limit";
 
 const bodySchema = z.object({
   tierId: z.string().min(1),
@@ -14,6 +15,16 @@ const bodySchema = z.object({
 });
 
 export async function POST(req: Request, props: { params: Promise<{ slug: string }> }) {
+  if (
+    !checkPublicApiRateLimit(rateLimitKeyFromHeaders(req.headers), {
+      namespace: "project-quote",
+      max: 60,
+      windowMs: 10 * 60 * 1000,
+    })
+  ) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const { slug } = await props.params;
   let json: unknown;
   try {

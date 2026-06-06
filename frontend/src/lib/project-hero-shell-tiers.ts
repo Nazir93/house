@@ -8,6 +8,7 @@ import type { HeroPricingTier, HouseProjectItem } from "@/lib/construction-data"
 import { inferPartOfSoulFloors, resolveProjectRoofPitch } from "@/lib/part-of-soul-pricing";
 import {
   getHouseCalculatorCategoryParams,
+  isHouseCalculatorCategoryId,
   type HouseCalculatorCategoryId,
 } from "@/lib/house-project-calculator-engine";
 
@@ -16,7 +17,7 @@ export async function getHeroShellTiersForProject(project: HouseProjectItem): Pr
   const calculatorUi = getEffectiveCalculatorUi(project);
   const explicitCategory =
     project.calculatorCategory &&
-    ["a", "b", "c", "d", "e", "f"].includes(project.calculatorCategory) ?
+    isHouseCalculatorCategoryId(project.calculatorCategory) ?
       (project.calculatorCategory as HouseCalculatorCategoryId)
     : null;
   const explicitCategoryParams = explicitCategory ? getHouseCalculatorCategoryParams(explicitCategory) : null;

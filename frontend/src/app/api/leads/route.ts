@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { v4 as uuidv4 } from "uuid";
 import { sendTelegramNotification, formatLeadMessage } from "@/lib/telegram";
 import { sendBitrixLead } from "@/lib/bitrix";
+import { createLeadFollowupToken, verifyLeadFollowupToken } from "@/lib/lead-followup-token";
 
 function logLeadDebug(payload: Record<string, unknown>) {
   if (process.env.NODE_ENV !== "production" || process.env.LEADS_DEBUG === "1") {
@@ -11,7 +12,7 @@ function logLeadDebug(payload: Record<string, unknown>) {
   }
 }
 
-/** Второй шаг оффера: комментарий к пицце без капчи, если previousLeadId — реальная заявка */
+/** Второй шаг оффера: комментарий к пицце без капчи, если previousLeadToken — реальная свежая заявка */
 async function verifyOfferPizzaPreviousLead(calcData: unknown): Promise<boolean> {
   let obj: unknown = calcData;
   if (typeof calcData === "string") {
@@ -22,9 +23,11 @@ async function verifyOfferPizzaPreviousLead(calcData: unknown): Promise<boolean>
     }
   }
   if (!obj || typeof obj !== "object") return false;
-  const prev = (obj as { kind?: string; previousLeadId?: string }).previousLeadId;
-  if (!prev || typeof prev !== "string") return false;
-  const row = await prisma.lead.findUnique({ where: { id: prev }, select: { id: true } });
+  const prevToken = (obj as { kind?: string; previousLeadId?: string; previousLeadToken?: string }).previousLeadToken;
+  if (!prevToken || typeof prevToken !== "string") return false;
+  const leadId = verifyLeadFollowupToken(prevToken);
+  if (!leadId) return false;
+  const row = await prisma.lead.findUnique({ where: { id: leadId }, select: { id: true } });
   return Boolean(row);
 }
 
@@ -120,8 +123,8 @@ export async function POST(request: NextRequest) {
 
     const smartCaptchaSecret = process.env.YANDEX_SMARTCAPTCHA_SERVER_KEY?.trim();
     const pizzaFollowupOk =
-      (body?.source === "offer-pizza" || body?.source === "calculator-pizza") &&
-      (await verifyOfferPizzaPreviousLead(body.calcData));
+      (parsed.data.source === "offer-pizza" || parsed.data.source === "calculator-pizza") &&
+      (await verifyOfferPizzaPreviousLead(parsed.data.calcData));
 
     if (smartCaptchaSecret && parsed.data.recaptchaToken) {
       try {
@@ -156,7 +159,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = uuidv4();
-    const source = body.source || "unknown";
+    const source = parsed.data.source || "unknown";
 
     let createdLead: { id: string };
     try {
@@ -167,13 +170,15 @@ export async function POST(request: NextRequest) {
             phone: parsed.data.phone,
             email: parsed.data.email || null,
             service: parsed.data.service || null,
-            pageUrl: body.pageUrl || null,
+            pageUrl: parsed.data.pageUrl || null,
             source,
-            utmSource: body.utmSource || null,
-            utmMedium: body.utmMedium || null,
-            utmCampaign: body.utmCampaign || null,
-            utmTerm: body.utmTerm || null,
-            calcData: body.calcData || null,
+            utmSource: parsed.data.utmSource || null,
+            utmMedium: parsed.data.utmMedium || null,
+            utmCampaign: parsed.data.utmCampaign || null,
+            utmTerm: parsed.data.utmTerm || null,
+            ...(parsed.data.calcData !== undefined
+              ? { calcData: parsed.data.calcData as object }
+              : {}),
           },
         });
 
@@ -207,8 +212,8 @@ export async function POST(request: NextRequest) {
           email: parsed.data.email,
           service: parsed.data.service,
           source,
-          pageUrl: body.pageUrl,
-          calcData: body.calcData,
+          pageUrl: parsed.data.pageUrl,
+          calcData: parsed.data.calcData,
         })
       );
     } catch (tgErr) {
@@ -222,8 +227,8 @@ export async function POST(request: NextRequest) {
         email: parsed.data.email,
         service: parsed.data.service,
         source,
-        pageUrl: body.pageUrl,
-        calcData: body.calcData,
+        pageUrl: parsed.data.pageUrl,
+        calcData: parsed.data.calcData,
       });
     } catch (bitrixErr) {
       console.error("[leads] Bitrix lead sync failed:", bitrixErr);
@@ -239,8 +244,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       redirectUrl,
-      id: createdLead.id,
-      leadId: createdLead.id,
+      followupToken: createLeadFollowupToken(createdLead.id),
     });
   } catch (error) {
     console.error("[LEAD ERROR]", error);

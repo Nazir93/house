@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from "react";
 import { LandingHeroCinematic } from "@/components/landing/landing-hero-cinematic";
 import type { StoryTimelineItem } from "@/lib/service-landing-schema";
 import {
@@ -25,6 +25,17 @@ function usePrefersReducedMotion() {
 }
 
 type HeroProps = React.ComponentProps<typeof LandingHeroCinematic>;
+type AfterHeroRenderer = (spineOriginRef: RefObject<HTMLDivElement | null>) => ReactNode;
+
+function AfterHeroSlot({
+  render,
+  originRef,
+}: {
+  render: AfterHeroRenderer;
+  originRef: RefObject<HTMLDivElement | null>;
+}) {
+  return render(originRef);
+}
 
 export function ServiceStoryScrollTrack({
   hero,
@@ -33,7 +44,7 @@ export function ServiceStoryScrollTrack({
 }: {
   hero: Omit<HeroProps, "spineOriginRef">;
   timelineItems: StoryTimelineItem[];
-  afterHero?: ReactNode;
+  afterHero?: ReactNode | AfterHeroRenderer;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
   const originRef = useRef<HTMLDivElement>(null);
@@ -90,10 +101,18 @@ export function ServiceStoryScrollTrack({
     };
   }, [measure]);
 
+  const afterHeroOwnsSpineOrigin = typeof afterHero === "function";
+  const afterHeroNode =
+    afterHeroOwnsSpineOrigin && afterHero ? (
+      <AfterHeroSlot render={afterHero} originRef={originRef} />
+    ) : (
+      afterHero
+    );
+
   return (
     <div ref={trackRef} className="relative" data-story-scroll-track>
-      <LandingHeroCinematic {...hero} spineOriginRef={originRef} fullBleed />
-      {afterHero}
+      <LandingHeroCinematic {...hero} spineOriginRef={afterHeroOwnsSpineOrigin ? undefined : originRef} fullBleed />
+      {afterHeroNode}
 
       {lineLayout.maxHeight > 0 && lineLayout.height > 0 ? (
         <div

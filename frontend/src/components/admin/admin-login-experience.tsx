@@ -16,6 +16,7 @@ import { publicFormFieldClass, publicFormFieldStyle } from "@/lib/public-form-fi
 import { ShowcaseCarouselNav } from "@/components/ui/showcase-carousel-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { cn } from "@/lib/utils";
+import { safeAdminCallbackUrl } from "@/lib/safe-admin-callback-url";
 
 type AuthTab = "email" | "login";
 
@@ -66,7 +67,7 @@ const AUTO_ADVANCE_MS = 7500;
 
 function AdminLoginForm() {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/admin";
+  const callbackUrl = safeAdminCallbackUrl(searchParams.get("callbackUrl"));
 
   const [tab, setTab] = useState<AuthTab>("email");
   const [email, setEmail] = useState("");
@@ -102,8 +103,7 @@ function AdminLoginForm() {
 
     /** Только реальный успех: иначе NextAuth может дать URL на другой хост (/api/auth/signin?csrf) при ошибочном NEXTAUTH_URL. */
     if (result?.ok) {
-      const fallback = callbackUrl.startsWith("/") ? callbackUrl : "/admin";
-      let target = fallback;
+      let target = callbackUrl;
       if (result.url) {
         try {
           const u = new URL(result.url);

@@ -28,8 +28,9 @@ export async function GET(
     if (!project) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
+    const { passwordHash: _passwordHash, ...safeProject } = project;
     return NextResponse.json({
-      ...project,
+      ...safeProject,
       hasUnpublishedDraft: hasUnpublishedDraft(project),
     });
   } catch (e) {

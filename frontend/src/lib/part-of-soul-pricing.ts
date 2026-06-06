@@ -36,6 +36,12 @@ const SHELL_MATRIX: Partial<Record<`${PartOfSoulPricingFloors}_${PartOfSoulRoofP
   "1.5_triple_gas": 51_894,
   "1.5_triple_ceramic": 54_259,
   "1.5_triple_brick": 56_781,
+  "2_dual_gas": 55_446,
+  "2_dual_ceramic": 56_725,
+  "2_dual_brick": 60_299,
+  "2_triple_gas": 55_446,
+  "2_triple_ceramic": 56_725,
+  "2_triple_brick": 60_299,
   "2_quad_gas": 55_446,
   "2_quad_ceramic": 56_725,
   "2_quad_brick": 60_299,
@@ -95,7 +101,7 @@ export function inferPartOfSoulFloors(projectFloorsInt: number, override?: PartO
 export function partOfSoulRoofOptions(pf: PartOfSoulPricingFloors): PartOfSoulRoofPitch[] {
   if (pf === 1) return ["dual", "triple", "quad"];
   if (pf === 1.5) return ["dual", "triple"];
-  return ["quad"];
+  return ["dual", "triple", "quad"];
 }
 
 /**
@@ -109,6 +115,7 @@ export function resolveProjectRoofPitch(
   const choices = partOfSoulRoofOptions(pricingFloors);
   if (choices.length === 0) return "dual";
   if (projectDefault && choices.includes(projectDefault)) return projectDefault;
+  if (pricingFloors === 2) return "quad";
   return choices[0];
 }
 

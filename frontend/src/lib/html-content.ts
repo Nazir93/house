@@ -1,4 +1,5 @@
 /** Общая разметка для статей блога и HTML-блоков страниц (SEO-админка). */
+import sanitizeHtml from "sanitize-html";
 
 /**
  * Если HTML в БД сохранён с экранированием (&lt;strong&gt; вместо <strong>),
@@ -30,15 +31,49 @@ export const PAGE_INTRO_PROSE_CLASS =
   "w-full max-w-[min(100%,65ch)] text-sm sm:text-base md:text-[1.0625rem] leading-[1.65] sm:leading-relaxed text-pretty break-words hyphens-auto [overflow-wrap:anywhere] [&_p]:mb-4 [&_p:last-child]:mb-0 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:underline [&_a]:underline-offset-2 [&_a]:decoration-[var(--accent)]/60 [&_strong]:font-semibold [&_strong]:text-[var(--text)] [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg";
 
 export function sanitizeArticleHtml(html: string): string {
-  return html
-    .replace(/<script[\s>][\s\S]*?<\/script>/gi, "")
-    .replace(/<style[\s>][\s\S]*?<\/style>/gi, "")
-    .replace(/\son\w+\s*=\s*["'][^"']*["']/gi, "")
-    .replace(/\son\w+\s*=\s*[^\s>]*/gi, "")
-    .replace(/javascript\s*:/gi, "blocked:")
-    .replace(/data\s*:\s*text\/html/gi, "blocked:")
-    .replace(/<\/?(iframe|object|embed|form|input|textarea|button|select|meta|link|base|applet)[\s>][^>]*>/gi, "")
-    /** Переносы из Word/редактора внутри абзаца — в пробел, иначе «одно слово на строку» и отступы после точки */
+  return sanitizeHtml(html, {
+    allowedTags: [
+      "p",
+      "br",
+      "strong",
+      "b",
+      "em",
+      "i",
+      "u",
+      "s",
+      "ul",
+      "ol",
+      "li",
+      "blockquote",
+      "a",
+      "img",
+      "h2",
+      "h3",
+      "h4",
+      "hr",
+      "table",
+      "thead",
+      "tbody",
+      "tr",
+      "th",
+      "td",
+    ],
+    allowedAttributes: {
+      a: ["href", "target", "rel", "title"],
+      img: ["src", "alt", "title", "width", "height", "loading"],
+      th: ["colspan", "rowspan"],
+      td: ["colspan", "rowspan"],
+    },
+    allowedSchemes: ["http", "https", "mailto", "tel"],
+    allowedSchemesByTag: {
+      img: ["http", "https"],
+    },
+    transformTags: {
+      a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer" }, true),
+    },
+    disallowedTagsMode: "discard",
+  })
+    /** Переносы из Word/редактора внутри абзаца — в пробел, иначе «одно слово на строку» */
     .replace(/<br\s*\/?>/gi, " ")
     /** Убираем лишние пробелы в начале/конце абзацев после вставки из документов */
     .replace(/<p(\s[^>]*)?>\s+/gi, "<p$1>")

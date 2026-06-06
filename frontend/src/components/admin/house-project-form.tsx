@@ -364,11 +364,11 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
 
       <AdminFormSection
         title="Калькулятор на сайте"
-        subtitle="Категория дома (a–f) и корректировка цены в %. Цены коробки, фасадов и опций — в разделе админки «Калькулятор проектов»."
+        subtitle="Категория дома и корректировка цены в %. Цены коробки, фасадов и опций — в разделе админки «Калькулятор проектов»."
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label className="space-y-1">
-            <span className="block text-xs font-medium text-white/40">Категория дома (a–f)</span>
+            <span className="block text-xs font-medium text-white/40">Категория дома</span>
             <AdminSelect
               value={form.calculatorCategory || "auto"}
               onValueChange={(v) => set("calculatorCategory", v === "auto" ? "" : v)}
@@ -380,6 +380,8 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
                 { value: "d", label: "d — мансарда, двухскатная" },
                 { value: "e", label: "e — мансарда, трёхскатная" },
                 { value: "f", label: "f — 2 эт., четырёхскатная" },
+                { value: "g", label: "g — 2 эт., двухскатная (цены как f)" },
+                { value: "h", label: "h — 2 эт., трёхскатная (цены как f)" },
               ]}
               triggerClassName="rounded-xl px-3 py-2"
             />

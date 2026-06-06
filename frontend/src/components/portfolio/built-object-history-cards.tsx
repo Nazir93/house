@@ -34,11 +34,11 @@ export function BuiltObjectHistoryCards({ cards }: { cards: BuiltObjectHistoryCa
           <article
             key={card.id}
             className={cn(
-              "flex w-[min(82vw,248px)] shrink-0 snap-start flex-col rounded-xl p-3 transition-shadow duration-200 lg:p-4",
+              "flex w-[min(82vw,248px)] shrink-0 snap-start flex-col rounded-xl border p-3 shadow-[0_8px_24px_rgba(15,61,46,0.05)] transition-shadow duration-200 lg:p-4",
               "lg:w-auto lg:min-w-0 lg:self-start",
               isOpen && hasBody && "shadow-[0_4px_20px_rgb(var(--accent-rgb)/0.06)]",
             )}
-            style={{ backgroundColor: "var(--stone)" }}
+            style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
           >
             <button
               type="button"

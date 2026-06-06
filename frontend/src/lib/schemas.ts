@@ -6,6 +6,14 @@ function normalizePhoneInput(v: unknown): unknown {
   return v.replace(/[\u00a0\u202f\u2007]/g, " ").trim();
 }
 
+function jsonByteLength(value: unknown): number {
+  try {
+    return new TextEncoder().encode(JSON.stringify(value) || "").length;
+  } catch {
+    return Number.POSITIVE_INFINITY;
+  }
+}
+
 export const leadFormSchema = z.object({
   name: z
     .string()
@@ -24,10 +32,19 @@ export const leadFormSchema = z.object({
     (v) => (v === "" || v === null || v === undefined ? undefined : v),
     z.string().email("Некорректный email").optional()
   ),
-  service: z.string().optional(),
+  service: z.string().max(160).optional(),
   message: z.string().max(1000).optional(),
   honeypot: z.string().max(0, "Bot detected").optional(),
-  recaptchaToken: z.string().optional(),
+  recaptchaToken: z.string().max(4096).optional(),
+  source: z.string().trim().min(1).max(80).optional(),
+  pageUrl: z.string().trim().max(1024).optional(),
+  utmSource: z.string().trim().max(120).optional().nullable(),
+  utmMedium: z.string().trim().max(120).optional().nullable(),
+  utmCampaign: z.string().trim().max(160).optional().nullable(),
+  utmTerm: z.string().trim().max(160).optional().nullable(),
+  calcData: z.unknown().optional().refine((value) => jsonByteLength(value) <= 16_384, {
+    message: "Данные расчёта слишком большие",
+  }),
 });
 
 export type LeadFormData = z.infer<typeof leadFormSchema>;

@@ -1,6 +1,7 @@
 "use client";
 
 import { forwardRef, useState, type CSSProperties, type FormEvent } from "react";
+import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
 
 export const LeadMiniForm = forwardRef<HTMLFormElement, {
   source: string;
@@ -21,12 +22,16 @@ export const LeadMiniForm = forwardRef<HTMLFormElement, {
 }, ref) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [honeypot, setHoneypot] = useState("");
   const [status, setStatus] = useState("");
   const dark = variant === "dark";
+  const getSmartCaptchaToken = useSmartCaptchaToken();
 
   async function submit(event: FormEvent) {
     event.preventDefault();
+    if (honeypot) return;
     setStatus("Отправляем...");
+    const recaptchaToken = await getSmartCaptchaToken();
     const res = await fetch("/api/leads", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -37,6 +42,8 @@ export const LeadMiniForm = forwardRef<HTMLFormElement, {
         source,
         pageUrl: typeof window !== "undefined" ? window.location.href : "",
         calcData,
+        honeypot,
+        recaptchaToken: recaptchaToken || undefined,
       }),
     });
     const data = await res.json();
@@ -79,6 +86,14 @@ export const LeadMiniForm = forwardRef<HTMLFormElement, {
         className={inputClass}
         style={inputStyle}
         autoComplete="tel"
+      />
+      <input
+        value={honeypot}
+        onChange={(e) => setHoneypot(e.target.value)}
+        tabIndex={-1}
+        autoComplete="off"
+        className="sr-only"
+        aria-hidden
       />
       <button
         type="submit"

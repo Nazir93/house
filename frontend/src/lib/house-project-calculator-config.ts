@@ -18,6 +18,8 @@ const COEF: Record<HouseCalculatorCategoryId, CategoryCoefficients> = {
   d: { facade: 1.85, perimeter: 0.33, roof: 1.2, soffit: 0.55, gutter: 0.6, overlap: 0.55, insulation: 1.2, cross: 1.2 },
   e: { facade: 1.95, perimeter: 0.34, roof: 1.3, soffit: 0.6, gutter: 0.75, overlap: 0.55, insulation: 1.3, cross: 1.3 },
   f: { facade: 2.05, perimeter: 0.3, roof: 0.9, soffit: 0.7, gutter: 1, overlap: 0.5, insulation: 0.85, cross: 0.85 },
+  g: { facade: 2.05, perimeter: 0.3, roof: 0.9, soffit: 0.7, gutter: 1, overlap: 0.5, insulation: 0.85, cross: 0.85 },
+  h: { facade: 2.05, perimeter: 0.3, roof: 0.9, soffit: 0.7, gutter: 1, overlap: 0.5, insulation: 0.85, cross: 0.85 },
 };
 
 const SHELL: Record<HouseCalculatorCategoryId, CategoryShellPrices> = {
@@ -27,6 +29,8 @@ const SHELL: Record<HouseCalculatorCategoryId, CategoryShellPrices> = {
   d: { gas: 0, ceramic: 0, brick: 0 },
   e: { gas: 0, ceramic: 0, brick: 0 },
   f: { gas: 0, ceramic: 0, brick: 0 },
+  g: { gas: 0, ceramic: 0, brick: 0 },
+  h: { gas: 0, ceramic: 0, brick: 0 },
 };
 
 const CATEGORY_LABELS: Record<HouseCalculatorCategoryId, string> = {
@@ -36,10 +40,12 @@ const CATEGORY_LABELS: Record<HouseCalculatorCategoryId, string> = {
   d: "Мансарда, двухскатная кровля",
   e: "Мансарда, трёхскатная кровля",
   f: "2 этажа, четырёхскатная кровля",
+  g: "2 этажа, двухскатная кровля",
+  h: "2 этажа, трёхскатная кровля",
 };
 
 function buildDefaultCategories(): Record<HouseCalculatorCategoryId, HouseCalculatorCategoryDef> {
-  const ids: HouseCalculatorCategoryId[] = ["a", "b", "c", "d", "e", "f"];
+  const ids: HouseCalculatorCategoryId[] = ["a", "b", "c", "d", "e", "f", "g", "h"];
   const floorRoof: Record<HouseCalculatorCategoryId, { floors: 1 | 1.5 | 2; roof: "dual" | "triple" | "quad" }> = {
     a: { floors: 1, roof: "dual" },
     b: { floors: 1, roof: "triple" },
@@ -47,6 +53,8 @@ function buildDefaultCategories(): Record<HouseCalculatorCategoryId, HouseCalcul
     d: { floors: 1.5, roof: "dual" },
     e: { floors: 1.5, roof: "triple" },
     f: { floors: 2, roof: "quad" },
+    g: { floors: 2, roof: "dual" },
+    h: { floors: 2, roof: "triple" },
   };
   const out = {} as Record<HouseCalculatorCategoryId, HouseCalculatorCategoryDef>;
   for (const id of ids) {

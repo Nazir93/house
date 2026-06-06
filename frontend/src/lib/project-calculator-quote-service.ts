@@ -16,6 +16,7 @@ import {
 import { computeTransportSurchargeRub, normalizeTransportBands } from "@/lib/project-transport-surcharge";
 import {
   getHouseCalculatorCategoryParams,
+  isHouseCalculatorCategoryId,
   type ConstructionOptionCode,
   type EngineeringOptionCode,
   type HouseCalculatorCategoryId,
@@ -63,7 +64,7 @@ export async function computeProjectQuoteForSlug(projectSlug: string, body: Proj
 
   const explicitCategory =
     project.calculatorCategory &&
-    ["a", "b", "c", "d", "e", "f"].includes(project.calculatorCategory) ?
+    isHouseCalculatorCategoryId(project.calculatorCategory) ?
       (project.calculatorCategory as HouseCalculatorCategoryId)
     : null;
 

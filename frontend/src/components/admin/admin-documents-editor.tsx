@@ -148,6 +148,7 @@ export function AdminDocumentsEditor({
     async (file: File): Promise<string | null> => {
       const fd = new FormData();
       fd.set("file", file);
+      fd.set("purpose", "client-document");
       const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.url) {
@@ -398,7 +399,7 @@ export function AdminDocumentsEditor({
           className="flex-1 min-w-[160px] rounded-lg border border-white/[0.1] bg-white/[0.05] px-2.5 py-1.5 text-sm text-white"
           value={docUrl}
           onChange={(e) => setDocUrl(e.target.value)}
-          placeholder="/uploads/..."
+          placeholder="/private-uploads/client-documents/..."
           disabled={uploading}
         />
         <button

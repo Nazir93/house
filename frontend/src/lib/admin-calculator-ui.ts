@@ -20,6 +20,8 @@ export const CALCULATOR_CATEGORY_SHORT: Record<string, string> = {
   d: "Мансарда, двухскатная",
   e: "Мансарда, трёхскатная",
   f: "2 эт., четырёхскатная",
+  g: "2 эт., двухскатная (цены как f)",
+  h: "2 эт., трёхскатная (цены как f)",
 };
 
 export function calculatorCategoryTitle(id: string, labelRu?: string): string {

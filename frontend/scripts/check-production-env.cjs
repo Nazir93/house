@@ -86,6 +86,27 @@ if (process.env.NODE_ENV === "production") {
   );
 }
 
+const securityRecommended = [
+  ["YANDEX_SMARTCAPTCHA_SERVER_KEY", "SmartCaptcha server key для публичных форм"],
+  ["NEXT_PUBLIC_YANDEX_SMARTCAPTCHA_CLIENT_KEY", "SmartCaptcha client key для публичных форм"],
+  ["HEALTH_CHECK_SECRET", "секрет для deep health-check (/api/health?deep=1)"],
+];
+
+console.log("");
+console.log("  Рекомендуемые security-переменные:");
+for (const [key, hint] of securityRecommended) {
+  const v = process.env[key]?.trim();
+  if (!v) {
+    console.warn(`  ⚠ ${key} — не задано (${hint})`);
+  } else {
+    console.log(`  ✓ ${key} = ${key.includes("SECRET") || key.includes("KEY") ? "(скрыто)" : v}`);
+  }
+}
+
+if (process.env.E2E_ENABLED === "1") {
+  console.warn("  ⚠ E2E_ENABLED=1 — отключите на production (тестовый seed API)");
+}
+
 console.log("");
 
 if (failed) {

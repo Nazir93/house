@@ -22,6 +22,7 @@ import {
   publishedDocumentWhere,
   publishedPhotoWhere,
 } from "@/lib/client-portal-order";
+import { safeIframeUrl } from "@/lib/safe-iframe-url";
 
 export const dynamic = "force-dynamic";
 
@@ -81,6 +82,7 @@ export default async function AccountDashboardPage() {
   const currentStagesInProgress = getCurrentStagesInProgress(stagesWithMeta);
 
   const cover = project.coverImageUrl || "/images/banner-hero.png";
+  const cameraStreamUrl = safeIframeUrl(project.cameraStreamUrl);
 
   return (
     <div className="space-y-8">
@@ -163,17 +165,17 @@ export default async function AccountDashboardPage() {
         >
           <div className="flex items-center justify-between gap-2 mb-3">
             <h2 className="font-heading font-bold">Онлайн камера</h2>
-            {project.cameraStreamUrl ? (
+            {cameraStreamUrl ? (
               <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-red-600 text-white">
                 Live
               </span>
             ) : null}
           </div>
-          {project.cameraStreamUrl ? (
+          {cameraStreamUrl ? (
             <div className="space-y-3">
               <div className="relative aspect-video rounded-xl overflow-hidden bg-black/80">
                 <iframe
-                  src={project.cameraStreamUrl}
+                  src={cameraStreamUrl}
                   className="absolute inset-0 w-full h-full border-0"
                   title="Онлайн камера"
                   allow="autoplay; fullscreen"
@@ -181,7 +183,7 @@ export default async function AccountDashboardPage() {
                 />
               </div>
               <a
-                href={project.cameraStreamUrl}
+                href={cameraStreamUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm font-medium underline"

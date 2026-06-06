@@ -18,6 +18,8 @@ const TZ_SHELL_PRICES: Record<HouseCalculatorCategoryId, Record<PartOfSoulWallMa
   d: { gas: 50_890, ceramic: 53_078, brick: 55_409 },
   e: { gas: 51_894, ceramic: 54_259, brick: 56_781 },
   f: { gas: 55_446, ceramic: 56_725, brick: 60_299 },
+  g: { gas: 55_446, ceramic: 56_725, brick: 60_299 },
+  h: { gas: 55_446, ceramic: 56_725, brick: 60_299 },
 };
 
 const TZ_FACADE_PRICES: Record<PartOfSoulFacadeVariant, number> = {
@@ -197,7 +199,7 @@ export async function seedCalculatorCatalog(
     const o = C.construction[slug];
     const pricePerUnit = knownConstructionPrice(slug, o.price);
     const allowed: string[] =
-      slug === "monolithic_stairs" || slug === "monolithic_overlap" ? ["d", "e", "f"] : [];
+      slug === "monolithic_stairs" || slug === "monolithic_overlap" ? ["d", "e", "f", "g", "h"] : [];
     await prisma.calculatorOption.upsert({
       where: { slug },
       create: {

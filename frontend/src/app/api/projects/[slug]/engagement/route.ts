@@ -9,6 +9,7 @@ import {
   ENGAGEMENT_VIEW_COOKIE_MAX_AGE,
   resolveHouseProjectEngagement,
 } from "@/lib/house-project-engagement";
+import { checkPublicApiRateLimit, rateLimitKeyFromHeaders } from "@/lib/public-api-rate-limit";
 import { revalidateTagWithProfile } from "@/lib/revalidate-tag";
 
 export const dynamic = "force-dynamic";
@@ -49,6 +50,16 @@ export async function POST(
   request: NextRequest,
   context: { params: Promise<{ slug: string }> },
 ) {
+  if (
+    !checkPublicApiRateLimit(rateLimitKeyFromHeaders(request.headers), {
+      namespace: "project-engagement",
+      max: 120,
+      windowMs: 10 * 60 * 1000,
+    })
+  ) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const { slug } = await context.params;
   const row = await prisma.houseProject.findFirst({
     where: { slug, published: true },

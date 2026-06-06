@@ -15,6 +15,16 @@ describe("buildPublicCatalog", () => {
     expect(stairs?.allowed).toBe(true);
   });
 
+  it("allows two-floor dual/triple roof categories to use two-floor construction options", () => {
+    for (const categoryId of ["g", "h"] as const) {
+      const cat = buildPublicCatalog(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG, categoryId);
+      const stairs = cat.construction.find((o) => o.slug === "monolithic_stairs");
+      const overlap = cat.construction.find((o) => o.slug === "monolithic_overlap");
+      expect(stairs?.allowed).toBe(true);
+      expect(overlap?.allowed).toBe(true);
+    }
+  });
+
   it("respects disabledOptionIds from project overrides", () => {
     const cat = buildPublicCatalog(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG, "d", ["electric"]);
     const electric = cat.engineering.find((o) => o.slug === "electric");

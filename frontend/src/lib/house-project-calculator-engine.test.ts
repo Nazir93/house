@@ -39,6 +39,14 @@ const C = {
       ...DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG.categories.f,
       shellPrices: { gas: 55_446, ceramic: 56_725, brick: 60_299 },
     },
+    g: {
+      ...DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG.categories.g,
+      shellPrices: { gas: 55_446, ceramic: 56_725, brick: 60_299 },
+    },
+    h: {
+      ...DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG.categories.h,
+      shellPrices: { gas: 55_446, ceramic: 56_725, brick: 60_299 },
+    },
   },
   facades: {
     ...structuredClone(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG.facades),
@@ -149,6 +157,8 @@ describe("house-project-calculator-engine (TZ)", () => {
       d: { facade: 1.85, perimeter: 0.33, roof: 1.2, soffit: 0.55, gutter: 0.6, overlap: 0.55, insulation: 1.2, cross: 1.2 },
       e: { facade: 1.95, perimeter: 0.34, roof: 1.3, soffit: 0.6, gutter: 0.75, overlap: 0.55, insulation: 1.3, cross: 1.3 },
       f: { facade: 2.05, perimeter: 0.3, roof: 0.9, soffit: 0.7, gutter: 1, overlap: 0.5, insulation: 0.85, cross: 0.85 },
+      g: { facade: 2.05, perimeter: 0.3, roof: 0.9, soffit: 0.7, gutter: 1, overlap: 0.5, insulation: 0.85, cross: 0.85 },
+      h: { facade: 2.05, perimeter: 0.3, roof: 0.9, soffit: 0.7, gutter: 1, overlap: 0.5, insulation: 0.85, cross: 0.85 },
     });
   });
 
@@ -248,6 +258,8 @@ describe("house-project-calculator-engine (TZ)", () => {
       d: { gas: 50_890, ceramic: 53_078, brick: 55_409 },
       e: { gas: 51_894, ceramic: 54_259, brick: 56_781 },
       f: { gas: 55_446, ceramic: 56_725, brick: 60_299 },
+      g: { gas: 55_446, ceramic: 56_725, brick: 60_299 },
+      h: { gas: 55_446, ceramic: 56_725, brick: 60_299 },
     };
     for (const [id, prices] of Object.entries(expected)) {
       expect(C.categories[id as keyof typeof C.categories].shellPrices).toEqual(prices);
@@ -509,10 +521,21 @@ describe("house-project-calculator-engine (TZ)", () => {
   it("resolveHouseCalculatorCategory из этажности и кровли", () => {
     expect(resolveHouseCalculatorCategory({ floors: 1, roof: "dual" })).toBe("a");
     expect(resolveHouseCalculatorCategory({ floors: 2, roof: "quad" })).toBe("f");
+    expect(resolveHouseCalculatorCategory({ floors: 2, roof: "dual" })).toBe("g");
+    expect(resolveHouseCalculatorCategory({ floors: 2, roof: "triple" })).toBe("h");
   });
 
   it("явная категория b задаёт трёхскатную кровлю для отображения и расчёта", () => {
     expect(getHouseCalculatorCategoryParams("b")).toEqual({ floors: 1, roof: "triple" });
+  });
+
+  it("двухэтажные двух-/трёхскатные категории используют цены и коэффициенты категории f", () => {
+    expect(getHouseCalculatorCategoryParams("g")).toEqual({ floors: 2, roof: "dual" });
+    expect(getHouseCalculatorCategoryParams("h")).toEqual({ floors: 2, roof: "triple" });
+    expect(C.categories.g.coefficients).toEqual(C.categories.f.coefficients);
+    expect(C.categories.h.coefficients).toEqual(C.categories.f.coefficients);
+    expect(C.categories.g.shellPrices).toEqual(C.categories.f.shellPrices);
+    expect(C.categories.h.shellPrices).toEqual(C.categories.f.shellPrices);
   });
 
   it("§8 матрица цен коробки (6 категорий × газобетон)", () => {
@@ -523,6 +546,8 @@ describe("house-project-calculator-engine (TZ)", () => {
       d: 50_890,
       e: 51_894,
       f: 55_446,
+      g: 55_446,
+      h: 55_446,
     };
     for (const [id, price] of Object.entries(expected)) {
       const cat = C.categories[id as keyof typeof C.categories];

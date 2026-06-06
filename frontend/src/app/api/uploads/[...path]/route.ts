@@ -24,6 +24,7 @@ const MIME: Record<string, string> = {
 };
 
 const VIDEO_EXT = new Set([".mp4", ".webm", ".mov", ".mkv", ".m4v", ".avi", ".ogv"]);
+const PRIVATE_DOCUMENT_EXT = new Set([".pdf", ".doc", ".docx", ".xls", ".xlsx", ".zip", ".rar"]);
 
 type RangeResult =
   | { kind: "range"; start: number; end: number }
@@ -92,6 +93,9 @@ export async function GET(request: NextRequest, props: { params: Promise<{ path:
 
     const size = info.size;
     const ext = path.extname(filePath).toLowerCase();
+    if (PRIVATE_DOCUMENT_EXT.has(ext)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
     const contentType = MIME[ext] || "application/octet-stream";
     const rangeResult = parseByteRange(request.headers.get("range"), size);
 

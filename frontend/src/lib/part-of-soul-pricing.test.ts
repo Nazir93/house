@@ -21,7 +21,7 @@ describe("part-of-soul-pricing", () => {
   it("partOfSoulRoofOptions: допустимые кровли по этажности", () => {
     expect(partOfSoulRoofOptions(1)).toEqual(["dual", "triple", "quad"]);
     expect(partOfSoulRoofOptions(1.5)).toEqual(["dual", "triple"]);
-    expect(partOfSoulRoofOptions(2)).toEqual(["quad"]);
+    expect(partOfSoulRoofOptions(2)).toEqual(["dual", "triple", "quad"]);
   });
 
   it("resolveProjectRoofPitch: defaultRoof из проекта или первая допустимая", () => {

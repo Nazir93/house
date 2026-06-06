@@ -25,5 +25,7 @@ describe("admin-calculator-ui (админка калькулятора)", () => 
     expect(calculatorCategoryTitle("a")).toContain("Категория a");
     expect(calculatorCategoryTitle("a")).toContain("двухскатная");
     expect(calculatorCategoryTitle("f", "2 этажа")).toContain("2 этажа");
+    expect(calculatorCategoryTitle("g")).toContain("2 эт., двухскатная");
+    expect(calculatorCategoryTitle("h")).toContain("2 эт., трёхскатная");
   });
 });

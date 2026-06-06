@@ -26,6 +26,7 @@ import {
 import { resolveProjectCategory } from "@/lib/house-project-calculator-quote";
 import {
   getHouseCalculatorCategoryParams,
+  isHouseCalculatorCategoryId,
   type HouseCalculatorCategoryId,
 } from "@/lib/house-project-calculator-engine";
 import { resolveProjectPriceOffer } from "@/lib/project-price-offer";
@@ -70,7 +71,7 @@ export function HouseProjectDetailContent({
     () => {
       if (
         project.calculatorCategory &&
-        ["a", "b", "c", "d", "e", "f"].includes(project.calculatorCategory)
+        isHouseCalculatorCategoryId(project.calculatorCategory)
       ) {
         return getHouseCalculatorCategoryParams(project.calculatorCategory as HouseCalculatorCategoryId).floors;
       }
@@ -78,11 +79,11 @@ export function HouseProjectDetailContent({
     },
     [project.calculatorCategory, project.floors, posCfg?.pricingFloors]
   );
-  /** Явная категория a–f важнее старого calculatorJson.partOfSoul.defaultRoof. */
+  /** Явная категория калькулятора важнее старого calculatorJson.partOfSoul.defaultRoof. */
   const roofPitch = useMemo<PartOfSoulRoofPitch>(() => {
     if (
       project.calculatorCategory &&
-      ["a", "b", "c", "d", "e", "f"].includes(project.calculatorCategory)
+      isHouseCalculatorCategoryId(project.calculatorCategory)
     ) {
       return getHouseCalculatorCategoryParams(project.calculatorCategory as HouseCalculatorCategoryId).roof;
     }
@@ -104,7 +105,7 @@ export function HouseProjectDetailContent({
   const calculatorCategoryId = useMemo((): HouseCalculatorCategoryId | null => {
     const explicit =
       project.calculatorCategory &&
-      ["a", "b", "c", "d", "e", "f"].includes(project.calculatorCategory) ?
+      isHouseCalculatorCategoryId(project.calculatorCategory) ?
         (project.calculatorCategory as HouseCalculatorCategoryId)
       : null;
     return resolveProjectCategory({

@@ -14,20 +14,19 @@ export function ProjectTemplateViewer() {
   return (
     <section className="px-4 pb-16 pt-8 sm:px-6 md:pb-20" style={{ backgroundColor: "var(--bg)" }} onContextMenu={(e) => e.preventDefault()}>
       <div className="mx-auto max-w-[1320px]">
-        <div className="mb-6 max-w-2xl">
+        <div className="mb-6 max-w-4xl">
           <p className="text-sm uppercase tracking-[0.16em]" style={{ color: "color-mix(in srgb, var(--text) 45%, transparent)" }}>
             Шаблон проекта
           </p>
-          <h2 className="mt-3 font-heading text-3xl font-bold md:text-4xl" style={{ color: "var(--text)" }}>
+          <h2
+            className="mt-3 max-w-[820px] text-balance font-heading text-[clamp(2rem,5.2vw,4.75rem)] font-bold leading-[0.96] tracking-[-0.045em]"
+            style={{ color: "var(--text)" }}
+          >
             Как выглядит стандартный проект
           </h2>
-          <p className="mt-4 text-sm leading-relaxed" style={{ color: "color-mix(in srgb, var(--text) 62%, transparent)" }}>
-            Пример альбома проектной документации, который клиент получает после проектирования. Документ можно
-            листать и увеличивать прямо на странице.
-          </p>
         </div>
 
-        <div className="overflow-hidden rounded-sm bg-[#071f1b] shadow-[0_24px_80px_rgba(7,31,27,0.24)]">
+        <div className="overflow-hidden rounded-[28px] bg-[#071f1b] shadow-[0_24px_80px_rgba(7,31,27,0.24)] md:rounded-[32px]">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3 text-white sm:px-5">
             <div className="text-sm text-white/70">
               Страница {safePage} / {TOTAL_PAGES}
@@ -55,10 +54,10 @@ export function ProjectTemplateViewer() {
               <object
                 data={`/proektirovanie/project-template.pdf#page=${safePage}&toolbar=0&navpanes=0&scrollbar=1`}
                 type="application/pdf"
-                className="h-[72vh] w-[min(92vw,920px)] border-0 bg-white"
+                className="h-[72vh] w-[min(92vw,920px)] overflow-hidden rounded-2xl border-0 bg-white"
                 aria-label="Шаблон проекта"
               >
-                <div className="flex h-[72vh] w-[min(92vw,920px)] flex-col items-center justify-center gap-4 bg-white p-8 text-center text-[#071f1b]">
+                <div className="flex h-[72vh] w-[min(92vw,920px)] flex-col items-center justify-center gap-4 rounded-2xl bg-white p-8 text-center text-[#071f1b]">
                   <p className="max-w-md text-sm leading-relaxed">
                     Браузер не смог открыть встроенный просмотр PDF. Откройте шаблон проекта в новой вкладке.
                   </p>
@@ -76,10 +75,6 @@ export function ProjectTemplateViewer() {
           </div>
         </div>
 
-        <p className="mt-3 text-xs leading-relaxed" style={{ color: "color-mix(in srgb, var(--text) 45%, transparent)" }}>
-          Скачивание и копирование скрыты в интерфейсе настолько, насколько это возможно в браузере. Полностью
-          запретить снимки экрана технически невозможно.
-        </p>
       </div>
     </section>
   );

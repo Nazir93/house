@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { DEFAULT_NEW_DOCUMENT_SIGNATURE_STATUS } from "@/lib/client-document-admin-patch";
 import { draftDocumentWhere, touchDraftSavedAt } from "@/lib/client-project-draft-media";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
+import { isAllowedClientDocumentUrl } from "@/lib/upload-file-validation";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +45,17 @@ export async function POST(
 
     if (items.length === 0) {
       return NextResponse.json({ error: "filename and url required" }, { status: 400 });
+    }
+
+    const invalidUrl = items.find((item) => !isAllowedClientDocumentUrl(item.url));
+    if (invalidUrl) {
+      return NextResponse.json(
+        {
+          error:
+            "URL документа должен указывать на /private-uploads/client-documents/… Загрузите файл через форму, а не public /uploads.",
+        },
+        { status: 400 }
+      );
     }
 
     const startOrder = await nextDocumentOrder(projectId);
