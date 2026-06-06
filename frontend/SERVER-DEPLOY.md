@@ -153,6 +153,25 @@ NextAuth строит CSRF и cookie от **`NEXTAUTH_URL`**. Если в `.env`
 
 Полный список переменных и смысл каждой — **`frontend/.env.example`** и **`DEPLOY-SERVER.md`**.
 
+## Security Checklist
+
+- В production заданы `NEXTAUTH_SECRET`, `ADMIN_SECRET`, `YANDEX_SMARTCAPTCHA_SERVER_KEY`, `NEXT_PUBLIC_YANDEX_SMARTCAPTCHA_CLIENT_KEY` и `HEALTH_CHECK_SECRET`.
+- `E2E_ENABLED=1` не включён на production: тестовый seed API должен быть доступен только в dev/CI.
+- Клиентские документы загружаются как `/private-uploads/client-documents/...` и скачиваются только через `/api/client/documents/:id/download`.
+- Nginx/прокси передаёт `X-Forwarded-Proto` и `Host`; HTTPS включён, HSTS отдаётся приложением.
+- CSP сейчас включён как `Content-Security-Policy-Report-Only`; после проверки карт, SmartCaptcha, аналитики и камер можно переводить в enforced `Content-Security-Policy`.
+
+## PWA (установка на экран)
+
+- PWA **включается только в production** (`npm run build` + `next start` / PM2). В `next dev` service worker отключён.
+- Manifest: `https://ВАШ_ДОМЕН/manifest.webmanifest`
+- Service worker: `https://ВАШ_ДОМЕН/serwist/sw.js` (network-first: HTML и API из сети, кэш статики).
+- После деплоя проверка: Chrome DevTools → **Application** → Manifest + Service Workers, или Lighthouse → **Installable**.
+- Иконки PWA: `public/icons/icon-192.png`, `icon-512.png`, `apple-touch-icon.png`. Перегенерация из `src/app/icon.svg`:
+  ```bash
+  cd frontend && node scripts/generate-pwa-icons.mjs
+  ```
+
 ## Ваши уточнения (этот VPS)
 
 Сервер: `7767362-mb967823` (из приглашения shell — при смене хоста обновите).

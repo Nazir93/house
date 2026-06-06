@@ -1,3 +1,22 @@
+import { withSerwist } from "@serwist/turbopack";
+
+const cspReportOnly = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://smartcaptcha.yandexcloud.net https://*.yandex.ru https://*.yandex.net https://*.yandex.com https://api-maps.yandex.ru",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https: http://localhost http://127.0.0.1",
+  "font-src 'self' data:",
+  "connect-src 'self' https://api.telegram.org https://smartcaptcha.yandexcloud.net https://*.yandex.ru https://*.yandex.net https://*.yandex.com https://*.bitrix24.ru https://*.bitrix24.com",
+  "frame-src 'self' https://smartcaptcha.yandexcloud.net https://*.yandex.ru https://*.yandex.net https://*.yandex.com https://rtsp.me https://*.rtsp.me https://ivideon.com https://*.ivideon.com",
+  "media-src 'self' blob:",
+  "worker-src 'self' blob:",
+  "upgrade-insecure-requests",
+].join("; ");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
@@ -67,10 +86,18 @@ const nextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
+          {
+            key: "Content-Security-Policy-Report-Only",
+            value: cspReportOnly,
+          },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=31536000; includeSubDomains",
+          },
         ],
       },
     ];
   },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);

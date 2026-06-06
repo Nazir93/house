@@ -3,9 +3,10 @@ import "@fontsource/montserrat/500.css";
 import "@fontsource/montserrat/700.css";
 import "./globals.css";
 
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 
+import { PwaSerwistProvider } from "@/components/pwa/serwist-provider";
 import { SiteShell } from "@/components/layout/site-shell";
 import { SessionProvider } from "@/components/admin/session-provider";
 import { ThemeProvider } from "@/lib/theme-context";
@@ -16,6 +17,7 @@ import { AnalyticsScripts } from "@/components/seo/analytics";
 import { JsonLd } from "@/components/seo/json-ld";
 import { ContactConfigProvider } from "@/lib/contact-config-context";
 import { loadContactConfig } from "@/lib/load-contact-config";
+import { PWA_ICON_PATHS, PWA_THEME_COLORS } from "@/lib/pwa-config";
 
 function buildSiteVerification(): Metadata["verification"] | undefined {
   const google = process.env.GOOGLE_SITE_VERIFICATION?.trim();
@@ -35,6 +37,15 @@ const siteVerification = buildSiteVerification();
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  applicationName: SITE_NAME,
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: SITE_NAME,
+  },
+  icons: {
+    apple: [{ url: PWA_ICON_PATHS.appleTouch, sizes: "180x180", type: "image/png" }],
+  },
   title: {
     default: `${SITE_NAME} — строительство загородных домов под ключ в ${CITY}`,
     template: `%s | ${SITE_NAME}`,
@@ -67,6 +78,18 @@ export const metadata: Metadata = {
   ...(siteVerification ? { verification: siteVerification } : {}),
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  maximumScale: 5,
+  colorScheme: "light dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: PWA_THEME_COLORS.light },
+    { media: "(prefers-color-scheme: dark)", color: PWA_THEME_COLORS.dark },
+  ],
+};
+
 export default async function RootLayout({
   children,
 }: {
@@ -76,9 +99,7 @@ export default async function RootLayout({
   return (
     <html lang="ru" suppressHydrationWarning>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
-        <meta name="color-scheme" content="light dark" />
-        <meta name="theme-color" content="#F6F6F4" />
+        <meta name="theme-color" content={PWA_THEME_COLORS.light} />
         <meta name="format-detection" content="telephone=no" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <JsonLd />
@@ -87,15 +108,17 @@ export default async function RootLayout({
         <Script id="house-theme-init" strategy="beforeInteractive">
           {`(function(){try{var k="house-theme";var t=localStorage.getItem(k);var pref=(t==="light"||t==="dark"||t==="system")?t:"system";var sys=window.matchMedia("(prefers-color-scheme: dark)").matches;var resolved=pref==="system"?(sys?"dark":"light"):pref;document.documentElement.setAttribute("data-theme",resolved);document.documentElement.style.colorScheme=resolved;}catch(e){var sys=window.matchMedia("(prefers-color-scheme: dark)").matches;var resolved=sys?"dark":"light";document.documentElement.setAttribute("data-theme",resolved);document.documentElement.style.colorScheme=resolved;}})();`}
         </Script>
-        <ThemeProvider>
-          <SessionProvider>
-            <ContactConfigProvider value={contactConfig}>
-              <ModalProvider>
-                <SiteShell>{children}</SiteShell>
-              </ModalProvider>
-            </ContactConfigProvider>
-          </SessionProvider>
-        </ThemeProvider>
+        <PwaSerwistProvider>
+          <ThemeProvider>
+            <SessionProvider>
+              <ContactConfigProvider value={contactConfig}>
+                <ModalProvider>
+                  <SiteShell>{children}</SiteShell>
+                </ModalProvider>
+              </ContactConfigProvider>
+            </SessionProvider>
+          </ThemeProvider>
+        </PwaSerwistProvider>
         <AnalyticsScripts />
       </body>
     </html>
