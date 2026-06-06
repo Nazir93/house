@@ -1,5 +1,6 @@
 import { LandingHero } from "@/components/landing/landing-hero";
 import { LandingHeroCinematic } from "@/components/landing/landing-hero-cinematic";
+import { ProektirovanieStoryScrollSection } from "@/components/landing/proektirovanie-story-scroll-section";
 import { ServiceStoryScrollTrack } from "@/components/landing/service-story-scroll-track";
 import { ServiceStoryTimeline } from "@/components/landing/service-story-timeline";
 import { LandingShowcase } from "@/components/landing/landing-showcase";
@@ -63,7 +64,7 @@ export async function ServiceLandingRenderer({
         ) {
           const timeline = document.sections[i + 2];
           return timeline.type === "storyTimeline" ? (
-            <ServiceStoryScrollTrack
+            <ProektirovanieStoryScrollSection
               key={i}
               hero={{
                 title: heroH1ByIndex.get(i) ?? section.title,
@@ -73,16 +74,7 @@ export async function ServiceLandingRenderer({
                 bannerImageDesktop: section.bannerImageDesktop,
                 bannerImageMobile: section.bannerImageMobile,
               }}
-              afterHero={(spineOriginRef) => (
-                <ProjectDesignCostCalculator
-                  source="individual-design"
-                  defaultArea={150}
-                  layout="banner"
-                  showPromoLink={false}
-                  pricingSettings={designPricing}
-                  spineOriginRef={spineOriginRef}
-                />
-              )}
+              pricingSettings={designPricing}
               timelineItems={timeline.items}
             />
           ) : null;
