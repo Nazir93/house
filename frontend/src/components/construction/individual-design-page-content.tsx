@@ -50,7 +50,7 @@ export function IndividualDesignPageContent() {
           aria-hidden
         />
 
-        <div className="container relative mx-auto max-w-6xl px-4 pb-10 pt-28 sm:px-5 sm:pb-14 sm:pt-32 md:pb-16">
+        <div className="page-top-offset container relative mx-auto max-w-6xl px-4 pb-10 sm:px-5 sm:pb-14 md:pb-16">
           <span
             className="inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em]"
             style={{

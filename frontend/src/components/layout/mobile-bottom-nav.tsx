@@ -44,15 +44,10 @@ export function MobileBottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 lg:hidden safe-bottom"
+      className="mobile-bottom-nav-shell fixed inset-x-0 bottom-0 z-50 lg:hidden pointer-events-none"
       aria-label="Основные разделы"
-      style={{
-        borderTop: "1px solid var(--border)",
-        backgroundColor: "color-mix(in srgb, var(--card-bg) 94%, transparent)",
-        boxShadow: "0 -8px 32px rgba(0, 0, 0, 0.06)",
-      }}
     >
-      <div className="mx-auto flex max-w-lg items-stretch justify-around px-1 pb-[env(safe-area-inset-bottom,0px)] pt-1">
+      <div className="mobile-bottom-nav-bar pointer-events-auto mx-auto flex max-w-md items-center justify-around gap-1 px-1">
         {NAV_ITEMS.map(({ href, label, Icon, isActive }) => {
           const active = isActive(pathname);
 
@@ -60,26 +55,27 @@ export function MobileBottomNav() {
             <Link
               key={href}
               href={href}
-              className="flex min-h-[52px] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 transition-colors duration-200 touch-manipulation"
-              style={{
-                color: active ? "var(--accent)" : "var(--text-muted)",
-              }}
+              className="flex min-w-0 flex-1 flex-col items-center justify-center gap-1 py-0.5 transition-colors duration-200 touch-manipulation"
             >
-              <span
-                className="flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-200"
-                style={{
-                  backgroundColor: active ? "rgba(15, 61, 46, 0.12)" : "transparent",
-                }}
-              >
+              <span className="relative flex h-10 w-10 items-center justify-center">
+                <span
+                  className={`absolute inset-0 rounded-2xl ${
+                    active
+                      ? "mobile-bottom-nav-icon-glow"
+                      : "mobile-bottom-nav-icon-base"
+                  }`}
+                  aria-hidden
+                />
                 <Icon
                   size={20}
-                  strokeWidth={active ? 2.25 : 2}
-                  className="shrink-0"
+                  strokeWidth={active ? 2.35 : 2.1}
+                  className="relative shrink-0 drop-shadow-[0_1px_2px_rgba(0,0,0,0.12)]"
+                  style={{ color: active ? "var(--accent)" : "var(--text)" }}
                   aria-hidden
                 />
               </span>
               <span
-                className="max-w-full truncate text-[10px] font-semibold leading-tight tracking-[0.02em] sm:text-[11px]"
+                className="max-w-full truncate text-[10px] font-semibold leading-none tracking-[0.01em]"
                 style={{ color: active ? "var(--accent)" : "var(--text-muted)" }}
               >
                 {label}

@@ -13,6 +13,7 @@ describe("client-notification-routes (п. 10 ТЗ)", () => {
     expect(clientNotificationTargetHref("STAGE_IN_PROGRESS")).toBe("/account/stages");
     expect(clientNotificationTargetHref("STAGE_DONE")).toBe("/account/stages");
     expect(clientNotificationTargetHref("PHOTO_NEW")).toBe("/account/photos");
+    expect(clientNotificationTargetHref("TICKET_REPLY")).toBe("/account/support");
   });
 
   it("clientNotificationReadLabel", () => {
@@ -29,5 +30,6 @@ describe("client-notification-routes (п. 10 ТЗ)", () => {
     expect(clientNotificationTypeLabel("DOCUMENT_NEW")).toBe("Документ");
     expect(clientNotificationTypeLabel("PAYMENT_EXPECTED")).toBe("Платёж");
     expect(clientNotificationTypeLabel("PHOTO_NEW")).toBe("Фотоотчёт");
+    expect(clientNotificationTypeLabel("TICKET_REPLY")).toBe("Обращение");
   });
 });

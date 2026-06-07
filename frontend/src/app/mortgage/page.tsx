@@ -16,7 +16,7 @@ export default async function MortgagePage() {
   const mortgageSettings = await getMortgagePageSettings();
 
   return (
-    <section className="pt-28 pb-20" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
+    <section className="page-top-offset pb-20" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
       <div className="container mx-auto max-w-6xl px-5">
         <span
           className="rounded-full border px-3 py-1 text-xs uppercase tracking-[0.14em]"

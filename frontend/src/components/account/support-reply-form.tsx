@@ -4,7 +4,15 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { localizeTicketApiError } from "@/lib/client-ticket-labels";
 
-export function SupportReplyForm({ ticketId, disabled }: { ticketId: string; disabled: boolean }) {
+export function SupportReplyForm({
+  ticketId,
+  disabled,
+  onSent,
+}: {
+  ticketId: string;
+  disabled: boolean;
+  onSent?: () => void;
+}) {
   const router = useRouter();
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -35,6 +43,7 @@ export function SupportReplyForm({ ticketId, disabled }: { ticketId: string; dis
         return;
       }
       setMessage("");
+      onSent?.();
       router.refresh();
     } catch {
       setError("Не удалось связаться с сервером. Проверьте интернет и попробуйте снова.");

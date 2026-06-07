@@ -8,7 +8,6 @@ import {
   ArrowUpRight,
   Bath,
   Bed,
-  type LucideIcon,
   Maximize2,
 } from "lucide-react";
 import { ProjectEngagementBadges } from "@/components/projects/project-engagement-badges";
@@ -70,22 +69,6 @@ function ruBathroomsLabel(n: number): string {
   const word =
     m10 === 1 && m100 !== 11 ? "санузел" : m10 >= 2 && m10 <= 4 && (m100 < 10 || m100 >= 20) ? "санузла" : "санузлов";
   return `${n} ${word}`;
-}
-
-function ProjectStat({ Icon, value, label }: { Icon: LucideIcon; value: string; label: string }) {
-  return (
-    <div className="rounded-2xl bg-white/90 px-2 py-2 text-[#17231f] shadow-sm ring-1 ring-black/5 backdrop-blur-sm">
-      <div className="flex items-center justify-center gap-1">
-        <Icon className="h-3.5 w-3.5 shrink-0 text-[#0f3d2e]/70" strokeWidth={1.9} aria-hidden />
-        <span className="whitespace-nowrap text-[13px] font-bold leading-none tabular-nums sm:text-sm">
-          {value}
-        </span>
-      </div>
-      <p className="mt-1 text-[9px] font-semibold uppercase leading-none tracking-[0.06em] text-[#17231f]/58 sm:text-[10px]">
-        {label}
-      </p>
-    </div>
-  );
 }
 
 export function FeaturedHouseProjectsSection({
@@ -205,8 +188,8 @@ export function FeaturedHouseProjectsSection({
                 const mats = materialsLine(tiers.length ? tiers.map((tier) => tier.label) : p.materials);
 
                 return (
-                  <article key={p.id} data-reveal="card" style={revealDelayStyle(idx)} className="group">
-                    <div className="relative isolate aspect-[4/3] w-full overflow-hidden rounded-[22px] bg-[var(--stone)] shadow-[0_12px_40px_rgba(15,61,46,0.1)] ring-1 ring-black/5 transition-[box-shadow,transform] duration-500 group-hover:-translate-y-0.5 group-hover:shadow-[0_18px_52px_rgba(15,61,46,0.16)] dark:ring-white/10 sm:aspect-[16/11]">
+                  <article key={p.id} data-reveal="card" style={revealDelayStyle(idx)} className="group flex flex-col">
+                    <div className="relative isolate aspect-[16/9] w-full overflow-hidden rounded-[22px] bg-[var(--stone)] shadow-[0_12px_40px_rgba(15,61,46,0.08)] transition-[box-shadow,transform] duration-500 group-hover:-translate-y-0.5 group-hover:shadow-[0_18px_52px_rgba(15,61,46,0.14)]">
                       <Link href={href} className="absolute inset-0 z-0 block overflow-hidden rounded-[inherit]">
                         <Image
                           src={cover}
@@ -217,7 +200,6 @@ export function FeaturedHouseProjectsSection({
                           sizes="(max-width: 768px) 100vw, 50vw"
                         />
                       </Link>
-                      <div className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(to_bottom,rgba(0,0,0,0.34)_0%,rgba(0,0,0,0.05)_32%,rgba(0,0,0,0.18)_55%,rgba(0,0,0,0.82)_100%)]" aria-hidden />
 
                       <ProjectEngagementBadges
                         slug={p.slug}
@@ -236,34 +218,43 @@ export function FeaturedHouseProjectsSection({
                           <ArrowRight className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
                         </Link>
                       </div>
+                    </div>
 
-                      <div className="absolute inset-x-0 bottom-0 z-[2] p-3 text-white sm:p-4">
-                        <div className="rounded-[20px] border border-white/14 bg-black/42 p-3 shadow-[0_18px_44px_rgba(0,0,0,0.28)] backdrop-blur-md sm:p-4">
-                          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
-                            <Link
-                              href={href}
-                              className="min-w-0 flex-1 truncate font-heading text-xl font-bold uppercase tracking-[0.03em] text-white transition hover:text-white/86 sm:text-2xl"
-                            >
-                              {p.title}
-                            </Link>
-                            <span className="shrink-0 rounded-full bg-white/88 px-3 py-1.5 font-heading text-sm font-bold tabular-nums leading-none text-[#0f3d2e] shadow-sm">
-                              от {formatPriceMln(standardPrice)}
-                            </span>
-                          </div>
-
-                          {mats ? (
-                            <p className="mt-2 line-clamp-1 text-[11px] leading-snug text-white/72 sm:text-xs">
-                              {mats}
-                            </p>
-                          ) : null}
-
-                          <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                            <ProjectStat Icon={Maximize2} value={`${p.area} м²`} label="площадь" />
-                            <ProjectStat Icon={Bed} value={ruRoomsLabel(p.rooms).replace(/\s.*$/, "")} label="комн." />
-                            <ProjectStat Icon={Bath} value={ruBathroomsLabel(p.bathrooms).replace(/\s.*$/, "")} label="с/у" />
-                          </div>
-                        </div>
+                    <div className="mt-3 flex flex-col gap-2 px-0.5 sm:mt-3.5">
+                      <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
+                        <Link
+                          href={href}
+                          className="min-w-0 flex-1 truncate font-heading text-base font-bold uppercase tracking-tight text-[var(--text)] transition hover:text-[var(--accent)] sm:text-lg"
+                        >
+                          {p.title}
+                        </Link>
+                        <span className="shrink-0 font-heading text-[15px] font-bold tabular-nums leading-none text-[var(--text)] sm:text-base">
+                          от {formatPriceMln(standardPrice)}
+                        </span>
                       </div>
+
+                      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px] text-[var(--text-muted)] sm:gap-x-3 sm:text-[13px]">
+                        <span className="inline-flex items-center gap-1 tabular-nums">
+                          <Maximize2 className="h-3.5 w-3.5 shrink-0 text-[var(--text-subtle)]" strokeWidth={1.75} aria-hidden />
+                          <span className="whitespace-nowrap font-medium text-[var(--text)]">{p.area} м²</span>
+                        </span>
+                        <span className="h-3 w-px shrink-0 bg-[var(--border)] opacity-70" aria-hidden />
+                        <span className="inline-flex items-center gap-1 tabular-nums">
+                          <Bed className="h-3.5 w-3.5 shrink-0 text-[var(--text-subtle)]" strokeWidth={1.75} aria-hidden />
+                          <span className="whitespace-nowrap font-medium text-[var(--text)]">{ruRoomsLabel(p.rooms)}</span>
+                        </span>
+                        <span className="h-3 w-px shrink-0 bg-[var(--border)] opacity-70" aria-hidden />
+                        <span className="inline-flex items-center gap-1 tabular-nums">
+                          <Bath className="h-3.5 w-3.5 shrink-0 text-[var(--text-subtle)]" strokeWidth={1.75} aria-hidden />
+                          <span className="whitespace-nowrap font-medium text-[var(--text)]">{ruBathroomsLabel(p.bathrooms)}</span>
+                        </span>
+                      </div>
+                      {mats ? (
+                        <p className="text-[11px] leading-snug text-[var(--text-muted)] sm:text-[12px]">
+                          <span className="font-medium text-[var(--text-subtle)]">Материалы стен: </span>
+                          {mats}
+                        </p>
+                      ) : null}
                     </div>
                   </article>
                 );

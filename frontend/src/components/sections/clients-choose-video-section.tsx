@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { CLIENTS_CHOOSE_SERVICES } from "@/lib/clients-choose-services";
 import {
   getClientsChooseScrollState,
   resolveClientsChooseSlideVisual,
@@ -18,6 +19,8 @@ const SCROLL_VH_PER_ITEM_DESKTOP = 100;
 
 const SERVICES_VIDEO_SRC = "/videos/14654251600401.mp4";
 
+const SERVICES = CLIENTS_CHOOSE_SERVICES;
+
 function warmUpVideo(v: HTMLVideoElement) {
   if ((v as unknown as { _warmedUp?: boolean })._warmedUp) return;
   (v as unknown as { _warmedUp?: boolean })._warmedUp = true;
@@ -25,33 +28,29 @@ function warmUpVideo(v: HTMLVideoElement) {
   if (p) p.then(() => v.pause()).catch(() => {});
 }
 
-const SERVICES = [
-  {
-    title: "Проект",
-    href: "/services/proektirovanie" as const,
-    description: "Архитектурное и планировочное решение, адаптированное под участок и задачи семьи.",
-  },
-  {
-    title: "Фундамент",
-    href: "/services/fundament" as const,
-    description: "Надежное основание под тип грунта и проект вашего дома.",
-  },
-  {
-    title: "Кровля",
-    href: "/services/krovlya" as const,
-    description: "Теплая и герметичная кровельная система с правильными узлами.",
-  },
-  {
-    title: "Коммуникации",
-    href: "/services/inzheneriya" as const,
-    description: "Вода, канализация, электричество и инженерия, готовые к эксплуатации.",
-  },
-  {
-    title: "Отделка",
-    href: "/services/otdelka" as const,
-    description: "Чистовая отделка под ключ с аккуратной реализацией каждого этапа.",
-  },
-] as const;
+function ServicesScrollCue({ visible }: { visible: boolean }) {
+  if (!visible) return null;
+
+  return (
+    <div
+      className="flex flex-col items-center justify-center gap-2 px-2 py-3 md:px-3 md:py-0"
+      aria-hidden
+    >
+      <div
+        className="services-scroll-cue-wheel flex h-11 w-7 items-start justify-center rounded-full border pt-1.5"
+        style={{
+          borderColor: "color-mix(in srgb, var(--text-muted) 45%, transparent)",
+          backgroundColor: "color-mix(in srgb, var(--bg-secondary) 65%, var(--bg))",
+        }}
+      >
+        <span className="services-scroll-cue-dot h-1.5 w-1 rounded-full bg-[var(--accent)]" />
+      </div>
+      <p className="max-w-[5.5rem] text-center text-[9px] font-bold uppercase leading-tight tracking-[0.14em] text-[var(--text-muted)] md:max-w-none md:text-[10px]">
+        Прокрутите
+      </p>
+    </div>
+  );
+}
 
 function VideoPanel({ videoRef }: { videoRef: Ref<HTMLVideoElement> }) {
   return (
@@ -157,6 +156,7 @@ export function ClientsChooseVideoSection() {
   const lastSeekRef = useRef<number>(NaN);
   const [, setActiveIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [hasScrolled, setHasScrolled] = useState(false);
 
   const syncScrollToServices = useCallback(() => {
     const section = sectionRef.current;
@@ -170,6 +170,7 @@ export function ClientsChooseVideoSection() {
     const progress = Math.max(0, Math.min(scrolled / scrollRange, 1));
     const { baseIndex } = getClientsChooseScrollState(progress, SERVICES.length);
     setScrollProgress(progress);
+    if (progress > 0.04) setHasScrolled(true);
     setActiveIndex((prev) => {
       if (prev !== baseIndex) lastSeekRef.current = NaN;
       return prev === baseIndex ? prev : baseIndex;
@@ -281,6 +282,8 @@ export function ClientsChooseVideoSection() {
     };
   }, [syncScrollToServices]);
 
+  const showScrollCue = !hasScrolled;
+
   return (
     <section
       ref={sectionRef}
@@ -307,15 +310,8 @@ export function ClientsChooseVideoSection() {
         )}
         style={{ backgroundColor: "var(--bg)" }}
       >
-        <div className="mx-auto flex h-full min-h-0 w-full max-w-[1380px] flex-col md:flex-row md:items-center md:justify-between md:gap-8 md:px-8 lg:gap-10 lg:px-12">
-          <div className="shrink-0 px-4 pt-3 sm:px-6 md:order-2 md:flex-none md:w-[50%] md:px-0 md:pt-0 lg:w-[52%]">
-            <div className="mx-auto w-full max-w-[680px] md:max-w-[620px] lg:max-w-[680px]">
-              <VideoPanel videoRef={videoRef} />
-              <ServiceProgressBars scrollProgress={scrollProgress} className="mt-3 md:mt-4" />
-            </div>
-          </div>
-
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-center px-4 pb-6 pt-4 sm:px-6 md:order-1 md:max-w-[560px] md:px-0 md:pb-0 md:pt-0">
+        <div className="mx-auto grid h-full min-h-0 w-full max-w-[1380px] grid-cols-1 content-center gap-y-1 px-4 sm:px-6 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-center md:gap-x-6 md:px-8 lg:gap-x-10 lg:px-12">
+          <div className="order-2 flex min-h-0 min-w-0 flex-col justify-center md:order-1 md:max-w-[560px] md:px-0">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)] md:text-[13px]">
               Что мы делаем
             </p>
@@ -336,6 +332,17 @@ export function ClientsChooseVideoSection() {
                 Все услуги
                 <ArrowUpRight className="h-4 w-4 shrink-0 opacity-80" strokeWidth={2} aria-hidden />
               </Link>
+            </div>
+          </div>
+
+          <div className="order-3 flex justify-center md:order-2">
+            <ServicesScrollCue visible={showScrollCue} />
+          </div>
+
+          <div className="order-1 shrink-0 md:order-3 md:px-0">
+            <div className="mx-auto w-full max-w-[680px] md:max-w-[620px] lg:max-w-[680px]">
+              <VideoPanel videoRef={videoRef} />
+              <ServiceProgressBars scrollProgress={scrollProgress} className="mt-3 md:mt-4" />
             </div>
           </div>
         </div>

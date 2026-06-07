@@ -77,7 +77,7 @@ export function ThankYouContent() {
 
   return (
     <section
-      className="flex min-h-[calc(100dvh-var(--site-header-sticky-offset))] items-center justify-center px-4 py-10 pt-[calc(var(--site-header-sticky-offset)+1.5rem)] pb-24 lg:pb-10"
+      className="page-top-offset flex min-h-[calc(100dvh-var(--site-header-sticky-offset))] items-center justify-center px-4 py-10 pb-24 lg:pb-10"
       style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}
     >
       <div

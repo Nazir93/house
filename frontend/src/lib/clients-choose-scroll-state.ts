@@ -1,6 +1,15 @@
 /** Доля скролл-сегмента: сначала уход текущей услуги, затем появление следующей. */
 export const CLIENTS_CHOOSE_EXIT_FRACTION = 0.42;
 
+/**
+ * Hold-кадры ролика для первых двух услуг.
+ * Разрез с фундаментом — в начале ролика; на «Проекте» показываем более поздний кадр.
+ */
+export const CLIENTS_CHOOSE_VIDEO_HOLD_ANCHORS = {
+  project: 0.14,
+  fundament: 0,
+} as const;
+
 export type ClientsChooseScrollState = {
   scaled: number;
   baseIndex: number;
@@ -37,10 +46,27 @@ export function resolveClientsChooseVideoProgress(
 
   if (localProgress <= exitFraction) {
     const holdT = localProgress / exitFraction;
+    if (baseIndex === 0) {
+      return CLIENTS_CHOOSE_VIDEO_HOLD_ANCHORS.project + holdT * 0.02;
+    }
+    if (baseIndex === 1) {
+      return CLIENTS_CHOOSE_VIDEO_HOLD_ANCHORS.fundament + holdT * 0.04;
+    }
     return (baseIndex + holdT * 0.35 + 0.08) / serviceCount;
   }
 
   const enterT = (localProgress - exitFraction) / (1 - exitFraction);
+  if (baseIndex === 0) {
+    const { project, fundament } = CLIENTS_CHOOSE_VIDEO_HOLD_ANCHORS;
+    return project - (project - fundament) * enterT;
+  }
+  if (baseIndex === 1) {
+    const segment2Hold = (2 + 0.08) / serviceCount;
+    return (
+      CLIENTS_CHOOSE_VIDEO_HOLD_ANCHORS.fundament +
+      (segment2Hold - CLIENTS_CHOOSE_VIDEO_HOLD_ANCHORS.fundament) * enterT
+    );
+  }
   return (baseIndex + 1 + enterT * 0.6) / serviceCount;
 }
 

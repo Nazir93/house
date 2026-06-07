@@ -2,6 +2,7 @@ import type { Session } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { notifyAdminClientTicketMessage } from "@/lib/admin-ticket-notify";
 import { prisma } from "@/lib/db";
 
 function projectIdFromSession(session: Session | null) {
@@ -74,8 +75,18 @@ export async function POST(request: NextRequest) {
     },
     include: {
       messages: { orderBy: { createdAt: "asc" } },
+      project: { select: { contractNumber: true, clientName: true } },
     },
   });
+
+  void notifyAdminClientTicketMessage({
+    contractNumber: ticket.project.contractNumber,
+    clientName: ticket.project.clientName,
+    subject: ticket.subject,
+    messageBody: message,
+    ticketId: ticket.id,
+    isNewTicket: true,
+  }).catch((e) => console.error("[CLIENT TICKET NOTIFY]", e));
 
   return NextResponse.json({
     ticket: {

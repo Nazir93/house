@@ -135,7 +135,7 @@ export function BlogPageContent({
   bodyHtml?: string | null;
 }) {
   return (
-    <section className="pt-12 pb-20 md:pt-16 md:pb-28" style={{ backgroundColor: "var(--bg)" }}>
+    <section className="page-top-offset pb-20 md:pb-28" style={{ backgroundColor: "var(--bg)" }}>
       <div className="container mx-auto max-w-5xl px-5">
         <span
           className="inline-block text-[10px] sm:text-xs uppercase tracking-[0.12em] px-3 py-1.5 rounded-full mb-4 sm:mb-5"

@@ -45,7 +45,7 @@ export function EditorialPageShell({
 }: EditorialPageShellProps) {
   const headingClass = titleClassName ?? DEFAULT_TITLE_CLASS;
   return (
-    <article className="pt-12 pb-16 md:pt-16 md:pb-24" style={{ backgroundColor: "var(--bg)" }}>
+    <article className="page-top-offset pb-16 md:pb-24" style={{ backgroundColor: "var(--bg)" }}>
       {fullWidthTop ? (
         <div className="mb-8 w-full md:mb-10">{fullWidthTop}</div>
       ) : null}

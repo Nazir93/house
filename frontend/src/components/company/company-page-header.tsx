@@ -12,7 +12,7 @@ export function CompanyPageHeader({
 }) {
   return (
     <header
-      className="border-b pb-8 pt-24 sm:pb-10 sm:pt-28"
+      className="page-top-offset border-b pb-8 sm:pb-10"
       style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
     >
       <div className="container mx-auto max-w-[1200px] min-w-0 px-4 sm:px-5 lg:px-6">

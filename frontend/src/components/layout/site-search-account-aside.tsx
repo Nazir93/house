@@ -95,13 +95,13 @@ export function SiteSearchAccountAside({
     <aside
       className={cn(
         glassPane,
-        "order-2 flex shrink-0 flex-col justify-between gap-4 p-4 sm:p-5 lg:order-2 lg:col-start-2 lg:max-h-full lg:min-h-0 lg:shrink",
+        "order-2 flex w-full shrink-0 flex-col gap-3 p-3 sm:gap-4 sm:p-4 lg:order-2 lg:col-start-2 lg:max-h-full lg:min-h-0 lg:justify-between lg:gap-4 lg:p-5",
       )}
     >
       <div className="min-w-0">
         <div
           className={cn(
-            "mb-3 overflow-hidden rounded-2xl border p-1.5 shadow-lg sm:rounded-[1.25rem] sm:p-2",
+            "overflow-hidden rounded-2xl border p-1.5 shadow-lg sm:rounded-[1.25rem] sm:p-2 lg:mb-3",
             isLight
               ? "border-[rgba(26,30,29,0.12)] bg-[var(--stone)] shadow-[0_8px_24px_rgba(15,61,46,0.06)]"
               : "border-black/40 bg-black/35 shadow-black/30",
@@ -109,22 +109,22 @@ export function SiteSearchAccountAside({
         >
           <div
             className={cn(
-              "flex items-start gap-3 rounded-xl px-3 py-3 sm:rounded-[1.05rem] sm:px-4 sm:py-3.5",
+              "flex items-start gap-2.5 rounded-xl px-2.5 py-2.5 sm:gap-3 sm:rounded-[1.05rem] sm:px-4 sm:py-3.5",
               isLight ? "bg-white/90 shadow-[inset_0_1px_0_rgba(255,255,255,0.94)]" : "bg-black/30",
             )}
           >
             <div
               className={cn(
-                "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-md sm:h-12 sm:w-12 sm:rounded-2xl",
+                "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-md sm:h-12 sm:w-12 sm:rounded-2xl",
                 isLight ? "bg-[var(--accent)] text-[var(--on-accent)]" : "bg-white text-[#0f3d2e]",
               )}
             >
-              <UserRound className="h-6 w-6" strokeWidth={2} aria-hidden />
+              <UserRound className="h-5 w-5 sm:h-6 sm:w-6" strokeWidth={2} aria-hidden />
             </div>
             <div className="min-w-0 flex-1">
               <h3
                 className={cn(
-                  "font-heading text-base font-bold md:text-lg",
+                  "font-heading text-sm font-bold sm:text-base lg:text-lg",
                   isLight ? "text-[var(--text)]" : "text-white",
                 )}
               >
@@ -132,7 +132,7 @@ export function SiteSearchAccountAside({
               </h3>
 
               {isClient ? (
-                <div className="mt-2 space-y-2">
+                <div className="mt-1.5 space-y-1.5 sm:mt-2 sm:space-y-2">
                   {loadingPreview && !preview ? (
                     <p
                       className={cn(
@@ -147,7 +147,7 @@ export function SiteSearchAccountAside({
                   {projectLine ? (
                     <p
                       className={cn(
-                        "text-sm font-medium leading-snug",
+                        "line-clamp-2 text-xs font-medium leading-snug sm:text-sm",
                         isLight ? "text-[var(--text)]" : "text-white/92",
                       )}
                     >
@@ -158,7 +158,7 @@ export function SiteSearchAccountAside({
                   {preview?.currentStageLabel ? (
                     <p
                       className={cn(
-                        "text-xs leading-snug",
+                        "hidden text-xs leading-snug sm:block",
                         isLight ? "text-[color:var(--text-subtle)]" : "text-white/62",
                       )}
                     >
@@ -167,7 +167,7 @@ export function SiteSearchAccountAside({
                   ) : null}
 
                   {preview != null ? (
-                    <div>
+                    <div className="hidden sm:block">
                       <div
                         className={cn(
                           "mb-1 flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.12em]",
@@ -197,7 +197,7 @@ export function SiteSearchAccountAside({
               ) : (
                 <p
                   className={cn(
-                    "mt-1 text-xs leading-snug md:text-sm",
+                    "mt-1 line-clamp-2 text-[11px] leading-snug sm:text-xs lg:text-sm",
                     isLight ? "text-[color:var(--text-subtle)]" : "text-white/62",
                   )}
                 >
@@ -211,7 +211,7 @@ export function SiteSearchAccountAside({
 
       <div
         className={cn(
-          "flex flex-col gap-2.5 border-t pt-4",
+          "flex flex-col gap-2 border-t pt-3 sm:gap-2.5 sm:pt-4",
           isLight ? "border-[rgba(26,30,29,0.12)]" : "border-white/10",
         )}
       >
@@ -221,7 +221,7 @@ export function SiteSearchAccountAside({
               В кабинет
               <ArrowRight className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
             </Link>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
               <Link href="/account/stages" onClick={onClose} className={accountLinkClass(isLight)}>
                 <ListOrdered className="h-3.5 w-3.5 shrink-0" aria-hidden />
                 Этапы

@@ -23,7 +23,7 @@ export default async function PortfolioMapPage(props: { searchParams?: Promise<{
 
   return (
     <>
-      <section className="pb-24 pt-28" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
+      <section className="page-top-offset pb-24" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
         <div className="container mx-auto max-w-[1320px] px-5">
           <nav className="text-[12px] tracking-[0.02em] text-[var(--text-muted)] sm:text-[13px]" aria-label="Навигация по разделу">
             <Link href="/" className="transition-colors hover:text-[var(--accent)]">

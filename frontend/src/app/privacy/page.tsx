@@ -18,7 +18,7 @@ export default async function PrivacyPage() {
 
   return (
     <section
-      className="pt-32 pb-20 min-h-screen"
+      className="page-top-offset pb-20 min-h-screen"
       style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}
     >
       <div className="container mx-auto max-w-3xl px-5 sm:px-8 lg:pr-[80px]">

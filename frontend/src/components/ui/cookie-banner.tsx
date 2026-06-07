@@ -32,7 +32,7 @@ export function CookieBanner() {
 
   return (
     <div
-      className="fixed bottom-20 lg:bottom-4 left-4 right-4 lg:right-[80px] z-[60] animate-slideUp"
+      className="fixed mobile-above-bottom-nav lg:bottom-4 left-4 right-4 lg:right-[80px] z-[60] animate-slideUp"
       style={{ pointerEvents: "auto" }}
     >
       <div

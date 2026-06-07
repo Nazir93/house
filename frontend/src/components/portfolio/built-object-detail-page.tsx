@@ -159,7 +159,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
         alt={object.title}
       />
 
-      <article className="pb-20 pt-[calc(var(--site-header-sticky-offset)+0.75rem)]" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
+      <article className="page-top-offset pb-20" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
         <div className="container mx-auto max-w-[1320px] px-4 sm:px-5">
           {/* Верхний блок: на мобиле сначала фото, затем инфо */}
           <div className="grid gap-6 sm:gap-8 lg:grid-cols-[minmax(280px,340px)_minmax(0,1fr)] lg:items-start lg:gap-10">

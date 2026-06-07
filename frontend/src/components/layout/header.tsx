@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { ChevronDown, Send, X } from "lucide-react";
+import { BrandLogo } from "@/components/brand/brand-logo";
+import { MobileMenuProjectCarousel } from "@/components/layout/mobile-menu-project-carousel";
 import { SiteHeaderBar } from "./site-header-bar";
 import { SITE_NAME } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
@@ -11,6 +13,7 @@ import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { NAV_SECTIONS, isNavGroup, type NavSection } from "@/lib/nav-sections";
 import { useModal } from "@/lib/modal-context";
 import { maxChatUrlFromRawPhone, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
+import { cn } from "@/lib/utils";
 
 const MESSENGER_CHAT_PHONE = "+79046000099";
 
@@ -127,7 +130,7 @@ function FullscreenOverlayNavItems({
               onClose();
               openContactModal();
             }}
-            className="min-h-[44px] py-2 text-left text-sm transition-colors duration-300 hover:text-[var(--accent)] max-lg:min-h-0 max-lg:py-1 max-lg:leading-snug max-lg:text-[13px] sm:min-h-0 sm:py-1 sm:text-sm md:text-base lg:text-[15px]"
+            className="mobile-fs-menu__subitem min-h-[44px] py-2 text-left text-sm transition-colors duration-300 hover:text-[var(--accent)] max-lg:min-h-0 max-lg:py-1 max-lg:leading-snug max-lg:text-[13px] sm:min-h-0 sm:py-1 sm:text-sm md:text-base lg:text-[15px]"
             style={{ color: "var(--text-muted)" }}
           >
             {item.label}
@@ -137,7 +140,7 @@ function FullscreenOverlayNavItems({
             key={item.href}
             href={item.href}
             onClick={onClose}
-            className="min-h-[44px] py-2 text-sm transition-colors duration-300 hover:text-[var(--accent)] max-lg:min-h-0 max-lg:py-1 max-lg:leading-snug max-lg:text-[13px] sm:min-h-0 sm:py-1 sm:text-sm md:text-base lg:text-[15px]"
+            className="mobile-fs-menu__subitem min-h-[44px] py-2 text-sm transition-colors duration-300 hover:text-[var(--accent)] max-lg:min-h-0 max-lg:py-1 max-lg:leading-snug max-lg:text-[13px] sm:min-h-0 sm:py-1 sm:text-sm md:text-base lg:text-[15px]"
             style={{ color: "var(--text-muted)" }}
           >
             {item.label}
@@ -242,6 +245,7 @@ export function Header() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [expandedMenuSection, setExpandedMenuSection] = useState<string | null>(null);
+  const mobileMenuListRef = useRef<HTMLDivElement>(null);
   const { openModal } = useModal();
   const contact = useContactConfig();
   const telegramMessengerHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE) ?? "";
@@ -276,6 +280,16 @@ export function Header() {
     setIsOpen(false);
     setExpandedMenuSection(null);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isOpen || !expandedMenuSection) return;
+    const list = mobileMenuListRef.current;
+    if (!list) return;
+    const idx = NAV_SECTIONS.findIndex((s) => s.label === expandedMenuSection);
+    if (idx < 0) return;
+    const panel = list.querySelector<HTMLElement>(`#fs-menu-section-${idx}`);
+    panel?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [expandedMenuSection, isOpen]);
 
   return (
     <>
@@ -359,21 +373,39 @@ export function Header() {
 
           {/* Один экран: без внутреннего скролла, контент уплотнён под viewport */}
           <div className="relative z-10 flex min-h-0 flex-1 flex-col overflow-hidden">
-            <button
-              type="button"
-              onClick={closeMenu}
-              className="absolute right-4 top-[max(0.75rem,env(safe-area-inset-top,0px))] z-20 flex h-11 w-11 items-center justify-center rounded-full border bg-[var(--bg)]/90 shadow-lg backdrop-blur-md transition hover:border-[var(--accent)] hover:text-[var(--accent)] lg:right-6 lg:top-6"
-              style={{ borderColor: "var(--border)", color: "var(--text)" }}
-              aria-label="Закрыть меню"
-            >
-              <X className="h-5 w-5" strokeWidth={2.25} aria-hidden />
-            </button>
+            <div className="mobile-fs-menu__header flex shrink-0 items-center justify-between gap-3 px-4 pb-2 pt-[max(0.75rem,env(safe-area-inset-top,0px))] sm:px-8 md:px-10 lg:px-16 lg:pb-3 lg:pt-6">
+              <Link
+                href="/"
+                onClick={closeMenu}
+                className="min-w-0 shrink rounded-sm transition-opacity hover:opacity-90"
+                aria-label={`${SITE_NAME} — на главную`}
+              >
+                <BrandLogo height={34} className="mobile-fs-menu__header-logo min-w-0 min-[380px]:h-[38px]" />
+              </Link>
+              <button
+                type="button"
+                onClick={closeMenu}
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border bg-[var(--bg)]/90 shadow-lg backdrop-blur-md transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                style={{ borderColor: "var(--border)", color: "var(--text)" }}
+                aria-label="Закрыть меню"
+              >
+                <X className="h-5 w-5" strokeWidth={2.25} aria-hidden />
+              </button>
+            </div>
             <div className="flex min-h-0 w-full flex-1 flex-row items-stretch">
             {/* Nav area — на мобильном крупнее шрифты и зоны нажатия */}
-            <nav className="flex min-h-0 w-full min-w-0 flex-1 flex-col justify-between px-4 sm:px-8 md:px-10 lg:px-16 pt-[max(1rem,env(safe-area-inset-top,0px))] pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
-              {/* Экраны до lg: аккордеон */}
-              <div className="flex min-h-0 flex-1 flex-col lg:hidden">
-              <div className="scrollbar-none grid min-h-0 w-full flex-1 grid-cols-1 content-start gap-x-4 gap-y-1.5 overflow-y-auto overscroll-contain sm:gap-y-6 md:grid-cols-2 md:gap-x-10 md:gap-y-6 lg:grid-cols-4 lg:gap-x-12 lg:gap-y-6 [@media(max-height:700px)]:gap-y-2 [@media(max-height:700px)]:gap-x-3">
+            <nav className="mobile-fs-menu__shell flex min-h-0 w-full min-w-0 flex-1 flex-col justify-between px-4 sm:px-8 md:px-10 lg:px-16 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
+              {/* Экраны до lg: аккордеон + превью проектов */}
+              <div
+                className={cn(
+                  "mobile-fs-menu flex min-h-0 flex-1 flex-col gap-2 lg:hidden",
+                  expandedMenuSection && "mobile-fs-menu--section-open",
+                )}
+              >
+              <div
+                ref={mobileMenuListRef}
+                className="mobile-fs-menu__nav scrollbar-none flex min-h-0 w-full shrink-0 flex-col gap-0 overflow-y-auto overscroll-contain"
+              >
                 {NAV_SECTIONS.map((section, si) => {
                   const isExpanded = expandedMenuSection === section.label;
                   const panelId = `fs-menu-section-${si}`;
@@ -381,9 +413,10 @@ export function Header() {
                   return (
                   <div
                     key={section.label}
-                    className="flex min-h-0 min-w-0 flex-col border-b border-[var(--border)] pb-2 sm:border-0 sm:pb-0 menu-stagger [@media(max-height:700px)]:pb-1.5"
+                    className="relative flex w-full min-w-0 flex-col border-b border-[var(--border)] pb-2 menu-stagger last:border-b-0 [@media(max-height:700px)]:pb-1.5"
                     style={{
                       animation: `menuFadeIn 0.6s ease-out ${si * 0.08}s both`,
+                      zIndex: isExpanded ? 2 : 1,
                     }}
                   >
                     <button
@@ -396,22 +429,22 @@ export function Header() {
                           prev === section.label ? null : section.label
                         )
                       }
-                      className="touch-manipulation grid w-full min-w-0 grid-cols-[auto_1fr_auto] items-start gap-x-2 rounded-lg py-0.5 text-left outline-none ring-offset-2 ring-offset-[var(--bg)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] sm:gap-x-3 sm:py-0"
+                      className="mobile-fs-menu__section-trigger touch-manipulation grid w-full min-w-0 grid-cols-[auto_1fr_auto] items-center gap-x-2 rounded-lg py-2 text-left outline-none ring-offset-2 ring-offset-[var(--bg)] focus-visible:ring-2 focus-visible:ring-[var(--accent)] sm:items-start sm:gap-x-3 sm:py-0"
                     >
                       <span
-                        className="shrink-0 pt-1 font-heading text-xs tabular-nums tracking-[0.15em] sm:text-sm md:text-base lg:text-lg"
+                        className="shrink-0 pt-0.5 font-heading text-[10px] tabular-nums tracking-[0.15em] sm:pt-1 sm:text-sm md:text-base lg:text-lg"
                         style={{ color: "var(--text-subtle)" }}
                         aria-hidden
                       >
                         {String(si + 1).padStart(2, "0")}
                       </span>
                       <h3
-                        className="min-w-0 font-heading text-lg leading-[1.15] tracking-tight sm:text-xl md:text-2xl lg:text-2xl xl:text-3xl [@media(max-height:700px)]:max-lg:text-base"
+                        className="mobile-fs-menu__section-title min-w-0 font-heading text-lg leading-[1.15] tracking-tight sm:text-xl md:text-2xl lg:text-2xl xl:text-3xl"
                         style={{ color: "var(--text)" }}
                       >
                         {section.label}
                       </h3>
-                      <span className="shrink-0 pt-1" aria-hidden>
+                      <span className="mobile-fs-menu__section-chevron flex h-11 w-11 shrink-0 items-center justify-center sm:h-auto sm:w-auto sm:pt-1" aria-hidden>
                         <ChevronDown
                           className={`h-5 w-5 transition-transform duration-200 sm:h-5 sm:w-5 md:h-6 md:w-6 ${isExpanded ? "rotate-180" : ""}`}
                           style={{ color: "var(--text-subtle)" }}
@@ -423,26 +456,33 @@ export function Header() {
                       id={panelId}
                       role="region"
                       aria-labelledby={triggerId}
-                      hidden={!isExpanded}
-                      className={isExpanded ? "mt-1.5 max-lg:mt-1 sm:mt-3" : undefined}
+                      aria-hidden={!isExpanded}
+                      className="grid transition-[grid-template-rows] duration-200 ease-out"
+                      style={{ gridTemplateRows: isExpanded ? "1fr" : "0fr" }}
                     >
-                      {isExpanded && (
-                      <div
-                        className="flex min-w-0 flex-col gap-2 border-l pl-3 max-lg:gap-1 sm:gap-2 md:gap-2.5 lg:gap-3 [@media(max-height:700px)]:max-lg:gap-1 sm:pl-4 max-lg:pl-2.5"
-                        style={{ borderColor: "var(--border)" }}
-                      >
-                        <FullscreenOverlayNavItems
-                          section={section}
-                          onClose={closeMenu}
-                          openContactModal={openModal}
-                        />
+                      <div className="min-h-0 overflow-hidden">
+                        <div
+                          className="flex min-w-0 flex-col gap-2 border-l pb-1 pl-3 pt-1.5 max-lg:gap-1 sm:gap-2 sm:pl-4 [@media(max-height:700px)]:max-lg:gap-1"
+                          style={{ borderColor: "var(--border)" }}
+                        >
+                          <FullscreenOverlayNavItems
+                            section={section}
+                            onClose={closeMenu}
+                            openContactModal={openModal}
+                          />
+                        </div>
                       </div>
-                      )}
                     </div>
                   </div>
                   );
                 })}
               </div>
+
+              <MobileMenuProjectCarousel
+                active={isOpen}
+                onClose={closeMenu}
+                className="mobile-fs-menu__carousel"
+              />
               </div>
 
               {/* lg+: прежняя сетка, все секции раскрыты */}
@@ -485,10 +525,10 @@ export function Header() {
 
               {/* Bottom: contacts + CTA */}
               <div
-                className="shrink-0 pt-4 sm:pt-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-3 [@media(max-height:700px)]:pt-2 [@media(max-height:700px)]:gap-2"
+                className="mobile-fs-menu__footer shrink-0 flex flex-col gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:pt-3"
                 style={{ animation: "menuFadeIn 0.6s ease-out 0.4s both" }}
               >
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-x-6">
+                <div className="mobile-fs-menu__footer-phones flex flex-wrap items-center gap-x-4 gap-y-2 sm:gap-x-6">
                   {contact.phone.trim() && contact.phoneRaw.trim() ? (
                     <a
                       href={`tel:${contact.phoneRaw}`}
@@ -510,14 +550,17 @@ export function Header() {
                     </a>
                   ) : null}
                 </div>
-                <Link
-                  href="/contacts"
-                  onClick={closeMenu}
-                  className="inline-flex min-h-[48px] items-center justify-center rounded-full px-6 py-3 font-heading text-sm uppercase tracking-[0.1em] transition-all duration-500 hover:scale-[1.02] sm:min-h-0 sm:px-7 sm:py-2.5 sm:text-base md:text-lg [@media(max-height:700px)]:max-lg:py-2 [@media(max-height:700px)]:max-lg:px-5"
+                <button
+                  type="button"
+                  onClick={() => {
+                    closeMenu();
+                    openModal();
+                  }}
+                  className="mobile-fs-menu__footer-cta inline-flex min-h-[48px] w-full items-center justify-center rounded-full px-6 py-3 font-heading text-sm uppercase tracking-[0.1em] transition-all duration-500 hover:scale-[1.02] sm:min-h-0 sm:w-auto sm:px-7 sm:py-2.5 sm:text-base md:text-lg"
                   style={{ backgroundColor: "var(--sale)", color: "var(--accent-contrast)" }}
                 >
                   Оставить заявку
-                </Link>
+                </button>
               </div>
             </nav>
 

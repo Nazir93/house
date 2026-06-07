@@ -25,16 +25,19 @@ import {
   ClipboardList,
   PanelTop,
   ExternalLink,
+  MessageCircle,
 } from "lucide-react";
 import { useState } from "react";
 import { SITE_NAME } from "@/lib/constants";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { cn } from "@/lib/utils";
 import { useAdminNewLeadsNotify } from "@/hooks/use-admin-new-leads-notify";
+import { useAdminPendingTicketsNotify } from "@/hooks/use-admin-pending-tickets-notify";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Дашборд", icon: LayoutDashboard, exact: true },
   { href: "/admin/leads", label: "Заявки", icon: Inbox },
+  { href: "/admin/tickets", label: "Чат с клиентами", icon: MessageCircle },
   { href: "/admin/house-projects", label: "Проекты домов", icon: Home },
   { href: "/admin/calculator", label: "Калькулятор проектов", icon: Calculator },
   { href: "/admin/design-project-pricing", label: "Калькулятор проектирования", icon: Calculator },
@@ -81,15 +84,17 @@ export function AdminSidebar({ collapsed: collapsedProp, onCollapsedChange }: Ad
           color: "var(--adm-mobile-btn-fg)",
           boxShadow: "var(--adm-sidebar-glow)",
         }}
-        aria-label={leadsNewCount > 0 ? `Меню, ${leadsNewCount} новых заявок` : "Меню"}
+        aria-label={
+          mobileBadgeCount > 0 ? `Меню, ${mobileBadgeCount} новых уведомлений` : "Меню"
+        }
       >
         <Menu size={20} />
-        {leadsNewCount > 0 ? (
+        {mobileBadgeCount > 0 ? (
           <span
             className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-red-500 text-[10px] font-bold text-white flex items-center justify-center tabular-nums ring-2 ring-[var(--adm-sidebar-bg)]"
             aria-hidden
           >
-            {leadsNewCount > 99 ? "99+" : leadsNewCount}
+            {mobileBadgeCount > 99 ? "99+" : mobileBadgeCount}
           </span>
         ) : null}
       </button>
@@ -151,6 +156,9 @@ export function AdminSidebar({ collapsed: collapsedProp, onCollapsedChange }: Ad
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isLeads = item.href === "/admin/leads";
+            const isTickets = item.href === "/admin/tickets";
+            const badgeCount = isLeads ? leadsNewCount : isTickets ? ticketsPendingCount : 0;
+            const badgeHighlight = isLeads ? leadsHighlight : isTickets ? ticketsHighlight : false;
             const isActive = item.exact
               ? pathname === item.href
               : pathname.startsWith(item.href);
@@ -163,9 +171,8 @@ export function AdminSidebar({ collapsed: collapsedProp, onCollapsedChange }: Ad
                 className={cn(
                   "relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-150",
                   !isActive && "hover:bg-[color:var(--adm-nav-hover-bg)] hover:text-[color:var(--adm-nav-fg-hover)]",
-                  isLeads && leadsNewCount > 0 && !isActive && "bg-red-500/[0.08]",
-                  isLeads &&
-                    leadsHighlight &&
+                  badgeCount > 0 && !isActive && "bg-red-500/[0.08]",
+                  badgeHighlight &&
                     "ring-2 ring-red-500/70 shadow-[0_0_20px_rgba(239,68,68,0.35)] motion-safe:animate-pulse",
                 )}
                 style={
@@ -174,23 +181,21 @@ export function AdminSidebar({ collapsed: collapsedProp, onCollapsedChange }: Ad
                         backgroundColor: "var(--adm-nav-active-bg)",
                         color: "var(--adm-nav-active-fg)",
                       }
-                    : isLeads && leadsNewCount > 0
-                      ? { color: "var(--adm-nav-fg)" }
-                      : { color: "var(--adm-nav-fg)" }
+                    : { color: "var(--adm-nav-fg)" }
                 }
                 title={
                   collapsed
-                    ? isLeads && leadsNewCount > 0
-                      ? `${item.label}: ${leadsNewCount} новых`
+                    ? badgeCount > 0
+                      ? `${item.label}: ${badgeCount} новых`
                       : item.label
-                    : isLeads && leadsNewCount > 0
-                      ? `${leadsNewCount} новых заявок`
+                    : badgeCount > 0
+                      ? `${badgeCount} требует внимания`
                       : undefined
                 }
               >
                 <span className="relative flex-shrink-0">
-                  <Icon size={18} className={isLeads && leadsNewCount > 0 && !isActive ? "text-red-400" : undefined} />
-                  {isLeads && leadsNewCount > 0 ? (
+                  <Icon size={18} className={badgeCount > 0 && !isActive ? "text-red-400" : undefined} />
+                  {badgeCount > 0 ? (
                     <span
                       className={cn(
                         "absolute -top-1.5 -right-2 min-w-[17px] h-[17px] px-0.5 rounded-full bg-red-500 text-[9px] font-bold text-white flex items-center justify-center tabular-nums shadow-[0_0_10px_rgba(239,68,68,0.55)]",
@@ -198,18 +203,18 @@ export function AdminSidebar({ collapsed: collapsedProp, onCollapsedChange }: Ad
                       )}
                       aria-hidden
                     >
-                      {leadsNewCount > 99 ? "99+" : leadsNewCount}
+                      {badgeCount > 99 ? "99+" : badgeCount}
                     </span>
                   ) : null}
                 </span>
                 {!collapsed && (
                   <span className="flex flex-1 items-center justify-between gap-2 min-w-0">
-                    <span className={isLeads && leadsNewCount > 0 && !isActive ? "text-red-300 font-semibold" : undefined}>
+                    <span className={badgeCount > 0 && !isActive ? "text-red-300 font-semibold" : undefined}>
                       {item.label}
                     </span>
-                    {isLeads && leadsNewCount > 0 ? (
+                    {badgeCount > 0 ? (
                       <span className="shrink-0 rounded-md bg-red-500 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white tabular-nums">
-                        {leadsNewCount > 99 ? "99+" : leadsNewCount}
+                        {badgeCount > 99 ? "99+" : badgeCount}
                       </span>
                     ) : null}
                   </span>

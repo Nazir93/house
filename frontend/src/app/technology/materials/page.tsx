@@ -14,7 +14,7 @@ export async function generateMetadata() {
 
 export default function MaterialsInfoPage() {
   return (
-    <article className="min-h-screen pt-28 pb-20" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
+    <article className="page-top-offset min-h-screen pb-20" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
       <div className="container mx-auto max-w-3xl px-5">
         <Link href="/projects" className="text-sm font-semibold text-[var(--accent)]">
           ← К каталогу проектов

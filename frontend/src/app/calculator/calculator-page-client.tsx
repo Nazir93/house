@@ -10,7 +10,7 @@ export function CalculatorPageClient() {
 
   if (done) {
     return (
-      <section className="min-h-[55vh] pt-28 pb-20" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
+      <section className="page-top-offset min-h-[55vh] pb-20" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
         <div className="container mx-auto max-w-xl px-5 text-center">
           <CheckCircle className="mx-auto mb-6" size={56} style={{ color: "var(--accent)" }} aria-hidden />
           <h1 className="font-heading text-3xl md:text-4xl mb-4">Заявка отправлена</h1>
@@ -27,7 +27,7 @@ export function CalculatorPageClient() {
 
   return (
     <>
-      <div className="container mx-auto max-w-[1280px] px-5 pt-28 pb-2">
+      <div className="page-top-offset container mx-auto max-w-[1280px] px-5 pb-2">
         <span
           className="inline-block rounded-full border px-3 py-1 text-xs uppercase tracking-[0.14em]"
           style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
@@ -38,13 +38,8 @@ export function CalculatorPageClient() {
       </div>
       <HouseConstructionCalculatorForm
         onSuccess={(_leadId, name) => setDone({ name })}
-        heading={
-          <>
-            ПАРАМЕТРЫ
-            <br />
-            И СМЕТА
-          </>
-        }
+        heading="Параметры и смета"
+        headingEyebrow="Калькулятор"
       />
     </>
   );

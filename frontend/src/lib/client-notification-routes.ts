@@ -7,6 +7,7 @@ export const CLIENT_NOTIFICATION_ROUTES: Record<ClientNotificationType, string> 
   STAGE_DONE: "/account/stages",
   DOCUMENT_NEW: "/account/documents",
   PHOTO_NEW: "/account/photos",
+  TICKET_REPLY: "/account/support",
 };
 
 export function clientNotificationTargetHref(type: ClientNotificationType): string {
@@ -32,6 +33,8 @@ export function clientNotificationTypeLabel(type: ClientNotificationType): strin
       return "Документ";
     case "PHOTO_NEW":
       return "Фотоотчёт";
+    case "TICKET_REPLY":
+      return "Обращение";
     default:
       return "Событие";
   }

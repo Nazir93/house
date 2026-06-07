@@ -20,6 +20,7 @@ import {
   type MaterialFilterId,
   type ProjectsSortKey,
 } from "@/lib/project-filters";
+import { HouseProjectGridCard } from "@/components/projects/house-project-grid-card";
 import { CmsImage } from "@/components/ui/cms-image";
 import { SiteSelect } from "@/components/ui/site-select";
 
@@ -35,6 +36,15 @@ const filterShellClass =
   "overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--text)_8%,transparent)] bg-[color-mix(in_srgb,var(--bg-secondary)_55%,var(--bg))] shadow-[0_8px_32px_rgb(0_0_0/0.04)]";
 const filterSectionClass =
   "border-b border-[color-mix(in_srgb,var(--text)_7%,transparent)] px-4 py-4 last:border-b-0 md:px-5 md:py-5";
+const catalogFieldClass =
+  "catalog-field-input w-full border text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--accent)]";
+const catalogFieldStyle = {
+  borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
+  backgroundColor: "var(--bg)",
+  color: "var(--text)",
+} as const;
+const filterInputClass = `${catalogFieldClass} px-4 py-2.5`;
+const catalogSearchInputClass = `${catalogFieldClass} funnel-text-input h-12 py-2 pl-10 pr-4`;
 
 export function ProjectsCatalogContent({
   projects,
@@ -247,7 +257,7 @@ export function ProjectsCatalogContent({
   };
 
   return (
-    <section className="pt-28 pb-20 md:pt-32 md:pb-28" style={{ backgroundColor: "var(--bg)" }}>
+    <section className="page-top-offset pb-20 md:pb-28" style={{ backgroundColor: "var(--bg)" }}>
       <div className="container mx-auto max-w-[1400px] px-5">
         <div className="grid gap-10 lg:grid-cols-[minmax(260px,320px)_1fr] lg:items-start lg:gap-12">
           {/* ——— Сайдбар фильтров (как на референсе) ——— */}
@@ -333,12 +343,8 @@ export function ProjectsCatalogContent({
                           priceMaxRub,
                         });
                       }}
-                      className="w-full rounded-xl border px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-                      style={{
-                        borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
-                        backgroundColor: "var(--bg)",
-                        color: "var(--text)",
-                      }}
+                      className={filterInputClass}
+                      style={catalogFieldStyle}
                     />
                   </label>
                   <label className="space-y-1">
@@ -360,12 +366,8 @@ export function ProjectsCatalogContent({
                           priceMaxRub,
                         });
                       }}
-                      className="w-full rounded-xl border px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-                      style={{
-                        borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
-                        backgroundColor: "var(--bg)",
-                        color: "var(--text)",
-                      }}
+                      className={filterInputClass}
+                      style={catalogFieldStyle}
                     />
                   </label>
                 </div>
@@ -420,12 +422,8 @@ export function ProjectsCatalogContent({
                           priceMaxRub,
                         });
                       }}
-                      className="w-full rounded-xl border px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-                      style={{
-                        borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
-                        backgroundColor: "var(--bg)",
-                        color: "var(--text)",
-                      }}
+                      className={filterInputClass}
+                      style={catalogFieldStyle}
                     />
                   </label>
                   <label className="space-y-1">
@@ -448,12 +446,8 @@ export function ProjectsCatalogContent({
                           priceMaxRub: Math.max(Math.min(v, bounds.maxPriceRub), priceMinRub),
                         });
                       }}
-                      className="w-full rounded-xl border px-3 py-2 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-                      style={{
-                        borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
-                        backgroundColor: "var(--bg)",
-                        color: "var(--text)",
-                      }}
+                      className={filterInputClass}
+                      style={catalogFieldStyle}
                     />
                   </label>
                 </div>
@@ -526,8 +520,8 @@ export function ProjectsCatalogContent({
                   placeholder="Например, название или артикул проекта"
                   value={queryInput}
                   onChange={(e) => setQueryInput(e.target.value)}
-                  className="h-12 w-full rounded-full border py-2 pl-10 pr-4 text-sm outline-none ring-[var(--accent)] focus-visible:ring-2"
-                  style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)", color: "var(--text)" }}
+                  className={catalogSearchInputClass}
+                  style={catalogFieldStyle}
                   aria-label="Поиск по каталогу"
                 />
               </div>
@@ -656,66 +650,24 @@ export function ProjectsCatalogContent({
             </div>
 
             {/* Карточки */}
-            <div className={view === "grid" ? "mt-10 grid gap-5 sm:grid-cols-2 xl:grid-cols-3" : "mt-10 grid gap-5"}>
+            <div
+              className={
+                view === "grid"
+                  ? "mt-10 grid gap-3 sm:grid-cols-2 sm:gap-4 md:gap-x-5 md:gap-y-4 xl:grid-cols-3"
+                  : "mt-10 grid gap-5"
+              }
+            >
               {visible.map((project) => {
                 const cover = getProjectRenders(project)[0];
                 const matLabel = project.materials[0] || "на выбор";
 
                 if (view === "grid") {
                   return (
-                    <article
+                    <HouseProjectGridCard
                       key={project.id}
-                      className="group overflow-hidden rounded-[1.35rem] border bg-[var(--card-bg)] shadow-[0_16px_40px_rgba(15,61,46,0.08)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_22px_56px_rgba(15,61,46,0.14)]"
-                      style={{ borderColor: "color-mix(in srgb, var(--text) 9%, transparent)" }}
-                    >
-                      <Link href={`/projects/${project.slug}`} className="block">
-                        <div className="relative aspect-[16/10] overflow-hidden bg-[var(--stone)]">
-                          {cover ? (
-                            <CmsImage
-                              src={cover.url}
-                              alt={cover.alt || project.title}
-                              fill
-                              className="scale-[1.03] object-cover object-[center_38%] transition-transform duration-700 group-hover:scale-[1.08]"
-                              sizes="(max-width: 1280px) 50vw, 400px"
-                            />
-                          ) : null}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/18 via-transparent to-white/8" aria-hidden />
-                          <div className="absolute left-3 top-3 flex flex-wrap gap-2">
-                            <span className="rounded-full bg-white/88 px-3 py-1 text-[11px] font-semibold text-[var(--text)] shadow-sm backdrop-blur-md">
-                              {project.floors} {project.floors === 1 ? "этаж" : "этажа"}
-                            </span>
-                            <span className="max-w-[11rem] truncate rounded-full bg-white/82 px-3 py-1 text-[11px] font-medium text-[var(--text-muted)] shadow-sm backdrop-blur-md">
-                              {matLabel}
-                            </span>
-                          </div>
-                        </div>
-                        <div className="p-4 md:p-5">
-                          <div className="flex items-start justify-between gap-3">
-                            <p className="font-heading text-lg font-bold text-[var(--text)] transition-colors group-hover:text-[var(--accent)] md:text-xl">
-                              {project.title}
-                            </p>
-                            <p className="shrink-0 rounded-full bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] px-3 py-1 text-sm font-bold tabular-nums text-[var(--accent)] md:text-[15px]">
-                              {formatRub(project.price)}
-                            </p>
-                          </div>
-                          <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                            {[
-                              [`${project.area} м²`, "площадь"],
-                              [`${project.rooms}`, "комн."],
-                              [`${project.bathrooms}`, "с/у"],
-                            ].map(([value, label]) => (
-                              <span
-                                key={label}
-                                className="rounded-2xl bg-[color-mix(in_srgb,var(--bg-secondary)_78%,var(--bg))] px-2 py-2"
-                              >
-                                <span className="block text-sm font-bold leading-none text-[var(--text)]">{value}</span>
-                                <span className="mt-1 block text-[10px] font-medium uppercase tracking-[0.08em] text-[var(--text-subtle)]">{label}</span>
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </Link>
-                    </article>
+                      project={project}
+                      imageSizes="(max-width: 1280px) 50vw, 400px"
+                    />
                   );
                 }
 

@@ -9,6 +9,22 @@ import {
 const COUNT = 5;
 
 describe("clients-choose-scroll-state", () => {
+  it("на Проекте видео не в начале ролика (разрез — для Фундамента)", () => {
+    const video = resolveClientsChooseVideoProgress(0, COUNT);
+    expect(video).toBeGreaterThan(0.1);
+    expect(video).toBeLessThan(0.2);
+  });
+
+  it("на Фундаменте видео в начале ролика", () => {
+    const progress = 1 / COUNT;
+    const state = getClientsChooseScrollState(progress, COUNT);
+    expect(state.baseIndex).toBe(1);
+    expect(state.displayNumber).toBe(2);
+
+    const video = resolveClientsChooseVideoProgress(progress, COUNT);
+    expect(video).toBeLessThan(0.06);
+  });
+
   it("при переходе на Отделку видео в сегменте 5, а не Коммуникаций", () => {
   const progress = (3 + CLIENTS_CHOOSE_EXIT_FRACTION + 0.05) / COUNT;
   const state = getClientsChooseScrollState(progress, COUNT);

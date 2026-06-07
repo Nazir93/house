@@ -15,6 +15,7 @@ import { ContactModal } from "../ui/contact-modal";
 import { CookieBanner } from "../ui/cookie-banner";
 import { SmartCaptchaGate } from "../smartcaptcha-provider";
 import { DiscussProjectFab } from "./discuss-project-fab";
+import { PwaInstallBanner } from "../pwa/pwa-install-banner";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -42,8 +43,9 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       <Footer />
       <FixedStatsBar />
       <MobileBottomNav />
+      <PwaInstallBanner />
       <CookieBanner />
-      <div className="h-14 lg:hidden" />
+      <div className="mobile-bottom-nav-spacer lg:hidden" />
     </>
     </SmartCaptchaGate>
   );

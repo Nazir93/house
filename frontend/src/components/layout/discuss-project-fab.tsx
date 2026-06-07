@@ -11,8 +11,7 @@ import { cn } from "@/lib/utils";
 
 const FAB_RIGHT =
   "right-[max(1rem,env(safe-area-inset-right))] lg:right-[max(1.5rem,env(safe-area-inset-right))]";
-const FAB_BOTTOM =
-  "bottom-[calc(4.5rem+env(safe-area-inset-bottom))] lg:bottom-10";
+const FAB_BOTTOM = "bottom-[var(--mobile-bottom-nav-offset)] lg:bottom-10";
 const MESSENGER_CHAT_PHONE = "+79046000099";
 
 const fabBtnClass =

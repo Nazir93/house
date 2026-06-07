@@ -34,7 +34,7 @@ import { formatRub } from "@/lib/construction-shared";
 import { readLeadError } from "@/lib/read-lead-error";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { useHouseConstructionCalculatorConfig } from "@/lib/use-house-construction-calculator-config";
-import { FunnelInputField as InputField, FunnelSelect, FunnelFillButton as FillButton } from "@/components/ui/funnel-ui";
+import { FunnelInputField as InputField, FunnelSelect } from "@/components/ui/funnel-ui";
 
 const catalogFloorOptions = (["1", "1.5", "2"] as CatalogFloorId[]).map((id) => ({
   value: id,
@@ -148,13 +148,8 @@ export function buildHouseConstructionCalcPayload(
 export function HouseConstructionCalculatorForm({
   onSuccess,
   getRecaptchaToken,
-  heading = (
-    <>
-      ОРИЕНТИРОВОЧНЫЙ
-      <br />
-      РАСЧЁТ
-    </>
-  ),
+  heading = "Ориентировочный расчёт",
+  headingEyebrow = "Калькулятор",
   calculatorConfig,
   /** Промо со страницы QR: одна бесплатная услуга попадает в calcData и Lead.service */
   promoFreeService,
@@ -171,6 +166,7 @@ export function HouseConstructionCalculatorForm({
   onSuccess: (followupToken: string, name: string, phone: string) => void;
   getRecaptchaToken?: (action: string) => Promise<string>;
   heading?: ReactNode;
+  headingEyebrow?: string;
   /** Прайс с сервера; без пропа — загрузка через /api/calculator-config */
   calculatorConfig?: HouseConstructionCalculatorConfig;
   promoFreeService?: { slug: string; title: string } | null;
@@ -324,11 +320,27 @@ export function HouseConstructionCalculatorForm({
         className={
           compactLayout
             ? "container mx-auto w-full py-6 pt-2 md:py-8"
-            : "container mx-auto py-20 md:py-16 pt-24 md:pt-20"
+            : "page-top-offset container mx-auto py-20 md:py-16"
         }
       >
         <div className="max-w-2xl mx-auto">
-          <h2 className={`font-heading text-2xl sm:text-3xl md:text-4xl leading-[1.05] ${compactLayout ? "mb-4" : "mb-6"}`}>{heading}</h2>
+          <header className={compactLayout ? "mb-4" : "mb-5"}>
+            {headingEyebrow ? (
+              <p
+                className="text-[10px] font-semibold uppercase tracking-[0.18em]"
+                style={{ color: "var(--accent)" }}
+              >
+                {headingEyebrow}
+              </p>
+            ) : null}
+            <h2
+              className={`font-heading font-bold leading-tight tracking-tight text-[var(--text)] ${
+                headingEyebrow ? "mt-1" : ""
+              } ${compactLayout ? "text-[1.25rem] sm:text-[1.35rem]" : "text-[1.35rem] sm:text-[1.5rem] md:text-[1.65rem]"}`}
+            >
+              {heading}
+            </h2>
+          </header>
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
             {!hideObjectType ? (
               <InputField label="Тип объекта (по желанию)">
@@ -597,9 +609,14 @@ export function HouseConstructionCalculatorForm({
             {submitError && (
               <p className="text-sm text-red-400 rounded-xl bg-red-500/10 border border-red-500/20 px-4 py-3">{submitError}</p>
             )}
-            <FillButton type="submit" disabled={loading}>
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex w-full min-h-[52px] items-center justify-center rounded-full px-6 py-3.5 font-heading text-[13px] font-bold uppercase tracking-[0.1em] transition-all duration-300 hover:scale-[1.02] disabled:cursor-wait disabled:opacity-60 disabled:hover:scale-100"
+              style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
+            >
               {loading ? "Отправка..." : submitButtonLabel ?? "Получить точный расчёт"}
-            </FillButton>
+            </button>
           </form>
         </div>
       </div>

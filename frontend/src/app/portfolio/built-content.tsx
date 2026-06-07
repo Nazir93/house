@@ -105,7 +105,7 @@ export function BuiltPortfolioContent({
   const mappedCount = filtered.filter((o) => o.latitude != null && o.longitude != null).length;
 
   return (
-    <section className="pb-24 pt-28" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
+    <section className="page-top-offset pb-24" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
       <div className="container mx-auto max-w-[1320px] px-5">
         <nav className="text-[12px] tracking-[0.02em] text-[var(--text-muted)] sm:text-[13px]" aria-label="Навигация по разделу">
           <Link href="/" className="transition-colors hover:text-[var(--accent)]">
@@ -117,22 +117,20 @@ export function BuiltPortfolioContent({
           <span className="text-[var(--text)]">Наши проекты</span>
         </nav>
 
-        <div className="mt-5 rounded-[2rem] bg-[var(--bg-secondary)] px-5 py-6 shadow-[0_16px_50px_rgba(15,61,46,0.06)] sm:px-7 md:px-8 md:py-8">
-          <div className="max-w-3xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">Построенные дома</p>
-            <h1 className="mt-2 font-heading text-3xl font-bold tracking-tight text-[var(--accent)] md:text-[2.75rem] md:leading-[1.06] lg:text-[3.15rem] dark:text-[var(--text)]">
-              Портфолио
-            </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--text-muted)] md:text-base">
-              Реализованные дома, которые можно отфильтровать по материалу, этажности и площади.
-            </p>
-          </div>
+        <div className="mt-5 max-w-3xl md:mt-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">Построенные дома</p>
+          <h1 className="mt-2 font-heading text-3xl font-bold tracking-tight text-[var(--accent)] md:text-[2.75rem] md:leading-[1.06] lg:text-[3.15rem] dark:text-[var(--text)]">
+            Портфолио
+          </h1>
+          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--text-muted)] md:text-base">
+            Реализованные дома, которые можно отфильтровать по материалу, этажности и площади.
+          </p>
         </div>
 
         <div ref={explorerRef} id="portfolio-explorer" className="mt-8 scroll-mt-24 space-y-8 md:scroll-mt-28">
           {view === "map" ? (
-            <div className="space-y-6 rounded-[2rem] bg-[var(--bg-secondary)] p-4 shadow-[0_16px_50px_rgba(15,61,46,0.06)] sm:p-5 md:p-6">
-              <div className="flex w-full flex-wrap items-center gap-2 rounded-2xl bg-[var(--bg)] p-3">
+            <div className="space-y-6">
+              <div className="flex w-full flex-wrap items-center gap-2">
                 <button type="button" onClick={() => setView("grid")} className={chipClass(true)}>
                   <LayoutGrid size={15} strokeWidth={2} aria-hidden />
                   К сетке
@@ -145,13 +143,13 @@ export function BuiltPortfolioContent({
                   Открыть страницу карты
                 </Link>
               </div>
-              <div className="overflow-hidden rounded-[1.5rem] bg-[var(--bg)] p-2">
+              <div className="overflow-hidden rounded-[1.5rem]">
                 <PortfolioObjectMapExplorer objects={objects} layout="embedded" />
               </div>
             </div>
           ) : (
             <>
-              <div className="rounded-[1.75rem] bg-[var(--bg-secondary)] p-4 shadow-[0_14px_42px_rgba(15,61,46,0.05)] sm:p-5">
+              <div>
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
                     Фильтры портфолио
@@ -209,7 +207,7 @@ export function BuiltPortfolioContent({
               ) : filtered.length === 0 ? (
                 <p className="py-16 text-center text-sm text-[var(--text-muted)]">Нет объектов с выбранными фильтрами.</p>
               ) : (
-                <ul className="grid list-none grid-cols-1 gap-5 rounded-[2rem] bg-[var(--bg-secondary)] p-4 shadow-[0_18px_58px_rgba(15,61,46,0.06)] sm:grid-cols-2 sm:p-5 lg:grid-cols-3 lg:gap-6 lg:p-6">
+                <ul className="grid list-none grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 lg:gap-6">
                   {filtered.map((object) => {
                     const cover = getBuiltObjectCover(object);
                     return (

@@ -203,16 +203,17 @@ export function SiteSearchPanel({
 
           <div
             className={cn(
-              "mt-4 flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain touch-pan-y [-webkit-overflow-scrolling:touch] lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] lg:grid-rows-1 lg:items-stretch lg:gap-8 lg:overflow-hidden lg:overscroll-auto lg:pb-2",
+              "mt-4 grid min-h-0 flex-1 grid-cols-1 gap-3 overflow-hidden",
+              "grid-rows-[minmax(0,1fr)_auto]",
+              "lg:grid-cols-[minmax(0,1fr)_minmax(260px,320px)] lg:grid-rows-1 lg:items-stretch lg:gap-8 lg:pb-2",
             )}
-            style={{ scrollbarGutter: "stable" }}
           >
-            <div className="order-1 flex min-h-0 min-w-0 flex-col lg:order-1 lg:min-h-0 lg:overflow-hidden">
+            <div className="order-1 flex min-h-0 min-w-0 flex-col overflow-hidden lg:order-1">
               {sections.length === 0 ? (
                 <div
                   className={cn(
                     glassPane,
-                    "flex min-h-[12rem] items-center justify-center px-6 py-10 text-center text-sm lg:min-h-0 lg:flex-1",
+                    "flex min-h-0 flex-1 items-center justify-center px-6 py-10 text-center text-sm",
                     isLight ? "text-[color:var(--text-subtle)]" : "text-neutral-300",
                   )}
                 >
@@ -221,7 +222,7 @@ export function SiteSearchPanel({
               ) : (
                 <div
                   className={cn(
-                    "grid auto-rows-max content-start gap-2.5 sm:grid-cols-2 lg:max-h-full lg:min-h-0 lg:flex-1 lg:grid-cols-3 lg:gap-3 lg:overflow-y-auto lg:overscroll-contain lg:touch-pan-y lg:pr-1 lg:[-webkit-overflow-scrolling:touch] xl:grid-cols-3",
+                    "grid min-h-0 flex-1 auto-rows-max content-start gap-2.5 overflow-y-auto overscroll-contain touch-pan-y pr-0.5 [-webkit-overflow-scrolling:touch] sm:grid-cols-2 lg:grid-cols-3 lg:gap-3 lg:pr-1 xl:grid-cols-3",
                   )}
                   style={{ scrollbarGutter: "stable" }}
                 >

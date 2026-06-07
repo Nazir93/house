@@ -159,7 +159,7 @@ export function HouseProjectDetailContent({
   return (
     <>
       <ImageLightbox slides={slides} index={lightboxIndex} open={lightboxOpen} onClose={() => setLightboxOpen(false)} onIndexChange={setLightboxIndex} alt={project.title} />
-      <article className="pt-24" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
+      <article className="page-top-offset" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
         <section className="container mx-auto px-5 pb-10 md:pb-16">
           <nav className="text-sm" aria-label="Хлебные крошки" style={{ color: "var(--text-muted)" }}>
             <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">

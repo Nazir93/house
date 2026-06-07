@@ -555,6 +555,7 @@ enum ClientNotificationType {
   STAGE_DONE
   DOCUMENT_NEW
   PHOTO_NEW
+  TICKET_REPLY
 }
 
 /// Статус документа в личном кабинете (ознакомление → подписание в офисе)
@@ -692,14 +693,16 @@ model ClientPhotoReport {
 }
 
 model ClientSupportTicket {
-  id        String                    @id @default(cuid())
-  projectId String
-  project   ClientConstructionProject   @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  subject   String
-  status    ClientSupportTicketStatus   @default(OPEN)
-  createdAt DateTime                  @default(now())
-  updatedAt DateTime                  @updatedAt
-  messages  ClientTicketMessage[]
+  id              String                    @id @default(cuid())
+  projectId       String
+  project         ClientConstructionProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  subject         String
+  status          ClientSupportTicketStatus @default(OPEN)
+  /// Когда сотрудник последний раз открывал переписку (для бейджа «ждёт ответа»)
+  staffLastReadAt DateTime?
+  createdAt       DateTime                  @default(now())
+  updatedAt       DateTime                  @updatedAt
+  messages        ClientTicketMessage[]
 
   @@index([projectId, updatedAt])
 }

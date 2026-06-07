@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function PromoQrPage() {
   return (
-    <Suspense fallback={<div className="min-h-[40vh] pt-28 text-center text-sm text-white/40">Загрузка…</div>}>
+    <Suspense fallback={<div className="page-top-offset min-h-[40vh] text-center text-sm text-white/40">Загрузка…</div>}>
       <PromoQrPageClient />
     </Suspense>
   );

@@ -14,7 +14,7 @@ export function ServicesPageContent({
   bodyHtml: string | null;
 }) {
   return (
-    <section className="pt-14 md:pt-16" style={{ backgroundColor: "var(--bg)" }}>
+    <section className="page-top-offset" style={{ backgroundColor: "var(--bg)" }}>
       <ServicesHub services={services} pageH1={pageH1} introText={introText} />
 
       {bodyHtml ? (
