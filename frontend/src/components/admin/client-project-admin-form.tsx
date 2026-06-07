@@ -8,7 +8,7 @@ import type {
 } from "@prisma/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, MessageCircle, Plus } from "lucide-react";
 import {
   AdminDraftSectionSaveControl,
   AdminSectionHeader,
@@ -40,13 +40,6 @@ import type { ClientProjectDraftSection } from "@/lib/client-project-draft";
 import { buildClientProjectDraftBaselineKey } from "@/lib/draft-section-baseline";
 import { CLIENT_STAGE_STATUS_OPTIONS } from "@/lib/client-stage-status";
 import { formatDateTimeRu, ticketStatusLabel } from "@/lib/client-portal-labels";
-import { localizeTicketApiError, ticketAuthorLabel } from "@/lib/client-ticket-labels";
-
-const TICKET_STATUS_OPTIONS = [
-  { value: "OPEN", label: "Открыт" },
-  { value: "IN_PROGRESS", label: "В работе" },
-  { value: "CLOSED", label: "Закрыт" },
-];
 
 const ADMIN_COMPACT_SELECT_TRIGGER =
   "rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 py-2 text-sm text-white focus:outline-none focus:border-[#0F3D2E]";
@@ -199,10 +192,7 @@ export function ClientProjectAdminForm({
       : []
   );
 
-  const [tickets, setTickets] = useState(initial.tickets);
-
-  const [ticketReplies, setTicketReplies] = useState<Record<string, string>>({});
-  const [ticketStatus, setTicketStatus] = useState<Record<string, string>>({});
+  const tickets = initial.tickets;
   const [hasUnpublishedDraft, setHasUnpublishedDraft] = useState(initial.hasUnpublishedDraft ?? false);
   const [publishing, setPublishing] = useState(false);
   useEffect(() => {
@@ -339,38 +329,6 @@ export function ClientProjectAdminForm({
     } finally {
       setPublishing(false);
     }
-  }
-
-  async function sendReply(ticketId: string) {
-    const body = ticketReplies[ticketId]?.trim();
-    if (!body) return;
-    const status = ticketStatus[ticketId];
-    const res = await fetch(`/api/admin/client-projects/${projectId}/tickets/${ticketId}/reply`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ body, ...(status ? { status } : {}) }),
-    });
-    const updated = await res.json().catch(() => null);
-    if (!res.ok) {
-      setErr(localizeTicketApiError(updated?.error, "Ответ не отправлен"));
-      return;
-    }
-    setTicketReplies((r) => ({ ...r, [ticketId]: "" }));
-    setTickets((prev) =>
-      prev.map((t) =>
-        t.id === ticketId
-          ? {
-              ...t,
-              status: updated.status,
-              messages: updated.messages.map((m: { authorType: string; body: string; createdAt: string }) => ({
-                authorType: m.authorType,
-                body: m.body,
-                createdAt: m.createdAt,
-              })),
-            }
-          : t
-      )
-    );
   }
 
   const inp =
@@ -582,78 +540,55 @@ export function ClientProjectAdminForm({
       />
 
       <section className="space-y-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">
-        <div>
-          <h2 className="text-lg font-bold">Обращения</h2>
-          <p className="text-sm text-white/45 mt-1">
-            Сообщения клиента из личного кабинета. Ответ увидит клиент в разделе «Обращения».
-          </p>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-lg font-bold">Обращения</h2>
+            <p className="mt-1 text-sm text-white/45">
+              Переписка ведётся в общем разделе «Чат с клиентами» — здесь только краткий список по этому проекту.
+            </p>
+          </div>
+          <Link
+            href="/admin/tickets"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-white/15 px-3 py-2 text-xs font-semibold text-white/80 transition hover:border-emerald-400/40 hover:text-white"
+          >
+            <MessageCircle size={14} aria-hidden />
+            Чат с клиентами
+          </Link>
         </div>
-        {tickets.map((t) => (
-          <div key={t.id} className="border border-white/[0.06] rounded-xl p-4 space-y-3">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-              <div className="min-w-0">
-                <p className="font-medium">{t.subject}</p>
-                <p className="text-xs text-white/40 mt-0.5">
-                  Создано {formatDateTimeRu(t.messages[0]?.createdAt ?? null)}
+        {tickets.map((t) => {
+          const last = t.messages[t.messages.length - 1];
+          return (
+            <div
+              key={t.id}
+              className="flex flex-wrap items-start justify-between gap-3 rounded-xl border border-white/[0.06] p-4"
+            >
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-medium">{t.subject}</p>
+                  <span className="rounded border border-white/10 px-2 py-0.5 text-[10px] font-bold uppercase text-white/70">
+                    {ticketStatusLabel(t.status)}
+                  </span>
+                </div>
+                {last ? (
+                  <p className="mt-2 line-clamp-2 text-sm text-white/65">{last.body}</p>
+                ) : null}
+                <p className="mt-1.5 text-xs text-white/40">
+                  Обновлено {formatDateTimeRu(last?.createdAt ?? t.messages[0]?.createdAt ?? null)}
                 </p>
               </div>
-              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded border border-white/10 text-white/70 shrink-0">
-                {ticketStatusLabel(t.status)}
-              </span>
-            </div>
-            <ul className="space-y-2 border-t border-white/[0.06] pt-3">
-              {t.messages.map((m, i) => (
-                <li
-                  key={i}
-                  className={`text-sm rounded-lg px-3 py-2 ${
-                    m.authorType === "STAFF" ? "bg-[#0F3D2E]/20 ml-4" : "bg-white/[0.04] mr-4"
-                  }`}
-                >
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-white/45">
-                    {ticketAuthorLabel(m.authorType, "admin")}
-                  </p>
-                  <p className="mt-1 text-white/85 whitespace-pre-wrap">{m.body}</p>
-                  <p className="text-[10px] mt-1.5 text-white/35">{formatDateTimeRu(m.createdAt)}</p>
-                </li>
-              ))}
-            </ul>
-            <div className="flex flex-wrap gap-2 items-end border-t border-white/[0.06] pt-3">
-              <div className="w-full sm:w-auto">
-                <label className="block text-[10px] uppercase tracking-wider text-white/40 mb-1">
-                  Статус
-                </label>
-                <AdminSelect
-                  className="w-40 shrink-0"
-                  triggerClassName={ADMIN_COMPACT_SELECT_TRIGGER}
-                  value={ticketStatus[t.id] ?? t.status}
-                  onValueChange={(v) => setTicketStatus((s) => ({ ...s, [t.id]: v }))}
-                  options={TICKET_STATUS_OPTIONS}
-                />
-              </div>
-              <div className="flex-1 min-w-[200px]">
-                <label className="block text-[10px] uppercase tracking-wider text-white/40 mb-1">
-                  Ответ
-                </label>
-                <textarea
-                  className={inp + " min-h-[72px] resize-y"}
-                  value={ticketReplies[t.id] ?? ""}
-                  onChange={(e) => setTicketReplies((s) => ({ ...s, [t.id]: e.target.value }))}
-                  placeholder="Текст ответа клиенту…"
-                  rows={2}
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => sendReply(t.id)}
-                className="px-3 py-2 rounded-lg bg-[#0F3D2E] text-sm font-semibold shrink-0"
+              <Link
+                href={`/admin/tickets?ticket=${encodeURIComponent(t.id)}`}
+                className="shrink-0 rounded-lg bg-[#0F3D2E] px-3 py-2 text-sm font-semibold transition hover:bg-[#145c45]"
               >
-                Отправить
-              </button>
+                Открыть чат
+              </Link>
             </div>
-          </div>
-        ))}
+          );
+        })}
         {tickets.length === 0 ? (
-          <p className="text-white/40 text-sm">Клиент ещё не писал — обращения появятся здесь после отправки из личного кабинета.</p>
+          <p className="text-sm text-white/40">
+            Клиент ещё не писал — обращения появятся здесь и в «Чате с клиентами» после отправки из личного кабинета.
+          </p>
         ) : null}
       </section>
 

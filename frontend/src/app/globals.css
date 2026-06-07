@@ -738,28 +738,94 @@
   }
 }
 
-@keyframes skeleton-shimmer {
+@keyframes skeleton-sweep {
   0% {
-    background-position: 200% 0;
+    transform: translateX(-72%) skewX(-14deg);
+    opacity: 0.55;
+  }
+  18% {
+    opacity: 1;
+  }
+  82% {
+    opacity: 1;
   }
   100% {
-    background-position: -200% 0;
+    transform: translateX(72%) skewX(-14deg);
+    opacity: 0.55;
+  }
+}
+
+@keyframes skeleton-breathe {
+  0%,
+  100% {
+    opacity: 0.42;
+  }
+  50% {
+    opacity: 0.72;
+  }
+}
+
+@keyframes skeleton-shell-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
 .skeleton-shimmer {
-  background-image: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--card-bg) 100%, transparent) 0%,
-    color-mix(in srgb, var(--bg-secondary) 100%, transparent) 45%,
-    color-mix(in srgb, var(--card-bg) 100%, transparent) 90%
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background: linear-gradient(
+    148deg,
+    color-mix(in srgb, var(--card-bg) 94%, var(--bg)) 0%,
+    color-mix(in srgb, var(--card-bg) 100%, var(--bg-secondary) 10%) 48%,
+    color-mix(in srgb, var(--card-bg) 90%, var(--bg)) 100%
   );
-  background-size: 200% 100%;
-  animation: skeleton-shimmer 1.35s ease-in-out infinite;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 7%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, black 4%, transparent);
+}
+
+.skeleton-shimmer::before {
+  content: "";
+  position: absolute;
+  inset: -50% -70%;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    color-mix(in srgb, var(--card-bg) 35%, white 14%) 44%,
+    color-mix(in srgb, var(--accent) 10%, white 90%) 50%,
+    color-mix(in srgb, var(--card-bg) 35%, white 14%) 56%,
+    transparent 70%
+  );
+  animation: skeleton-sweep 2.15s cubic-bezier(0.42, 0.08, 0.22, 1) infinite;
+  animation-delay: var(--skeleton-delay, 0ms);
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+.skeleton-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 80% 55% at 50% 0%,
+    color-mix(in srgb, var(--accent) 7%, transparent) 0%,
+    transparent 72%
+  );
+  animation: skeleton-breathe 2.8s ease-in-out infinite;
+  animation-delay: calc(var(--skeleton-delay, 0ms) + 120ms);
+  pointer-events: none;
 }
 
 .page-skeleton-shell {
   min-height: 50vh;
+  animation: skeleton-shell-enter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 [data-reveal] {
@@ -944,7 +1010,11 @@ html.reveal-animations-ready [data-reveal="card"]:not(.is-visible) {
   .animate-slideUp {
     animation: none !important;
   }
-  .skeleton-shimmer {
+  .skeleton-shimmer::before,
+  .skeleton-shimmer::after {
+    animation: none !important;
+  }
+  .page-skeleton-shell {
     animation: none !important;
   }
   html.reveal-animations-ready [data-reveal]:not(.is-visible) {

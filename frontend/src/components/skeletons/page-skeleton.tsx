@@ -1,15 +1,18 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
-function CardGridSkeleton({ count = 3 }: { count?: number }) {
+function CardGridSkeleton({ count = 3, staggerBase = 0 }: { count?: number; staggerBase?: number }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {Array.from({ length: count }, (_, i) => (
-        <div key={i} className="flex flex-col gap-3">
-          <Skeleton className="aspect-[4/3] w-full" rounded="2xl" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-3 w-1/2" />
-        </div>
-      ))}
+      {Array.from({ length: count }, (_, i) => {
+        const base = staggerBase + i * 110;
+        return (
+          <div key={i} className="flex flex-col gap-3">
+            <Skeleton className="aspect-[4/3] w-full" rounded="2xl" delay={base} />
+            <Skeleton className="h-4 w-3/4" delay={base + 70} />
+            <Skeleton className="h-3 w-1/2" delay={base + 130} />
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -43,19 +46,23 @@ export function HomePageSkeleton() {
         <div className="section-inline-pad flex min-h-[100svh] min-h-[100dvh] flex-col justify-end pb-8 pt-[calc(var(--site-header-sticky-offset)+var(--site-header-banner-overlap)+1rem+env(safe-area-inset-top,0px))] md:pb-12">
           <div className="grid w-full gap-4 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(260px,40vw)] min-[1100px]:items-end">
             <div className="max-w-3xl space-y-3">
-              <Skeleton className="h-10 w-full max-w-2xl sm:h-12" rounded="2xl" />
-              <Skeleton className="h-10 w-[88%] max-w-xl sm:h-12" rounded="2xl" />
-              <Skeleton className="h-16 w-full max-w-xl" rounded="lg" />
+              <Skeleton className="h-10 w-full max-w-2xl sm:h-12" rounded="2xl" delay={0} />
+              <Skeleton className="h-10 w-[88%] max-w-xl sm:h-12" rounded="2xl" delay={80} />
+              <Skeleton className="h-16 w-full max-w-xl" rounded="lg" delay={160} />
               <div className="flex flex-wrap gap-2 pt-1">
-                <Skeleton className="h-10 w-36" rounded="xl" />
-                <Skeleton className="h-10 w-40" rounded="xl" />
+                <Skeleton className="h-10 w-36" rounded="xl" delay={240} />
+                <Skeleton className="h-10 w-40" rounded="xl" delay={300} />
               </div>
             </div>
-            <Skeleton className="h-[min(48vw,280px)] w-full min-h-[200px] sm:h-[260px] min-[1100px]:h-[220px]" rounded="2xl" />
+            <Skeleton
+              className="h-[min(48vw,280px)] w-full min-h-[200px] sm:h-[260px] min-[1100px]:h-[220px]"
+              rounded="2xl"
+              delay={120}
+            />
           </div>
           <div className="mt-6 grid grid-cols-1 gap-2 min-[400px]:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }, (_, i) => (
-              <Skeleton key={i} className="h-12 w-full" rounded="xl" />
+              <Skeleton key={i} className="h-12 w-full" rounded="xl" delay={360 + i * 70} />
             ))}
           </div>
         </div>

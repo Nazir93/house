@@ -33,6 +33,7 @@ import { ProjectCalculatorCatalogOptions } from "@/components/construction/proje
 import type { PublicCalculatorCatalog } from "@/lib/calculator-catalog";
 import type { HouseCalculatorCategoryId } from "@/lib/house-project-calculator-engine";
 import { buildProjectCalculatorLeadPayload } from "@/lib/project-calculator-lead";
+import { resolveStageDisplayImageUrl } from "@/lib/project-calculator-stage-images";
 import { toggleConstructionOptionSelection } from "@/lib/project-calculator-option-selection";
 import { useProjectCalculatorQuote } from "@/lib/use-project-calculator-quote";
 import { cn } from "@/lib/utils";
@@ -172,7 +173,17 @@ export function HouseProjectCompletionSection({
     [calculatorUi, fallbackLines, stage.id, tierKey]
   );
 
-  const imgSrc = table.imageUrl || coverImageUrl || "/images/banner/banner-hero-01.png";
+  const imgSrc = useMemo(
+    () =>
+      resolveStageDisplayImageUrl({
+        stageId: stage.id,
+        floors: partOfSoulContext.pricingFloors,
+        tierKey,
+        tableImageUrl: table.imageUrl,
+        coverImageUrl,
+      }),
+    [coverImageUrl, partOfSoulContext.pricingFloors, stage.id, table.imageUrl, tierKey],
+  );
 
   const transportBands = useMemo(
     () => normalizeTransportBands(calculatorUi.transportBands),
