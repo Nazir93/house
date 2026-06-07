@@ -72,6 +72,9 @@ export function AdminSidebar({ collapsed: collapsedProp, onCollapsedChange }: Ad
   };
   const [mobileOpen, setMobileOpen] = useState(false);
   const { newCount: leadsNewCount, highlight: leadsHighlight } = useAdminNewLeadsNotify();
+  const { pendingCount: ticketsPendingCount, highlight: ticketsHighlight } =
+    useAdminPendingTicketsNotify();
+  const mobileBadgeCount = leadsNewCount + ticketsPendingCount;
 
   return (
     <>
