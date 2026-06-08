@@ -13,6 +13,10 @@ import type {
 } from "@/lib/house-project-calculator-engine";
 import type { PartOfSoulFacadeVariant, PartOfSoulRoofPitch } from "@/lib/part-of-soul-pricing";
 import { isConstructionOptionAllowed } from "@/lib/house-project-calculator-engine";
+import {
+  resolveOptionDisplayDescription,
+  resolveOptionDisplayImageUrl,
+} from "@/lib/project-calculator-option-images";
 
 const CATEGORY_LIMITED_CONSTRUCTION_SLUGS = new Set<string>([
   "monolithic_stairs",
@@ -197,14 +201,26 @@ export function buildPublicCatalog(
 
   const engineering = Object.keys(config.engineering)
     .filter((slug) => config.engineering[slug]?.enabled)
-    .map((slug) => ({
-      slug,
-      name: config.engineering[slug].label,
-      description: config.engineering[slug].description,
-      imageUrl: config.engineering[slug].imageUrl,
-      groupSlug: "engineering" as const,
-      allowed: !disabled.has(slug),
-    }));
+    .map((slug) => {
+      const description = resolveOptionDisplayDescription({
+        slug,
+        groupSlug: "engineering",
+        description: config.engineering[slug].description,
+      });
+      const imageUrl = resolveOptionDisplayImageUrl({
+        slug,
+        groupSlug: "engineering",
+        imageUrl: config.engineering[slug].imageUrl,
+      });
+      return {
+        slug,
+        name: config.engineering[slug].label,
+        ...(description ? { description } : {}),
+        ...(imageUrl ? { imageUrl } : {}),
+        groupSlug: "engineering" as const,
+        allowed: !disabled.has(slug),
+      };
+    });
 
   const construction = Object.keys(config.construction)
     .filter((slug) => config.construction[slug]?.enabled)
@@ -212,11 +228,21 @@ export function buildPublicCatalog(
       const allowedByCategory =
         !CATEGORY_LIMITED_CONSTRUCTION_SLUGS.has(slug) ||
         isConstructionOptionAllowed(slug as ConstructionOptionCode, categoryId);
+      const description = resolveOptionDisplayDescription({
+        slug,
+        groupSlug: "construction",
+        description: config.construction[slug].description,
+      });
+      const imageUrl = resolveOptionDisplayImageUrl({
+        slug,
+        groupSlug: "construction",
+        imageUrl: config.construction[slug].imageUrl,
+      });
       return {
         slug,
         name: config.construction[slug].label,
-        description: config.construction[slug].description,
-        imageUrl: config.construction[slug].imageUrl,
+        ...(description ? { description } : {}),
+        ...(imageUrl ? { imageUrl } : {}),
         groupSlug: "construction" as const,
         allowed: allowedByCategory && !disabled.has(slug),
       };

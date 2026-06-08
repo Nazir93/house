@@ -177,6 +177,8 @@ export async function seedCalculatorCatalog(
         allowedCategories: [],
         sortOrder: oi++,
         isActive: o.enabled,
+        description: o.description ?? null,
+        imageUrl: o.imageUrl ?? null,
       },
       update:
         options.resetPrices ?
@@ -185,11 +187,15 @@ export async function seedCalculatorCatalog(
             pricingType: o.pricingType,
             pricePerUnit,
             isActive: o.enabled,
+            description: o.description ?? null,
+            imageUrl: o.imageUrl ?? null,
           }
         : {
             name: o.label,
             pricingType: o.pricingType,
             isActive: o.enabled,
+            description: o.description ?? null,
+            imageUrl: o.imageUrl ?? null,
           },
     });
     optCount++;
@@ -212,6 +218,8 @@ export async function seedCalculatorCatalog(
         allowedCategories: allowed,
         sortOrder: oi++,
         isActive: o.enabled,
+        description: o.description ?? null,
+        imageUrl: o.imageUrl ?? null,
       },
       update:
         options.resetPrices ?
@@ -221,12 +229,16 @@ export async function seedCalculatorCatalog(
             pricePerUnit,
             allowedCategories: allowed,
             isActive: o.enabled,
+            description: o.description ?? null,
+            imageUrl: o.imageUrl ?? null,
           }
         : {
             name: o.label,
             pricingType: o.pricingType,
             allowedCategories: allowed,
             isActive: o.enabled,
+            description: o.description ?? null,
+            imageUrl: o.imageUrl ?? null,
           },
     });
     optCount++;

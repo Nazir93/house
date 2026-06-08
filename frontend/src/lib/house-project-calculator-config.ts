@@ -8,6 +8,13 @@ import type {
   HouseProjectCalculatorConfig,
   PricedOptionDef,
 } from "@/lib/house-project-calculator-engine";
+import { CALCULATOR_OPTION_CATALOG_META } from "@/lib/project-calculator-option-images";
+
+function optionMeta(slug: string): Pick<PricedOptionDef, "description" | "imageUrl"> {
+  const meta = CALCULATOR_OPTION_CATALOG_META[slug];
+  if (!meta) return {};
+  return { description: meta.description, imageUrl: meta.imageUrl };
+}
 
 export const HOUSE_PROJECT_CALCULATOR_SETTINGS_KEY = "house_project_calculator_json";
 
@@ -70,17 +77,24 @@ function buildDefaultCategories(): Record<HouseCalculatorCategoryId, HouseCalcul
   return out;
 }
 
-function eng(code: EngineeringOptionCode, label: string, pricingType: "per_area" | "fixed", price: number): PricedOptionDef {
-  return { label, pricingType, price, enabled: true };
+function eng(
+  code: EngineeringOptionCode,
+  label: string,
+  pricingType: "per_area" | "fixed",
+  price: number,
+  meta?: Pick<PricedOptionDef, "description" | "imageUrl">,
+): PricedOptionDef {
+  return { label, pricingType, price, enabled: true, ...meta };
 }
 
 function con(
   label: string,
   pricingType: PricedOptionDef["pricingType"],
   price: number,
-  enabled = true
+  enabled = true,
+  meta?: Pick<PricedOptionDef, "description" | "imageUrl">,
 ): PricedOptionDef {
-  return { label, pricingType, price, enabled };
+  return { label, pricingType, price, enabled, ...meta };
 }
 
 export const DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG: HouseProjectCalculatorConfig = {
@@ -92,26 +106,26 @@ export const DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG: HouseProjectCalculatorConf
     brick_insulated: { label: "Облицовка кирпичом с утеплением", pricePerM2: 0 },
   },
   engineering: {
-    electric: eng("electric", "Электроснабжение", "per_area", 0),
-    radiators: eng("radiators", "Радиаторы", "per_area", 0),
-    water: eng("water", "Разводка воды", "per_area", 0),
-    heatedFloor: eng("heatedFloor", "Тёплый пол", "per_area", 0),
-    sewer: eng("sewer", "Канализация", "per_area", 0),
-    boiler: eng("boiler", "Котельная", "fixed", 0),
-    bio: eng("bio", "Станция биоочистки", "fixed", 0),
+    electric: eng("electric", "Электроснабжение", "per_area", 0, optionMeta("electric")),
+    radiators: eng("radiators", "Радиаторы", "per_area", 0, optionMeta("radiators")),
+    water: eng("water", "Разводка воды", "per_area", 0, optionMeta("water")),
+    heatedFloor: eng("heatedFloor", "Тёплый пол", "per_area", 0, optionMeta("heatedFloor")),
+    sewer: eng("sewer", "Канализация", "per_area", 0, optionMeta("sewer")),
+    boiler: eng("boiler", "Котельная", "fixed", 0, optionMeta("boiler")),
+    bio: eng("bio", "Станция биоочистки", "fixed", 0, optionMeta("bio")),
   },
   construction: {
-    interior_plaster: con("Внутренняя штукатурка", "per_area", 0),
-    blind_area: con("Отмостка", "per_blind_area", 0),
-    drainage: con("Дренаж", "per_perimeter", 0),
-    soffits: con("Софиты", "per_soffit_length", 0),
-    gutter: con("Водосточка", "per_gutter_length", 0),
-    roof_folding: con("Фальцевая кровля", "per_roof", 0),
-    roof_soft: con("Мягкая кровля", "per_roof", 0),
-    roof_insulation_200: con("Утепление кровли 200 мм", "per_roof", 0),
-    roof_insulation_250: con("Утепление кровли 250 мм", "per_roof", 0),
-    monolithic_stairs: con("Монолитная лестница", "fixed", 0),
-    monolithic_overlap: con("Монолитное перекрытие", "per_overlap_area", 0),
+    interior_plaster: con("Внутренняя штукатурка", "per_area", 0, true, optionMeta("interior_plaster")),
+    blind_area: con("Отмостка", "per_blind_area", 0, true, optionMeta("blind_area")),
+    drainage: con("Дренаж", "per_perimeter", 0, true, optionMeta("drainage")),
+    soffits: con("Софиты", "per_soffit_length", 0, true, optionMeta("soffits")),
+    gutter: con("Водосточка", "per_gutter_length", 0, true, optionMeta("gutter")),
+    roof_folding: con("Фальцевая кровля", "per_roof", 0, true, optionMeta("roof_folding")),
+    roof_soft: con("Мягкая кровля", "per_roof", 0, true, optionMeta("roof_soft")),
+    roof_insulation_200: con("Утепление кровли 200 мм", "per_roof", 0, true, optionMeta("roof_insulation_200")),
+    roof_insulation_250: con("Утепление кровли 250 мм", "per_roof", 0, true, optionMeta("roof_insulation_250")),
+    monolithic_stairs: con("Монолитная лестница", "fixed", 0, true, optionMeta("monolithic_stairs")),
+    monolithic_overlap: con("Монолитное перекрытие", "per_overlap_area", 0, true, optionMeta("monolithic_overlap")),
   },
   settings: {
     smallAreaThresholdM2: 100,
@@ -157,6 +171,9 @@ function mergePricedOption(def: PricedOptionDef, raw: unknown): PricedOptionDef 
     pricingType: def.pricingType,
     price: finiteOr(def.price, o.price),
     enabled: typeof o.enabled === "boolean" ? o.enabled : def.enabled,
+    description:
+      typeof o.description === "string" && o.description.trim() ? o.description : def.description,
+    imageUrl: typeof o.imageUrl === "string" && o.imageUrl.trim() ? o.imageUrl : def.imageUrl,
   };
 }
 

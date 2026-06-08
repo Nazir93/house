@@ -4,6 +4,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { formatRub } from "@/lib/construction-data";
 import type { PublicCalculatorCatalog } from "@/lib/calculator-catalog";
+import { isCalculatorOptionDiagramUrl } from "@/lib/project-calculator-option-images";
 import { cn } from "@/lib/utils";
 import { CmsImage } from "@/components/ui/cms-image";
 
@@ -263,13 +264,43 @@ function OptionRow({
         </div>
       </div>
       {open && hasFootnote ? (
-        <div className="mt-3 grid gap-3 rounded-xl bg-[var(--bg-secondary)] p-3 sm:grid-cols-[minmax(0,1fr)_9rem]">
-          {description?.trim() ? (
-            <p className="text-xs leading-relaxed text-[var(--text-muted)]">{description}</p>
-          ) : null}
+        <div className="mt-3 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]">
           {imageUrl?.trim() ? (
-            <div className="relative aspect-[4/3] overflow-hidden rounded-lg bg-[var(--stone)]">
-              <CmsImage src={imageUrl} alt={name} fill className="object-cover" sizes="144px" />
+            <div
+              className={cn(
+                "relative w-full",
+                isCalculatorOptionDiagramUrl(imageUrl)
+                  ? "aspect-[16/10] bg-[#0a0a0a] p-3 sm:aspect-[16/9] sm:p-4 md:aspect-[2/1]"
+                  : "aspect-[4/3] bg-[var(--stone)]",
+              )}
+            >
+              <CmsImage
+                src={imageUrl}
+                alt={name}
+                fill
+                className={cn(
+                  isCalculatorOptionDiagramUrl(imageUrl)
+                    ? "object-contain object-center"
+                    : "object-cover object-center",
+                )}
+                sizes="(max-width: 768px) 100vw, 640px"
+              />
+              <button
+                type="button"
+                onClick={() => window.open(imageUrl, "_blank")}
+                className="absolute inset-0 z-10 cursor-zoom-in bg-transparent"
+                aria-label={`Открыть схему: ${name}`}
+              />
+            </div>
+          ) : null}
+          {description?.trim() ? (
+            <div className="border-t border-[var(--border)] p-3 sm:p-4">
+              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--accent)] sm:text-[11px]">
+                Состав работ
+              </p>
+              <p className="mt-2 text-[11px] leading-relaxed text-[var(--text-muted)] sm:text-xs">
+                {description}
+              </p>
             </div>
           ) : null}
         </div>
