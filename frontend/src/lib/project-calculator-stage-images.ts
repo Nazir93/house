@@ -125,7 +125,7 @@ export function resolveRoofStageImageUrl(params: {
   floors: PartOfSoulPricingFloors;
   tierKey: string;
 }): string | null {
-  if (params.floors !== 1.5) return null;
+  if (params.floors !== 1.5 && params.floors !== 2) return null;
   if (params.tierKey === "gas") return ROOF_STAGE_IMAGE_MANSARD_GAS_1_5;
   if (params.tierKey === "ceramic") return ROOF_STAGE_IMAGE_MANSARD_CERAMIC_1_5;
   if (params.tierKey === "brick") return ROOF_STAGE_IMAGE_MANSARD_BRICK_1_5;
@@ -173,6 +173,11 @@ export function resolveDoorsStageImageUrl(): string {
 export function isLegacyStagePlaceholderImage(url: string | null | undefined): boolean {
   if (!url?.trim()) return true;
   return url.trim() === LEGACY_STAGE_PLACEHOLDER_IMAGE;
+}
+
+/** Схема этапа из public/images/calculator — показываем целиком, без обрезки cover. */
+export function isCalculatorStageDiagramUrl(url: string | null | undefined): boolean {
+  return !!url?.includes("/images/calculator/");
 }
 
 /** Итоговый URL картинки этапа в блоке «Состав работ по этапам». */

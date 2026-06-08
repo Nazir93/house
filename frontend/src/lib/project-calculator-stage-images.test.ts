@@ -22,6 +22,7 @@ import {
   resolveFoundationStageImageUrl,
   resolveRoofStageImageUrl,
   resolveStageDisplayImageUrl,
+  isCalculatorStageDiagramUrl,
   resolveWallsStageImageUrl,
   resolveWindowsStageImageUrl,
 } from "@/lib/project-calculator-stage-images";
@@ -56,11 +57,14 @@ describe("project-calculator-stage-images", () => {
     expect(url).toBe(custom);
   });
 
-  it("1,5 этаж + газоблок — схема кровли мансарды", () => {
+  it("1,5 и 2 этажа + газоблок — схема кровли", () => {
     expect(resolveRoofStageImageUrl({ floors: 1.5, tierKey: "gas" })).toBe(
       ROOF_STAGE_IMAGE_MANSARD_GAS_1_5,
     );
-    expect(resolveRoofStageImageUrl({ floors: 2, tierKey: "gas" })).toBeNull();
+    expect(resolveRoofStageImageUrl({ floors: 2, tierKey: "gas" })).toBe(
+      ROOF_STAGE_IMAGE_MANSARD_GAS_1_5,
+    );
+    expect(resolveRoofStageImageUrl({ floors: 1, tierKey: "gas" })).toBeNull();
   });
 
   it("1,5 этаж + керамоблок — схема кровли мансарды", () => {
@@ -259,6 +263,11 @@ describe("project-calculator-stage-images", () => {
         expect(url).toBe(WINDOWS_STAGE_IMAGE_ALL);
       }
     }
+  });
+
+  it("распознаёт схемы из /images/calculator/", () => {
+    expect(isCalculatorStageDiagramUrl(WALLS_STAGE_IMAGE_GAS)).toBe(true);
+    expect(isCalculatorStageDiagramUrl("/images/banner/banner-hero-01.png")).toBe(false);
   });
 
   it("двери — единая схема для всех проектов", () => {

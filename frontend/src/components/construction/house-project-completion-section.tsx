@@ -33,7 +33,10 @@ import { ProjectCalculatorCatalogOptions } from "@/components/construction/proje
 import type { PublicCalculatorCatalog } from "@/lib/calculator-catalog";
 import type { HouseCalculatorCategoryId } from "@/lib/house-project-calculator-engine";
 import { buildProjectCalculatorLeadPayload } from "@/lib/project-calculator-lead";
-import { resolveStageDisplayImageUrl } from "@/lib/project-calculator-stage-images";
+import {
+  isCalculatorStageDiagramUrl,
+  resolveStageDisplayImageUrl,
+} from "@/lib/project-calculator-stage-images";
 import { toggleConstructionOptionSelection } from "@/lib/project-calculator-option-selection";
 import { useProjectCalculatorQuote } from "@/lib/use-project-calculator-quote";
 import { cn } from "@/lib/utils";
@@ -184,6 +187,8 @@ export function HouseProjectCompletionSection({
       }),
     [coverImageUrl, partOfSoulContext.pricingFloors, stage.id, table.imageUrl, tierKey],
   );
+
+  const isStageDiagram = isCalculatorStageDiagramUrl(imgSrc);
 
   const transportBands = useMemo(
     () => normalizeTransportBands(calculatorUi.transportBands),
@@ -426,9 +431,24 @@ export function HouseProjectCompletionSection({
             softBorder
           )}
         >
-          <div className="grid md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-            <div className="relative aspect-[4/3] md:aspect-auto md:min-h-[320px] bg-[var(--stone)]">
-              <CmsImage src={imgSrc} alt="" fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
+          <div className="grid md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+            <div
+              className={cn(
+                "relative",
+                isStageDiagram
+                  ? "min-h-[300px] bg-[color-mix(in_srgb,var(--bg-secondary)_72%,var(--bg))] p-5 sm:min-h-[360px] sm:p-6 md:min-h-[440px] md:p-8 lg:min-h-[500px]"
+                  : "aspect-[4/3] bg-[var(--stone)] md:aspect-auto md:min-h-[320px]",
+              )}
+            >
+              <CmsImage
+                src={imgSrc}
+                alt=""
+                fill
+                className={cn(
+                  isStageDiagram ? "object-contain object-center" : "object-cover",
+                )}
+                sizes="(max-width: 768px) 100vw, 58vw"
+              />
               <button
                 type="button"
                 onClick={() => window.open(imgSrc, "_blank")}
