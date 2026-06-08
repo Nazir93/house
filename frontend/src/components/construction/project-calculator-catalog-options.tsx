@@ -264,45 +264,54 @@ function OptionRow({
         </div>
       </div>
       {open && hasFootnote ? (
-        <div className="mt-3 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]">
-          {imageUrl?.trim() ? (
-            <div
-              className={cn(
-                "relative w-full",
-                isCalculatorOptionDiagramUrl(imageUrl)
-                  ? "aspect-[16/10] bg-[var(--bg)] p-3 sm:aspect-[16/9] sm:p-4 md:aspect-[2/1]"
-                  : "aspect-[4/3] bg-[var(--stone)]",
-              )}
-            >
-              <CmsImage
-                src={imageUrl}
-                alt={name}
-                fill
+        <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-3 sm:p-4">
+          <div
+            className={cn(
+              "grid items-start gap-3 sm:gap-4",
+              imageUrl?.trim()
+                ? "grid-cols-[minmax(84px,104px)_minmax(0,1fr)] sm:grid-cols-[minmax(120px,148px)_minmax(0,1fr)]"
+                : "grid-cols-1",
+            )}
+          >
+            {imageUrl?.trim() ? (
+              <div
                 className={cn(
+                  "relative overflow-hidden rounded-lg border border-[var(--border)]",
                   isCalculatorOptionDiagramUrl(imageUrl)
-                    ? "object-contain object-center"
-                    : "object-cover object-center",
+                    ? "aspect-square bg-[var(--bg)] p-1.5 sm:p-2"
+                    : "aspect-[4/3] bg-[var(--stone)]",
                 )}
-                sizes="(max-width: 768px) 100vw, 640px"
-              />
-              <button
-                type="button"
-                onClick={() => window.open(imageUrl, "_blank")}
-                className="absolute inset-0 z-10 cursor-zoom-in bg-transparent"
-                aria-label={`Открыть схему: ${name}`}
-              />
-            </div>
-          ) : null}
-          {description?.trim() ? (
-            <div className="border-t border-[var(--border)] p-3 sm:p-4">
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--accent)] sm:text-[11px]">
-                Состав работ
-              </p>
-              <p className="mt-2 text-[11px] leading-relaxed text-[var(--text-muted)] sm:text-xs">
-                {description}
-              </p>
-            </div>
-          ) : null}
+              >
+                <CmsImage
+                  src={imageUrl}
+                  alt={name}
+                  fill
+                  className={cn(
+                    isCalculatorOptionDiagramUrl(imageUrl)
+                      ? "object-contain object-center"
+                      : "object-cover object-center",
+                  )}
+                  sizes="(max-width: 640px) 104px, 148px"
+                />
+                <button
+                  type="button"
+                  onClick={() => window.open(imageUrl, "_blank")}
+                  className="absolute inset-0 z-10 cursor-zoom-in bg-transparent"
+                  aria-label={`Открыть схему: ${name}`}
+                />
+              </div>
+            ) : null}
+            {description?.trim() ? (
+              <div className="min-w-0 self-center sm:self-start">
+                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--accent)] sm:text-[11px]">
+                  Состав работ
+                </p>
+                <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--text-muted)] sm:mt-2 sm:text-xs">
+                  {description}
+                </p>
+              </div>
+            ) : null}
+          </div>
         </div>
       ) : null}
     </li>
