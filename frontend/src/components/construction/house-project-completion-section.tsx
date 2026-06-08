@@ -431,12 +431,16 @@ export function HouseProjectCompletionSection({
             softBorder
           )}
         >
-          <div className="grid md:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+          <div
+            className={cn(
+              isStageDiagram ? "flex flex-col" : "grid md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]",
+            )}
+          >
             <div
               className={cn(
-                "relative",
+                "relative w-full",
                 isStageDiagram
-                  ? "min-h-[300px] bg-[color-mix(in_srgb,var(--bg-secondary)_72%,var(--bg))] p-5 sm:min-h-[360px] sm:p-6 md:min-h-[440px] md:p-8 lg:min-h-[500px]"
+                  ? "aspect-[16/10] bg-[#0a0a0a] p-3 sm:aspect-[16/9] sm:p-4 md:aspect-[2/1]"
                   : "aspect-[4/3] bg-[var(--stone)] md:aspect-auto md:min-h-[320px]",
               )}
             >
@@ -447,7 +451,7 @@ export function HouseProjectCompletionSection({
                 className={cn(
                   isStageDiagram ? "object-contain object-center" : "object-cover",
                 )}
-                sizes="(max-width: 768px) 100vw, 58vw"
+                sizes={isStageDiagram ? "100vw" : "(max-width: 768px) 100vw, 50vw"}
               />
               <button
                 type="button"
@@ -455,43 +459,68 @@ export function HouseProjectCompletionSection({
                 className="absolute inset-0 z-10 cursor-zoom-in bg-transparent"
                 aria-label="Открыть изображение в новой вкладке"
               />
-              <div className="absolute bottom-4 left-4 z-20 flex items-center gap-2 rounded-full bg-black/50 px-3 py-1.5 text-xs font-medium text-white backdrop-blur-md">
+              <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-md sm:bottom-4 sm:left-4 sm:px-3 sm:py-1.5 sm:text-xs">
                 <StageIcon className="h-3.5 w-3.5" aria-hidden />
                 {stage.label}
               </div>
             </div>
             <div
               className={cn(
-                "flex flex-col p-6 md:p-8 lg:p-9 border-t md:border-t-0 md:border-l",
+                "flex flex-col",
+                isStageDiagram ? "border-t p-4 sm:p-5 md:p-6" : "border-t p-6 md:border-t-0 md:border-l md:p-8 lg:p-9",
                 softDivide
               )}
             >
-              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--accent)]">
-                {tier.label}
-              </p>
-              <h4 className="mt-2 font-heading text-2xl md:text-[1.65rem] leading-tight text-[var(--graphite)]">
-                {stage.label}
-              </h4>
-              <div className="mt-6 space-y-5 flex-1">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--accent)] sm:text-[11px]">
+                  {tier.label}
+                </p>
+                <h4
+                  className={cn(
+                    "font-heading leading-tight text-[var(--graphite)]",
+                    isStageDiagram ? "text-lg sm:text-xl" : "text-2xl md:text-[1.65rem]",
+                  )}
+                >
+                  {stage.label}
+                </h4>
+              </div>
+              <div className={cn("flex-1", isStageDiagram ? "mt-3 space-y-2.5 sm:mt-4" : "mt-6 space-y-5")}>
                 {table.rows.map((row) => (
                   <div
                     key={`${row.label}-${row.value.slice(0, 24)}`}
-                    className="rounded-2xl bg-[color-mix(in_srgb,var(--bg-secondary)_70%,var(--bg))] p-4"
+                    className={cn(
+                      "rounded-xl bg-[color-mix(in_srgb,var(--bg-secondary)_70%,var(--bg))]",
+                      isStageDiagram ? "p-3 sm:p-3.5" : "rounded-2xl p-4",
+                    )}
                   >
-                    <p className="text-sm font-semibold text-[var(--text)]">{row.label}</p>
-                    <p className="mt-2 text-sm leading-relaxed whitespace-pre-line text-[var(--text-muted)]">
+                    <p
+                      className={cn(
+                        "font-semibold text-[var(--text)]",
+                        isStageDiagram ? "text-xs sm:text-[13px]" : "text-sm",
+                      )}
+                    >
+                      {row.label}
+                    </p>
+                    <p
+                      className={cn(
+                        "whitespace-pre-line text-[var(--text-muted)]",
+                        isStageDiagram
+                          ? "mt-1.5 text-[11px] leading-[1.55] sm:text-xs sm:leading-relaxed"
+                          : "mt-2 text-sm leading-relaxed",
+                      )}
+                    >
                       {row.value}
                     </p>
-                    <button
-                      type="button"
-                      className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[var(--accent)] hover:underline"
-                      onClick={() => openModalToEstimate()}
-                    >
-                      Уточнить в смете
-                    </button>
                   </div>
                 ))}
               </div>
+              <button
+                type="button"
+                className="mt-3 inline-flex items-center gap-1 self-start text-[11px] font-bold text-[var(--accent)] hover:underline sm:mt-4 sm:text-xs"
+                onClick={() => openModalToEstimate()}
+              >
+                Уточнить в смете
+              </button>
             </div>
           </div>
         </article>
