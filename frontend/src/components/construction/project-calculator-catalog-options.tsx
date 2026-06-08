@@ -270,7 +270,7 @@ function OptionRow({
               className={cn(
                 "relative w-full",
                 isCalculatorOptionDiagramUrl(imageUrl)
-                  ? "aspect-[16/10] bg-[#0a0a0a] p-3 sm:aspect-[16/9] sm:p-4 md:aspect-[2/1]"
+                  ? "aspect-[16/10] bg-[var(--bg)] p-3 sm:aspect-[16/9] sm:p-4 md:aspect-[2/1]"
                   : "aspect-[4/3] bg-[var(--stone)]",
               )}
             >
