@@ -276,9 +276,9 @@ function OptionRow({
             {imageUrl?.trim() ? (
               <div
                 className={cn(
-                  "relative overflow-hidden rounded-lg border border-[var(--border)]",
+                  "relative overflow-hidden rounded-lg",
                   isCalculatorOptionDiagramUrl(imageUrl)
-                    ? "aspect-square bg-[var(--bg)] p-1.5 sm:p-2"
+                    ? "aspect-square bg-transparent"
                     : "aspect-[4/3] bg-[var(--stone)]",
                 )}
               >
