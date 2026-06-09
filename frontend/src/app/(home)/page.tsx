@@ -10,6 +10,7 @@ import { getHomeHeroBannerConfig } from "@/lib/home-hero-banner-config";
 import { ProjectsConstructorSection } from "@/components/sections/projects-constructor-section";
 import { FeaturedHouseProjectsSection } from "@/components/sections/featured-house-projects";
 import { ClientsChooseVideoSection } from "@/components/sections/clients-choose-video-section";
+import { AccountShowcaseSection } from "@/components/sections/account-showcase-section";
 import { HomePartnersSection } from "@/components/sections/home-partners-section";
 import { PortfolioSection } from "@/components/sections/portfolio";
 import { HomeNewsFeed } from "@/components/sections/home-news-feed";
@@ -56,6 +57,7 @@ export default async function HomePage() {
       <ProjectsConstructorSection />
       <FeaturedHouseProjectsSection projects={houseProjects} projectHeroTiers={projectHeroTiers} />
       <ClientsChooseVideoSection />
+      <AccountShowcaseSection />
       <HomePartnersSection partners={partners} />
       <PortfolioSection
         builtObjects={builtPortfolioPreview}
