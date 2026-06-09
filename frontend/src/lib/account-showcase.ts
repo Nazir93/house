@@ -1,14 +1,3 @@
-import {
-  Bell,
-  CalendarCheck,
-  CreditCard,
-  FileText,
-  Images,
-  LayoutDashboard,
-  MessageCircle,
-  type LucideIcon,
-} from "lucide-react";
-
 import type { ResolvedSiteTheme } from "@/lib/theme-preference";
 
 export type AccountShowcaseImages = {
@@ -23,7 +12,6 @@ export type AccountShowcaseItem = {
   description: string;
   image: string;
   images?: AccountShowcaseImages;
-  Icon: LucideIcon;
   accent: string;
   metrics: readonly string[];
   points: readonly string[];
@@ -40,7 +28,6 @@ export const ACCOUNT_SHOWCASE_ITEMS: readonly AccountShowcaseItem[] = [
       light: "/images/account/showcase-dashboard-light.png",
       dark: "/images/account/showcase-dashboard-dark.png",
     },
-    Icon: LayoutDashboard,
     accent: "#86efac",
     metrics: ["Прогресс", "Платежи", "Новое"],
     points: ["Карточка объекта", "Полоска этапов", "Блоки «требует внимания»"],
@@ -55,7 +42,6 @@ export const ACCOUNT_SHOWCASE_ITEMS: readonly AccountShowcaseItem[] = [
       light: "/images/account/showcase-stages-light.png",
       dark: "/images/account/showcase-stages-dark.png",
     },
-    Icon: CalendarCheck,
     accent: "#7dd3a8",
     metrics: ["Фундамент", "Стены", "Кровля"],
     points: ["Статусы этапов", "План ближайших работ", "История изменений"],
@@ -70,7 +56,6 @@ export const ACCOUNT_SHOWCASE_ITEMS: readonly AccountShowcaseItem[] = [
       light: "/images/account/showcase-photos-light.png",
       dark: "/images/account/showcase-photos-dark.png",
     },
-    Icon: Images,
     accent: "#93c5fd",
     metrics: ["Новые фото", "Подписи", "Архив"],
     points: ["Отчёты с объекта", "Пояснения прораба", "Удобная галерея"],
@@ -85,7 +70,6 @@ export const ACCOUNT_SHOWCASE_ITEMS: readonly AccountShowcaseItem[] = [
       light: "/images/account/showcase-documents-light.png",
       dark: "/images/account/showcase-documents-dark.png",
     },
-    Icon: FileText,
     accent: "#facc15",
     metrics: ["Договор", "Акты", "Файлы"],
     points: ["Скачивание документов", "Актуальные версии", "Хранение по объекту"],
@@ -100,7 +84,6 @@ export const ACCOUNT_SHOWCASE_ITEMS: readonly AccountShowcaseItem[] = [
       light: "/images/account/showcase-payments-light.png",
       dark: "/images/account/showcase-payments-dark.png",
     },
-    Icon: CreditCard,
     accent: "#fca5a5",
     metrics: ["График", "Суммы", "История"],
     points: ["Ближайший платёж", "План оплат", "Прозрачная смета"],
@@ -115,7 +98,6 @@ export const ACCOUNT_SHOWCASE_ITEMS: readonly AccountShowcaseItem[] = [
       light: "/images/account/showcase-support-light.png",
       dark: "/images/account/showcase-support-dark.png",
     },
-    Icon: MessageCircle,
     accent: "#fdba74",
     metrics: ["Тикеты", "Ответы", "История"],
     points: ["Новое обращение", "Статус ответа", "Переписка по объекту"],
@@ -130,7 +112,6 @@ export const ACCOUNT_SHOWCASE_ITEMS: readonly AccountShowcaseItem[] = [
       light: "/images/account/showcase-notifications-light.png",
       dark: "/images/account/showcase-notifications-dark.png",
     },
-    Icon: Bell,
     accent: "#67e8f9",
     metrics: ["Этапы", "Документы", "Платежи"],
     points: ["Лента событий", "Быстрые переходы", "Непрочитанные метки"],
@@ -142,7 +123,7 @@ export function accountShowcaseTitles(items = ACCOUNT_SHOWCASE_ITEMS): string[] 
 }
 
 export function resolveAccountShowcaseImage(
-  item: AccountShowcaseItem,
+  item: Pick<AccountShowcaseItem, "image" | "images">,
   theme: ResolvedSiteTheme = "light",
 ): string {
   if (item.images) {

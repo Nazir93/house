@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 
-import { resolveAccountShowcaseImage, type AccountShowcaseItem } from "@/lib/account-showcase";
+import { resolveAccountShowcaseImage, type AccountShowcaseImages, type AccountShowcaseItem } from "@/lib/account-showcase";
+import { ACCOUNT_SHOWCASE_ICON_BY_ID } from "@/lib/account-showcase-icons";
 import { useTheme } from "@/lib/theme-context";
 
 const SHOWCASE_IMAGE_PROPS = {
@@ -11,18 +12,24 @@ const SHOWCASE_IMAGE_PROPS = {
   sizes: "(max-width: 1024px) 100vw, 48vw",
 };
 
-export function AccountShowcaseMockup({ item }: { item: AccountShowcaseItem }) {
-  const Icon = item.Icon;
+export type AccountShowcaseMockupProps = {
+  itemId: AccountShowcaseItem["id"];
+  image: string;
+  images?: AccountShowcaseImages;
+  metrics: readonly string[];
+};
+
+export function AccountShowcaseMockup({ itemId, image, images, metrics }: AccountShowcaseMockupProps) {
+  const Icon = ACCOUNT_SHOWCASE_ICON_BY_ID[itemId];
   const { theme } = useTheme();
-  const imageSrc = resolveAccountShowcaseImage(item, theme);
-  const themedImages = item.images;
+  const imageSrc = resolveAccountShowcaseImage({ image, images }, theme);
 
   return (
     <div className="relative min-h-[19rem] overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#07120e] shadow-[0_28px_90px_rgba(0,0,0,0.34)] lg:min-h-[28rem]">
-      {themedImages ? (
+      {images ? (
         <>
           <Image
-            src={themedImages.dark}
+            src={images.dark}
             alt=""
             {...SHOWCASE_IMAGE_PROPS}
             className={`object-cover object-left-top saturate-[0.95] transition-opacity duration-500 ${
@@ -30,7 +37,7 @@ export function AccountShowcaseMockup({ item }: { item: AccountShowcaseItem }) {
             }`}
           />
           <Image
-            src={themedImages.light}
+            src={images.light}
             alt=""
             {...SHOWCASE_IMAGE_PROPS}
             className={`object-cover object-left-top saturate-[0.95] transition-opacity duration-500 ${
@@ -47,7 +54,7 @@ export function AccountShowcaseMockup({ item }: { item: AccountShowcaseItem }) {
         />
       )}
       <div
-        className={`absolute inset-0 bg-gradient-to-t from-black/88 via-black/46 to-black/22 ${themedImages ? "opacity-35" : ""}`}
+        className={`absolute inset-0 bg-gradient-to-t from-black/88 via-black/46 to-black/22 ${images ? "opacity-35" : ""}`}
         aria-hidden
       />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_20%,rgba(125,211,168,0.22),transparent_34%)]" aria-hidden />
@@ -63,7 +70,7 @@ export function AccountShowcaseMockup({ item }: { item: AccountShowcaseItem }) {
         </div>
 
         <div className="grid gap-3 sm:grid-cols-3">
-          {item.metrics.map((metric) => (
+          {metrics.map((metric) => (
             <div key={metric} className="rounded-2xl border border-white/10 bg-black/30 px-3 py-3 backdrop-blur-md">
               <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-white/44">раздел</p>
               <p className="mt-1 text-sm font-semibold text-white">{metric}</p>

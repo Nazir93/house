@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
 
 import { ACCOUNT_SHOWCASE_ITEMS } from "@/lib/account-showcase";
+import { ACCOUNT_SHOWCASE_ICON_BY_ID } from "@/lib/account-showcase-icons";
 import { AccountShowcaseMockup } from "@/components/sections/account-showcase-mockup";
 
 export function AccountShowcaseSection() {
@@ -48,7 +49,7 @@ export function AccountShowcaseSection() {
 
         <div className="relative space-y-6 lg:space-y-0">
           {ACCOUNT_SHOWCASE_ITEMS.map((item, index) => {
-            const Icon = item.Icon;
+            const Icon = ACCOUNT_SHOWCASE_ICON_BY_ID[item.id];
             return (
               <article
                 key={item.id}
@@ -90,7 +91,12 @@ export function AccountShowcaseSection() {
                 </div>
 
                 <div className="p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pl-0">
-                  <AccountShowcaseMockup item={item} />
+                  <AccountShowcaseMockup
+                    itemId={item.id}
+                    image={item.image}
+                    images={item.images}
+                    metrics={item.metrics}
+                  />
                 </div>
               </article>
             );
