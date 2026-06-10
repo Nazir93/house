@@ -89,7 +89,7 @@ export function AccountShowcaseSection() {
                   </div>
                 </div>
 
-                <div className="relative min-h-[19rem] p-6 sm:p-8 lg:min-h-[inherit] lg:p-10">
+                <div className="flex min-h-[19rem] items-center p-6 sm:p-8 lg:min-h-[inherit] lg:items-center lg:justify-center lg:p-10">
                   <AccountShowcaseMockup
                     itemId={item.id}
                     image={item.image}
