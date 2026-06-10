@@ -440,7 +440,7 @@ export function HouseProjectCompletionSection({
               className={cn(
                 "relative w-full",
                 isStageDiagram
-                  ? "aspect-[16/10] bg-[#0a0a0a] p-3 sm:aspect-[16/9] sm:p-4 md:aspect-[2/1]"
+                  ? "aspect-[16/10] bg-[var(--bg)] p-3 sm:aspect-[16/9] sm:p-4 md:aspect-[2/1]"
                   : "aspect-[4/3] bg-[var(--stone)] md:aspect-auto md:min-h-[320px]",
               )}
             >

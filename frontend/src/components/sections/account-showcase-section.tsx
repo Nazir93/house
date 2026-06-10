@@ -43,21 +43,21 @@ export function AccountShowcaseSection() {
           </div>
         </div>
 
-        <div className="relative space-y-6 lg:space-y-0">
+        <div className="relative space-y-0">
           {ACCOUNT_SHOWCASE_ITEMS.map((item, index) => {
             const Icon = ACCOUNT_SHOWCASE_ICON_BY_ID[item.id];
             return (
               <article
                 key={item.id}
                 data-reveal="card"
-                className="group relative grid min-h-[34rem] overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--bg-secondary)] lg:sticky lg:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] lg:gap-8"
+                className="group relative grid min-h-[calc(100dvh-var(--site-header-sticky-offset))] grid-rows-[auto_minmax(22rem,1fr)] overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--bg-secondary)] sticky lg:min-h-[38rem] lg:grid-rows-none lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:gap-6"
                 style={{
                   top: "var(--site-header-sticky-offset)",
                   zIndex: index + 1,
                   "--reveal-delay": `${index * 80}ms`,
                 } as CSSProperties}
               >
-                <div className="flex min-h-[22rem] flex-col justify-between p-6 sm:p-8 lg:min-h-[34rem] lg:p-10">
+                <div className="flex min-h-[22rem] flex-col justify-between p-6 sm:p-8 lg:min-h-[38rem] lg:p-10">
                   <div>
                     <div className="inline-flex items-center rounded-full border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_72%,transparent)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
                       {item.index}
@@ -85,7 +85,7 @@ export function AccountShowcaseSection() {
                   </div>
                 </div>
 
-                <div className="p-4 pt-0 sm:p-6 sm:pt-0 lg:flex lg:items-center lg:p-8 lg:pl-0">
+                <div className="flex min-h-[22rem] w-full flex-1 flex-col px-4 pb-4 pt-0 sm:px-6 sm:pb-6 lg:min-h-[38rem] lg:flex-none lg:items-stretch lg:py-8 lg:pr-10 lg:pl-0">
                   <AccountShowcaseMockup
                     itemId={item.id}
                     image={item.image}
