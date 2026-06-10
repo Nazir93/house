@@ -5,7 +5,6 @@ import { ACCOUNT_SHOWCASE_ITEMS } from "@/lib/account-showcase";
 import { ACCOUNT_SHOWCASE_ICON_BY_ID } from "@/lib/account-showcase-icons";
 import { AccountShowcaseFooter } from "@/components/sections/account-showcase-footer";
 import { AccountShowcaseMockup } from "@/components/sections/account-showcase-mockup";
-import { cn } from "@/lib/utils";
 
 export function AccountShowcaseSection() {
   return (
@@ -51,17 +50,14 @@ export function AccountShowcaseSection() {
               <article
                 key={item.id}
                 data-reveal="card"
-                className={cn(
-                  "group relative grid min-h-[34rem] overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--bg-secondary)]",
-                  "lg:sticky lg:top-[var(--site-header-sticky-offset)] lg:min-h-[calc(100dvh-var(--site-header-sticky-offset))]",
-                  "lg:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] lg:gap-8",
-                )}
+                className="group relative grid min-h-[34rem] overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--bg-secondary)] lg:sticky lg:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] lg:gap-8"
                 style={{
+                  top: "var(--site-header-sticky-offset)",
                   zIndex: index + 1,
                   "--reveal-delay": `${index * 80}ms`,
                 } as CSSProperties}
               >
-                <div className="flex min-h-[22rem] flex-col justify-between p-6 sm:p-8 lg:min-h-[inherit] lg:p-10">
+                <div className="flex min-h-[22rem] flex-col justify-between p-6 sm:p-8 lg:min-h-[34rem] lg:p-10">
                   <div>
                     <div className="inline-flex items-center rounded-full border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_72%,transparent)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
                       {item.index}
@@ -89,7 +85,7 @@ export function AccountShowcaseSection() {
                   </div>
                 </div>
 
-                <div className="flex min-h-[19rem] items-center p-6 sm:p-8 lg:min-h-[inherit] lg:items-center lg:justify-center lg:p-10">
+                <div className="p-4 pt-0 sm:p-6 sm:pt-0 lg:flex lg:items-center lg:p-8 lg:pl-0">
                   <AccountShowcaseMockup
                     itemId={item.id}
                     image={item.image}

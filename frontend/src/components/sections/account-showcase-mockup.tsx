@@ -25,9 +25,7 @@ export function AccountShowcaseMockup({ itemId, image, images, metrics }: Accoun
   const imageSrc = resolveAccountShowcaseImage({ image, images }, theme);
 
   return (
-    <div
-      className="relative aspect-[16/11] w-full max-h-[min(30rem,70vh)] overflow-hidden rounded-[1.6rem] border border-[var(--border)] bg-[#07120e]"
-    >
+    <div className="relative min-h-[19rem] overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#07120e] lg:min-h-[28rem]">
       {images ? (
         <>
           <Image
@@ -56,25 +54,24 @@ export function AccountShowcaseMockup({ itemId, image, images, metrics }: Accoun
         />
       )}
 
-      <div className="absolute inset-x-0 top-0 z-[1] flex items-start justify-between gap-3 p-4 sm:p-5">
-        <div className="rounded-xl border border-white/12 bg-white/[0.08] p-2.5 backdrop-blur-md">
-          <Icon className="h-5 w-5 text-white" strokeWidth={1.9} aria-hidden />
-        </div>
-        <div className="rounded-full border border-white/10 bg-black/30 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.16em] text-white/70 backdrop-blur-md">
-          кабинет клиента
-        </div>
-      </div>
-
-      <div className="absolute inset-x-0 bottom-0 z-[1] grid grid-cols-3 gap-2 p-4 sm:gap-2.5 sm:p-5">
-        {metrics.map((metric) => (
-          <div
-            key={metric}
-            className="rounded-xl border border-white/10 bg-black/35 px-2.5 py-2 backdrop-blur-md sm:px-3 sm:py-2.5"
-          >
-            <p className="text-[9px] font-semibold uppercase tracking-[0.12em] text-white/44">раздел</p>
-            <p className="mt-0.5 text-xs font-semibold leading-tight text-white sm:text-sm">{metric}</p>
+      <div className="relative z-[1] flex min-h-[19rem] flex-col justify-between p-5 sm:p-6 lg:min-h-[28rem] lg:p-8">
+        <div className="flex items-start justify-between gap-4">
+          <div className="rounded-2xl border border-white/12 bg-white/[0.08] p-3 backdrop-blur-md">
+            <Icon className="h-6 w-6 text-white" strokeWidth={1.9} aria-hidden />
           </div>
-        ))}
+          <div className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/70 backdrop-blur-md">
+            кабинет клиента
+          </div>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3">
+          {metrics.map((metric) => (
+            <div key={metric} className="rounded-2xl border border-white/10 bg-black/30 px-3 py-3 backdrop-blur-md">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-white/44">раздел</p>
+              <p className="mt-1 text-sm font-semibold text-white">{metric}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
