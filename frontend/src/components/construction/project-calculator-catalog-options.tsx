@@ -286,6 +286,7 @@ function OptionRow({
                   src={imageUrl}
                   alt={name}
                   fill
+                  unoptimized={isCalculatorOptionDiagramUrl(imageUrl)}
                   className={cn(
                     isCalculatorOptionDiagramUrl(imageUrl)
                       ? "object-contain object-center"
@@ -293,12 +294,14 @@ function OptionRow({
                   )}
                   sizes="(max-width: 640px) 104px, 148px"
                 />
-                <button
-                  type="button"
-                  onClick={() => window.open(imageUrl, "_blank")}
-                  className="absolute inset-0 z-10 cursor-zoom-in bg-transparent"
-                  aria-label={`Открыть схему: ${name}`}
-                />
+                {!isCalculatorOptionDiagramUrl(imageUrl) ? (
+                  <button
+                    type="button"
+                    onClick={() => window.open(imageUrl, "_blank")}
+                    className="absolute inset-0 z-10 cursor-zoom-in bg-transparent"
+                    aria-label={`Открыть схему: ${name}`}
+                  />
+                ) : null}
               </div>
             ) : null}
             {description?.trim() ? (

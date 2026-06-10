@@ -2,20 +2,20 @@ import { describe, expect, it } from "vitest";
 
 import {
   ACCOUNT_SHOWCASE_ITEMS,
-  accountShowcaseTitles,
+  accountShowcaseHeadlines,
   resolveAccountShowcaseImage,
 } from "@/lib/account-showcase";
 
 describe("account-showcase", () => {
   it("covers seven client cabinet areas without camera", () => {
-    expect(accountShowcaseTitles()).toEqual([
-      "Главная",
-      "Этапы строительства",
-      "Фотоотчёты",
-      "Документы",
-      "Платежи",
-      "Обращения",
-      "Уведомления",
+    expect(accountShowcaseHeadlines()).toEqual([
+      "Обзор объекта",
+      "Контроль сроков",
+      "Прозрачный прогресс",
+      "Порядок в бумагах",
+      "Финансовая ясность",
+      "Связь с компанией",
+      "Ничего не пропустить",
     ]);
     expect(ACCOUNT_SHOWCASE_ITEMS.some((item) => item.id === "camera")).toBe(false);
   });

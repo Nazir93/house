@@ -5,22 +5,19 @@ import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
 import { ACCOUNT_SHOWCASE_ITEMS } from "@/lib/account-showcase";
 import { ACCOUNT_SHOWCASE_ICON_BY_ID } from "@/lib/account-showcase-icons";
 import { AccountShowcaseMockup } from "@/components/sections/account-showcase-mockup";
+import { cn } from "@/lib/utils";
 
 export function AccountShowcaseSection() {
   return (
     <section
       id="account-showcase"
       data-reveal="section"
-      className="relative overflow-clip border-t border-[var(--border)] py-16 sm:py-20 lg:py-28"
+      className="relative scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)]"
       style={{ backgroundColor: "var(--bg)" }}
       aria-labelledby="account-showcase-heading"
     >
-      <div
-        className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--accent)_14%,transparent),transparent_62%)]"
-        aria-hidden
-      />
-      <div className="container relative z-[1] mx-auto max-w-[1180px]">
-        <div className="mb-10 grid gap-6 lg:mb-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.6fr)] lg:items-end">
+      <div className="container relative z-[1] mx-auto max-w-[1180px] px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-28">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.6fr)] lg:items-end">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
               Личный кабинет клиента
@@ -46,33 +43,38 @@ export function AccountShowcaseSection() {
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="relative space-y-6 lg:space-y-0">
-          {ACCOUNT_SHOWCASE_ITEMS.map((item, index) => {
-            const Icon = ACCOUNT_SHOWCASE_ICON_BY_ID[item.id];
-            return (
-              <article
-                key={item.id}
-                data-reveal="card"
-                className="group relative grid min-h-[34rem] overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--bg-secondary)] shadow-[0_20px_70px_rgba(15,61,46,0.11)] lg:sticky lg:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] lg:gap-8"
-                style={{
-                  top: `calc(var(--site-header-sticky-offset) + ${index * 1.15}rem + 1.5rem)`,
-                  zIndex: index + 1,
-                  "--reveal-delay": `${index * 80}ms`,
-                } as CSSProperties}
-              >
-                <div className="flex min-h-[22rem] flex-col justify-between p-6 sm:p-8 lg:min-h-[34rem] lg:p-10">
+      <div className="relative">
+        {ACCOUNT_SHOWCASE_ITEMS.map((item, index) => {
+          const Icon = ACCOUNT_SHOWCASE_ICON_BY_ID[item.id];
+          return (
+            <article
+              key={item.id}
+              data-reveal="card"
+              className={cn(
+                "relative w-full border-t border-[var(--border)] bg-[var(--bg-secondary)]",
+                "min-h-[34rem] lg:min-h-[calc(100dvh-var(--site-header-sticky-offset))]",
+                "lg:sticky lg:top-[var(--site-header-sticky-offset)]",
+              )}
+              style={{
+                zIndex: index + 2,
+                "--reveal-delay": `${index * 80}ms`,
+              } as CSSProperties}
+            >
+              <div className="mx-auto grid h-full w-full max-w-[1380px] grid-cols-1 lg:min-h-[inherit] lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:gap-10 lg:px-8 xl:px-12">
+                <div className="flex flex-col justify-center px-4 py-10 sm:px-6 lg:px-0 lg:py-14">
                   <div>
                     <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_72%,transparent)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
                       <span className="h-2 w-2 rounded-full" style={{ backgroundColor: item.accent }} aria-hidden />
-                      {item.kicker}
+                      {item.index}
                     </div>
                     <div className="mt-7 flex items-center gap-4">
                       <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--accent-contrast)] shadow-[0_14px_40px_color-mix(in_srgb,var(--accent)_28%,transparent)]">
                         <Icon className="h-7 w-7" strokeWidth={1.8} aria-hidden />
                       </span>
                       <h3 className="font-heading text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl">
-                        {item.title}
+                        {item.headline}
                       </h3>
                     </div>
                     <p className="mt-5 max-w-lg text-sm leading-relaxed text-[var(--text-muted)] sm:text-[15px]">
@@ -90,20 +92,26 @@ export function AccountShowcaseSection() {
                   </div>
                 </div>
 
-                <div className="p-4 pt-0 sm:p-6 sm:pt-0 lg:p-8 lg:pl-0">
+                <div className="relative min-h-[19rem] lg:min-h-[inherit]">
                   <AccountShowcaseMockup
                     itemId={item.id}
                     image={item.image}
                     images={item.images}
                     metrics={item.metrics}
+                    fullBleed
                   />
                 </div>
-              </article>
-            );
-          })}
-        </div>
+              </div>
+            </article>
+          );
+        })}
+      </div>
 
-        <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div
+        className="relative z-[20] border-t border-[var(--border)]"
+        style={{ backgroundColor: "var(--bg)" }}
+      >
+        <div className="container mx-auto flex max-w-[1180px] flex-col gap-3 px-4 py-10 sm:px-6 sm:flex-row sm:items-center sm:justify-between lg:px-8">
           <p className="max-w-2xl text-sm leading-relaxed text-[var(--text-muted)]">
             Такой подход помогает продавать не обещание, а управляемый процесс: клиент видит, что стройка ведётся
             системно.
