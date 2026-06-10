@@ -25,7 +25,7 @@ export function AccountShowcaseMockup({ itemId, image, images, metrics }: Accoun
   const imageSrc = resolveAccountShowcaseImage({ image, images }, theme);
 
   return (
-    <div className="relative min-h-[19rem] overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#07120e] shadow-[0_28px_90px_rgba(0,0,0,0.34)] lg:min-h-[28rem]">
+    <div className="relative min-h-[19rem] overflow-hidden rounded-[1.6rem] border border-[var(--border)] bg-[#07120e] lg:min-h-[28rem]">
       {images ? (
         <>
           <Image
@@ -53,15 +53,9 @@ export function AccountShowcaseMockup({ itemId, image, images, metrics }: Accoun
           className="object-cover object-left-top opacity-58 saturate-[0.9]"
         />
       )}
-      <div
-        className={`absolute inset-0 bg-gradient-to-t from-black/88 via-black/46 to-black/22 ${images ? "opacity-35" : ""}`}
-        aria-hidden
-      />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_20%,rgba(125,211,168,0.22),transparent_34%)]" aria-hidden />
-
       <div className="relative z-[1] flex min-h-[19rem] flex-col justify-between p-5 sm:p-6 lg:min-h-[28rem] lg:p-8">
         <div className="flex items-start justify-between gap-4">
-          <div className="rounded-2xl border border-white/12 bg-white/[0.08] p-3 shadow-[0_12px_32px_rgba(0,0,0,0.25)] backdrop-blur-md">
+          <div className="rounded-2xl border border-white/12 bg-white/[0.08] p-3 backdrop-blur-md">
             <Icon className="h-6 w-6 text-white" strokeWidth={1.9} aria-hidden />
           </div>
           <div className="rounded-full border border-white/10 bg-black/30 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/70 backdrop-blur-md">

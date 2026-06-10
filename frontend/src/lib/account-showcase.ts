@@ -14,7 +14,6 @@ export type AccountShowcaseItem = {
   description: string;
   image: string;
   images?: AccountShowcaseImages;
-  accent: string;
   metrics: readonly string[];
   points: readonly string[];
 };
@@ -31,7 +30,6 @@ export const ACCOUNT_SHOWCASE_ITEMS: readonly AccountShowcaseItem[] = [
       light: "/images/account/showcase-dashboard-light.png",
       dark: "/images/account/showcase-dashboard-dark.png",
     },
-    accent: "#86efac",
     metrics: ["Прогресс", "Платежи", "Новое"],
     points: ["Карточка объекта", "Полоска этапов", "Блоки «требует внимания»"],
   },
@@ -46,7 +44,6 @@ export const ACCOUNT_SHOWCASE_ITEMS: readonly AccountShowcaseItem[] = [
       light: "/images/account/showcase-stages-light.png",
       dark: "/images/account/showcase-stages-dark.png",
     },
-    accent: "#7dd3a8",
     metrics: ["Фундамент", "Стены", "Кровля"],
     points: ["Статусы этапов", "План ближайших работ", "История изменений"],
   },
@@ -61,7 +58,6 @@ export const ACCOUNT_SHOWCASE_ITEMS: readonly AccountShowcaseItem[] = [
       light: "/images/account/showcase-photos-light.png",
       dark: "/images/account/showcase-photos-dark.png",
     },
-    accent: "#93c5fd",
     metrics: ["Новые фото", "Подписи", "Архив"],
     points: ["Отчёты с объекта", "Пояснения прораба", "Удобная галерея"],
   },
@@ -76,7 +72,6 @@ export const ACCOUNT_SHOWCASE_ITEMS: readonly AccountShowcaseItem[] = [
       light: "/images/account/showcase-documents-light.png",
       dark: "/images/account/showcase-documents-dark.png",
     },
-    accent: "#facc15",
     metrics: ["Договор", "Акты", "Файлы"],
     points: ["Скачивание документов", "Актуальные версии", "Хранение по объекту"],
   },
@@ -91,7 +86,6 @@ export const ACCOUNT_SHOWCASE_ITEMS: readonly AccountShowcaseItem[] = [
       light: "/images/account/showcase-payments-light.png",
       dark: "/images/account/showcase-payments-dark.png",
     },
-    accent: "#fca5a5",
     metrics: ["График", "Суммы", "История"],
     points: ["Ближайший платёж", "План оплат", "Прозрачная смета"],
   },
@@ -106,7 +100,6 @@ export const ACCOUNT_SHOWCASE_ITEMS: readonly AccountShowcaseItem[] = [
       light: "/images/account/showcase-support-light.png",
       dark: "/images/account/showcase-support-dark.png",
     },
-    accent: "#fdba74",
     metrics: ["Тикеты", "Ответы", "История"],
     points: ["Новое обращение", "Статус ответа", "Переписка по объекту"],
   },
@@ -121,7 +114,6 @@ export const ACCOUNT_SHOWCASE_ITEMS: readonly AccountShowcaseItem[] = [
       light: "/images/account/showcase-notifications-light.png",
       dark: "/images/account/showcase-notifications-dark.png",
     },
-    accent: "#67e8f9",
     metrics: ["Этапы", "Документы", "Платежи"],
     points: ["Лента событий", "Быстрые переходы", "Непрочитанные метки"],
   },
