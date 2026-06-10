@@ -1,23 +1,26 @@
-import Link from "next/link";
 import type { CSSProperties } from "react";
-import { ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
+import { CheckCircle2, ShieldCheck } from "lucide-react";
 
 import { ACCOUNT_SHOWCASE_ITEMS } from "@/lib/account-showcase";
 import { ACCOUNT_SHOWCASE_ICON_BY_ID } from "@/lib/account-showcase-icons";
+import { AccountShowcaseFooter } from "@/components/sections/account-showcase-footer";
 import { AccountShowcaseMockup } from "@/components/sections/account-showcase-mockup";
-import { cn } from "@/lib/utils";
 
 export function AccountShowcaseSection() {
   return (
     <section
       id="account-showcase"
       data-reveal="section"
-      className="relative scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)]"
+      className="relative overflow-clip scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)] py-16 sm:py-20 lg:py-28"
       style={{ backgroundColor: "var(--bg)" }}
       aria-labelledby="account-showcase-heading"
     >
-      <div className="container relative z-[1] mx-auto max-w-[1180px] px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-28">
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.6fr)] lg:items-end">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--accent)_14%,transparent),transparent_62%)]"
+        aria-hidden
+      />
+      <div className="container relative z-[1] mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-8">
+        <div className="mb-10 grid gap-6 lg:mb-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.6fr)] lg:items-end">
           <div>
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
               Личный кабинет клиента
@@ -43,27 +46,20 @@ export function AccountShowcaseSection() {
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="relative">
-        {ACCOUNT_SHOWCASE_ITEMS.map((item, index) => {
-          const Icon = ACCOUNT_SHOWCASE_ICON_BY_ID[item.id];
-          return (
-            <article
-              key={item.id}
-              data-reveal="card"
-              className={cn(
-                "relative w-full border-t border-[var(--border)] bg-[var(--bg-secondary)]",
-                "min-h-[34rem] lg:min-h-[calc(100dvh-var(--site-header-sticky-offset))]",
-                "lg:sticky lg:top-[var(--site-header-sticky-offset)]",
-              )}
-              style={{
-                zIndex: index + 2,
-                "--reveal-delay": `${index * 80}ms`,
-              } as CSSProperties}
-            >
-              <div className="mx-auto grid h-full w-full max-w-[1380px] grid-cols-1 lg:min-h-[inherit] lg:grid-cols-[minmax(0,0.88fr)_minmax(0,1.12fr)] lg:gap-10 lg:px-8 xl:px-12">
-                <div className="flex flex-col justify-center px-4 py-10 sm:px-6 lg:px-0 lg:py-14">
+        <div className="relative space-y-6">
+          {ACCOUNT_SHOWCASE_ITEMS.map((item, index) => {
+            const Icon = ACCOUNT_SHOWCASE_ICON_BY_ID[item.id];
+            return (
+              <article
+                key={item.id}
+                data-reveal="card"
+                className="group relative grid min-h-[34rem] overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--bg-secondary)] shadow-[0_20px_70px_rgba(15,61,46,0.11)] lg:grid-cols-[minmax(0,0.86fr)_minmax(0,1.14fr)] lg:gap-8"
+                style={{
+                  "--reveal-delay": `${index * 80}ms`,
+                } as CSSProperties}
+              >
+                <div className="flex min-h-[22rem] flex-col justify-between p-6 sm:p-8 lg:min-h-[34rem] lg:p-10">
                   <div>
                     <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_72%,transparent)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
                       <span className="h-2 w-2 rounded-full" style={{ backgroundColor: item.accent }} aria-hidden />
@@ -92,38 +88,20 @@ export function AccountShowcaseSection() {
                   </div>
                 </div>
 
-                <div className="relative min-h-[19rem] lg:min-h-[inherit]">
+                <div className="relative min-h-[19rem] p-6 sm:p-8 lg:min-h-[34rem] lg:p-10">
                   <AccountShowcaseMockup
                     itemId={item.id}
                     image={item.image}
                     images={item.images}
                     metrics={item.metrics}
-                    fullBleed
                   />
                 </div>
-              </div>
-            </article>
-          );
-        })}
-      </div>
-
-      <div
-        className="relative z-[20] border-t border-[var(--border)]"
-        style={{ backgroundColor: "var(--bg)" }}
-      >
-        <div className="container mx-auto flex max-w-[1180px] flex-col gap-3 px-4 py-10 sm:px-6 sm:flex-row sm:items-center sm:justify-between lg:px-8">
-          <p className="max-w-2xl text-sm leading-relaxed text-[var(--text-muted)]">
-            Такой подход помогает продавать не обещание, а управляемый процесс: клиент видит, что стройка ведётся
-            системно.
-          </p>
-          <Link
-            href="/account/login"
-            className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-bold uppercase tracking-[0.08em] text-[var(--accent-contrast)] shadow-[0_14px_40px_color-mix(in_srgb,var(--accent)_25%,transparent)] transition hover:bg-[var(--accent-hover)]"
-          >
-            Войти в кабинет
-            <ArrowRight className="h-4 w-4" strokeWidth={2.1} aria-hidden />
-          </Link>
+              </article>
+            );
+          })}
         </div>
+
+        <AccountShowcaseFooter />
       </div>
     </section>
   );
