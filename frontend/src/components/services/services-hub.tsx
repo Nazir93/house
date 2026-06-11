@@ -6,7 +6,8 @@ import { Fragment, useMemo, useState } from "react";
 import { ArrowRight, ChevronRight } from "lucide-react";
 
 import type { ServiceItem } from "@/lib/get-services";
-import { SERVICES_PROCESS_STEPS, getServiceHubCopy, slugSegmentFromServiceHref } from "@/lib/services-hub-data";
+import { SERVICES_PROCESS_STEPS, getServiceHubCopy, resolveServiceHubCtaAction, slugSegmentFromServiceHref } from "@/lib/services-hub-data";
+import { useModal } from "@/lib/modal-context";
 import { cn } from "@/lib/utils";
 
 type HubRow = {
@@ -35,6 +36,7 @@ export function ServicesHub({
   );
 
   const [active, setActive] = useState(0);
+  const { openModal } = useModal();
   if (rows.length === 0) {
     return (
       <div className="container mx-auto max-w-[900px] px-4 py-20 text-center text-[var(--text-muted)]">
@@ -59,7 +61,13 @@ export function ServicesHub({
   const sectionParagraphs = hub?.sectionParagraphs.slice(0, 2) ?? [];
   const features = hub?.features ?? [];
   const ctaLabel = hub?.ctaLabel ?? "Подробнее об услуге";
+  const ctaAction = resolveServiceHubCtaAction(hub);
   const centerSrc = hub?.centerImageSrc;
+
+  const ctaClassName = cn(
+    "inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-5 py-3.5 text-sm font-semibold text-[var(--on-accent)] transition-colors hover:bg-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] sm:w-auto sm:min-w-[240px]",
+    features.length > 0 ? "mt-6" : "",
+  );
 
   return (
     <div className="pb-16 md:pb-20">
@@ -219,16 +227,17 @@ export function ServicesHub({
                 </div>
               ) : null}
 
-              <Link
-                href={href}
-                className={cn(
-                  "inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-5 py-3.5 text-sm font-semibold text-[var(--on-accent)] transition-colors hover:bg-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] sm:w-auto sm:min-w-[240px]",
-                  features.length > 0 ? "mt-6" : "",
-                )}
-              >
-                {ctaLabel}
-                <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
-              </Link>
+              {ctaAction === "modal" ? (
+                <button type="button" onClick={openModal} className={ctaClassName}>
+                  {ctaLabel}
+                  <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+                </button>
+              ) : (
+                <Link href={href} className={ctaClassName}>
+                  {ctaLabel}
+                  <ArrowRight className="h-4 w-4 shrink-0" aria-hidden />
+                </Link>
+              )}
             </div>
           </div>
         </div>

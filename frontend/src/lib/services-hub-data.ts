@@ -40,6 +40,8 @@ export type ServiceHubCopy = {
   features: ServiceHubFeature[];
   /** Текст основной кнопки на карточке */
   ctaLabel: string;
+  /** modal — форма заявки; link — страница услуги */
+  ctaAction?: "modal" | "link";
   /** Изображение в центре секции (файл из `/public`, см. `hub-*` в `public/images/services/hub/`) */
   centerImageSrc?: string | null;
 };
@@ -61,6 +63,7 @@ const hubBySlugSegment: Record<string, ServiceHubCopy> = {
       { Icon: DraftingCompass, label: "3D-визуализация и детализация" },
     ],
     ctaLabel: "Обсудить проект",
+    ctaAction: "modal",
     centerImageSrc: "/images/services/hub/hub-projecting.png",
   },
   foundation: {
@@ -97,6 +100,7 @@ const hubBySlugSegment: Record<string, ServiceHubCopy> = {
       { Icon: BadgeCheck, label: "Приёмка по чек-листу" },
     ],
     ctaLabel: "Обсудить коробку",
+    ctaAction: "modal",
     centerImageSrc: "/images/services/hub/hub-foundation.png",
   },
   roofing: {
@@ -154,6 +158,7 @@ const hubBySlugSegment: Record<string, ServiceHubCopy> = {
       { Icon: Lightbulb, label: "Освещение и навеска" },
     ],
     ctaLabel: "Обсудить отделку",
+    ctaAction: "modal",
     centerImageSrc: "/images/services/hub/hub-finishing.png",
   },
 };
@@ -176,6 +181,14 @@ const RU_HUB_SEGMENT_ALIASES: Record<string, string> = {
 export function getServiceHubCopy(segment: string): ServiceHubCopy | null {
   const key = RU_HUB_SEGMENT_ALIASES[segment] ?? segment;
   return hubBySlugSegment[key] ?? null;
+}
+
+/** Кнопка «Обсудить…» открывает форму заявки; «Рассчитать…» ведёт на страницу услуги. */
+export function resolveServiceHubCtaAction(hub: ServiceHubCopy | null): "modal" | "link" {
+  if (!hub) return "link";
+  if (hub.ctaAction) return hub.ctaAction;
+  if (hub.ctaLabel.trim().startsWith("Обсудить")) return "modal";
+  return "link";
 }
 
 export const BENEFITS_BAR = [

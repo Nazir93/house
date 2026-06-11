@@ -27,6 +27,10 @@ export function LandingHeroCinematic({
 }) {
   const [visible, setVisible] = useState(false);
   const image = bannerImageDesktop || bannerImageMobile || "/images/hero/hero-01.png";
+  const useSingleBanner =
+    !bannerImageMobile ||
+    !bannerImageDesktop ||
+    bannerImageMobile === bannerImageDesktop;
 
   useEffect(() => {
     setVisible(true);
@@ -53,26 +57,40 @@ export function LandingHeroCinematic({
         }}
       >
         <div className="absolute inset-0">
-          {bannerImageDesktop ? (
+          {useSingleBanner ? (
             <CmsImage
-              src={bannerImageDesktop}
+              src={image}
               alt=""
               fill
               priority
               unoptimized={fullBleed}
-              className={cn("object-cover object-center", bannerImageMobile ? "hidden md:block" : "")}
+              className="object-cover object-center"
               sizes="100vw"
             />
-          ) : null}
-          <CmsImage
-            src={bannerImageMobile || image}
-            alt=""
-            fill
-            priority
-            unoptimized={fullBleed}
-            className={cn("object-cover object-center", bannerImageDesktop ? "md:hidden" : "")}
-            sizes="100vw"
-          />
+          ) : (
+            <>
+              {bannerImageDesktop ? (
+                <CmsImage
+                  src={bannerImageDesktop}
+                  alt=""
+                  fill
+                  priority
+                  unoptimized={fullBleed}
+                  className="hidden object-cover object-center md:block"
+                  sizes="100vw"
+                />
+              ) : null}
+              <CmsImage
+                src={bannerImageMobile!}
+                alt=""
+                fill
+                priority
+                unoptimized={fullBleed}
+                className="object-cover object-center md:hidden"
+                sizes="100vw"
+              />
+            </>
+          )}
           {!fullBleed ? (
             <>
               <div

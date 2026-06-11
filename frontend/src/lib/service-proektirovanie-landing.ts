@@ -50,6 +50,11 @@ export const PROEKTROVANIE_TIMELINE_ITEMS: StoryTimelineItem[] = [
 /** @deprecated alias */
 export const PROEKTROVANIE_TIMELINE_PLACEHOLDERS = PROEKTROVANIE_TIMELINE_ITEMS;
 
+function resolveProektirovanieHeroBanner(url: string | undefined): string {
+  if (!url || url === PROEKTROVANIE_HERO_BANNER) return PROEKTROVANIE_HERO_FALLBACK_BANNER;
+  return url;
+}
+
 /** Подключает cinematic hero + scroll timeline для /services/proektirovanie. */
 export function enrichProektirovanieLandingDocument(
   slug: string,
@@ -68,20 +73,18 @@ export function enrichProektirovanieLandingDocument(
       s.type !== "faq"
   );
 
+  const heroBanner = heroSection
+    ? resolveProektirovanieHeroBanner(heroSection.bannerImageDesktop)
+    : PROEKTROVANIE_HERO_FALLBACK_BANNER;
+
   const cinematic =
     heroSection?.type === "heroCinematic"
       ? {
           ...heroSection,
           title: PROEKTROVANIE_HERO_TITLE,
           subtitle: PROEKTROVANIE_HERO_SUBTITLE,
-          bannerImageDesktop:
-            !heroSection.bannerImageDesktop || heroSection.bannerImageDesktop === PROEKTROVANIE_HERO_BANNER
-              ? PROEKTROVANIE_HERO_FALLBACK_BANNER
-              : heroSection.bannerImageDesktop,
-          bannerImageMobile:
-            !heroSection.bannerImageMobile || heroSection.bannerImageMobile === PROEKTROVANIE_HERO_BANNER
-              ? heroSection.bannerImageDesktop ?? PROEKTROVANIE_HERO_FALLBACK_BANNER
-              : heroSection.bannerImageMobile,
+          bannerImageDesktop: heroBanner,
+          bannerImageMobile: heroBanner,
         }
       : heroSection?.type === "hero"
         ? {
@@ -92,21 +95,15 @@ export function enrichProektirovanieLandingDocument(
             tag: heroSection.tag,
             features: heroSection.features,
             goals: heroSection.goals,
-            bannerImageDesktop:
-              !heroSection.bannerImageDesktop || heroSection.bannerImageDesktop === PROEKTROVANIE_HERO_BANNER
-                ? PROEKTROVANIE_HERO_FALLBACK_BANNER
-                : heroSection.bannerImageDesktop,
-            bannerImageMobile:
-              !heroSection.bannerImageMobile || heroSection.bannerImageMobile === PROEKTROVANIE_HERO_BANNER
-                ? heroSection.bannerImageDesktop ?? PROEKTROVANIE_HERO_FALLBACK_BANNER
-                : heroSection.bannerImageMobile,
+            bannerImageDesktop: heroBanner,
+            bannerImageMobile: heroBanner,
           }
         : {
             type: "heroCinematic" as const,
             title: PROEKTROVANIE_HERO_TITLE,
             subtitle: PROEKTROVANIE_HERO_SUBTITLE,
-            bannerImageDesktop: PROEKTROVANIE_HERO_FALLBACK_BANNER,
-            bannerImageMobile: PROEKTROVANIE_HERO_FALLBACK_BANNER,
+            bannerImageDesktop: heroBanner,
+            bannerImageMobile: heroBanner,
           };
 
 

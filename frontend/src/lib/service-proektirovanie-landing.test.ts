@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   enrichProektirovanieLandingDocument,
+  PROEKTROVANIE_HERO_BANNER,
   PROEKTROVANIE_HERO_FALLBACK_BANNER,
   PROEKTROVANIE_HERO_SUBTITLE,
   PROEKTROVANIE_HERO_TITLE,
@@ -56,6 +57,32 @@ describe("enrichProektirovanieLandingDocument", () => {
     expect(out.sections[0]?.type).toBe("heroCinematic");
     if (out.sections[0]?.type === "heroCinematic") {
       expect(out.sections[0].bannerImageDesktop).toBe(PROEKTROVANIE_HERO_FALLBACK_BANNER);
+      expect(out.sections[0].bannerImageMobile).toBe(PROEKTROVANIE_HERO_FALLBACK_BANNER);
+    }
+  });
+
+  it("proektirovanie: mobile баннер совпадает с desktop (карточка v2 → cinematic hero)", () => {
+    const doc: ServiceLandingDocument = {
+      sections: [
+        {
+          type: "hero",
+          title: "T",
+          subtitle: "S",
+          serviceKey: "proektirovanie",
+          tag: "",
+          features: [],
+          goals: "",
+          bannerImageDesktop: PROEKTROVANIE_HERO_BANNER,
+          bannerImageMobile: PROEKTROVANIE_HERO_BANNER,
+        },
+      ],
+    };
+    const out = enrichProektirovanieLandingDocument("proektirovanie", doc);
+    const hero = out.sections[0];
+    expect(hero?.type).toBe("heroCinematic");
+    if (hero?.type === "heroCinematic") {
+      expect(hero.bannerImageDesktop).toBe(PROEKTROVANIE_HERO_FALLBACK_BANNER);
+      expect(hero.bannerImageMobile).toBe(hero.bannerImageDesktop);
     }
   });
 });

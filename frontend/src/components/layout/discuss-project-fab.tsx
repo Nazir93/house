@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ComponentProps, type CSSProperties } from "react";
+import { useState, type ComponentProps } from "react";
 import { ChevronUp, MessageCircle, Phone, Send, X } from "lucide-react";
 
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
@@ -14,26 +14,40 @@ const FAB_RIGHT =
 const FAB_BOTTOM = "bottom-[var(--mobile-bottom-nav-offset)] lg:bottom-10";
 const MESSENGER_CHAT_PHONE = "+79046000099";
 
-const fabBtnClass =
-  "flex h-12 w-12 touch-manipulation items-center justify-center rounded-full text-white shadow-[0_4px_20px_rgba(0,0,0,0.28)] transition-transform duration-200 hover:scale-[1.06] active:scale-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/80";
+const fabItemClass =
+  "contact-fab-item relative z-10 flex min-w-0 items-center justify-center rounded-[1.65rem] py-2 transition-[color,transform] duration-300 ease-out touch-manipulation active:scale-95";
 
-function FabCircle({
-  className,
+function FabIconWrap({
   children,
-  style,
-  ...props
-}: ComponentProps<"button"> & { style?: CSSProperties }) {
+  active,
+  className,
+}: {
+  children: React.ReactNode;
+  active?: boolean;
+  className?: string;
+}) {
   return (
-    <button
-      type="button"
-      className={cn(fabBtnClass, className)}
-      style={{
-        backgroundColor: "var(--accent)",
-        ...style,
-      }}
-      {...props}
+    <span
+      className={cn(
+        "contact-fab-icon-wrap relative flex h-8 w-8 items-center justify-center",
+        active && "contact-fab-icon-wrap--active",
+        className
+      )}
     >
       {children}
+    </span>
+  );
+}
+
+function FabButton({
+  className,
+  children,
+  active,
+  ...props
+}: ComponentProps<"button"> & { active?: boolean }) {
+  return (
+    <button type="button" className={cn(fabItemClass, className)} {...props}>
+      <FabIconWrap active={active}>{children}</FabIconWrap>
     </button>
   );
 }
@@ -45,13 +59,8 @@ function FabLink({
   ...props
 }: ComponentProps<"a">) {
   return (
-    <a
-      href={href}
-      className={cn(fabBtnClass, className)}
-      style={{ backgroundColor: "var(--accent)" }}
-      {...props}
-    >
-      {children}
+    <a href={href} className={cn(fabItemClass, className)} {...props}>
+      <FabIconWrap>{children}</FabIconWrap>
     </a>
   );
 }
@@ -83,52 +92,90 @@ export function DiscussProjectFab() {
 
   return (
     <div
-      className={cn("fixed z-[115] flex flex-col items-center gap-2.5", FAB_RIGHT, FAB_BOTTOM)}
+      className={cn("contact-fab-shell fixed z-[115]", FAB_RIGHT, FAB_BOTTOM)}
       aria-label="Быстрые действия"
     >
-      {contactOpen ? (
-        <>
-          {maxHref ? (
-            <FabLink
-              href={maxHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Написать в Max"
+      <div className="contact-fab-bar pointer-events-auto relative flex flex-col items-center overflow-hidden px-1 py-1">
+        {contactOpen ? (
+          <>
+            {maxHref ? (
+              <FabLink
+                href={maxHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Написать в Max"
+              >
+                <MaxMessengerIcon
+                  className="h-[22px] w-[22px] shrink-0 text-[var(--text)]"
+                />
+              </FabLink>
+            ) : null}
+
+            {telegramHref ? (
+              <FabLink
+                href={telegramHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Написать в Telegram"
+              >
+                <Send
+                  size={22}
+                  strokeWidth={2.3}
+                  className="shrink-0"
+                  style={{ color: "var(--text)" }}
+                  aria-hidden
+                />
+              </FabLink>
+            ) : null}
+
+            {phoneHref ? (
+              <FabLink href={phoneHref} aria-label={`Позвонить: ${contact.phone}`}>
+                <Phone
+                  size={22}
+                  strokeWidth={2.3}
+                  className="shrink-0"
+                  style={{ color: "var(--text)" }}
+                  aria-hidden
+                />
+              </FabLink>
+            ) : null}
+
+            <FabButton
+              onClick={() => setContactOpen(false)}
+              aria-label="Скрыть контакты"
+              active
             >
-              <MaxMessengerIcon className="h-5 w-5 opacity-95" aria-hidden />
-            </FabLink>
-          ) : null}
+              <X
+                size={22}
+                strokeWidth={2.55}
+                className="shrink-0"
+                style={{ color: "var(--accent)" }}
+                aria-hidden
+              />
+            </FabButton>
+          </>
+        ) : (
+          <FabButton onClick={() => setContactOpen(true)} aria-label="Показать контакты" active>
+            <MessageCircle
+              size={22}
+              strokeWidth={2.55}
+              className="shrink-0"
+              style={{ color: "var(--accent)" }}
+              aria-hidden
+            />
+          </FabButton>
+        )}
 
-          {telegramHref ? (
-            <FabLink
-              href={telegramHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Написать в Telegram"
-            >
-              <Send className="h-5 w-5" strokeWidth={2} aria-hidden />
-            </FabLink>
-          ) : null}
-
-          {phoneHref ? (
-            <FabLink href={phoneHref} aria-label={`Позвонить: ${contact.phone}`}>
-              <Phone className="h-5 w-5" strokeWidth={2} aria-hidden />
-            </FabLink>
-          ) : null}
-
-          <FabCircle onClick={() => setContactOpen(false)} aria-label="Скрыть контакты">
-            <X className="h-5 w-5" strokeWidth={2.25} aria-hidden />
-          </FabCircle>
-        </>
-      ) : (
-        <FabCircle onClick={() => setContactOpen(true)} aria-label="Показать контакты">
-          <MessageCircle className="h-5 w-5" strokeWidth={2} aria-hidden />
-        </FabCircle>
-      )}
-
-      <FabCircle onClick={scrollToTop} aria-label="Прокрутить наверх">
-        <ChevronUp className="h-5 w-5" strokeWidth={2.25} aria-hidden />
-      </FabCircle>
+        <FabButton onClick={scrollToTop} aria-label="Прокрутить наверх">
+          <ChevronUp
+            size={22}
+            strokeWidth={2.3}
+            className="shrink-0"
+            style={{ color: "var(--text)" }}
+            aria-hidden
+          />
+        </FabButton>
+      </div>
     </div>
   );
 }

@@ -296,50 +296,161 @@ export function Header() {
       {/* Полноэкранное меню (открывается с мобильной шапки и сайднава); верхняя полоса — в NavBar / SiteHeaderBar */}
       {/* Fullscreen menu overlay */}
       {isOpen && (
-        <div
-          className="fixed inset-0 z-[80] flex flex-col overflow-hidden"
-          style={{ backgroundColor: "var(--bg)" }}
-        >
+        <div className="mobile-fs-menu-overlay">
           {/* Blueprint background */}
-          <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+          <div className="mobile-fs-menu__blueprint absolute inset-0 pointer-events-none z-[1] overflow-hidden">
             <svg
-              className="absolute inset-0 w-full h-full"
+              className="absolute inset-0 h-full w-full"
               viewBox="0 0 800 600"
               preserveAspectRatio="xMidYMid slice"
               fill="none"
+              aria-hidden
             >
               {/* Grid */}
               {Array.from({ length: 31 }, (_, i) => (
-                <line key={`gh-${i}`} x1={0} y1={i * 20} x2={800} y2={i * 20} stroke="rgba(0,0,0,0.03)" strokeWidth="0.5" />
+                <line
+                  key={`gh-${i}`}
+                  x1={0}
+                  y1={i * 20}
+                  x2={800}
+                  y2={i * 20}
+                  stroke="var(--mobile-fs-blueprint-grid)"
+                  strokeWidth="0.5"
+                />
               ))}
               {Array.from({ length: 41 }, (_, i) => (
-                <line key={`gv-${i}`} x1={i * 20} y1={0} x2={i * 20} y2={600} stroke="rgba(0,0,0,0.03)" strokeWidth="0.5" />
+                <line
+                  key={`gv-${i}`}
+                  x1={i * 20}
+                  y1={0}
+                  x2={i * 20}
+                  y2={600}
+                  stroke="var(--mobile-fs-blueprint-grid)"
+                  strokeWidth="0.5"
+                />
               ))}
 
               {/* DIN rail */}
-              <rect x="80" y="80" width="640" height="8" rx="1" stroke="rgba(0,0,0,0.05)" strokeWidth="0.5" fill="none" />
-              <rect x="80" y="200" width="640" height="8" rx="1" stroke="rgba(0,0,0,0.05)" strokeWidth="0.5" fill="none" />
-              <rect x="80" y="380" width="640" height="8" rx="1" stroke="rgba(0,0,0,0.05)" strokeWidth="0.5" fill="none" />
+              <rect
+                x="80"
+                y="80"
+                width="640"
+                height="8"
+                rx="1"
+                stroke="var(--mobile-fs-blueprint-line)"
+                strokeWidth="0.5"
+                fill="none"
+              />
+              <rect
+                x="80"
+                y="200"
+                width="640"
+                height="8"
+                rx="1"
+                stroke="var(--mobile-fs-blueprint-line)"
+                strokeWidth="0.5"
+                fill="none"
+              />
+              <rect
+                x="80"
+                y="380"
+                width="640"
+                height="8"
+                rx="1"
+                stroke="var(--mobile-fs-blueprint-line)"
+                strokeWidth="0.5"
+                fill="none"
+              />
 
               {/* Circuit breakers */}
               {[120, 180, 240, 300, 360, 420, 480, 540, 600, 660].map((x, i) => (
-                <g key={`cb-${i}`} opacity={0.045}>
-                  <rect x={x - 12} y={90} width={24} height={40} rx="2" stroke="rgba(15,61,46,1)" strokeWidth="0.8" />
-                  <line x1={x} y1={90} x2={x} y2={80} stroke="rgba(15,61,46,1)" strokeWidth="0.5" />
-                  <line x1={x} y1={130} x2={x} y2={145} stroke="rgba(15,61,46,1)" strokeWidth="0.5" />
-                  <circle cx={x} cy={105} r="3" stroke="rgba(15,61,46,1)" strokeWidth="0.5" />
-                  <line x1={x - 2} y1={103} x2={x + 2} y2={107} stroke="rgba(15,61,46,1)" strokeWidth="0.5" />
+                <g key={`cb-${i}`} opacity={0.09}>
+                  <rect
+                    x={x - 12}
+                    y={90}
+                    width={24}
+                    height={40}
+                    rx="2"
+                    stroke="var(--mobile-fs-blueprint-accent)"
+                    strokeWidth="0.8"
+                  />
+                  <line
+                    x1={x}
+                    y1={90}
+                    x2={x}
+                    y2={80}
+                    stroke="var(--mobile-fs-blueprint-accent)"
+                    strokeWidth="0.5"
+                  />
+                  <line
+                    x1={x}
+                    y1={130}
+                    x2={x}
+                    y2={145}
+                    stroke="var(--mobile-fs-blueprint-accent)"
+                    strokeWidth="0.5"
+                  />
+                  <circle
+                    cx={x}
+                    cy={105}
+                    r="3"
+                    stroke="var(--mobile-fs-blueprint-accent)"
+                    strokeWidth="0.5"
+                  />
+                  <line
+                    x1={x - 2}
+                    y1={103}
+                    x2={x + 2}
+                    y2={107}
+                    stroke="var(--mobile-fs-blueprint-accent)"
+                    strokeWidth="0.5"
+                  />
                 </g>
               ))}
 
               {/* RCD symbols */}
               {[150, 350, 550].map((x, i) => (
-                <g key={`rcd-${i}`} opacity={0.04}>
-                  <rect x={x - 18} y={210} width={36} height={50} rx="3" stroke="rgba(15,61,46,1)" strokeWidth="0.8" />
-                  <line x1={x} y1={200} x2={x} y2={210} stroke="rgba(15,61,46,1)" strokeWidth="0.5" />
-                  <line x1={x} y1={260} x2={x} y2={280} stroke="rgba(15,61,46,1)" strokeWidth="0.5" />
-                  <path d={`M${x - 8} 230 Q${x} 240 ${x + 8} 230`} stroke="rgba(15,61,46,1)" strokeWidth="0.6" />
-                  <text x={x} y={253} textAnchor="middle" fill="rgba(15,61,46,1)" fontSize="6" fontFamily="monospace">T</text>
+                <g key={`rcd-${i}`} opacity={0.08}>
+                  <rect
+                    x={x - 18}
+                    y={210}
+                    width={36}
+                    height={50}
+                    rx="3"
+                    stroke="var(--mobile-fs-blueprint-accent)"
+                    strokeWidth="0.8"
+                  />
+                  <line
+                    x1={x}
+                    y1={200}
+                    x2={x}
+                    y2={210}
+                    stroke="var(--mobile-fs-blueprint-accent)"
+                    strokeWidth="0.5"
+                  />
+                  <line
+                    x1={x}
+                    y1={260}
+                    x2={x}
+                    y2={280}
+                    stroke="var(--mobile-fs-blueprint-accent)"
+                    strokeWidth="0.5"
+                  />
+                  <path
+                    d={`M${x - 8} 230 Q${x} 240 ${x + 8} 230`}
+                    stroke="var(--mobile-fs-blueprint-accent)"
+                    strokeWidth="0.6"
+                  />
+                  <text
+                    x={x}
+                    y={253}
+                    textAnchor="middle"
+                    fill="var(--mobile-fs-blueprint-accent)"
+                    fontSize="6"
+                    fontFamily="monospace"
+                  >
+                    T
+                  </text>
                 </g>
               ))}
 
@@ -353,20 +464,60 @@ export function Header() {
                 "M 240 145 L 240 300 L 280 300 L 280 380",
                 "M 600 145 L 600 350 L 650 350 L 650 380",
               ].map((d, i) => (
-                <path key={`w-${i}`} d={d} stroke="rgba(0,0,0,0.035)" strokeWidth="0.8" strokeLinejoin="round" />
+                <path
+                  key={`w-${i}`}
+                  d={d}
+                  stroke="var(--mobile-fs-blueprint-grid)"
+                  strokeWidth="0.8"
+                  strokeLinejoin="round"
+                />
               ))}
 
               {/* Ground symbol */}
-              <g opacity={0.04}>
-                <line x1={400} y1={500} x2={400} y2={520} stroke="rgba(15,61,46,1)" strokeWidth="0.8" />
-                <line x1={388} y1={520} x2={412} y2={520} stroke="rgba(15,61,46,1)" strokeWidth="0.8" />
-                <line x1={392} y1={525} x2={408} y2={525} stroke="rgba(15,61,46,1)" strokeWidth="0.6" />
-                <line x1={396} y1={530} x2={404} y2={530} stroke="rgba(15,61,46,1)" strokeWidth="0.4" />
+              <g opacity={0.08}>
+                <line
+                  x1={400}
+                  y1={500}
+                  x2={400}
+                  y2={520}
+                  stroke="var(--mobile-fs-blueprint-accent)"
+                  strokeWidth="0.8"
+                />
+                <line
+                  x1={388}
+                  y1={520}
+                  x2={412}
+                  y2={520}
+                  stroke="var(--mobile-fs-blueprint-accent)"
+                  strokeWidth="0.8"
+                />
+                <line
+                  x1={392}
+                  y1={525}
+                  x2={408}
+                  y2={525}
+                  stroke="var(--mobile-fs-blueprint-accent)"
+                  strokeWidth="0.6"
+                />
+                <line
+                  x1={396}
+                  y1={530}
+                  x2={404}
+                  y2={530}
+                  stroke="var(--mobile-fs-blueprint-accent)"
+                  strokeWidth="0.4"
+                />
               </g>
 
               {/* Junction dots */}
               {[[120, 200], [300, 200], [150, 280], [350, 280], [550, 280], [280, 380], [400, 380], [500, 380], [650, 380]].map(([cx, cy], i) => (
-                <circle key={`jd-${i}`} cx={cx} cy={cy} r="2" fill="rgba(0,0,0,0.04)" />
+                <circle
+                  key={`jd-${i}`}
+                  cx={cx}
+                  cy={cy}
+                  r="2"
+                  fill="var(--mobile-fs-blueprint-fill)"
+                />
               ))}
             </svg>
           </div>
@@ -385,8 +536,8 @@ export function Header() {
               <button
                 type="button"
                 onClick={closeMenu}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border bg-[var(--bg)]/90 shadow-lg backdrop-blur-md transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                style={{ borderColor: "var(--border)", color: "var(--text)" }}
+                className="mobile-fs-menu__close flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                style={{ color: "var(--text)" }}
                 aria-label="Закрыть меню"
               >
                 <X className="h-5 w-5" strokeWidth={2.25} aria-hidden />
