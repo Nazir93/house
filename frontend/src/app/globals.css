@@ -918,7 +918,7 @@
     position: fixed;
     right: 0;
     top: 42%;
-    z-index: 44;
+    z-index: 52;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -974,7 +974,7 @@
   .projects-catalog-filters-overlay {
     position: fixed;
     inset: 0;
-    z-index: 45;
+    z-index: 51;
     pointer-events: none;
     visibility: hidden;
   }
@@ -1198,13 +1198,11 @@
 @keyframes pageContentFadeIn {
   from {
     opacity: 0;
-    transform: translateY(8px);
-    filter: blur(3px) saturate(0.98);
+    filter: blur(2px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
-    filter: blur(0) saturate(1);
+    filter: none;
   }
 }
 
