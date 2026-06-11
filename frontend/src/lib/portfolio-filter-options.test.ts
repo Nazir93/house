@@ -1,14 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { BuiltObjectItem } from "./construction-shared";
 import {
-  addCustomFloorOption,
-  addCustomMaterialOption,
   filterPortfolioObjects,
   floorMatchesFilterOption,
   formatFloorFilterLabel,
   mergeFloorFilterOptions,
   mergeMaterialFilterOptions,
-  parsePortfolioFilterOptionsConfig,
 } from "./portfolio-filter-options";
 
 function sampleObject(overrides: Partial<BuiltObjectItem> = {}): BuiltObjectItem {
@@ -28,27 +25,18 @@ function sampleObject(overrides: Partial<BuiltObjectItem> = {}): BuiltObjectItem
 }
 
 describe("portfolio-filter-options", () => {
-  // ТЗ п.3–5: пресеты материалов, этажности и площади
   it("mergeMaterialFilterOptions includes default presets", () => {
-    const opts = mergeMaterialFilterOptions({ customMaterials: [], customFloors: [] });
+    const opts = mergeMaterialFilterOptions();
     expect(opts.map((o) => o.label)).toEqual(["Кирпич", "Газобетон", "Керамический блок"]);
   });
 
-  it("mergeMaterialFilterOptions merges custom admin materials", () => {
-    const opts = mergeMaterialFilterOptions({
-      customMaterials: [{ value: "FRAME", label: "Каркасный дом" }],
-      customFloors: [],
-    });
-    expect(opts.some((o) => o.value === "FRAME" && o.label === "Каркасный дом")).toBe(true);
-  });
-
   it("mergeFloorFilterOptions includes default floor presets", () => {
-    const opts = mergeFloorFilterOptions({ customMaterials: [], customFloors: [] });
+    const opts = mergeFloorFilterOptions();
     expect(opts.map((o) => o.label)).toEqual(["1 этаж", "1,5 этажа", "2 этажа"]);
   });
 
   it("floorMatchesFilterOption matches 1, 1.5 and 2 floors", () => {
-    const opts = mergeFloorFilterOptions({ customMaterials: [], customFloors: [] });
+    const opts = mergeFloorFilterOptions();
     const one = opts.find((o) => o.id === "1")!;
     const mid = opts.find((o) => o.id === "1.5")!;
     const two = opts.find((o) => o.id === "2")!;
@@ -66,7 +54,7 @@ describe("portfolio-filter-options", () => {
       sampleObject({ id: "b", material: "GAS_BLOCK", floors: 2, area: 200 }),
       sampleObject({ id: "c", material: "BRICK", floors: 2, area: 300 }),
     ];
-    const floorOptions = mergeFloorFilterOptions({ customMaterials: [], customFloors: [] });
+    const floorOptions = mergeFloorFilterOptions();
 
     const byMaterial = filterPortfolioObjects(objects, { material: "BRICK", floorId: "all", areaId: "all" }, floorOptions);
     expect(byMaterial.map((o) => o.id)).toEqual(["a", "c"]);
@@ -84,36 +72,14 @@ describe("portfolio-filter-options", () => {
     expect(gtArea.map((o) => o.id)).toEqual(["c"]);
   });
 
-  // ТЗ п.6: регион не участвует в фильтрации (география — через карту)
   it("filterPortfolioObjects has no region filter", () => {
     const objects = [
       sampleObject({ id: "nw", regionSlug: "north-west" }),
       sampleObject({ id: "mo", regionSlug: "moscow" }),
     ];
-    const floorOptions = mergeFloorFilterOptions({ customMaterials: [], customFloors: [] });
+    const floorOptions = mergeFloorFilterOptions();
     const filtered = filterPortfolioObjects(objects, { material: "all", floorId: "all", areaId: "all" }, floorOptions);
     expect(filtered).toHaveLength(2);
-  });
-
-  it("parsePortfolioFilterOptionsConfig rejects invalid material enum", () => {
-    const config = parsePortfolioFilterOptionsConfig(
-      JSON.stringify({ customMaterials: [{ value: "INVALID", label: "X" }], customFloors: [] })
-    );
-    expect(config.customMaterials).toEqual([]);
-  });
-
-  it("addCustomMaterialOption skips duplicate preset labels", () => {
-    const base = { customMaterials: [], customFloors: [] };
-    const next = addCustomMaterialOption(base, "BRICK", "Кирпич");
-    expect(next.customMaterials).toEqual([]);
-  });
-
-  it("addCustomFloorOption adds custom floor option", () => {
-    const base = { customMaterials: [], customFloors: [] };
-    const next = addCustomFloorOption(base, "3 этажа", 3);
-    expect(next.customFloors).toHaveLength(1);
-    expect(next.customFloors[0].label).toBe("3 этажа");
-    expect(next.customFloors[0].floors).toBe(3);
   });
 
   it("formatFloorFilterLabel formats common values", () => {

@@ -44,7 +44,9 @@ const NAV_ITEMS: NavItem[] = [
 export function MobileBottomNav() {
   const pathname = usePathname();
   const [isCompact, setIsCompact] = useState(false);
+  const [arrivedIndex, setArrivedIndex] = useState<number | null>(null);
   const lastScrollYRef = useRef(0);
+  const prevPathnameRef = useRef(pathname);
   const activeIndex = NAV_ITEMS.findIndex(({ isActive }) => isActive(pathname));
 
   useEffect(() => {
@@ -54,11 +56,21 @@ export function MobileBottomNav() {
       const currentScrollY = window.scrollY;
       const delta = currentScrollY - lastScrollYRef.current;
 
-      if (Math.abs(delta) < 6) {
+      if (currentScrollY <= 16) {
+        setIsCompact(false);
+        lastScrollYRef.current = currentScrollY;
         return;
       }
 
-      setIsCompact(delta > 0 && currentScrollY > 12);
+      if (Math.abs(delta) < 4) {
+        return;
+      }
+
+      if (delta > 0) {
+        setIsCompact(true);
+      } else {
+        setIsCompact(false);
+      }
       lastScrollYRef.current = currentScrollY;
     };
 
@@ -74,6 +86,18 @@ export function MobileBottomNav() {
     lastScrollYRef.current = window.scrollY;
   }, [pathname]);
 
+  useEffect(() => {
+    if (pathname === prevPathnameRef.current) return;
+
+    prevPathnameRef.current = pathname;
+    const idx = NAV_ITEMS.findIndex(({ isActive }) => isActive(pathname));
+    if (idx < 0) return;
+
+    setArrivedIndex(idx);
+    const timer = window.setTimeout(() => setArrivedIndex(null), 560);
+    return () => window.clearTimeout(timer);
+  }, [pathname]);
+
   return (
     <nav
       className="mobile-bottom-nav-shell fixed inset-x-0 bottom-0 z-50 lg:hidden pointer-events-none"
@@ -81,29 +105,42 @@ export function MobileBottomNav() {
     >
       <div
         className={cn(
-          "mobile-bottom-nav-bar pointer-events-auto relative mx-auto grid max-w-md grid-cols-4 items-center gap-0 overflow-hidden px-1.5 py-1.5",
+          "mobile-bottom-nav-bar pointer-events-auto relative mx-auto grid max-w-[min(100%,17.5rem)] grid-cols-4 items-center gap-0 overflow-hidden px-1 py-1",
           isCompact && "mobile-bottom-nav-bar--compact"
         )}
         style={{ ["--active-index" as string]: Math.max(activeIndex, 0) }}
       >
         {activeIndex >= 0 ? (
-          <span className="mobile-bottom-nav-active-pill" aria-hidden />
+          <span
+            className={cn(
+              "mobile-bottom-nav-active-pill",
+              arrivedIndex === activeIndex && "mobile-bottom-nav-active-pill--arrived"
+            )}
+            aria-hidden
+          />
         ) : null}
-        {NAV_ITEMS.map(({ href, label, Icon, isActive }) => {
+        {NAV_ITEMS.map(({ href, label, Icon, isActive }, index) => {
           const active = isActive(pathname);
+          const justArrived = arrivedIndex === index;
 
           return (
             <Link
               key={href}
               href={href}
               aria-current={active ? "page" : undefined}
-              className="mobile-bottom-nav-item relative z-10 flex min-w-0 items-center justify-center rounded-[1.65rem] py-2.5 transition-[color,transform] duration-300 ease-out touch-manipulation active:scale-95"
+              className="mobile-bottom-nav-item relative z-10 flex min-w-0 items-center justify-center rounded-[1.65rem] py-2 transition-[color,transform] duration-300 ease-out touch-manipulation active:scale-95"
             >
-              <span className="relative flex h-9 w-9 items-center justify-center">
+              <span
+                className={cn(
+                  "mobile-bottom-nav-icon-wrap relative flex h-8 w-8 items-center justify-center",
+                  active && "mobile-bottom-nav-icon-wrap--active",
+                  justArrived && "mobile-bottom-nav-icon-wrap--arrived"
+                )}
+              >
                 <Icon
-                  size={26}
+                  size={22}
                   strokeWidth={active ? 2.55 : 2.3}
-                  className="relative shrink-0 transition-all duration-300 ease-out"
+                  className="relative shrink-0"
                   style={{ color: active ? "var(--accent)" : "var(--text)" }}
                   aria-hidden
                 />

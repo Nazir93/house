@@ -38,6 +38,13 @@ interface ErrorItem {
 
 const KNOWN_PAGES = [
   { path: "/", label: "Главная" },
+  { path: "/projects", label: "Каталог проектов домов" },
+  { path: "/individual-design", label: "Индивидуальное проектирование" },
+  { path: "/calculator", label: "Калькулятор строительства" },
+  { path: "/mortgage", label: "Ипотека" },
+  { path: "/about", label: "О компании" },
+  { path: "/reviews", label: "Отзывы" },
+  { path: "/team", label: "Команда" },
   { path: "/services", label: "Услуги" },
   { path: "/services/proektirovanie", label: "Услуга: проектирование" },
   { path: "/services/fundament", label: "Услуга: фундамент" },
@@ -45,9 +52,12 @@ const KNOWN_PAGES = [
   { path: "/services/krovlya", label: "Услуга: кровля" },
   { path: "/services/inzheneriya", label: "Услуга: инженерные сети" },
   { path: "/services/otdelka", label: "Услуга: отделка" },
-  { path: "/portfolio", label: "Наши проекты" },
+  { path: "/portfolio", label: "Портфолио (список)" },
+  { path: "/portfolio/map", label: "Портфолио на карте" },
   { path: "/blog", label: "Блог" },
   { path: "/contacts", label: "Контакты" },
+  { path: "/technology/materials", label: "Технологии: материалы" },
+  { path: "/technology/house-area", label: "Технологии: площадь дома" },
   { path: "/partners/partner", label: "Партнёры — подряд" },
   { path: "/partners/supplier", label: "Партнёры — поставщик" },
   { path: "/partners/vacancies", label: "Партнёры — вакансии" },
@@ -98,6 +108,7 @@ export default function AdminSeoPage() {
 function MetaTab() {
   const [pages, setPages] = useState<PageMetaItem[]>([]);
   const [portfolioCases, setPortfolioCases] = useState<{ slug: string; title: string }[]>([]);
+  const [houseProjects, setHouseProjects] = useState<{ slug: string; title: string }[]>([]);
   const [blogPosts, setBlogPosts] = useState<{ slug: string; title: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -112,6 +123,19 @@ function MetaTab() {
         const data = await r.json();
         if (r.ok && Array.isArray(data)) {
           setPortfolioCases(
+            data.map((p: { slug: string; title: string }) => ({ slug: p.slug, title: p.title || p.slug }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/admin/house-projects")
+      .then(async (r) => {
+        const data = await r.json();
+        if (r.ok && Array.isArray(data)) {
+          setHouseProjects(
             data.map((p: { slug: string; title: string }) => ({ slug: p.slug, title: p.title || p.slug }))
           );
         }
@@ -243,6 +267,10 @@ function MetaTab() {
         ...blogPosts.map((p) => ({
           path: `/blog/${p.slug}`,
           label: `Статья: ${p.title}`,
+        })),
+        ...houseProjects.map((p) => ({
+          path: `/projects/${p.slug}`,
+          label: `Проект дома: ${p.title}`,
         })),
         ...portfolioCases.map((c) => ({
           path: `/portfolio/${c.slug}`,

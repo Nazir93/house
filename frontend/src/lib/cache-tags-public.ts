@@ -7,5 +7,3 @@ export const CACHE_TAG_PUBLIC_VACANCIES = "public-vacancies";
 export const CACHE_TAG_PUBLIC_HOUSE_PROJECTS = "public-house-projects";
 /** Каталог построенных домов и карточки `/portfolio/[slug]`. */
 export const CACHE_TAG_PUBLIC_BUILT_OBJECTS = "public-built-objects";
-/** Варианты фильтров на странице `/portfolio`. */
-export const CACHE_TAG_PORTFOLIO_FILTER_OPTIONS = "portfolio-filter-options";

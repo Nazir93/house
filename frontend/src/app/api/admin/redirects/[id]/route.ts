@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { revalidateTagWithProfile } from "@/lib/revalidate-tag";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export async function DELETE(_request: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -9,6 +10,7 @@ export async function DELETE(_request: NextRequest, props: { params: Promise<{ i
 
   try {
     await prisma.redirect.delete({ where: { id: params.id } });
+    revalidateTagWithProfile("redirect-map");
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[ADMIN REDIRECT DELETE]", error);

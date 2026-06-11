@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowRight, LayoutGrid, LayoutList, Search, SlidersHorizontal } from "lucide-react";
+import { ArrowRight, LayoutGrid, LayoutList, Search, SlidersHorizontal, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { formatRub, getProjectRenders, type HouseProjectItem } from "@/lib/construction-data";
 import {
   buildProjectsSearchParams,
@@ -65,10 +66,22 @@ export function ProjectsCatalogContent({
   const [page, setPage] = useState(1);
   const [queryInput, setQueryInput] = useState(q);
   const [view, setView] = useState<"grid" | "list">("grid");
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const mobileFiltersDrawerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setQueryInput(q);
   }, [q]);
+
+  useEffect(() => {
+    if (!mobileFiltersOpen) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileFiltersOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileFiltersOpen]);
 
   const hasCustomFilters = hasCustomProjectsCatalogFilters(searchParams);
 
@@ -256,24 +269,23 @@ export function ProjectsCatalogContent({
     );
   };
 
-  return (
-    <section className="page-top-offset pb-20 md:pb-28" style={{ backgroundColor: "var(--bg)" }}>
-      <div className="container mx-auto max-w-[1400px] px-5">
-        <div className="grid gap-10 lg:grid-cols-[minmax(260px,320px)_1fr] lg:items-start lg:gap-12">
-          {/* ——— Сайдбар фильтров (как на референсе) ——— */}
-          <aside className="space-y-4 lg:sticky lg:top-28">
-            <div className="flex items-center justify-between lg:hidden">
-              <span className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--text)" }}>
-                <SlidersHorizontal size={18} /> Фильтры
-              </span>
-              {hasCustomFilters ? (
-                <button type="button" onClick={clearFilters} className="text-sm font-medium underline-offset-4 hover:underline" style={{ color: "var(--text-muted)" }}>
-                  Сбросить
-                </button>
-              ) : null}
-            </div>
+  const drawerTouchStartY = useRef(0);
 
-            <div className={filterShellClass}>
+  function onDrawerTouchStart(e: React.TouchEvent) {
+    drawerTouchStartY.current = e.touches[0]?.clientY ?? 0;
+  }
+
+  function onDrawerTouchMove(e: React.TouchEvent) {
+    const el = mobileFiltersDrawerRef.current;
+    if (!el || el.scrollTop > 2) return;
+    const y = e.touches[0]?.clientY ?? 0;
+    if (y - drawerTouchStartY.current > 52) {
+      setMobileFiltersOpen(false);
+    }
+  }
+
+  const filtersPanel = (
+    <div className={filterShellClass}>
               <div className={filterSectionClass}>
                 <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-subtle)" }}>
                   Технология / материал
@@ -481,8 +493,104 @@ export function ProjectsCatalogContent({
                 </div>
               </div>
             </div>
+  );
 
-            <div className="hidden items-center justify-between lg:flex">
+  return (
+    <section className="page-top-offset pb-20 md:pb-28" style={{ backgroundColor: "var(--bg)" }}>
+      {/* Мобильная кнопка фильтров — справа, видна при скролле */}
+      <button
+        type="button"
+        className={cn(
+          "projects-catalog-filters-fab lg:hidden",
+          mobileFiltersOpen && "projects-catalog-filters-fab--hidden"
+        )}
+        onClick={() => setMobileFiltersOpen(true)}
+        aria-expanded={mobileFiltersOpen}
+        aria-controls="projects-catalog-filters-drawer"
+      >
+        <SlidersHorizontal size={20} strokeWidth={2.2} aria-hidden />
+        <span className="sr-only">Фильтры</span>
+        {hasCustomFilters ? <span className="projects-catalog-filters-fab__dot" aria-hidden /> : null}
+      </button>
+
+      {/* Мобильная панель фильтров — выезд справа */}
+      <div
+        className={cn(
+          "projects-catalog-filters-overlay lg:hidden",
+          mobileFiltersOpen && "projects-catalog-filters-overlay--open"
+        )}
+        aria-hidden={!mobileFiltersOpen}
+      >
+        <button
+          type="button"
+          className="projects-catalog-filters-backdrop"
+          aria-label="Закрыть фильтры"
+          onClick={() => setMobileFiltersOpen(false)}
+          onWheel={() => setMobileFiltersOpen(false)}
+          tabIndex={mobileFiltersOpen ? 0 : -1}
+        />
+        <aside
+          id="projects-catalog-filters-drawer"
+          ref={mobileFiltersDrawerRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Фильтры каталога"
+          className={cn(
+            "projects-catalog-filters-drawer",
+            mobileFiltersOpen && "projects-catalog-filters-drawer--open"
+          )}
+          onTouchStart={onDrawerTouchStart}
+          onTouchMove={onDrawerTouchMove}
+        >
+          <div className="projects-catalog-filters-drawer__head">
+            <span className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--text)" }}>
+              <SlidersHorizontal size={18} aria-hidden />
+              Фильтры
+            </span>
+            <div className="flex items-center gap-3">
+              {hasCustomFilters ? (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="text-sm font-medium underline-offset-4 hover:underline"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  Сбросить
+                </button>
+              ) : null}
+              <button
+                type="button"
+                onClick={() => setMobileFiltersOpen(false)}
+                className="flex h-9 w-9 items-center justify-center rounded-full border transition-colors hover:border-[var(--accent)]"
+                style={{
+                  borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
+                  color: "var(--text-muted)",
+                }}
+                aria-label="Закрыть"
+              >
+                <X size={18} />
+              </button>
+            </div>
+          </div>
+          <div
+            className="projects-catalog-filters-drawer__body"
+            onWheel={(e) => {
+              const el = mobileFiltersDrawerRef.current;
+              if (el && el.scrollTop <= 0 && e.deltaY < 0) {
+                setMobileFiltersOpen(false);
+              }
+            }}
+          >
+            {filtersPanel}
+          </div>
+        </aside>
+      </div>
+
+      <div className="container mx-auto max-w-[1400px] px-5">
+        <div className="grid gap-10 lg:grid-cols-[minmax(260px,320px)_1fr] lg:items-start lg:gap-12">
+          <aside className="hidden space-y-4 lg:sticky lg:top-28 lg:block">
+            {filtersPanel}
+            <div className="flex items-center justify-between">
               {hasCustomFilters ? (
                 <button type="button" onClick={clearFilters} className="text-sm font-medium underline-offset-4 hover:underline" style={{ color: "var(--text-muted)" }}>
                   Сбросить фильтры

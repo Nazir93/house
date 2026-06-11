@@ -1,5 +1,42 @@
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
+import { lookupRedirect, type RedirectMap } from "@/lib/seo/redirect-map";
+
+const REDIRECT_MAP_TTL_MS = 60_000;
+let redirectMapCache: RedirectMap | null = null;
+let redirectMapLoadedAt = 0;
+
+function internalSecret(): string {
+  return (
+    process.env.INTERNAL_API_SECRET?.trim() ||
+    process.env.NEXTAUTH_SECRET?.trim() ||
+    ""
+  );
+}
+
+async function loadRedirectMap(origin: string): Promise<RedirectMap> {
+  const now = Date.now();
+  if (redirectMapCache && now - redirectMapLoadedAt < REDIRECT_MAP_TTL_MS) {
+    return redirectMapCache;
+  }
+
+  const secret = internalSecret();
+  if (!secret) return {};
+
+  try {
+    const res = await fetch(`${origin}/api/internal/redirect-map`, {
+      headers: { "x-internal-secret": secret },
+      cache: "no-store",
+    });
+    if (!res.ok) return redirectMapCache ?? {};
+    const map = (await res.json()) as RedirectMap;
+    redirectMapCache = map;
+    redirectMapLoadedAt = now;
+    return map;
+  } catch {
+    return redirectMapCache ?? {};
+  }
+}
 
 /**
  * Имя session-cookie в NextAuth зависит от secure: для HTTPS это `__Secure-next-auth.*`.
@@ -65,6 +102,15 @@ export async function proxy(request: NextRequest) {
   }
 
   const { pathname } = request.nextUrl;
+
+  /** Редиректы из админки SEO → таблица Redirect */
+  const dbRedirect = lookupRedirect(await loadRedirectMap(request.nextUrl.origin), pathname);
+  if (dbRedirect) {
+    const url = request.nextUrl.clone();
+    url.pathname = dbRedirect.toPath;
+    url.search = "";
+    return NextResponse.redirect(url, dbRedirect.permanent ? 308 : 307);
+  }
 
   /** Устаревшие URL старого сайта — редирект на актуальные разделы */
   if (pathname === "/offer" || pathname.startsWith("/offer/")) {

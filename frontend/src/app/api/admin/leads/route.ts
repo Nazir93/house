@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { leadSourceFilterWhere } from "@/lib/lead-admin-ui";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export async function GET(request: NextRequest) {
@@ -22,7 +23,8 @@ export async function GET(request: NextRequest) {
   }
 
   if (sourceParam) {
-    and.push({ source: sourceParam });
+    const sourceWhere = leadSourceFilterWhere(sourceParam);
+    if (sourceWhere) and.push(sourceWhere);
   }
 
   if (search) {

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { revalidateTagWithProfile } from "@/lib/revalidate-tag";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
@@ -44,6 +45,7 @@ export async function POST(request: NextRequest) {
         permanent: permanent ?? true,
       },
     });
+    revalidateTagWithProfile("redirect-map");
     return NextResponse.json(redirect, { status: 201 });
   } catch (error) {
     console.error("[ADMIN REDIRECT CREATE]", error);

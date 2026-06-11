@@ -52,7 +52,7 @@ const getCachedPageMetaRow = unstable_cache(
     }
   },
   ["page-meta-row"],
-  { revalidate: 60 }
+  { revalidate: 60, tags: ["page-meta"] }
 );
 
 export async function getPageMeta(defaults: MetaDefaults): Promise<Metadata> {

@@ -12,7 +12,6 @@ import {
   mergeMaterialFilterOptions,
   PORTFOLIO_AREA_FILTER_OPTIONS,
   type PortfolioAreaFilterId,
-  type PortfolioFilterOptionsConfig,
 } from "@/lib/portfolio-filter-options";
 import { cn } from "@/lib/utils";
 import { CmsImage } from "@/components/ui/cms-image";
@@ -45,11 +44,9 @@ function chipClass(active: boolean) {
 
 export function BuiltPortfolioContent({
   objects,
-  filterConfig,
   initialView = "grid",
 }: {
   objects: BuiltObjectItem[];
-  filterConfig: PortfolioFilterOptionsConfig;
   initialView?: ViewMode;
 }) {
   const [material, setMaterial] = useState("all");
@@ -61,12 +58,12 @@ export function BuiltPortfolioContent({
   const materialOptions = useMemo(
     () => [
       { value: "all", label: "Любая" },
-      ...mergeMaterialFilterOptions(filterConfig).map((m) => ({ value: m.value, label: m.label })),
+      ...mergeMaterialFilterOptions().map((m) => ({ value: m.value, label: m.label })),
     ],
-    [filterConfig]
+    []
   );
 
-  const floorOptions = useMemo(() => mergeFloorFilterOptions(filterConfig), [filterConfig]);
+  const floorOptions = useMemo(() => mergeFloorFilterOptions(), []);
 
   const floorSelectOptions = useMemo(
     () => [{ value: "all", label: "Любая" }, ...floorOptions.map((f) => ({ value: f.id, label: f.label }))],

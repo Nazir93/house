@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { revalidateTagWithProfile } from "@/lib/revalidate-tag";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
@@ -67,6 +68,8 @@ export async function PUT(request: NextRequest) {
       update: updatePayload as Prisma.PageMetaUpdateInput,
       create: createPayload as unknown as Prisma.PageMetaCreateInput,
     });
+
+    revalidateTagWithProfile("page-meta");
 
     return NextResponse.json(meta);
   } catch (error) {

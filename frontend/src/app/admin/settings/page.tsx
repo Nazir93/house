@@ -2,13 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { Save, AlertCircle } from "lucide-react";
-import { DEFAULT_HOUSE_CONSTRUCTION_CONFIG, formatCalculatorConfigJson } from "@/lib/house-construction-calculator";
-import { HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY } from "@/lib/house-construction-calculator-config";
-import {
-  DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG,
-  formatHouseProjectCalculatorConfigJson,
-  HOUSE_PROJECT_CALCULATOR_SETTINGS_KEY,
-} from "@/lib/house-project-calculator-config";
 
 type SettingsField = {
   key: string;
@@ -26,14 +19,6 @@ type SettingsGroup = {
 };
 
 const SETTINGS_GROUPS: SettingsGroup[] = [
-  {
-    title: "Общие",
-    fields: [
-      { key: "site_name", label: "Название компании", placeholder: "Часть души" },
-      { key: "site_description", label: "Описание сайта", placeholder: "Строительство загородных домов под ключ", multiline: true },
-      { key: "city", label: "Город", placeholder: "Санкт-Петербург" },
-    ],
-  },
   {
     title: "Контакты",
     description:
@@ -88,34 +73,6 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
       { key: "telegram_chat_id", label: "Chat ID", placeholder: "-100123456789 или личный id" },
     ],
   },
-  {
-    title: "Калькулятор строительства",
-    description:
-      `JSON переопределяет прайс калькулятора на сайте и блок «от … ₽/м²» на главной. Ключ в БД: ${HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY}. Пустое поле — встроенный прайс из кода. После сохранения кэш сбрасывается.`,
-    fields: [
-      {
-        key: HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY,
-        label: "JSON прайса (объект baseRubPerM2, smallArea, engineering, facadeRubPerM2)",
-        multiline: true,
-        rows: 20,
-        mono: true,
-        placeholder: "{}",
-      },
-    ],
-  },
-  {
-    title: "Калькулятор карточки проекта",
-    fields: [
-      {
-        key: HOUSE_PROJECT_CALCULATOR_SETTINGS_KEY,
-        label: "JSON (categories, facades, engineering, construction, settings)",
-        multiline: true,
-        rows: 20,
-        mono: true,
-        placeholder: "{}",
-      },
-    ],
-  },
 ];
 
 export default function AdminSettingsPage() {
@@ -145,26 +102,6 @@ export default function AdminSettingsPage() {
   }
 
   async function handleSave() {
-    const rawCalc = settings[HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY]?.trim();
-    if (rawCalc) {
-      try {
-        JSON.parse(rawCalc);
-      } catch {
-        setError("Некорректный JSON в блоке «Калькулятор строительства». Исправьте или очистите поле.");
-        return;
-      }
-    }
-
-    const rawProjectCalc = settings[HOUSE_PROJECT_CALCULATOR_SETTINGS_KEY]?.trim();
-    if (rawProjectCalc) {
-      try {
-        JSON.parse(rawProjectCalc);
-      } catch {
-        setError("Некорректный JSON в блоке «Калькулятор карточки проекта». Исправьте или очистите поле.");
-        return;
-      }
-    }
-
     setSaving(true);
     setError("");
     setSaved(false);
@@ -222,49 +159,6 @@ export default function AdminSettingsPage() {
           <h2 className="text-sm font-semibold text-white/60 uppercase tracking-wider">{group.title}</h2>
           {group.description && (
             <p className="text-xs text-white/35 leading-relaxed -mt-1">{group.description}</p>
-          )}
-          {group.title === "Калькулятор строительства" && (
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() =>
-                  updateField(HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY, formatCalculatorConfigJson(DEFAULT_HOUSE_CONSTRUCTION_CONFIG))
-                }
-                className="rounded-lg border border-white/15 bg-white/[0.06] px-3 py-1.5 text-xs text-white/80 hover:bg-white/[0.1]"
-              >
-                Подставить полный прайс по умолчанию
-              </button>
-              <button
-                type="button"
-                onClick={() => updateField(HOUSE_CONSTRUCTION_CALCULATOR_SETTINGS_KEY, "")}
-                className="rounded-lg border border-white/15 px-3 py-1.5 text-xs text-white/50 hover:text-white/80"
-              >
-                Очистить (как в коде)
-              </button>
-            </div>
-          )}
-          {group.title === "Калькулятор карточки проекта" && (
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() =>
-                  updateField(
-                    HOUSE_PROJECT_CALCULATOR_SETTINGS_KEY,
-                    formatHouseProjectCalculatorConfigJson(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG)
-                  )
-                }
-                className="rounded-lg border border-white/15 bg-white/[0.06] px-3 py-1.5 text-xs text-white/80 hover:bg-white/[0.1]"
-              >
-                Подставить конфиг по ТЗ
-              </button>
-              <button
-                type="button"
-                onClick={() => updateField(HOUSE_PROJECT_CALCULATOR_SETTINGS_KEY, "")}
-                className="rounded-lg border border-white/15 px-3 py-1.5 text-xs text-white/50 hover:text-white/80"
-              >
-                Очистить (дефолт из кода)
-              </button>
-            </div>
           )}
           <div className="space-y-3">
             {group.fields.map((field) => (
