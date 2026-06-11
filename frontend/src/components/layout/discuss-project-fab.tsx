@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ComponentProps } from "react";
+import { useEffect, useRef, useState, type ComponentProps } from "react";
 import { ChevronUp, MessageCircle, Phone, Send, X } from "lucide-react";
 
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
@@ -15,7 +15,7 @@ const FAB_BOTTOM = "bottom-[var(--mobile-bottom-nav-offset)] lg:bottom-10";
 const MESSENGER_CHAT_PHONE = "+79046000099";
 
 const fabItemClass =
-  "contact-fab-item relative z-10 flex min-w-0 items-center justify-center rounded-[1.65rem] py-2 transition-[color,transform] duration-300 ease-out touch-manipulation active:scale-95";
+  "contact-fab-item relative z-10 flex min-w-0 items-center justify-center rounded-[1.65rem] py-2 transition-[color,transform,padding] duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)] touch-manipulation active:scale-95";
 
 function FabIconWrap({
   children,
@@ -29,7 +29,7 @@ function FabIconWrap({
   return (
     <span
       className={cn(
-        "contact-fab-icon-wrap relative flex h-8 w-8 items-center justify-center",
+        "contact-fab-icon-wrap relative flex h-8 w-8 items-center justify-center transition-[transform,width,height] duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
         active && "contact-fab-icon-wrap--active",
         className
       )}
@@ -82,11 +82,43 @@ export function DiscussProjectFab() {
   const { isOpen } = useModal();
   const contact = useContactConfig();
   const [contactOpen, setContactOpen] = useState(false);
+  const [isCompact, setIsCompact] = useState(false);
+  const lastScrollYRef = useRef(0);
 
   const telegramHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE);
   const maxHref = maxChatUrlFromRawPhone(MESSENGER_CHAT_PHONE);
   const phoneHref =
     contact.phone.trim() && contact.phoneRaw.trim() ? `tel:${contact.phoneRaw}` : null;
+
+  useEffect(() => {
+    lastScrollYRef.current = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const delta = currentScrollY - lastScrollYRef.current;
+
+      if (currentScrollY <= 16) {
+        setIsCompact(false);
+        lastScrollYRef.current = currentScrollY;
+        return;
+      }
+
+      if (Math.abs(delta) < 4) {
+        return;
+      }
+
+      setIsCompact(delta > 0);
+      lastScrollYRef.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!contactOpen) return;
+    setIsCompact(false);
+  }, [contactOpen]);
 
   if (isOpen) return null;
 
@@ -95,9 +127,15 @@ export function DiscussProjectFab() {
       className={cn("contact-fab-shell fixed z-[115]", FAB_RIGHT, FAB_BOTTOM)}
       aria-label="Быстрые действия"
     >
-      <div className="contact-fab-bar pointer-events-auto relative flex flex-col items-center overflow-hidden px-1 py-1">
-        {contactOpen ? (
-          <>
+      <div
+        className={cn(
+          "contact-fab-bar pointer-events-auto relative flex flex-col items-center overflow-hidden px-1 py-1",
+          contactOpen && "contact-fab-bar--expanded",
+          isCompact && !contactOpen && "contact-fab-bar--compact"
+        )}
+      >
+        <div className="contact-fab-expanded">
+          <div className="contact-fab-expanded__inner">
             {maxHref ? (
               <FabLink
                 href={maxHref}
@@ -105,9 +143,7 @@ export function DiscussProjectFab() {
                 rel="noopener noreferrer"
                 aria-label="Написать в Max"
               >
-                <MaxMessengerIcon
-                  className="h-[22px] w-[22px] shrink-0 text-[var(--text)]"
-                />
+                <MaxMessengerIcon className="h-[22px] w-[22px] shrink-0 text-[var(--text)]" />
               </FabLink>
             ) : null}
 
@@ -153,8 +189,10 @@ export function DiscussProjectFab() {
                 aria-hidden
               />
             </FabButton>
-          </>
-        ) : (
+          </div>
+        </div>
+
+        <div className="contact-fab-chat">
           <FabButton onClick={() => setContactOpen(true)} aria-label="Показать контакты" active>
             <MessageCircle
               size={22}
@@ -164,7 +202,7 @@ export function DiscussProjectFab() {
               aria-hidden
             />
           </FabButton>
-        )}
+        </div>
 
         <FabButton onClick={scrollToTop} aria-label="Прокрутить наверх">
           <ChevronUp
