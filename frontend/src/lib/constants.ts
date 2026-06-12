@@ -135,10 +135,9 @@ export const SOCIAL_LINKS = {
   telegram:
     process.env.NEXT_PUBLIC_TELEGRAM_URL?.trim() || "https://t.me/sk_chastdushi",
   vk: process.env.NEXT_PUBLIC_VK_URL?.trim() || "https://vk.ru/sk_chastdushi",
-  /** Max — ссылка на чат (не канал _biz). */
+  /** Max — прямая ссылка на чат (web.max.ru/{id}, не канал _biz). */
   max:
-    process.env.NEXT_PUBLIC_MAX_CHAT_URL?.trim() ||
-    `https://web.max.ru/add?phone=${encodeURIComponent(MESSENGER_CHAT_PHONE_RAW)}`,
+    process.env.NEXT_PUBLIC_MAX_CHAT_URL?.trim() || "https://web.max.ru/8713027",
 };
 
 export const SERVICES = [

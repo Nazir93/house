@@ -41,7 +41,7 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
       {
         key: "social_max",
         label: "Max (чат)",
-        placeholder: "https://web.max.ru/add?phone=+79046000099",
+        placeholder: "https://web.max.ru/8713027",
       },
     ],
   },
