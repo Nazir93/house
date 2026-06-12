@@ -8,6 +8,7 @@ import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { VkIcon } from "@/components/icons/vk-icon";
 import { SITE_NAME } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
+import { maxMessengerChatUrl } from "@/lib/messenger-links";
 import { isWorkingHours } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -63,6 +64,8 @@ export function ThankYouContent() {
     (contact.phone.trim() && contact.phoneRaw.trim()) ||
     (contact.phone2.trim() && contact.phone2Raw.trim());
 
+  const maxHref = maxMessengerChatUrl(contact.social.max);
+
   const socialLinks = [
     contact.social.telegram.trim()
       ? { href: contact.social.telegram, label: "Telegram", icon: "telegram" as const }
@@ -70,9 +73,7 @@ export function ThankYouContent() {
     contact.social.vk?.trim()
       ? { href: contact.social.vk, label: "ВКонтакте", icon: "vk" as const }
       : null,
-    contact.social.max?.trim()
-      ? { href: contact.social.max, label: "Max", icon: "max" as const }
-      : null,
+    maxHref ? { href: maxHref, label: "Max", icon: "max" as const } : null,
   ].filter(Boolean) as { href: string; label: string; icon: "telegram" | "vk" | "max" }[];
 
   return (

@@ -7,15 +7,13 @@ import { ChevronDown, Send, X } from "lucide-react";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { MobileMenuProjectCarousel } from "@/components/layout/mobile-menu-project-carousel";
 import { SiteHeaderBar } from "./site-header-bar";
-import { SITE_NAME } from "@/lib/constants";
+import { MESSENGER_CHAT_PHONE_RAW, SITE_NAME } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { NAV_SECTIONS, isNavGroup, type NavSection } from "@/lib/nav-sections";
 import { useModal } from "@/lib/modal-context";
-import { maxChatUrlFromRawPhone, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
+import { maxMessengerChatUrl, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
 import { cn } from "@/lib/utils";
-
-const MESSENGER_CHAT_PHONE = "+79046000099";
 
 function buildGridPath(
   cols: number, rows: number, cellW: number, cellH: number,
@@ -248,8 +246,8 @@ export function Header() {
   const mobileMenuListRef = useRef<HTMLDivElement>(null);
   const { openModal } = useModal();
   const contact = useContactConfig();
-  const telegramMessengerHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE) ?? "";
-  const maxMessengerHref = maxChatUrlFromRawPhone(MESSENGER_CHAT_PHONE) ?? "";
+  const telegramMessengerHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE_RAW) ?? "";
+  const maxMessengerHref = maxMessengerChatUrl(contact.social.max) ?? "";
 
   const closeMenu = () => window.dispatchEvent(new Event("close-mobile-menu"));
 

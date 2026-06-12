@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Section, SectionTitle } from "@/components/ui/section";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -11,6 +11,7 @@ import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { VkIcon } from "@/components/icons/vk-icon";
 import { getYandexOfficeMapEmbedUrl } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
+import { maxMessengerChatUrl } from "@/lib/messenger-links";
 
 function RequisitesBlock() {
   const [open, setOpen] = useState(false);
@@ -98,6 +99,7 @@ export function ContactsSection({ embedded }: { embedded?: boolean }) {
     : contact.phone2Raw.trim()
       ? `tel:${contact.phone2Raw}`
       : undefined;
+  const maxHref = maxMessengerChatUrl(contact.social.max);
 
   const contactRows: {
     icon: LucideIcon;
@@ -216,13 +218,23 @@ export function ContactsSection({ embedded }: { embedded?: boolean }) {
 
         {/* Messengers */}
         <div className="flex gap-3 flex-wrap">
-          {[
-            { href: contact.social.telegram, label: "Telegram" as const, icon: <Send size={14} /> },
-            { href: contact.social.vk, label: "ВКонтакте" as const, icon: <VkIcon className="h-3.5 w-3.5" /> },
-            { href: contact.social.max, label: "Max" as const, icon: <MaxMessengerIcon className="h-3.5 w-3.5" /> },
-          ]
-            .filter((x) => x.href)
-            .map(({ href, label, icon }) => (
+          {(
+            [
+              contact.social.telegram.trim()
+                ? { href: contact.social.telegram, label: "Telegram" as const, icon: <Send size={14} /> }
+                : null,
+              contact.social.vk?.trim()
+                ? { href: contact.social.vk, label: "ВКонтакте" as const, icon: <VkIcon className="h-3.5 w-3.5" /> }
+                : null,
+              maxHref
+                ? { href: maxHref, label: "Max" as const, icon: <MaxMessengerIcon className="h-3.5 w-3.5" /> }
+                : null,
+            ].filter(Boolean) as {
+              href: string;
+              label: "Telegram" | "ВКонтакте" | "Max";
+              icon: ReactNode;
+            }[]
+          ).map(({ href, label, icon }) => (
             <a
               key={label}
               href={href}

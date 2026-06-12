@@ -5,15 +5,14 @@ import { ChevronUp, MessageCircle, Phone, Send, X } from "lucide-react";
 
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { useContactConfig } from "@/lib/contact-config-context";
-import { maxChatUrlFromRawPhone, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
+import { MESSENGER_CHAT_PHONE_RAW } from "@/lib/constants";
+import { maxMessengerChatUrl, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
 import { useModal } from "@/lib/modal-context";
 import { cn } from "@/lib/utils";
 
 const FAB_RIGHT =
   "right-[max(1rem,env(safe-area-inset-right))] lg:right-[max(1.5rem,env(safe-area-inset-right))]";
 const FAB_BOTTOM = "bottom-[var(--mobile-bottom-nav-offset)] lg:bottom-10";
-const MESSENGER_CHAT_PHONE = "+79046000099";
-
 const fabItemClass =
   "contact-fab-item relative z-10 flex min-w-0 items-center justify-center rounded-[1.65rem] py-2 transition-[color,transform,padding] duration-[420ms] ease-[cubic-bezier(0.22,1,0.36,1)] touch-manipulation active:scale-95";
 
@@ -85,8 +84,8 @@ export function DiscussProjectFab() {
   const [isCompact, setIsCompact] = useState(false);
   const lastScrollYRef = useRef(0);
 
-  const telegramHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE);
-  const maxHref = maxChatUrlFromRawPhone(MESSENGER_CHAT_PHONE);
+  const telegramHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE_RAW);
+  const maxHref = maxMessengerChatUrl(contact.social.max);
   const phoneHref =
     contact.phone.trim() && contact.phoneRaw.trim() ? `tel:${contact.phoneRaw}` : null;
 

@@ -4,10 +4,16 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import { ChevronDown, Percent, Search, Send, UserRound, X } from "lucide-react";
-import { SITE_NAME, HEADER_TAGLINE, ACCOUNT_PORTAL_PATH, YANDEX_REVIEWS_URL } from "@/lib/constants";
+import {
+  MESSENGER_CHAT_PHONE_RAW,
+  SITE_NAME,
+  HEADER_TAGLINE,
+  ACCOUNT_PORTAL_PATH,
+  YANDEX_REVIEWS_URL,
+} from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
-import { maxChatUrlFromRawPhone, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
+import { maxMessengerChatUrl, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
 import { NAV_SECTIONS, type NavSection } from "@/lib/nav-sections";
 import { NavDropdownPanel } from "@/components/layout/nav-dropdown-panel";
 import { useModal } from "@/lib/modal-context";
@@ -19,13 +25,11 @@ import { YandexMapsRatingChip } from "@/components/layout/yandex-maps-rating-chi
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/body-scroll-lock";
 import { cn } from "@/lib/utils";
 
-const MESSENGER_CHAT_PHONE = "+79046000099";
-
 export function SiteHeaderBar() {
   const pathname = usePathname();
   const contact = useContactConfig();
-  const telegramHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE);
-  const maxHref = maxChatUrlFromRawPhone(MESSENGER_CHAT_PHONE);
+  const telegramHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE_RAW);
+  const maxHref = maxMessengerChatUrl(contact.social.max);
   const { theme } = useTheme();
   const isHomeBanner = pathname === "/";
   const { openModal } = useModal();

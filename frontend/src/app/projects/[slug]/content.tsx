@@ -34,7 +34,9 @@ import { HouseProjectCompletionSection } from "@/components/construction/house-p
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { CmsImage } from "@/components/ui/cms-image";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
-import { maxChatUrlFromRawPhone, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
+import { useContactConfig } from "@/lib/contact-config-context";
+import { MESSENGER_CHAT_PHONE_RAW } from "@/lib/constants";
+import { maxMessengerChatUrl, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
 import {
   inferPartOfSoulFloors,
   resolveProjectRoofPitch,
@@ -44,8 +46,6 @@ import { cn } from "@/lib/utils";
 import { ProjectEngagementBadges } from "@/components/projects/project-engagement-badges";
 
 const heroSoftRing = "ring-1 ring-[color-mix(in_srgb,var(--text)_6%,transparent)]";
-const PROJECT_MESSENGER_PHONE = "+79046000099";
-
 const carouselArrowClass =
   "absolute top-1/2 z-10 flex -translate-y-1/2 items-center justify-center p-1 text-white transition hover:scale-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white/90";
 
@@ -130,10 +130,11 @@ export function HouseProjectDetailContent({
     setLightboxOpen(true);
   }
 
+  const contact = useContactConfig();
   const active = renders[activeRender] ?? renders[0];
 
-  const telegramHref = telegramChatUrlFromRawPhone(PROJECT_MESSENGER_PHONE);
-  const maxMessengerHref = maxChatUrlFromRawPhone(PROJECT_MESSENGER_PHONE);
+  const telegramHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE_RAW);
+  const maxMessengerHref = maxMessengerChatUrl(contact.social.max);
 
   const sortedPlans = useMemo(
     () => [...plans].sort((a, b) => (a.floor ?? 999) - (b.floor ?? 999)),

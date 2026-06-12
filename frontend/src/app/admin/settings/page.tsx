@@ -38,7 +38,11 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
     fields: [
       { key: "social_telegram", label: "Telegram", placeholder: "https://t.me/..." },
       { key: "social_vk", label: "ВКонтакте", placeholder: "https://vk.ru/..." },
-      { key: "social_max", label: "Max", placeholder: "https://max.ru/..." },
+      {
+        key: "social_max",
+        label: "Max (чат)",
+        placeholder: "https://web.max.ru/add?phone=+79046000099",
+      },
     ],
   },
   {

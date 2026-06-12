@@ -81,6 +81,10 @@ export const PHONE = "+7 (812) 989-99-01";
 export const PHONE_RAW = "+78129899901";
 export const PHONE2 = "+7 (911) 600-00-99";
 export const PHONE2_RAW = "+79116000099";
+
+/** Номер для чатов Telegram / Max (кнопки «написать»). */
+export const MESSENGER_CHAT_PHONE_RAW =
+  process.env.NEXT_PUBLIC_MESSENGER_CHAT_PHONE?.trim() || "+79046000099";
 export const EMAIL = "";
 /** Адрес офиса (контакты, подвал, schema.org; при записи в админке подменяется из БД) */
 export const ADDRESS = "г. Санкт-Петербург, ул. Ординарная, д. 18";
@@ -131,10 +135,10 @@ export const SOCIAL_LINKS = {
   telegram:
     process.env.NEXT_PUBLIC_TELEGRAM_URL?.trim() || "https://t.me/sk_chastdushi",
   vk: process.env.NEXT_PUBLIC_VK_URL?.trim() || "https://vk.ru/sk_chastdushi",
-  /** Мессенджер Max — ссылка на канал / профиль */
+  /** Max — ссылка на чат (не канал _biz). */
   max:
     process.env.NEXT_PUBLIC_MAX_CHAT_URL?.trim() ||
-    "https://max.ru/id5300018030_biz",
+    `https://web.max.ru/add?phone=${encodeURIComponent(MESSENGER_CHAT_PHONE_RAW)}`,
 };
 
 export const SERVICES = [
