@@ -5,7 +5,7 @@ import { Send } from "lucide-react";
 import { FooterBlueprintBackdrop } from "@/components/layout/footer-blueprint-backdrop";
 import { SITE_NAME } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
-import { maxMessengerChatUrl } from "@/lib/messenger-links";
+import { maxMessengerChannelUrl } from "@/lib/messenger-links";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { VkIcon } from "@/components/icons/vk-icon";
 
@@ -41,7 +41,8 @@ const FOOTER_COLUMNS: { title: string; links: { href: string; label: string }[] 
   {
     title: "Проекты",
     links: [
-      { href: "/projects", label: "Каталог типовых домов" },
+      { href: "/projects", label: "Каталог авторских проектов" },
+      { href: "/typical-projects", label: "Каталог типовых проектов" },
       { href: "/individual-design", label: "Индивидуальный проект" },
       { href: "/portfolio", label: "Наши проекты" },
       { href: "/mortgage", label: "Ипотека на дом" },
@@ -51,7 +52,7 @@ const FOOTER_COLUMNS: { title: string; links: { href: string; label: string }[] 
 
 export function Footer() {
   const contact = useContactConfig();
-  const maxHref = maxMessengerChatUrl(contact.social.max);
+  const maxHref = maxMessengerChannelUrl(contact.social.max);
   const currentYear = new Date().getFullYear();
 
   return (

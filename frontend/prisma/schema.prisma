@@ -165,6 +165,8 @@ model HouseProject {
   /// Переопределения опций: { "disabledOptionIds": ["stairs", ...] }
   calculatorOptionOverrides Json?
   anchorsJson         Json?
+  /// author = каталог авторских (/projects); partner = типовые от партнёра (/typical-projects)
+  catalogKind         String                     @default("author")
   createdAt           DateTime                   @default(now())
   updatedAt           DateTime                   @updatedAt
   media               HouseProjectMedia[]
@@ -174,6 +176,7 @@ model HouseProject {
   @@index([published, price])
   @@index([published, area])
   @@index([published, createdAt])
+  @@index([published, catalogKind])
 }
 
 /// Категория дома a–f для калькулятора карточки проекта

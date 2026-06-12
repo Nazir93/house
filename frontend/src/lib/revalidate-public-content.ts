@@ -45,5 +45,6 @@ export function revalidatePublicConstructionCatalog(): void {
   revalidateTagWithProfile(CACHE_TAG_PUBLIC_BUILT_OBJECTS);
   revalidatePath("/", "layout");
   revalidatePath("/projects");
+  revalidatePath("/typical-projects");
   revalidatePath("/portfolio");
 }

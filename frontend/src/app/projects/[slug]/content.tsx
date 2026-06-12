@@ -30,6 +30,7 @@ import {
   type HouseCalculatorCategoryId,
 } from "@/lib/house-project-calculator-engine";
 import { resolveProjectPriceOffer } from "@/lib/project-price-offer";
+import { resolveProjectListingPriceRub } from "@/lib/project-listing-price";
 import { HouseProjectCompletionSection } from "@/components/construction/house-project-completion-section";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { CmsImage } from "@/components/ui/cms-image";
@@ -44,6 +45,11 @@ import {
 } from "@/lib/part-of-soul-pricing";
 import { cn } from "@/lib/utils";
 import { ProjectEngagementBadges } from "@/components/projects/project-engagement-badges";
+import {
+  AUTHOR_HOUSE_PROJECT_CATALOG,
+  houseProjectDetailPath,
+  type HouseProjectCatalogConfig,
+} from "@/lib/house-project-catalog";
 
 const heroSoftRing = "ring-1 ring-[color-mix(in_srgb,var(--text)_6%,transparent)]";
 const carouselArrowClass =
@@ -58,10 +64,12 @@ export function HouseProjectDetailContent({
   project,
   similarProjects,
   heroShellTiers,
+  catalog = AUTHOR_HOUSE_PROJECT_CATALOG,
 }: {
   project: HouseProjectItem;
   similarProjects: HouseProjectItem[];
   heroShellTiers: HeroPricingTier[];
+  catalog?: HouseProjectCatalogConfig;
 }) {
   const renders = getProjectRenders(project);
   const plans = getProjectPlans(project);
@@ -93,14 +101,17 @@ export function HouseProjectDetailContent({
 
   const effectiveHeroTiers = heroShellTiers;
   const heroResolved = useMemo(() => resolveProjectHeroPricing(project), [project]);
-  const priceOffer = useMemo(
-    () =>
-      resolveProjectPriceOffer({
-        manualPriceRub: project.price,
-        standardPricesRub: effectiveHeroTiers.map((tier) => tier.price),
-      }),
-    [effectiveHeroTiers, project.price]
-  );
+  const priceOffer = useMemo(() => {
+    const gasTierPrice =
+      effectiveHeroTiers.find((t) => t.id === "gas")?.price ??
+      effectiveHeroTiers[0]?.price ??
+      resolveProjectListingPriceRub(project);
+    const manualPriceRub = project.price > 0 ? project.price : gasTierPrice;
+    return resolveProjectPriceOffer({
+      manualPriceRub,
+      standardPricesRub: effectiveHeroTiers.map((tier) => tier.price),
+    });
+  }, [effectiveHeroTiers, project]);
 
   const calculatorCategoryId = useMemo((): HouseCalculatorCategoryId | null => {
     const explicit =
@@ -134,7 +145,7 @@ export function HouseProjectDetailContent({
   const active = renders[activeRender] ?? renders[0];
 
   const telegramHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE_RAW);
-  const maxMessengerHref = maxMessengerChatUrl(contact.social.max);
+  const maxMessengerHref = maxMessengerChatUrl(contact.social.maxChat);
 
   const sortedPlans = useMemo(
     () => [...plans].sort((a, b) => (a.floor ?? 999) - (b.floor ?? 999)),
@@ -173,8 +184,8 @@ export function HouseProjectDetailContent({
                 /
               </li>
               <li>
-                <Link href="/projects" className="transition hover:text-[var(--accent)]">
-                  Проекты
+                <Link href={catalog.basePath} className="transition hover:text-[var(--accent)]">
+                  {catalog.detailBreadcrumbLabel}
                 </Link>
               </li>
               <li aria-hidden className="text-[var(--text-subtle)]">
@@ -694,7 +705,7 @@ export function HouseProjectDetailContent({
               return (
                 <Link
                   key={item.id}
-                  href={`/projects/${item.slug}`}
+                  href={houseProjectDetailPath(catalog, item.slug)}
                   className="group overflow-hidden rounded-[24px] border transition-colors hover:bg-[var(--bg-secondary)]"
                   style={{ borderColor: "var(--border)" }}
                 >

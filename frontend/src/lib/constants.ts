@@ -135,12 +135,13 @@ export const SOCIAL_LINKS = {
   telegram:
     process.env.NEXT_PUBLIC_TELEGRAM_URL?.trim() || "https://t.me/sk_chastdushi",
   vk: process.env.NEXT_PUBLIC_VK_URL?.trim() || "https://vk.ru/sk_chastdushi",
-  /**
-   * Max — чат с компанией в веб-клиенте (кнопка «Открыть в браузере» на max.ru/id5300018030_biz).
-   * Не max.ru/8713027 и не web.max.ru/add?phone= — они не открывают чат.
-   */
-  max:
-    process.env.NEXT_PUBLIC_MAX_CHAT_URL?.trim() || "https://web.max.ru/id5300018030_biz",
+  /** Max — канал компании (только иконка в подвале). */
+  maxChannel:
+    process.env.NEXT_PUBLIC_MAX_CHANNEL_URL?.trim() || "https://max.ru/id5300018030_biz",
+  /** Max — личный чат (сайдбар, шапка, контакты, карточки проектов). */
+  maxChat:
+    process.env.NEXT_PUBLIC_MAX_CHAT_URL?.trim() ||
+    "https://max.ru/u/f9LHodD0cOK3s_V3_9fIAc06d6ugU_K52gW4bcHHHEC8u7cxvjbJSKS8fts",
 };
 
 export const SERVICES = [

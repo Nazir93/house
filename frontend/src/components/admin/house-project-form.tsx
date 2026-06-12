@@ -17,6 +17,10 @@ import { HouseProjectBlocksEditor } from "@/components/admin/house-project-block
 import { moveListItem } from "@/lib/reorder-list";
 import type { CompletionGroup, ConstructionStep } from "@/lib/construction-shared";
 import {
+  getHouseProjectCatalog,
+  type HouseProjectCatalogKind,
+} from "@/lib/house-project-catalog";
+import {
   buildHeroPricingJson,
   parseAnchorsFromDb,
   parseCompletionFromDb,
@@ -136,7 +140,14 @@ function SaveButton({
   );
 }
 
-export function HouseProjectForm({ initial }: { initial?: any }) {
+export function HouseProjectForm({
+  initial,
+  catalogKind = "author",
+}: {
+  initial?: any;
+  catalogKind?: HouseProjectCatalogKind;
+}) {
+  const catalog = getHouseProjectCatalog(catalogKind);
   const router = useRouter();
   const searchParams = useSearchParams();
   const [form, setForm] = useState<HouseProjectFormState>(() => mapHouseProjectToForm(initial));
@@ -229,6 +240,7 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
     setSaved(false);
     const payload = {
       ...form,
+      catalogKind,
       mortgageMode: form.mortgageMode,
       materials: form.materials,
       completionJson: serializeCompletion(form.completionGroups),
@@ -261,7 +273,7 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
         setSaved(true);
         const id = data.id || form.id;
         if (id && id !== form.id) {
-          router.push(`/admin/house-projects/${id}?saved=1`);
+          router.push(`${catalog.adminListPath}/${id}?saved=1`);
         } else if (id) {
           router.refresh();
         }
@@ -276,12 +288,14 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
   return (
     <div className="max-w-4xl space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/admin/house-projects" className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors">
+        <Link href={catalog.adminListPath} className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors">
           <ArrowLeft size={18} />
         </Link>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold tracking-tight">{form.id ? "Проект дома" : "Новый проект дома"}</h1>
-          <p className="text-sm text-white/40 mt-1">Каталог типовых домов, фильтры и карточка проекта.</p>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {form.id ? catalog.adminFormTitleEdit : catalog.adminFormTitleNew}
+          </h1>
+          <p className="text-sm text-white/40 mt-1">{catalog.adminFormDescription}</p>
         </div>
         <SaveButton disabled={saveDisabled} onSave={save} saved={saved} saving={saving} />
       </div>
@@ -329,7 +343,7 @@ export function HouseProjectForm({ initial }: { initial?: any }) {
               <input type="number" value={form[field as keyof HouseProjectFormState] as string} onChange={(e) => set(field as keyof HouseProjectFormState, e.target.value as any)} className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
               {field === "price" ? (
                 <span className="block text-[11px] leading-snug text-white/35">
-                  Если ниже расчетной цены коробки, на сайте покажется как скидка.
+                  Если пусто — на сайте цена газобетона считается от площади. Ручная цена ниже расчётной покажется как скидка.
                 </span>
               ) : null}
             </label>

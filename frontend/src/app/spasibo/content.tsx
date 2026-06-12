@@ -64,7 +64,7 @@ export function ThankYouContent() {
     (contact.phone.trim() && contact.phoneRaw.trim()) ||
     (contact.phone2.trim() && contact.phone2Raw.trim());
 
-  const maxHref = maxMessengerChatUrl(contact.social.max);
+  const maxHref = maxMessengerChatUrl(contact.social.maxChat);
 
   const socialLinks = [
     contact.social.telegram.trim()

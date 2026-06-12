@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { generateSlug } from "@/lib/utils";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
+import { parseHouseProjectCatalogKind } from "@/lib/house-project-catalog";
 import { revalidatePublicConstructionCatalog } from "@/lib/revalidate-public-content";
 
 export const dynamic = "force-dynamic";
@@ -32,10 +33,14 @@ export async function GET(request: NextRequest) {
   if (!gate.ok) return gate.response;
 
   const search = request.nextUrl.searchParams.get("search")?.trim();
+  const catalogKind = parseHouseProjectCatalogKind(request.nextUrl.searchParams.get("catalogKind"));
 
   try {
     const projects = await (prisma as any).houseProject.findMany({
-      where: search ? { title: { contains: search, mode: "insensitive" } } : undefined,
+      where: {
+        catalogKind,
+        ...(search ? { title: { contains: search, mode: "insensitive" } } : {}),
+      },
       orderBy: [{ order: "asc" }, { createdAt: "desc" }],
       include: {
         media: { orderBy: [{ type: "asc" }, { order: "asc" }] },
@@ -59,9 +64,12 @@ export async function POST(request: NextRequest) {
     const renders = Array.isArray(body.renders) ? body.renders : [];
     const plans = Array.isArray(body.plans) ? body.plans : [];
 
+    const catalogKind = parseHouseProjectCatalogKind(body.catalogKind);
+
     const project = await (prisma as any).houseProject.create({
       data: {
         slug,
+        catalogKind,
         title: body.title || "Новый проект",
         shortDescription: body.shortDescription || "",
         description: body.description || "",

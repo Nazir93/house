@@ -1,4 +1,5 @@
 import type { HouseProjectItem } from "@/lib/construction-data";
+import { resolveProjectListingPriceRub } from "@/lib/project-listing-price";
 
 export type MaterialFilterId = "all" | "gazobeton" | "keramoblok" | "kirpich";
 export type FloorsFilterId = "all" | "1" | "1.5" | "2";
@@ -64,7 +65,8 @@ export function projectMatchesAreaPrice(
   priceMinRub: number,
   priceMaxRub: number,
 ): boolean {
-  return p.area >= areaMin && p.area <= areaMax && p.price >= priceMinRub && p.price <= priceMaxRub;
+  const price = resolveProjectListingPriceRub(p);
+  return p.area >= areaMin && p.area <= areaMax && price >= priceMinRub && price <= priceMaxRub;
 }
 
 export function projectMatchesQuery(p: HouseProjectItem, q: string): boolean {
@@ -88,7 +90,7 @@ export function getPublishedProjectBounds(projects: HouseProjectItem[]) {
     };
   }
   const areas = list.map((x) => x.area);
-  const prices = list.map((x) => x.price);
+  const prices = list.map((x) => resolveProjectListingPriceRub(x));
   return {
     minArea: Math.min(...areas),
     maxArea: Math.max(...areas),

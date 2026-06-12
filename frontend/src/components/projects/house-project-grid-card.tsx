@@ -40,13 +40,15 @@ export function HouseProjectGridCard({
   priceRub,
   revealStyle,
   imageSizes = "(max-width: 768px) 100vw, 50vw",
+  projectBasePath = "/projects",
 }: {
   project: HouseProjectItem;
   priceRub?: number;
   revealStyle?: CSSProperties;
   imageSizes?: string;
+  projectBasePath?: string;
 }) {
-  const href = `/projects/${project.slug}`;
+  const href = `${projectBasePath}/${project.slug}`;
   const cover = getProjectRenders(project)[0];
   const price = priceRub ?? project.price;
   const mats = materialsLine(project.materials);

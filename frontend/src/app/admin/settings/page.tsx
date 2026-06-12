@@ -40,8 +40,13 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
       { key: "social_vk", label: "ВКонтакте", placeholder: "https://vk.ru/..." },
       {
         key: "social_max",
-        label: "Max (чат)",
-        placeholder: "https://web.max.ru/id5300018030_biz",
+        label: "Max — канал (подвал)",
+        placeholder: "https://max.ru/id5300018030_biz",
+      },
+      {
+        key: "social_max_chat",
+        label: "Max — личный чат (иконки)",
+        placeholder: "https://max.ru/u/f9LHodD0cOK3s_V3_9fIAc06d6ugU_K52gW4bcHHHEC8u7cxvjbJSKS8fts",
       },
     ],
   },

@@ -2,7 +2,7 @@ import { SITE_NAME, CITY, SITE_URL, buildSchemaAreaServed, getDefaultSiteGeoDesc
 import { toAbsoluteSiteUrl } from "@/lib/absolute-site-url";
 import { OFFICE_OPENING_HOURS_JSON_LD } from "@/lib/contact-config";
 import { loadContactConfig } from "@/lib/load-contact-config";
-import { maxMessengerChatUrl } from "@/lib/messenger-links";
+import { maxMessengerChannelUrl } from "@/lib/messenger-links";
 import { htmlToPlainText } from "@/lib/html-to-plain-text";
 import { prisma } from "@/lib/db";
 
@@ -23,8 +23,8 @@ export async function JsonLd() {
   const contact = await loadContactConfig();
 
   const tel = [contact.phoneRaw, contact.phone2Raw].filter((t) => t?.trim());
-  const maxProfileUrl = maxMessengerChatUrl(contact.social.max);
-  const sameAs = [contact.social.telegram, contact.social.vk, maxProfileUrl].filter((u) => u?.trim());
+  const maxChannelUrl = maxMessengerChannelUrl(contact.social.max);
+  const sameAs = [contact.social.telegram, contact.social.vk, maxChannelUrl].filter((u) => u?.trim());
   const logoUrl = toAbsoluteSiteUrl(
     process.env.NEXT_PUBLIC_PUBLISHER_LOGO_URL?.trim() || "/icon.png"
   );

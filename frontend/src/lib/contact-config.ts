@@ -37,7 +37,10 @@ export type ContactConfig = {
   social: {
     telegram: string;
     vk: string;
+    /** Канал Max — подвал. */
     max: string;
+    /** Личный чат Max — кнопки «написать». */
+    maxChat: string;
   };
 };
 
@@ -61,7 +64,8 @@ export function createDefaultContactConfig(): ContactConfig {
     social: {
       telegram: SOCIAL_LINKS.telegram,
       vk: SOCIAL_LINKS.vk,
-      max: SOCIAL_LINKS.max,
+      max: SOCIAL_LINKS.maxChannel,
+      maxChat: SOCIAL_LINKS.maxChat,
     },
   };
 }

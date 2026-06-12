@@ -99,7 +99,7 @@ export function ContactsSection({ embedded }: { embedded?: boolean }) {
     : contact.phone2Raw.trim()
       ? `tel:${contact.phone2Raw}`
       : undefined;
-  const maxHref = maxMessengerChatUrl(contact.social.max);
+  const maxHref = maxMessengerChatUrl(contact.social.maxChat);
 
   const contactRows: {
     icon: LucideIcon;

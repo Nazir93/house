@@ -85,9 +85,8 @@ export function DiscussProjectFab() {
   const lastScrollYRef = useRef(0);
 
   const telegramHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE_RAW);
-  const maxHref = maxMessengerChatUrl(contact.social.max);
-  const phoneHref =
-    contact.phone.trim() && contact.phoneRaw.trim() ? `tel:${contact.phoneRaw}` : null;
+  const maxHref = maxMessengerChatUrl(contact.social.maxChat);
+  const phoneHref = `tel:${MESSENGER_CHAT_PHONE_RAW}`;
 
   useEffect(() => {
     lastScrollYRef.current = window.scrollY;
@@ -164,7 +163,7 @@ export function DiscussProjectFab() {
             ) : null}
 
             {phoneHref ? (
-              <FabLink href={phoneHref} aria-label={`Позвонить: ${contact.phone}`}>
+              <FabLink href={phoneHref} aria-label={`Позвонить: ${MESSENGER_CHAT_PHONE_RAW}`}>
                 <Phone
                   size={22}
                   strokeWidth={2.3}

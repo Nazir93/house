@@ -14,6 +14,7 @@ import { ProjectEngagementBadges } from "@/components/projects/project-engagemen
 
 import type { HeroPricingTier, HouseProjectItem } from "@/lib/construction-data";
 import { getProjectRenders } from "@/lib/construction-shared";
+import { resolveProjectListingPriceRub } from "@/lib/project-listing-price";
 import { revealDelayStyle } from "@/lib/reveal-animation";
 import { cn } from "@/lib/utils";
 
@@ -182,9 +183,9 @@ export function FeaturedHouseProjectsSection({
                 const views = 180 + p.area + p.order * 7;
                 const hot = 12 + (p.isNew ? 28 : 0) + p.order * 3;
                 const tiers = projectHeroTiers[p.id] ?? [];
-                const standardPrice = tiers.length ?
-                  Math.min(...tiers.map((tier) => tier.price).filter((price) => price > 0))
-                : p.price;
+                const tierPrices = tiers.map((tier) => tier.price).filter((price) => price > 0);
+                const standardPrice =
+                  tierPrices.length ? Math.min(...tierPrices) : resolveProjectListingPriceRub(p);
                 const mats = materialsLine(tiers.length ? tiers.map((tier) => tier.label) : p.materials);
 
                 return (

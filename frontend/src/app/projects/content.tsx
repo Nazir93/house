@@ -23,6 +23,12 @@ import {
   type ProjectsSortKey,
 } from "@/lib/project-filters";
 import { HouseProjectGridCard } from "@/components/projects/house-project-grid-card";
+import {
+  AUTHOR_HOUSE_PROJECT_CATALOG,
+  houseProjectDetailPath,
+  type HouseProjectCatalogConfig,
+} from "@/lib/house-project-catalog";
+import { resolveProjectListingPriceRub } from "@/lib/project-listing-price";
 import { CmsImage } from "@/components/ui/cms-image";
 import { SiteSelect } from "@/components/ui/site-select";
 
@@ -51,10 +57,13 @@ const catalogSearchInputClass = `${catalogFieldClass} funnel-text-input h-12 py-
 export function ProjectsCatalogContent({
   projects,
   searchParams,
+  catalog = AUTHOR_HOUSE_PROJECT_CATALOG,
 }: {
   projects: HouseProjectItem[];
   searchParams: Record<string, string | string[] | undefined>;
+  catalog?: HouseProjectCatalogConfig;
 }) {
+  const basePath = catalog.basePath;
   const router = useRouter();
   const bounds = useMemo(() => getPublishedProjectBounds(projects), [projects]);
   const filters = useMemo(
@@ -109,10 +118,10 @@ export function ProjectsCatalogContent({
         sort: next.sort,
         bounds,
       });
-      router.push(qs ? `/projects?${qs}` : "/projects");
+      router.push(qs ? `${basePath}?${qs}` : basePath);
       setPage(1);
     },
-    [router, bounds],
+    [router, bounds, basePath],
   );
 
   const filtered = useMemo(() => {
@@ -127,7 +136,7 @@ export function ProjectsCatalogContent({
     return [...result].sort((a, b) => {
       if (sort === "area") return a.area - b.area;
       if (sort === "new") return Number(b.isNew) - Number(a.isNew);
-      return a.price - b.price;
+      return resolveProjectListingPriceRub(a) - resolveProjectListingPriceRub(b);
     });
   }, [areaMax, areaMin, floors, material, priceMaxRub, priceMinRub, projects, q, sort]);
 
@@ -159,7 +168,7 @@ export function ProjectsCatalogContent({
       sort,
       bounds,
     });
-    router.replace(qs ? `/projects?${qs}` : "/projects");
+    router.replace(qs ? `${basePath}?${qs}` : basePath);
   }, [
     bounds,
     filtered.length,
@@ -196,7 +205,7 @@ export function ProjectsCatalogContent({
   }
 
   function clearFilters() {
-    router.push("/projects");
+    router.push(basePath);
     setPage(1);
   }
 
@@ -626,14 +635,14 @@ export function ProjectsCatalogContent({
               <span className="mx-1.5 text-[var(--text-subtle)] sm:mx-2" aria-hidden>
                 {' › '}
               </span>
-              <span style={{ color: "var(--text)" }}>Проекты домов</span>
+              <span style={{ color: "var(--text)" }}>{catalog.listBreadcrumb}</span>
             </nav>
 
             <h1 className="mt-4 font-heading text-[1.75rem] font-bold leading-tight tracking-tight md:text-4xl lg:text-[2.5rem]" style={{ color: "var(--text)" }}>
-              Проекты домов
+              {catalog.listTitle}
             </h1>
             <p className="mt-4 max-w-2xl text-[15px] leading-relaxed md:text-base" style={{ color: "var(--text-muted)" }}>
-              Подбор по материалу, этажности, площади и бюджету; на главной — расширенный конструктор подбора.
+              {catalog.listDescription}
             </p>
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
@@ -790,6 +799,8 @@ export function ProjectsCatalogContent({
                     <HouseProjectGridCard
                       key={project.id}
                       project={project}
+                      priceRub={resolveProjectListingPriceRub(project)}
+                      projectBasePath={basePath}
                       imageSizes="(max-width: 1280px) 50vw, 400px"
                     />
                   );
@@ -801,7 +812,7 @@ export function ProjectsCatalogContent({
                     className="group grid overflow-hidden rounded-[28px] border md:grid-cols-[minmax(260px,420px)_1fr]"
                     style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)" }}
                   >
-                    <Link href={`/projects/${project.slug}`} className="relative min-h-[260px] overflow-hidden bg-[var(--stone)]">
+                    <Link href={houseProjectDetailPath(catalog, project.slug)} className="relative min-h-[260px] overflow-hidden bg-[var(--stone)]">
                       {cover ? (
                         <CmsImage
                           src={cover.url}
@@ -828,7 +839,7 @@ export function ProjectsCatalogContent({
                       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                         <div>
                           <Link
-                            href={`/projects/${project.slug}`}
+                            href={houseProjectDetailPath(catalog, project.slug)}
                             className="font-heading text-3xl transition-colors group-hover:text-[var(--accent)]"
                             style={{ color: "var(--text)" }}
                           >
@@ -843,7 +854,7 @@ export function ProjectsCatalogContent({
                             Стоимость
                           </p>
                           <p className="mt-1 text-2xl font-semibold" style={{ color: "var(--sale)" }}>
-                            {formatRub(project.price)}
+                            {formatRub(resolveProjectListingPriceRub(project))}
                           </p>
                         </div>
                       </div>
@@ -867,7 +878,7 @@ export function ProjectsCatalogContent({
                       </div>
                       <div className="flex flex-wrap items-center gap-3">
                         <Link
-                          href={`/projects/${project.slug}`}
+                          href={houseProjectDetailPath(catalog, project.slug)}
                           className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white"
                           style={{ backgroundColor: "var(--accent)" }}
                         >

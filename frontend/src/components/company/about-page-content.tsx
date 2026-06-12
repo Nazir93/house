@@ -186,7 +186,7 @@ export function AboutPageContent() {
                 className="mt-10 inline-flex items-center gap-2 text-sm font-semibold transition hover:gap-3"
                 style={{ color: "var(--accent)" }}
               >
-                Каталог типовых проектов
+                Каталог авторских проектов
                 <ArrowRight size={18} aria-hidden />
               </Link>
             </div>

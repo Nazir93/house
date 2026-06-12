@@ -1,5 +1,5 @@
 import { HouseProjectForm } from "@/components/admin/house-project-form";
 
 export default function NewHouseProjectPage() {
-  return <HouseProjectForm />;
+  return <HouseProjectForm catalogKind="author" />;
 }

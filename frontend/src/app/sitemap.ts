@@ -13,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: baseUrl, lastModified: new Date(), changeFrequency: "weekly", priority: 1.0 },
     { url: `${baseUrl}/services`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
     { url: `${baseUrl}/projects`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
+    { url: `${baseUrl}/typical-projects`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.88 },
     { url: `${baseUrl}/portfolio`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
     { url: `${baseUrl}/portfolio/map`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.72 },
     { url: `${baseUrl}/individual-design`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
@@ -38,7 +39,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const [posts, houseProjects, builtObjects, servicesFromDb] = await Promise.all([
       prisma.post.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
-      prisma.houseProject.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
+      prisma.houseProject.findMany({
+        where: { published: true },
+        select: { slug: true, updatedAt: true, catalogKind: true },
+      }),
       prisma.builtObject.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
       prisma.service.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
     ]);
@@ -51,7 +55,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.6,
       })),
       ...houseProjects.map((p) => ({
-        url: `${baseUrl}/projects/${p.slug}`,
+        url: `${baseUrl}${p.catalogKind === "partner" ? "/typical-projects" : "/projects"}/${p.slug}`,
         lastModified: p.updatedAt,
         changeFrequency: "monthly" as const,
         priority: 0.75,

@@ -29,7 +29,7 @@ export function SiteHeaderBar() {
   const pathname = usePathname();
   const contact = useContactConfig();
   const telegramHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE_RAW);
-  const maxHref = maxMessengerChatUrl(contact.social.max);
+  const maxHref = maxMessengerChatUrl(contact.social.maxChat);
   const { theme } = useTheme();
   const isHomeBanner = pathname === "/";
   const { openModal } = useModal();

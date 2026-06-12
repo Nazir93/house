@@ -5,6 +5,11 @@ import { CACHE_TAG_PUBLIC_BUILT_OBJECTS, CACHE_TAG_PUBLIC_HOUSE_PROJECTS } from 
 import { AURORA_PROJECT_CALCULATOR_UI } from "@/lib/project-calculator-aurora-defaults";
 import type { ProjectCalculatorUi } from "@/lib/project-calculator-types";
 import {
+  type HouseProjectCatalogKind,
+  parseHouseProjectCatalogKind,
+} from "@/lib/house-project-catalog";
+import { resolveDefaultGasShellPriceRub } from "@/lib/project-listing-price";
+import {
   computePartOfSoulShellTotalRub,
   inferPartOfSoulFloors,
   tierIdToWallMaterial,
@@ -83,6 +88,7 @@ export interface HouseProjectItem {
   calculatorCategory?: string | null;
   projectAdjustmentPercent?: number;
   calculatorOptionOverrides?: { disabledOptionIds?: string[] } | null;
+  catalogKind?: HouseProjectCatalogKind;
 }
 
 export type { BuiltObjectItem } from "@/lib/construction-shared";
@@ -432,12 +438,14 @@ export function resolveProjectHeroPricing(project: HouseProjectItem): {
   const fallbackWarranty = 5;
   const fallbackMonths = 5;
   const fromDb = project.heroPricing?.tiers?.length ? project.heroPricing.tiers : null;
+  const manualPrice = Math.round(Number(project.price));
+  const basePrice = manualPrice > 0 ? manualPrice : resolveDefaultGasShellPriceRub(project);
   const tiers: HeroPricingTier[] =
     fromDb ??
     [
-      { id: "gas", label: "Газоблок", price: Math.round(project.price) },
-      { id: "ceramic", label: "Керамоблок", price: Math.round(project.price * 1.034) },
-      { id: "brick", label: "Кирпич", price: Math.round(project.price * 1.086) },
+      { id: "gas", label: "Газоблок", price: basePrice },
+      { id: "ceramic", label: "Керамоблок", price: Math.round(basePrice * 1.034) },
+      { id: "brick", label: "Кирпич", price: Math.round(basePrice * 1.086) },
     ];
   return {
     tiers,
@@ -538,6 +546,7 @@ function mapHouseProject(row: any): HouseProjectItem {
       row.calculatorOptionOverrides && typeof row.calculatorOptionOverrides === "object" ?
         (row.calculatorOptionOverrides as { disabledOptionIds?: string[] })
       : null,
+    catalogKind: parseHouseProjectCatalogKind(row.catalogKind),
   };
 }
 
@@ -643,10 +652,10 @@ export function getBuiltObjectStages(object: BuiltObjectItem) {
 }
 
 const getHouseProjectsCached = unstable_cache(
-  async (): Promise<HouseProjectItem[]> => {
+  async (catalogKind: HouseProjectCatalogKind): Promise<HouseProjectItem[]> => {
     try {
       const rows = await (prisma as any).houseProject.findMany({
-        where: { published: true },
+        where: { published: true, catalogKind },
         orderBy: [{ order: "asc" }, { price: "asc" }],
         include: {
           media: { orderBy: [{ type: "asc" }, { order: "asc" }] },
@@ -657,42 +666,52 @@ const getHouseProjectsCached = unstable_cache(
     } catch {
       // Database may not be migrated yet.
     }
-    return FALLBACK_HOUSE_PROJECTS;
+    if (catalogKind === "author") return FALLBACK_HOUSE_PROJECTS;
+    return [];
   },
   ["house-projects-published"],
   { revalidate: 60, tags: [CACHE_TAG_PUBLIC_HOUSE_PROJECTS] }
 );
 
-export async function getHouseProjects(): Promise<HouseProjectItem[]> {
-  return getHouseProjectsCached();
+export async function getHouseProjects(
+  catalogKind: HouseProjectCatalogKind = "author",
+): Promise<HouseProjectItem[]> {
+  return getHouseProjectsCached(catalogKind);
 }
 
 const getHouseProjectBySlugCached = unstable_cache(
-  async (slug: string): Promise<HouseProjectItem | null> => {
+  async (slug: string, catalogKind: HouseProjectCatalogKind): Promise<HouseProjectItem | null> => {
     try {
-      const row = await (prisma as any).houseProject.findUnique({
-        where: { slug },
+      const row = await (prisma as any).houseProject.findFirst({
+        where: { slug, published: true, catalogKind },
         include: {
           media: { orderBy: [{ type: "asc" }, { order: "asc" }] },
           builtObjects: { where: { published: true }, select: { slug: true }, take: 1 },
         },
       });
-      if (row?.published) return mapHouseProject(row);
+      if (row) return mapHouseProject(row);
     } catch {
       // Database may not be migrated yet.
     }
-    return FALLBACK_HOUSE_PROJECTS.find((project) => project.slug === slug) ?? null;
+    if (catalogKind === "author") {
+      return FALLBACK_HOUSE_PROJECTS.find((project) => project.slug === slug) ?? null;
+    }
+    return null;
   },
   ["house-project-by-slug"],
   { revalidate: 60, tags: [CACHE_TAG_PUBLIC_HOUSE_PROJECTS] }
 );
 
-export async function getHouseProjectBySlug(slug: string): Promise<HouseProjectItem | null> {
-  return getHouseProjectBySlugCached(slug);
+export async function getHouseProjectBySlug(
+  slug: string,
+  catalogKind: HouseProjectCatalogKind = "author",
+): Promise<HouseProjectItem | null> {
+  return getHouseProjectBySlugCached(slug, catalogKind);
 }
 
 export async function getSimilarHouseProjects(project: HouseProjectItem, limit = 3): Promise<HouseProjectItem[]> {
-  const all = await getHouseProjects();
+  const catalogKind = project.catalogKind ?? "author";
+  const all = await getHouseProjects(catalogKind);
   const areaRef = Math.max(project.area, 1);
   const priceRef = Math.max(project.price, 1);
   return all

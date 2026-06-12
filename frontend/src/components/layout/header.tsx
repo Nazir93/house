@@ -247,7 +247,7 @@ export function Header() {
   const { openModal } = useModal();
   const contact = useContactConfig();
   const telegramMessengerHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE_RAW) ?? "";
-  const maxMessengerHref = maxMessengerChatUrl(contact.social.max) ?? "";
+  const maxMessengerHref = maxMessengerChatUrl(contact.social.maxChat) ?? "";
 
   const closeMenu = () => window.dispatchEvent(new Event("close-mobile-menu"));
 

@@ -9,7 +9,7 @@ export function telegramChatUrlFromRawPhone(raw: string): string | null {
   return `https://t.me/+${digits}`;
 }
 
-function normalizeMaxHttpUrl(raw: string): string | null {
+export function normalizeMaxHttpUrl(raw: string): string | null {
   const href = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
 
   try {
@@ -20,8 +20,8 @@ function normalizeMaxHttpUrl(raw: string): string | null {
       parsed.hostname === "web.max.ru";
     if (!hostOk) return null;
 
-    // С лендинга max.ru/id…_biz в браузер ведёт web.max.ru/id…_biz
-    if (parsed.hostname === "max.ru" && parsed.pathname.length > 1) {
+    // Бизнес-канал _biz: в браузере открывается через web.max.ru
+    if (parsed.hostname === "max.ru" && /_biz/i.test(parsed.pathname)) {
       return `https://web.max.ru${parsed.pathname}${parsed.search}`;
     }
 
@@ -31,15 +31,28 @@ function normalizeMaxHttpUrl(raw: string): string | null {
   }
 }
 
-/**
- * Публичная ссылка Max для кнопок «Написать» на сайте.
- * Дефолт: web.max.ru/id5300018030_biz — «Открыть в браузере» с официальной страницы бизнеса в Max.
- */
+/** Канал Max (подвал сайта). */
+export function maxMessengerChannelUrl(configuredUrl?: string | null): string | null {
+  const candidates = [
+    process.env.NEXT_PUBLIC_MAX_CHANNEL_URL?.trim(),
+    configuredUrl?.trim(),
+    SOCIAL_LINKS.maxChannel?.trim(),
+  ].filter(Boolean) as string[];
+
+  for (const candidate of candidates) {
+    const normalized = normalizeMaxHttpUrl(candidate);
+    if (normalized) return normalized;
+  }
+
+  return null;
+}
+
+/** Личный чат Max (иконки «написать» в шапке, сайдбаре, контактах). */
 export function maxMessengerChatUrl(configuredUrl?: string | null): string | null {
   const candidates = [
     process.env.NEXT_PUBLIC_MAX_CHAT_URL?.trim(),
     configuredUrl?.trim(),
-    SOCIAL_LINKS.max?.trim(),
+    SOCIAL_LINKS.maxChat?.trim(),
   ].filter(Boolean) as string[];
 
   for (const candidate of candidates) {
