@@ -2453,38 +2453,3 @@ html.reveal-animations-ready [data-reveal="card"]:not(.is-visible) {
   text-shadow: 0 1px 0 rgba(61, 143, 110, 0.08);
 }
 
-.service-theme-foundation section.page-top-offset ul li span,
-.service-theme-foundation section.py-16 .font-heading,
-.service-theme-foundation section.py-24 .font-heading,
-.service-theme-foundation section.py-32 .font-heading {
-  color: #9a6b2e !important;
-}
-
-.service-theme-structure section.page-top-offset ul li span,
-.service-theme-structure section.py-16 .font-heading,
-.service-theme-structure section.py-24 .font-heading,
-.service-theme-structure section.py-32 .font-heading {
-  color: #4a6fa5 !important;
-}
-
-.service-theme-roofing section.page-top-offset ul li span,
-.service-theme-roofing section.py-16 .font-heading,
-.service-theme-roofing section.py-24 .font-heading,
-.service-theme-roofing section.py-32 .font-heading {
-  color: #5c6b7a !important;
-}
-
-.service-theme-engineering section.page-top-offset ul li span,
-.service-theme-engineering section.py-16 .font-heading,
-.service-theme-engineering section.py-24 .font-heading,
-.service-theme-engineering section.py-32 .font-heading {
-  color: #c9a227 !important;
-}
-
-.service-theme-finishing section.page-top-offset ul li span,
-.service-theme-finishing section.py-16 .font-heading,
-.service-theme-finishing section.py-24 .font-heading,
-.service-theme-finishing section.py-32 .font-heading {
-  color: #3d8f6e !important;
-}
-
