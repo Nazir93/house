@@ -82,7 +82,7 @@ export const PHONE_RAW = "+78129899901";
 export const PHONE2 = "+7 (911) 600-00-99";
 export const PHONE2_RAW = "+79116000099";
 
-/** Номер для чатов Telegram / Max (кнопки «написать»). */
+/** Номер для чата Telegram (кнопки «написать»). */
 export const MESSENGER_CHAT_PHONE_RAW =
   process.env.NEXT_PUBLIC_MESSENGER_CHAT_PHONE?.trim() || "+79046000099";
 export const EMAIL = "";
@@ -135,9 +135,12 @@ export const SOCIAL_LINKS = {
   telegram:
     process.env.NEXT_PUBLIC_TELEGRAM_URL?.trim() || "https://t.me/sk_chastdushi",
   vk: process.env.NEXT_PUBLIC_VK_URL?.trim() || "https://vk.ru/sk_chastdushi",
-  /** Max — прямая ссылка на чат (web.max.ru/{id}, не канал _biz). */
+  /**
+   * Max — чат с компанией в веб-клиенте (кнопка «Открыть в браузере» на max.ru/id5300018030_biz).
+   * Не max.ru/8713027 и не web.max.ru/add?phone= — они не открывают чат.
+   */
   max:
-    process.env.NEXT_PUBLIC_MAX_CHAT_URL?.trim() || "https://web.max.ru/8713027",
+    process.env.NEXT_PUBLIC_MAX_CHAT_URL?.trim() || "https://web.max.ru/id5300018030_biz",
 };
 
 export const SERVICES = [
