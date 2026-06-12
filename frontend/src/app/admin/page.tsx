@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { countTicketsNeedingStaffReply } from "@/lib/admin-ticket-inbox";
 import {
   Inbox,
   FileText,
@@ -14,6 +15,10 @@ import {
   Landmark,
   Globe,
   ChevronRight,
+  MessageCircle,
+  Calculator,
+  PanelTop,
+  Settings,
 } from "lucide-react";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
@@ -23,8 +28,10 @@ export const dynamic = "force-dynamic";
 type ContentStats = {
   leads: number;
   newLeads: number;
+  pendingTickets: number;
+  authorHouseProjects: number;
+  typicalHouseProjects: number;
   posts: number;
-  houseProjects: number;
   faqs: number;
   reviews: number;
   teamMembers: number;
@@ -36,13 +43,33 @@ type ContentStats = {
   dbConnected: boolean;
 };
 
+const EMPTY_STATS: ContentStats = {
+  leads: 0,
+  newLeads: 0,
+  pendingTickets: 0,
+  authorHouseProjects: 0,
+  typicalHouseProjects: 0,
+  posts: 0,
+  faqs: 0,
+  reviews: 0,
+  teamMembers: 0,
+  vacancies: 0,
+  builtObjects: 0,
+  clientProjects: 0,
+  partners: 0,
+  services: 0,
+  dbConnected: false,
+};
+
 async function getStats(): Promise<ContentStats> {
   try {
     const [
       leads,
       newLeads,
+      tickets,
+      authorHouseProjects,
+      typicalHouseProjects,
       posts,
-      houseProjects,
       faqs,
       reviews,
       teamMembers,
@@ -54,8 +81,13 @@ async function getStats(): Promise<ContentStats> {
     ] = await Promise.all([
       prisma.lead.count(),
       prisma.lead.count({ where: { status: "NEW" } }),
+      prisma.clientSupportTicket.findMany({
+        where: { status: { not: "CLOSED" } },
+        include: { messages: { orderBy: { createdAt: "asc" } } },
+      }),
+      prisma.houseProject.count({ where: { catalogKind: "author" } }),
+      prisma.houseProject.count({ where: { catalogKind: "partner" } }),
       prisma.post.count(),
-      prisma.houseProject.count(),
       prisma.faq.count(),
       prisma.review.count(),
       prisma.teamMember.count(),
@@ -68,8 +100,10 @@ async function getStats(): Promise<ContentStats> {
     return {
       leads,
       newLeads,
+      pendingTickets: countTicketsNeedingStaffReply(tickets),
+      authorHouseProjects,
+      typicalHouseProjects,
       posts,
-      houseProjects,
       faqs,
       reviews,
       teamMembers,
@@ -81,21 +115,7 @@ async function getStats(): Promise<ContentStats> {
       dbConnected: true,
     };
   } catch {
-    return {
-      leads: 0,
-      newLeads: 0,
-      posts: 0,
-      houseProjects: 0,
-      faqs: 0,
-      reviews: 0,
-      teamMembers: 0,
-      vacancies: 0,
-      builtObjects: 0,
-      clientProjects: 0,
-      partners: 0,
-      services: 0,
-      dbConnected: false,
-    };
+    return EMPTY_STATS;
   }
 }
 
@@ -123,16 +143,12 @@ function StatCard({
   value,
   subValue,
   icon: Icon,
-  accent,
-  bg,
 }: {
   href: string;
   label: string;
   value: number;
   subValue?: string;
   icon: LucideIcon;
-  accent: string;
-  bg: string;
 }) {
   return (
     <Link
@@ -142,15 +158,15 @@ function StatCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="adm-uppercase-label mb-2">{label}</p>
-          <p className={`text-3xl font-bold tabular-nums ${accent}`}>
+          <p className="text-3xl font-bold tabular-nums text-white/90">
             {value}
             {subValue != null ? (
               <span className="text-sm font-normal adm-faint ml-1">{subValue}</span>
             ) : null}
           </p>
         </div>
-        <div className={`p-2.5 rounded-xl shrink-0 ${bg}`}>
-          <Icon size={20} className={accent} />
+        <div className="p-2.5 rounded-xl shrink-0 bg-white/[0.06]">
+          <Icon size={20} className="text-white/45" />
         </div>
       </div>
       <span className="adm-card-foot">
@@ -166,29 +182,45 @@ function CompactStatCard({
   label,
   value,
   icon: Icon,
-  accent,
-  bg,
 }: {
   href: string;
   label: string;
   value: number;
   icon: LucideIcon;
-  accent: string;
-  bg: string;
 }) {
   return (
     <Link
       href={href}
       className="group flex items-center gap-3 p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-white/[0.14] transition-all duration-200"
     >
-      <div className={`p-2 rounded-lg shrink-0 ${bg}`}>
-        <Icon size={18} className={accent} />
+      <div className="p-2 rounded-lg shrink-0 bg-white/[0.06]">
+        <Icon size={18} className="text-white/45" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="adm-uppercase-label text-[11px] truncate">{label}</p>
-        <p className={`text-xl font-bold tabular-nums ${accent}`}>{value}</p>
+        <p className="text-xl font-bold tabular-nums text-white/90">{value}</p>
       </div>
       <ChevronRight size={16} className="adm-faint shrink-0 group-hover:translate-x-0.5 transition-all" />
+    </Link>
+  );
+}
+
+function SectionLink({
+  href,
+  label,
+  icon: Icon,
+}: {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+}) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] px-3 py-2 text-sm text-white/70 hover:border-white/[0.14] hover:text-white/90 transition-colors"
+    >
+      <Icon size={16} className="opacity-70" />
+      {label}
     </Link>
   );
 }
@@ -231,31 +263,31 @@ export default async function AdminDashboard() {
 
       <section className="space-y-3">
         <h2 className="adm-section-title">Главное</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           <StatCard
             href="/admin/leads"
             label="Заявки (новые / всего)"
             value={stats.newLeads}
             subValue={`/ ${stats.leads}`}
             icon={Inbox}
-            accent="text-blue-400"
-            bg="bg-blue-500/10"
           />
           <StatCard
-            href="/admin/posts"
-            label="Публикации в блоге"
-            value={stats.posts}
-            icon={FileText}
-            accent="text-emerald-400"
-            bg="bg-emerald-500/10"
+            href="/admin/tickets"
+            label="Чат (ожидают ответа)"
+            value={stats.pendingTickets}
+            icon={MessageCircle}
           />
           <StatCard
             href="/admin/house-projects"
-            label="Типовые проекты домов"
-            value={stats.houseProjects}
+            label="Авторские проекты"
+            value={stats.authorHouseProjects}
             icon={Home}
-            accent="text-amber-400"
-            bg="bg-amber-500/10"
+          />
+          <StatCard
+            href="/admin/partner-house-projects"
+            label="Типовые проекты"
+            value={stats.typicalHouseProjects}
+            icon={Home}
           />
         </div>
       </section>
@@ -264,44 +296,40 @@ export default async function AdminDashboard() {
         <h2 className="adm-section-title">Контент сайта</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
           <CompactStatCard
+            href="/admin/posts"
+            label="Новости"
+            value={stats.posts}
+            icon={FileText}
+          />
+          <CompactStatCard
             href="/admin/built-objects"
             label="Портфолио"
             value={stats.builtObjects}
             icon={Images}
-            accent="text-cyan-400"
-            bg="bg-cyan-500/10"
           />
           <CompactStatCard
             href="/admin/faq"
             label="Вопросы FAQ"
             value={stats.faqs}
             icon={HelpCircle}
-            accent="text-violet-400"
-            bg="bg-violet-500/10"
           />
           <CompactStatCard
             href="/admin/reviews"
             label="Отзывы"
             value={stats.reviews}
             icon={Star}
-            accent="text-yellow-400"
-            bg="bg-yellow-500/10"
           />
           <CompactStatCard
             href="/admin/team"
             label="Команда"
             value={stats.teamMembers}
             icon={ContactRound}
-            accent="text-rose-400"
-            bg="bg-rose-500/10"
           />
           <CompactStatCard
             href="/admin/vacancies"
             label="Вакансии"
             value={stats.vacancies}
             icon={ClipboardList}
-            accent="text-orange-400"
-            bg="bg-orange-500/10"
           />
         </div>
       </section>
@@ -314,24 +342,18 @@ export default async function AdminDashboard() {
             label="Личные кабинеты"
             value={stats.clientProjects}
             icon={UserRound}
-            accent="text-sky-400"
-            bg="bg-sky-500/10"
           />
           <CompactStatCard
             href="/admin/partners"
             label="Партнёры"
             value={stats.partners}
             icon={Users}
-            accent="text-indigo-400"
-            bg="bg-indigo-500/10"
           />
           <CompactStatCard
             href="/admin/services"
             label="Услуги"
             value={stats.services}
             icon={Briefcase}
-            accent="text-teal-400"
-            bg="bg-teal-500/10"
           />
         </div>
       </section>
@@ -339,30 +361,15 @@ export default async function AdminDashboard() {
       <section className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5">
         <p className="adm-uppercase-label font-semibold mb-3">Ещё разделы</p>
         <div className="flex flex-wrap gap-2">
-          <Link
-            href="/admin/mortgage"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] px-3 py-2 text-sm text-white/70 hover:border-[#0F3D2E]/40 hover:text-emerald-300 transition-colors"
-          >
-            <Landmark size={16} className="opacity-80" />
-            Ипотека
-          </Link>
-          <Link
-            href="/admin/seo"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] px-3 py-2 text-sm text-white/70 hover:border-[#0F3D2E]/40 hover:text-emerald-300 transition-colors"
-          >
-            <Globe size={16} className="opacity-80" />
-            SEO и редиректы
-          </Link>
-          <Link
-            href="/admin/settings"
-            className="inline-flex items-center gap-2 rounded-xl border border-white/[0.08] px-3 py-2 text-sm text-white/70 hover:border-[#0F3D2E]/40 hover:text-emerald-300 transition-colors"
-          >
-            Настройки сайта
-          </Link>
+          <SectionLink href="/admin/home-banner" label="Главный баннер" icon={PanelTop} />
+          <SectionLink href="/admin/calculator" label="Калькулятор проектов" icon={Calculator} />
+          <SectionLink href="/admin/design-project-pricing" label="Калькулятор проектирования" icon={Calculator} />
+          <SectionLink href="/admin/mortgage" label="Ипотека" icon={Landmark} />
+          <SectionLink href="/admin/seo" label="SEO и редиректы" icon={Globe} />
+          <SectionLink href="/admin/settings" label="Настройки сайта" icon={Settings} />
         </div>
       </section>
 
-      {/* Recent leads */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">Последние заявки</h2>
