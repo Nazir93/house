@@ -43,11 +43,11 @@ export const PARTNER_HOUSE_PROJECT_CATALOG: HouseProjectCatalogConfig = {
   detailBreadcrumbLabel: "Каталог типовых проектов",
   adminListPath: "/admin/partner-house-projects",
   adminNewPath: "/admin/partner-house-projects/new",
-  adminListTitle: "Типовые проекты (партнёр)",
+  adminListTitle: "Типовые проекты",
   adminListDescription: "Каталог типовых проектов на сайте (/typical-projects).",
   adminFormTitleNew: "Новый типовой проект",
   adminFormTitleEdit: "Типовой проект дома",
-  adminFormDescription: "Карточка в каталоге типовых проектов партнёра.",
+  adminFormDescription: "Карточка в каталоге типовых проектов.",
 };
 
 export function getHouseProjectCatalog(kind: HouseProjectCatalogKind): HouseProjectCatalogConfig {

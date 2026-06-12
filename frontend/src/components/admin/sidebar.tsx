@@ -39,7 +39,7 @@ const NAV_ITEMS = [
   { href: "/admin/leads", label: "Заявки", icon: Inbox },
   { href: "/admin/tickets", label: "Чат с клиентами", icon: MessageCircle },
   { href: "/admin/house-projects", label: "Авторские проекты", icon: Home },
-  { href: "/admin/partner-house-projects", label: "Типовые (партнёр)", icon: Home },
+  { href: "/admin/partner-house-projects", label: "Типовые проекты", icon: Home },
   { href: "/admin/calculator", label: "Калькулятор проектов", icon: Calculator },
   { href: "/admin/design-project-pricing", label: "Калькулятор проектирования", icon: Calculator },
   { href: "/admin/home-banner", label: "Главный баннер", icon: PanelTop },
