@@ -19,7 +19,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: "Проекты",
     items: [
       { href: "/projects", label: "Каталог авторских проектов" },
-      { href: "/typical-projects", label: "И каталог типовых проектов" },
+      { href: "/typical-projects", label: "Каталог типовых проектов" },
     ],
   },
   {
