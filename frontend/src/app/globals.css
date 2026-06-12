@@ -2351,3 +2351,140 @@ html.reveal-animations-ready [data-reveal="card"]:not(.is-visible) {
   border-radius: 9999px;
 }
 
+/* Индивидуальная визуальная тема для страниц услуг (кроме проектирования). */
+.service-theme-foundation,
+.service-theme-structure,
+.service-theme-roofing,
+.service-theme-engineering,
+.service-theme-finishing {
+  --service-hero-overlay: transparent;
+}
+
+.service-theme-foundation {
+  --service-hero-overlay: linear-gradient(
+    140deg,
+    color-mix(in srgb, #9a6b2e 14%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 22%, transparent) 44%,
+    transparent 100%
+  );
+}
+
+.service-theme-structure {
+  --service-hero-overlay: linear-gradient(
+    140deg,
+    color-mix(in srgb, #4a6fa5 14%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 22%, transparent) 44%,
+    transparent 100%
+  );
+}
+
+.service-theme-roofing {
+  --service-hero-overlay: linear-gradient(
+    140deg,
+    color-mix(in srgb, #5c6b7a 14%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 22%, transparent) 44%,
+    transparent 100%
+  );
+}
+
+.service-theme-engineering {
+  --service-hero-overlay: linear-gradient(
+    140deg,
+    color-mix(in srgb, #c9a227 14%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 22%, transparent) 44%,
+    transparent 100%
+  );
+}
+
+.service-theme-finishing {
+  --service-hero-overlay: linear-gradient(
+    140deg,
+    color-mix(in srgb, #3d8f6e 14%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 22%, transparent) 44%,
+    transparent 100%
+  );
+}
+
+.service-theme-foundation section.page-top-offset,
+.service-theme-structure section.page-top-offset,
+.service-theme-roofing section.page-top-offset,
+.service-theme-engineering section.page-top-offset,
+.service-theme-finishing section.page-top-offset {
+  position: relative;
+}
+
+.service-theme-foundation section.page-top-offset::before,
+.service-theme-structure section.page-top-offset::before,
+.service-theme-roofing section.page-top-offset::before,
+.service-theme-engineering section.page-top-offset::before,
+.service-theme-finishing section.page-top-offset::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--service-hero-overlay);
+  pointer-events: none;
+}
+
+.service-theme-foundation section.page-top-offset .container,
+.service-theme-structure section.page-top-offset .container,
+.service-theme-roofing section.page-top-offset .container,
+.service-theme-engineering section.page-top-offset .container,
+.service-theme-finishing section.page-top-offset .container {
+  position: relative;
+}
+
+.service-theme-foundation section.page-top-offset h1 {
+  text-shadow: 0 1px 0 rgba(154, 107, 46, 0.08);
+}
+
+.service-theme-structure section.page-top-offset h1 {
+  text-shadow: 0 1px 0 rgba(74, 111, 165, 0.08);
+}
+
+.service-theme-roofing section.page-top-offset h1 {
+  text-shadow: 0 1px 0 rgba(92, 107, 122, 0.08);
+}
+
+.service-theme-engineering section.page-top-offset h1 {
+  text-shadow: 0 1px 0 rgba(201, 162, 39, 0.1);
+}
+
+.service-theme-finishing section.page-top-offset h1 {
+  text-shadow: 0 1px 0 rgba(61, 143, 110, 0.08);
+}
+
+.service-theme-foundation section.page-top-offset ul li span,
+.service-theme-foundation section.py-16 .font-heading,
+.service-theme-foundation section.py-24 .font-heading,
+.service-theme-foundation section.py-32 .font-heading {
+  color: #9a6b2e !important;
+}
+
+.service-theme-structure section.page-top-offset ul li span,
+.service-theme-structure section.py-16 .font-heading,
+.service-theme-structure section.py-24 .font-heading,
+.service-theme-structure section.py-32 .font-heading {
+  color: #4a6fa5 !important;
+}
+
+.service-theme-roofing section.page-top-offset ul li span,
+.service-theme-roofing section.py-16 .font-heading,
+.service-theme-roofing section.py-24 .font-heading,
+.service-theme-roofing section.py-32 .font-heading {
+  color: #5c6b7a !important;
+}
+
+.service-theme-engineering section.page-top-offset ul li span,
+.service-theme-engineering section.py-16 .font-heading,
+.service-theme-engineering section.py-24 .font-heading,
+.service-theme-engineering section.py-32 .font-heading {
+  color: #c9a227 !important;
+}
+
+.service-theme-finishing section.page-top-offset ul li span,
+.service-theme-finishing section.py-16 .font-heading,
+.service-theme-finishing section.py-24 .font-heading,
+.service-theme-finishing section.py-32 .font-heading {
+  color: #3d8f6e !important;
+}
+

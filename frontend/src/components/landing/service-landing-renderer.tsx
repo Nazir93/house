@@ -17,6 +17,22 @@ import { ProjectDesignCostCalculator } from "@/components/construction/project-d
 import { ProjectTemplateViewer } from "@/components/construction/project-template-viewer";
 import { getDesignProjectPricingSettings } from "@/lib/design-project-pricing-config";
 
+type ServiceVisualTheme =
+  | "service-theme-foundation"
+  | "service-theme-structure"
+  | "service-theme-roofing"
+  | "service-theme-engineering"
+  | "service-theme-finishing";
+
+function resolveServiceVisualTheme(pagePath: string): ServiceVisualTheme | null {
+  if (pagePath.endsWith("/fundament")) return "service-theme-foundation";
+  if (pagePath.endsWith("/karkas")) return "service-theme-structure";
+  if (pagePath.endsWith("/krovlya")) return "service-theme-roofing";
+  if (pagePath.endsWith("/inzheneriya")) return "service-theme-engineering";
+  if (pagePath.endsWith("/otdelka")) return "service-theme-finishing";
+  return null;
+}
+
 export async function ServiceLandingRenderer({
   document,
   pagePath,
@@ -28,6 +44,7 @@ export async function ServiceLandingRenderer({
   const contact = await loadContactConfig();
   const designPricing = await getDesignProjectPricingSettings();
   const telephone = [contact.phoneRaw, contact.phone2Raw].filter((t) => t?.trim());
+  const visualTheme = resolveServiceVisualTheme(pagePath);
 
   const heroH1ByIndex = new Map<number, string>();
   for (let i = 0; i < document.sections.length; i++) {
@@ -38,7 +55,7 @@ export async function ServiceLandingRenderer({
   }
 
   return (
-    <article>
+    <article className={visualTheme ?? undefined} data-service-page={pagePath}>
       {document.sections.map((section, i) => {
         const next = document.sections[i + 1];
         if (section.type === "heroCinematic" && next?.type === "storyTimeline") {
