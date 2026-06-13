@@ -44,14 +44,22 @@ export function CookieBanner() {
       >
         <div className="flex-1 min-w-0">
           <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
-            Мы используем файлы cookie для аналитики и улучшения работы сайта.
-            Продолжая использовать сайт, вы соглашаетесь с{" "}
+            Мы используем файлы cookie для аналитики и корректной работы сайта. Продолжая использование,
+            вы соглашаетесь с{" "}
             <Link
               href="/privacy"
               className="underline transition-colors hover:text-[var(--accent)]"
               style={{ color: "var(--text)" }}
             >
               Политикой&nbsp;конфиденциальности
+            </Link>
+            {" "}и{" "}
+            <Link
+              href="/consent"
+              className="underline transition-colors hover:text-[var(--accent)]"
+              style={{ color: "var(--text)" }}
+            >
+              Согласием&nbsp;на&nbsp;обработку&nbsp;данных
             </Link>
             .
           </p>

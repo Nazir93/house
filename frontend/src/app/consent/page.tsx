@@ -1,20 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import { LegalOperatorCard } from "@/components/legal/legal-operator-card";
 import { loadContactConfig } from "@/lib/load-contact-config";
+import { getPublicSiteUrl, LEGAL_DOCUMENT_EFFECTIVE_DATE } from "@/lib/legal-site";
 
 export const metadata: Metadata = {
   title: "Согласие на обработку персональных данных",
-  robots: { index: false, follow: false },
+  description:
+    "Согласие на обработку персональных данных при использовании сайта chastdushi.ru. 152-ФЗ.",
+  robots: { index: true, follow: true },
 };
 
 export default async function ConsentPage() {
   const contact = await loadContactConfig();
   const co = contact.company;
+  const siteUrl = getPublicSiteUrl();
   const consentOperator =
     co.fullName.trim() && co.inn.trim()
-      ? `${co.fullName} (ИНН: ${co.inn}, ОГРНИП: ${co.ogrnip}), адрес: ${co.postalAddress.trim() || "—"}`
-      : "оператор персональных данных (реквизиты — в разделе «Контакты» или в настройках сайта)";
+      ? `${co.fullName} (ИНН: ${co.inn}${co.ogrnip.trim() ? `, ОГРНИП: ${co.ogrnip}` : ""}), адрес: ${co.postalAddress.trim() || contact.address.trim() || "—"}`
+      : "оператор персональных данных (реквизиты — в разделе «Контакты» и в Политике)";
 
   return (
     <section
@@ -22,34 +26,33 @@ export default async function ConsentPage() {
       style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}
     >
       <div className="container mx-auto max-w-3xl px-5 sm:px-8 lg:pr-[80px]">
-        <p
-          className="text-[10px] uppercase tracking-[0.25em] mb-4"
-          style={{ color: "var(--text-subtle)" }}
-        >
+        <p className="text-[10px] uppercase tracking-[0.25em] mb-4" style={{ color: "var(--text-subtle)" }}>
           Юридическая информация
         </p>
-        <h1
-          className="text-3xl md:text-4xl font-heading font-bold mb-3"
-          style={{ color: "var(--text)" }}
-        >
+        <h1 className="text-3xl md:text-4xl font-heading font-bold mb-3" style={{ color: "var(--text)" }}>
           Согласие на обработку персональных данных
         </h1>
         <p className="text-sm mb-10" style={{ color: "var(--text-muted)" }}>
-          В соответствии с Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных»
+          В соответствии с Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных» · актуально с{" "}
+          {LEGAL_DOCUMENT_EFFECTIVE_DATE}
         </p>
 
         <div className="space-y-6 text-[15px] leading-relaxed" style={{ color: "var(--text-muted)" }}>
-
           <p>
-            Пользователь, заполняя формы обратной связи на сайте{" "}
-            <a href={SITE_URL} className="underline" style={{ color: "var(--accent)" }}>{SITE_URL}</a>,
-            принимает настоящее Согласие на обработку персональных данных (далее — «Согласие»).
+            Пользователь, заполняя формы на сайте{" "}
+            <a href={siteUrl} className="underline" style={{ color: "var(--accent)" }}>{siteUrl}</a>, принимает
+            настоящее Согласие на обработку персональных данных (далее — «Согласие») и подтверждает, что
+            ознакомился с{" "}
+            <Link href="/privacy" className="underline" style={{ color: "var(--accent)" }}>
+              Политикой в отношении обработки персональных данных
+            </Link>
+            .
           </p>
 
           <p>
-            Действуя свободно, своей волей и в своём интересе, а также подтверждая свою
-            дееспособность, пользователь даёт своё согласие {consentOperator}, далее — «Оператор», на обработку
-            своих персональных данных со следующими условиями:
+            Действуя свободно, своей волей и в своём интересе, подтверждая дееспособность, пользователь даёт
+            согласие {consentOperator}, далее — «Оператор», на обработку персональных данных на следующих
+            условиях:
           </p>
 
           <div>
@@ -58,10 +61,11 @@ export default async function ConsentPage() {
             </h2>
             <p>Согласие даётся на обработку следующих персональных данных:</p>
             <ul className="list-disc pl-6 space-y-1 mt-2">
-              <li>Имя</li>
-              <li>Номер телефона</li>
-              <li>Адрес электронной почты</li>
-              <li>Описание проекта/объекта, площадь, тип услуги и иные данные, добровольно указанные пользователем в формах</li>
+              <li>имя (фамилия, отчество — при указании);</li>
+              <li>номер телефона;</li>
+              <li>адрес электронной почты;</li>
+              <li>описание проекта, объекта, площади, услуги и иные данные, добровольно указанные в формах;</li>
+              <li>технические данные (IP-адрес, cookie, данные браузера) — при использовании Сайта.</li>
             </ul>
           </div>
 
@@ -70,48 +74,43 @@ export default async function ConsentPage() {
               2. Цели обработки
             </h2>
             <ul className="list-disc pl-6 space-y-1">
-              <li>Обработка входящих заявок и обратная связь с пользователем</li>
-              <li>Предоставление информации об услугах компании</li>
-              <li>Подготовка коммерческого предложения и расчёт стоимости работ</li>
-              <li>Заключение и исполнение договоров</li>
+              <li>обработка заявок и обратная связь;</li>
+              <li>консультации и расчёт стоимости работ;</li>
+              <li>подготовка коммерческих предложений;</li>
+              <li>заключение и исполнение договоров;</li>
+              <li>ведение личного кабинета клиента (при предоставлении доступа).</li>
             </ul>
           </div>
 
           <div>
             <h2 className="text-lg font-heading font-bold mb-3" style={{ color: "var(--text)" }}>
-              3. Способы обработки
+              3. Действия с персональными данными
             </h2>
             <p>
-              Обработка персональных данных осуществляется с использованием средств автоматизации
-              и без использования таких средств. Обработка включает: сбор, запись, систематизацию,
-              накопление, хранение, уточнение (обновление, изменение), извлечение, использование,
-              передачу (предоставление, доступ), обезличивание, блокирование, удаление, уничтожение.
+              Обработка включает: сбор, записи, систематизацию, накопление, хранение, уточнение (обновление,
+              изменение), извлечение, использование, передачу (предоставление, доступ), обезличивание,
+              блокирование, удаление, уничтожение — с использованием средств автоматизации и без них.
             </p>
           </div>
 
           <div>
             <h2 className="text-lg font-heading font-bold mb-3" style={{ color: "var(--text)" }}>
-              4. Срок действия согласия
+              4. Срок действия и отзыв согласия
             </h2>
             <p>
-              Настоящее Согласие действует бессрочно до момента его отзыва пользователем.
-              Отзыв Согласия может быть осуществлён путём направления письменного заявления
-              на электронную почту Оператора
+              Согласие действует до достижения целей обработки или до отзыва. Отзыв направляется Оператору
               {contact.email.trim() ? (
                 <>
-                  :{" "}
+                  {" "}
+                  на email{" "}
                   <a href={`mailto:${contact.email}`} className="underline" style={{ color: "var(--accent)" }}>
                     {contact.email}
                   </a>
                 </>
               ) : (
-                <> (адрес указан в разделе «Контакты» на сайте)</>
+                " (контакты — в разделе «Контакты»)"
               )}
-              .
-            </p>
-            <p className="mt-3">
-              В случае отзыва Согласия Оператор вправе продолжить обработку персональных данных
-              при наличии оснований, предусмотренных законодательством Российской Федерации.
+              . При отзыве Оператор может продолжить обработку при наличии оснований, предусмотренных 152-ФЗ.
             </p>
           </div>
 
@@ -120,8 +119,8 @@ export default async function ConsentPage() {
               5. Передача данных
             </h2>
             <p>
-              Оператор не передаёт персональные данные третьим лицам без согласия субъекта,
-              за исключением случаев, предусмотренных законодательством Российской Федерации.
+              Оператор может поручать обработку уполномоченным третьим лицам (хостинг, почта, CRM, аналитика) и
+              передавать данные государственным органам в случаях, предусмотренных законом.
             </p>
           </div>
 
@@ -130,10 +129,8 @@ export default async function ConsentPage() {
               6. Права субъекта
             </h2>
             <p>
-              Субъект персональных данных имеет право на получение сведений об обработке
-              своих данных, требовать их уточнения, блокирования или уничтожения в случае,
-              если данные являются неполными, устаревшими, неточными, незаконно полученными
-              или не являются необходимыми для заявленной цели обработки.
+              Субъект вправе получать информацию об обработке, требовать уточнения, блокирования или уничтожения
+              ПДн, отозвать согласие и обжаловать действия Оператора в Роскомнадзор или суд.
             </p>
           </div>
 
@@ -142,34 +139,15 @@ export default async function ConsentPage() {
             style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)" }}
           >
             <p className="text-sm mb-3" style={{ color: "var(--text)" }}>
-              Отправляя форму на сайте, вы подтверждаете, что ознакомились с{" "}
+              Отправляя форму на Сайте, вы подтверждаете согласие с настоящим документом и{" "}
               <Link href="/privacy" className="underline" style={{ color: "var(--accent)" }}>
                 Политикой конфиденциальности
-              </Link>{" "}
-              и даёте согласие на обработку персональных данных.
+              </Link>
+              .
             </p>
-            <div className="text-sm space-y-1" style={{ color: "var(--text-muted)" }}>
-              {contact.phone.trim() || contact.phone2.trim() ? (
-                <p>
-                  Телефон:{" "}
-                  {contact.phone.trim() ? (
-                    <a href={`tel:${contact.phone.replace(/\D/g, "")}`} className="underline" style={{ color: "var(--accent)" }}>{contact.phone}</a>
-                  ) : null}
-                  {contact.phone.trim() && contact.phone2.trim() ? " / " : null}
-                  {contact.phone2.trim() ? (
-                    <a href={`tel:${contact.phone2.replace(/\D/g, "")}`} className="underline" style={{ color: "var(--accent)" }}>{contact.phone2}</a>
-                  ) : null}
-                </p>
-              ) : null}
-              {contact.email.trim() ? (
-                <p>
-                  Email:{" "}
-                  <a href={`mailto:${contact.email}`} className="underline" style={{ color: "var(--accent)" }}>{contact.email}</a>
-                </p>
-              ) : null}
-            </div>
           </div>
 
+          <LegalOperatorCard contact={contact} />
         </div>
       </div>
     </section>

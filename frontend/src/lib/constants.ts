@@ -72,9 +72,9 @@ export function buildSchemaAreaServed(): SchemaPlace[] {
   return out;
 }
 
-/** Без env для локальной сборки — подставьте реальный URL на проде (.env). */
+/** Публичный URL сайта (мета, schema.org, юридические документы). */
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL?.trim() || "http://localhost:3000";
+  process.env.NEXT_PUBLIC_SITE_URL?.trim()?.replace(/\/$/, "") || "https://chastdushi.ru";
 
 /** Дефолты; при наличии записей в админке «Настройки» подставятся из БД. */
 export const PHONE = "+7 (812) 989-99-01";
