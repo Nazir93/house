@@ -88,6 +88,9 @@ fi
 echo "==> npm ci"
 npm ci
 
+echo "==> playwright chromium (PDF коммерческих предложений)"
+npx playwright install chromium --with-deps 2>/dev/null || npx playwright install chromium
+
 echo "==> prisma generate"
 npx prisma generate --schema=prisma/schema.prisma
 

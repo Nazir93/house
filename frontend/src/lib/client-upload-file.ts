@@ -28,6 +28,7 @@ export type ResolvedClientUploadFile = {
 
 const PUBLIC_UPLOAD_PREFIX = "/uploads/";
 const PRIVATE_CLIENT_DOCUMENT_PREFIX = "/private-uploads/client-documents/";
+const PRIVATE_PROPOSALS_PREFIX = "/private-uploads/proposals/";
 
 /** Нормализует URL документа/фото к внутреннему upload path. */
 export function normalizeClientUploadPath(url: string): string | null {
@@ -37,7 +38,11 @@ export function normalizeClientUploadPath(url: string): string | null {
   if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
     try {
       const u = new URL(trimmed);
-      if (u.pathname.startsWith(PUBLIC_UPLOAD_PREFIX) || u.pathname.startsWith(PRIVATE_CLIENT_DOCUMENT_PREFIX)) {
+      if (
+        u.pathname.startsWith(PUBLIC_UPLOAD_PREFIX) ||
+        u.pathname.startsWith(PRIVATE_CLIENT_DOCUMENT_PREFIX) ||
+        u.pathname.startsWith(PRIVATE_PROPOSALS_PREFIX)
+      ) {
         return u.pathname;
       }
       return null;
@@ -49,7 +54,11 @@ export function normalizeClientUploadPath(url: string): string | null {
   if (trimmed.startsWith("//")) {
     try {
       const u = new URL(`https:${trimmed}`);
-      if (u.pathname.startsWith(PUBLIC_UPLOAD_PREFIX) || u.pathname.startsWith(PRIVATE_CLIENT_DOCUMENT_PREFIX)) {
+      if (
+        u.pathname.startsWith(PUBLIC_UPLOAD_PREFIX) ||
+        u.pathname.startsWith(PRIVATE_CLIENT_DOCUMENT_PREFIX) ||
+        u.pathname.startsWith(PRIVATE_PROPOSALS_PREFIX)
+      ) {
         return u.pathname;
       }
       return null;
@@ -58,7 +67,11 @@ export function normalizeClientUploadPath(url: string): string | null {
     }
   }
 
-  if (trimmed.startsWith(PUBLIC_UPLOAD_PREFIX) || trimmed.startsWith(PRIVATE_CLIENT_DOCUMENT_PREFIX)) return trimmed;
+  if (
+    trimmed.startsWith(PUBLIC_UPLOAD_PREFIX) ||
+    trimmed.startsWith(PRIVATE_CLIENT_DOCUMENT_PREFIX) ||
+    trimmed.startsWith(PRIVATE_PROPOSALS_PREFIX)
+  ) return trimmed;
   if (trimmed.startsWith("uploads/")) return `/${trimmed}`;
   return null;
 }
@@ -75,13 +88,20 @@ export function resolveClientUploadFile(url: string): ResolvedClientUploadFile |
   const publicPath = normalizeClientUploadPath(url);
   if (!publicPath) return null;
 
-  const privateDocument = publicPath.startsWith(PRIVATE_CLIENT_DOCUMENT_PREFIX);
-  const prefix = privateDocument ? PRIVATE_CLIENT_DOCUMENT_PREFIX : PUBLIC_UPLOAD_PREFIX;
+  const privateDocument =
+    publicPath.startsWith(PRIVATE_CLIENT_DOCUMENT_PREFIX) || publicPath.startsWith(PRIVATE_PROPOSALS_PREFIX);
+  const prefix = publicPath.startsWith(PRIVATE_PROPOSALS_PREFIX)
+    ? PRIVATE_PROPOSALS_PREFIX
+    : privateDocument
+      ? PRIVATE_CLIENT_DOCUMENT_PREFIX
+      : PUBLIC_UPLOAD_PREFIX;
   const segments = safeUploadSegments(publicPath, prefix);
   if (!segments || segments.length === 0) return null;
 
   const uploadsRoot = privateDocument
-    ? path.join(process.cwd(), "storage", "private", "client-documents")
+    ? publicPath.startsWith(PRIVATE_PROPOSALS_PREFIX)
+      ? path.join(process.cwd(), "storage", "private", "proposals")
+      : path.join(process.cwd(), "storage", "private", "client-documents")
     : path.join(process.cwd(), "public", "uploads");
   const filePath = path.join(uploadsRoot, ...segments);
 

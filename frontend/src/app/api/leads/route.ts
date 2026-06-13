@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { sendTelegramNotification, formatLeadMessage } from "@/lib/telegram";
 import { sendBitrixLead } from "@/lib/bitrix";
 import { createLeadFollowupToken, verifyLeadFollowupToken } from "@/lib/lead-followup-token";
+import { generateLeadProposalPdf } from "@/lib/proposal/proposal-service";
 
 function logLeadDebug(payload: Record<string, unknown>) {
   if (process.env.NODE_ENV !== "production" || process.env.LEADS_DEBUG === "1") {
@@ -161,7 +162,7 @@ export async function POST(request: NextRequest) {
     const token = uuidv4();
     const source = parsed.data.source || "unknown";
 
-    let createdLead: { id: string };
+    let createdLead: { id: string; name: string; phone: string; email: string | null; calcData: unknown; createdAt: Date };
     try {
       createdLead = await prisma.$transaction(async (tx) => {
         const l = await tx.lead.create({
@@ -176,6 +177,7 @@ export async function POST(request: NextRequest) {
             utmMedium: parsed.data.utmMedium || null,
             utmCampaign: parsed.data.utmCampaign || null,
             utmTerm: parsed.data.utmTerm || null,
+            proposalStatus: "PENDING",
             ...(parsed.data.calcData !== undefined
               ? { calcData: parsed.data.calcData as object }
               : {}),
@@ -185,6 +187,7 @@ export async function POST(request: NextRequest) {
         await tx.thankYouToken.create({
           data: {
             token,
+            leadId: l.id,
             leadName: parsed.data.name,
             source,
             expiresAt: new Date(Date.now() + 5 * 60 * 1000),
@@ -234,6 +237,18 @@ export async function POST(request: NextRequest) {
       console.error("[leads] Bitrix lead sync failed:", bitrixErr);
     }
 
+    // Генерацию КП не делаем критичной: заявка уже сохранена и обработана.
+    void generateLeadProposalPdf({
+      id: createdLead.id,
+      name: createdLead.name,
+      phone: createdLead.phone,
+      email: createdLead.email,
+      calcData: createdLead.calcData,
+      createdAt: createdLead.createdAt,
+    }).catch((proposalErr) => {
+      console.error("[leads] proposal generation failed:", proposalErr);
+    });
+
     logLeadDebug({
       id: createdLead.id,
       source,
@@ -245,6 +260,7 @@ export async function POST(request: NextRequest) {
       success: true,
       redirectUrl,
       followupToken: createLeadFollowupToken(createdLead.id),
+      proposalStatus: "PENDING",
     });
   } catch (error) {
     console.error("[LEAD ERROR]", error);

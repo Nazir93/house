@@ -38,6 +38,14 @@ enum LeadStatus {
   CANCELLED
 }
 
+enum LeadProposalStatus {
+  NONE
+  PENDING
+  READY
+  FAILED
+  UNSUPPORTED
+}
+
 enum ConstructionMediaType {
   RENDER
   PLAN
@@ -345,6 +353,11 @@ model Lead {
   utmTerm     String?
   calcData    Json?
   status      LeadStatus @default(NEW)
+  proposalStatus LeadProposalStatus @default(NONE)
+  proposalPath   String?
+  proposalFilename String?
+  proposalError  String?    @db.Text
+  proposalReadyAt DateTime?
   notes       String?    @db.Text
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -517,6 +530,7 @@ model SiteSettings {
 model ThankYouToken {
   id        String   @id @default(cuid())
   token     String   @unique
+  leadId    String?
   leadName  String?
   source    String?
   used      Boolean  @default(false)

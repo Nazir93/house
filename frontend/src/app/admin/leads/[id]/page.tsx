@@ -22,6 +22,10 @@ type Lead = {
   utmTerm: string | null;
   calcData: unknown;
   status: string;
+  proposalStatus?: "NONE" | "PENDING" | "READY" | "FAILED" | "UNSUPPORTED";
+  proposalPath?: string | null;
+  proposalFilename?: string | null;
+  proposalError?: string | null;
   notes: string | null;
   createdAt: string;
 };
@@ -220,6 +224,24 @@ export default function AdminLeadDetailPage() {
         </div>
 
         {lead.calcData != null ? <LeadCalcSummary calcData={lead.calcData} /> : null}
+
+        <div className="space-y-2 pt-3 border-t border-white/[0.06]">
+          <p className="text-[11px] uppercase tracking-wider text-white/35">Коммерческое предложение (PDF)</p>
+          {lead.proposalStatus === "READY" ? (
+            <a
+              href={`/api/leads/proposal?leadId=${encodeURIComponent(lead.id)}`}
+              className="inline-flex items-center gap-1.5 text-sm text-emerald-300/90 hover:underline"
+            >
+              Скачать PDF
+              <ExternalLink size={13} className="shrink-0 opacity-70" />
+            </a>
+          ) : (
+            <p className="text-sm text-white/70">
+              Статус: {lead.proposalStatus || "NONE"}
+              {lead.proposalError ? ` · ${lead.proposalError}` : ""}
+            </p>
+          )}
+        </div>
 
         {utmRows.length > 0 ? (
           <details className="pt-3 border-t border-white/[0.06]">

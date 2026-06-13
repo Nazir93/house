@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Clock, Phone, Send } from "lucide-react";
+import { ArrowRight, CheckCircle2, Clock, Download, Phone, Send } from "lucide-react";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { VkIcon } from "@/components/icons/vk-icon";
 import { SITE_NAME } from "@/lib/constants";
@@ -26,6 +26,7 @@ export function ThankYouContent() {
 
   const [countdown, setCountdown] = useState(15);
   const [valid, setValid] = useState<boolean | null>(null);
+  const [proposalStatus, setProposalStatus] = useState<"idle" | "pending" | "ready" | "failed">("idle");
 
   useEffect(() => {
     if (!token) {
@@ -34,6 +35,38 @@ export function ThankYouContent() {
     }
     setValid(true);
   }, [token, router]);
+
+  useEffect(() => {
+    if (!token) return;
+    let cancelled = false;
+    const run = async () => {
+      for (let i = 0; i < 5; i++) {
+        try {
+          const res = await fetch(`/api/leads/proposal?token=${encodeURIComponent(token)}`, { method: "GET" });
+          if (cancelled) return;
+          if (res.ok) {
+            setProposalStatus("ready");
+            return;
+          }
+          if (res.status === 202) {
+            setProposalStatus("pending");
+            await new Promise((r) => setTimeout(r, 1200));
+            continue;
+          }
+          setProposalStatus("failed");
+          return;
+        } catch {
+          setProposalStatus("failed");
+          return;
+        }
+      }
+      setProposalStatus("pending");
+    };
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [token]);
 
   useEffect(() => {
     if (!valid) return;
@@ -218,6 +251,24 @@ export function ThankYouContent() {
               backgroundColor: "color-mix(in srgb, var(--bg-secondary) 40%, var(--bg))",
             }}
           >
+            {proposalStatus !== "idle" ? (
+              <div className="mb-4 rounded-xl border px-4 py-3 text-sm" style={{ borderColor: "var(--border)" }}>
+                <p className="font-semibold text-[var(--text)]">Коммерческое предложение</p>
+                {proposalStatus === "ready" ? (
+                  <a
+                    href={`/api/leads/proposal?token=${encodeURIComponent(token || "")}`}
+                    className="mt-2 inline-flex items-center gap-2 text-[var(--accent)] hover:underline"
+                  >
+                    <Download className="h-4 w-4" />
+                    Скачать PDF
+                  </a>
+                ) : proposalStatus === "pending" ? (
+                  <p className="mt-1 text-[var(--text-muted)]">Файл готовится, обновите страницу через пару секунд.</p>
+                ) : (
+                  <p className="mt-1 text-[var(--text-muted)]">Файл пока недоступен. Менеджер отправит КП вручную.</p>
+                )}
+              </div>
+            ) : null}
             <p className="text-center text-sm text-[var(--text-muted)]">
               Пока ждёте — посмотрите наши проекты
             </p>
