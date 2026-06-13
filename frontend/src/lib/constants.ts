@@ -79,8 +79,8 @@ export const SITE_URL =
 /** Дефолты; при наличии записей в админке «Настройки» подставятся из БД. */
 export const PHONE = "+7 (812) 989-99-01";
 export const PHONE_RAW = "+78129899901";
-export const PHONE2 = "+7 (911) 600-00-99";
-export const PHONE2_RAW = "+79116000099";
+export const PHONE2 = "+7 (904) 600-00-99";
+export const PHONE2_RAW = "+79046000099";
 
 /** Номер для чата Telegram (кнопки «написать»). */
 export const MESSENGER_CHAT_PHONE_RAW =
