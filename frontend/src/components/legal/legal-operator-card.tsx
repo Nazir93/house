@@ -46,13 +46,7 @@ export function LegalOperatorCard({ contact }: { contact: ContactConfig }) {
               {contact.email}
             </a>
           </p>
-        ) : (
-          <p>
-            Email для обращений по персональным данным: укажите в разделе{" "}
-            <a href="/contacts" className="underline" style={{ color: "var(--accent)" }}>«Контакты»</a> или в
-            админке «Настройки сайта».
-          </p>
-        )}
+        ) : null}
         {contact.workingHours.trim() ? <p>Режим работы: {contact.workingHours}</p> : null}
       </div>
     </div>
