@@ -53,7 +53,7 @@ export async function JsonLd() {
     },
     areaServed: buildSchemaAreaServed(),
     ...(sameAs.length > 0 ? { sameAs } : {}),
-    openingHoursSpecification: [OFFICE_OPENING_HOURS_JSON_LD],
+    openingHoursSpecification: OFFICE_OPENING_HOURS_JSON_LD,
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: "Строительство загородных домов",

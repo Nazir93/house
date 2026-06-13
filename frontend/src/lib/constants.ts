@@ -88,7 +88,7 @@ export const MESSENGER_CHAT_PHONE_RAW =
 export const EMAIL = "";
 /** Адрес офиса (контакты, подвал, schema.org; при записи в админке подменяется из БД) */
 export const ADDRESS = "г. Санкт-Петербург, ул. Ординарная, д. 18";
-export const WORKING_HOURS = "Пн–Пт 9:00–17:00";
+export const WORKING_HOURS = "Пн–Пт 9:00–20:00, сб 11:00–19:00, вс выходной";
 
 /**
  * Координаты офиса (WGS84): долгота, широта — метка на Яндекс.Картах (виджет и ссылка).

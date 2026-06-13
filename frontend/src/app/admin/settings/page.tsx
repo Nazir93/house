@@ -30,7 +30,7 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
       { key: "phone2_raw", label: "Телефон 2 (для ссылки tel:)", placeholder: "+79997654321" },
       { key: "email", label: "Email", placeholder: "office@example.com" },
       { key: "address", label: "Адрес офиса", placeholder: "г. Санкт-Петербург, ул. …" },
-      { key: "working_hours", label: "Режим работы", placeholder: "Пн–Пт 9:00–17:00" },
+      { key: "working_hours", label: "Режим работы", placeholder: "Пн–Пт 9:00–20:00, сб 11:00–19:00, вс выходной" },
     ],
   },
   {

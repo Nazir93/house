@@ -70,10 +70,18 @@ export function createDefaultContactConfig(): ContactConfig {
   };
 }
 
-/** Часы работы офиса для schema.org — синхронно с WORKING_HOURS в constants (9–17 пн–пт). */
-export const OFFICE_OPENING_HOURS_JSON_LD = {
-  "@type": "OpeningHoursSpecification" as const,
-  dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const,
-  opens: "09:00",
-  closes: "17:00",
-};
+/** Часы работы офиса для schema.org — синхронно с WORKING_HOURS в constants. */
+export const OFFICE_OPENING_HOURS_JSON_LD = [
+  {
+    "@type": "OpeningHoursSpecification" as const,
+    dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] as const,
+    opens: "09:00",
+    closes: "20:00",
+  },
+  {
+    "@type": "OpeningHoursSpecification" as const,
+    dayOfWeek: ["Saturday"] as const,
+    opens: "11:00",
+    closes: "19:00",
+  },
+];

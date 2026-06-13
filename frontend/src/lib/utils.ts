@@ -38,5 +38,8 @@ export function isWorkingHours(): boolean {
   const moscow = new Date(utc + moscowOffset * 60000);
   const hour = moscow.getHours();
   const day = moscow.getDay();
-  return day >= 1 && day <= 5 && hour >= 9 && hour < 18;
+  if (day === 0) return false;
+  if (day >= 1 && day <= 5) return hour >= 9 && hour < 20;
+  if (day === 6) return hour >= 11 && hour < 19;
+  return false;
 }
