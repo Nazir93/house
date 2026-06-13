@@ -29,3 +29,6 @@ export function getPublicSiteUrl(): string {
 
   return raw.replace(/\/$/, "");
 }
+
+/** Дата актуальной редакции политики и согласия (отображение на сайте). */
+export const LEGAL_DOCUMENT_EFFECTIVE_DATE = "14 июня 2026 г.";
