@@ -5,9 +5,9 @@ import { AboutPageContent } from "@/components/company/about-page-content";
 export async function generateMetadata() {
   return getPageMeta({
     title: `О нас — ${SITE_NAME}`,
-    description: `Компания ${SITE_NAME}: строительство домов под ключ в ${CITY}, ценности, подход к работе и контакты.`,
+    description: `«Часть Души»: проектируем и строим загородные дома в ${CITY}. Миссия, ценности и команда — архитектура, качество исполнения и внимание к деталям.`,
     path: "/about",
-    keywords: ["о компании", "строительство домов", SITE_NAME, CITY],
+    keywords: ["о компании", "строительство домов", SITE_NAME, CITY, "ценности", "миссия"],
   });
 }
 

@@ -41,10 +41,16 @@ test.describe("Контакты", () => {
 });
 
 test.describe("О компании", () => {
-  test("/about — без внешних фото (локальные иллюстрации)", async ({ page }) => {
+  test("/about — контент по ТЗ и без Unsplash", async ({ page }) => {
     await expectPublicPage(page, "/about");
     const html = await page.content();
     expect(html.includes("images.unsplash.com"), "страница не должна тянуть Unsplash").toBe(false);
+    await expect(page.getByText("Кузнецова Ольга Олеговна")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Ценности" })).toBeVisible();
+    await expect(page.getByText("Продуманность")).toBeVisible();
+    const portfolioLink = page.getByRole("link", { name: "Как мы строим" });
+    await expect(portfolioLink).toBeVisible();
+    await expect(portfolioLink).toHaveAttribute("href", "/portfolio");
   });
 });
 
