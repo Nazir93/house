@@ -1,4 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { SITE_URL } from "@/lib/constants";
+import { proposalSiteHost } from "@/lib/proposal/proposal-format";
 import { renderProposalHtml } from "@/lib/proposal/render-proposal-html";
 import type { ProposalDocumentModel } from "@/lib/proposal/types";
 
@@ -39,7 +41,7 @@ describe("render-proposal-html", () => {
     };
     const html = renderProposalHtml(model);
     expect(html).toContain("АВТОРСКИЙ ПРОЕКТ «БРАУН»");
-    expect(html).toContain("chastdushi.ru");
+    expect(html).toContain(proposalSiteHost(SITE_URL));
     expect(html).toContain("Дата печати:");
     expect(html).toContain("Опции и стоимость");
     expect(html).toContain("Стандарт*");
