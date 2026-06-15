@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useCallback } from "react";
+import { PWA_ICON_PATHS } from "@/lib/pwa-config";
 
 const POLL_MS = 12_000;
 
@@ -39,7 +40,7 @@ export function useAdminNewLeadsNotify() {
                 delta === 1
                   ? "Поступила новая заявка — откройте раздел «Заявки»"
                   : `Поступило ${delta} новых заявок`,
-              icon: "/icon.png",
+              icon: PWA_ICON_PATHS.png32,
               tag: "admin-new-lead",
             });
           } catch {

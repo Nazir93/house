@@ -2,6 +2,7 @@ import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { toAbsoluteSiteUrl } from "@/lib/absolute-site-url";
 import { buildBreadcrumbListSchema } from "@/lib/breadcrumb-schema";
 import { JsonLdInline } from "./json-ld-inline";
+import { SITE_DEFAULT_ICON_PATH } from "@/lib/pwa-config";
 
 type Props = {
   title: string;
@@ -14,7 +15,7 @@ type Props = {
 };
 
 const PUBLISHER_LOGO = toAbsoluteSiteUrl(
-  process.env.NEXT_PUBLIC_PUBLISHER_LOGO_URL?.trim() || "/icon.png"
+  process.env.NEXT_PUBLIC_PUBLISHER_LOGO_URL?.trim() || SITE_DEFAULT_ICON_PATH
 );
 
 export function BlogArticleJsonLd({

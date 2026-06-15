@@ -4,7 +4,7 @@
 # или: ./scripts/db-tunnel.sh 1.2.3.4
 
 set -euo pipefail
-HOST="${VPS_SSH_HOST:-${1:-}}"
+HOST="${VPS_SSH_HOST:-${1:-46.173.26.108}}"
 USER="${VPS_SSH_USER:-root}"
 LOCAL_PORT="${DB_TUNNEL_LOCAL_PORT:-5433}"
 

@@ -29,6 +29,7 @@ import {
   type HouseProjectCatalogConfig,
 } from "@/lib/house-project-catalog";
 import { resolveProjectListingPriceRub } from "@/lib/project-listing-price";
+import { houseProjectCatalogTeaser } from "@/lib/house-project-teaser";
 import { CmsImage } from "@/components/ui/cms-image";
 import { SiteSelect } from "@/components/ui/site-select";
 
@@ -846,7 +847,7 @@ export function ProjectsCatalogContent({
                             {project.title}
                           </Link>
                           <p className="mt-3 max-w-2xl text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                            {project.shortDescription}
+                            {houseProjectCatalogTeaser(project.shortDescription, project.description)}
                           </p>
                         </div>
                         <div className="text-left md:text-right">

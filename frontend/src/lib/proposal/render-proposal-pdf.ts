@@ -1,6 +1,7 @@
 import path from "path";
 import { mkdir, writeFile } from "fs/promises";
 import { chromium } from "playwright";
+import { fillMasterProposalTemplate } from "@/lib/proposal/proposal-template-fill";
 import { renderProposalHtml } from "@/lib/proposal/render-proposal-html";
 import type { ProposalDocumentModel } from "@/lib/proposal/types";
 
@@ -15,7 +16,6 @@ function safeSegment(input: string): string {
 }
 
 export async function renderAndStoreProposalPdf(model: ProposalDocumentModel): Promise<StoredProposalPdf> {
-  const html = renderProposalHtml(model);
   const dir = path.join(process.cwd(), "storage", "private", "proposals");
   await mkdir(dir, { recursive: true });
 
@@ -23,6 +23,17 @@ export async function renderAndStoreProposalPdf(model: ProposalDocumentModel): P
   const filename = safeSegment(`kp-${model.leadId}-${stamp}.pdf`);
   const filePath = path.join(dir, filename);
 
+  if (model.kind === "house-project-quote") {
+    const pdfBytes = await fillMasterProposalTemplate(model);
+    await writeFile(filePath, pdfBytes);
+    return {
+      storagePath: filePath,
+      publicPath: `/private-uploads/proposals/${filename}`,
+      filename,
+    };
+  }
+
+  const html = renderProposalHtml(model);
   const browser = await chromium.launch({ headless: true });
   try {
     const page = await browser.newPage();
@@ -52,4 +63,3 @@ export async function writeProposalErrorSnapshot(leadId: string, reason: string)
   await writeFile(filePath, reason, "utf8");
   return filePath;
 }
-

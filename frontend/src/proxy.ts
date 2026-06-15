@@ -103,13 +103,15 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  /** Редиректы из админки SEO → таблица Redirect */
-  const dbRedirect = lookupRedirect(await loadRedirectMap(request.nextUrl.origin), pathname);
-  if (dbRedirect) {
-    const url = request.nextUrl.clone();
-    url.pathname = dbRedirect.toPath;
-    url.search = "";
-    return NextResponse.redirect(url, dbRedirect.permanent ? 308 : 307);
+  /** Редиректы из админки SEO → таблица Redirect (не для /api — иначе fetch redirect-map в middleware зависает) */
+  if (!pathname.startsWith("/api/")) {
+    const dbRedirect = lookupRedirect(await loadRedirectMap(request.nextUrl.origin), pathname);
+    if (dbRedirect) {
+      const url = request.nextUrl.clone();
+      url.pathname = dbRedirect.toPath;
+      url.search = "";
+      return NextResponse.redirect(url, dbRedirect.permanent ? 308 : 307);
+    }
   }
 
   /** Устаревшие URL старого сайта — редирект на актуальные разделы */

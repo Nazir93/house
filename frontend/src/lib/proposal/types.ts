@@ -22,8 +22,23 @@ export type ProposalScopeKind =
 
 export type ProposalSummaryField = { label: string; value: string };
 
+export type ProposalTemplateFillData = {
+  constructionLocationLine1: string;
+  constructionLocationLine2: string;
+  houseDimensions: string;
+  buildDurationLabel: string;
+  floorLabel: string;
+  wallMaterialLabel: string;
+  livingRoomAreaLabel: string;
+  priceStandardRub: number;
+  priceComfortRub: number;
+  priceComfortPlusRub: number;
+  priceWithExtrasRub: number;
+};
+
 export type ProposalPriceRow = {
   key: string;
+  rowKind?: "item" | "section";
   group: "shell" | "engineering" | "facade" | "construction" | "other";
   label: string;
   amountRub: number;
@@ -43,5 +58,7 @@ export type ProposalDocumentModel = {
   packageTotalsRub: Record<ProposalPackageKey, number>;
   planImageUrl?: string | null;
   notes: string[];
+  /** Поля для 16-страничного шаблона КП (Павел клиент). */
+  templateFill?: Partial<ProposalTemplateFillData>;
 };
 

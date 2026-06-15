@@ -60,6 +60,7 @@ module.exports = {
       script: path.join(__dirname, "node_modules/next/dist/bin/next"),
       args: "start -H 0.0.0.0",
       instances: 1,
+      exec_mode: "fork",
       autorestart: true,
       watch: false,
       max_restarts: 15,

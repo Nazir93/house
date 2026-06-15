@@ -1,8 +1,8 @@
 # Дом — Статус проекта
 
-> Дата обновления: 9 мая 2026
+> Дата обновления: 15 июня 2026
 
-**Продакшен-сайт:** [https://dom.ru](https://dom.ru)
+**Продакшен-сайт:** [https://chastdushi.ru](https://chastdushi.ru) · VPS `46.173.26.108` · SSH `ssh carcas-vps`
 
 ---
 
@@ -47,7 +47,7 @@ npm run dev
 
 ### 4. Продакшен на VPS
 
-Next.js через **PM2**, PostgreSQL на сервере, **Nginx** как reverse proxy. Подробно: `frontend/DEPLOY-SERVER.md`, `DEPLOY-STEPS.md`.
+Next.js через **PM2** на **`46.173.26.108`**, PostgreSQL на том же VPS, **Nginx** (порт 8080 для теста, 80/443 после DNS). SSH: `ssh carcas-vps`. Подробно: `frontend/SERVER-DEPLOY.md`, `frontend/DEPLOY-SERVER.md`.
 
 ---
 
@@ -162,13 +162,13 @@ Next.js через **PM2**, PostgreSQL на сервере, **Nginx** как rev
 ```
 DATABASE_URL="postgresql://user:password@localhost:5432/garant_montazh?schema=public"
 # На сервере укажите канонический адрес сайта (политика конфиденциальности, метаданные):
-NEXT_PUBLIC_SITE_URL="https://dom.ru"
-NEXT_PUBLIC_SITE_NAME="Дом"
-NEXT_PUBLIC_CITY="Сочи"
-ADMIN_EMAIL="admin@dom.ru"
+NEXT_PUBLIC_SITE_URL="https://chastdushi.ru"
+NEXT_PUBLIC_SITE_NAME="Часть души"
+NEXT_PUBLIC_CITY="Санкт-Петербург"
+ADMIN_EMAIL="admin@chastdushi.ru"
 ADMIN_SECRET="dev-secret-change-in-production"
 NEXTAUTH_SECRET="dev-nextauth-secret"
-NEXTAUTH_URL="https://dom.ru"
+NEXTAUTH_URL="https://chastdushi.ru"
 ```
 
 Локальная разработка: `NEXT_PUBLIC_SITE_URL` и `NEXTAUTH_URL` можно временно задать как `http://localhost:3000`.

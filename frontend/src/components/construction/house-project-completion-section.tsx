@@ -265,6 +265,7 @@ export function HouseProjectCompletionSection({
     if (!catalogMode || !catalogQuote || !categoryId) return undefined;
     return buildProjectCalculatorLeadPayload({
       project,
+      tierId: tier?.id ?? "gas",
       tierLabel: tier?.label ?? "",
       categoryId,
       quote: catalogQuote,

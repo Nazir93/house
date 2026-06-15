@@ -7,7 +7,7 @@ import {
 
 describe("legal-site", () => {
   it("isNonPublicSiteHost detects IP and localhost", () => {
-    expect(isNonPublicSiteHost("81.200.145.113")).toBe(true);
+    expect(isNonPublicSiteHost("46.173.26.108")).toBe(true);
     expect(isNonPublicSiteHost("127.0.0.1")).toBe(true);
     expect(isNonPublicSiteHost("localhost")).toBe(true);
     expect(isNonPublicSiteHost("chastdushi.ru")).toBe(false);
@@ -15,7 +15,7 @@ describe("legal-site", () => {
 
   it("getPublicSiteUrl uses canonical domain for IP env", () => {
     const prev = process.env.NEXT_PUBLIC_SITE_URL;
-    process.env.NEXT_PUBLIC_SITE_URL = "http://81.200.145.113";
+    process.env.NEXT_PUBLIC_SITE_URL = "http://46.173.26.108:8080";
     expect(getPublicSiteUrl()).toBe(CANONICAL_PUBLIC_SITE_URL);
     process.env.NEXT_PUBLIC_SITE_URL = prev;
   });

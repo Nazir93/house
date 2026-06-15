@@ -1,4 +1,8 @@
 {
+  "private": true,
+  "scripts": {
+    "deploy:remote": "node scripts/deploy-remote.mjs"
+  },
   "dependencies": {
     "ssh2": "^1.17.0"
   }

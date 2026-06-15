@@ -46,6 +46,14 @@ const nextConfig = {
       { protocol: "http", hostname: "127.0.0.1" },
       {
         protocol: "https",
+        hostname: "chastdushi.ru",
+      },
+      {
+        protocol: "https",
+        hostname: "*.chastdushi.ru",
+      },
+      {
+        protocol: "https",
         hostname: "dom.ru",
       },
       {
@@ -77,6 +85,12 @@ const nextConfig = {
         {
           source: "/uploads/:path*",
           destination: "/api/uploads/:path*",
+        },
+      ],
+      fallback: [
+        {
+          source: "/favicon.ico",
+          destination: "/icon.png",
         },
       ],
     };

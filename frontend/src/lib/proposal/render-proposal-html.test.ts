@@ -3,34 +3,48 @@ import { renderProposalHtml } from "@/lib/proposal/render-proposal-html";
 import type { ProposalDocumentModel } from "@/lib/proposal/types";
 
 describe("render-proposal-html", () => {
-  it("renders package columns and row data", () => {
+  it("renders Braun-style project quote layout", () => {
     const model: ProposalDocumentModel = {
       leadId: "lead-1",
       kind: "house-project-quote",
-      title: "Проект Браун",
+      title: "Браун",
       leadName: "Иван",
       leadPhone: "+79990000000",
       leadEmail: null,
       createdAtIso: "2026-06-13T10:00:00.000Z",
-      summary: [{ label: "Площадь", value: "114 м2" }],
+      summary: [
+        { label: "Площадь", value: "114 м2" },
+        { label: "Этажность", value: "1 эт." },
+      ],
       rows: [
         {
           key: "shell",
           group: "shell",
           label: "Коробка",
-          amountRub: 100,
+          amountRub: 7_536_540,
           included: { STANDARD: true, ENGINEERING: true, WHITE_BOX: true, CLIENT_CHOICE: true },
         },
+        {
+          key: "section:engineering",
+          rowKind: "section",
+          group: "other",
+          label: "Инженерные коммуникации",
+          amountRub: 0,
+          included: { STANDARD: false, ENGINEERING: false, WHITE_BOX: false, CLIENT_CHOICE: false },
+        },
       ],
-      packageTotalsRub: { STANDARD: 100, ENGINEERING: 100, WHITE_BOX: 100, CLIENT_CHOICE: 100 },
+      packageTotalsRub: { STANDARD: 7_536_540, ENGINEERING: 10_019_455, WHITE_BOX: 12_548_956, CLIENT_CHOICE: 12_415_741 },
       planImageUrl: null,
       notes: ["* test"],
     };
     const html = renderProposalHtml(model);
-    expect(html).toContain("Проект Браун");
-    expect(html).toContain("Стандарт");
-    expect(html).toContain("White Box");
-    expect(html).toContain("Коробка");
+    expect(html).toContain("АВТОРСКИЙ ПРОЕКТ «БРАУН»");
+    expect(html).toContain("chastdushi.ru");
+    expect(html).toContain("Дата печати:");
+    expect(html).toContain("Опции и стоимость");
+    expect(html).toContain("Стандарт*");
+    expect(html.replace(/\u00a0/g, " ")).toContain("7 536 540");
+    expect(html).not.toContain("Клиент:");
+    expect(html).not.toContain("₽");
   });
 });
-

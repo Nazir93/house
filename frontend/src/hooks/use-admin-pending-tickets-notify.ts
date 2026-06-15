@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { PWA_ICON_PATHS } from "@/lib/pwa-config";
 
 const POLL_MS = 10_000;
 
@@ -35,7 +36,7 @@ export function useAdminPendingTicketsNotify() {
                 delta === 1
                   ? "Новое сообщение в личном кабинете — откройте «Чат с клиентами»"
                   : `${delta} обращений ждут ответа`,
-              icon: "/icon.png",
+              icon: PWA_ICON_PATHS.png32,
               tag: "admin-client-ticket",
             });
           } catch {

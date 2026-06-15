@@ -1,5 +1,7 @@
 # Что задать на VPS (production)
 
+**Production VPS:** `46.173.26.108` · SSH: `ssh carcas-vps` · домены: `chastdushi.ru`, `частьдуши.рф`
+
 ## Закреплённая команда деплоя
 
 Выполнять **на сервере** по SSH. Каталог проекта: **`/var/www/house`**. Перезапуск PM2: **`house-next`**.
@@ -132,7 +134,7 @@ cd /var/www/house/frontend && npm run env:check && npm run db:verify
 
 | Переменная | Пример |
 |------------|--------|
-| `NEXT_PUBLIC_SITE_URL` | `https://dom.ru` |
+| `NEXT_PUBLIC_SITE_URL` | `https://chastdushi.ru` |
 
 Должен совпадать с тем, как пользователи открывают сайт (**https**, ваш домен, без лишнего слэша в конце или с ним — главное единообразие).
 
@@ -152,7 +154,7 @@ cd /var/www/house/frontend && npm run env:check && npm run db:verify
 | `ADMIN_EMAIL` | ваш email | Тот же, что вводите в форме входа |
 | `ADMIN_SECRET` | длинная случайная строка | Пароль администратора |
 | `NEXTAUTH_SECRET` | длинная случайная строка | Подпись сессий; не меняйте без сброса всех сессий |
-| **`NEXTAUTH_URL`** | **`https://dom.ru`** | **Должен совпадать с URL в браузере** |
+| **`NEXTAUTH_URL`** | **`https://chastdushi.ru`** | **Должен совпадать с URL в браузере** |
 | **`AUTH_TRUST_HOST`** | `true` | За **nginx** с HTTPS: иначе возможны CSRF и редирект на `/api/auth/signin?csrf=true`. В `location /`: `proxy_set_header Host $host;`, `proxy_set_header X-Forwarded-Proto $scheme;`, желательно `X-Forwarded-Host $host;`. |
 
 ### Ошибка «раньше заходил по IP, по домену не пускает»
@@ -163,27 +165,31 @@ cd /var/www/house/frontend && npm run env:check && npm run db:verify
 NEXTAUTH_URL=http://123.45.67.89:3000
 ```
 
-или `http://localhost:3000`. Тогда вход по **`https://dom.ru`** ломается.
+или `http://46.173.26.108:8080` (тест до DNS). Тогда вход по **`https://chastdushi.ru`** ломается.
 
 **Исправление:** выставить именно:
 
 ```env
-NEXTAUTH_URL=https://dom.ru
+NEXTAUTH_URL=https://chastdushi.ru
 ```
 
-(если сайт открывают с `www` — используйте один вариант везде, например `https://www.dom.ru`.)
+(если сайт открывают с `www` — используйте один вариант везде, например `https://www.chastdushi.ru`.)
 
 Перезапустить приложение, в браузере очистить cookie для сайта или войти в инкогнито.
 
 ## Редирект HTTP→HTTPS
 
-По умолчанию Next.js **не** делает редирект на HTTPS в `middleware` (иначе при доступе напрямую на `:3000` возможны ошибочные `Location`). Редирект с порта **80** на **443** настройте в **nginx** (см. `nginx/vps-site.conf`). Если нужен редирект именно из Node за прокси: в `.env` задайте **`MIDDLEWARE_HTTPS_REDIRECT=true`** и корректные **`X-Forwarded-Proto`** / **`X-Forwarded-For`**.
+По умолчанию Next.js **не** делает редирект на HTTPS в `middleware`. Редирект с порта **80** на **443** — **nginx** + certbot (см. [`nginx/chastdushi-site.conf`](../nginx/chastdushi-site.conf), `scripts/enable-https-chastdushi.sh`).
 
 ## Nginx
 
-Пока нет домена и TLS, для доступа по **`http://ВАШ_IP`** без порта используйте [`nginx/vps-site-http-ip.conf`](../nginx/vps-site-http-ip.conf): прокси на `127.0.0.1:3000`. На сервере отключите дефолтный сайт (`rm /etc/nginx/sites-enabled/default`), положите конфиг в `sites-available/house`, сделайте symlink в `sites-enabled`, затем `nginx -t` и `systemctl reload nginx`. В `.env` выставьте **`NEXT_PUBLIC_SITE_URL`** и **`NEXTAUTH_URL`** как `http://ВАШ_IP` (без `:3000`).
+Эталон для chastdushi.ru + частьдуши.рф: [`nginx/chastdushi-site.conf`](../nginx/chastdushi-site.conf).
 
-В прокси на Next.js должны передаваться заголовки (как в [`nginx/vps-site.conf`](../nginx/vps-site.conf)):
+- **Тест по IP:** порт **8080** → `http://46.173.26.108:8080`
+- **Домены (после DNS):** порт **80/443** → `chastdushi.ru`, `частьдуши.рф`
+- На том же VPS **kemperlabs.ru** — отдельный `server_name`, не трогать.
+
+На сервере: `/etc/nginx/sites-available/house-chastdushi` → symlink в `sites-enabled`, `nginx -t`, `systemctl reload nginx`.
 
 - `Host`
 - `X-Forwarded-Proto` (чтобы приложение понимало HTTPS)

@@ -6,6 +6,7 @@ import { getHouseProjectBySlug, getSimilarHouseProjects } from "@/lib/constructi
 import { PARTNER_HOUSE_PROJECT_CATALOG } from "@/lib/house-project-catalog";
 import { getHeroShellTiersForProject } from "@/lib/project-hero-shell-tiers";
 import { getProjectRenders } from "@/lib/construction-shared";
+import { houseProjectHeroTeaser } from "@/lib/house-project-teaser";
 import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 import { HouseProjectDetailContent } from "@/app/projects/[slug]/content";
 
@@ -18,9 +19,10 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   const project = await getHouseProjectBySlug(params.slug, catalog.kind);
   if (!project) return {};
   const cover = getProjectRenders(project)[0]?.url;
+  const metaDescription = houseProjectHeroTeaser(project.shortDescription, project.description);
   return getPageMeta({
     title: `${project.title} — типовой проект дома ${project.area} м² | ${SITE_NAME}`,
-    description: project.shortDescription,
+    description: metaDescription,
     path: `${catalog.basePath}/${project.slug}`,
     keywords: [project.title, "типовой проект дома", `${project.area} м2`, SITE_NAME],
     ...(cover ? { ogImage: cover } : {}),

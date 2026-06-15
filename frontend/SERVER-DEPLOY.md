@@ -172,17 +172,24 @@ NextAuth строит CSRF и cookie от **`NEXTAUTH_URL`**. Если в `.env`
   cd frontend && node scripts/generate-pwa-icons.mjs
   ```
 
-## Ваши уточнения (этот VPS)
+## Ваши уточнения (production VPS)
 
-Сервер: `7767362-mb967823` (из приглашения shell — при смене хоста обновите).
+Сервер: **`46.173.26.108`** (рядом с kemperlabs.ru на том же VPS).
 
+- **SSH с ПК:** `ssh carcas-vps` (ключ `~/.ssh/carcas_vps_ed25519`)
+- **Старый VPS (архив):** `ssh carcas-vps-old` — `81.200.145.113`
 - **Корень репо** (`PROJECT_ROOT`, там же `git pull`): **`/var/www/house`**
 - **Рабочая папка фронта / PM2 `exec cwd`**: **`/var/www/house/frontend`**
-- База: вариант A (`migrate deploy`) или B (`db push`): `________________` *(допишите, как у вас принято)*
-- Другое (докер, порт, имя процесса PM2): процесс **`house-next`**, порт в `ecosystem.config.cjs` — **3000**
+- **Домены:** `chastdushi.ru`, `www.chastdushi.ru`, `частьдуши.рф` (`xn--80aim8afhxn7a.xn--p1ai`)
+- **База:** `migrate deploy` (`bash scripts/deploy-vps.sh`)
+- **PM2:** процесс **`house-next`**, Node **`3000`**, nginx тест **`8080`**, домены **`80/443`**
+- **Деплой с ПК:** `bash scripts/deploy-remote.sh` или `node .ssh-deploy-tmp/deploy-remote.js`
 
-Копипаст — **одна строка**:
+Копипаст — **на сервере**:
 
 ```bash
 bash /var/www/house/scripts/deploy-vps.sh
 ```
+
+Тест до DNS: **http://46.173.26.108:8080/**  
+После DNS + HTTPS: `bash /var/www/house/scripts/enable-https-chastdushi.sh`

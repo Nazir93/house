@@ -8,10 +8,15 @@ export const PWA_THEME_COLORS = {
 
 export const PWA_ICON_PATHS = {
   svg: "/icons/icon.svg",
+  png32: "/icon.png",
   png192: "/icons/icon-192.png",
   png512: "/icons/icon-512.png",
   appleTouch: "/icons/apple-touch-icon.png",
+  favicon: "/favicon.ico",
 } as const;
+
+/** OG / JSON-LD / push-уведомления, если нет NEXT_PUBLIC_DEFAULT_OG_IMAGE */
+export const SITE_DEFAULT_ICON_PATH = PWA_ICON_PATHS.png512;
 
 export const PWA_SW_URL = "/serwist/sw.js" as const;
 
@@ -65,6 +70,7 @@ export function buildPwaManifest(input: PwaManifestInput): MetadataRoute.Manifes
 
 export function buildPwaPrecacheUrls(): string[] {
   return [
+    PWA_ICON_PATHS.png32,
     PWA_ICON_PATHS.svg,
     PWA_ICON_PATHS.png192,
     PWA_ICON_PATHS.png512,

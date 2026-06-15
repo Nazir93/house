@@ -40,7 +40,7 @@ const TZ_ENGINEERING_PRICES: Record<EngineeringOptionCode, number> = {
 };
 
 const TZ_CONSTRUCTION_PRICES: Partial<Record<ConstructionOptionCode, number>> = {
-  interior_plaster: 0,
+  interior_plaster: 8_448,
   blind_area: 7_428,
   drainage: 6_063,
   soffits: 3_750,

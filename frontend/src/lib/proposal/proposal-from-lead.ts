@@ -18,11 +18,15 @@ import {
 import {
   type HouseCalculatorCategoryId,
 } from "@/lib/house-project-calculator-engine";
-import { computeProjectCalculatorQuote } from "@/lib/house-project-calculator-quote";
 import { getCalculatorConfig } from "@/lib/calculator-catalog";
+import {
+  buildProjectProposalCatalogRows,
+  sumProjectProposalTotals,
+} from "@/lib/proposal/proposal-project-catalog-rows";
 import { packageIncludedByGroup, sumPackageTotals } from "@/lib/proposal/proposal-packages";
 import type { ProposalDocumentModel, ProposalPriceRow, ProposalScopeKind } from "@/lib/proposal/types";
-import type { PartOfSoulFacadeVariant, PartOfSoulWallMaterial } from "@/lib/part-of-soul-pricing";
+import type { PartOfSoulWallMaterial } from "@/lib/part-of-soul-pricing";
+import { tierIdToWallMaterial } from "@/lib/part-of-soul-pricing";
 import type { ConstructionMedia } from "@/lib/construction-shared";
 
 type DbLead = {
@@ -47,13 +51,10 @@ function asNumber(v: unknown): number | null {
   return typeof v === "number" && Number.isFinite(v) ? v : null;
 }
 
-function toWallForProjectCalc(value: unknown): PartOfSoulWallMaterial | null {
-  const s = asString(value);
-  if (!s) return null;
-  if (s === "gas" || s === "keramzit") return "gas";
-  if (s === "ceramic") return "ceramic";
-  if (s === "brick") return "brick";
-  return null;
+function resolveProjectWallMaterial(calc: Record<string, unknown>): PartOfSoulWallMaterial {
+  const tierId = asString(calc.tierId) ?? "";
+  const tierLabel = asString(calc.tierLabel) ?? asString(calc.wallMaterial) ?? "";
+  return tierIdToWallMaterial(tierId, tierLabel);
 }
 
 function toWallForHouseCalc(value: unknown): WallMaterialId | null {
@@ -98,7 +99,7 @@ async function buildFromHouseProjectQuote(lead: DbLead, calc: Record<string, unk
   const projectSlug = asString(calc.projectSlug);
   const categoryId = asString(calc.categoryId) as HouseCalculatorCategoryId | null;
   const area = asNumber(calc.area);
-  const wall = toWallForProjectCalc(calc.tierLabel) ?? toWallForProjectCalc(calc.wallMaterial) ?? "gas";
+  const wall = resolveProjectWallMaterial(calc);
   if (!projectSlug || !categoryId || !area) return null;
 
   const config = await getCalculatorConfig();
@@ -119,54 +120,42 @@ async function buildFromHouseProjectQuote(lead: DbLead, calc: Record<string, unk
   const engCodes = Array.isArray(calc.engineeringSlugs) ? calc.engineeringSlugs.map(String) : [];
   const conCodes = Array.isArray(calc.constructionSlugs) ? calc.constructionSlugs.map(String) : [];
   const facadeRaw = asString(calc.facadeSlug);
-  const facadeVariant =
-    facadeRaw && Object.prototype.hasOwnProperty.call(config.facades, facadeRaw)
-      ? (facadeRaw as PartOfSoulFacadeVariant)
-      : null;
-  const quote = computeProjectCalculatorQuote(
-    {
-      buildingArea: area,
-      categoryId,
-      wallMaterial: wall,
-      facadeVariant,
-      engineeringCodes: engCodes,
-      constructionCodes: conCodes,
-      projectAdjustmentPercent: 0,
-      transportSurchargeRub: 0,
-    },
-    config
-  );
-  if (!quote) return null;
 
-  const rows: ProposalPriceRow[] = [];
-  pushRow(rows, "shell", "shell", "Коробка", quote.shellTotalRub, true);
-  quote.engineeringLines.forEach((line: { id: string; label: string; amountRub: number }) =>
-    pushRow(rows, `eng:${line.id}`, "engineering", line.label, line.amountRub, engCodes.includes(line.id))
-  );
-  if (quote.facadeTotalRub > 0) {
-    pushRow(rows, "facade:selected", "facade", `Фасад: ${facadeRaw ?? "выбранный"}`, quote.facadeTotalRub, Boolean(facadeRaw));
-  }
-  quote.constructionLines.forEach((line: { id: string; label: string; amountRub: number }) =>
-    pushRow(rows, `con:${line.id}`, "construction", line.label, line.amountRub, conCodes.includes(line.id))
-  );
+  const rows = buildProjectProposalCatalogRows({
+    config,
+    categoryId,
+    buildingArea: area,
+    wallMaterial: wall,
+    engineeringSlugs: engCodes,
+    constructionSlugs: conCodes,
+    facadeSlug: facadeRaw,
+  });
+  if (rows.length === 0) return null;
 
-  const packageTotalsRub = sumPackageTotals(rows);
-  const planUrl = firstPlanUrl(project.media as ConstructionMedia[]);
+  const packageTotalsRub = sumProjectProposalTotals(rows);
+  const planRelative = firstPlanUrl(project.media as ConstructionMedia[]);
+  const projectTitle = asString(calc.projectTitle) ?? project.title;
+  const tierLabel = asString(calc.tierLabel) ?? "Газоблок";
+  const floorLabel = project.floors >= 2 ? "Двухэтажный" : project.floors === 1 ? "Одноэтажный" : "1,5 этажа";
 
   return {
     leadId: lead.id,
     kind: "house-project-quote",
-    title: asString(calc.projectTitle) ?? project.title,
+    title: projectTitle,
     leadName: lead.name,
     leadPhone: lead.phone,
     leadEmail: lead.email,
     createdAtIso: lead.createdAt.toISOString(),
-    planImageUrl: planUrl,
+    planImageUrl: planRelative,
+    templateFill: {
+      wallMaterialLabel: tierLabel,
+      floorLabel,
+    },
     summary: [
       { label: "Площадь", value: `${project.area} м2` },
-      { label: "Этажность", value: `${project.floors}` },
-      { label: "Спален", value: `${project.rooms}` },
-      { label: "Санузлов", value: `${project.bathrooms}` },
+      { label: "Этажность", value: `${project.floors} эт.` },
+      { label: "Количество спален", value: `${project.rooms} шт.` },
+      { label: "Количество санузлов", value: `${project.bathrooms} шт.` },
     ],
     rows,
     packageTotalsRub,

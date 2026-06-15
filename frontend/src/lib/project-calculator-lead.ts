@@ -6,6 +6,7 @@ import type { ProjectCalculatorQuoteResponse } from "@/lib/use-project-calculato
 
 export function buildProjectCalculatorLeadPayload(params: {
   project: HouseProjectItem;
+  tierId: string;
   tierLabel: string;
   categoryId: HouseCalculatorCategoryId;
   quote: ProjectCalculatorQuoteResponse["quote"];
@@ -37,6 +38,7 @@ export function buildProjectCalculatorLeadPayload(params: {
     projectTitle: params.project.title,
     area: params.project.area,
     categoryId: params.categoryId,
+    tierId: params.tierId,
     tierLabel: params.tierLabel,
     facadeSlug: params.facadeSlug,
     engineeringSlugs: params.engineeringSlugs,

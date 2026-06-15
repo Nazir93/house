@@ -50,6 +50,11 @@ import {
   houseProjectDetailPath,
   type HouseProjectCatalogConfig,
 } from "@/lib/house-project-catalog";
+import { PAGE_INTRO_PROSE_CLASS } from "@/lib/html-content";
+import {
+  houseProjectDescriptionHtml,
+  houseProjectHeroTeaser,
+} from "@/lib/house-project-teaser";
 
 const heroSoftRing = "ring-1 ring-[color-mix(in_srgb,var(--text)_6%,transparent)]";
 const carouselArrowClass =
@@ -152,10 +157,21 @@ export function HouseProjectDetailContent({
     [plans]
   );
 
-  const visibleAnchors = useMemo(
-    () => project.anchors.filter((a) => a.id !== "schedule" && a.id !== "mortgage"),
-    [project.anchors]
+  const descriptionHtml = useMemo(
+    () => houseProjectDescriptionHtml(project.description ?? ""),
+    [project.description]
   );
+  const heroTeaser = useMemo(
+    () => houseProjectHeroTeaser(project.shortDescription, project.description ?? ""),
+    [project.shortDescription, project.description]
+  );
+
+  const visibleAnchors = useMemo(() => {
+    const base = project.anchors.filter((a) => a.id !== "schedule" && a.id !== "mortgage");
+    if (!descriptionHtml) return base;
+    if (base.some((a) => a.id === "about")) return base;
+    return [{ id: "about", label: "О проекте" }, ...base];
+  }, [project.anchors, descriptionHtml]);
 
   function planSlideIndex(planId: string) {
     const idx = plans.findIndex((p) => p.id === planId);
@@ -203,9 +219,11 @@ export function HouseProjectDetailContent({
           <h1 className="mt-3 font-heading text-4xl leading-tight md:text-5xl lg:text-6xl" style={{ color: "var(--graphite)" }}>
             {project.title}
           </h1>
-          <p className="mt-4 max-w-3xl text-lg" style={{ color: "var(--text-muted)" }}>
-            {project.shortDescription}
-          </p>
+          {heroTeaser ? (
+            <p className="mt-4 max-w-3xl text-lg" style={{ color: "var(--text-muted)" }}>
+              {heroTeaser}
+            </p>
+          ) : null}
           {project.builtObjectSlug ? (
             <p className="mt-4">
               <Link
@@ -513,6 +531,23 @@ export function HouseProjectDetailContent({
           </div>
         </nav>
 
+        {descriptionHtml ? (
+          <section
+            id="about"
+            className="scroll-mt-[8.5rem] border-b md:scroll-mt-[9rem]"
+            style={{ borderColor: "var(--border)" }}
+          >
+            <div className="container mx-auto max-w-6xl px-5 py-10 md:py-12">
+              <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--accent)]">О проекте</p>
+              <div
+                className={cn("mt-4", PAGE_INTRO_PROSE_CLASS)}
+                style={{ color: "var(--text-muted)" }}
+                dangerouslySetInnerHTML={{ __html: descriptionHtml }}
+              />
+            </div>
+          </section>
+        ) : null}
+
         <section id="plans" className="scroll-mt-[8.5rem] md:scroll-mt-[9rem]">
           <div className="container mx-auto max-w-6xl px-5 py-10 md:py-12">
             <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--accent)]">Чертежи проекта</p>
@@ -726,7 +761,7 @@ export function HouseProjectDetailContent({
                   )}
                   <div className="p-5">
                     <h3 className="font-heading text-2xl">{item.title}</h3>
-                    <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>{item.area} м² - {formatRub(item.price)}</p>
+                    <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>{item.area} м² — от {formatRub(resolveProjectListingPriceRub(item))}</p>
                   </div>
                 </Link>
               );

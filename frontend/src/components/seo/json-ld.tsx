@@ -5,6 +5,7 @@ import { loadContactConfig } from "@/lib/load-contact-config";
 import { maxMessengerChannelUrl } from "@/lib/messenger-links";
 import { htmlToPlainText } from "@/lib/html-to-plain-text";
 import { prisma } from "@/lib/db";
+import { SITE_DEFAULT_ICON_PATH } from "@/lib/pwa-config";
 
 async function getDbData() {
   try {
@@ -26,7 +27,7 @@ export async function JsonLd() {
   const maxChannelUrl = maxMessengerChannelUrl(contact.social.max);
   const sameAs = [contact.social.telegram, contact.social.vk, maxChannelUrl].filter((u) => u?.trim());
   const logoUrl = toAbsoluteSiteUrl(
-    process.env.NEXT_PUBLIC_PUBLISHER_LOGO_URL?.trim() || "/icon.png"
+    process.env.NEXT_PUBLIC_PUBLISHER_LOGO_URL?.trim() || SITE_DEFAULT_ICON_PATH
   );
 
   const organization = {

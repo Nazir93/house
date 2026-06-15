@@ -9,7 +9,7 @@
 # Пользователь SSH по умолчанию root — сменить: -SshUser "ubuntu"
 
 param(
-    [string] $VpsHost = $env:VPS_SSH_HOST,
+    [string] $VpsHost = $(if ($env:VPS_SSH_HOST) { $env:VPS_SSH_HOST } else { "46.173.26.108" }),
     [string] $SshUser = "root",
     [int] $LocalPort = 5433
 )

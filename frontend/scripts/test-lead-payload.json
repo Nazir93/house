@@ -1,0 +1,18 @@
+{
+  "name": "Тест PDF",
+  "phone": "+79990001122",
+  "source": "project-calculator",
+  "calcData": {
+    "kind": "house-project-quote",
+    "projectSlug": "bismit",
+    "projectTitle": "Бисмит",
+    "area": 114,
+    "categoryId": "a",
+    "tierId": "gas",
+    "tierLabel": "Газоблок",
+    "facadeSlug": null,
+    "engineeringSlugs": ["electric", "water", "sewer", "bio", "heatedFloor", "boiler"],
+    "constructionSlugs": ["drainage", "roof_insulation_250"],
+    "grandTotalRub": 0
+  }
+}

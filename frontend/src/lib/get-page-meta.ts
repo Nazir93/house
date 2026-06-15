@@ -3,8 +3,9 @@ import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { toAbsoluteSiteUrl } from "@/lib/absolute-site-url";
+import { SITE_DEFAULT_ICON_PATH } from "@/lib/pwa-config";
 
-const DEFAULT_OG_PATH = process.env.NEXT_PUBLIC_DEFAULT_OG_IMAGE?.trim() || "/icon.png";
+const DEFAULT_OG_PATH = process.env.NEXT_PUBLIC_DEFAULT_OG_IMAGE?.trim() || SITE_DEFAULT_ICON_PATH;
 
 interface MetaDefaults {
   title: string;

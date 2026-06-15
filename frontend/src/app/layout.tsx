@@ -17,7 +17,7 @@ import { AnalyticsScripts } from "@/components/seo/analytics";
 import { JsonLd } from "@/components/seo/json-ld";
 import { ContactConfigProvider } from "@/lib/contact-config-context";
 import { loadContactConfig } from "@/lib/load-contact-config";
-import { PWA_ICON_PATHS, PWA_THEME_COLORS } from "@/lib/pwa-config";
+import { PWA_ICON_PATHS, PWA_THEME_COLORS, SITE_DEFAULT_ICON_PATH } from "@/lib/pwa-config";
 
 function buildSiteVerification(): Metadata["verification"] | undefined {
   const google = process.env.GOOGLE_SITE_VERIFICATION?.trim();
@@ -31,7 +31,7 @@ function buildSiteVerification(): Metadata["verification"] | undefined {
 }
 
 const defaultOgImageUrl = toAbsoluteSiteUrl(
-  process.env.NEXT_PUBLIC_DEFAULT_OG_IMAGE?.trim() || "/icon.png"
+  process.env.NEXT_PUBLIC_DEFAULT_OG_IMAGE?.trim() || SITE_DEFAULT_ICON_PATH
 );
 const siteVerification = buildSiteVerification();
 
@@ -44,6 +44,12 @@ export const metadata: Metadata = {
     title: SITE_NAME,
   },
   icons: {
+    icon: [
+      { url: PWA_ICON_PATHS.svg, type: "image/svg+xml" },
+      { url: PWA_ICON_PATHS.png32, sizes: "32x32", type: "image/png" },
+      { url: PWA_ICON_PATHS.png192, sizes: "192x192", type: "image/png" },
+    ],
+    shortcut: PWA_ICON_PATHS.favicon,
     apple: [{ url: PWA_ICON_PATHS.appleTouch, sizes: "180x180", type: "image/png" }],
   },
   title: {

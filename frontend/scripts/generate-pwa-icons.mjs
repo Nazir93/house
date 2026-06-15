@@ -8,19 +8,20 @@ const root = path.join(__dirname, "..");
 const svgPath = path.join(root, "src", "app", "icon.svg");
 const outDir = path.join(root, "public", "icons");
 
-const sizes = [
-  { name: "icon-192.png", size: 192 },
-  { name: "icon-512.png", size: 512 },
-  { name: "apple-touch-icon.png", size: 180 },
+const iconSizes = [
+  { dir: outDir, name: "icon-192.png", size: 192 },
+  { dir: outDir, name: "icon-512.png", size: 512 },
+  { dir: outDir, name: "apple-touch-icon.png", size: 180 },
+  { dir: path.join(root, "public"), name: "icon.png", size: 32 },
 ];
 
 const svg = await readFile(svgPath);
 
-for (const { name, size } of sizes) {
+for (const { dir, name, size } of iconSizes) {
   const buffer = await sharp(svg, { density: 300 })
     .resize(size, size)
     .png()
     .toBuffer();
-  await writeFile(path.join(outDir, name), buffer);
+  await writeFile(path.join(dir, name), buffer);
   console.log(`Wrote ${name} (${size}x${size})`);
 }

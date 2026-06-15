@@ -624,7 +624,7 @@ function RobotsTab() {
           onChange={(e) => { setContent(e.target.value); setSaved(false); }}
           rows={12}
           className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/[0.08] text-sm text-white font-mono placeholder:text-white/20 resize-y focus:outline-none focus:border-[#0F3D2E]/50 transition-colors"
-          placeholder={`User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/\n\nHost: https://dom.ru\nSitemap: https://dom.ru/sitemap.xml`}
+          placeholder={`User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/\n\nHost: https://chastdushi.ru\nSitemap: https://chastdushi.ru/sitemap.xml`}
         />
       </div>
     </div>
