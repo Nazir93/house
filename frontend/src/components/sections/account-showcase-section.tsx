@@ -10,7 +10,7 @@ export function AccountShowcaseSection() {
   return (
     <section
       id="account-showcase"
-      className="relative overflow-x-clip scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)] py-12 sm:py-16 lg:py-28"
+      className="relative overflow-clip scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)] py-12 sm:py-16 lg:py-28"
       style={{ backgroundColor: "var(--bg)" }}
       aria-labelledby="account-showcase-heading"
     >
@@ -45,21 +45,21 @@ export function AccountShowcaseSection() {
           </div>
         </div>
 
-        <div className="relative space-y-5 sm:space-y-6 lg:space-y-0">
+        <div className="relative space-y-0">
           {ACCOUNT_SHOWCASE_ITEMS.map((item, index) => {
             const Icon = ACCOUNT_SHOWCASE_ICON_BY_ID[item.id];
             return (
               <article
                 key={item.id}
                 data-reveal="card"
-                className="group relative grid grid-rows-[auto_minmax(16rem,auto)] overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-[var(--bg-secondary)] sm:grid-rows-[auto_minmax(20rem,auto)] sm:rounded-[1.75rem] lg:sticky lg:min-h-[38rem] lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:grid-rows-none lg:gap-6 lg:rounded-[2rem]"
+                className="group relative sticky grid min-h-[calc(100dvh-var(--site-header-sticky-offset)-var(--mobile-bottom-nav-offset))] grid-rows-[auto_minmax(22rem,1fr)] overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-[var(--bg-secondary)] sm:rounded-[1.75rem] lg:min-h-[38rem] lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:grid-rows-none lg:gap-6 lg:rounded-[2rem]"
                 style={{
                   top: "var(--site-header-sticky-offset)",
                   zIndex: index + 1,
                   "--reveal-delay": `${index * 80}ms`,
                 } as CSSProperties}
               >
-                <div className="flex flex-col justify-between p-5 sm:p-7 lg:min-h-[38rem] lg:p-10">
+                <div className="flex min-h-[22rem] flex-col justify-between p-5 sm:p-7 lg:min-h-[38rem] lg:p-10">
                   <div>
                     <div className="inline-flex items-center rounded-full border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_72%,transparent)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
                       {item.index}
@@ -87,7 +87,7 @@ export function AccountShowcaseSection() {
                   </div>
                 </div>
 
-                <div className="flex min-h-[16rem] w-full flex-1 flex-col px-4 pb-4 pt-0 sm:min-h-[20rem] sm:px-5 sm:pb-5 lg:min-h-[38rem] lg:flex-none lg:items-stretch lg:py-8 lg:pr-10 lg:pl-0">
+                <div className="flex min-h-[22rem] w-full flex-1 flex-col px-4 pb-4 pt-0 sm:px-6 sm:pb-6 lg:min-h-[38rem] lg:flex-none lg:items-stretch lg:py-8 lg:pr-10 lg:pl-0">
                   <AccountShowcaseMockup
                     itemId={item.id}
                     image={item.image}
