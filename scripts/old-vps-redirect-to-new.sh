@@ -3,7 +3,7 @@
 # Запуск на СТАРОМ сервере: bash scripts/old-vps-redirect-to-new.sh
 set -euo pipefail
 
-NEW_URL="${NEW_PUBLIC_SITE_URL:-https://chastdushi.ru}"
+NEW_URL="${NEW_PUBLIC_SITE_URL:-https://www.chastdushi.ru}"
 SSL_CERT="${OLD_SSL_CERT:-/etc/letsencrypt/live/chastdushi.ru/fullchain.pem}"
 SSL_KEY="${OLD_SSL_KEY:-/etc/letsencrypt/live/chastdushi.ru/privkey.pem}"
 SITES="/etc/nginx/sites-available/house-chastdushi-redirect"

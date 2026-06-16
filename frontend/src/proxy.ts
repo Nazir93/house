@@ -105,13 +105,8 @@ async function getJwt(req: NextRequest) {
 }
 
 export async function proxy(request: NextRequest) {
-  const host = request.headers.get("host")?.split(":")[0]?.toLowerCase() ?? "";
-  if (host === "www.chastdushi.ru") {
-    const url = request.nextUrl.clone();
-    url.protocol = "https:";
-    url.host = "chastdushi.ru";
-    return NextResponse.redirect(url, 308);
-  }
+  // www → apex временно отключён: пока у части клиентов apex в DNS ещё указывает на старый VPS (81.200.145.113),
+  // редирект www→apex создавал петлю. Канонический URL — chastdushi.ru без www (см. metadata / nginx позже).
 
   // Редирект HTTP→HTTPS из Node по умолчанию ВЫКЛЮЧЕН: у многих VPS на :3000 всё равно пробрасывают
   // X-Forwarded-* → получался битый Location (например https://0.0.0.0:3000/). На проде редирект на HTTPS
