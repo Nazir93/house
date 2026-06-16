@@ -12,7 +12,7 @@ declare global {
 declare const self: ServiceWorkerGlobalScope;
 
 /** Меняйте при смене стратегии кэша — старые runtime-кэши удалятся при activate. */
-const RUNTIME_CACHE_VERSION = "v3";
+const RUNTIME_CACHE_VERSION = "v4";
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,

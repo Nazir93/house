@@ -107,6 +107,9 @@ export default async function RootLayout({
       <head>
         <meta name="theme-color" content={PWA_THEME_COLORS.light} />
         <meta name="format-detection" content="telephone=no" />
+        {process.env.NEXT_PUBLIC_BUILD_ID ? (
+          <meta name="build-id" content={process.env.NEXT_PUBLIC_BUILD_ID} />
+        ) : null}
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <JsonLd />
       </head>
@@ -114,6 +117,11 @@ export default async function RootLayout({
         <Script id="house-theme-init" strategy="beforeInteractive">
           {`(function(){try{var k="house-theme";var t=localStorage.getItem(k);var pref=(t==="light"||t==="dark"||t==="system")?t:"system";var sys=window.matchMedia("(prefers-color-scheme: dark)").matches;var resolved=pref==="system"?(sys?"dark":"light"):pref;document.documentElement.setAttribute("data-theme",resolved);document.documentElement.style.colorScheme=resolved;}catch(e){var sys=window.matchMedia("(prefers-color-scheme: dark)").matches;var resolved=sys?"dark":"light";document.documentElement.setAttribute("data-theme",resolved);document.documentElement.style.colorScheme=resolved;}})();`}
         </Script>
+        {process.env.NEXT_PUBLIC_BUILD_ID ? (
+          <Script id="house-build-id-sync" strategy="beforeInteractive">
+            {`(function(){try{var k="house-build-id";var c=${JSON.stringify(process.env.NEXT_PUBLIC_BUILD_ID)};var s=localStorage.getItem(k);if(s&&s!==c){localStorage.setItem(k,c);var reload=function(){location.reload();};var clearCaches=function(){if(!("caches"in window))return Promise.resolve();return caches.keys().then(function(keys){return Promise.all(keys.map(function(n){return caches.delete(n);}));});};var clearSw=function(){if(!("serviceWorker"in navigator))return Promise.resolve();return navigator.serviceWorker.getRegistrations().then(function(r){return Promise.all(r.map(function(x){return x.unregister();}));});};clearSw().then(clearCaches).then(reload).catch(reload);}else if(c){localStorage.setItem(k,c);}}catch(e){}})();`}
+          </Script>
+        ) : null}
         <PwaSerwistProvider>
           <ThemeProvider>
             <SessionProvider>
