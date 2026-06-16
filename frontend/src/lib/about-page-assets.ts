@@ -8,6 +8,8 @@ const PUBLIC_ROOT = path.join(process.cwd(), "public");
 /** Целевые пути после загрузки фото из ТЗ (№1, №5, №8, №7). */
 export const ABOUT_ASSET_PATHS = {
   founder: "/images/about/founder.jpg",
+  founderLight: "/images/about/founder-light.jpg",
+  founderDark: "/images/about/founder-dark.jpg",
   missionBg: "/images/about/mission-bg.jpg",
   valuesImage: "/images/about/values.jpg",
   team: "/images/about/team.jpg",
@@ -20,7 +22,7 @@ function resolvePublicImage(targetPath: string, fallback = PLACEHOLDER): string 
 }
 
 export type AboutPageAssets = {
-  founder: { src: string; alt: string };
+  founder: { src: string; lightSrc: string; darkSrc: string; alt: string };
   missionBg: { src: string; alt: string };
   valuesImage: { src: string; alt: string };
   team: { src: string | null; alt: string };
@@ -31,6 +33,8 @@ export function getAboutPageAssets(): AboutPageAssets {
   return {
     founder: {
       src: resolvePublicImage(ABOUT_ASSET_PATHS.founder),
+      lightSrc: resolvePublicImage(ABOUT_ASSET_PATHS.founderLight, resolvePublicImage(ABOUT_ASSET_PATHS.founder)),
+      darkSrc: resolvePublicImage(ABOUT_ASSET_PATHS.founderDark, resolvePublicImage(ABOUT_ASSET_PATHS.founder)),
       alt: "Кузнецова Ольга Олеговна — основатель компании «Часть Души»",
     },
     missionBg: {

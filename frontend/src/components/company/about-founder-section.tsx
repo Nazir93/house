@@ -1,21 +1,34 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { CmsImage } from "@/components/ui/cms-image";
 import { ABOUT_FOUNDER } from "@/lib/about-page-copy";
+import { useTheme } from "@/lib/theme-context";
 
 type AboutFounderSectionProps = {
   founderImageSrc: string;
+  founderImageLightSrc?: string;
+  founderImageDarkSrc?: string;
   founderImageAlt: string;
 };
 
-export function AboutFounderSection({ founderImageSrc, founderImageAlt }: AboutFounderSectionProps) {
+export function AboutFounderSection({
+  founderImageSrc,
+  founderImageLightSrc,
+  founderImageDarkSrc,
+  founderImageAlt,
+}: AboutFounderSectionProps) {
+  const { theme } = useTheme();
+  const themedImageSrc = theme === "dark" ? (founderImageDarkSrc ?? founderImageSrc) : (founderImageLightSrc ?? founderImageSrc);
+
   return (
     <section className="py-12 md:py-16 lg:py-20" style={{ backgroundColor: "var(--bg-secondary)" }} aria-label="Кто мы">
       <div className="container mx-auto max-w-[1200px] px-5">
         <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-14">
           <div className="relative aspect-[4/5] min-h-[320px] overflow-hidden rounded-[1.35rem] bg-[var(--card-bg)] sm:aspect-[5/4] lg:aspect-[4/5]">
             <CmsImage
-              src={founderImageSrc}
+              src={themedImageSrc}
               alt={founderImageAlt}
               fill
               className="object-cover"
@@ -27,10 +40,9 @@ export function AboutFounderSection({ founderImageSrc, founderImageAlt }: AboutF
               aria-label="Основатель компании"
             >
               <div
-                className="rounded-xl border px-4 py-3 backdrop-blur-md sm:px-5 sm:py-4"
+                className="rounded-xl px-4 py-3 sm:px-5 sm:py-4"
                 style={{
-                  borderColor: "rgba(255,255,255,0.22)",
-                  backgroundColor: "rgba(15, 61, 46, 0.82)",
+                  backgroundColor: "rgba(15, 61, 46, 0.9)",
                 }}
               >
                 <p className="font-heading text-base font-bold text-white sm:text-lg">{ABOUT_FOUNDER.cardName}</p>

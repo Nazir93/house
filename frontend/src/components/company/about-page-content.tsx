@@ -17,7 +17,12 @@ export function AboutPageContent() {
         description={`${SITE_NAME}: проектируем и строим загородные дома с вниманием к архитектуре, качеству и каждой детали.`}
       />
 
-      <AboutFounderSection founderImageSrc={assets.founder.src} founderImageAlt={assets.founder.alt} />
+      <AboutFounderSection
+        founderImageSrc={assets.founder.src}
+        founderImageLightSrc={assets.founder.lightSrc}
+        founderImageDarkSrc={assets.founder.darkSrc}
+        founderImageAlt={assets.founder.alt}
+      />
       <AboutMissionSection backgroundSrc={assets.missionBg.src} backgroundAlt={assets.missionBg.alt} />
       <AboutTeamSection teamImageSrc={assets.team.src} teamImageAlt={assets.team.alt} />
       <AboutValuesSection valuesImageSrc={assets.valuesImage.src} valuesImageAlt={assets.valuesImage.alt} />
