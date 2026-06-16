@@ -93,24 +93,6 @@ function getEdgeAuthSecret(): string | undefined {
   return undefined;
 }
 
-/** HTML и RSC не кэшируем в браузере — иначе после деплоя домен долго отдаёт старую версию. */
-function nextFresh(request: NextRequest, init?: Parameters<typeof NextResponse.next>[0]): NextResponse {
-  const response = NextResponse.next(init);
-  if (request.nextUrl.pathname.startsWith("/api/")) return response;
-
-  const isRsc =
-    request.headers.get("rsc") === "1" ||
-    request.headers.get("Next-Router-Prefetch") === "1" ||
-    request.headers.get("Next-Router-State-Tree") != null;
-  const accept = request.headers.get("accept") ?? "";
-
-  if (isRsc || accept.includes("text/html")) {
-    response.headers.set("Cache-Control", "private, no-cache, no-store, max-age=0, must-revalidate");
-    response.headers.set("Pragma", "no-cache");
-  }
-  return response;
-}
-
 /** Сначала по ожидаемому флагу secure, затем с противоположным — смесь nginx / NEXTAUTH_URL не теряет сессию. */
 async function getJwt(req: NextRequest) {
   const secret = getEdgeAuthSecret();
