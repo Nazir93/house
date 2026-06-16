@@ -120,6 +120,10 @@ else
   npm run check
 fi
 
+export GIT_COMMIT_SHA="$(git -C "$ROOT" rev-parse HEAD)"
+export NEXT_PUBLIC_BUILD_ID="$(git -C "$ROOT" rev-parse --short HEAD)"
+echo "==> build id: ${NEXT_PUBLIC_BUILD_ID} (${GIT_COMMIT_SHA})"
+
 echo "==> npm run build"
 npm run build
 

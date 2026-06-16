@@ -58,6 +58,28 @@ function resolveSecureCookie(req: NextRequest): boolean {
   return (process.env.NEXTAUTH_URL ?? "").startsWith("https://");
 }
 
+/** Не даём браузеру месяцами держать устаревший HTML/RSC (особенно на chastdushi.ru с PWA). */
+function applyFreshDocumentHeaders(request: NextRequest, response: NextResponse): NextResponse {
+  if (request.nextUrl.pathname.startsWith("/api/")) return response;
+
+  const isRsc =
+    request.headers.get("RSC") === "1" ||
+    request.headers.get("Next-Router-Prefetch") === "1" ||
+    request.headers.get("Next-Router-State-Tree") !== null;
+  const accept = request.headers.get("accept") ?? "";
+
+  if (isRsc || accept.includes("text/html")) {
+    response.headers.set("Cache-Control", "private, no-cache, no-store, max-age=0, must-revalidate");
+    response.headers.set("Pragma", "no-cache");
+  }
+
+  return response;
+}
+
+function nextFresh(request: NextRequest, init?: Parameters<typeof NextResponse.next>[0]): NextResponse {
+  return applyFreshDocumentHeaders(request, NextResponse.next(init));
+}
+
 /**
  * Секрет для Edge proxy: читаем через Reflect/get по строкам ключей — так надёжнее для runtime
  * (PM2 / `.env` при `next start`), чем статический `process.env.NEXTAUTH_SECRET` в некоторых сборках.
@@ -69,6 +91,24 @@ function getEdgeAuthSecret(): string | undefined {
     if (typeof v === "string" && v.trim()) return v.trim();
   }
   return undefined;
+}
+
+/** HTML и RSC не кэшируем в браузере — иначе после деплоя домен долго отдаёт старую версию. */
+function nextFresh(request: NextRequest, init?: Parameters<typeof NextResponse.next>[0]): NextResponse {
+  const response = NextResponse.next(init);
+  if (request.nextUrl.pathname.startsWith("/api/")) return response;
+
+  const isRsc =
+    request.headers.get("rsc") === "1" ||
+    request.headers.get("Next-Router-Prefetch") === "1" ||
+    request.headers.get("Next-Router-State-Tree") != null;
+  const accept = request.headers.get("accept") ?? "";
+
+  if (isRsc || accept.includes("text/html")) {
+    response.headers.set("Cache-Control", "private, no-cache, no-store, max-age=0, must-revalidate");
+    response.headers.set("Pragma", "no-cache");
+  }
+  return response;
 }
 
 /** Сначала по ожидаемому флагу secure, затем с противоположным — смесь nginx / NEXTAUTH_URL не теряет сессию. */
@@ -166,7 +206,7 @@ export async function proxy(request: NextRequest) {
   if (pathname.startsWith("/admin")) {
     const h = new Headers(request.headers);
     h.set("x-url-pathname", pathname);
-    return NextResponse.next({ request: { headers: h } });
+    return nextFresh(request, { request: { headers: h } });
   }
 
   const isApiAuth = pathname.startsWith("/api/auth");
@@ -176,7 +216,7 @@ export async function proxy(request: NextRequest) {
 
   /** /api/admin — авторизация в самих route handlers (Node + getServerSession), см. require-admin-api.ts */
   const skipToken = !isAccountRoute && !isClientApi;
-  if (skipToken) return NextResponse.next();
+  if (skipToken) return nextFresh(request);
   if (isApiAuth) return NextResponse.next();
 
   const token = await getJwt(request);
@@ -187,7 +227,7 @@ export async function proxy(request: NextRequest) {
     if (token && role === "client") {
       return NextResponse.redirect(new URL("/account/dashboard", request.url));
     }
-    return NextResponse.next();
+    return nextFresh(request);
   }
 
   if (isAccountRoute) {
@@ -199,7 +239,7 @@ export async function proxy(request: NextRequest) {
       loginUrl.searchParams.set("callbackUrl", pathname);
       return NextResponse.redirect(loginUrl);
     }
-    return NextResponse.next();
+    return nextFresh(request);
   }
 
   if (isClientApi) {
@@ -209,7 +249,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  return NextResponse.next();
+  return nextFresh(request);
 }
 
 export const config = {

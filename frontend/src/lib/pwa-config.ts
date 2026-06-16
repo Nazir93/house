@@ -83,6 +83,7 @@ export function resolvePwaCacheRevision(): string {
   const fromEnv =
     process.env.VERCEL_GIT_COMMIT_SHA?.trim() ||
     process.env.GIT_COMMIT_SHA?.trim() ||
+    process.env.NEXT_PUBLIC_BUILD_ID?.trim() ||
     process.env.npm_package_version?.trim();
   return fromEnv || "1";
 }

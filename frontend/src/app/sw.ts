@@ -1,6 +1,6 @@
 /// <reference lib="esnext" />
 /// <reference lib="webworker" />
-import { CacheFirst, NetworkOnly, Serwist, StaleWhileRevalidate } from "serwist";
+import { CacheFirst, NetworkFirst, NetworkOnly, Serwist, StaleWhileRevalidate } from "serwist";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 
 declare global {
@@ -10,6 +10,9 @@ declare global {
 }
 
 declare const self: ServiceWorkerGlobalScope;
+
+/** Меняйте при смене стратегии кэша — старые runtime-кэши удалятся при activate. */
+const RUNTIME_CACHE_VERSION = "v3";
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
@@ -22,26 +25,58 @@ const serwist = new Serwist({
       handler: new NetworkOnly(),
     },
     {
+      matcher: ({ request }) =>
+        request.headers.get("RSC") === "1" ||
+        request.headers.get("Next-Router-Prefetch") === "1" ||
+        request.headers.get("Next-Router-State-Tree") !== null,
+      handler: new NetworkOnly(),
+    },
+    {
       matcher: ({ url }) => url.pathname.startsWith("/api/"),
       handler: new NetworkOnly(),
+    },
+    {
+      matcher: ({ url }) => url.pathname.startsWith("/_next/static/"),
+      handler: new CacheFirst({
+        cacheName: `next-static-${RUNTIME_CACHE_VERSION}`,
+      }),
     },
     {
       matcher: ({ request }) =>
         request.destination === "script" ||
         request.destination === "style" ||
         request.destination === "worker",
-      handler: new CacheFirst({
-        cacheName: "static-assets",
+      handler: new NetworkFirst({
+        cacheName: `static-assets-${RUNTIME_CACHE_VERSION}`,
+        networkTimeoutSeconds: 4,
       }),
     },
     {
       matcher: ({ request }) =>
         request.destination === "font" || request.destination === "image",
       handler: new StaleWhileRevalidate({
-        cacheName: "static-media",
+        cacheName: `static-media-${RUNTIME_CACHE_VERSION}`,
       }),
     },
   ],
 });
 
 serwist.addEventListeners();
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((names) =>
+      Promise.all(
+        names
+          .filter(
+            (name) =>
+              (name.startsWith("static-assets") ||
+                name.startsWith("static-media") ||
+                name.startsWith("next-static")) &&
+              !name.endsWith(RUNTIME_CACHE_VERSION)
+          )
+          .map((name) => caches.delete(name))
+      )
+    )
+  );
+});
