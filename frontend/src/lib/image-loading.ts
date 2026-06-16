@@ -9,11 +9,16 @@ export function isUploadImageSrc(src: string): boolean {
   return cleanImageSrc(src).startsWith("/uploads/");
 }
 
+export function isPublicStaticImageSrc(src: string): boolean {
+  return cleanImageSrc(src).startsWith("/images/");
+}
+
 export function shouldUseBrowserImageDirectly(src: string): boolean {
   const value = cleanImageSrc(src);
   if (!value) return false;
   if (value.startsWith("data:") || UNOPTIMIZED_IMAGE_RE.test(value)) return true;
-  return isUploadImageSrc(value) && BROWSER_READY_UPLOAD_RE.test(value);
+  if (!BROWSER_READY_UPLOAD_RE.test(value)) return false;
+  return isUploadImageSrc(value) || isPublicStaticImageSrc(value);
 }
 
 export function buildNextImagePrefetchHref(src: string, width: number, quality: number): string {

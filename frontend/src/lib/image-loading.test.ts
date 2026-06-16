@@ -15,11 +15,18 @@ describe("image-loading", () => {
     expect(buildImagePrefetchSrc("/uploads/hero.webp", 828, 78)).toBe("/uploads/hero.webp");
   });
 
-  it("still optimizes remote and public raster images through next/image", () => {
-    expect(shouldUseBrowserImageDirectly("/images/banner/banner-hero-01.png")).toBe(false);
+  it("serves public static raster images directly from /images/", () => {
+    expect(shouldUseBrowserImageDirectly("/images/banner/banner-hero-01.png")).toBe(true);
+    expect(shouldUseBrowserImageDirectly("/images/about/founder-light.jpg")).toBe(true);
+    expect(buildImagePrefetchSrc("/images/about/founder-light.jpg", 828, 78)).toBe(
+      "/images/about/founder-light.jpg"
+    );
+  });
+
+  it("still optimizes remote raster images through next/image", () => {
     expect(shouldUseBrowserImageDirectly("https://example.com/house.webp")).toBe(false);
-    expect(buildImagePrefetchSrc("/images/banner/banner-hero-01.png", 828, 78)).toBe(
-      buildNextImagePrefetchHref("/images/banner/banner-hero-01.png", 828, 78)
+    expect(buildImagePrefetchSrc("https://example.com/house.webp", 828, 78)).toBe(
+      buildNextImagePrefetchHref("https://example.com/house.webp", 828, 78)
     );
   });
 
