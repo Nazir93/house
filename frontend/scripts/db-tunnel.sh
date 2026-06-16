@@ -6,6 +6,8 @@
 set -euo pipefail
 HOST="${VPS_SSH_HOST:-${1:-46.173.26.108}}"
 USER="${VPS_SSH_USER:-root}"
+SSH_ALIAS="${VPS_SSH_ALIAS:-carcas-vps}"
+SSH_KEY="${SSH_KEY_PATH:-${HOME}/.ssh/carcas_vps_ed25519}"
 LOCAL_PORT="${DB_TUNNEL_LOCAL_PORT:-5433}"
 
 if [[ -z "$HOST" ]]; then
@@ -15,4 +17,12 @@ fi
 
 echo "Туннель: 127.0.0.1:${LOCAL_PORT} -> ${HOST}:5432 (Postgres на VPS)"
 echo "В .env.local — DATABASE_URL с портом ${LOCAL_PORT}. Ctrl+C — стоп."
-exec ssh -N -L "${LOCAL_PORT}:127.0.0.1:5432" "${USER}@${HOST}"
+
+if ssh -G "${SSH_ALIAS}" >/dev/null 2>&1; then
+  exec ssh -N -L "${LOCAL_PORT}:127.0.0.1:5432" "${SSH_ALIAS}"
+elif [[ -f "${SSH_KEY}" ]]; then
+  exec ssh -i "${SSH_KEY}" -o IdentitiesOnly=yes -N -L "${LOCAL_PORT}:127.0.0.1:5432" "${USER}@${HOST}"
+else
+  echo "ERROR: нет alias ${SSH_ALIAS} в ~/.ssh/config и ключ ${SSH_KEY}" >&2
+  exit 1
+fi

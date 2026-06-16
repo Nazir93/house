@@ -1,7 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "deploy:remote": "node scripts/deploy-remote.mjs"
+    "deploy:remote": "node scripts/deploy-remote.mjs",
+    "deploy:remote:ps1": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/deploy-remote.ps1"
   },
   "dependencies": {
     "ssh2": "^1.17.0"

@@ -7,6 +7,7 @@
 VPS_HOST="${VPS_HOST:-46.173.26.108}"
 VPS_SSH_USER="${VPS_SSH_USER:-root}"
 VPS_SSH_ALIAS="${VPS_SSH_ALIAS:-carcas-vps}"
+VPS_SSH_KEY="${VPS_SSH_KEY:-${SSH_KEY_PATH:-${HOME}/.ssh/carcas_vps_ed25519}}"
 VPS_OLD_HOST="${VPS_OLD_HOST:-81.200.145.113}"
 
 HOUSE_ROOT="${HOUSE_ROOT:-/var/www/house}"

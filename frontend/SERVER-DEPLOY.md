@@ -183,7 +183,8 @@ NextAuth строит CSRF и cookie от **`NEXTAUTH_URL`**. Если в `.env`
 - **Домены:** `chastdushi.ru`, `www.chastdushi.ru`, `частьдуши.рф` (`xn--80aim8afhxn7a.xn--p1ai`)
 - **База:** `migrate deploy` (`bash scripts/deploy-vps.sh`)
 - **PM2:** процесс **`house-next`**, Node **`3000`**, nginx тест **`8080`**, домены **`80/443`**
-- **Деплой с ПК:** `bash scripts/deploy-remote.sh` или `node .ssh-deploy-tmp/deploy-remote.js`
+- **Деплой с ПК:** `npm run deploy:remote` (корень репо) или `powershell -File scripts/deploy-remote.ps1`
+- **SSH явно:** `ssh -i ~/.ssh/carcas_vps_ed25519 root@46.173.26.108` (= `ssh carcas-vps`)
 
 Копипаст — **на сервере**:
 

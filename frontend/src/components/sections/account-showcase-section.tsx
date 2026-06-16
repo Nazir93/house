@@ -10,29 +10,31 @@ export function AccountShowcaseSection() {
   return (
     <section
       id="account-showcase"
-      data-reveal="section"
-      className="relative overflow-clip scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)] py-16 sm:py-20 lg:py-28"
+      className="relative overflow-x-clip scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)] py-12 sm:py-16 lg:py-28"
       style={{ backgroundColor: "var(--bg)" }}
       aria-labelledby="account-showcase-heading"
     >
       <div className="container relative z-[1] mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 grid gap-6 lg:mb-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.6fr)] lg:items-end">
-          <div>
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
+        <div
+          data-reveal="section"
+          className="relative z-10 mb-8 grid gap-5 bg-[var(--bg)] sm:mb-10 sm:gap-6 lg:mb-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.6fr)] lg:items-end"
+        >
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)] sm:text-[11px]">
               Личный кабинет клиента
             </p>
             <h2
               id="account-showcase-heading"
-              className="mt-3 max-w-4xl text-balance font-heading text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl md:text-[2.45rem] md:leading-[1.08]"
+              className="mt-3 max-w-4xl text-balance font-heading text-[clamp(1.35rem,5.4vw,2.45rem)] font-bold leading-[1.12] tracking-tight text-[var(--text)] sm:mt-3.5 sm:leading-[1.08]"
             >
               Показываем стройку так, чтобы клиент видел порядок, сроки и деньги
             </h2>
-            <p className="mt-5 max-w-2xl text-sm leading-relaxed text-[var(--text-muted)] sm:text-[15px]">
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--text-muted)] sm:mt-5 sm:text-[15px]">
               Это не просто вход по договору. В кабинете собраны этапы, фотоотчёты, документы и платежи — поэтому
               заказчик понимает, что происходит на объекте, а компания выглядит системно и прозрачно.
             </p>
           </div>
-          <div className="rounded-[1.4rem] border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg-secondary)_72%,transparent)] p-5 shadow-[0_16px_50px_rgba(15,61,46,0.08)]">
+          <div className="rounded-[1.25rem] border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg-secondary)_72%,transparent)] p-4 shadow-[0_16px_50px_rgba(15,61,46,0.08)] sm:rounded-[1.4rem] sm:p-5">
             <div className="flex items-start gap-3">
               <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[var(--accent)]" strokeWidth={1.9} aria-hidden />
               <p className="text-sm leading-relaxed text-[var(--text-muted)]">
@@ -43,21 +45,21 @@ export function AccountShowcaseSection() {
           </div>
         </div>
 
-        <div className="relative space-y-0">
+        <div className="relative space-y-5 sm:space-y-6 lg:space-y-0">
           {ACCOUNT_SHOWCASE_ITEMS.map((item, index) => {
             const Icon = ACCOUNT_SHOWCASE_ICON_BY_ID[item.id];
             return (
               <article
                 key={item.id}
                 data-reveal="card"
-                className="group relative grid min-h-[calc(100dvh-var(--site-header-sticky-offset))] grid-rows-[auto_minmax(22rem,1fr)] overflow-hidden rounded-[2rem] border border-[var(--border)] bg-[var(--bg-secondary)] sticky lg:min-h-[38rem] lg:grid-rows-none lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:gap-6"
+                className="group relative grid grid-rows-[auto_minmax(16rem,auto)] overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-[var(--bg-secondary)] sm:grid-rows-[auto_minmax(20rem,auto)] sm:rounded-[1.75rem] lg:sticky lg:min-h-[38rem] lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:grid-rows-none lg:gap-6 lg:rounded-[2rem]"
                 style={{
                   top: "var(--site-header-sticky-offset)",
                   zIndex: index + 1,
                   "--reveal-delay": `${index * 80}ms`,
                 } as CSSProperties}
               >
-                <div className="flex min-h-[22rem] flex-col justify-between p-6 sm:p-8 lg:min-h-[38rem] lg:p-10">
+                <div className="flex flex-col justify-between p-5 sm:p-7 lg:min-h-[38rem] lg:p-10">
                   <div>
                     <div className="inline-flex items-center rounded-full border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_72%,transparent)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
                       {item.index}
@@ -85,7 +87,7 @@ export function AccountShowcaseSection() {
                   </div>
                 </div>
 
-                <div className="flex min-h-[22rem] w-full flex-1 flex-col px-4 pb-4 pt-0 sm:px-6 sm:pb-6 lg:min-h-[38rem] lg:flex-none lg:items-stretch lg:py-8 lg:pr-10 lg:pl-0">
+                <div className="flex min-h-[16rem] w-full flex-1 flex-col px-4 pb-4 pt-0 sm:min-h-[20rem] sm:px-5 sm:pb-5 lg:min-h-[38rem] lg:flex-none lg:items-stretch lg:py-8 lg:pr-10 lg:pl-0">
                   <AccountShowcaseMockup
                     itemId={item.id}
                     image={item.image}
