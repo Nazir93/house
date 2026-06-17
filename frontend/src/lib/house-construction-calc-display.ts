@@ -39,6 +39,64 @@ export function resolveFacadeFinishLabel(facadeFinish: FacadeFinishId | string |
   return String(facadeFinish);
 }
 
+export type CalcQuoteLineItem = { label: string; amountRub: number };
+
+export function formatCalcRubPlain(amountRub: number): string {
+  return `${amountRub.toLocaleString("ru-RU")} ₽`;
+}
+
+export function formatCalcQuoteLineItemRu(item: CalcQuoteLineItem): string {
+  return `${item.label} — ${formatCalcRubPlain(item.amountRub)}`;
+}
+
+export function parseCalcQuoteLineItems(raw: unknown): CalcQuoteLineItem[] | null {
+  if (!Array.isArray(raw)) return null;
+  const items = raw
+    .map((row) => {
+      if (!row || typeof row !== "object") return null;
+      const o = row as Record<string, unknown>;
+      const label = typeof o.label === "string" ? o.label.trim() : "";
+      const amountRub = typeof o.amountRub === "number" && Number.isFinite(o.amountRub) ? o.amountRub : NaN;
+      if (!label || !Number.isFinite(amountRub)) return null;
+      return { label, amountRub };
+    })
+    .filter((row): row is CalcQuoteLineItem => row != null);
+  return items.length ? items : null;
+}
+
+/** Текстовый блок для selectionSummaryRu / Telegram: заголовок + строки «название — сумма». */
+export function buildCalcQuoteLineItemsSummarySection(
+  title: string,
+  items: CalcQuoteLineItem[] | null | undefined,
+  emptyLabel = "—"
+): string {
+  if (!items?.length) return `${title}: ${emptyLabel}`;
+  return [title, ...items.map(formatCalcQuoteLineItemRu)].join("\n");
+}
+
+function pushItemizedRow(
+  rows: HouseConstructionCalcDisplayRow[],
+  label: string,
+  items: CalcQuoteLineItem[] | null | undefined,
+  options?: { fallbackTotal?: number; fallbackValue?: string }
+) {
+  if (items?.length) {
+    rows.push({
+      label,
+      value: formatCalcRubPlain(items.reduce((sum, item) => sum + item.amountRub, 0)),
+      items,
+    });
+    return;
+  }
+  if (typeof options?.fallbackTotal === "number" && options.fallbackTotal > 0) {
+    rows.push({ label, value: formatCalcRubPlain(options.fallbackTotal) });
+    return;
+  }
+  if (options?.fallbackValue) {
+    rows.push({ label, value: options.fallbackValue });
+  }
+}
+
 export function buildHouseConstructionSelectionSummaryRu(params: {
   objectType?: string | null;
   area?: string | null;
@@ -47,6 +105,7 @@ export function buildHouseConstructionSelectionSummaryRu(params: {
   wallMaterialLabel: string;
   facadeFinishLabel: string;
   engineeringLabels: string[];
+  engineeringLines?: CalcQuoteLineItem[];
   grandTotalRub: number | null | undefined;
   promoFreeServiceTitle?: string | null;
 }): string {
@@ -59,19 +118,27 @@ export function buildHouseConstructionSelectionSummaryRu(params: {
   lines.push(`Материал стен: ${params.wallMaterialLabel}`);
   lines.push(`Фасад: ${params.facadeFinishLabel}`);
   lines.push(
-    `Инженерия: ${params.engineeringLabels.length ? params.engineeringLabels.join(", ") : "ничего не выбрано"}`
+    buildCalcQuoteLineItemsSummarySection(
+      "Инженерия",
+      params.engineeringLines,
+      params.engineeringLabels.length ? params.engineeringLabels.join(", ") : "ничего не выбрано"
+    )
   );
   if (params.promoFreeServiceTitle?.trim()) {
     lines.push(`Акция (QR): бесплатно — ${params.promoFreeServiceTitle.trim()}`);
   }
   const g = params.grandTotalRub;
   if (typeof g === "number" && Number.isFinite(g)) {
-    lines.push(`Ориентировочно по прайсу: ${g.toLocaleString("ru-RU")} ₽`);
+    lines.push(`Ориентировочно по прайсу: ${formatCalcRubPlain(g)}`);
   }
   return lines.join("\n");
 }
 
-export type HouseConstructionCalcDisplayRow = { label: string; value: string };
+export type HouseConstructionCalcDisplayRow = {
+  label: string;
+  value: string;
+  items?: CalcQuoteLineItem[];
+};
 
 /** Человекочитаемые строки для админки и старых заявок без selectionSummaryRu */
 export function houseConstructionCalcDisplayRows(calc: unknown): HouseConstructionCalcDisplayRow[] | null {
@@ -82,19 +149,41 @@ export function houseConstructionCalcDisplayRows(calc: unknown): HouseConstructi
     const rows: HouseConstructionCalcDisplayRow[] = [];
     if (typeof h.projectTitle === "string") rows.push({ label: "Проект", value: h.projectTitle });
     if (h.area != null) rows.push({ label: "Площадь", value: `${h.area} м²` });
-    if (h.categoryId != null) rows.push({ label: "Категория", value: String(h.categoryId) });
+    if (h.categoryId != null) rows.push({ label: "Категория дома", value: String(h.categoryId) });
+    if (typeof h.roofLabel === "string" && h.roofLabel.trim()) {
+      rows.push({ label: "Кровля", value: h.roofLabel.trim() });
+    }
     if (typeof h.tierLabel === "string") rows.push({ label: "Материал стен", value: h.tierLabel });
     if (h.facadeSlug != null) rows.push({ label: "Фасад", value: String(h.facadeSlug) });
-    if (typeof h.shellTotalRub === "number")
-      rows.push({ label: "Коробка", value: `${h.shellTotalRub.toLocaleString("ru-RU")} ₽` });
-    if (typeof h.facadeTotalRub === "number" && h.facadeTotalRub > 0)
-      rows.push({ label: "Сумма фасада", value: `${h.facadeTotalRub.toLocaleString("ru-RU")} ₽` });
-    if (typeof h.engineeringTotalRub === "number" && h.engineeringTotalRub > 0)
-      rows.push({ label: "Инженерия", value: `${h.engineeringTotalRub.toLocaleString("ru-RU")} ₽` });
-    if (typeof h.constructionTotalRub === "number" && h.constructionTotalRub > 0)
-      rows.push({ label: "Доп. опции", value: `${h.constructionTotalRub.toLocaleString("ru-RU")} ₽` });
-    if (typeof h.grandTotalRub === "number")
-      rows.push({ label: "Итого ориентир", value: `${h.grandTotalRub.toLocaleString("ru-RU")} ₽` });
+
+    const engineeringLines =
+      parseCalcQuoteLineItems(h.engineeringLines) ??
+      parseCalcQuoteLineItems((h.quote as { engineeringLines?: unknown } | undefined)?.engineeringLines);
+    pushItemizedRow(rows, "Инженерия", engineeringLines, {
+      fallbackTotal: typeof h.engineeringTotalRub === "number" ? h.engineeringTotalRub : undefined,
+      fallbackValue: "—",
+    });
+
+    const constructionLines =
+      parseCalcQuoteLineItems(h.constructionLines) ??
+      parseCalcQuoteLineItems((h.quote as { constructionLines?: unknown } | undefined)?.constructionLines);
+    pushItemizedRow(rows, "Доп. опции", constructionLines, {
+      fallbackTotal: typeof h.constructionTotalRub === "number" ? h.constructionTotalRub : undefined,
+      fallbackValue: "—",
+    });
+
+    if (typeof h.shellTotalRub === "number") {
+      rows.push({ label: "Коробка", value: formatCalcRubPlain(h.shellTotalRub) });
+    }
+    if (typeof h.facadeTotalRub === "number" && h.facadeTotalRub > 0) {
+      rows.push({ label: "Фасад", value: formatCalcRubPlain(h.facadeTotalRub) });
+    }
+    if (typeof h.transportSurchargeRub === "number" && h.transportSurchargeRub > 0) {
+      rows.push({ label: "Транспорт", value: formatCalcRubPlain(h.transportSurchargeRub) });
+    }
+    if (typeof h.grandTotalRub === "number") {
+      rows.push({ label: "Итого ориентир", value: formatCalcRubPlain(h.grandTotalRub) });
+    }
     return rows;
   }
 
@@ -142,15 +231,37 @@ export function houseConstructionCalcDisplayRows(calc: unknown): HouseConstructi
       : resolveFacadeFinishLabel(facadeRaw);
   rows.push({ label: "Фасад", value: facadeLabel });
 
+  const quote = h.quote as
+    | {
+        grandTotalRub?: number;
+        engineeringLines?: unknown;
+        facadeLines?: unknown;
+        baseTotalRub?: number;
+        facadeTotalRub?: number;
+      }
+    | undefined;
+
+  const engineeringLines =
+    parseCalcQuoteLineItems(h.engineeringLines) ?? parseCalcQuoteLineItems(quote?.engineeringLines);
   const eng = h.engineering as Partial<EngineeringSelection> | undefined;
   const engLabels =
     Array.isArray(h.engineeringSelectedLabels) && h.engineeringSelectedLabels.every((x) => typeof x === "string")
       ? (h.engineeringSelectedLabels as string[])
       : engineeringSelectedHumanLabels(eng);
-  rows.push({
-    label: "Инженерия",
-    value: engLabels.length ? engLabels.join(", ") : "ничего не выбрано",
+  pushItemizedRow(rows, "Инженерия", engineeringLines, {
+    fallbackValue: engLabels.length ? engLabels.join(", ") : "ничего не выбрано",
   });
+
+  if (typeof quote?.baseTotalRub === "number" && quote.baseTotalRub > 0) {
+    rows.push({ label: "Тёплый контур", value: formatCalcRubPlain(quote.baseTotalRub) });
+  }
+
+  const facadeLines = parseCalcQuoteLineItems(quote?.facadeLines);
+  if (facadeLines?.length) {
+    pushItemizedRow(rows, "Фасад (сумма)", facadeLines);
+  } else if (typeof quote?.facadeTotalRub === "number" && quote.facadeTotalRub > 0) {
+    rows.push({ label: "Фасад (сумма)", value: formatCalcRubPlain(quote.facadeTotalRub) });
+  }
 
   const obj = h.objectType != null ? String(h.objectType).trim() : "";
   if (obj) rows.push({ label: "Тип объекта", value: obj });
@@ -159,10 +270,9 @@ export function houseConstructionCalcDisplayRows(calc: unknown): HouseConstructi
     rows.push({ label: "Акция (QR)", value: `бесплатно — ${h.promoFreeServiceTitle.trim()}` });
   }
 
-  const quote = h.quote as { grandTotalRub?: number } | undefined;
   const g = quote?.grandTotalRub ?? h.estimate;
   if (typeof g === "number" && Number.isFinite(g)) {
-    rows.push({ label: "Ориентировочно по прайсу", value: `${g.toLocaleString("ru-RU")} ₽` });
+    rows.push({ label: "Ориентировочно по прайсу", value: formatCalcRubPlain(g) });
   }
 
   return rows;

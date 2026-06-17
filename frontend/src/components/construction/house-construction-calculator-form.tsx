@@ -102,6 +102,7 @@ export function buildHouseConstructionCalcPayload(
   );
   const facadeFinishLabel = resolveFacadeFinishLabel(data.facadeFinish);
   const engineeringSelectedLabels = engineeringSelectedHumanLabels(engineering);
+  const engineeringLines = q.engineeringLines.map(({ label, amountRub }) => ({ label, amountRub }));
   const selectionSummaryRu = buildHouseConstructionSelectionSummaryRu({
     objectType: data.objectType?.trim() || null,
     area: data.area?.trim() || null,
@@ -110,6 +111,7 @@ export function buildHouseConstructionCalcPayload(
     wallMaterialLabel: WALL_MATERIAL_LABELS[data.wallMaterial],
     facadeFinishLabel,
     engineeringLabels: engineeringSelectedLabels,
+    engineeringLines,
     grandTotalRub: q.grandTotalRub,
     promoFreeServiceTitle: extras?.promoFreeServiceTitle ?? null,
   });
@@ -126,6 +128,7 @@ export function buildHouseConstructionCalcPayload(
     wallMaterialLabel: WALL_MATERIAL_LABELS[data.wallMaterial],
     engineering,
     engineeringSelectedLabels,
+    engineeringLines,
     facadeFinish: data.facadeFinish,
     facadeFinishLabel,
     estimate: q.grandTotalRub,
@@ -136,10 +139,12 @@ export function buildHouseConstructionCalcPayload(
       smallHouseBaseApplied: q.smallHouseBaseApplied,
       smallHouseBaseExtraRub: q.smallHouseBaseExtraRub,
       baseTotalRub: q.baseTotalRub,
+      engineeringLines: q.engineeringLines,
       engineeringSubtotalRub: q.engineeringSubtotalRub,
       smallHouseEngineeringApplied: q.smallHouseEngineeringApplied,
       smallHouseEngineeringExtraRub: q.smallHouseEngineeringExtraRub,
       engineeringTotalRub: q.engineeringTotalRub,
+      facadeLines: q.facadeLines,
       facadeTotalRub: q.facadeTotalRub,
       grandTotalRub: q.grandTotalRub,
     },

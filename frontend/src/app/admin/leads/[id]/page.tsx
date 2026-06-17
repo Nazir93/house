@@ -46,30 +46,37 @@ function pageHref(pageUrl: string): string | null {
 }
 
 function LeadCalcSummary({ calcData }: { calcData: unknown }) {
-  const calc = calcData as Record<string, unknown>;
-  const summary =
-    typeof calc.selectionSummaryRu === "string" && calc.selectionSummaryRu.trim()
-      ? calc.selectionSummaryRu.trim()
-      : null;
   const rows = houseConstructionCalcDisplayRows(calcData);
 
-  if (!summary && !rows?.length) return null;
+  if (!rows?.length) return null;
 
   return (
     <div className="space-y-2 pt-3 border-t border-white/[0.06]">
       <p className="text-[11px] uppercase tracking-wider text-white/35">Данные калькулятора</p>
-      {summary ? (
-        <pre className="text-sm text-white/85 whitespace-pre-wrap font-sans leading-relaxed">{summary}</pre>
-      ) : (
-        <dl className="space-y-2">
-          {rows!.map((r) => (
-            <div key={r.label} className="grid grid-cols-[minmax(0,9rem)_1fr] gap-3 text-sm">
-              <dt className="text-white/40">{r.label}</dt>
-              <dd className="text-white/85">{r.value}</dd>
-            </div>
-          ))}
-        </dl>
-      )}
+      <dl className="space-y-3">
+        {rows.map((r) => (
+          <div
+            key={r.label}
+            className={r.items?.length ? "space-y-2" : "grid grid-cols-[minmax(0,9rem)_1fr] gap-3 text-sm"}
+          >
+            <dt className="text-white/40">{r.label}</dt>
+            <dd className={r.items?.length ? "space-y-1" : "text-white/85"}>
+              {r.items?.length ? (
+                <ul className="space-y-1.5">
+                  {r.items.map((item) => (
+                    <li key={`${r.label}-${item.label}`} className="flex justify-between gap-3 text-sm">
+                      <span className="min-w-0 text-white/70">{item.label}</span>
+                      <span className="shrink-0 tabular-nums text-white/85">{item.amountRub.toLocaleString("ru-RU")} ₽</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                r.value
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
     </div>
   );
 }

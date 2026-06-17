@@ -20,13 +20,7 @@ export function BuiltObjectHistoryCards({ cards }: { cards: BuiltObjectHistoryCa
   if (cards.length === 0) return null;
 
   return (
-    <div
-      className={cn(
-        "flex gap-3 overflow-x-auto pb-1 snap-x snap-mandatory",
-        "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-        "lg:grid lg:grid-cols-4 lg:gap-3 lg:overflow-visible lg:snap-none lg:pb-0 lg:auto-rows-min",
-      )}
-    >
+    <div className="flex flex-col gap-3 lg:grid lg:grid-cols-4 lg:gap-3 lg:auto-rows-min">
       {cards.map((card, index) => {
         const isOpen = expanded.has(card.id);
         const hasBody = Boolean(card.description?.trim());
@@ -34,8 +28,8 @@ export function BuiltObjectHistoryCards({ cards }: { cards: BuiltObjectHistoryCa
           <article
             key={card.id}
             className={cn(
-              "flex w-[min(82vw,248px)] shrink-0 snap-start flex-col rounded-xl border p-3 shadow-[0_8px_24px_rgba(15,61,46,0.05)] transition-shadow duration-200 lg:p-4",
-              "lg:w-auto lg:min-w-0 lg:self-start",
+              "flex w-full min-w-0 flex-col overflow-hidden rounded-xl border p-3 shadow-[0_8px_24px_rgba(15,61,46,0.05)] transition-shadow duration-200 lg:p-4",
+              "lg:min-w-0 lg:self-start",
               isOpen && hasBody && "shadow-[0_4px_20px_rgb(var(--accent-rgb)/0.06)]",
             )}
             style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
@@ -46,7 +40,7 @@ export function BuiltObjectHistoryCards({ cards }: { cards: BuiltObjectHistoryCa
               disabled={!hasBody}
               aria-expanded={isOpen}
               className={cn(
-                "flex w-full items-start gap-2 text-left",
+                "flex w-full min-w-0 items-start gap-2 text-left",
                 !hasBody && "cursor-default",
               )}
             >
@@ -59,7 +53,7 @@ export function BuiltObjectHistoryCards({ cards }: { cards: BuiltObjectHistoryCa
               </span>
               <span
                 className={cn(
-                  "min-w-0 flex-1 font-heading text-[11px] font-bold leading-[1.3] lg:text-xs",
+                  "min-w-0 flex-1 break-words font-heading text-[11px] font-bold leading-[1.3] [overflow-wrap:anywhere] lg:text-xs",
                   !isOpen && "line-clamp-2",
                 )}
                 style={{ color: "var(--text)" }}
@@ -81,7 +75,7 @@ export function BuiltObjectHistoryCards({ cards }: { cards: BuiltObjectHistoryCa
             </button>
             {isOpen && hasBody ? (
               <p
-                className="mt-3 pt-1 text-xs leading-[1.55] whitespace-pre-line lg:text-[13px]"
+                className="mt-3 min-w-0 break-words pt-1 text-xs leading-[1.55] whitespace-pre-line [overflow-wrap:anywhere] lg:text-[13px]"
                 style={{ color: "var(--text-muted)" }}
               >
                 {card.description}
