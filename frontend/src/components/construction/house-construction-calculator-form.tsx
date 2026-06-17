@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -17,11 +17,11 @@ import {
   FACADE_FINISH_LABELS,
   computeHouseConstructionQuote,
   defaultEngineeringSelection,
+  normalizeEngineeringSelection,
   defaultRoofForFloor,
   facadeAvailable,
   isValidHouseConfiguration,
   validRoofsForFloor,
-  type EngineeringSelection,
   type HouseConstructionCalculatorConfig,
 } from "@/lib/house-construction-calculator";
 import {
@@ -88,19 +88,20 @@ export function buildHouseConstructionCalcPayload(
   config: HouseConstructionCalculatorConfig,
   extras?: { promoFreeServiceTitle?: string | null }
 ) {
+  const engineering = normalizeEngineeringSelection(data.engineering);
   const q = computeHouseConstructionQuote(
     {
       areaM2: areaNum,
       catalogFloor: data.catalogFloor,
       roof: data.roof,
       wall: data.wallMaterial,
-      engineering: data.engineering,
+      engineering,
       facadeFinish: data.facadeFinish,
     },
     config
   );
   const facadeFinishLabel = resolveFacadeFinishLabel(data.facadeFinish);
-  const engineeringSelectedLabels = engineeringSelectedHumanLabels(data.engineering);
+  const engineeringSelectedLabels = engineeringSelectedHumanLabels(engineering);
   const selectionSummaryRu = buildHouseConstructionSelectionSummaryRu({
     objectType: data.objectType?.trim() || null,
     area: data.area?.trim() || null,
@@ -123,7 +124,7 @@ export function buildHouseConstructionCalcPayload(
     roofLabel: ROOF_LABELS[data.roof],
     wallMaterial: data.wallMaterial,
     wallMaterialLabel: WALL_MATERIAL_LABELS[data.wallMaterial],
-    engineering: data.engineering,
+    engineering,
     engineeringSelectedLabels,
     facadeFinish: data.facadeFinish,
     facadeFinishLabel,
@@ -206,7 +207,26 @@ export function HouseConstructionCalculatorForm({
   const roof = watch("roof");
   const wallMaterial = watch("wallMaterial");
   const areaStr = watch("area");
-  const engineering = watch("engineering");
+  const [
+    engElectric,
+    engWater,
+    engSewage,
+    engRadiators,
+    engWarmFloor,
+    engBoiler,
+    engBio,
+  ] = useWatch({
+    control,
+    name: [
+      "engineering.electric",
+      "engineering.water",
+      "engineering.sewage",
+      "engineering.radiators",
+      "engineering.warmFloor",
+      "engineering.boiler",
+      "engineering.bio",
+    ],
+  });
   const facadeFinish = watch("facadeFinish");
 
   const areaNum = useMemo(() => {
@@ -226,20 +246,26 @@ export function HouseConstructionCalculatorForm({
     }
   }, [catalogFloor, roof, facadeFinish, setValue]);
 
-  const quote = useMemo(
-    () =>
-      computeHouseConstructionQuote(
-        {
-          areaM2: areaNum,
-          catalogFloor,
-          roof,
-          wall: wallMaterial,
-          engineering: engineering as EngineeringSelection,
-          facadeFinish,
-        },
-        config
-      ),
-    [areaNum, catalogFloor, roof, wallMaterial, engineering, facadeFinish, config]
+  const engineeringSelection = normalizeEngineeringSelection({
+    electric: engElectric,
+    water: engWater,
+    sewage: engSewage,
+    radiators: engRadiators,
+    warmFloor: engWarmFloor,
+    boiler: engBoiler,
+    bio: engBio,
+  });
+
+  const quote = computeHouseConstructionQuote(
+    {
+      areaM2: areaNum,
+      catalogFloor,
+      roof,
+      wall: wallMaterial,
+      engineering: engineeringSelection,
+      facadeFinish,
+    },
+    config
   );
 
   const configOk = isValidHouseConfiguration(catalogFloor, roof, config);
@@ -437,25 +463,36 @@ export function HouseConstructionCalculatorForm({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {HOUSE_CONSTRUCTION_ENGINEERING_FIELD_ORDER.map((key) => {
                   const label = ENGINEERING_OPTION_LABELS[key];
-                  const on = Boolean(engineering?.[key]);
                   return (
-                  <label
-                    key={key}
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-300"
-                    style={{
-                      border: `1px solid ${on ? "var(--accent)" : "var(--border)"}`,
-                      backgroundColor: on ? "rgba(15,61,46,0.08)" : "transparent",
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 accent-[var(--accent)] shrink-0"
-                      {...register(`engineering.${key}` as const)}
+                    <Controller
+                      key={key}
+                      name={`engineering.${key}`}
+                      control={control}
+                      render={({ field }) => {
+                        const on = field.value === true;
+                        return (
+                          <label
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all duration-300"
+                            style={{
+                              border: `1px solid ${on ? "var(--accent)" : "var(--border)"}`,
+                              backgroundColor: on ? "rgba(15,61,46,0.08)" : "transparent",
+                            }}
+                          >
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 accent-[var(--accent)] shrink-0"
+                              checked={on}
+                              onChange={(e) => field.onChange(e.target.checked)}
+                              onBlur={field.onBlur}
+                              ref={field.ref}
+                            />
+                            <span className="text-sm" style={{ color: on ? "var(--accent)" : "var(--text-muted)" }}>
+                              {label}
+                            </span>
+                          </label>
+                        );
+                      }}
                     />
-                    <span className="text-sm" style={{ color: on ? "var(--accent)" : "var(--text-muted)" }}>
-                      {label}
-                    </span>
-                  </label>
                   );
                 })}
               </div>

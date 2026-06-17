@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   computeHouseConstructionQuote,
   defaultEngineeringSelection,
+  normalizeEngineeringSelection,
   DEFAULT_HOUSE_CONSTRUCTION_CONFIG,
   getBaseRubPerM2,
   isValidHouseConfiguration,
@@ -124,5 +125,60 @@ describe("house-construction-calculator", () => {
     expect(m.gas).toBe(50_890);
     expect(m.ceramic).toBe(53_078);
     expect(m.brick).toBe(55_409);
+  });
+
+  it("суммирует все инженерные опции (100 м², 1,5 этажа — тариф one_half_or_two)", () => {
+    const engineering = normalizeEngineeringSelection({
+      electric: true,
+      water: true,
+      sewage: true,
+      radiators: true,
+      warmFloor: true,
+      boiler: true,
+      bio: true,
+    });
+    const q = computeHouseConstructionQuote({
+      areaM2: 100,
+      catalogFloor: "1.5",
+      roof: "dual",
+      wall: "gas",
+      engineering,
+      facadeFinish: "none",
+    });
+    expect(q.engineeringLines).toHaveLength(7);
+    expect(q.engineeringSubtotalRub).toBe(2_336_953);
+    expect(q.baseSubtotalRub).toBe(5_089_000);
+    expect(q.grandTotalRub).toBe(7_425_953);
+  });
+
+  it("normalizeEngineeringSelection: частичный объект не ломает расчёт", () => {
+    const partial = normalizeEngineeringSelection({ water: true });
+    expect(partial).toEqual({ ...defaultEngineeringSelection(), water: true });
+    const q = computeHouseConstructionQuote({
+      areaM2: 100,
+      catalogFloor: "1.5",
+      roof: "dual",
+      wall: "gas",
+      engineering: partial,
+      facadeFinish: "none",
+    });
+    expect(q.engineeringLines).toHaveLength(1);
+    expect(q.engineeringLines[0]?.label).toBe("Разводка воды по дому");
+    expect(q.engineeringSubtotalRub).toBe(64_800);
+  });
+
+  it("normalizeEngineeringSelection: явный false убирает опцию из расчёта", () => {
+    const partial = normalizeEngineeringSelection({ water: false });
+    expect(partial.water).toBe(false);
+    const q = computeHouseConstructionQuote({
+      areaM2: 100,
+      catalogFloor: "1.5",
+      roof: "dual",
+      wall: "gas",
+      engineering: partial,
+      facadeFinish: "none",
+    });
+    expect(q.engineeringLines).toHaveLength(0);
+    expect(q.engineeringSubtotalRub).toBe(0);
   });
 });

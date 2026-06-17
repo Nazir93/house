@@ -279,6 +279,21 @@ export const defaultEngineeringSelection = (): EngineeringSelection => ({
   bio: false,
 });
 
+/** Частичный объект из формы (RHF) → полный набор флагов для расчёта. */
+export function normalizeEngineeringSelection(
+  partial?: Partial<EngineeringSelection> | null
+): EngineeringSelection {
+  const defaults = defaultEngineeringSelection();
+  if (!partial) return defaults;
+  return (Object.keys(defaults) as (keyof EngineeringSelection)[]).reduce(
+    (acc, key) => {
+      acc[key] = partial[key] === true;
+      return acc;
+    },
+    { ...defaults }
+  );
+}
+
 function getBaseMatrix(cfg: HouseConstructionCalculatorConfig): BaseRubMatrix {
   return cfg.baseRubPerM2;
 }
@@ -389,6 +404,7 @@ export function computeHouseConstructionQuote(
   const baseTotal =
     baseSubtotal != null ? roundRub(baseSubtotal + smallHouseBaseExtra) : null;
 
+  const engineering = normalizeEngineeringSelection(params.engineering);
   const engTier = engineeringFloorTier(params.catalogFloor);
   const rates = cfg.engineering[engTier === "one" ? "one" : "one_half_or_two"];
   const engLines: LineItem[] = [];
@@ -398,15 +414,15 @@ export function computeHouseConstructionQuote(
     engLines.push({ id, label, amountRub: roundRub(area * rate) });
   };
 
-  if (params.engineering.electric) addPerM2("eng-el", "Электроснабжение", true, rates.electricPerM2);
-  if (params.engineering.water) addPerM2("eng-water", "Разводка воды по дому", true, rates.waterPerM2);
-  if (params.engineering.sewage) addPerM2("eng-sew", "Канализация", true, rates.sewagePerM2);
-  if (params.engineering.radiators) addPerM2("eng-rad", "Радиаторы", true, rates.radiatorsPerM2);
-  if (params.engineering.warmFloor) addPerM2("eng-warm", "Тёплый пол (1-й этаж)", true, rates.warmFloorFirstPerM2);
-  if (params.engineering.boiler) {
+  if (engineering.electric) addPerM2("eng-el", "Электроснабжение", true, rates.electricPerM2);
+  if (engineering.water) addPerM2("eng-water", "Разводка воды по дому", true, rates.waterPerM2);
+  if (engineering.sewage) addPerM2("eng-sew", "Канализация", true, rates.sewagePerM2);
+  if (engineering.radiators) addPerM2("eng-rad", "Радиаторы", true, rates.radiatorsPerM2);
+  if (engineering.warmFloor) addPerM2("eng-warm", "Тёплый пол (1-й этаж)", true, rates.warmFloorFirstPerM2);
+  if (engineering.boiler) {
     engLines.push({ id: "eng-boiler", label: "Котельная", amountRub: rates.boilerFixed });
   }
-  if (params.engineering.bio) {
+  if (engineering.bio) {
     engLines.push({ id: "eng-bio", label: "Станция биоочистки", amountRub: rates.bioFixed });
   }
 
