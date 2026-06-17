@@ -127,6 +127,9 @@ echo "==> build id: ${NEXT_PUBLIC_BUILD_ID} (${GIT_COMMIT_SHA})"
 echo "==> npm run build"
 npm run build
 
+echo "==> nginx (gzip, keepalive, static cache)"
+bash "$ROOT/scripts/setup-nginx-house.sh"
+
 echo "==> pm2 reload house-next --update-env && pm2 save"
 pm2 reload house-next --update-env
 pm2 save

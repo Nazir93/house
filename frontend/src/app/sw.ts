@@ -1,6 +1,6 @@
 /// <reference lib="esnext" />
 /// <reference lib="webworker" />
-import { CacheFirst, NetworkFirst, NetworkOnly, Serwist, StaleWhileRevalidate } from "serwist";
+import { CacheFirst, NetworkOnly, Serwist, StaleWhileRevalidate } from "serwist";
 import type { PrecacheEntry, SerwistGlobalConfig } from "serwist";
 
 declare global {
@@ -11,8 +11,7 @@ declare global {
 
 declare const self: ServiceWorkerGlobalScope;
 
-/** Меняйте при смене стратегии кэша — старые runtime-кэши удалятся при activate. */
-const RUNTIME_CACHE_VERSION = "v4";
+const RUNTIME_CACHE_VERSION = "v5";
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
@@ -46,10 +45,7 @@ const serwist = new Serwist({
         request.destination === "script" ||
         request.destination === "style" ||
         request.destination === "worker",
-      handler: new NetworkFirst({
-        cacheName: `static-assets-${RUNTIME_CACHE_VERSION}`,
-        networkTimeoutSeconds: 4,
-      }),
+      handler: new NetworkOnly(),
     },
     {
       matcher: ({ request }) =>
