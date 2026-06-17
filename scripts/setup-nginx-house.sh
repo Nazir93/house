@@ -14,6 +14,9 @@ if ! grep -q 'house-gzip.conf' /etc/nginx/nginx.conf; then
   sed -i '/http {/a \    include /etc/nginx/snippets/house-gzip.conf;' /etc/nginx/nginx.conf
 fi
 
+# Убрать дубли include, если скрипт запускали повторно
+awk '!seen[$0]++' /etc/nginx/nginx.conf > /tmp/nginx.conf.$$ && mv /tmp/nginx.conf.$$ /etc/nginx/nginx.conf
+
 ln -sf "$CONF" /etc/nginx/sites-enabled/house-chastdushi
 
 nginx -t
