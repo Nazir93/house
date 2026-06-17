@@ -8,7 +8,6 @@ SNIPPETS="/etc/nginx/snippets"
 
 cp "$ROOT/nginx/snippets/house-proxy.conf" "$SNIPPETS/house-proxy.conf"
 cp "$ROOT/nginx/snippets/house-gzip.conf" "$SNIPPETS/house-gzip.conf"
-cp "$ROOT/nginx/snippets/ssl-tls12-only.conf" "$SNIPPETS/ssl-tls12-only.conf"
 cp "$ROOT/nginx/chastdushi-site.conf" "$CONF"
 
 if [[ -f "$ROOT/nginx/nginx-vps.conf" ]]; then
