@@ -802,6 +802,7 @@ export function ProjectsCatalogContent({
                       project={project}
                       priceRub={resolveProjectListingPriceRub(project)}
                       projectBasePath={basePath}
+                      catalogKind={catalog.kind}
                       imageSizes="(max-width: 1280px) 50vw, 400px"
                     />
                   );

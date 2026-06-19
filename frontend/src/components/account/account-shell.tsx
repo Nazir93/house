@@ -273,6 +273,7 @@ export function AccountShell({
             <Link
               href={bellHref}
               title={bellLabel}
+              aria-label={bellLabel}
               className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-semibold border transition hover:opacity-90"
               style={{
                 borderColor:

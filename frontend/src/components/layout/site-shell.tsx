@@ -16,6 +16,7 @@ import { CookieBanner } from "../ui/cookie-banner";
 import { SmartCaptchaGate } from "../smartcaptcha-provider";
 import { DiscussProjectFab } from "./discuss-project-fab";
 import { PwaInstallBanner } from "../pwa/pwa-install-banner";
+import { ProjectCompareBar } from "../projects/project-compare-bar";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -44,6 +45,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       <FixedStatsBar />
       <MobileBottomNav />
       <PwaInstallBanner />
+      <ProjectCompareBar />
       <CookieBanner />
       <div className="mobile-bottom-nav-spacer lg:hidden" />
     </>

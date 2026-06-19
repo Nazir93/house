@@ -47,9 +47,6 @@ export const PROEKTROVANIE_TIMELINE_ITEMS: StoryTimelineItem[] = [
   },
 ];
 
-/** @deprecated alias */
-export const PROEKTROVANIE_TIMELINE_PLACEHOLDERS = PROEKTROVANIE_TIMELINE_ITEMS;
-
 function resolveProektirovanieHeroBanner(url: string | undefined): string {
   if (!url || url === PROEKTROVANIE_HERO_BANNER) return PROEKTROVANIE_HERO_FALLBACK_BANNER;
   return url;

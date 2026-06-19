@@ -29,7 +29,7 @@ test.describe("Личный кабинет — критический путь",
 
   test("звоночек ведёт в центр уведомлений", async ({ page }) => {
     await page.goto("/account/dashboard");
-    const bell = page.getByRole("link", { name: /Непрочитанных уведомлений|Открыть центр уведомлений/i });
+    const bell = page.locator('header a[href="/account/notifications"]').first();
     await expect(bell).toHaveAttribute("href", "/account/notifications");
     await bell.click();
     await expect(page).toHaveURL(/\/account\/notifications/);
@@ -48,11 +48,15 @@ test.describe("Личный кабинет — критический путь",
 
   test("скачивание документа → «Ожидает подписания»", async ({ page }) => {
     await page.goto("/account/documents");
-    await expect(page.getByText(fixture!.documentFilename)).toBeVisible();
+    await expect(page.getByText(fixture!.documentFilename).first()).toBeVisible();
 
     const downloadHref = `/api/client/documents/${fixture!.documentId}/download`;
-    const downloadRes = await page.goto(downloadHref, { waitUntil: "commit" });
-    expect(downloadRes?.ok(), `download HTTP ${downloadRes?.status()}`).toBeTruthy();
+    const downloadPromise = page.waitForEvent("download");
+    await page.goto(downloadHref).catch((err: Error) => {
+      if (!/Download is starting/i.test(err.message)) throw err;
+    });
+    const download = await downloadPromise;
+    expect(download.suggestedFilename()).toContain("E2E");
 
     await page.goto("/account/documents");
     await expect(page.getByText("Ожидает подписания")).toBeVisible();

@@ -47,7 +47,7 @@ test.describe("О компании", () => {
     expect(html.includes("images.unsplash.com"), "страница не должна тянуть Unsplash").toBe(false);
     await expect(page.getByText("Кузнецова Ольга Олеговна")).toBeVisible();
     await expect(page.getByRole("heading", { name: "Ценности" })).toBeVisible();
-    await expect(page.getByText("Продуманность")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Продуманность" })).toBeVisible();
     const portfolioLink = page.getByRole("link", { name: "Как мы строим" });
     await expect(portfolioLink).toBeVisible();
     await expect(portfolioLink).toHaveAttribute("href", "/portfolio");

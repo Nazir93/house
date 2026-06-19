@@ -5,6 +5,8 @@ import { ArrowRight, Bath, Bed, Maximize2 } from "lucide-react";
 import type { CSSProperties } from "react";
 
 import { ProjectEngagementBadges } from "@/components/projects/project-engagement-badges";
+import { ProjectCompareButton } from "@/components/projects/project-compare-button";
+import type { HouseProjectCatalogKind } from "@/lib/house-project-catalog";
 import { CmsImage } from "@/components/ui/cms-image";
 import type { HouseProjectItem } from "@/lib/construction-data";
 import { getProjectRenders } from "@/lib/construction-shared";
@@ -41,12 +43,14 @@ export function HouseProjectGridCard({
   revealStyle,
   imageSizes = "(max-width: 768px) 100vw, 50vw",
   projectBasePath = "/projects",
+  catalogKind = "author",
 }: {
   project: HouseProjectItem;
   priceRub?: number;
   revealStyle?: CSSProperties;
   imageSizes?: string;
   projectBasePath?: string;
+  catalogKind?: HouseProjectCatalogKind;
 }) {
   const href = `${projectBasePath}/${project.slug}`;
   const cover = getProjectRenders(project)[0];
@@ -68,12 +72,15 @@ export function HouseProjectGridCard({
           ) : null}
         </Link>
 
-        <ProjectEngagementBadges
-          slug={project.slug}
-          initialViewCount={project.viewCount}
-          initialLikeCount={project.likeCount}
-          className="absolute inset-x-0 top-3 z-[2] px-3"
-        />
+        <div className="absolute inset-x-0 top-3 z-[2] flex items-start justify-between gap-2 px-3">
+          <ProjectCompareButton slug={project.slug} catalogKind={catalogKind} variant="card" />
+          <ProjectEngagementBadges
+            slug={project.slug}
+            initialViewCount={project.viewCount}
+            initialLikeCount={project.likeCount}
+            className="shrink-0"
+          />
+        </div>
 
         <div className="absolute bottom-2 left-2 right-2 z-[1] sm:bottom-3 sm:left-auto sm:right-3">
           <Link

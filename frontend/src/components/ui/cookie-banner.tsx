@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Cookie } from "lucide-react";
 
 const STORAGE_KEY = "cookie_consent";
 
@@ -32,44 +33,61 @@ export function CookieBanner() {
 
   return (
     <div
-      className="fixed mobile-above-bottom-nav lg:bottom-4 left-4 right-4 lg:right-[80px] z-[60] animate-slideUp"
-      style={{ pointerEvents: "auto" }}
+      role="dialog"
+      aria-live="polite"
+      aria-label="Уведомление об использовании cookie"
+      className="fixed inset-x-0 z-[60] flex justify-center px-4 pb-4 pointer-events-none mobile-above-bottom-nav lg:bottom-6 animate-slideUp"
     >
       <div
-        className="max-w-xl mx-auto lg:mx-0 rounded-2xl border px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5 shadow-2xl"
+        className="pointer-events-auto w-full max-w-md rounded-2xl border px-5 py-5 text-center shadow-[0_18px_50px_rgb(0_0_0/0.14)] backdrop-blur-md sm:max-w-lg sm:px-6 sm:py-5"
         style={{
-          backgroundColor: "var(--bg)",
+          backgroundColor: "color-mix(in srgb, var(--bg) 92%, transparent)",
           borderColor: "var(--border)",
         }}
       >
-        <div className="flex-1 min-w-0">
-          <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
-            Мы используем файлы cookie для аналитики и корректной работы сайта. Продолжая использование,
-            вы соглашаетесь с{" "}
-            <Link
-              href="/privacy"
-              className="underline transition-colors hover:text-[var(--accent)]"
-              style={{ color: "var(--text)" }}
-            >
-              Политикой&nbsp;конфиденциальности
-            </Link>
-            {" "}и{" "}
-            <Link
-              href="/consent"
-              className="underline transition-colors hover:text-[var(--accent)]"
-              style={{ color: "var(--text)" }}
-            >
-              Согласием&nbsp;на&nbsp;обработку&nbsp;данных
-            </Link>
-            .
-          </p>
+        <div
+          className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full"
+          style={{ backgroundColor: "color-mix(in srgb, var(--accent) 12%, transparent)" }}
+          aria-hidden
+        >
+          <Cookie className="h-5 w-5" style={{ color: "var(--accent)" }} strokeWidth={1.75} />
         </div>
+
+        <p
+          className="text-[10px] font-semibold uppercase tracking-[0.18em]"
+          style={{ color: "var(--accent)" }}
+        >
+          Файлы cookie
+        </p>
+
+        <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
+          Мы используем cookie для работы сайта, сохранения настроек и аналитики посещений.
+          Нажимая «Принять», вы соглашаетесь с{" "}
+          <Link
+            href="/privacy"
+            className="underline underline-offset-2 transition-colors hover:text-[var(--accent)]"
+            style={{ color: "var(--text)" }}
+          >
+            Политикой конфиденциальности
+          </Link>{" "}
+          и{" "}
+          <Link
+            href="/consent"
+            className="underline underline-offset-2 transition-colors hover:text-[var(--accent)]"
+            style={{ color: "var(--text)" }}
+          >
+            Согласием на обработку персональных данных
+          </Link>
+          .
+        </p>
+
         <button
+          type="button"
           onClick={accept}
-          className="shrink-0 px-6 py-2.5 text-xs font-heading uppercase tracking-[0.1em] rounded-full transition-all duration-300 hover:scale-105"
+          className="mt-4 min-w-[9.5rem] rounded-full px-7 py-2.5 text-xs font-heading font-semibold uppercase tracking-[0.12em] transition-all duration-300 hover:opacity-90"
           style={{
             backgroundColor: "var(--accent)",
-            color: "var(--bg)",
+            color: "var(--accent-contrast)",
           }}
         >
           Принять
@@ -77,4 +95,4 @@ export function CookieBanner() {
       </div>
     </div>
   );
-}
+};

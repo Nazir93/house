@@ -2,9 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildUpcomingPaymentSummary,
   isAwaitingPayment,
-  isUnpaidPayment,
   pickDashboardPaymentPreview,
-  pickNextUnpaidPayment,
 } from "./client-payments-dashboard";
 
 const base = [
@@ -42,7 +40,6 @@ describe("client-payments-dashboard (п. 10 ТЗ)", () => {
     expect(isAwaitingPayment("EXPECTED")).toBe(true);
     expect(isAwaitingPayment("NOT_ISSUED")).toBe(false);
     expect(isAwaitingPayment("PAID")).toBe(false);
-    expect(isUnpaidPayment("NOT_ISSUED")).toBe(false);
   });
 
   it("buildUpcomingPaymentSummary — один платёж EXPECTED", () => {
@@ -72,10 +69,6 @@ describe("client-payments-dashboard (п. 10 ТЗ)", () => {
     expect(
       buildUpcomingPaymentSummary([{ ...base[2]!, status: "NOT_ISSUED" }])
     ).toBeNull();
-  });
-
-  it("pickNextUnpaidPayment — первый из EXPECTED (совместимость)", () => {
-    expect(pickNextUnpaidPayment(base)?.label).toBe("Заливка фундамента");
   });
 
   it("pickDashboardPaymentPreview — только первые две позиции", () => {

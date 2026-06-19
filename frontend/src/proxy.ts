@@ -158,12 +158,6 @@ export async function proxy(request: NextRequest) {
     url.search = "";
     return NextResponse.redirect(url, 308);
   }
-  if (pathname === "/projects/compare" || pathname.startsWith("/projects/compare/")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/projects";
-    url.search = "";
-    return NextResponse.redirect(url, 308);
-  }
   /** Устаревшие URL услуг с прежнего шаблона (коммерческий сайт) — на общий список услуг */
   const legacyService = pathname.match(/^\/services\/([^/]+)$/);
   if (legacyService) {

@@ -45,6 +45,7 @@ import {
 } from "@/lib/part-of-soul-pricing";
 import { cn } from "@/lib/utils";
 import { ProjectEngagementBadges } from "@/components/projects/project-engagement-badges";
+import { ProjectCompareButton } from "@/components/projects/project-compare-button";
 import {
   AUTHOR_HOUSE_PROJECT_CATALOG,
   houseProjectDetailPath,
@@ -240,13 +241,19 @@ export function HouseProjectDetailContent({
 
           <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(280px,400px)]">
             <div className="relative min-h-0 self-start overflow-hidden rounded-[32px] bg-[var(--stone)] shadow-[inset_0_1px_0_rgba(255,255,255,0.4)]">
-              <ProjectEngagementBadges
-                slug={project.slug}
-                initialViewCount={project.viewCount}
-                initialLikeCount={project.likeCount}
-                recordView
-                className="absolute right-3 top-3 z-[15]"
-              />
+              <div className="absolute right-3 top-3 z-[16] flex flex-col items-end gap-2">
+                <ProjectCompareButton
+                  slug={project.slug}
+                  catalogKind={catalog.kind}
+                  variant="detail"
+                />
+                <ProjectEngagementBadges
+                  slug={project.slug}
+                  initialViewCount={project.viewCount}
+                  initialLikeCount={project.likeCount}
+                  recordView
+                />
+              </div>
               {active ? (
                 <button
                   type="button"

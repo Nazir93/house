@@ -1,3 +1,5 @@
+import { mkdir, writeFile } from "fs/promises";
+import path from "path";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { buildDocumentNewNotification } from "@/lib/client-notification-messages";
@@ -8,8 +10,20 @@ export const E2E_CLIENT_CONTRACT_NUMBER = "E2E-CABINET-TEST";
 export const E2E_CLIENT_PASSWORD = "e2e-cabinet-pass";
 
 const E2E_DOCUMENT_FILENAME = "E2E Тестовый договор.pdf";
-/** Статический файл из public/ — редирект скачивания не падает. */
-const E2E_DOCUMENT_URL = "/images/banner/banner-hero-05.png";
+const E2E_DOCUMENT_URL = "/private-uploads/client-documents/e2e/e2e-test.pdf";
+
+async function ensureE2eDocumentFile(): Promise<void> {
+  const filePath = path.join(
+    process.cwd(),
+    "storage",
+    "private",
+    "client-documents",
+    "e2e",
+    "e2e-test.pdf",
+  );
+  await mkdir(path.dirname(filePath), { recursive: true });
+  await writeFile(filePath, "%PDF-1.4 E2E fixture\n", "utf8");
+}
 
 export type E2eClientCabinetSeedResult = {
   contractNumber: string;
@@ -22,6 +36,7 @@ export type E2eClientCabinetSeedResult = {
 
 export async function seedE2eClientCabinet(): Promise<E2eClientCabinetSeedResult> {
   await cleanupE2eClientCabinet();
+  await ensureE2eDocumentFile();
 
   const passwordHash = await hashPassword(E2E_CLIENT_PASSWORD);
   const docNotification = buildDocumentNewNotification({ filename: E2E_DOCUMENT_FILENAME });

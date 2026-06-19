@@ -227,12 +227,6 @@ export function formatCalculatorConfigJson(config: HouseConstructionCalculatorCo
   return JSON.stringify(config, null, 2);
 }
 
-/** @deprecated используйте config.smallArea — оставлено для совместимости импортов */
-export const SMALL_AREA_BASE_THRESHOLD_M2 = DEFAULT_HOUSE_CONSTRUCTION_CONFIG.smallArea.baseThresholdM2;
-export const SMALL_AREA_BASE_SURCHARGE = DEFAULT_HOUSE_CONSTRUCTION_CONFIG.smallArea.baseSurcharge;
-export const SMALL_AREA_ENGINEERING_THRESHOLD_M2 = DEFAULT_HOUSE_CONSTRUCTION_CONFIG.smallArea.engineeringThresholdM2;
-export const SMALL_AREA_ENGINEERING_SURCHARGE = DEFAULT_HOUSE_CONSTRUCTION_CONFIG.smallArea.engineeringSurcharge;
-
 export type EngineeringFloorTier = "one" | "one_half_or_two";
 
 export function engineeringFloorTier(catalogFloor: CatalogFloorId): EngineeringFloorTier {

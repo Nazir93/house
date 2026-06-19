@@ -115,64 +115,6 @@ export function computeActiveBeatIndex(progress: number, total: number): number 
   return Math.min(Math.max(0, Math.floor(progress * total)), total - 1);
 }
 
-/** @deprecated */
-export type BeatAnimationState = {
-  verticalProgress: number;
-  branchProgress: number;
-  contentProgress: number;
-};
-
-/** @deprecated */
-export function computeBeatLocalProgress(sectionProgress: number, index: number, total: number): number {
-  if (total <= 0) return 0;
-  return sectionProgress * total - index;
-}
-
-/** @deprecated */
-export function computeBeatAnimationState(
-  sectionProgress: number,
-  index: number,
-  total: number
-): BeatAnimationState {
-  const reveal = computeBeatReveal(sectionProgress, index, total);
-  return { verticalProgress: reveal, branchProgress: reveal, contentProgress: reveal };
-}
-
-/** @deprecated */
-export function computeSpineProgress(sectionProgress: number, total: number): number {
-  return sectionProgress;
-}
-
-/** @deprecated */
-export function computeSpineVisibleLengthPx(
-  trackProgress: number,
-  beatCount: number,
-  originToNodeSpanPx: number,
-  leadInPx = STORY_SPINE_LEAD_IN_PX
-): number {
-  return computeLineHeightPx(trackProgress, 0, originToNodeSpanPx + leadInPx, leadInPx);
-}
-
-/** @deprecated */
-export function computeBeatRevealProgress(sectionProgress: number, index: number, total: number): number {
-  return computeBeatReveal(sectionProgress, index, total);
-}
-
-export const BEAT_VERTICAL_END = 0.35;
-export const BEAT_BRANCH_DOWN_END = 0.42;
-
-/** Фаза 1: от точки на оси вниз до уровня под текстом. @deprecated — ветка только горизонтальная */
-export function computeBeatBranchDownProgress(reveal: number, downEnd = BEAT_BRANCH_DOWN_END): number {
-  if (reveal <= 0) return 0;
-  return Math.min(reveal / downEnd, 1);
-}
-
-/** @deprecated alias */
-export function computeBeatBranchAcrossProgressLegacy(reveal: number, downEnd = BEAT_BRANCH_DOWN_END): number {
-  if (reveal <= downEnd) return 0;
-  return easeOutCubic((reveal - downEnd) / (1 - downEnd));
-}
-
 export type BeatBranchGeometry = {
   spineX: number;
   /** Y точки на оси — под блоком текста */

@@ -15,11 +15,6 @@ export function isAwaitingPayment(status: ClientPaymentStatus): boolean {
   return status === "EXPECTED";
 }
 
-/** @deprecated Используйте isAwaitingPayment */
-export function isUnpaidPayment(status: ClientPaymentStatus): boolean {
-  return isAwaitingPayment(status);
-}
-
 export type UpcomingPaymentSummary = {
   totalAmountKopeks: number;
   payments: ClientPaymentScheduleItem[];
@@ -50,13 +45,6 @@ export function buildUpcomingPaymentSummary(
     totalAmountKopeks: awaiting.reduce((sum, p) => sum + p.amountKopeks, 0),
     payments: awaiting,
   };
-}
-
-/** @deprecated Используйте buildUpcomingPaymentSummary */
-export function pickNextUnpaidPayment(
-  payments: ClientPaymentScheduleItem[]
-): ClientPaymentScheduleItem | null {
-  return buildUpcomingPaymentSummary(payments)?.payments[0] ?? null;
 }
 
 function sortPaymentsSchedule(payments: ClientPaymentScheduleItem[]): ClientPaymentScheduleItem[] {

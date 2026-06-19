@@ -313,6 +313,41 @@ export function formatLeadMessage(lead: {
     rawCalc &&
     typeof rawCalc === "object" &&
     "kind" in rawCalc &&
+    (rawCalc as { kind?: string }).kind === "house-project-quote"
+  ) {
+    const q = rawCalc as {
+      kind: string;
+      projectTitle?: string;
+      area?: number | string;
+      tierLabel?: string;
+      roofLabel?: string;
+      selectionSummaryRu?: string;
+      grandTotalRub?: number;
+    };
+    lines.push(``, `<b>Расчёт с карточки проекта</b>`);
+    if (q.selectionSummaryRu?.trim()) {
+      lines.push(
+        q.selectionSummaryRu
+          .trim()
+          .split("\n")
+          .map((ln) => escapeHtml(ln))
+          .join("<br>")
+      );
+    } else {
+      if (q.projectTitle) lines.push(`<b>Проект:</b> ${escapeHtml(q.projectTitle)}`);
+      if (q.area != null) lines.push(`<b>Площадь:</b> ${escapeHtml(String(q.area))} м²`);
+      if (q.tierLabel) lines.push(`<b>Материал:</b> ${escapeHtml(q.tierLabel)}`);
+      if (q.roofLabel) lines.push(`<b>Кровля:</b> ${escapeHtml(q.roofLabel)}`);
+      if (typeof q.grandTotalRub === "number" && Number.isFinite(q.grandTotalRub)) {
+        lines.push(`<b>Итого ориентир:</b> ${q.grandTotalRub.toLocaleString("ru-RU")} ₽`);
+      }
+    }
+  }
+
+  if (
+    rawCalc &&
+    typeof rawCalc === "object" &&
+    "kind" in rawCalc &&
     (rawCalc as { kind?: string }).kind === "house-construction-quote"
   ) {
     const h = rawCalc as {

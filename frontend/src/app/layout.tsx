@@ -11,6 +11,7 @@ import { SiteShell } from "@/components/layout/site-shell";
 import { SessionProvider } from "@/components/admin/session-provider";
 import { ThemeProvider } from "@/lib/theme-context";
 import { ModalProvider } from "@/lib/modal-context";
+import { ProjectCompareProvider } from "@/lib/project-compare-context";
 import { SITE_NAME, CITY, SITE_URL, getDefaultSiteGeoDescription } from "@/lib/constants";
 import { toAbsoluteSiteUrl } from "@/lib/absolute-site-url";
 import { AnalyticsScripts } from "@/components/seo/analytics";
@@ -122,7 +123,9 @@ export default async function RootLayout({
             <SessionProvider>
               <ContactConfigProvider value={contactConfig}>
                 <ModalProvider>
-                  <SiteShell>{children}</SiteShell>
+                  <ProjectCompareProvider>
+                    <SiteShell>{children}</SiteShell>
+                  </ProjectCompareProvider>
                 </ModalProvider>
               </ContactConfigProvider>
             </SessionProvider>
