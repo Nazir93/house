@@ -10,11 +10,9 @@
 | chastdushi.ru, www.chastdushi.ru | как есть |
 | частьдуши.рф | `xn--80aim8afhxn7a.xn--p1ai` |
 
-## TLS и ТСПУ (мобильный интернет в РФ)
+## TLS
 
-На VPS для `chastdushi.ru` используется **`ssl-tls12-only.conf`** (только TLS 1.2) — рекомендация хостинга при сбоях ТСПУ у части операторов. Certbot-сертификаты те же; меняются только протоколы.
-
-Если после смены у **десктопных** клиентов появятся ошибки сертификата — временно вернуть `include /etc/letsencrypt/options-ssl-nginx.conf;` в `chastdushi-site.conf` и `bash scripts/setup-nginx-house.sh`.
+На VPS используется стандартный **`/etc/letsencrypt/options-ssl-nginx.conf`** (TLS 1.2 + 1.3). Сниппет `ssl-tls12-only.conf` в репозитории — запасной вариант при точечных сбоях ТСПУ; не включать без проверки с десктопа и мобильного.
 
 ## Certbot (после A-записей на 46.173.26.108)
 
