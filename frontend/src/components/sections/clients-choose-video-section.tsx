@@ -52,16 +52,22 @@ function ServicesScrollCue({ visible }: { visible: boolean }) {
   );
 }
 
-function VideoPanel({ videoRef }: { videoRef: Ref<HTMLVideoElement> }) {
+function VideoPanel({
+  videoRef,
+  enabled,
+}: {
+  videoRef: Ref<HTMLVideoElement>;
+  enabled: boolean;
+}) {
   return (
     <div className="relative w-full overflow-hidden rounded-[22px] shadow-[0_20px_56px_rgba(0,0,0,0.08)] md:rounded-[30px]">
       <div className="relative aspect-[16/10] max-h-[min(46vh,320px)] w-full overflow-hidden rounded-[inherit] md:aspect-[4/3] md:max-h-[min(52vh,480px)] lg:max-h-none">
         <video
           ref={videoRef}
-          src={SERVICES_VIDEO_SRC}
+          src={enabled ? SERVICES_VIDEO_SRC : undefined}
           muted
           playsInline
-          preload="auto"
+          preload={enabled ? "metadata" : "none"}
           className="absolute inset-0 h-full w-full object-cover object-center"
           style={{ pointerEvents: "none" }}
           aria-hidden="true"
@@ -157,6 +163,7 @@ export function ClientsChooseVideoSection() {
   const [, setActiveIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [hasScrolled, setHasScrolled] = useState(false);
+  const [videoEnabled, setVideoEnabled] = useState(false);
 
   const syncScrollToServices = useCallback(() => {
     const section = sectionRef.current;
@@ -177,7 +184,7 @@ export function ClientsChooseVideoSection() {
     });
 
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !videoEnabled) return;
     if (!video.duration || Number.isNaN(video.duration) || !Number.isFinite(video.duration)) {
       warmUpVideo(video);
       return;
@@ -204,7 +211,7 @@ export function ClientsChooseVideoSection() {
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [videoEnabled]);
 
   useEffect(() => {
     const onScroll = () => syncScrollToServices();
@@ -249,6 +256,7 @@ export function ClientsChooseVideoSection() {
     const io = new IntersectionObserver(
       ([entry]) => {
         const next = entry.isIntersecting;
+        if (next) setVideoEnabled(true);
         if (next && !active) {
           active = true;
           syncScrollToServices();
@@ -270,6 +278,7 @@ export function ClientsChooseVideoSection() {
   }, [syncScrollToServices]);
 
   useEffect(() => {
+    if (!videoEnabled) return;
     const video = videoRef.current;
     if (!video) return;
     const onReady = () => syncScrollToServices();
@@ -280,7 +289,7 @@ export function ClientsChooseVideoSection() {
       video.removeEventListener("loadedmetadata", onReady);
       video.removeEventListener("canplay", onReady);
     };
-  }, [syncScrollToServices]);
+  }, [videoEnabled, syncScrollToServices]);
 
   const showScrollCue = !hasScrolled;
 
@@ -341,7 +350,7 @@ export function ClientsChooseVideoSection() {
 
           <div className="order-1 shrink-0 md:order-3 md:px-0">
             <div className="mx-auto w-full max-w-[680px] md:max-w-[620px] lg:max-w-[680px]">
-              <VideoPanel videoRef={videoRef} />
+              <VideoPanel videoRef={videoRef} enabled={videoEnabled} />
               <ServiceProgressBars scrollProgress={scrollProgress} className="mt-3 md:mt-4" />
             </div>
           </div>
