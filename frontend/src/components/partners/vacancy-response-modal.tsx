@@ -11,6 +11,7 @@ import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { vacancyResponseFormSchema, type VacancyResponseFormData } from "@/lib/schemas";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/body-scroll-lock";
+import { cn } from "@/lib/utils";
 
 async function readLeadError(response: Response): Promise<string> {
   try {
@@ -127,44 +128,53 @@ export function VacancyResponseModal({ position, open, onClose }: Props) {
   if (!open) return null;
 
   const inputClass =
-    "w-full bg-transparent border-0 border-b border-[var(--border)] py-3 px-0 text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[var(--accent)] transition-colors";
+    "w-full rounded-xl border bg-[var(--bg)] px-4 py-3 text-base text-[var(--text)] placeholder:text-[var(--text-muted)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_18%,transparent)]";
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end justify-center p-0 sm:items-center sm:p-4"
+      className="fixed inset-0 z-[100] flex items-end sm:items-center sm:justify-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="vacancy-response-title"
     >
       <button
         type="button"
-        className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-black/45 backdrop-blur-[2px]"
         aria-label="Закрыть"
         onClick={onClose}
       />
 
       <div
-        className="relative z-[1] max-h-[92dvh] w-full overflow-y-auto rounded-t-[28px] border px-5 py-6 sm:max-w-lg sm:rounded-[28px] sm:px-6 sm:py-7"
+        className={cn(
+          "relative z-[1] flex max-h-[min(94dvh,720px)] w-full flex-col",
+          "rounded-t-[24px] border sm:max-w-md sm:rounded-[24px]",
+        )}
         style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
+        onClick={(event) => event.stopPropagation()}
       >
-        <div className="mb-5 flex items-start justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">
-              Отклик на вакансию
-            </p>
-            <h2 id="vacancy-response-title" className="mt-2 font-heading text-2xl leading-tight text-[var(--graphite)]">
-              {position}
+        <div
+          className="flex shrink-0 items-center justify-center pt-3 sm:hidden"
+          aria-hidden
+        >
+          <span className="h-1 w-10 rounded-full bg-[color-mix(in_srgb,var(--text)_18%,transparent)]" />
+        </div>
+
+        <div
+          className="flex shrink-0 items-start justify-between gap-3 border-b px-4 py-3 sm:px-5 sm:py-4"
+          style={{ borderColor: "var(--border)" }}
+        >
+          <div className="min-w-0 pr-2">
+            <h2
+              id="vacancy-response-title"
+              className="font-heading text-lg font-bold leading-snug text-[var(--graphite)] sm:text-xl"
+            >
+              Отклик: {position}
             </h2>
-            <p className="mt-2 text-sm text-[var(--text-muted)]">
-              Оставьте контакты — отклик придёт на{" "}
-              <span className="font-medium text-[var(--text)]">info@chastdushi.ru</span> через почту домена
-              (без передачи данных за рубеж).
-            </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition hover:border-[var(--accent)]"
+            className="flex h-10 w-10 shrink-0 touch-manipulation items-center justify-center rounded-full border transition hover:border-[var(--accent)]"
             style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
             aria-label="Закрыть"
           >
@@ -172,35 +182,61 @@ export function VacancyResponseModal({ position, open, onClose }: Props) {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-4 py-4 sm:gap-5 sm:px-5 sm:py-5"
+          style={{
+            paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))",
+          }}
+        >
           <input type="text" tabIndex={-1} autoComplete="off" className="sr-only" aria-hidden {...register("honeypot")} />
 
           <InputField label="Имя" error={errors.name?.message}>
-            <input type="text" autoComplete="name" className={inputClass} {...register("name")} />
+            <input
+              type="text"
+              autoComplete="name"
+              className={inputClass}
+              style={{ borderColor: "var(--border)" }}
+              {...register("name")}
+            />
           </InputField>
 
           <InputField label="Телефон" error={errors.phone?.message}>
-            <input type="tel" autoComplete="tel" className={inputClass} {...register("phone")} />
+            <input
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              className={inputClass}
+              style={{ borderColor: "var(--border)" }}
+              {...register("phone")}
+            />
           </InputField>
 
-          <InputField label="Email (необязательно)" error={errors.email?.message}>
-            <input type="email" autoComplete="email" className={inputClass} {...register("email")} />
+          <InputField label="Email" error={errors.email?.message}>
+            <input
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              className={inputClass}
+              style={{ borderColor: "var(--border)" }}
+              {...register("email")}
+            />
           </InputField>
 
-          <InputField label="Резюме (необязательно)" error={errors.resume?.message}>
+          <InputField label="Резюме" error={errors.resume?.message}>
             <input
               type="text"
               className={inputClass}
-              placeholder="Ссылка на резюме или кратко о себе"
+              style={{ borderColor: "var(--border)" }}
               {...register("resume")}
             />
           </InputField>
 
-          <InputField label="Комментарий (необязательно)" error={errors.message?.message}>
+          <InputField label="Комментарий" error={errors.message?.message}>
             <textarea
-              rows={4}
-              className={`${inputClass} rounded-xl border px-4 py-3 resize-y min-h-[96px]`}
-              placeholder="Дополнительная информация"
+              rows={3}
+              className={cn(inputClass, "min-h-[88px] resize-y")}
+              style={{ borderColor: "var(--border)" }}
               {...register("message")}
             />
           </InputField>
@@ -221,8 +257,12 @@ export function VacancyResponseModal({ position, open, onClose }: Props) {
                 />
               )}
             />
-            <label htmlFor="privacy-vacancy-response" className="cursor-pointer text-sm" style={{ color: "var(--text-muted)" }}>
-              Я согласен с{" "}
+            <label
+              htmlFor="privacy-vacancy-response"
+              className="cursor-pointer text-sm leading-snug"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Согласен с{" "}
               <Link href="/privacy" className="underline" onClick={(event) => event.stopPropagation()}>
                 политикой конфиденциальности
               </Link>
@@ -243,7 +283,7 @@ export function VacancyResponseModal({ position, open, onClose }: Props) {
                 Отправка…
               </>
             ) : (
-              "Отправить отклик"
+              "Отправить"
             )}
           </FillButton>
         </form>
