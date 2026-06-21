@@ -667,25 +667,27 @@ export function ProjectsCatalogContent({
             </p>
 
             {seoLandingLinks.length > 0 ? (
-              <div className="mt-6 grid gap-3 md:grid-cols-3">
-                {seoLandingLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="rounded-2xl border p-4 transition hover:border-[color-mix(in_srgb,var(--accent)_45%,transparent)]"
-                    style={{
-                      borderColor: "color-mix(in srgb, var(--text) 10%, transparent)",
-                      backgroundColor: "color-mix(in srgb, var(--bg-secondary) 52%, var(--bg))",
-                    }}
-                  >
-                    <span className="block text-sm font-semibold" style={{ color: "var(--text)" }}>
+              <div className="mt-6">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-subtle)" }}>
+                  Популярные подборки
+                </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {seoLandingLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      title={link.description}
+                      className="rounded-full border px-4 py-2 text-[13px] font-medium transition-colors hover:border-[color-mix(in_srgb,var(--accent)_40%,transparent)] hover:text-[var(--text)]"
+                      style={{
+                        borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
+                        backgroundColor: "color-mix(in srgb, var(--bg) 75%, var(--bg-secondary))",
+                        color: "var(--text-muted)",
+                      }}
+                    >
                       {link.label}
-                    </span>
-                    <span className="mt-1 block text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                      {link.description}
-                    </span>
-                  </Link>
-                ))}
+                    </Link>
+                  ))}
+                </div>
               </div>
             ) : null}
 
