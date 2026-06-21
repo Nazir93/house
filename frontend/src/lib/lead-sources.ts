@@ -37,6 +37,7 @@ export const LEAD_SOURCE_OPTIONS: { value: string; label: string; hint?: string 
   ...serviceLeadOptions(),
   { value: "partner-partner", label: "Партнёрам: подряд", hint: "/partners/partner" },
   { value: "partner-supplier", label: "Партнёрам: поставщик", hint: "/partners/supplier" },
+  { value: "partner-vacancy", label: "Партнёрам: отклик на вакансию", hint: "/partners/vacancies" },
   { value: "about-leadership-feedback", label: "Связь с руководством", hint: "Раздел «О компании»" },
 ];
 

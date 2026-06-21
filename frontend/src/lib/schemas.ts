@@ -71,6 +71,35 @@ export const partnerFeedbackFormSchema = z.object({
 
 export type PartnerFeedbackFormData = z.infer<typeof partnerFeedbackFormSchema>;
 
+/** Отклик на вакансию — /partners/vacancies */
+export const vacancyResponseFormSchema = z.object({
+  name: z.string().min(2, "Введите имя").max(100, "Имя слишком длинное"),
+  phone: z.preprocess(
+    normalizePhoneInput,
+    z
+      .string()
+      .min(10, "Введите корректный номер телефона")
+      .max(30, "Номер слишком длинный")
+      .regex(/^[\d\s\+\-\(\)]+$/, "Некорректный формат телефона"),
+  ),
+  email: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : v),
+    z.string().email("Некорректный email").optional(),
+  ),
+  resume: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : v),
+    z.string().max(500, "Слишком длинное резюме").optional(),
+  ),
+  message: z.preprocess(
+    (v) => (v === "" || v === null || v === undefined ? undefined : v),
+    z.string().max(1000, "Слишком длинное сообщение").optional(),
+  ),
+  privacy: z.boolean().refine((v) => v === true, { message: "Необходимо согласие" }),
+  honeypot: z.string().max(0).optional(),
+});
+
+export type VacancyResponseFormData = z.infer<typeof vacancyResponseFormSchema>;
+
 export const callbackFormSchema = z.object({
   name: z.string().min(2, "Введите имя").max(100),
   phone: z

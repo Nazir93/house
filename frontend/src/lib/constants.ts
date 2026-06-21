@@ -101,20 +101,15 @@ export const OFFICE_GEO_LAT = Number(
   process.env.NEXT_PUBLIC_OFFICE_GEO_LAT?.trim() || "59.9669"
 );
 
-/** Встроенный виджет: центр + красная метка pm2rdm на здании */
-export function getYandexOfficeMapEmbedUrl(): string {
-  const lon = OFFICE_GEO_LON;
-  const lat = OFFICE_GEO_LAT;
-  const ll = `${lon}%2C${lat}`;
-  return `https://yandex.ru/map-widget/v1/?ll=${ll}&z=17&l=map&pt=${lon},${lat},pm2rdm`;
-}
-
-/** Полноэкранные Яндекс.Карты — та же метка, что и во встроенном виджете */
-export function getYandexOfficeMapLinkUrl(): string {
-  const lon = OFFICE_GEO_LON;
-  const lat = OFFICE_GEO_LAT;
-  return `https://yandex.ru/maps/?pt=${lon}%2C${lat}&z=17&l=map`;
-}
+/** Карта офиса и маршруты от метро — @/lib/office-map */
+export {
+  getYandexOfficeMapEmbedUrl,
+  getYandexOfficeMapLinkUrl,
+  getYandexOfficePedestrianRouteUrl,
+  formatOfficeMetroWalkingLabel,
+  OFFICE_METRO_DIRECTIONS,
+  YANDEX_OFFICE_MAP_CONSTRUCTOR_ID,
+} from "@/lib/office-map";
 
 /** Реквизиты по умолчанию пустые — задаются в админке (ключи company_*, bank_*). */
 export const COMPANY = {

@@ -1,7 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Briefcase, ChevronDown, MapPin, Clock, Wallet } from "lucide-react";
+
 import type { PublicVacancy } from "@/lib/get-public-vacancies";
-import { buildVacancyResponseHref, getVacancyMetaChips } from "@/lib/vacancy-public";
+import { getVacancyMetaChips } from "@/lib/vacancy-public";
+import { VacancyResponseModal } from "@/components/partners/vacancy-response-modal";
 
 const CHIP_ICONS: Record<string, typeof MapPin> = {
   location: MapPin,
@@ -44,109 +49,122 @@ function VacancyEmptyState() {
 }
 
 export function VacanciesList({ vacancies }: { vacancies: PublicVacancy[] }) {
+  const [responseVacancy, setResponseVacancy] = useState<PublicVacancy | null>(null);
+
   if (vacancies.length === 0) {
     return <VacancyEmptyState />;
   }
 
   return (
-    <div className="space-y-4 md:space-y-5">
-      <p className="text-sm sm:text-[15px]" style={{ color: "var(--text-muted)" }}>
-        Открытых позиций: <span className="font-semibold tabular-nums" style={{ color: "var(--text)" }}>{vacancies.length}</span>
-      </p>
+    <>
+      <div className="space-y-4 md:space-y-5">
+        <p className="text-sm sm:text-[15px]" style={{ color: "var(--text-muted)" }}>
+          Открытых позиций:{" "}
+          <span className="font-semibold tabular-nums" style={{ color: "var(--text)" }}>
+            {vacancies.length}
+          </span>
+        </p>
 
-      <ul className="space-y-3 md:space-y-4" role="list">
-        {vacancies.map((vacancy, index) => {
-          const chips = getVacancyMetaChips(vacancy);
-          const responseHref = buildVacancyResponseHref(vacancy.title);
-          const openByDefault = index === 0;
+        <ul className="space-y-3 md:space-y-4" role="list">
+          {vacancies.map((vacancy, index) => {
+            const chips = getVacancyMetaChips(vacancy);
+            const openByDefault = index === 0;
 
-          return (
-            <li
-              key={vacancy.id}
-              className="overflow-hidden rounded-2xl border"
-              style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)" }}
-            >
-              <details className="group" open={openByDefault}>
-                <summary className="flex cursor-pointer list-none flex-col gap-3 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-5 sm:py-5 [&::-webkit-details-marker]:hidden">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-heading text-base font-bold leading-snug sm:text-lg" style={{ color: "var(--text)" }}>
-                      {vacancy.title}
-                    </p>
-                    {chips.length > 0 ? (
-                      <ul className="mt-2.5 flex flex-wrap gap-2">
-                        {chips.map((chip) => {
-                          const Icon = CHIP_ICONS[chip.key] ?? MapPin;
-                          return (
-                            <li
-                              key={chip.key}
-                              className="inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium sm:text-xs"
-                              style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
-                            >
-                              <Icon size={13} className="shrink-0 opacity-70" aria-hidden />
-                              <span className="truncate">{chip.label}</span>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    ) : null}
-                  </div>
-                  <span
-                    className="inline-flex shrink-0 items-center gap-1 self-start text-xs font-semibold uppercase tracking-wide sm:mt-1"
-                    style={{ color: "var(--accent)" }}
-                  >
-                    Подробнее
-                    <ChevronDown
-                      size={16}
-                      className="transition-transform duration-200 group-open:rotate-180"
-                      aria-hidden
-                    />
-                  </span>
-                </summary>
-
-                <div
-                  className="border-t px-4 pb-4 pt-1 sm:px-5 sm:pb-5"
-                  style={{ borderColor: "var(--border)" }}
-                >
-                  <div className="space-y-4 text-sm leading-relaxed sm:text-[15px]" style={{ color: "var(--text-muted)" }}>
-                    <div>
-                      <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--text)" }}>
-                        Описание
+            return (
+              <li
+                key={vacancy.id}
+                className="overflow-hidden rounded-2xl border"
+                style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)" }}
+              >
+                <details className="group" open={openByDefault}>
+                  <summary className="flex cursor-pointer list-none flex-col gap-3 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:px-5 sm:py-5 [&::-webkit-details-marker]:hidden">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-heading text-base font-bold leading-snug sm:text-lg" style={{ color: "var(--text)" }}>
+                        {vacancy.title}
                       </p>
-                      <p className="whitespace-pre-line">{vacancy.description}</p>
+                      {chips.length > 0 ? (
+                        <ul className="mt-2.5 flex flex-wrap gap-2">
+                          {chips.map((chip) => {
+                            const Icon = CHIP_ICONS[chip.key] ?? MapPin;
+                            return (
+                              <li
+                                key={chip.key}
+                                className="inline-flex max-w-full items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium sm:text-xs"
+                                style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+                              >
+                                <Icon size={13} className="shrink-0 opacity-70" aria-hidden />
+                                <span className="truncate">{chip.label}</span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      ) : null}
                     </div>
-                    {vacancy.requirements ? (
+                    <span
+                      className="inline-flex shrink-0 items-center gap-1 self-start text-xs font-semibold uppercase tracking-wide sm:mt-1"
+                      style={{ color: "var(--accent)" }}
+                    >
+                      Подробнее
+                      <ChevronDown
+                        size={16}
+                        className="transition-transform duration-200 group-open:rotate-180"
+                        aria-hidden
+                      />
+                    </span>
+                  </summary>
+
+                  <div
+                    className="border-t px-4 pb-4 pt-1 sm:px-5 sm:pb-5"
+                    style={{ borderColor: "var(--border)" }}
+                  >
+                    <div className="space-y-4 text-sm leading-relaxed sm:text-[15px]" style={{ color: "var(--text-muted)" }}>
                       <div>
                         <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--text)" }}>
-                          Требования
+                          Описание
                         </p>
-                        <p className="whitespace-pre-line">{vacancy.requirements}</p>
+                        <p className="whitespace-pre-line">{vacancy.description}</p>
                       </div>
-                    ) : null}
-                  </div>
+                      {vacancy.requirements ? (
+                        <div>
+                          <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.12em]" style={{ color: "var(--text)" }}>
+                            Требования
+                          </p>
+                          <p className="whitespace-pre-line">{vacancy.requirements}</p>
+                        </div>
+                      ) : null}
+                    </div>
 
-                  <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                    <Link
-                      href={responseHref}
-                      className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-[var(--accent-contrast)] transition hover:opacity-95"
-                      style={{ backgroundColor: "var(--accent)" }}
-                    >
-                      Откликнуться
-                      <ArrowRight size={16} aria-hidden />
-                    </Link>
-                    <Link
-                      href="/contacts"
-                      className="inline-flex min-h-[44px] items-center justify-center rounded-xl border px-5 py-2.5 text-sm font-semibold transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
-                      style={{ borderColor: "var(--border)", color: "var(--text)" }}
-                    >
-                      Все контакты
-                    </Link>
+                    <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => setResponseVacancy(vacancy)}
+                        className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-[var(--accent-contrast)] transition hover:opacity-95"
+                        style={{ backgroundColor: "var(--accent)" }}
+                      >
+                        Откликнуться
+                        <ArrowRight size={16} aria-hidden />
+                      </button>
+                      <Link
+                        href="/contacts"
+                        className="inline-flex min-h-[44px] items-center justify-center rounded-xl border px-5 py-2.5 text-sm font-semibold transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                        style={{ borderColor: "var(--border)", color: "var(--text)" }}
+                      >
+                        Все контакты
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              </details>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+                </details>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      <VacancyResponseModal
+        open={responseVacancy != null}
+        position={responseVacancy?.title ?? ""}
+        onClose={() => setResponseVacancy(null)}
+      />
+    </>
   );
 }

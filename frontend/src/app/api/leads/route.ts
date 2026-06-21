@@ -6,6 +6,9 @@ import { sendTelegramNotification, formatLeadMessage } from "@/lib/telegram";
 import { sendBitrixLead } from "@/lib/bitrix";
 import { createLeadFollowupToken, verifyLeadFollowupToken } from "@/lib/lead-followup-token";
 import { generateLeadProposalPdf } from "@/lib/proposal/proposal-service";
+import { sendVacancyResponseEmail } from "@/lib/vacancy-response-mail";
+
+const VACANCY_RESPONSE_SOURCE = "partner-vacancy";
 
 function logLeadDebug(payload: Record<string, unknown>) {
   if (process.env.NODE_ENV !== "production" || process.env.LEADS_DEBUG === "1") {
@@ -161,6 +164,7 @@ export async function POST(request: NextRequest) {
 
     const token = uuidv4();
     const source = parsed.data.source || "unknown";
+    const isVacancyResponse = source === VACANCY_RESPONSE_SOURCE;
 
     let createdLead: { id: string; name: string; phone: string; email: string | null; calcData: unknown; createdAt: Date };
     try {
@@ -207,9 +211,42 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    try {
-      await sendTelegramNotification(
-        formatLeadMessage({
+    if (isVacancyResponse) {
+      const calc =
+        parsed.data.calcData && typeof parsed.data.calcData === "object"
+          ? (parsed.data.calcData as Record<string, unknown>)
+          : {};
+      const mailResult = await sendVacancyResponseEmail({
+        position: typeof calc.position === "string" ? calc.position : parsed.data.service || "Вакансия",
+        name: parsed.data.name,
+        phone: parsed.data.phone,
+        email: parsed.data.email,
+        resume: typeof calc.resume === "string" ? calc.resume : null,
+        message: typeof calc.message === "string" ? calc.message : parsed.data.message,
+        pageUrl: parsed.data.pageUrl,
+      });
+      if (!mailResult.ok) {
+        return NextResponse.json({ error: mailResult.error }, { status: 503 });
+      }
+    } else {
+      try {
+        await sendTelegramNotification(
+          formatLeadMessage({
+            name: parsed.data.name,
+            phone: parsed.data.phone,
+            email: parsed.data.email,
+            service: parsed.data.service,
+            source,
+            pageUrl: parsed.data.pageUrl,
+            calcData: parsed.data.calcData,
+          }),
+        );
+      } catch (tgErr) {
+        console.error("[leads] Telegram notification failed:", tgErr);
+      }
+
+      try {
+        await sendBitrixLead({
           name: parsed.data.name,
           phone: parsed.data.phone,
           email: parsed.data.email,
@@ -217,37 +254,25 @@ export async function POST(request: NextRequest) {
           source,
           pageUrl: parsed.data.pageUrl,
           calcData: parsed.data.calcData,
-        })
-      );
-    } catch (tgErr) {
-      console.error("[leads] Telegram notification failed:", tgErr);
+        });
+      } catch (bitrixErr) {
+        console.error("[leads] Bitrix lead sync failed:", bitrixErr);
+      }
     }
 
-    try {
-      await sendBitrixLead({
-        name: parsed.data.name,
-        phone: parsed.data.phone,
-        email: parsed.data.email,
-        service: parsed.data.service,
-        source,
-        pageUrl: parsed.data.pageUrl,
-        calcData: parsed.data.calcData,
+    if (!isVacancyResponse) {
+      // Генерацию КП не делаем критичной: заявка уже сохранена и обработана.
+      void generateLeadProposalPdf({
+        id: createdLead.id,
+        name: createdLead.name,
+        phone: createdLead.phone,
+        email: createdLead.email,
+        calcData: createdLead.calcData,
+        createdAt: createdLead.createdAt,
+      }).catch((proposalErr) => {
+        console.error("[leads] proposal generation failed:", proposalErr);
       });
-    } catch (bitrixErr) {
-      console.error("[leads] Bitrix lead sync failed:", bitrixErr);
     }
-
-    // Генерацию КП не делаем критичной: заявка уже сохранена и обработана.
-    void generateLeadProposalPdf({
-      id: createdLead.id,
-      name: createdLead.name,
-      phone: createdLead.phone,
-      email: createdLead.email,
-      calcData: createdLead.calcData,
-      createdAt: createdLead.createdAt,
-    }).catch((proposalErr) => {
-      console.error("[leads] proposal generation failed:", proposalErr);
-    });
 
     logLeadDebug({
       id: createdLead.id,

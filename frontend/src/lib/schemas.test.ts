@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { leadFormSchema } from "./schemas";
+import { leadFormSchema, vacancyResponseFormSchema } from "./schemas";
 
 describe("leadFormSchema", () => {
   const base = { name: "Иван", phone: "+7 999 111-22-33" };
@@ -23,5 +23,19 @@ describe("leadFormSchema", () => {
     });
 
     expect(parsed.success).toBe(false);
+  });
+
+  it("vacancyResponseFormSchema — резюме необязательно", () => {
+    const parsed = vacancyResponseFormSchema.safeParse({
+      name: "Иван",
+      phone: "+7 999 111-22-33",
+      email: "",
+      resume: "",
+      message: "",
+      privacy: true,
+      honeypot: "",
+    });
+
+    expect(parsed.success).toBe(true);
   });
 });

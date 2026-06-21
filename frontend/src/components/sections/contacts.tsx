@@ -4,12 +4,18 @@ import { useState, type ReactNode } from "react";
 import { Section, SectionTitle } from "@/components/ui/section";
 import type { LucideIcon } from "lucide-react";
 import {
-  Phone, Mail, MapPin, Clock, Send,
-  Building2, CreditCard, ChevronDown,
+  Phone, Mail, MapPin, Clock, Send, TrainFront,
+  Building2, CreditCard, ChevronDown, ExternalLink, Route,
 } from "lucide-react";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { VkIcon } from "@/components/icons/vk-icon";
-import { getYandexOfficeMapEmbedUrl } from "@/lib/constants";
+import {
+  getYandexOfficeMapEmbedUrl,
+  getYandexOfficeMapLinkUrl,
+  getYandexOfficePedestrianRouteUrl,
+  formatOfficeMetroWalkingLabel,
+  OFFICE_METRO_DIRECTIONS,
+} from "@/lib/office-map";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { maxMessengerChatUrl } from "@/lib/messenger-links";
 
@@ -202,17 +208,78 @@ export function ContactsSection({ embedded }: { embedded?: boolean }) {
           >
             Как добраться
           </p>
+
           <div
-            className="relative w-full rounded-2xl overflow-hidden border aspect-[16/10] max-h-[400px] sm:aspect-[21/9] sm:max-h-[360px]"
+            className="mb-4 rounded-2xl border p-4 sm:p-5"
+            style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-secondary)" }}
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                style={{
+                  backgroundColor: "rgba(15,61,46,0.08)",
+                  border: "1px solid rgba(15,61,46,0.15)",
+                }}
+              >
+                <TrainFront size={16} style={{ color: "var(--accent)" }} aria-hidden />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold" style={{ color: "var(--text)" }}>
+                  От метро пешком
+                </p>
+                <ul className="mt-3 space-y-3">
+                  {OFFICE_METRO_DIRECTIONS.map((metro) => (
+                    <li key={metro.name} className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                      <div>
+                        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                          {formatOfficeMetroWalkingLabel(metro)}
+                        </p>
+                        <p className="text-xs" style={{ color: "var(--text-subtle)" }}>
+                          {metro.line}
+                        </p>
+                      </div>
+                      <a
+                        href={getYandexOfficePedestrianRouteUrl(metro)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                        style={{ borderColor: "var(--border)", color: "var(--text)" }}
+                      >
+                        <Route size={14} aria-hidden />
+                        Маршрут
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="relative w-full overflow-hidden rounded-2xl border min-h-[280px] h-[min(404px,62vw)] sm:h-[404px]"
             style={{ borderColor: "var(--border)" }}
           >
             <iframe
               title={`Карта: ${contact.address}`}
               src={mapIframeSrc}
-              className="absolute inset-0 w-full h-full border-0"
-              loading="lazy"
+              className="absolute inset-0 h-full w-full border-0"
+              loading="eager"
               referrerPolicy="no-referrer-when-downgrade"
+              allow="geolocation"
             />
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            <a
+              href={getYandexOfficeMapLinkUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border px-4 py-2 text-xs font-semibold transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+            >
+              <ExternalLink size={14} aria-hidden />
+              Открыть в Яндекс.Картах
+            </a>
           </div>
         </div>
 
