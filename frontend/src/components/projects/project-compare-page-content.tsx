@@ -1,16 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowRight, Plus, Trash2 } from "lucide-react";
 
 import { BackNavLink } from "@/components/ui/back-nav";
 import { ProjectCompareTable, type CompareColumn } from "@/components/projects/project-compare-table";
 import { ProjectCompareUnifiedPanel } from "@/components/projects/project-compare-unified-panel";
+import { ProjectCompareStatusToast } from "@/components/projects/project-compare-status-toast";
 import { useModal } from "@/lib/modal-context";
 import { useProjectCompare } from "@/lib/project-compare-context";
 import {
   PROJECT_COMPARE_MAX,
+  PROJECT_COMPARE_PAGE_PATH,
   buildComparePageHref,
 } from "@/lib/project-compare";
 import {
@@ -45,11 +48,26 @@ function ruRemainingSlots(count: number): string {
 
 export function ProjectComparePageContent({ columns, missingEntries }: Props) {
   const compare = useProjectCompare();
+  const router = useRouter();
   const { openModalToEstimate } = useModal();
   const [unifiedSettings, setUnifiedSettings] = useState<CompareUnifiedSettings>(
     DEFAULT_COMPARE_UNIFIED_SETTINGS,
   );
   const [settingsHydrated, setSettingsHydrated] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const statusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showStatusMessage = useCallback((message: string) => {
+    if (statusTimerRef.current) clearTimeout(statusTimerRef.current);
+    setStatusMessage(message);
+    statusTimerRef.current = setTimeout(() => setStatusMessage(null), 3500);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (statusTimerRef.current) clearTimeout(statusTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     setUnifiedSettings(readCompareSettingsFromStorage());
@@ -91,6 +109,12 @@ export function ProjectComparePageContent({ columns, missingEntries }: Props) {
     }
   }, [compare.entries, compare.hydrated]);
 
+  const handleClearList = useCallback(() => {
+    compare.clear();
+    router.replace(PROJECT_COMPARE_PAGE_PATH);
+    showStatusMessage("Список сравнения очищен");
+  }, [compare, router, showStatusMessage]);
+
   const slotsLeft = PROJECT_COMPARE_MAX - columns.length;
 
   const consultPayload = useMemo(
@@ -120,7 +144,10 @@ export function ProjectComparePageContent({ columns, missingEntries }: Props) {
   );
 
   return (
-    <div className="container mx-auto px-5 pb-24 pt-8 md:pt-12">
+    <>
+      <ProjectCompareStatusToast message={statusMessage} />
+
+      <div className="container mx-auto px-5 pb-24 pt-8 md:pt-12">
       <BackNavLink href="/projects" className="mb-6">
         К каталогу проектов
       </BackNavLink>
@@ -142,7 +169,7 @@ export function ProjectComparePageContent({ columns, missingEntries }: Props) {
           {columns.length > 0 ? (
             <button
               type="button"
-              onClick={() => compare.clear()}
+              onClick={handleClearList}
               className="inline-flex items-center gap-2 text-sm font-medium text-[var(--text-muted)] underline-offset-4 hover:underline"
             >
               <Trash2 className="h-4 w-4" aria-hidden />
@@ -179,6 +206,7 @@ export function ProjectComparePageContent({ columns, missingEntries }: Props) {
             onChange={handleUnifiedSettingsChange}
             loading={quotesLoading}
             lineAmounts={lineAmounts}
+            onStatusMessage={showStatusMessage}
           />
 
           <div className="mt-8 overflow-x-auto pb-2">
@@ -207,6 +235,7 @@ export function ProjectComparePageContent({ columns, missingEntries }: Props) {
           </div>
         </>
       )}
-    </div>
+      </div>
+    </>
   );
 }

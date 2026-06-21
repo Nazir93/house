@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import Link from "next/link";
 import { Check, ArrowRight } from "lucide-react";
 import { LeadMiniForm } from "@/components/construction/lead-mini-form";
@@ -13,6 +13,7 @@ import {
   type DesignProjectPricingSettings,
 } from "@/lib/design-project-pricing";
 import { formatRub } from "@/lib/construction-shared";
+import { cn } from "@/lib/utils";
 
 const cardSurface = {
   borderColor: "var(--border)",
@@ -63,6 +64,9 @@ export function ProjectDesignCostCalculator({
     engineering: false,
   });
   const [showLeadForm, setShowLeadForm] = useState(false);
+  const [showStickyOrderCta, setShowStickyOrderCta] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+  const orderCtaAnchorRef = useRef<HTMLDivElement>(null);
 
   const area = useMemo(() => clampDesignArea(Number(areaText), pricingSettings), [areaText, pricingSettings]);
   const quote = useMemo(() => calculateDesignProjectQuote(area, extras, pricingSettings), [area, extras, pricingSettings]);
@@ -103,9 +107,36 @@ export function ProjectDesignCostCalculator({
     setAreaText(String(clampDesignArea(Number(areaText), pricingSettings)));
   }
 
+  function openOrderForm() {
+    setShowLeadForm(true);
+    window.setTimeout(() => {
+      sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 80);
+  }
+
+  useEffect(() => {
+    if (layout !== "banner") return;
+    const anchor = orderCtaAnchorRef.current;
+    if (!anchor) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowStickyOrderCta(!entry.isIntersecting);
+      },
+      { root: null, threshold: 0, rootMargin: "0px 0px -8px 0px" },
+    );
+    observer.observe(anchor);
+    return () => observer.disconnect();
+  }, [layout]);
+
   if (isBanner) {
     return (
-      <section className="px-4 py-8 sm:px-6 md:py-10" style={{ backgroundColor: "var(--bg)" }}>
+      <>
+      <section
+        ref={sectionRef}
+        className="scroll-mt-[var(--site-header-sticky-offset)] px-4 py-8 sm:px-6 md:py-10"
+        style={{ backgroundColor: "var(--bg)" }}
+      >
         <div className="relative mx-auto max-w-[1320px] overflow-hidden rounded-[28px] bg-[#071f1b] text-white shadow-[0_24px_80px_rgba(7,31,27,0.24)] md:rounded-[32px]">
           <div className="grid min-h-[250px] grid-cols-1 divide-y divide-white/10 lg:grid-cols-[1.08fr_0.72fr_0.9fr_1fr] lg:divide-x lg:divide-y-0">
             <div className="p-6 sm:p-8 lg:p-10">
@@ -189,14 +220,8 @@ export function ProjectDesignCostCalculator({
             <SummaryCell label="Стоимость основной документации" value={formatRub(quote.mainDocumentation)} />
             <SummaryCell label="Стоимость дополнительной документации" value={formatRub(quote.additionalDocumentation)} />
             <SummaryCell label="Итого" value={formatRub(quote.total)} emphasis />
-            <div className="flex items-center justify-center p-5">
-              <button
-                type="button"
-                onClick={() => setShowLeadForm((v) => !v)}
-                className="inline-flex min-h-[46px] items-center justify-center gap-3 rounded-2xl bg-[#f4f1eb] px-6 text-sm font-semibold text-[#071f1b] transition hover:bg-white"
-              >
-                Заказать проект <ArrowRight size={16} aria-hidden />
-              </button>
+            <div ref={orderCtaAnchorRef} className="flex items-center justify-center p-5">
+              <OrderProjectButton onClick={openOrderForm} />
             </div>
           </div>
 
@@ -243,6 +268,29 @@ export function ProjectDesignCostCalculator({
           />
         </div>
       </section>
+
+      <div
+        className={cn(
+          "pointer-events-none fixed inset-x-0 z-[45] px-4 transition-[opacity,transform] duration-300 ease-out",
+          "bottom-[var(--mobile-bottom-nav-offset)] lg:bottom-6",
+          showStickyOrderCta
+            ? "translate-y-0 opacity-100"
+            : "translate-y-4 opacity-0",
+        )}
+        aria-hidden={!showStickyOrderCta}
+      >
+        <div
+          className={cn(
+            "mx-auto max-w-[1320px] pr-14 lg:pr-0",
+            showStickyOrderCta ? "pointer-events-auto" : "pointer-events-none",
+          )}
+        >
+          <div className="rounded-[20px] border border-white/10 bg-[#071f1b]/95 p-3 shadow-[0_16px_48px_rgba(7,31,27,0.35)] backdrop-blur-md sm:mx-auto sm:max-w-md">
+            <OrderProjectButton onClick={openOrderForm} className="w-full" />
+          </div>
+        </div>
+      </div>
+      </>
     );
   }
 
@@ -416,6 +464,27 @@ export function ProjectDesignCostCalculator({
         </div>
       </div>
     </div>
+  );
+}
+
+function OrderProjectButton({
+  onClick,
+  className,
+}: {
+  onClick: () => void;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "inline-flex min-h-[46px] items-center justify-center gap-3 rounded-2xl bg-[#f4f1eb] px-6 text-sm font-semibold text-[#071f1b] transition hover:bg-white",
+        className,
+      )}
+    >
+      Заказать проект <ArrowRight size={16} aria-hidden />
+    </button>
   );
 }
 

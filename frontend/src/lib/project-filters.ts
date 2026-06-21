@@ -64,8 +64,9 @@ export function projectMatchesAreaPrice(
   areaMax: number,
   priceMinRub: number,
   priceMaxRub: number,
+  material: MaterialFilterId = "all",
 ): boolean {
-  const price = resolveProjectListingPriceRub(p);
+  const price = resolveProjectListingPriceRub(p, material);
   return p.area >= areaMin && p.area <= areaMax && price >= priceMinRub && price <= priceMaxRub;
 }
 
@@ -79,18 +80,33 @@ export function projectMatchesQuery(p: HouseProjectItem, q: string): boolean {
   );
 }
 
-export function getPublishedProjectBounds(projects: HouseProjectItem[]) {
-  const list = projects.filter((p) => p.published);
+const FALLBACK_PROJECT_BOUNDS = {
+  minArea: 50,
+  maxArea: 350,
+  minPriceRub: 4_000_000,
+  maxPriceRub: 25_000_000,
+} as const;
+
+export type ProjectsCatalogBounds = {
+  minArea: number;
+  maxArea: number;
+  minPriceRub: number;
+  maxPriceRub: number;
+};
+
+export function getPublishedProjectBounds(
+  projects: HouseProjectItem[],
+  material: MaterialFilterId = "all",
+): ProjectsCatalogBounds {
+  let list = projects.filter((p) => p.published);
+  if (material !== "all") {
+    list = list.filter((p) => projectMatchesMaterial(p, material));
+  }
   if (list.length === 0) {
-    return {
-      minArea: 50,
-      maxArea: 350,
-      minPriceRub: 4_000_000,
-      maxPriceRub: 25_000_000,
-    };
+    return material === "all" ? { ...FALLBACK_PROJECT_BOUNDS } : getPublishedProjectBounds(projects, "all");
   }
   const areas = list.map((x) => x.area);
-  const prices = list.map((x) => resolveProjectListingPriceRub(x));
+  const prices = list.map((x) => resolveProjectListingPriceRub(x, material));
   return {
     minArea: Math.min(...areas),
     maxArea: Math.max(...areas),
@@ -99,7 +115,24 @@ export function getPublishedProjectBounds(projects: HouseProjectItem[]) {
   };
 }
 
-export type ProjectsCatalogBounds = ReturnType<typeof getPublishedProjectBounds>;
+/** Сброс диапазонов площади/цены при смене материала в каталоге. */
+export function getCatalogFiltersForMaterialChange(
+  projects: HouseProjectItem[],
+  material: MaterialFilterId,
+  keep: Pick<ProjectsCatalogFilters, "floors" | "q" | "sort">,
+): ProjectsCatalogFilters {
+  const bounds = getPublishedProjectBounds(projects, material);
+  return {
+    areaMin: bounds.minArea,
+    areaMax: bounds.maxArea,
+    priceMinRub: bounds.minPriceRub,
+    priceMaxRub: bounds.maxPriceRub,
+    material,
+    floors: keep.floors,
+    q: keep.q,
+    sort: keep.sort,
+  };
+}
 
 export type ProjectsCatalogFilters = {
   areaMin: number;

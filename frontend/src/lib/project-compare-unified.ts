@@ -1,5 +1,6 @@
 import type { ProjectCompareEntry } from "@/lib/project-compare";
 import { compareEntryKey } from "@/lib/project-compare";
+import { sanitizeConstructionOptionSelection } from "@/lib/project-calculator-option-selection";
 
 export const PROJECT_COMPARE_SETTINGS_STORAGE_KEY = "house-project-compare-settings-v2";
 
@@ -162,7 +163,7 @@ export function normalizeCompareUnifiedSettings(raw: unknown): CompareUnifiedSet
       tierLabel: tier.label,
       facadeSlug: raw.facadeSlug,
       engineeringSlugs: raw.engineeringSlugs.map(String),
-      constructionSlugs: raw.constructionSlugs.map(String),
+      constructionSlugs: sanitizeConstructionOptionSelection(raw.constructionSlugs),
       transportBandId: raw.transportBandId.trim() || DEFAULT_COMPARE_UNIFIED_SETTINGS.transportBandId,
     };
   }
@@ -213,6 +214,29 @@ export function buildCompareSettingsKey(settings: CompareUnifiedSettings): strin
     settings.constructionSlugs.join(","),
     settings.transportBandId,
   ].join("|");
+}
+
+export function isDefaultCompareUnifiedSettings(settings: CompareUnifiedSettings): boolean {
+  const defaults = DEFAULT_COMPARE_UNIFIED_SETTINGS;
+  return (
+    settings.tierId === defaults.tierId &&
+    settings.facadeSlug === defaults.facadeSlug &&
+    settings.transportBandId === defaults.transportBandId &&
+    settings.engineeringSlugs.length === 0 &&
+    settings.constructionSlugs.length === 0
+  );
+}
+
+export function summarizeCompareUnifiedSettings(settings: CompareUnifiedSettings): string {
+  const parts: string[] = [settings.tierLabel];
+  if (settings.facadeSlug) parts.push("фасад");
+  if (settings.engineeringSlugs.length > 0) {
+    parts.push(`инженерия: ${settings.engineeringSlugs.length}`);
+  }
+  if (settings.constructionSlugs.length > 0) {
+    parts.push(`отделка: ${settings.constructionSlugs.length}`);
+  }
+  return parts.join(" · ");
 }
 
 export function aggregateCompareQuoteLineAmounts(

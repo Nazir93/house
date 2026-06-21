@@ -20,6 +20,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:install": "playwright install chromium",
+    "brochure:pdf": "node scripts/export-sales-brochure-pdf.mjs",
+    "brochure:screenshots": "node scripts/capture-brochure-screenshots.mjs",
     "test:watch": "vitest",
     "check:with-e2e": "npm run check && npm run test:e2e",
     "db:generate": "prisma generate",

@@ -6,7 +6,9 @@ import {
   compareQuoteFallbackBodies,
   findCheapestCompareQuoteKey,
   formatComparePriceDeltaRub,
+  isDefaultCompareUnifiedSettings,
   normalizeCompareUnifiedSettings,
+  summarizeCompareUnifiedSettings,
 } from "@/lib/project-compare-unified";
 
 describe("project-compare-unified", () => {
@@ -67,5 +69,35 @@ describe("project-compare-unified", () => {
       constructionSlugs: [],
       transportBandId: "50",
     });
+  });
+
+  it("isDefaultCompareUnifiedSettings — базовые и изменённые настройки", () => {
+    expect(isDefaultCompareUnifiedSettings(DEFAULT_COMPARE_UNIFIED_SETTINGS)).toBe(true);
+    expect(
+      isDefaultCompareUnifiedSettings({
+        ...DEFAULT_COMPARE_UNIFIED_SETTINGS,
+        engineeringSlugs: ["electric"],
+      }),
+    ).toBe(false);
+    expect(
+      summarizeCompareUnifiedSettings({
+        ...DEFAULT_COMPARE_UNIFIED_SETTINGS,
+        engineeringSlugs: ["electric", "water"],
+        constructionSlugs: ["rough"],
+        facadeSlug: "plaster",
+      }),
+    ).toBe("Газоблок · фасад · инженерия: 2 · отделка: 1");
+  });
+
+  it("normalizeCompareUnifiedSettings — взаимоисключающие строительные опции", () => {
+    const settings = normalizeCompareUnifiedSettings({
+      tierId: "gas",
+      tierLabel: "Газоблок",
+      facadeSlug: null,
+      engineeringSlugs: [],
+      constructionSlugs: ["roof_folding", "roof_soft", "roof_insulation_200", "roof_insulation_250"],
+      transportBandId: "30",
+    });
+    expect(settings.constructionSlugs.sort()).toEqual(["roof_soft", "roof_insulation_250"].sort());
   });
 });

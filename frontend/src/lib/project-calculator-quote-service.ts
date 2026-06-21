@@ -17,10 +17,9 @@ import { computeTransportSurchargeRub, normalizeTransportBands } from "@/lib/pro
 import {
   getHouseCalculatorCategoryParams,
   isHouseCalculatorCategoryId,
-  type ConstructionOptionCode,
-  type EngineeringOptionCode,
   type HouseCalculatorCategoryId,
 } from "@/lib/house-project-calculator-engine";
+import { sanitizeConstructionOptionSelection } from "@/lib/project-calculator-option-selection";
 
 export type ProjectQuoteRequest = {
   tierId: string;
@@ -92,11 +91,12 @@ export async function computeProjectQuoteForSlug(projectSlug: string, body: Proj
 
   const allowedEng = new Set(catalog.engineering.filter((o) => o.allowed).map((o) => o.slug));
   const allowedCon = new Set(catalog.construction.filter((o) => o.allowed).map((o) => o.slug));
+  const constructionSlugs = sanitizeConstructionOptionSelection(body.constructionSlugs);
 
   for (const slug of body.engineeringSlugs) {
     if (!allowedEng.has(slug)) return { error: "invalid_option" as const, slug };
   }
-  for (const slug of body.constructionSlugs) {
+  for (const slug of constructionSlugs) {
     if (!allowedCon.has(slug)) return { error: "invalid_option" as const, slug };
   }
 
@@ -112,7 +112,7 @@ export async function computeProjectQuoteForSlug(projectSlug: string, body: Proj
       wallMaterial: tierIdToWallMaterial(body.tierId, body.tierLabel),
       facadeVariant: (body.facadeSlug as PartOfSoulFacadeVariant) || null,
       engineeringCodes: body.engineeringSlugs,
-      constructionCodes: body.constructionSlugs,
+      constructionCodes: constructionSlugs,
       projectAdjustmentPercent: 0,
       transportSurchargeRub: 0,
     },

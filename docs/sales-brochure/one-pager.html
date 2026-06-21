@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Платформа для застройщика — one-pager</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+
+    :root {
+      --brand: #0f3d2e;
+      --muted: #5c5c5c;
+      --border: #e2e8e5;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Inter", system-ui, sans-serif;
+      font-size: 9pt;
+      line-height: 1.45;
+      color: #1a1a1a;
+      background: #888;
+    }
+
+    .sheet {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 12px auto;
+      padding: 14mm;
+      background: #fff;
+      display: grid;
+      grid-template-rows: auto auto 1fr auto;
+      gap: 5mm;
+    }
+
+    .head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid var(--brand);
+      padding-bottom: 4mm;
+    }
+
+    .head h1 {
+      font-size: 14pt;
+      color: var(--brand);
+      max-width: 70%;
+      line-height: 1.2;
+    }
+
+    .head .badge {
+      font-size: 7pt;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+
+    .tagline {
+      font-size: 9.5pt;
+      color: var(--muted);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 3mm;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 3mm;
+      padding: 3mm;
+      background: #f4f6f5;
+    }
+
+    .card h2 {
+      font-size: 8.5pt;
+      color: var(--brand);
+      margin-bottom: 1.5mm;
+    }
+
+    .card ul {
+      list-style: none;
+      font-size: 7.5pt;
+      color: var(--muted);
+    }
+
+    .card li {
+      padding-left: 3mm;
+      position: relative;
+      margin-bottom: 1mm;
+    }
+
+    .card li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--brand);
+    }
+
+    .flow {
+      grid-column: 1 / -1;
+      text-align: center;
+      font-size: 7.5pt;
+      color: var(--muted);
+      padding: 2mm;
+      border: 1px dashed var(--border);
+      border-radius: 2mm;
+    }
+
+    .flow strong { color: var(--brand); }
+
+    .cta {
+      background: var(--brand);
+      color: #fff;
+      border-radius: 3mm;
+      padding: 5mm;
+      text-align: center;
+    }
+
+    .cta h2 { font-size: 11pt; margin-bottom: 2mm; }
+    .cta p { font-size: 8.5pt; opacity: 0.9; }
+
+    @media print {
+      body { background: none; }
+      .sheet { margin: 0; }
+      .no-print { display: none; }
+    }
+
+    .bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--brand);
+      color: #fff;
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .bar button {
+      background: #fff;
+      color: var(--brand);
+      border: none;
+      padding: 6px 16px;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="bar no-print">
+    <span>One-pager · A4 · для первого касания</span>
+    <button type="button" onclick="window.print()">PDF</button>
+  </div>
+
+  <article class="sheet">
+    <header class="head">
+      <h1>Цифровая платформа для застройщика</h1>
+      <span class="badge">One-pager</span>
+    </header>
+
+    <p class="tagline">Сайт + калькуляторы + автоматическое КП + личный кабинет + админ-панель + PWA. Готовое решение для загородного строительства — от первой заявки до сдачи дома.</p>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Публичный сайт</h2>
+        <ul>
+          <li>Каталог проектов с фильтрами</li>
+          <li>Планировки из админки</li>
+          <li>Портфолио + карта объектов</li>
+          <li>Калькуляторы стоимости</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Продажи</h2>
+        <ul>
+          <li>PDF КП за минуты</li>
+          <li>CRM заявок + Telegram</li>
+          <li>Bitrix24 по запросу</li>
+          <li>QR-акции и UTM</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>После сделки</h2>
+        <ul>
+          <li>Личный кабинет клиента</li>
+          <li>Этапы, фото, документы</li>
+          <li>График платежей</li>
+          <li>Чат с менеджером</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>Админ-панель</h2>
+        <ul>
+          <li>20+ модулей в одном месте</li>
+          <li>Цены без программиста</li>
+          <li>SEO, новости, настройки</li>
+          <li>Публикация в кабинет</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>PWA</h2>
+        <ul>
+          <li>Установка на телефон</li>
+          <li>Без App Store</li>
+          <li>Уведомления менеджеру</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h2>В комплекте</h2>
+        <ul>
+          <li>Исходный код</li>
+          <li>Деплой на VPS</li>
+          <li>Обучение админке</li>
+          <li>Продакшен-кейс</li>
+        </ul>
+      </div>
+      <p class="flow"><strong>Сайт</strong> → заявка → <strong>КП PDF</strong> → договор → <strong>личный кабинет</strong> · весь цикл в одной системе</p>
+    </div>
+
+    <footer class="cta">
+      <h2>Покажем демо за 30 минут</h2>
+      <p>email@example.com · +7 (000) 000-00-00 · <a href="https://code1618.ru">code1618.ru</a> · Полная презентация: 20 стр.</p>
+    </footer>
+  </article>
+</body>
+</html>

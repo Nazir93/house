@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { SITE_URL } from "@/lib/constants";
 import { FALLBACK_BUILT_OBJECTS, FALLBACK_HOUSE_PROJECTS } from "@/lib/construction-data";
 import { KNOWN_CMS_SERVICE_SLUGS } from "@/lib/service-slug-routes";
+import { getKnownServiceSeoSlugs } from "@/lib/seo/service-seo-defaults";
 
 export const revalidate = 300;
 
@@ -33,6 +34,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/technology/materials`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.55 },
     { url: `${baseUrl}/technology/house-area`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.55 },
   ];
+
+  const serviceLandingPages: MetadataRoute.Sitemap = getKnownServiceSeoSlugs().map((slug) => ({
+    url: `${baseUrl}/services/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.74,
+  }));
 
   let dynamicPages: MetadataRoute.Sitemap = [];
 
@@ -96,7 +104,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ];
   }
 
-  const merged = [...staticPages, ...dynamicPages];
+  const merged = [...staticPages, ...serviceLandingPages, ...dynamicPages];
   const seen = new Set<string>();
   return merged.filter((entry) => {
     if (seen.has(entry.url)) return false;

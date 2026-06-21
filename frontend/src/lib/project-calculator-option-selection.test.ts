@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { toggleConstructionOptionSelection } from "./project-calculator-option-selection";
+import {
+  sanitizeConstructionOptionSelection,
+  toggleConstructionOptionSelection,
+} from "./project-calculator-option-selection";
 
 describe("toggleConstructionOptionSelection", () => {
   it("нельзя выбрать фальцевую и мягкую кровлю одновременно", () => {
@@ -20,5 +23,16 @@ describe("toggleConstructionOptionSelection", () => {
   it("повторный клик снимает выбранную опцию", () => {
     const selected = toggleConstructionOptionSelection(["roof_soft"], "roof_soft");
     expect([...selected]).toEqual([]);
+  });
+
+  it("sanitizeConstructionOptionSelection убирает конфликтующие опции из сохранённого набора", () => {
+    const sanitized = sanitizeConstructionOptionSelection([
+      "roof_folding",
+      "roof_soft",
+      "roof_insulation_200",
+      "roof_insulation_250",
+      "gutter",
+    ]);
+    expect(sanitized.sort()).toEqual(["gutter", "roof_soft", "roof_insulation_250"].sort());
   });
 });

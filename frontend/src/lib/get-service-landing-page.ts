@@ -7,6 +7,7 @@ import { resolveServiceLandingDocument, stripShowcaseSections } from "@/lib/serv
 import type { ServiceLandingDocument } from "@/lib/service-landing-schema";
 import { enrichProektirovanieLandingDocument } from "@/lib/service-proektirovanie-landing";
 import { getServiceLandingHeroBannerFields } from "@/lib/service-card-media";
+import { getServiceSeoBySlug } from "@/lib/seo/service-seo-defaults";
 
 function mergeHeroBannersFromDb(
   document: ServiceLandingDocument,
@@ -99,6 +100,15 @@ export async function getServiceMetadataDefaults(slug: string): Promise<{
   description: string;
   keywords?: string[];
 } | null> {
+  const semanticSeo = getServiceSeoBySlug(slug);
+  if (semanticSeo) {
+    return {
+      title: semanticSeo.title,
+      description: semanticSeo.description,
+      keywords: semanticSeo.keywords,
+    };
+  }
+
   try {
     const s = await prisma.service.findUnique({
       where: { slug },

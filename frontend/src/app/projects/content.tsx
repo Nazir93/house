@@ -10,7 +10,9 @@ import { formatRub, getProjectRenders, type HouseProjectItem } from "@/lib/const
 import {
   buildProjectsSearchParams,
   hasCustomProjectsCatalogFilters,
+  getCatalogFiltersForMaterialChange,
   MATERIAL_OPTIONS,
+  parseMaterialParam,
   parseProjectsCatalogSearchParams,
   projectMatchesAreaPrice,
   projectMatchesCatalogFiltersExceptRange,
@@ -66,7 +68,15 @@ export function ProjectsCatalogContent({
 }) {
   const basePath = catalog.basePath;
   const router = useRouter();
-  const bounds = useMemo(() => getPublishedProjectBounds(projects), [projects]);
+  const materialFromUrl = useMemo(() => {
+    const raw = searchParams.material;
+    const value = Array.isArray(raw) ? raw[0] : raw;
+    return parseMaterialParam(value ?? null);
+  }, [searchParams.material]);
+  const bounds = useMemo(
+    () => getPublishedProjectBounds(projects, materialFromUrl),
+    [projects, materialFromUrl],
+  );
   const filters = useMemo(
     () => parseProjectsCatalogSearchParams(searchParams, bounds),
     [searchParams, bounds],
@@ -112,17 +122,30 @@ export function ProjectsCatalogContent({
       q: string;
       sort: ProjectsSortKey;
     }) => {
+      const nextBounds = getPublishedProjectBounds(projects, next.material);
       const qs = buildProjectsSearchParams({
         ...next,
         priceMinRub: next.priceMinRub,
         priceMaxRub: next.priceMaxRub,
         sort: next.sort,
-        bounds,
+        bounds: nextBounds,
       });
       router.push(qs ? `${basePath}?${qs}` : basePath);
       setPage(1);
     },
-    [router, bounds, basePath],
+    [router, projects, basePath],
+  );
+
+  const setMaterialFilter = useCallback(
+    (nextMaterial: MaterialFilterId) => {
+      pushFilters(getCatalogFiltersForMaterialChange(projects, nextMaterial, { floors, q, sort }));
+    },
+    [projects, pushFilters, floors, q, sort],
+  );
+
+  const listingPriceRub = useCallback(
+    (project: HouseProjectItem) => resolveProjectListingPriceRub(project, material),
+    [material],
   );
 
   const filtered = useMemo(() => {
@@ -130,16 +153,16 @@ export function ProjectsCatalogContent({
       if (!project.published) return false;
       if (!projectMatchesMaterial(project, material)) return false;
       if (!projectMatchesFloors(project, floors)) return false;
-      if (!projectMatchesAreaPrice(project, areaMin, areaMax, priceMinRub, priceMaxRub)) return false;
+      if (!projectMatchesAreaPrice(project, areaMin, areaMax, priceMinRub, priceMaxRub, material)) return false;
       if (!projectMatchesQuery(project, q)) return false;
       return true;
     });
     return [...result].sort((a, b) => {
       if (sort === "area") return a.area - b.area;
       if (sort === "new") return Number(b.isNew) - Number(a.isNew);
-      return resolveProjectListingPriceRub(a) - resolveProjectListingPriceRub(b);
+      return listingPriceRub(a) - listingPriceRub(b);
     });
-  }, [areaMax, areaMin, floors, material, priceMaxRub, priceMinRub, projects, q, sort]);
+  }, [areaMax, areaMin, floors, listingPriceRub, material, priceMaxRub, priceMinRub, projects, q, sort]);
 
   /** Старый URL с зафиксированным areaMax/priceMax скрывал новые проекты — сбрасываем только диапазон. */
   useEffect(() => {
@@ -313,18 +336,7 @@ export function ProjectsCatalogContent({
                       <button
                         key={o.id}
                         type="button"
-                        onClick={() =>
-                          pushFilters({
-                            areaMin,
-                            areaMax,
-                            priceMinRub,
-                            priceMaxRub,
-                            material: o.id,
-                            floors,
-                            q,
-                            sort,
-                          })
-                        }
+                        onClick={() => setMaterialFilter(o.id)}
                         className="rounded-full border px-3 py-2 text-left text-[13px] font-medium leading-snug transition-colors hover:border-[color-mix(in_srgb,var(--accent)_40%,transparent)]"
                         style={chip(active)}
                       >
@@ -800,7 +812,7 @@ export function ProjectsCatalogContent({
                     <HouseProjectGridCard
                       key={project.id}
                       project={project}
-                      priceRub={resolveProjectListingPriceRub(project)}
+                      priceRub={listingPriceRub(project)}
                       projectBasePath={basePath}
                       catalogKind={catalog.kind}
                       imageSizes="(max-width: 1280px) 50vw, 400px"
@@ -856,7 +868,7 @@ export function ProjectsCatalogContent({
                             Стоимость
                           </p>
                           <p className="mt-1 text-2xl font-semibold" style={{ color: "var(--sale)" }}>
-                            {formatRub(resolveProjectListingPriceRub(project))}
+                            {formatRub(listingPriceRub(project))}
                           </p>
                         </div>
                       </div>

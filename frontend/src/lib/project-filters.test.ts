@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   buildProjectsSearchParams,
+  getCatalogFiltersForMaterialChange,
   getPublishedProjectBounds,
   hasCustomProjectsCatalogFilters,
   parseProjectsCatalogSearchParams,
+  projectMatchesAreaPrice,
   projectMatchesCatalogFiltersExceptRange,
 } from "@/lib/project-filters";
 import type { HouseProjectItem } from "@/lib/construction-data";
@@ -75,5 +77,50 @@ describe("project-filters catalog URL", () => {
   it("hasCustomProjectsCatalogFilters", () => {
     expect(hasCustomProjectsCatalogFilters({})).toBe(false);
     expect(hasCustomProjectsCatalogFilters({ material: "kirpich" })).toBe(true);
+  });
+
+  it("getPublishedProjectBounds учитывает материал фильтра", () => {
+    const projects = [
+      stubProject({ area: 120, price: 0, floors: 1, materials: ["Газобетон"] }),
+      stubProject({
+        id: "2",
+        slug: "big",
+        area: 180,
+        price: 0,
+        floors: 1.5,
+        materials: ["Керамоблок"],
+      }),
+    ];
+    const allBounds = getPublishedProjectBounds(projects, "all");
+    const ceramicBounds = getPublishedProjectBounds(projects, "keramoblok");
+    expect(ceramicBounds.minArea).toBe(180);
+    expect(ceramicBounds.maxArea).toBe(180);
+    expect(ceramicBounds.minPriceRub).toBeGreaterThan(allBounds.minPriceRub);
+  });
+
+  it("getCatalogFiltersForMaterialChange сбрасывает диапазоны под материал", () => {
+    const projects = [
+      stubProject({ area: 120, price: 0, floors: 1 }),
+      stubProject({ id: "2", slug: "b", area: 160, price: 0, floors: 1, materials: ["Кирпич"] }),
+    ];
+    const next = getCatalogFiltersForMaterialChange(projects, "kirpich", {
+      floors: "all",
+      q: "",
+      sort: "price",
+    });
+    expect(next.material).toBe("kirpich");
+    expect(next.areaMin).toBe(160);
+    expect(next.areaMax).toBe(160);
+    expect(next.priceMinRub).toBe(next.priceMaxRub);
+  });
+
+  it("projectMatchesAreaPrice использует цену выбранного материала", () => {
+    const project = stubProject({ area: 128, price: 9_500_000, floors: 1 });
+    expect(
+      projectMatchesAreaPrice(project, 100, 200, 8_000_000, 9_000_000, "gazobeton"),
+    ).toBe(false);
+    expect(
+      projectMatchesAreaPrice(project, 100, 200, 8_000_000, 9_000_000, "keramoblok"),
+    ).toBe(true);
   });
 });
