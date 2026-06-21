@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { Loader2, X } from "lucide-react";
 
-import { FunnelInputField as InputField, FunnelFillButton as FillButton } from "@/components/ui/funnel-ui";
+import { FunnelInputField as InputField } from "@/components/ui/funnel-ui";
 import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { vacancyResponseFormSchema, type VacancyResponseFormData } from "@/lib/schemas";
-import { lockBodyScroll, unlockBodyScroll } from "@/lib/body-scroll-lock";
 import { cn } from "@/lib/utils";
 
 async function readLeadError(response: Response): Promise<string> {
@@ -31,9 +31,13 @@ type Props = {
   onClose: () => void;
 };
 
+const INPUT_CLASS =
+  "funnel-text-input touch-manipulation w-full rounded-xl border border-[var(--border)] bg-[var(--bg)] px-4 py-3 text-base text-[var(--text)] placeholder:text-[var(--text-muted)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_18%,transparent)]";
+
 export function VacancyResponseModal({ position, open, onClose }: Props) {
   const contact = useContactConfig();
   const getSmartCaptchaToken = useSmartCaptchaToken();
+  const [portalReady, setPortalReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -57,6 +61,10 @@ export function VacancyResponseModal({ position, open, onClose }: Props) {
   });
 
   useEffect(() => {
+    setPortalReady(true);
+  }, []);
+
+  useEffect(() => {
     if (!open) return;
     setSubmitError(null);
     reset({
@@ -68,13 +76,19 @@ export function VacancyResponseModal({ position, open, onClose }: Props) {
       privacy: false,
       honeypot: "",
     });
-    lockBodyScroll();
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    window.__lenis?.stop();
+
     const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
+
     return () => {
-      unlockBodyScroll();
+      document.body.style.overflow = prevOverflow;
+      window.__lenis?.start();
       window.removeEventListener("keydown", onKey);
     };
   }, [open, onClose, reset]);
@@ -125,37 +139,39 @@ export function VacancyResponseModal({ position, open, onClose }: Props) {
     }
   };
 
-  if (!open) return null;
+  const scrollFieldIntoView = (event: React.FocusEvent<HTMLElement>) => {
+    window.requestAnimationFrame(() => {
+      event.currentTarget.scrollIntoView({ block: "center", behavior: "smooth" });
+    });
+  };
 
-  const inputClass =
-    "w-full rounded-xl border bg-[var(--bg)] px-4 py-3 text-base text-[var(--text)] placeholder:text-[var(--text-muted)] outline-none transition focus:border-[var(--accent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--accent)_18%,transparent)]";
+  if (!open || !portalReady || typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-end sm:items-center sm:justify-center sm:p-4"
+      className="fixed inset-0 z-[100] lg:flex lg:items-center lg:justify-center lg:p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="vacancy-response-title"
+      onWheel={(event) => event.stopPropagation()}
+      onTouchMove={(event) => event.stopPropagation()}
     >
       <button
         type="button"
-        className="absolute inset-0 bg-black/45 backdrop-blur-[2px]"
+        className="absolute inset-0 bg-black/45 backdrop-blur-[2px] touch-manipulation"
         aria-label="Закрыть"
         onClick={onClose}
       />
 
       <div
         className={cn(
-          "relative z-[1] flex max-h-[min(94dvh,720px)] w-full flex-col",
-          "rounded-t-[24px] border sm:max-w-md sm:rounded-[24px]",
+          "absolute inset-x-0 bottom-[var(--mobile-bottom-nav-offset)] flex max-h-[min(70dvh,calc(100dvh-var(--mobile-bottom-nav-offset)-var(--site-header-sticky-offset)-0.75rem))] flex-col",
+          "rounded-t-[24px] border lg:static lg:bottom-auto lg:z-[1] lg:max-h-[min(85dvh,640px)] lg:w-full lg:max-w-md lg:rounded-[24px]",
         )}
         style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
         onClick={(event) => event.stopPropagation()}
       >
-        <div
-          className="flex shrink-0 items-center justify-center pt-3 sm:hidden"
-          aria-hidden
-        >
+        <div className="flex shrink-0 items-center justify-center pt-3 lg:hidden" aria-hidden>
           <span className="h-1 w-10 rounded-full bg-[color-mix(in_srgb,var(--text)_18%,transparent)]" />
         </div>
 
@@ -184,110 +200,124 @@ export function VacancyResponseModal({ position, open, onClose }: Props) {
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain px-4 py-4 sm:gap-5 sm:px-5 sm:py-5"
+          className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-4 py-4 sm:gap-5 sm:px-5 sm:py-5"
           style={{
+            WebkitOverflowScrolling: "touch",
             paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))",
           }}
         >
-          <input type="text" tabIndex={-1} autoComplete="off" className="sr-only" aria-hidden {...register("honeypot")} />
+          <div className="flex flex-col gap-4 sm:gap-5">
+            <input type="text" tabIndex={-1} autoComplete="off" className="sr-only" aria-hidden {...register("honeypot")} />
 
-          <InputField label="Имя" error={errors.name?.message}>
-            <input
-              type="text"
-              autoComplete="name"
-              className={inputClass}
-              style={{ borderColor: "var(--border)" }}
-              {...register("name")}
-            />
-          </InputField>
+            <InputField label="Имя" error={errors.name?.message}>
+              <input
+                type="text"
+                autoComplete="name"
+                enterKeyHint="next"
+                className={INPUT_CLASS}
+                onFocus={scrollFieldIntoView}
+                {...register("name")}
+              />
+            </InputField>
 
-          <InputField label="Телефон" error={errors.phone?.message}>
-            <input
-              type="tel"
-              inputMode="tel"
-              autoComplete="tel"
-              className={inputClass}
-              style={{ borderColor: "var(--border)" }}
-              {...register("phone")}
-            />
-          </InputField>
+            <InputField label="Телефон" error={errors.phone?.message}>
+              <input
+                type="tel"
+                inputMode="tel"
+                autoComplete="tel"
+                enterKeyHint="next"
+                className={INPUT_CLASS}
+                onFocus={scrollFieldIntoView}
+                {...register("phone")}
+              />
+            </InputField>
 
-          <InputField label="Email" error={errors.email?.message}>
-            <input
-              type="email"
-              inputMode="email"
-              autoComplete="email"
-              className={inputClass}
-              style={{ borderColor: "var(--border)" }}
-              {...register("email")}
-            />
-          </InputField>
+            <InputField label="Email" error={errors.email?.message}>
+              <input
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                enterKeyHint="next"
+                className={INPUT_CLASS}
+                onFocus={scrollFieldIntoView}
+                {...register("email")}
+              />
+            </InputField>
 
-          <InputField label="Резюме" error={errors.resume?.message}>
-            <input
-              type="text"
-              className={inputClass}
-              style={{ borderColor: "var(--border)" }}
-              {...register("resume")}
-            />
-          </InputField>
+            <InputField label="Резюме" error={errors.resume?.message}>
+              <input
+                type="text"
+                enterKeyHint="next"
+                className={INPUT_CLASS}
+                onFocus={scrollFieldIntoView}
+                {...register("resume")}
+              />
+            </InputField>
 
-          <InputField label="Комментарий" error={errors.message?.message}>
-            <textarea
-              rows={3}
-              className={cn(inputClass, "min-h-[88px] resize-y")}
-              style={{ borderColor: "var(--border)" }}
-              {...register("message")}
-            />
-          </InputField>
+            <InputField label="Комментарий" error={errors.message?.message}>
+              <textarea
+                rows={2}
+                enterKeyHint="done"
+                className={cn(INPUT_CLASS, "min-h-[72px] resize-y")}
+                onFocus={scrollFieldIntoView}
+                {...register("message")}
+              />
+            </InputField>
 
-          <div className="flex items-start gap-3">
-            <Controller
-              name="privacy"
-              control={control}
-              render={({ field }) => (
-                <input
-                  id="privacy-vacancy-response"
-                  type="checkbox"
-                  className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[var(--accent)]"
-                  checked={field.value === true}
-                  onChange={(event) => field.onChange(event.target.checked)}
-                  onBlur={field.onBlur}
-                  ref={field.ref}
-                />
-              )}
-            />
-            <label
-              htmlFor="privacy-vacancy-response"
-              className="cursor-pointer text-sm leading-snug"
-              style={{ color: "var(--text-muted)" }}
+            <div className="flex items-start gap-3">
+              <Controller
+                name="privacy"
+                control={control}
+                render={({ field }) => (
+                  <input
+                    id="privacy-vacancy-response"
+                    type="checkbox"
+                    className="relative z-10 mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[var(--accent)]"
+                    checked={field.value === true}
+                    onChange={(event) => field.onChange(event.target.checked)}
+                    onBlur={field.onBlur}
+                    ref={field.ref}
+                  />
+                )}
+              />
+              <label
+                htmlFor="privacy-vacancy-response"
+                className="cursor-pointer text-sm leading-snug"
+                style={{ color: "var(--text-muted)" }}
+              >
+                Согласен с{" "}
+                <Link href="/privacy" className="underline" onClick={(event) => event.stopPropagation()}>
+                  политикой конфиденциальности
+                </Link>
+              </label>
+            </div>
+            {errors.privacy ? <p className="-mt-2 text-[11px] text-red-400">{errors.privacy.message}</p> : null}
+
+            {submitError ? (
+              <p className="text-sm text-red-400" role="alert">
+                {submitError}
+              </p>
+            ) : null}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex min-h-[48px] w-full touch-manipulation items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-[var(--accent-contrast)] transition hover:opacity-95 disabled:cursor-wait disabled:opacity-60"
+              style={{ backgroundColor: "var(--accent)" }}
             >
-              Согласен с{" "}
-              <Link href="/privacy" className="underline" onClick={(event) => event.stopPropagation()}>
-                политикой конфиденциальности
-              </Link>
-            </label>
+              {loading ? (
+                <>
+                  <Loader2 className="animate-spin" size={18} aria-hidden />
+                  Отправка…
+                </>
+              ) : (
+                "Отправить"
+              )}
+            </button>
           </div>
-          {errors.privacy ? <p className="-mt-2 text-[11px] text-red-400">{errors.privacy.message}</p> : null}
-
-          {submitError ? (
-            <p className="text-sm text-red-400" role="alert">
-              {submitError}
-            </p>
-          ) : null}
-
-          <FillButton type="submit" disabled={loading}>
-            {loading ? (
-              <>
-                <Loader2 className="animate-spin" size={18} aria-hidden />
-                Отправка…
-              </>
-            ) : (
-              "Отправить"
-            )}
-          </FillButton>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
