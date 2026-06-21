@@ -1,4 +1,7 @@
 import { prisma } from "@/lib/db";
+import { getCommercialPageSeoSeeds } from "@/lib/seo/commercial-page-seo";
+import { getProjectCatalogSlicePageMetaSeeds } from "@/lib/seo/project-catalog-slice-seo";
+import { getProjectMaterialPageMetaSeeds } from "@/lib/seo/project-material-seo";
 import { getServicePageMetaSeeds } from "@/lib/seo/service-seo-defaults";
 
 /**
@@ -6,7 +9,12 @@ import { getServicePageMetaSeeds } from "@/lib/seo/service-seo-defaults";
  * Не перезаписывает существующие строки (правки в админке SEO сохраняются).
  */
 export async function ensureDefaultServicePageMetaIfNeeded(): Promise<{ created: number; skipped: number }> {
-  const seeds = getServicePageMetaSeeds();
+  const seeds = [
+    ...getCommercialPageSeoSeeds(),
+    ...getServicePageMetaSeeds(),
+    ...getProjectMaterialPageMetaSeeds(),
+    ...getProjectCatalogSlicePageMetaSeeds(),
+  ];
   let created = 0;
   let skipped = 0;
 

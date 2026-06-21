@@ -3,7 +3,9 @@ import { prisma } from "@/lib/db";
 import { SITE_URL } from "@/lib/constants";
 import { FALLBACK_BUILT_OBJECTS, FALLBACK_HOUSE_PROJECTS } from "@/lib/construction-data";
 import { KNOWN_CMS_SERVICE_SLUGS } from "@/lib/service-slug-routes";
+import { getProjectCatalogSliceSeoPages } from "@/lib/seo/project-catalog-slice-seo";
 import { getKnownServiceSeoSlugs } from "@/lib/seo/service-seo-defaults";
+import { getProjectMaterialSeoPages } from "@/lib/seo/project-material-seo";
 
 export const revalidate = 300;
 
@@ -40,6 +42,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: new Date(),
     changeFrequency: "monthly",
     priority: 0.74,
+  }));
+
+  const projectMaterialLandingPages: MetadataRoute.Sitemap = getProjectMaterialSeoPages().map((page) => ({
+    url: `${baseUrl}${page.path}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: page.slug === "kirpich" ? 0.82 : page.slug === "gazobeton" ? 0.8 : 0.72,
+  }));
+
+  const projectCatalogSliceLandingPages: MetadataRoute.Sitemap = getProjectCatalogSliceSeoPages().map((page) => ({
+    url: `${baseUrl}${page.path}`,
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.78,
   }));
 
   let dynamicPages: MetadataRoute.Sitemap = [];
@@ -104,7 +120,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ];
   }
 
-  const merged = [...staticPages, ...serviceLandingPages, ...dynamicPages];
+  const merged = [
+    ...staticPages,
+    ...serviceLandingPages,
+    ...projectMaterialLandingPages,
+    ...projectCatalogSliceLandingPages,
+    ...dynamicPages,
+  ];
   const seen = new Set<string>();
   return merged.filter((entry) => {
     if (seen.has(entry.url)) return false;

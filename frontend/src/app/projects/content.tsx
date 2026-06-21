@@ -61,10 +61,18 @@ export function ProjectsCatalogContent({
   projects,
   searchParams,
   catalog = AUTHOR_HOUSE_PROJECT_CATALOG,
+  pageTitle,
+  pageDescription,
+  breadcrumbLabel,
+  seoLandingLinks = [],
 }: {
   projects: HouseProjectItem[];
   searchParams: Record<string, string | string[] | undefined>;
   catalog?: HouseProjectCatalogConfig;
+  pageTitle?: string;
+  pageDescription?: string;
+  breadcrumbLabel?: string;
+  seoLandingLinks?: Array<{ href: string; label: string; description: string }>;
 }) {
   const basePath = catalog.basePath;
   const router = useRouter();
@@ -648,15 +656,38 @@ export function ProjectsCatalogContent({
               <span className="mx-1.5 text-[var(--text-subtle)] sm:mx-2" aria-hidden>
                 {' › '}
               </span>
-              <span style={{ color: "var(--text)" }}>{catalog.listBreadcrumb}</span>
+              <span style={{ color: "var(--text)" }}>{breadcrumbLabel || catalog.listBreadcrumb}</span>
             </nav>
 
             <h1 className="mt-4 font-heading text-[1.75rem] font-bold leading-tight tracking-tight md:text-4xl lg:text-[2.5rem]" style={{ color: "var(--text)" }}>
-              {catalog.listTitle}
+              {pageTitle || catalog.listTitle}
             </h1>
             <p className="mt-4 max-w-2xl text-[15px] leading-relaxed md:text-base" style={{ color: "var(--text-muted)" }}>
-              {catalog.listDescription}
+              {pageDescription || catalog.listDescription}
             </p>
+
+            {seoLandingLinks.length > 0 ? (
+              <div className="mt-6 grid gap-3 md:grid-cols-3">
+                {seoLandingLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="rounded-2xl border p-4 transition hover:border-[color-mix(in_srgb,var(--accent)_45%,transparent)]"
+                    style={{
+                      borderColor: "color-mix(in srgb, var(--text) 10%, transparent)",
+                      backgroundColor: "color-mix(in srgb, var(--bg-secondary) 52%, var(--bg))",
+                    }}
+                  >
+                    <span className="block text-sm font-semibold" style={{ color: "var(--text)" }}>
+                      {link.label}
+                    </span>
+                    <span className="mt-1 block text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                      {link.description}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            ) : null}
 
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
               <div className="relative min-w-0 flex-1 sm:max-w-md">

@@ -31,6 +31,9 @@ export default function MaterialsInfoPage() {
               Лёгкая кладка, короткие сроки монтажа стен, хорошая теплоизоляция при соблюдении толщины и защиты от влаги. Требуется аккуратная
               гидроизоляция цоколя и продуманный фасадный слой.
             </p>
+            <Link href="/projects/gazobeton" className="mt-3 inline-flex text-sm font-semibold text-[var(--accent)]">
+              Смотреть проекты домов из газобетона
+            </Link>
           </section>
           <section>
             <h2 className="font-heading text-2xl text-[var(--text)]">Кирпич</h2>
@@ -38,6 +41,9 @@ export default function MaterialsInfoPage() {
               Высокая долговечность и предсказуемое поведение под нагрузкой. Увеличивает сроки и часть статических затрат по сравнению с блоками —
               зато даёт классический «каменный» дом и широкий выбор отделки.
             </p>
+            <Link href="/projects/kirpich" className="mt-3 inline-flex text-sm font-semibold text-[var(--accent)]">
+              Смотреть проекты кирпичных домов
+            </Link>
           </section>
           <section>
             <h2 className="font-heading text-2xl text-[var(--text)]">Керамический блок</h2>
@@ -45,6 +51,9 @@ export default function MaterialsInfoPage() {
               Компромисс по скорости кладки и массе при сохранении инерции конструкции. Часто используется вместе с облицовочным кирпичом или
               навесным фасадом.
             </p>
+            <Link href="/projects/keramoblok" className="mt-3 inline-flex text-sm font-semibold text-[var(--accent)]">
+              Смотреть проекты домов из керамоблока
+            </Link>
           </section>
           <p className="rounded-2xl border p-5 text-sm" style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-secondary)" }}>
             Конкретный материал фиксируется в договоре на проектирование или строительство после геологии участка и выбора фундамента. Если в карточке

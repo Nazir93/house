@@ -39,6 +39,13 @@ interface ErrorItem {
 const KNOWN_PAGES = [
   { path: "/", label: "Главная" },
   { path: "/projects", label: "Каталог проектов домов" },
+  { path: "/projects/gazobeton", label: "Проекты: газобетон" },
+  { path: "/projects/kirpich", label: "Проекты: кирпич" },
+  { path: "/projects/keramoblok", label: "Проекты: керамоблок" },
+  { path: "/projects/odnoetazhnye", label: "Проекты: одноэтажные" },
+  { path: "/projects/dvuhetazhnye", label: "Проекты: двухэтажные" },
+  { path: "/projects/do-150-m2", label: "Проекты: до 150 м²" },
+  { path: "/projects/150-220-m2", label: "Проекты: 150–220 м²" },
   { path: "/individual-design", label: "Индивидуальное проектирование" },
   { path: "/calculator", label: "Калькулятор строительства" },
   { path: "/mortgage", label: "Ипотека" },
