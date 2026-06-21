@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   VACANCY_RESPONSE_EMAIL,
+  DEFAULT_VACANCY_SMTP_HOST,
   formatVacancyResponseEmailSubject,
   formatVacancyResponseEmailText,
+  resolveVacancySmtpConfig,
 } from "./vacancy-response-mail";
 
 describe("vacancy-response-mail", () => {
@@ -42,5 +44,21 @@ describe("vacancy-response-mail", () => {
     expect(text).not.toContain("Email:");
     expect(text).not.toContain("Резюме:");
     expect(text).not.toContain("Комментарий:");
+  });
+
+  it("resolveVacancySmtpConfig — Яндекс SMTP по умолчанию", () => {
+    expect(resolveVacancySmtpConfig({})).toBeNull();
+    const cfg = resolveVacancySmtpConfig({
+      VACANCY_SMTP_USER: "noreply@chastdushi.ru",
+      VACANCY_SMTP_PASS: "secret",
+    });
+    expect(cfg).toEqual({
+      host: DEFAULT_VACANCY_SMTP_HOST,
+      port: 465,
+      secure: true,
+      user: "noreply@chastdushi.ru",
+      pass: "secret",
+      from: "Часть души <noreply@chastdushi.ru>",
+    });
   });
 });

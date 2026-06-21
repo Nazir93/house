@@ -156,8 +156,9 @@ export function VacancyResponseModal({ position, open, onClose }: Props) {
               {position}
             </h2>
             <p className="mt-2 text-sm text-[var(--text-muted)]">
-              Оставьте контакты — отклик отправим на{" "}
-              <span className="font-medium text-[var(--text)]">info@chastdushi.ru</span>.
+              Оставьте контакты — отклик придёт на{" "}
+              <span className="font-medium text-[var(--text)]">info@chastdushi.ru</span> через почту домена
+              (без передачи данных за рубеж).
             </p>
           </div>
           <button
