@@ -16,7 +16,7 @@ describe("buildPublicCatalog", () => {
   });
 
   it("allows two-floor dual/triple roof categories to use two-floor construction options", () => {
-    for (const categoryId of ["g", "h"] as const) {
+    for (const categoryId of ["g", "h", "j"] as const) {
       const cat = buildPublicCatalog(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG, categoryId);
       const stairs = cat.construction.find((o) => o.slug === "monolithic_stairs");
       const overlap = cat.construction.find((o) => o.slug === "monolithic_overlap");

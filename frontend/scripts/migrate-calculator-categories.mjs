@@ -10,14 +10,18 @@ const MAP = [
   { floors: 1, roof: "dual", cat: "a" },
   { floors: 1, roof: "triple", cat: "b" },
   { floors: 1, roof: "quad", cat: "c" },
+  { floors: 1, roof: "flat", cat: "i" },
   { floors: 1.5, roof: "dual", cat: "d" },
   { floors: 1.5, roof: "triple", cat: "e" },
   { floors: 2, roof: "quad", cat: "f" },
+  { floors: 2, roof: "dual", cat: "g" },
+  { floors: 2, roof: "triple", cat: "h" },
+  { floors: 2, roof: "flat", cat: "j" },
 ];
 
 function inferRoof(calculatorJson, floors) {
   const roof = calculatorJson?.partOfSoul?.defaultRoof;
-  if (roof === "dual" || roof === "triple" || roof === "quad") return roof;
+  if (roof === "dual" || roof === "triple" || roof === "quad" || roof === "flat") return roof;
   if (floors >= 2) return "quad";
   return "dual";
 }

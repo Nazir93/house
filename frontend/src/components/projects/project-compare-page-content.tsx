@@ -209,7 +209,7 @@ export function ProjectComparePageContent({ columns, missingEntries }: Props) {
             onStatusMessage={showStatusMessage}
           />
 
-          <div className="mt-8 overflow-x-auto pb-2">
+          <div className="relative isolate mt-8 overflow-x-auto overscroll-x-contain pb-2 [-webkit-overflow-scrolling:touch]">
             <ProjectCompareTable
               columns={columns}
               slotsLeft={slotsLeft}

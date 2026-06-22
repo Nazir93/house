@@ -1,12 +1,13 @@
 /**
  * Калькулятор стоимости на карточке проекта (ТЗ: категории a–f, коэффициенты, формулы).
  * Категории g/h — двухэтажные дома с двух-/трёхскатной кровлей по прайсу категории f.
+ * Категории i/j — плоская кровля: i как c (1 эт.), j как f (2 эт.).
  * Числовые значения приходят из конфига БД; здесь только типы формул и расчёт.
  */
 
 import type { PartOfSoulFacadeVariant, PartOfSoulRoofPitch, PartOfSoulWallMaterial } from "@/lib/part-of-soul-pricing";
 
-export const HOUSE_CALCULATOR_CATEGORY_IDS = ["a", "b", "c", "d", "e", "f", "g", "h"] as const;
+export const HOUSE_CALCULATOR_CATEGORY_IDS = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"] as const;
 export type HouseCalculatorCategoryId = (typeof HOUSE_CALCULATOR_CATEGORY_IDS)[number];
 
 export function isHouseCalculatorCategoryId(value: string | null | undefined): value is HouseCalculatorCategoryId {
@@ -152,10 +153,12 @@ const CATEGORY_FLOOR_ROOF: Record<
   f: { floors: 2, roof: "quad" },
   g: { floors: 2, roof: "dual" },
   h: { floors: 2, roof: "triple" },
+  i: { floors: 1, roof: "flat" },
+  j: { floors: 2, roof: "flat" },
 };
 
-const LADDER_CATEGORIES = new Set<HouseCalculatorCategoryId>(["d", "e", "f", "g", "h"]);
-const OVERLAP_CATEGORIES = new Set<HouseCalculatorCategoryId>(["d", "e", "f", "g", "h"]);
+const LADDER_CATEGORIES = new Set<HouseCalculatorCategoryId>(["d", "e", "f", "g", "h", "j"]);
+const OVERLAP_CATEGORIES = new Set<HouseCalculatorCategoryId>(["d", "e", "f", "g", "h", "j"]);
 
 export function getHouseCalculatorCategoryParams(
   categoryId: HouseCalculatorCategoryId

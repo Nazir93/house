@@ -396,6 +396,8 @@ export function HouseProjectForm({
                 { value: "f", label: "f — 2 эт., четырёхскатная" },
                 { value: "g", label: "g — 2 эт., двухскатная (цены как f)" },
                 { value: "h", label: "h — 2 эт., трёхскатная (цены как f)" },
+                { value: "i", label: "i — 1 эт., плоская (цены как c)" },
+                { value: "j", label: "j — 2 эт., плоская (цены как f)" },
               ]}
               triggerClassName="rounded-xl px-3 py-2"
             />

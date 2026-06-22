@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, type ReactNode, useMemo, useState } from "react";
+import { Fragment, type CSSProperties, type ReactNode, useMemo, useState } from "react";
 import Link from "next/link";
 import { Check, ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 
@@ -79,12 +79,41 @@ function CompareGrid({
     <div
       className="grid min-w-[640px] gap-0"
       style={{
-        gridTemplateColumns: `minmax(140px, 180px) repeat(${columns.length + Math.max(slotsLeft, 0)}, minmax(160px, 1fr))`,
+        gridTemplateColumns: `minmax(148px, 180px) repeat(${columns.length + Math.max(slotsLeft, 0)}, minmax(168px, 1fr))`,
       }}
     >
       {children}
     </div>
   );
+}
+
+const STICKY_LABEL_CLASS = "sticky left-0 z-[5] min-w-0 border-r";
+
+type LabelSurface = "default" | "secondary" | "accent" | "group";
+
+const LABEL_SURFACE_BG: Record<LabelSurface, string> = {
+  default: "var(--bg)",
+  secondary: "var(--bg-secondary)",
+  accent: "#0f3d2e",
+  group: "color-mix(in srgb, var(--bg-secondary) 80%, var(--bg))",
+};
+
+function inferLabelSurface(className?: string): LabelSurface {
+  if (!className) return "default";
+  if (className.includes("bg-[#0f3d2e]")) return "accent";
+  if (className.includes("bg-[var(--bg-secondary)]")) return "secondary";
+  if (className.includes("color-mix(in_srgb,var(--bg-secondary)")) return "group";
+  return "default";
+}
+
+/** Непрозрачная полоса + сплошная тень справа — цены не просвечивают под sticky на iOS. */
+function stickyLabelStyle(surface: LabelSurface): CSSProperties {
+  const bg = LABEL_SURFACE_BG[surface];
+  return {
+    borderColor: "var(--border)",
+    backgroundColor: bg,
+    boxShadow: `12px 0 0 0 ${bg}`,
+  };
 }
 
 function LabelCell({
@@ -99,17 +128,18 @@ function LabelCell({
   onClick?: () => void;
 }) {
   const Tag = onClick ? "button" : "div";
+  const surface = inferLabelSurface(className);
   return (
     <Tag
       type={onClick ? "button" : undefined}
       onClick={onClick}
       className={cn(
-        sticky && "sticky left-0 z-[2]",
+        sticky && STICKY_LABEL_CLASS,
         "border-b px-3 py-3 text-sm",
-        onClick && "flex w-full items-center justify-between text-left",
+        onClick && "flex w-full items-center justify-between gap-2 text-left touch-manipulation",
         className,
       )}
-      style={{ borderColor: "var(--border)" }}
+      style={sticky ? stickyLabelStyle(surface) : { borderColor: "var(--border)" }}
     >
       {children}
     </Tag>
@@ -118,7 +148,10 @@ function LabelCell({
 
 function DataCell({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cn("border-b px-3 py-3 text-sm", className)} style={{ borderColor: "var(--border)" }}>
+    <div
+      className={cn("relative z-0 border-b bg-[var(--bg)] px-3 py-3 text-sm", className)}
+      style={{ borderColor: "var(--border)" }}
+    >
       {children}
     </div>
   );
@@ -182,7 +215,7 @@ export function ProjectCompareTable({
 
   return (
     <CompareGrid columns={columns} slotsLeft={slotsLeft}>
-      <div className="sticky left-0 z-[2] bg-[var(--bg)]" aria-hidden />
+      <div className={cn(STICKY_LABEL_CLASS, "border-b")} style={stickyLabelStyle("default")} aria-hidden />
 
       {columns.map(({ entry, project }) => {
         const cover = getProjectRenders(project)[0];

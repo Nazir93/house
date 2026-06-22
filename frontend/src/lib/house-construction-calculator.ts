@@ -6,7 +6,7 @@
 
 export type WallMaterialId = "gas" | "ceramic" | "brick";
 
-export type RoofTypeId = "dual" | "triple" | "quad";
+export type RoofTypeId = "dual" | "triple" | "quad" | "flat";
 
 /** Этажность из прайса */
 export type CatalogFloorId = "1" | "1.5" | "2";
@@ -21,6 +21,7 @@ export const ROOF_LABELS: Record<RoofTypeId, string> = {
   dual: "Двухскатная",
   triple: "Трёхскатная",
   quad: "Четырёхскатная",
+  flat: "Плоская",
 };
 
 export const CATALOG_FLOOR_LABELS: Record<CatalogFloorId, string> = {
@@ -138,6 +139,7 @@ export const DEFAULT_HOUSE_CONSTRUCTION_CONFIG: HouseConstructionCalculatorConfi
       dual: [65_825, 68_054, 71_462],
       triple: [66_123, 70_161, 73_527],
       quad: [65_126, 68_680, 72_480],
+      flat: [65_126, 68_680, 72_480],
     },
     "1.5": {
       dual: [50_890, 53_078, 55_409],
@@ -145,6 +147,7 @@ export const DEFAULT_HOUSE_CONSTRUCTION_CONFIG: HouseConstructionCalculatorConfi
     },
     "2": {
       quad: [55_446, 56_725, 60_299],
+      flat: [55_446, 56_725, 60_299],
     },
   },
   smallArea: {

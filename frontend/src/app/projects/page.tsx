@@ -31,10 +31,10 @@ export default async function ProjectsPage({
       searchParams={sp}
       catalog={catalog}
       seoLandingLinks={[...getProjectMaterialSeoPages(), ...getProjectCatalogSliceSeoPages()].map((page) => ({
-          href: page.path,
-          label: page.h1,
-          description: page.keywords.slice(0, 3).join(", "),
-        }))}
+        href: page.path,
+        label: page.h1,
+        description: page.keywords.slice(0, 3).join(", "),
+      }))}
     />
   );
 }

@@ -93,6 +93,18 @@ function mapDbToConfig(rows: {
       coefficients: { ...categories.f.coefficients },
       shellPrices: { ...categories.f.shellPrices },
     };
+    categories.j = {
+      ...categories.j,
+      coefficients: { ...categories.f.coefficients },
+      shellPrices: { ...categories.f.shellPrices },
+    };
+  }
+  if (categories.c) {
+    categories.i = {
+      ...categories.i,
+      coefficients: { ...categories.c.coefficients },
+      shellPrices: { ...categories.c.shellPrices },
+    };
   }
 
   const facades = { ...DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG.facades };

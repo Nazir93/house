@@ -22,6 +22,8 @@ export const CALCULATOR_CATEGORY_SHORT: Record<string, string> = {
   f: "2 эт., четырёхскатная",
   g: "2 эт., двухскатная (цены как f)",
   h: "2 эт., трёхскатная (цены как f)",
+  i: "1 эт., плоская (цены как c)",
+  j: "2 эт., плоская (цены как f)",
 };
 
 export function calculatorCategoryTitle(id: string, labelRu?: string): string {

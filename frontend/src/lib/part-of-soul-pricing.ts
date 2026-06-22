@@ -4,7 +4,7 @@
  * Инженерия и отделка фасада (добавочные блоки): +10% к сумме этих опций при площади &lt; 100 м².
  */
 
-export type PartOfSoulRoofPitch = "dual" | "triple" | "quad";
+export type PartOfSoulRoofPitch = "dual" | "triple" | "quad" | "flat";
 export type PartOfSoulPricingFloors = 1 | 1.5 | 2;
 export type PartOfSoulWallMaterial = "gas" | "ceramic" | "brick";
 
@@ -30,6 +30,9 @@ const SHELL_MATRIX: Partial<Record<`${PartOfSoulPricingFloors}_${PartOfSoulRoofP
   "1_quad_gas": 65_126,
   "1_quad_ceramic": 68_680,
   "1_quad_brick": 72_480,
+  "1_flat_gas": 65_126,
+  "1_flat_ceramic": 68_680,
+  "1_flat_brick": 72_480,
   "1.5_dual_gas": 50_890,
   "1.5_dual_ceramic": 53_078,
   "1.5_dual_brick": 55_409,
@@ -45,6 +48,9 @@ const SHELL_MATRIX: Partial<Record<`${PartOfSoulPricingFloors}_${PartOfSoulRoofP
   "2_quad_gas": 55_446,
   "2_quad_ceramic": 56_725,
   "2_quad_brick": 60_299,
+  "2_flat_gas": 55_446,
+  "2_flat_ceramic": 56_725,
+  "2_flat_brick": 60_299,
 };
 
 const ENG: Record<PartOfSoulPricingFloors, Record<Exclude<PartOfSoulEngineeringCode, "boiler" | "bio">, number>> &
@@ -99,9 +105,9 @@ export function inferPartOfSoulFloors(projectFloorsInt: number, override?: PartO
 }
 
 export function partOfSoulRoofOptions(pf: PartOfSoulPricingFloors): PartOfSoulRoofPitch[] {
-  if (pf === 1) return ["dual", "triple", "quad"];
+  if (pf === 1) return ["dual", "triple", "quad", "flat"];
   if (pf === 1.5) return ["dual", "triple"];
-  return ["dual", "triple", "quad"];
+  return ["dual", "triple", "quad", "flat"];
 }
 
 /**
@@ -124,6 +130,7 @@ export function partOfSoulRoofLabels(r: PartOfSoulRoofPitch): string {
     dual: "Двухскатная",
     triple: "Трёхскатная",
     quad: "Четырёхскатная",
+    flat: "Плоская",
   };
   return m[r];
 }
@@ -173,7 +180,7 @@ export function engineeringAddonRub(code: PartOfSoulEngineeringCode, pf: PartOfS
   return Math.round(rate * Math.max(areaSqm, 0));
 }
 
-/** ₽ за м² строительной площади (PDF: отделка фасада, 1-й этаж). Для четырёхскатной по 1 эт. в документе нет строк — берём ближе к двухскатной. */
+/** ₽ за м² строительной площади (PDF: отделка фасада, 1-й этаж). Для четырёх-/плоской по 1 эт. в документе нет строк — берём ближе к двухскатной. */
 export function facadeRubPerSqm(roof: PartOfSoulRoofPitch, variant: PartOfSoulFacadeVariant, pf: PartOfSoulPricingFloors): number | null {
   if (pf !== 1) return null;
   const table = roof === "triple" ? FACADE_TRIPLE : FACADE_DUAL;

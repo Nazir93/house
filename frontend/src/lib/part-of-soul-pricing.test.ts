@@ -19,9 +19,15 @@ describe("part-of-soul-pricing", () => {
   });
 
   it("partOfSoulRoofOptions: допустимые кровли по этажности", () => {
-    expect(partOfSoulRoofOptions(1)).toEqual(["dual", "triple", "quad"]);
+    expect(partOfSoulRoofOptions(1)).toEqual(["dual", "triple", "quad", "flat"]);
     expect(partOfSoulRoofOptions(1.5)).toEqual(["dual", "triple"]);
-    expect(partOfSoulRoofOptions(2)).toEqual(["dual", "triple", "quad"]);
+    expect(partOfSoulRoofOptions(2)).toEqual(["dual", "triple", "quad", "flat"]);
+  });
+
+  it("resolveProjectRoofPitch: плоская доступна только на 1 и 2 этажах", () => {
+    expect(resolveProjectRoofPitch(1, "flat")).toBe("flat");
+    expect(resolveProjectRoofPitch(2, "flat")).toBe("flat");
+    expect(resolveProjectRoofPitch(1.5, "flat")).toBe("dual");
   });
 
   it("resolveProjectRoofPitch: defaultRoof из проекта или первая допустимая", () => {
@@ -32,6 +38,11 @@ describe("part-of-soul-pricing", () => {
 
   it("shellRubPerSqm: 1 эт. двускат, газоблок (PDF)", () => {
     expect(shellRubPerSqm(1, "dual", "gas")).toBe(65_825);
+  });
+
+  it("shellRubPerSqm: плоская кровля как четырёхскатная", () => {
+    expect(shellRubPerSqm(1, "flat", "gas")).toBe(shellRubPerSqm(1, "quad", "gas"));
+    expect(shellRubPerSqm(2, "flat", "brick")).toBe(shellRubPerSqm(2, "quad", "brick"));
   });
 
   it("computePartOfSoulShellTotalRub: Aurora 128 м² без надбавки", () => {

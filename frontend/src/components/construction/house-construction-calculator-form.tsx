@@ -58,7 +58,7 @@ const houseConstructionSchema = z.object({
   objectType: z.string().optional(),
   area: z.string().optional(),
   catalogFloor: z.enum(["1", "1.5", "2"]),
-  roof: z.enum(["dual", "triple", "quad"]),
+  roof: z.enum(["dual", "triple", "quad", "flat"]),
   wallMaterial: z.enum(["gas", "ceramic", "brick"]),
   engineering: z.object({
     electric: z.boolean(),

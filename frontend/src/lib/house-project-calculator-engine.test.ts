@@ -47,6 +47,14 @@ const C = {
       ...DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG.categories.h,
       shellPrices: { gas: 55_446, ceramic: 56_725, brick: 60_299 },
     },
+    i: {
+      ...DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG.categories.i,
+      shellPrices: { gas: 65_126, ceramic: 68_680, brick: 72_480 },
+    },
+    j: {
+      ...DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG.categories.j,
+      shellPrices: { gas: 55_446, ceramic: 56_725, brick: 60_299 },
+    },
   },
   facades: {
     ...structuredClone(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG.facades),
@@ -159,6 +167,8 @@ describe("house-project-calculator-engine (TZ)", () => {
       f: { facade: 2.05, perimeter: 0.3, roof: 0.9, soffit: 0.7, gutter: 1, overlap: 0.5, insulation: 0.85, cross: 0.85 },
       g: { facade: 2.05, perimeter: 0.3, roof: 0.9, soffit: 0.7, gutter: 1, overlap: 0.5, insulation: 0.85, cross: 0.85 },
       h: { facade: 2.05, perimeter: 0.3, roof: 0.9, soffit: 0.7, gutter: 1, overlap: 0.5, insulation: 0.85, cross: 0.85 },
+      i: { facade: 1.4, perimeter: 0.42, roof: 1.45, soffit: 0.7, gutter: 1, overlap: 0, insulation: 1, cross: 1 },
+      j: { facade: 2.05, perimeter: 0.3, roof: 0.9, soffit: 0.7, gutter: 1, overlap: 0.5, insulation: 0.85, cross: 0.85 },
     });
   });
 
@@ -523,6 +533,8 @@ describe("house-project-calculator-engine (TZ)", () => {
     expect(resolveHouseCalculatorCategory({ floors: 2, roof: "quad" })).toBe("f");
     expect(resolveHouseCalculatorCategory({ floors: 2, roof: "dual" })).toBe("g");
     expect(resolveHouseCalculatorCategory({ floors: 2, roof: "triple" })).toBe("h");
+    expect(resolveHouseCalculatorCategory({ floors: 1, roof: "flat" })).toBe("i");
+    expect(resolveHouseCalculatorCategory({ floors: 2, roof: "flat" })).toBe("j");
   });
 
   it("явная категория b задаёт трёхскатную кровлю для отображения и расчёта", () => {
@@ -538,6 +550,15 @@ describe("house-project-calculator-engine (TZ)", () => {
     expect(C.categories.h.shellPrices).toEqual(C.categories.f.shellPrices);
   });
 
+  it("плоская кровля: i как c, j как f", () => {
+    expect(getHouseCalculatorCategoryParams("i")).toEqual({ floors: 1, roof: "flat" });
+    expect(getHouseCalculatorCategoryParams("j")).toEqual({ floors: 2, roof: "flat" });
+    expect(C.categories.i.coefficients).toEqual(C.categories.c.coefficients);
+    expect(C.categories.j.coefficients).toEqual(C.categories.f.coefficients);
+    expect(C.categories.i.shellPrices).toEqual(C.categories.c.shellPrices);
+    expect(C.categories.j.shellPrices).toEqual(C.categories.f.shellPrices);
+  });
+
   it("§8 матрица цен коробки (6 категорий × газобетон)", () => {
     const expected: Record<string, number> = {
       a: 65_825,
@@ -548,6 +569,8 @@ describe("house-project-calculator-engine (TZ)", () => {
       f: 55_446,
       g: 55_446,
       h: 55_446,
+      i: 65_126,
+      j: 55_446,
     };
     for (const [id, price] of Object.entries(expected)) {
       const cat = C.categories[id as keyof typeof C.categories];

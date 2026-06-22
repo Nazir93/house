@@ -7,7 +7,7 @@ describe("seed calculator catalog (db runner)", () => {
     "writes TZ defaults to calculator tables",
     async () => {
       const result = await seedCalculatorCatalog();
-      expect(result.categories).toBe(8);
+      expect(result.categories).toBe(10);
       expect(result.options).toBeGreaterThan(10);
     },
     60_000
