@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
@@ -38,6 +38,26 @@ const SITE_STATUS_OPTIONS = [
 ];
 
 type UploadTarget = "renders" | "plans" | "stages" | "videos" | `phase:${string}`;
+
+const inputClass =
+  "w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white";
+
+function AdminField({
+  label,
+  children,
+  className,
+}: {
+  label: string;
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <label className={className ?? "block space-y-1"}>
+      <span className="block text-xs font-medium text-white/45">{label}</span>
+      {children}
+    </label>
+  );
+}
 
 function mapBuiltObjectToForm(initial?: any) {
   const media = mapBuiltObjectMediaToForm(initial?.media);
@@ -241,36 +261,63 @@ export function BuiltObjectForm({
 
       <AdminFormSection title="Основное">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Дом в д. Вырица" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
-          <input value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="slug" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
+          <AdminField label="Название объекта">
+            <input value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Дом в д. Вырица" className={inputClass} />
+          </AdminField>
+          <AdminField label="Slug (URL)">
+            <input value={form.slug} onChange={(e) => set("slug", e.target.value)} placeholder="vsevolozhsk" className={`${inputClass} font-mono`} />
+          </AdminField>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <label className="block">
-            <span className="mb-1 block text-xs font-medium text-white/45">Типовой проект (кнопка «Хочу такой дом»)</span>
+          <AdminField label="Типовой проект (кнопка «Хочу такой дом»)">
             <AdminSelect
               value={form.houseProjectId}
               onValueChange={applyHouseProjectLink}
               options={houseProjectOptions}
             />
-          </label>
+          </AdminField>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <AdminSelect value={form.material} onValueChange={(v) => set("material", v)} options={MATERIAL_OPTIONS} />
-          <input value={form.area} onChange={(e) => set("area", e.target.value)} placeholder="Площадь, м²" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
-          <input value={form.rooms} onChange={(e) => set("rooms", e.target.value)} placeholder="Спальни" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
-          <input value={form.bathrooms} onChange={(e) => set("bathrooms", e.target.value)} placeholder="Санузлы" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
-          <input value={form.floors} onChange={(e) => set("floors", e.target.value)} placeholder="Этажность (1, 1.5, 2…)" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
-          <input value={form.buildTerm} onChange={(e) => set("buildTerm", e.target.value)} placeholder="211 или 211 дней" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
+          <AdminField label="Материал">
+            <AdminSelect value={form.material} onValueChange={(v) => set("material", v)} options={MATERIAL_OPTIONS} />
+          </AdminField>
+          <AdminField label="Площадь, м²">
+            <input value={form.area} onChange={(e) => set("area", e.target.value)} placeholder="247" className={inputClass} />
+          </AdminField>
+          <AdminField label="Спальни">
+            <input value={form.rooms} onChange={(e) => set("rooms", e.target.value)} placeholder="4" className={inputClass} />
+          </AdminField>
+          <AdminField label="Санузлы">
+            <input value={form.bathrooms} onChange={(e) => set("bathrooms", e.target.value)} placeholder="2" className={inputClass} />
+          </AdminField>
+          <AdminField label="Этажность">
+            <input value={form.floors} onChange={(e) => set("floors", e.target.value)} placeholder="1, 1.5, 2…" className={inputClass} />
+          </AdminField>
+          <AdminField label="Срок строительства">
+            <input value={form.buildTerm} onChange={(e) => set("buildTerm", e.target.value)} placeholder="211 или 211 дней" className={inputClass} />
+          </AdminField>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input value={form.foundation} onChange={(e) => set("foundation", e.target.value)} placeholder="Фундамент" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
-          <input value={form.walls} onChange={(e) => set("walls", e.target.value)} placeholder="Стены" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
-          <input value={form.roof} onChange={(e) => set("roof", e.target.value)} placeholder="Кровля" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
+          <AdminField label="Фундамент">
+            <input value={form.foundation} onChange={(e) => set("foundation", e.target.value)} placeholder="Монолитная плита" className={inputClass} />
+          </AdminField>
+          <AdminField label="Стены">
+            <input value={form.walls} onChange={(e) => set("walls", e.target.value)} placeholder="Газобетон D400" className={inputClass} />
+          </AdminField>
+          <AdminField label="Кровля">
+            <input value={form.roof} onChange={(e) => set("roof", e.target.value)} placeholder="Металлочерепица" className={inputClass} />
+          </AdminField>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input value={form.location} onChange={(e) => set("location", e.target.value)} placeholder="Адрес/населенный пункт" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
-          <input value={form.latitude} onChange={(e) => set("latitude", e.target.value)} placeholder="Широта (≈59 для СПб)" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
-          <input value={form.longitude} onChange={(e) => set("longitude", e.target.value)} placeholder="Долгота (≈30 для СПб)" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
+          <AdminField label="Адрес / населённый пункт">
+            <input value={form.location} onChange={(e) => set("location", e.target.value)} placeholder="г. Всеволожск" className={inputClass} />
+          </AdminField>
+          <AdminField label="Широта">
+            <input value={form.latitude} onChange={(e) => set("latitude", e.target.value)} placeholder="≈59 для СПб" className={`${inputClass} font-mono`} />
+          </AdminField>
+          <AdminField label="Долгота">
+            <input value={form.longitude} onChange={(e) => set("longitude", e.target.value)} placeholder="≈30 для СПб" className={`${inputClass} font-mono`} />
+          </AdminField>
         </div>
         <BuiltObjectMapPicker
           latitude={form.latitude}
@@ -278,24 +325,38 @@ export function BuiltObjectForm({
           onCoordinatesChange={(lat, lon) => setForm((prev) => ({ ...prev, latitude: lat, longitude: lon }))}
         />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <AdminSelect
-            value={form.regionSlug}
-            onValueChange={(v) => setForm((prev) => ({ ...prev, regionSlug: v, district: "" }))}
-            options={REGION_OPTIONS}
-          />
-          <AdminSelect
-            value={form.district}
-            onValueChange={(v) => set("district", v)}
-            options={districtOptions}
-            disabled={!form.regionSlug.trim()}
-          />
-          <AdminSelect value={form.siteStatus} onValueChange={(v) => set("siteStatus", v)} options={SITE_STATUS_OPTIONS} />
+          <AdminField label="Регион">
+            <AdminSelect
+              value={form.regionSlug}
+              onValueChange={(v) => setForm((prev) => ({ ...prev, regionSlug: v, district: "" }))}
+              options={REGION_OPTIONS}
+            />
+          </AdminField>
+          <AdminField label="Район">
+            <AdminSelect
+              value={form.district}
+              onValueChange={(v) => set("district", v)}
+              options={districtOptions}
+              disabled={!form.regionSlug.trim()}
+            />
+          </AdminField>
+          <AdminField label="Статус объекта">
+            <AdminSelect value={form.siteStatus} onValueChange={(v) => set("siteStatus", v)} options={SITE_STATUS_OPTIONS} />
+          </AdminField>
         </div>
-        <RichEditor value={form.description} onChange={(value) => set("description", value)} minHeight="150px" />
-        <RichEditor value={form.worksDescription} onChange={(value) => set("worksDescription", value)} minHeight="120px" />
-        <div className="flex flex-wrap gap-5 text-sm text-white/70">
-          <label className="inline-flex items-center gap-2"><input type="checkbox" checked={form.published} onChange={(e) => set("published", e.target.checked)} /> Опубликован</label>
-          <input value={form.order} onChange={(e) => set("order", e.target.value)} placeholder="Порядок" className="w-28 px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
+        <AdminField label="Описание объекта">
+          <RichEditor value={form.description} onChange={(value) => set("description", value)} minHeight="150px" />
+        </AdminField>
+        <AdminField label="Описание работ">
+          <RichEditor value={form.worksDescription} onChange={(value) => set("worksDescription", value)} minHeight="120px" />
+        </AdminField>
+        <div className="flex flex-wrap items-end gap-5 text-sm text-white/70">
+          <label className="inline-flex items-center gap-2">
+            <input type="checkbox" checked={form.published} onChange={(e) => set("published", e.target.checked)} /> Опубликован
+          </label>
+          <AdminField label="Порядок в каталоге" className="block w-28 space-y-1">
+            <input value={form.order} onChange={(e) => set("order", e.target.value)} placeholder="0" className={inputClass} />
+          </AdminField>
         </div>
       </AdminFormSection>
 
@@ -374,8 +435,12 @@ export function BuiltObjectForm({
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input value={form.telegramUrl} onChange={(e) => set("telegramUrl", e.target.value)} placeholder="Telegram" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
-          <input value={form.vkUrl} onChange={(e) => set("vkUrl", e.target.value)} placeholder="VK" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
+          <AdminField label="Telegram">
+            <input value={form.telegramUrl} onChange={(e) => set("telegramUrl", e.target.value)} placeholder="https://t.me/..." className={inputClass} />
+          </AdminField>
+          <AdminField label="VK">
+            <input value={form.vkUrl} onChange={(e) => set("vkUrl", e.target.value)} placeholder="https://vk.com/..." className={inputClass} />
+          </AdminField>
         </div>
       </AdminFormSection>
     </div>
