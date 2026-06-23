@@ -1,9 +1,10 @@
 "use client";
 
 import { useMemo, useId } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight, LayoutGrid } from "lucide-react";
+
+import { CmsImage } from "@/components/ui/cms-image";
 
 import type { MaterialFilterId } from "@/lib/project-filters";
 import { minCatalogRubPerM2ByMaterial } from "@/lib/house-construction-calculator";
@@ -194,12 +195,11 @@ export function ProjectsConstructorSection() {
               )}
             >
               <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden border-b border-[var(--border)] sm:aspect-[5/4]">
-                <Image
+                <CmsImage
                   src={card.image}
                   alt={card.title}
                   fill
-                  quality={78}
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 400px"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 560px"
                   className="object-cover object-center transition duration-700 ease-out hover:scale-[1.03]"
                   priority={i === 0}
                 />
