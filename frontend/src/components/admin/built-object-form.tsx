@@ -5,16 +5,17 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Save } from "lucide-react";
 import { AdminFormSection } from "@/components/admin/admin-form-section";
-import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
+import { AdminImageUrlList, AdminPlanImageList } from "@/components/admin/admin-image-list-field";
 import { RichEditor } from "@/components/admin/rich-editor";
 import { AdminSelect } from "@/components/admin/admin-select";
 import { CASE_STUDY_CONSTRUCTION_PHASES } from "@/lib/portfolio-case-study-phases";
-import { initialPhaseMediaForm, mediaUrlsForForm } from "@/lib/built-object-admin-media";
+import { mapBuiltObjectMediaToForm } from "@/lib/built-object-admin-media";
 import { BUILT_OBJECT_MAP_DISTRICTS, BUILT_OBJECT_MAP_REGIONS } from "@/lib/built-object-map-taxonomy";
 import { BuiltObjectMapPicker } from "@/components/admin/built-object-map-picker";
 import { BuiltObjectHistoryEditor } from "@/components/admin/built-object-history-editor";
 import { historyStagesForAdmin, serializeConstructionHistory } from "@/lib/built-object-detail";
 import type { AdminHouseProjectOption } from "@/lib/load-admin-house-project-options";
+import { uploadAdminMedia } from "@/lib/admin-upload";
 
 const MATERIALS = [
   ["GAS_BLOCK", "Газобетон"],
@@ -36,21 +37,11 @@ const SITE_STATUS_OPTIONS = [
   { value: "UNDER_CONSTRUCTION", label: "Строится (стройплощадка)" },
 ];
 
-function urls(media: any[] | undefined, type: string) {
-  return mediaUrlsForForm(media, type);
-}
+type UploadTarget = "renders" | "plans" | "stages" | "videos" | `phase:${string}`;
 
-export function BuiltObjectForm({
-  initial,
-  houseProjects = [],
-}: {
-  initial?: any;
-  houseProjects?: AdminHouseProjectOption[];
-}) {
-  const router = useRouter();
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [form, setForm] = useState({
+function mapBuiltObjectToForm(initial?: any) {
+  const media = mapBuiltObjectMediaToForm(initial?.media);
+  return {
     id: initial?.id || "",
     title: initial?.title || "",
     slug: initial?.slug || "",
@@ -76,13 +67,28 @@ export function BuiltObjectForm({
     houseProjectId: initial?.houseProjectId || "",
     published: Boolean(initial?.published),
     order: String(initial?.order ?? 0),
-    renders: urls(initial?.media, "RENDER"),
-    plans: urls(initial?.media, "PLAN"),
-    phaseMedia: initialPhaseMediaForm(initial?.media),
-    stages: mediaUrlsForForm(initial?.media, "BUILD_STAGE", null),
-    videos: urls(initial?.media, "VIDEO"),
+    renders: media.renders,
+    plans: media.plans,
+    phaseMedia: media.phaseMedia,
+    stages: media.stages,
+    videos: media.videos,
     historyStages: historyStagesForAdmin(initial ?? {}),
-  });
+  };
+}
+
+export function BuiltObjectForm({
+  initial,
+  houseProjects = [],
+}: {
+  initial?: any;
+  houseProjects?: AdminHouseProjectOption[];
+}) {
+  const router = useRouter();
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [uploading, setUploading] = useState<UploadTarget | null>(null);
+  const [uploadProgress, setUploadProgress] = useState("");
+  const [form, setForm] = useState(() => mapBuiltObjectToForm(initial));
 
   function set(field: string, value: string | boolean) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -125,31 +131,70 @@ export function BuiltObjectForm({
     return opts;
   }, [form.regionSlug, form.district]);
 
-  function appendMediaLine(field: "renders" | "plans" | "stages" | "videos", url: string) {
-    const u = url.trim();
-    if (!u) return;
-    setForm((prev) => {
-      const cur = (prev[field] as string).trim();
-      return { ...prev, [field]: cur ? `${cur}\n${u}` : u };
-    });
+  async function uploadMany(target: UploadTarget, files: File[]) {
+    if (files.length === 0) return;
+    setUploading(target);
+    setUploadProgress("");
+    setError("");
+    const errors: string[] = [];
+    const uploadedUrls: string[] = [];
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]!;
+        if (files.length > 1) setUploadProgress(`${i + 1} / ${files.length}`);
+        const { url, error: uploadError } = await uploadAdminMedia(file);
+        if (uploadError || !url) {
+          errors.push(
+            uploadError
+              ? `${uploadError} (файл ${i + 1}${file.name ? `: ${file.name}` : ""})`
+              : `Не удалось загрузить файл ${i + 1}${file.name ? `: ${file.name}` : ""}.`,
+          );
+          continue;
+        }
+        uploadedUrls.push(url);
+      }
+
+      if (uploadedUrls.length > 0) {
+        setForm((prev) => {
+          if (target === "renders") {
+            return { ...prev, renders: [...prev.renders, ...uploadedUrls] };
+          }
+          if (target === "plans") {
+            return {
+              ...prev,
+              plans: [...prev.plans, ...uploadedUrls.map((url) => ({ url, label: "" }))],
+            };
+          }
+          if (target === "stages") {
+            return { ...prev, stages: [...prev.stages, ...uploadedUrls] };
+          }
+          if (target === "videos") {
+            return { ...prev, videos: [...prev.videos, ...uploadedUrls] };
+          }
+          if (target.startsWith("phase:")) {
+            const phaseId = target.slice("phase:".length);
+            const cur = prev.phaseMedia[phaseId] ?? [];
+            return {
+              ...prev,
+              phaseMedia: { ...prev.phaseMedia, [phaseId]: [...cur, ...uploadedUrls] },
+            };
+          }
+          return prev;
+        });
+      }
+    } finally {
+      setUploading(null);
+      setUploadProgress("");
+    }
+
+    if (errors.length) setError(errors.join(" "));
   }
 
-  function appendPhaseMediaLine(phaseId: string, url: string) {
-    const u = url.trim();
-    if (!u) return;
-    setForm((prev) => {
-      const cur = (prev.phaseMedia[phaseId] ?? "").trim();
-      return {
-        ...prev,
-        phaseMedia: { ...prev.phaseMedia, [phaseId]: cur ? `${cur}\n${u}` : u },
-      };
-    });
-  }
-
-  function setPhaseMedia(phaseId: string, value: string) {
+  function setPhaseMedia(phaseId: string, items: string[]) {
     setForm((prev) => ({
       ...prev,
-      phaseMedia: { ...prev.phaseMedia, [phaseId]: value },
+      phaseMedia: { ...prev.phaseMedia, [phaseId]: items },
     }));
   }
 
@@ -258,29 +303,28 @@ export function BuiltObjectForm({
         <BuiltObjectHistoryEditor stages={form.historyStages} onChange={setHistoryStages} />
       </AdminFormSection>
 
-      <AdminFormSection title="Кейс на сайте — медиа по разделам">
+      <AdminFormSection title="Кейс на сайте — медиа по разделам" subtitle="Загружайте файлы — превью, порядок и удаление как в админке проектов.">
         <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/50">Рендеры и фото объекта</p>
-          <AdminMediaUpload
-            label="Загрузить фото → рендеры"
-            accept="image"
-            value=""
-            multiple
-            onChange={(url) => appendMediaLine("renders", url)}
+          <AdminImageUrlList
+            title="Рендеры и фото объекта"
+            items={form.renders}
+            onItemsChange={(renders) => setForm((prev) => ({ ...prev, renders }))}
+            uploading={uploading === "renders"}
+            uploadProgress={uploadProgress}
+            onUploadFiles={(files) => void uploadMany("renders", files)}
+            emptyHint="Первое фото станет обложкой в каталоге портфолио."
           />
-          <textarea value={form.renders} onChange={(e) => set("renders", e.target.value)} rows={6} placeholder="Рендеры / фото объекта — по одному URL на строку" className="w-full min-h-[120px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
         </div>
 
         <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/50">Планировки</p>
-          <AdminMediaUpload
-            label="Загрузить изображение → планировки"
-            accept="image"
-            value=""
-            multiple
-            onChange={(url) => appendMediaLine("plans", url)}
+          <AdminPlanImageList
+            title="Планировки"
+            plans={form.plans}
+            onPlansChange={(plans) => setForm((prev) => ({ ...prev, plans }))}
+            uploading={uploading === "plans"}
+            uploadProgress={uploadProgress}
+            onUploadFiles={(files) => void uploadMany("plans", files)}
           />
-          <textarea value={form.plans} onChange={(e) => set("plans", e.target.value)} rows={4} placeholder="Планировки — по одному URL на строку" className="w-full min-h-[96px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
         </div>
 
         <div className="space-y-4">
@@ -289,19 +333,13 @@ export function BuiltObjectForm({
             {CASE_STUDY_CONSTRUCTION_PHASES.map(({ id, title }) => (
               <div key={id} className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
                 <p className="text-sm font-medium text-white/85">{title}</p>
-                <AdminMediaUpload
-                  label={`Загрузить → ${title}`}
-                  accept="image"
-                  value=""
-                  multiple
-                  onChange={(url) => appendPhaseMediaLine(id, url)}
-                />
-                <textarea
-                  value={form.phaseMedia[id] ?? ""}
-                  onChange={(e) => setPhaseMedia(id, e.target.value)}
-                  rows={3}
-                  placeholder="URL фото — по одному на строку"
-                  className="w-full min-h-[72px] px-3 py-2 rounded-lg bg-white/[0.05] border border-white/[0.08] text-xs text-white font-mono"
+                <AdminImageUrlList
+                  title="Фото этапа"
+                  items={form.phaseMedia[id] ?? []}
+                  onItemsChange={(items) => setPhaseMedia(id, items)}
+                  uploading={uploading === `phase:${id}`}
+                  uploadProgress={uploadProgress}
+                  onUploadFiles={(files) => void uploadMany(`phase:${id}`, files)}
                 />
               </div>
             ))}
@@ -310,29 +348,30 @@ export function BuiltObjectForm({
 
         <div className="space-y-3 rounded-xl border border-dashed border-white/[0.1] bg-white/[0.01] p-4">
           <p className="text-xs font-semibold text-white/45">Прочие фото этапов (без раздела)</p>
-          <p className="text-[11px] text-white/35 leading-relaxed">
+          <p className="text-[11px] leading-relaxed text-white/35">
             Старое поле: попадает в раздел «Фото этапов строительства» в конце таймлайна. Для новых объектов лучше загружать в разделы выше.
           </p>
-          <AdminMediaUpload
-            label="Загрузить фото → прочие этапы"
-            accept="image"
-            value=""
-            multiple
-            onChange={(url) => appendMediaLine("stages", url)}
+          <AdminImageUrlList
+            title="Прочие этапы"
+            items={form.stages}
+            onItemsChange={(stages) => setForm((prev) => ({ ...prev, stages }))}
+            uploading={uploading === "stages"}
+            uploadProgress={uploadProgress}
+            onUploadFiles={(files) => void uploadMany("stages", files)}
           />
-          <textarea value={form.stages} onChange={(e) => set("stages", e.target.value)} rows={4} placeholder="По одному URL на строку" className="w-full min-h-[96px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
         </div>
 
         <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/50">Видео</p>
-          <AdminMediaUpload
-            label="Загрузить видео"
-            accept="video"
-            value=""
-            multiple
-            onChange={(url) => appendMediaLine("videos", url)}
+          <AdminImageUrlList
+            title="Видео"
+            items={form.videos}
+            onItemsChange={(videos) => setForm((prev) => ({ ...prev, videos }))}
+            uploading={uploading === "videos"}
+            uploadProgress={uploadProgress}
+            onUploadFiles={(files) => void uploadMany("videos", files)}
+            accept="video/*"
+            emptyHint="MP4 или другие видеофайлы с сервера."
           />
-          <textarea value={form.videos} onChange={(e) => set("videos", e.target.value)} rows={4} placeholder="Видео / reels — по одному URL на строку" className="w-full min-h-[96px] px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white font-mono" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input value={form.telegramUrl} onChange={(e) => set("telegramUrl", e.target.value)} placeholder="Telegram" className="px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />

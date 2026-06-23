@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
-import { LayoutGrid, MapPinned } from "lucide-react";
+import { LayoutGrid, MapPinned, SlidersHorizontal, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { PortfolioFilterSelect } from "@/components/portfolio/portfolio-filter-select";
 import { builtObjectMaterialLabel, getBuiltObjectCover, type BuiltObjectItem } from "@/lib/construction-shared";
@@ -53,7 +54,24 @@ export function BuiltPortfolioContent({
   const [floorId, setFloorId] = useState("all");
   const [areaId, setAreaId] = useState<PortfolioAreaFilterId>("all");
   const [view, setView] = useState<ViewMode>(initialView);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [mobileFiltersPortalReady, setMobileFiltersPortalReady] = useState(false);
   const explorerRef = useRef<HTMLDivElement>(null);
+  const mobileFiltersDrawerRef = useRef<HTMLDivElement>(null);
+  const drawerTouchStartY = useRef(0);
+
+  useEffect(() => {
+    setMobileFiltersPortalReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mobileFiltersOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileFiltersOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileFiltersOpen]);
 
   const materialOptions = useMemo(
     () => [
@@ -81,6 +99,7 @@ export function BuiltPortfolioContent({
   );
 
   const filtersAreDefault = material === "all" && floorId === "all" && areaId === "all";
+  const hasCustomFilters = !filtersAreDefault;
 
   function resetAllFilters() {
     setMaterial("all");
@@ -96,13 +115,182 @@ export function BuiltPortfolioContent({
 
   function showMapView() {
     setView("map");
+    setMobileFiltersOpen(false);
     setTimeout(scrollToExplorer, 80);
+  }
+
+  function onDrawerTouchStart(e: React.TouchEvent) {
+    drawerTouchStartY.current = e.touches[0]?.clientY ?? 0;
+  }
+
+  function onDrawerTouchMove(e: React.TouchEvent) {
+    const el = mobileFiltersDrawerRef.current;
+    if (!el || el.scrollTop > 2) return;
+    const y = e.touches[0]?.clientY ?? 0;
+    if (y - drawerTouchStartY.current > 52) {
+      setMobileFiltersOpen(false);
+    }
   }
 
   const mappedCount = filtered.filter((o) => o.latitude != null && o.longitude != null).length;
 
+  const filterControls = (
+    <div className="flex flex-wrap items-center gap-2">
+      <button
+        type="button"
+        onClick={resetAllFilters}
+        className={chipClass(filtersAreDefault)}
+        aria-pressed={filtersAreDefault}
+      >
+        Все
+      </button>
+
+      <PortfolioFilterSelect
+        label="Материал"
+        value={material}
+        onValueChange={setMaterial}
+        options={materialOptions}
+        active={material !== "all"}
+      />
+      <PortfolioFilterSelect
+        label="Этажность"
+        value={floorId}
+        onValueChange={setFloorId}
+        options={floorSelectOptions}
+        active={floorId !== "all"}
+      />
+      <PortfolioFilterSelect
+        label="Площадь"
+        value={areaId}
+        onValueChange={(v) => setAreaId(v as PortfolioAreaFilterId)}
+        options={areaSelectOptions}
+        active={areaId !== "all"}
+      />
+    </div>
+  );
+
+  const mapButton = (
+    <button
+      type="button"
+      onClick={() => showMapView()}
+      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-[12px] font-semibold text-[var(--text)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] dark:bg-[var(--card-bg)] sm:text-[13px]"
+    >
+      <MapPinned size={15} strokeWidth={2} className="shrink-0 text-[var(--accent)]" aria-hidden />
+      Показать на карте
+      <span className="text-[11px] font-normal text-[var(--text-muted)]">({mappedCount})</span>
+    </button>
+  );
+
+  const filtersPanel = (
+    <div className="flex flex-col gap-3">
+      {filterControls}
+      {mapButton}
+    </div>
+  );
+
+  const mobileFiltersPortal =
+    mobileFiltersPortalReady &&
+    view === "grid" &&
+    createPortal(
+      <>
+        <button
+          type="button"
+          className={cn(
+            "projects-catalog-filters-fab lg:hidden",
+            mobileFiltersOpen && "projects-catalog-filters-fab--hidden"
+          )}
+          onClick={() => setMobileFiltersOpen(true)}
+          aria-expanded={mobileFiltersOpen}
+          aria-controls="portfolio-filters-drawer"
+        >
+          <SlidersHorizontal size={20} strokeWidth={2.2} aria-hidden />
+          <span className="sr-only">Фильтры портфолио</span>
+          {hasCustomFilters ? <span className="projects-catalog-filters-fab__dot" aria-hidden /> : null}
+        </button>
+
+        <div
+          className={cn(
+            "projects-catalog-filters-overlay lg:hidden",
+            mobileFiltersOpen && "projects-catalog-filters-overlay--open"
+          )}
+          aria-hidden={!mobileFiltersOpen}
+        >
+          <button
+            type="button"
+            className="projects-catalog-filters-backdrop"
+            aria-label="Закрыть фильтры"
+            onClick={() => setMobileFiltersOpen(false)}
+            onWheel={() => setMobileFiltersOpen(false)}
+            tabIndex={mobileFiltersOpen ? 0 : -1}
+          />
+          <aside
+            id="portfolio-filters-drawer"
+            ref={mobileFiltersDrawerRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Фильтры портфолио"
+            className={cn(
+              "projects-catalog-filters-drawer",
+              mobileFiltersOpen && "projects-catalog-filters-drawer--open"
+            )}
+            onTouchStart={onDrawerTouchStart}
+            onTouchMove={onDrawerTouchMove}
+          >
+            <div className="projects-catalog-filters-drawer__head">
+              <span
+                className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.12em]"
+                style={{ color: "var(--text)" }}
+              >
+                <SlidersHorizontal size={18} aria-hidden />
+                Фильтры
+              </span>
+              <div className="flex items-center gap-3">
+                {hasCustomFilters ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      resetAllFilters();
+                    }}
+                    className="text-sm font-medium underline-offset-4 hover:underline"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    Сбросить
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => setMobileFiltersOpen(false)}
+                  className="flex h-9 w-9 items-center justify-center rounded-full border transition-colors hover:border-[var(--accent)]"
+                  style={{
+                    borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
+                    color: "var(--text-muted)",
+                  }}
+                  aria-label="Закрыть"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            </div>
+            <div
+              className="projects-catalog-filters-drawer__body"
+              onWheel={(e) => {
+                const el = mobileFiltersDrawerRef.current;
+                if (el && el.scrollTop <= 0 && e.deltaY < 0) {
+                  setMobileFiltersOpen(false);
+                }
+              }}
+            >
+              {filtersPanel}
+            </div>
+          </aside>
+        </div>
+      </>,
+      document.body
+    );
+
   return (
     <section className="page-top-offset pb-24" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
+      {mobileFiltersPortal}
       <div className="container mx-auto max-w-[1320px] px-5">
         <nav className="text-[12px] tracking-[0.02em] text-[var(--text-muted)] sm:text-[13px]" aria-label="Навигация по разделу">
           <Link href="/" className="transition-colors hover:text-[var(--accent)]">
@@ -146,7 +334,7 @@ export function BuiltPortfolioContent({
             </div>
           ) : (
             <>
-              <div>
+              <div className="hidden lg:block">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
                     Фильтры портфолио
@@ -156,47 +344,18 @@ export function BuiltPortfolioContent({
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={resetAllFilters}
-                    className={chipClass(filtersAreDefault)}
-                    aria-pressed={filtersAreDefault}
-                  >
-                    Все
-                  </button>
-
-                  <PortfolioFilterSelect
-                    label="Материал"
-                    value={material}
-                    onValueChange={setMaterial}
-                    options={materialOptions}
-                    active={material !== "all"}
-                  />
-                  <PortfolioFilterSelect
-                    label="Этажность"
-                    value={floorId}
-                    onValueChange={setFloorId}
-                    options={floorSelectOptions}
-                    active={floorId !== "all"}
-                  />
-                  <PortfolioFilterSelect
-                    label="Площадь"
-                    value={areaId}
-                    onValueChange={(v) => setAreaId(v as PortfolioAreaFilterId)}
-                    options={areaSelectOptions}
-                    active={areaId !== "all"}
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => showMapView()}
-                    className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-[12px] font-semibold text-[var(--text)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] dark:bg-[var(--card-bg)] sm:text-[13px]"
-                  >
-                    <MapPinned size={15} strokeWidth={2} className="shrink-0 text-[var(--accent)]" aria-hidden />
-                    Показать на карте
-                    <span className="text-[11px] font-normal text-[var(--text-muted)]">({mappedCount})</span>
-                  </button>
+                  {filterControls}
+                  <div className="ml-auto">{mapButton}</div>
                 </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-3 lg:hidden">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
+                  Объекты
+                </p>
+                <span className="rounded-full bg-[var(--bg)] px-3 py-1 text-[11px] font-semibold text-[var(--text-muted)]">
+                  {filtered.length} объектов
+                </span>
               </div>
 
               {objects.length === 0 ? (
