@@ -87,7 +87,7 @@ function CompareGrid({
   );
 }
 
-const STICKY_LABEL_CLASS = "sticky left-0 z-[5] min-w-0 border-r";
+const STICKY_LABEL_CLASS = "sticky left-0 z-[5] min-w-0";
 
 type LabelSurface = "default" | "secondary" | "accent" | "group";
 
@@ -106,13 +106,13 @@ function inferLabelSurface(className?: string): LabelSurface {
   return "default";
 }
 
-/** Непрозрачная полоса + сплошная тень справа — цены не просвечивают под sticky на iOS. */
+/** inset-граница вместо border-r — фон доходит до линии на iOS; тень справа закрывает просвет при скролле. */
 function stickyLabelStyle(surface: LabelSurface): CSSProperties {
   const bg = LABEL_SURFACE_BG[surface];
   return {
     borderColor: "var(--border)",
     backgroundColor: bg,
-    boxShadow: `12px 0 0 0 ${bg}`,
+    boxShadow: `inset -1px 0 0 var(--border), 12px 0 0 0 ${bg}`,
   };
 }
 
@@ -157,12 +157,49 @@ function DataCell({ children, className }: { children: ReactNode; className?: st
   );
 }
 
-function EmptySlotCells({ count, keyPrefix }: { count: number; keyPrefix: string }) {
+function EmptySlotCells({
+  count,
+  keyPrefix,
+  rowBg,
+}: {
+  count: number;
+  keyPrefix: string;
+  rowBg?: string;
+}) {
   return (
     <>
       {Array.from({ length: count }).map((_, i) => (
-        <div key={`${keyPrefix}-${i}`} className="border-b" style={{ borderColor: "var(--border)" }} />
+        <div
+          key={`${keyPrefix}-${i}`}
+          className="border-b"
+          style={{ borderColor: "var(--border)", backgroundColor: rowBg }}
+        />
       ))}
+    </>
+  );
+}
+
+function SectionHeaderFillCells({
+  columns,
+  slotsLeft,
+  keyPrefix,
+  rowBg,
+}: {
+  columns: CompareColumn[];
+  slotsLeft: number;
+  keyPrefix: string;
+  rowBg: string;
+}) {
+  return (
+    <>
+      {columns.map(({ entry }) => (
+        <div
+          key={`${keyPrefix}-${compareColumnKey(entry)}`}
+          className="border-b"
+          style={{ borderColor: "var(--border)", backgroundColor: rowBg }}
+        />
+      ))}
+      <EmptySlotCells count={slotsLeft} keyPrefix={`${keyPrefix}-slot`} rowBg={rowBg} />
     </>
   );
 }
@@ -318,10 +355,12 @@ export function ProjectCompareTable({
         Разбивка стоимости
         {pricingOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
       </LabelCell>
-      {columns.map(({ entry }) => (
-        <div key={`pricing-head-${compareColumnKey(entry)}`} className="border-b" style={{ borderColor: "var(--border)" }} />
-      ))}
-      <EmptySlotCells count={slotsLeft} keyPrefix="pricing-head-slot" />
+      <SectionHeaderFillCells
+        columns={columns}
+        slotsLeft={slotsLeft}
+        keyPrefix="pricing-head"
+        rowBg={LABEL_SURFACE_BG.secondary}
+      />
 
       {pricingOpen ? (
         <>
@@ -370,10 +409,12 @@ export function ProjectCompareTable({
         Параметры
         {paramsOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
       </LabelCell>
-      {columns.map(({ entry }) => (
-        <div key={`params-head-${compareColumnKey(entry)}`} className="border-b" style={{ borderColor: "var(--border)" }} />
-      ))}
-      <EmptySlotCells count={slotsLeft} keyPrefix="params-head-slot" />
+      <SectionHeaderFillCells
+        columns={columns}
+        slotsLeft={slotsLeft}
+        keyPrefix="params-head"
+        rowBg={LABEL_SURFACE_BG.secondary}
+      />
 
       {paramsOpen ? (
         <>
@@ -433,10 +474,12 @@ export function ProjectCompareTable({
             Состав комплектации
             {completionOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </LabelCell>
-          {columns.map(({ entry }) => (
-            <div key={`comp-head-${compareColumnKey(entry)}`} className="border-b" style={{ borderColor: "var(--border)" }} />
-          ))}
-          <EmptySlotCells count={slotsLeft} keyPrefix="comp-head-slot" />
+          <SectionHeaderFillCells
+            columns={columns}
+            slotsLeft={slotsLeft}
+            keyPrefix="comp-head"
+            rowBg={LABEL_SURFACE_BG.secondary}
+          />
 
           {completionOpen
             ? completionGroups.map((groupTitle) => (
@@ -462,10 +505,12 @@ export function ProjectCompareTable({
             График строительства
             {scheduleOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </LabelCell>
-          {columns.map(({ entry }) => (
-            <div key={`sched-head-${compareColumnKey(entry)}`} className="border-b" style={{ borderColor: "var(--border)" }} />
-          ))}
-          <EmptySlotCells count={slotsLeft} keyPrefix="sched-head-slot" />
+          <SectionHeaderFillCells
+            columns={columns}
+            slotsLeft={slotsLeft}
+            keyPrefix="sched-head"
+            rowBg={LABEL_SURFACE_BG.secondary}
+          />
 
           {scheduleOpen
             ? scheduleRows.map((row) => (
@@ -491,10 +536,12 @@ export function ProjectCompareTable({
         Планировки
         {plansOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
       </LabelCell>
-      {columns.map(({ entry }) => (
-        <div key={`plans-head-${compareColumnKey(entry)}`} className="border-b" style={{ borderColor: "var(--border)" }} />
-      ))}
-      <EmptySlotCells count={slotsLeft} keyPrefix="plans-head-slot" />
+      <SectionHeaderFillCells
+        columns={columns}
+        slotsLeft={slotsLeft}
+        keyPrefix="plans-head"
+        rowBg={LABEL_SURFACE_BG.secondary}
+      />
 
       {plansOpen && planCount > 0
         ? Array.from({ length: planCount }).map((_, planIndex) => (
@@ -624,10 +671,12 @@ function CompletionGroupRows({
       <LabelCell className="bg-[color-mix(in_srgb,var(--bg-secondary)_80%,var(--bg))] pl-4 text-xs font-semibold uppercase tracking-wide text-[var(--text-subtle)]">
         {groupTitle}
       </LabelCell>
-      {columns.map(({ entry }) => (
-        <div key={`comp-grp-${groupTitle}-${compareColumnKey(entry)}`} className="border-b" style={{ borderColor: "var(--border)" }} />
-      ))}
-      <EmptySlotCells count={slotsLeft} keyPrefix={`comp-grp-${groupTitle}`} />
+      <SectionHeaderFillCells
+        columns={columns}
+        slotsLeft={slotsLeft}
+        keyPrefix={`comp-grp-${groupTitle}`}
+        rowBg={LABEL_SURFACE_BG.group}
+      />
 
       {rows.map((row) => (
         <Fragment key={`comp-${row.key}`}>
