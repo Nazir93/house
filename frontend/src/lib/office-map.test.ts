@@ -30,6 +30,6 @@ describe("office-map", () => {
   });
 
   it("formatOfficeMetroWalkingLabel", () => {
-    expect(formatOfficeMetroWalkingLabel(OFFICE_METRO_DIRECTIONS[0])).toContain("Старорусская");
+    expect(formatOfficeMetroWalkingLabel(OFFICE_METRO_DIRECTIONS[0])).toContain("Петроградская");
   });
 });

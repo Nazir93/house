@@ -17,20 +17,20 @@ export type OfficeMetroDirection = {
 /** Ближайшие станции метро до офиса на ул. Ординарной, 18. */
 export const OFFICE_METRO_DIRECTIONS: OfficeMetroDirection[] = [
   {
-    name: "Старорусская",
-    line: "Фрунзенско-Приморская (3)",
-    walkingMinutes: 8,
-    distanceMeters: 650,
-    geoLat: 59.96785,
-    geoLon: 30.29075,
+    name: "Петроградская",
+    line: "Кировско-Выборгская (1)",
+    walkingMinutes: 7,
+    distanceMeters: 450,
+    geoLat: 59.966389,
+    geoLon: 30.311389,
   },
   {
-    name: "Приморская",
-    line: "Фрунзенско-Приморская (3)",
+    name: "Чкаловская",
+    line: "Лахтинско-Правобережная (4)",
     walkingMinutes: 14,
-    distanceMeters: 1100,
-    geoLat: 59.94842,
-    geoLon: 30.28355,
+    distanceMeters: 1000,
+    geoLat: 59.960833,
+    geoLon: 30.291667,
   },
 ];
 
