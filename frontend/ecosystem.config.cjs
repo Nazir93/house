@@ -10,6 +10,7 @@
  */
 const fs = require("fs");
 const path = require("path");
+const os = require("os");
 
 function parseEnvFile(absPath) {
   if (!fs.existsSync(absPath)) {
@@ -52,6 +53,18 @@ if (!fs.existsSync(envPath) && !fs.existsSync(envLocalPath)) {
   );
 }
 
+function resolvePm2Instances() {
+  const explicit = fileEnv.PM2_INSTANCES?.trim() || process.env.PM2_INSTANCES?.trim();
+  if (explicit) {
+    const n = parseInt(explicit, 10);
+    if (!Number.isNaN(n) && n >= 1 && n <= 4) return n;
+  }
+  const ramGb = os.totalmem() / 1024 ** 3;
+  return ramGb >= 6 ? 2 : 1;
+}
+
+const pm2Instances = resolvePm2Instances();
+
 module.exports = {
   apps: [
     {
@@ -59,8 +72,8 @@ module.exports = {
       cwd: __dirname,
       script: path.join(__dirname, "node_modules/next/dist/bin/next"),
       args: "start -H 0.0.0.0",
-      instances: 1,
-      exec_mode: "fork",
+      instances: pm2Instances,
+      exec_mode: pm2Instances > 1 ? "cluster" : "fork",
       autorestart: true,
       watch: false,
       max_restarts: 15,

@@ -8,7 +8,7 @@ const txThankYouCreate = vi.fn();
 const dbTransaction = vi.fn();
 const sendTelegramNotification = vi.fn();
 const sendBitrixLead = vi.fn();
-const generateLeadProposalPdf = vi.fn();
+const scheduleLeadProposalPdf = vi.fn();
 
 vi.mock("uuid", () => ({
   v4: () => "uuid-test-token",
@@ -33,8 +33,8 @@ vi.mock("@/lib/bitrix", () => ({
   sendBitrixLead: (...args: unknown[]) => sendBitrixLead(...args),
 }));
 
-vi.mock("@/lib/proposal/proposal-service", () => ({
-  generateLeadProposalPdf: (...args: unknown[]) => generateLeadProposalPdf(...args),
+vi.mock("@/lib/proposal/schedule-proposal-job", () => ({
+  scheduleLeadProposalPdf: (...args: unknown[]) => scheduleLeadProposalPdf(...args),
 }));
 
 import { POST } from "@/app/api/leads/route";
@@ -61,10 +61,10 @@ describe("POST /api/leads", () => {
     );
     sendTelegramNotification.mockResolvedValue(undefined);
     sendBitrixLead.mockResolvedValue(undefined);
-    generateLeadProposalPdf.mockRejectedValue(new Error("pdf failed"));
+    scheduleLeadProposalPdf.mockImplementation(() => {});
   });
 
-  it("does not fail request when proposal generation crashes", async () => {
+  it("schedules proposal generation without blocking the response", async () => {
     const req = new NextRequest("http://localhost:3000/api/leads", {
       method: "POST",
       body: JSON.stringify({
@@ -83,7 +83,8 @@ describe("POST /api/leads", () => {
     expect(json.success).toBe(true);
     expect(json.redirectUrl).toContain("/spasibo?token=uuid-test-token");
     expect(json.proposalStatus).toBe("PENDING");
-    expect(generateLeadProposalPdf).toHaveBeenCalledOnce();
+    expect(scheduleLeadProposalPdf).toHaveBeenCalledOnce();
+    expect(scheduleLeadProposalPdf).toHaveBeenCalledWith("lead-1");
   });
 });
 

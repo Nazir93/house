@@ -127,11 +127,15 @@ echo "==> build id: ${NEXT_PUBLIC_BUILD_ID} (${GIT_COMMIT_SHA})"
 echo "==> npm run build"
 npm run build
 
-echo "==> nginx (gzip, keepalive, static cache)"
+echo "==> nginx (gzip, keepalive, static cache, uploads)"
 bash "$ROOT/scripts/setup-nginx-house.sh"
 
-echo "==> pm2 reload house-next --update-env && pm2 save"
-pm2 reload house-next --update-env
+echo "==> cron: фоновые КП (fallback)"
+bash "$ROOT/scripts/setup-proposal-cron.sh" 2>/dev/null || echo "WARN: cron proposal worker не настроен (нет crontab?)"
+
+echo "==> pm2 startOrReload house-next --update-env && pm2 save"
+cd "$ROOT/frontend"
+pm2 startOrReload ecosystem.config.cjs --update-env
 pm2 save
 
 echo "OK: деплой завершён (house-next перезагружен). ЛК: /account/login, админка: /admin/client-projects"

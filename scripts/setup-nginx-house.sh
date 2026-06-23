@@ -5,10 +5,16 @@ set -euo pipefail
 ROOT="${HOUSE_ROOT:-/var/www/house}"
 CONF="/etc/nginx/sites-available/house-chastdushi"
 SNIPPETS="/etc/nginx/snippets"
+UPLOADS_DIR="${HOUSE_UPLOADS_DIR:-$ROOT/frontend/public/uploads}"
 
 cp "$ROOT/nginx/snippets/house-proxy.conf" "$SNIPPETS/house-proxy.conf"
 cp "$ROOT/nginx/snippets/house-gzip.conf" "$SNIPPETS/house-gzip.conf"
 cp "$ROOT/nginx/snippets/ssl-tls12-only.conf" "$SNIPPETS/ssl-tls12-only.conf"
+
+# Подставляем реальный путь к uploads в snippet для nginx
+sed "s|/var/www/house/frontend/public/uploads/|${UPLOADS_DIR%/}/|g" \
+  "$ROOT/nginx/snippets/house-uploads-static.conf" > "$SNIPPETS/house-uploads-static.conf"
+
 cp "$ROOT/nginx/chastdushi-site.conf" "$CONF"
 
 if [[ -f "$ROOT/nginx/nginx-vps.conf" ]]; then

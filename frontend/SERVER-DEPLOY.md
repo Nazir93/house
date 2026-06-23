@@ -172,6 +172,15 @@ NextAuth строит CSRF и cookie от **`NEXTAUTH_URL`**. Если в `.env`
   cd frontend && node scripts/generate-pwa-icons.mjs
   ```
 
+## Нагрузка и мониторинг (после оптимизаций)
+
+- **КП (PDF):** после заявки генерация в **отдельном Node-процессе** (`scripts/run-proposal-job.cjs`), не в `house-next`. Зависшие `PENDING` подхватывает cron каждые 2 мин.
+- **Загрузки `/uploads/`:** nginx отдаёт с диска (`nginx/snippets/house-uploads-static.conf`), Node не трогает картинки/видео.
+- **PM2:** на VPS с **≥6 ГБ RAM** автоматически **2 инстанса** (`cluster`). Иначе 1. Явно: `PM2_INSTANCES=2` в `frontend/.env`.
+- **Health:** `GET /api/health` — shallow; `GET /api/health?deep=1` + `Authorization: Bearer $HEALTH_CHECK_SECRET` — БД, очередь КП, память.
+- **Проверка на сервере:** `bash /var/www/house/scripts/vps-health-check.sh`
+- **Cloudflare (рекомендуется при росте трафика):** A-запись на `46.173.26.108`, режим прокси (оранжевое облако), SSL Full, кэш статики. HTML/API — «bypass» или короткий TTL.
+
 ## Ваши уточнения (production VPS)
 
 Сервер: **`46.173.26.108`** (рядом с kemperlabs.ru на том же VPS).

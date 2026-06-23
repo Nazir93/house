@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 import { sendTelegramNotification, formatLeadMessage } from "@/lib/telegram";
 import { sendBitrixLead } from "@/lib/bitrix";
 import { createLeadFollowupToken, verifyLeadFollowupToken } from "@/lib/lead-followup-token";
-import { generateLeadProposalPdf } from "@/lib/proposal/proposal-service";
+import { scheduleLeadProposalPdf } from "@/lib/proposal/schedule-proposal-job";
 import { sendVacancyResponseEmail } from "@/lib/vacancy-response-mail";
 
 const VACANCY_RESPONSE_SOURCE = "partner-vacancy";
@@ -261,17 +261,8 @@ export async function POST(request: NextRequest) {
     }
 
     if (!isVacancyResponse) {
-      // Генерацию КП не делаем критичной: заявка уже сохранена и обработана.
-      void generateLeadProposalPdf({
-        id: createdLead.id,
-        name: createdLead.name,
-        phone: createdLead.phone,
-        email: createdLead.email,
-        calcData: createdLead.calcData,
-        createdAt: createdLead.createdAt,
-      }).catch((proposalErr) => {
-        console.error("[leads] proposal generation failed:", proposalErr);
-      });
+      // КП в отдельном процессе — Chromium не блокирует house-next.
+      scheduleLeadProposalPdf(createdLead.id);
     }
 
     logLeadDebug({
