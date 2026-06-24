@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { computeProjectQuoteForSlug } from "@/lib/project-calculator-quote-service";
-import { checkPublicApiRateLimit, rateLimitKeyFromHeaders } from "@/lib/public-api-rate-limit";
+import { checkPublicApiRateLimitAsync, rateLimitKeyFromHeaders } from "@/lib/public-api-rate-limit";
 
 const LEGACY_ID_MAP: Record<string, { group: "engineering" | "construction" | "facade"; slug: string }> = {
   el: { group: "engineering", slug: "electric" },
@@ -41,11 +41,11 @@ const bodySchema = z.object({
 
 export async function POST(req: NextRequest) {
   if (
-    !checkPublicApiRateLimit(rateLimitKeyFromHeaders(req.headers), {
+    !(await checkPublicApiRateLimitAsync(rateLimitKeyFromHeaders(req.headers), {
       namespace: "project-calculator-quote",
       max: 60,
       windowMs: 10 * 60 * 1000,
-    })
+    }))
   ) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }

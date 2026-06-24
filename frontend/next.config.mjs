@@ -96,6 +96,7 @@ const nextConfig = {
     };
   },
   async headers() {
+    const cspEnforced = process.env.CSP_ENFORCE === "1";
     return [
       {
         source: "/(.*)",
@@ -108,7 +109,7 @@ const nextConfig = {
             value: "camera=(), microphone=(), geolocation=()",
           },
           {
-            key: "Content-Security-Policy-Report-Only",
+            key: cspEnforced ? "Content-Security-Policy" : "Content-Security-Policy-Report-Only",
             value: cspReportOnly,
           },
           {

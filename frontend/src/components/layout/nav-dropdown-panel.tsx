@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import { NAV_SECTIONS, isNavGroup, type NavSection } from "@/lib/nav-sections";
+import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 const panelShell =
@@ -114,7 +115,7 @@ function PortfolioDropdown({
         onClick={onClose}
         className="mb-3 flex items-center justify-between gap-3 rounded-full bg-[#e8f0ea] px-4 py-3 transition hover:bg-[#dce8df]"
       >
-        <span className="text-[13px] font-semibold text-[#1a1e1d]">Все объекты портфолио</span>
+        <span className="text-[13px] font-semibold text-[#1a1e1d]">Все построенные дома</span>
         <span
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white shadow-md"
           style={{ backgroundColor: accentBg }}
@@ -355,7 +356,7 @@ export function NavDropdownPanel({
   let body: ReactNode;
   if (section.label === "Проекты") {
     body = <ProjectsDropdown section={section} onClose={onClose} />;
-  } else if (section.label === "Портфолио") {
+  } else if (section.label === BUILT_HOMES_SECTION_LABEL) {
     body = <PortfolioDropdown section={section} onClose={onClose} />;
   } else if (section.label === "Услуги") {
     body = <ServicesDropdown section={section} onClose={onClose} openModal={openModal} />;

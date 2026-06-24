@@ -57,10 +57,10 @@ Next.js через **PM2** на **`46.173.26.108`**, PostgreSQL на том же
 
 | Страница | URL | Описание |
 |----------|-----|----------|
-| Главная | `/` | Баннер, About, Hero, Услуги, Портфолио, Технологии, Партнёры |
+| Главная | `/` | Баннер, About, Hero, Услуги, Построенные дома, Технологии, Партнёры |
 | Блог | `/blog` | 9 статей (загрузка из БД с fallback на статику) |
 | Контакты | `/contacts` | Контакты, мессенджеры, реквизиты |
-| Портфолио | `/portfolio` | Объекты компании |
+| Построенные дома | `/portfolio` | Реализованные объекты компании |
 | Проекты домов | `/projects` | Каталог типовых проектов |
 | Услуги | `/services` | Каталог услуг строительства |
 | Ипотека | `/mortgage` | Ипотека и господдержка |
@@ -129,7 +129,7 @@ Next.js через **PM2** на **`46.173.26.108`**, PostgreSQL на том же
 
 - NextAuth v4 (Credentials provider)
 - JWT-сессия (7 дней)
-- Middleware защищает `/admin/*` и `/api/admin/*`
+- Edge `proxy.ts` защищает `/account/*` и `/api/client/*`; HTML `/admin` — в `admin/layout.tsx`; каждый `/api/admin/*` — `requireAdminApiSession()` (см. `admin-api-guards.test.ts`)
 - Логин из env: `ADMIN_EMAIL` + `ADMIN_SECRET`
 
 ### База данных (Prisma + PostgreSQL)

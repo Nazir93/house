@@ -16,3 +16,6 @@ next-env.d.ts
 # Загруженные из админки файлы (хранятся на сервере)
 public/uploads/*
 !public/uploads/.gitkeep
+
+# Приватные документы клиентов (только на сервере)
+storage/private/

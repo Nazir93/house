@@ -1,39 +1,6 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { prisma } from "@/lib/db";
-import { verifyPassword } from "@/lib/password";
-
-const AUTH_FAILS = new Map<string, { count: number; resetAt: number }>();
-const AUTH_FAIL_WINDOW_MS = 15 * 60 * 1000;
-const AUTH_FAIL_MAX = 8;
-
-function authKey(provider: string, id: string): string {
-  return `${provider}:${id.trim().toLowerCase() || "empty"}`;
-}
-
-async function applyAuthBackoff(key: string): Promise<boolean> {
-  const now = Date.now();
-  const entry = AUTH_FAILS.get(key);
-  if (!entry || now > entry.resetAt) return true;
-  if (entry.count >= AUTH_FAIL_MAX) return false;
-  const delayMs = Math.min(entry.count * 250, 2_000);
-  if (delayMs > 0) await new Promise((resolve) => setTimeout(resolve, delayMs));
-  return true;
-}
-
-function recordAuthResult(key: string, ok: boolean): void {
-  if (ok) {
-    AUTH_FAILS.delete(key);
-    return;
-  }
-  const now = Date.now();
-  const entry = AUTH_FAILS.get(key);
-  if (!entry || now > entry.resetAt) {
-    AUTH_FAILS.set(key, { count: 1, resetAt: now + AUTH_FAIL_WINDOW_MS });
-    return;
-  }
-  entry.count++;
-}
+import { authorizeAdminCredentials, authorizeClientCredentials } from "@/lib/auth-credentials";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -45,34 +12,7 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Пароль", type: "password" },
       },
       async authorize(credentials) {
-        const adminEmail = (process.env.ADMIN_EMAIL || "admin@dom.ru").trim();
-        const adminSecret = process.env.ADMIN_SECRET?.trim();
-
-        if (!adminSecret) {
-          console.error("[AUTH] ADMIN_SECRET is not set");
-          return null;
-        }
-
-        const inputEmail = credentials?.email?.trim() ?? "";
-        const inputPassword = credentials?.password ?? "";
-        const key = authKey("admin", inputEmail);
-        if (!(await applyAuthBackoff(key))) return null;
-
-        if (
-          inputEmail.toLowerCase() === adminEmail.toLowerCase() &&
-          inputPassword === adminSecret
-        ) {
-          recordAuthResult(key, true);
-          return {
-            id: "admin",
-            email: adminEmail,
-            name: "Администратор",
-            role: "admin" as const,
-          };
-        }
-
-        recordAuthResult(key, false);
-        return null;
+        return authorizeAdminCredentials(credentials?.email, credentials?.password);
       },
     }),
     CredentialsProvider({
@@ -83,34 +23,7 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Пароль", type: "password" },
       },
       async authorize(credentials) {
-        const contractNumber = credentials?.contractNumber?.trim() ?? "";
-        const password = credentials?.password ?? "";
-        if (!contractNumber || !password) return null;
-        const key = authKey("client", contractNumber);
-        if (!(await applyAuthBackoff(key))) return null;
-
-        const project = await prisma.clientConstructionProject.findUnique({
-          where: { contractNumber },
-        });
-        if (!project?.passwordHash) {
-          recordAuthResult(key, false);
-          return null;
-        }
-
-        const ok = await verifyPassword(password, project.passwordHash);
-        if (!ok) {
-          recordAuthResult(key, false);
-          return null;
-        }
-
-        recordAuthResult(key, true);
-        return {
-          id: project.id,
-          email: project.clientEmail ?? `${project.contractNumber}@client.local`,
-          name: project.clientName?.trim() || "Клиент",
-          role: "client" as const,
-          clientProjectId: project.id,
-        };
+        return authorizeClientCredentials(credentials?.contractNumber, credentials?.password);
       },
     }),
   ],

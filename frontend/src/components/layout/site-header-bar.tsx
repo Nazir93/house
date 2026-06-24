@@ -10,6 +10,7 @@ import {
   HEADER_TAGLINE,
   ACCOUNT_PORTAL_PATH,
   YANDEX_REVIEWS_URL,
+  BUILT_HOMES_SECTION_LABEL,
 } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
@@ -75,7 +76,7 @@ export function SiteHeaderBar() {
     : "color-mix(in srgb, var(--header-bar-bg) 44%, transparent)";
 
   const orderedNav = useMemo(() => {
-    const order = ["Проекты", "Портфолио", "Услуги", "О компании"];
+    const order = ["Проекты", BUILT_HOMES_SECTION_LABEL, "Услуги", "О компании"];
     return order
       .map((label) => NAV_SECTIONS.find((s) => s.label === label))
       .filter((s): s is NavSection => Boolean(s));

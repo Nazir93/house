@@ -39,6 +39,7 @@ import {
 import { BuiltObjectHistoryCards } from "@/components/portfolio/built-object-history-cards";
 import { formatArticleBody, PAGE_INTRO_PROSE_CLASS } from "@/lib/html-content";
 import type { BuiltObjectItem } from "@/lib/construction-shared";
+import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 /** Сетка 5×3 на странице; остальное — «Смотреть все». */
@@ -189,7 +190,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                   {" › "}
                 </span>
                 <Link href="/portfolio" className="hover:text-[var(--accent)]">
-                  Проекты
+                  {BUILT_HOMES_SECTION_LABEL}
                 </Link>
                 <span className="mx-1.5" aria-hidden>
                   {" › "}

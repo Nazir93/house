@@ -10,6 +10,8 @@ UPLOADS_DIR="${HOUSE_UPLOADS_DIR:-$ROOT/frontend/public/uploads}"
 cp "$ROOT/nginx/snippets/house-proxy.conf" "$SNIPPETS/house-proxy.conf"
 cp "$ROOT/nginx/snippets/house-gzip.conf" "$SNIPPETS/house-gzip.conf"
 cp "$ROOT/nginx/snippets/ssl-tls12-only.conf" "$SNIPPETS/ssl-tls12-only.conf"
+cp "$ROOT/nginx/snippets/house-rate-limit-zones.conf" "$SNIPPETS/house-rate-limit-zones.conf"
+cp "$ROOT/nginx/snippets/house-rate-limit-locations.conf" "$SNIPPETS/house-rate-limit-locations.conf"
 
 # Подставляем реальный путь к uploads в snippet для nginx
 sed "s|/var/www/house/frontend/public/uploads/|${UPLOADS_DIR%/}/|g" \
@@ -23,6 +25,10 @@ fi
 
 if ! grep -q 'house-gzip.conf' /etc/nginx/nginx.conf; then
   sed -i '/http {/a \    include /etc/nginx/snippets/house-gzip.conf;' /etc/nginx/nginx.conf
+fi
+
+if ! grep -q 'house-rate-limit-zones.conf' /etc/nginx/nginx.conf; then
+  sed -i '/http {/a \    include /etc/nginx/snippets/house-rate-limit-zones.conf;' /etc/nginx/nginx.conf
 fi
 
 ln -sf "$CONF" /etc/nginx/sites-enabled/house-chastdushi

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowRight, CheckCircle2, Clock, Download, Phone, Send } from "lucide-react";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { VkIcon } from "@/components/icons/vk-icon";
-import { SITE_NAME } from "@/lib/constants";
+import { SITE_NAME, BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { maxMessengerChatUrl } from "@/lib/messenger-links";
 import { isWorkingHours } from "@/lib/utils";
@@ -280,7 +280,7 @@ export function ThankYouContent() {
                 color: "var(--accent-contrast)",
               }}
             >
-              Перейти в портфолио
+              Перейти в {BUILT_HOMES_SECTION_LABEL.toLowerCase()}
               <ArrowRight className="h-4 w-4 shrink-0" strokeWidth={2.25} aria-hidden />
             </Link>
           </div>

@@ -131,7 +131,7 @@ export function PortfolioObjectMapDrawer({ object, onClose }: Props) {
               className="flex w-full items-center justify-center rounded-xl bg-[var(--accent)] px-4 py-3 text-center text-sm font-semibold text-white transition-opacity hover:opacity-95"
               onClick={onClose}
             >
-              Открыть проект в портфолио
+              Открыть карточку
             </Link>
           </div>
         </div>

@@ -28,7 +28,7 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { useState } from "react";
-import { SITE_NAME } from "@/lib/constants";
+import { SITE_NAME, BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { cn } from "@/lib/utils";
 import { useAdminNewLeadsNotify } from "@/hooks/use-admin-new-leads-notify";
@@ -43,7 +43,7 @@ const NAV_ITEMS = [
   { href: "/admin/calculator", label: "Калькулятор проектов", icon: Calculator },
   { href: "/admin/design-project-pricing", label: "Калькулятор проектирования", icon: Calculator },
   { href: "/admin/home-banner", label: "Главный баннер", icon: PanelTop },
-  { href: "/admin/built-objects", label: "Портфолио", icon: Images },
+  { href: "/admin/built-objects", label: BUILT_HOMES_SECTION_LABEL, icon: Images },
   { href: "/admin/client-projects", label: "Клиенты (кабинет)", icon: UserRound },
   { href: "/admin/posts", label: "Новости", icon: FileText },
   { href: "/admin/services", label: "Услуги", icon: Briefcase },

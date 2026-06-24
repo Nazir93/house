@@ -3,7 +3,15 @@ import crypto from "crypto";
 const TOKEN_TTL_MS = 30 * 60 * 1000;
 
 function secret(): string {
-  return process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || process.env.ADMIN_SECRET || "dev-lead-followup-secret";
+  const s =
+    process.env.LEAD_FOLLOWUP_SECRET?.trim() ||
+    process.env.NEXTAUTH_SECRET?.trim() ||
+    process.env.AUTH_SECRET?.trim();
+  if (s) return s;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("LEAD_FOLLOWUP_SECRET or NEXTAUTH_SECRET required in production");
+  }
+  return "dev-lead-followup-secret";
 }
 
 function sign(payload: string): string {

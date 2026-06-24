@@ -155,11 +155,13 @@ NextAuth строит CSRF и cookie от **`NEXTAUTH_URL`**. Если в `.env`
 
 ## Security Checklist
 
-- В production заданы `NEXTAUTH_SECRET`, `ADMIN_SECRET`, `YANDEX_SMARTCAPTCHA_SERVER_KEY`, `NEXT_PUBLIC_YANDEX_SMARTCAPTCHA_CLIENT_KEY` и `HEALTH_CHECK_SECRET`.
-- `E2E_ENABLED=1` не включён на production: тестовый seed API должен быть доступен только в dev/CI.
-- Клиентские документы загружаются как `/private-uploads/client-documents/...` и скачиваются только через `/api/client/documents/:id/download`.
-- Nginx/прокси передаёт `X-Forwarded-Proto` и `Host`; HTTPS включён, HSTS отдаётся приложением.
-- CSP сейчас включён как `Content-Security-Policy-Report-Only`; после проверки карт, SmartCaptcha, аналитики и камер можно переводить в enforced `Content-Security-Policy`.
+- В production заданы `NEXTAUTH_SECRET`, `ADMIN_EMAIL`, `ADMIN_SECRET` или `ADMIN_PASSWORD_HASH`, SmartCaptcha (`YANDEX_SMARTCAPTCHA_*`), `HEALTH_CHECK_SECRET`, желательно отдельный `INTERNAL_API_SECRET`.
+- `npm run env:check` с `NODE_ENV=production` должен проходить без ошибок перед деплоем.
+- `E2E_ENABLED=1` не включён на production: тестовый seed API только в dev/CI.
+- Клиентские документы: `storage/private/` — не в git; скачивание только через `/api/client/documents/:id/download`.
+- Nginx: `limit_req` на `/api/leads`, `/api/auth/*`, `/api/reviews/submit` (snippets `house-rate-limit-*`).
+- Cron: `scripts/setup-vps-cron.sh` — health каждые 5 мин + `pg_dump` ежедневно.
+- CSP: по умолчанию report-only; enforced — `CSP_ENFORCE=1` в `.env` после проверки в браузере.
 
 ## PWA (установка на экран)
 
@@ -174,7 +176,10 @@ NextAuth строит CSRF и cookie от **`NEXTAUTH_URL`**. Если в `.env`
 
 ## Нагрузка и мониторинг (после оптимизаций)
 
-- **КП (PDF):** после заявки генерация в **отдельном Node-процессе** (`scripts/run-proposal-job.cjs`), не в `house-next`. Зависшие `PENDING` подхватывает cron каждые 2 мин.
+- **Rate limit:** PostgreSQL `PublicRateBucket` — общий лимит для PM2 cluster; nginx `limit_req` на публичные POST.
+- **КП (PDF):** отдельный процесс, макс. `PROPOSAL_MAX_WORKERS` (по умолчанию 2) параллельных Chromium.
+- **Админка:** `pending-count` — SQL COUNT без загрузки всех сообщений.
+- **Cron:** health + pg backup — `scripts/setup-vps-cron.sh`.
 - **Загрузки `/uploads/`:** nginx отдаёт с диска (`nginx/snippets/house-uploads-static.conf`), Node не трогает картинки/видео.
 - **PM2:** на VPS с **≥6 ГБ RAM** автоматически **2 инстанса** (`cluster`). Иначе 1. Явно: `PM2_INSTANCES=2` в `frontend/.env`.
 - **Health:** `GET /api/health` — shallow; `GET /api/health?deep=1` + `Authorization: Bearer $HEALTH_CHECK_SECRET` — БД, очередь КП, память.

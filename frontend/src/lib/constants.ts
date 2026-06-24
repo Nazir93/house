@@ -1,5 +1,8 @@
 export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || "Часть души";
 
+/** Публичное название раздела `/portfolio` в меню, заголовках и хлебных крошках. */
+export const BUILT_HOMES_SECTION_LABEL = "Построенные дома";
+
 /** Слоган под логотипом в шапке (как на лендинге застройщика). */
 export const HEADER_TAGLINE =
   process.env.NEXT_PUBLIC_HEADER_TAGLINE?.trim() ||
@@ -47,7 +50,7 @@ export function getHeroGeoSubtitle(): string {
 
 /** Доп. фраза для meta description на главной и в layout. */
 export function getDefaultSiteGeoDescription(): string {
-  return `Строительство домов под ключ: качественные и понятные чертежи, прозрачная смета. Офис в ${CITY}, работаем в ${SERVICE_REGIONS}. Типовые и индивидуальные проекты, портфолио, ипотека.`;
+  return `Строительство домов под ключ: качественные и понятные чертежи, прозрачная смета. Офис в ${CITY}, работаем в ${SERVICE_REGIONS}. Типовые и индивидуальные проекты, построенные дома, ипотека.`;
 }
 
 type SchemaPlace = { "@type": "City" | "AdministrativeArea"; name: string };
@@ -214,7 +217,7 @@ export const STATS = [
     value: 120,
     label: "объектов в деле",
     suffix: "+",
-    detail: "Портфолио построенных домов и объектов на разных этапах строительства.",
+    detail: "Построенные дома и объекты на разных этапах строительства.",
   },
   {
     value: 85,

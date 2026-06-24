@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
 import type { ClientPaymentStatus } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { buildDefaultClientProjectStagesPayload } from "@/lib/client-project-default-stages";
@@ -10,6 +11,12 @@ import { hashPassword } from "@/lib/password";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export const dynamic = "force-dynamic";
+
+const clientProjectCreateSchema = z.object({
+  contractNumber: z.string().trim().min(1, "Нужен номер договора"),
+  plainPassword: z.string().min(6, "Пароль не короче 6 символов"),
+  title: z.string().trim().min(1, "Нужно название проекта"),
+});
 
 function parsePaymentStatus(v: unknown): ClientPaymentStatus {
   return v === "PAID" || v === "EXPECTED" || v === "NOT_ISSUED" ? v : "EXPECTED";
@@ -55,15 +62,16 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const contractNumber = String(body.contractNumber || "").trim();
-    const plainPassword = String(body.plainPassword || "");
-    const title = String(body.title || "").trim();
-    if (!contractNumber || !plainPassword || !title) {
-      return NextResponse.json(
-        { error: "Нужны contractNumber, plainPassword и title" },
-        { status: 400 }
-      );
+    const parsed = clientProjectCreateSchema.safeParse(body);
+    if (!parsed.success) {
+      const msg =
+        parsed.error.flatten().fieldErrors.contractNumber?.[0] ||
+        parsed.error.flatten().fieldErrors.plainPassword?.[0] ||
+        parsed.error.flatten().fieldErrors.title?.[0] ||
+        "Некорректные данные";
+      return NextResponse.json({ error: msg }, { status: 400 });
     }
+    const { contractNumber, plainPassword, title } = parsed.data;
 
     const exists = await prisma.clientConstructionProject.findUnique({
       where: { contractNumber },

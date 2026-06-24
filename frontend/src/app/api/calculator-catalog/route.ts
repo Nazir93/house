@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getCalculatorConfig, buildPublicCatalog } from "@/lib/calculator-catalog";
 import { isHouseCalculatorCategoryId, type HouseCalculatorCategoryId } from "@/lib/house-project-calculator-engine";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 export async function GET(req: Request) {
   const url = new URL(req.url);
@@ -12,10 +12,17 @@ export async function GET(req: Request) {
   const config = await getCalculatorConfig();
   const catalog = buildPublicCatalog(config, categoryId);
 
-  return NextResponse.json({
-    categoryId,
-    facades: catalog.facades,
-    engineering: catalog.engineering,
-    construction: catalog.construction,
-  });
+  return NextResponse.json(
+    {
+      categoryId,
+      facades: catalog.facades,
+      engineering: catalog.engineering,
+      construction: catalog.construction,
+    },
+    {
+      headers: {
+        "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60",
+      },
+    }
+  );
 }

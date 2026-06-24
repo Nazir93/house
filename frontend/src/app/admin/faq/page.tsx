@@ -106,7 +106,7 @@ export default function AdminFaqPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">FAQ</h1>
           <p className="text-sm text-white/40 mt-1">
-            {faqs.length} вопросов · главная и карточки портфолио
+            {faqs.length} вопросов · главная и карточки построенных домов
           </p>
           <p className="text-xs text-white/25 mt-1">
             FAQ на страницах услуг — в разделе «Услуги» → лендинг услуги.

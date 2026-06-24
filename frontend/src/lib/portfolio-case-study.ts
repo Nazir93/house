@@ -70,7 +70,7 @@ function prependCmsMediaPhases(object: BuiltObjectItem, phases: CaseStudyPhase[]
         "_cms_renders",
         "Рендеры и фото объекта",
         renderUrls,
-        renderUrls.length > 0 ? "Материалы из карточки портфолио." : undefined
+        renderUrls.length > 0 ? "Материалы из карточки построенного дома." : undefined
       )
     );
   }
@@ -78,7 +78,7 @@ function prependCmsMediaPhases(object: BuiltObjectItem, phases: CaseStudyPhase[]
   const plans = getBuiltObjectPlans(object);
   const planUrls = plans.map((m) => m.url).filter(Boolean);
   if (planUrls.length > 0) {
-    prefix.push(galleryPhase("_cms_plans", "Планировки", planUrls, "Из карточки портфолио."));
+    prefix.push(galleryPhase("_cms_plans", "Планировки", planUrls, "Из карточки построенного дома."));
   }
 
   return [...prefix, ...phases];

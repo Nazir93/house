@@ -7,6 +7,12 @@ import { sendBitrixLead } from "@/lib/bitrix";
 import { createLeadFollowupToken, verifyLeadFollowupToken } from "@/lib/lead-followup-token";
 import { scheduleLeadProposalPdf } from "@/lib/proposal/schedule-proposal-job";
 import { sendVacancyResponseEmail } from "@/lib/vacancy-response-mail";
+import { withApiRouteLog } from "@/lib/api-route-log";
+import {
+  isSmartCaptchaConfigured,
+  requireSmartCaptchaOnProduction,
+  smartCaptchaUnavailableResponse,
+} from "@/lib/smart-captcha-config";
 
 const VACANCY_RESPONSE_SOURCE = "partner-vacancy";
 
@@ -98,6 +104,10 @@ async function checkLeadRateLimit(ip: string): Promise<boolean> {
 }
 
 export async function POST(request: NextRequest) {
+  return withApiRouteLog("POST", "/api/leads", () => handleLeadPost(request));
+}
+
+async function handleLeadPost(request: NextRequest) {
   try {
     const ip =
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
@@ -130,6 +140,11 @@ export async function POST(request: NextRequest) {
       (parsed.data.source === "offer-pizza" || parsed.data.source === "calculator-pizza") &&
       (await verifyOfferPizzaPreviousLead(parsed.data.calcData));
 
+    if (requireSmartCaptchaOnProduction() && !isSmartCaptchaConfigured() && !pizzaFollowupOk) {
+      const unavailable = smartCaptchaUnavailableResponse();
+      return NextResponse.json({ error: unavailable.error }, { status: unavailable.status });
+    }
+
     if (smartCaptchaSecret && parsed.data.recaptchaToken) {
       try {
         const verifyRes = await fetch("https://smartcaptcha.yandexcloud.net/validate", {
@@ -155,7 +170,7 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-    } else if (smartCaptchaSecret && !parsed.data.recaptchaToken && !pizzaFollowupOk) {
+    } else if ((smartCaptchaSecret || requireSmartCaptchaOnProduction()) && !parsed.data.recaptchaToken && !pizzaFollowupOk) {
       return NextResponse.json(
         { error: "Проверка не пройдена. Обновите страницу и попробуйте снова." },
         { status: 400 }

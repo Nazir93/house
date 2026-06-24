@@ -4,12 +4,20 @@ import { prisma } from "@/lib/db";
 import { revalidatePublicReviews } from "@/lib/revalidate-public-content";
 import { isReviewSubmitValid, reviewSubmitSchema } from "@/lib/review-content";
 import { checkReviewSubmitRateLimit } from "@/lib/review-rate-limit";
+import {
+  isSmartCaptchaConfigured,
+  requireSmartCaptchaOnProduction,
+  smartCaptchaUnavailableResponse,
+} from "@/lib/smart-captcha-config";
 
 export const dynamic = "force-dynamic";
 
 async function verifySmartCaptcha(token: string, ip: string): Promise<boolean> {
   const secret = process.env.YANDEX_SMARTCAPTCHA_SERVER_KEY?.trim();
-  if (!secret) return true;
+  if (!secret) {
+    if (requireSmartCaptchaOnProduction()) return false;
+    return true;
+  }
   if (!token) return false;
 
   try {
@@ -32,7 +40,7 @@ export async function POST(request: NextRequest) {
       request.headers.get("x-real-ip") ||
       "unknown";
 
-    if (!checkReviewSubmitRateLimit(ip)) {
+    if (!(await checkReviewSubmitRateLimit(ip))) {
       return NextResponse.json(
         { error: "Слишком много попыток. Попробуйте через 15 минут." },
         { status: 429 },
@@ -56,8 +64,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Некорректные данные" }, { status: 400 });
     }
 
+    if (requireSmartCaptchaOnProduction() && !isSmartCaptchaConfigured()) {
+      const unavailable = smartCaptchaUnavailableResponse();
+      return NextResponse.json({ error: unavailable.error }, { status: unavailable.status });
+    }
+
     const captchaOk = await verifySmartCaptcha(parsed.data.recaptchaToken ?? "", ip);
-    if (!captchaOk && process.env.YANDEX_SMARTCAPTCHA_SERVER_KEY?.trim()) {
+    if (!captchaOk) {
       return NextResponse.json(
         { error: "Проверка не пройдена. Обновите страницу и попробуйте снова." },
         { status: 400 },

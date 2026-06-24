@@ -32,6 +32,10 @@ export async function GET(request: NextRequest) {
   }
 
   const secret = process.env.HEALTH_CHECK_SECRET?.trim();
+  const isProduction = process.env.NODE_ENV === "production";
+  if (!secret && isProduction) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   if (secret) {
     const auth = request.headers.get("authorization");
     const token = auth?.startsWith("Bearer ") ? auth.slice(7).trim() : "";

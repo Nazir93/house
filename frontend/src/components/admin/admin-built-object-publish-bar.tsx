@@ -1,6 +1,7 @@
 "use client";
 
 import { Upload } from "lucide-react";
+import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 
 type AdminBuiltObjectPublishBarProps = {
   publishing: boolean;
@@ -19,7 +20,7 @@ export function AdminBuiltObjectPublishBar({
   return (
     <div
       className="admin-built-object-publish-bar fixed z-[68] top-3 right-[4.35rem] sm:top-4 sm:right-[5rem] lg:top-5 lg:right-[5.75rem]"
-      aria-label="Публикация в портфолио на сайте"
+      aria-label={`Публикация в раздел «${BUILT_HOMES_SECTION_LABEL}» на сайте`}
     >
       <button
         type="button"
@@ -32,7 +33,7 @@ export function AdminBuiltObjectPublishBar({
           {publishing ? "Публикация…" : "На сайт"}
         </span>
         <span className="hidden md:inline">
-          {publishing ? "Публикация…" : "Опубликовать в портфолио на сайт"}
+          {publishing ? "Публикация…" : `Опубликовать в «${BUILT_HOMES_SECTION_LABEL}»`}
         </span>
         <span className="min-[420px]:hidden">{publishing ? "…" : "На сайт"}</span>
       </button>

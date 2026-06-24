@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Save, Plus, Trash2, AlertCircle, Search, ChevronDown, ChevronRight } from "lucide-react";
 import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
 import { RichEditor } from "@/components/admin/rich-editor";
+import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 
 interface PageMetaItem {
   id: string;
@@ -59,8 +60,8 @@ const KNOWN_PAGES = [
   { path: "/services/krovlya", label: "Услуга: кровля" },
   { path: "/services/inzheneriya", label: "Услуга: инженерные сети" },
   { path: "/services/otdelka", label: "Услуга: отделка" },
-  { path: "/portfolio", label: "Портфолио (список)" },
-  { path: "/portfolio/map", label: "Портфолио на карте" },
+  { path: "/portfolio", label: `${BUILT_HOMES_SECTION_LABEL} (список)` },
+  { path: "/portfolio/map", label: `${BUILT_HOMES_SECTION_LABEL} на карте` },
   { path: "/blog", label: "Блог" },
   { path: "/contacts", label: "Контакты" },
   { path: "/technology/materials", label: "Технологии: материалы" },
@@ -263,7 +264,7 @@ function MetaTab() {
         Задайте уникальные мета-теги для каждой страницы. Незаполненные поля используют значения по умолчанию из кода.
       </p>
       <p className="text-xs text-white/20 mb-4">
-        «Новости» и «Портфолио» (построенные дома): тексты и обложки в соответствующих разделах. Ниже — блоки по URL для{" "}
+        «Новости» и «{BUILT_HOMES_SECTION_LABEL}»: тексты и обложки в соответствующих разделах. Ниже — блоки по URL для{" "}
         <code className="text-white/40">/blog/slug</code> и{" "}
         <code className="text-white/40">/portfolio/slug</code>
         : сниппет и H1 по умолчанию из статьи/объекта; полное переопределение title/description/H1/OG — здесь (PageMeta).
@@ -281,7 +282,7 @@ function MetaTab() {
         })),
         ...portfolioCases.map((c) => ({
           path: `/portfolio/${c.slug}`,
-          label: `Портфолио: ${c.title}`,
+          label: `${BUILT_HOMES_SECTION_LABEL}: ${c.title}`,
         })),
       ].map(({ path, label }) => (
         <div

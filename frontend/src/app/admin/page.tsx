@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
+import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -303,7 +304,7 @@ export default async function AdminDashboard() {
           />
           <CompactStatCard
             href="/admin/built-objects"
-            label="Портфолио"
+            label={BUILT_HOMES_SECTION_LABEL}
             value={stats.builtObjects}
             icon={Images}
           />

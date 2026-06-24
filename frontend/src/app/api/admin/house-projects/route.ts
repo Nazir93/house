@@ -34,6 +34,8 @@ export async function GET(request: NextRequest) {
 
   const search = request.nextUrl.searchParams.get("search")?.trim();
   const catalogKind = parseHouseProjectCatalogKind(request.nextUrl.searchParams.get("catalogKind"));
+  const limitRaw = request.nextUrl.searchParams.get("limit");
+  const limit = limitRaw ? Math.min(Math.max(parseInt(limitRaw, 10) || 100, 1), 200) : undefined;
 
   try {
     const projects = await (prisma as any).houseProject.findMany({
@@ -42,6 +44,7 @@ export async function GET(request: NextRequest) {
         ...(search ? { title: { contains: search, mode: "insensitive" } } : {}),
       },
       orderBy: [{ order: "asc" }, { createdAt: "desc" }],
+      ...(limit ? { take: limit } : {}),
       include: {
         media: { orderBy: [{ type: "asc" }, { order: "asc" }] },
         builtObjects: { select: { id: true, title: true, slug: true } },

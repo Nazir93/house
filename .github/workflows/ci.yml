@@ -61,6 +61,19 @@ jobs:
       - name: Unit tests
         run: npm run test
 
+      - name: npm audit (high+)
+        run: npm audit --audit-level=high || true
+
+      - name: env:check (CI placeholders)
+        run: npm run env:check
+        env:
+          ADMIN_SECRET: ci-admin-secret
+          NEXT_PUBLIC_SITE_URL: http://localhost:3000
+          YANDEX_SMARTCAPTCHA_SERVER_KEY: ci-captcha-server
+          NEXT_PUBLIC_YANDEX_SMARTCAPTCHA_CLIENT_KEY: ci-captcha-client
+          HEALTH_CHECK_SECRET: ci-health-secret
+          ADMIN_EMAIL: ci@example.com
+
       - name: Production build
         run: npm run build
 

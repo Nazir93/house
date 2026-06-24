@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { SITE_NAME } from "@/lib/constants";
+import { SITE_NAME, BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 import { getBuiltObjectBySlug } from "@/lib/construction-data";
 import { getPublicFaqs } from "@/lib/get-public-faqs";
 import { getBuiltObjectCover } from "@/lib/construction-shared";
@@ -43,7 +43,7 @@ export default async function CasePage(props: Props) {
       <BreadcrumbJsonLd
         items={[
           { name: "Главная", path: "/" },
-          { name: "Портфолио", path: "/portfolio" },
+          { name: BUILT_HOMES_SECTION_LABEL, path: "/portfolio" },
           { name: object.title, path: `/portfolio/${object.slug}` },
         ]}
       />

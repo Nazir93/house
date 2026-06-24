@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useCallback, useState } from "react";
 import { MapPin } from "lucide-react";
+import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 import { normalizeRussiaMapCoordinates } from "@/lib/map-tiles";
 
 const BuiltObjectMapPickerMap = dynamic(
@@ -54,7 +55,7 @@ export function BuiltObjectMapPicker({ latitude, longitude, onCoordinatesChange 
         <MapPin size={12} aria-hidden />
         {latNum != null && lonNum != null
           ? `Метка: ${formatCoord(latNum)}, ${formatCoord(lonNum)}`
-          : "Кликните на карту — без метки дом на карте портфолио не появится"}
+          : `Кликните на карту — без метки дом на карте «${BUILT_HOMES_SECTION_LABEL}» не появится`}
       </p>
     </div>
   );

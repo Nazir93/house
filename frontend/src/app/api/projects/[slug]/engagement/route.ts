@@ -9,7 +9,7 @@ import {
   ENGAGEMENT_VIEW_COOKIE_MAX_AGE,
   resolveHouseProjectEngagement,
 } from "@/lib/house-project-engagement";
-import { checkPublicApiRateLimit, rateLimitKeyFromHeaders } from "@/lib/public-api-rate-limit";
+import { checkPublicApiRateLimitAsync, rateLimitKeyFromHeaders } from "@/lib/public-api-rate-limit";
 import { revalidateTagWithProfile } from "@/lib/revalidate-tag";
 
 export const dynamic = "force-dynamic";
@@ -51,11 +51,11 @@ export async function POST(
   context: { params: Promise<{ slug: string }> },
 ) {
   if (
-    !checkPublicApiRateLimit(rateLimitKeyFromHeaders(request.headers), {
+    !(await checkPublicApiRateLimitAsync(rateLimitKeyFromHeaders(request.headers), {
       namespace: "project-engagement",
       max: 120,
       windowMs: 10 * 60 * 1000,
-    })
+    }))
   ) {
     return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
@@ -101,7 +101,6 @@ export async function POST(
         sameSite: "lax",
         path: "/",
       });
-      revalidateTagWithProfile(CACHE_TAG_PUBLIC_HOUSE_PROJECTS);
     }
   } else {
     const wantLiked = likedPayload ?? !wasLiked;

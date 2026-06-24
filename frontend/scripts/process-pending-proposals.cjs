@@ -5,6 +5,7 @@
 const { spawn } = require("child_process");
 const path = require("path");
 const { loadEnvFiles } = require("./load-env-files.cjs");
+const { canSpawnProposalWorker } = require("./proposal-worker-semaphore.cjs");
 
 loadEnvFiles();
 
@@ -33,6 +34,7 @@ async function main() {
     }
 
     for (const row of pending) {
+      if (!canSpawnProposalWorker()) break;
       const child = spawn(process.execPath, [script, row.id], {
         detached: true,
         stdio: "ignore",

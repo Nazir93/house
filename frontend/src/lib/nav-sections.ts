@@ -14,6 +14,8 @@ export function isNavGroup(item: NavItem): item is NavGroup {
   return "children" in item && Array.isArray((item as NavGroup).children);
 }
 
+import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
+
 export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Проекты",
@@ -23,7 +25,7 @@ export const NAV_SECTIONS: NavSection[] = [
     ],
   },
   {
-    label: "Портфолио",
+    label: BUILT_HOMES_SECTION_LABEL,
     items: [
       { href: "/portfolio", label: "Реализованные объекты" },
       { href: "/portfolio/map", label: "Карта объектов" },

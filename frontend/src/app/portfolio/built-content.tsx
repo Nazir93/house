@@ -15,6 +15,7 @@ import {
   type PortfolioAreaFilterId,
 } from "@/lib/portfolio-filter-options";
 import { cn } from "@/lib/utils";
+import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 import { CmsImage } from "@/components/ui/cms-image";
 
 const PortfolioObjectMapExplorer = dynamic(
@@ -204,7 +205,7 @@ export function BuiltPortfolioContent({
           aria-controls="portfolio-filters-drawer"
         >
           <SlidersHorizontal size={20} strokeWidth={2.2} aria-hidden />
-          <span className="sr-only">Фильтры портфолио</span>
+          <span className="sr-only">Фильтры: {BUILT_HOMES_SECTION_LABEL}</span>
           {hasCustomFilters ? <span className="projects-catalog-filters-fab__dot" aria-hidden /> : null}
         </button>
 
@@ -228,7 +229,7 @@ export function BuiltPortfolioContent({
             ref={mobileFiltersDrawerRef}
             role="dialog"
             aria-modal="true"
-            aria-label="Фильтры портфолио"
+            aria-label={`Фильтры: ${BUILT_HOMES_SECTION_LABEL}`}
             className={cn(
               "projects-catalog-filters-drawer",
               mobileFiltersOpen && "projects-catalog-filters-drawer--open"
@@ -299,13 +300,12 @@ export function BuiltPortfolioContent({
           <span className="mx-1.5 text-[var(--text-subtle)] sm:mx-2" aria-hidden>
             {" > "}
           </span>
-          <span className="text-[var(--text)]">Наши проекты</span>
+          <span className="text-[var(--text)]">{BUILT_HOMES_SECTION_LABEL}</span>
         </nav>
 
         <div className="mt-5 max-w-3xl md:mt-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">Построенные дома</p>
-          <h1 className="mt-2 font-heading text-3xl font-bold tracking-tight text-[var(--accent)] md:text-[2.75rem] md:leading-[1.06] lg:text-[3.15rem] dark:text-[var(--text)]">
-            Портфолио
+          <h1 className="font-heading text-3xl font-bold tracking-tight text-[var(--accent)] md:text-[2.75rem] md:leading-[1.06] lg:text-[3.15rem] dark:text-[var(--text)]">
+            {BUILT_HOMES_SECTION_LABEL}
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--text-muted)] md:text-base">
             Реализованные дома, которые можно отфильтровать по материалу, этажности и площади.
@@ -337,7 +337,7 @@ export function BuiltPortfolioContent({
               <div className="hidden lg:block">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--text-muted)]">
-                    Фильтры портфолио
+                    Фильтры
                   </p>
                   <span className="rounded-full bg-[var(--bg)] px-3 py-1 text-[11px] font-semibold text-[var(--text-muted)]">
                     {filtered.length} объектов
@@ -359,7 +359,7 @@ export function BuiltPortfolioContent({
               </div>
 
               {objects.length === 0 ? (
-                <p className="py-16 text-center text-sm text-[var(--text-muted)]">Объекты портфолио пока не добавлены.</p>
+                <p className="py-16 text-center text-sm text-[var(--text-muted)]">Построенные дома пока не добавлены.</p>
               ) : filtered.length === 0 ? (
                 <p className="py-16 text-center text-sm text-[var(--text-muted)]">Нет объектов с выбранными фильтрами.</p>
               ) : (

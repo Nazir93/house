@@ -1,13 +1,13 @@
 import { getPageMeta, getPageMetaFields } from "@/lib/get-page-meta";
 import { getBuiltObjects } from "@/lib/construction-data";
-import { SITE_NAME } from "@/lib/constants";
+import { SITE_NAME, BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 import { BuiltPortfolioContent } from "./built-content";
 
 export const revalidate = 60;
 
 export async function generateMetadata() {
   return getPageMeta({
-    title: `Наши проекты — построенные дома | ${SITE_NAME}`,
+    title: `${BUILT_HOMES_SECTION_LABEL} | ${SITE_NAME}`,
     description: `Наши проекты ${SITE_NAME}: реализованные объекты, этапы строительства и карта объектов.`,
     path: "/portfolio",
     keywords: ["построенные дома", "портфолио строительства", "карта объектов", SITE_NAME],

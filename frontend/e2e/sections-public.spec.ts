@@ -7,7 +7,7 @@ test.describe("Главная", () => {
   });
 });
 
-test.describe("Портфолио", () => {
+test.describe("Построенные дома", () => {
   test("/portfolio", async ({ page }) => {
     await expectPublicPage(page, "/portfolio");
   });

@@ -60,7 +60,14 @@ for (const key of required) {
 
 const adminEmail = process.env.ADMIN_EMAIL?.trim();
 if (!adminEmail) {
-  console.log("  · ADMIN_EMAIL — не задано, вход в админку: admin@dom.ru (см. lib/auth.ts)");
+  if (isProduction) {
+    console.error("  ✗ ADMIN_EMAIL — не задано (обязательно на production, не используйте admin@dom.ru)");
+    failed = true;
+  } else {
+    console.log("  · ADMIN_EMAIL — не задано, вход в админку: admin@dom.ru (см. lib/auth.ts)");
+  }
+} else if (isProduction && adminEmail.toLowerCase() === "admin@dom.ru") {
+  console.warn("  ⚠ ADMIN_EMAIL = admin@dom.ru — смените на уникальный адрес");
 } else {
   console.log(`  ✓ ADMIN_EMAIL = ${adminEmail}`);
 }
@@ -90,7 +97,18 @@ const securityRecommended = [
   ["YANDEX_SMARTCAPTCHA_SERVER_KEY", "SmartCaptcha server key для публичных форм"],
   ["NEXT_PUBLIC_YANDEX_SMARTCAPTCHA_CLIENT_KEY", "SmartCaptcha client key для публичных форм"],
   ["HEALTH_CHECK_SECRET", "секрет для deep health-check (/api/health?deep=1)"],
+  ["INTERNAL_API_SECRET", "секрет для /api/internal/* (не NEXTAUTH_SECRET)"],
 ];
+
+const productionSecurityRequired = [
+  ["YANDEX_SMARTCAPTCHA_SERVER_KEY", "SmartCaptcha server key"],
+  ["NEXT_PUBLIC_YANDEX_SMARTCAPTCHA_CLIENT_KEY", "SmartCaptcha client key"],
+  ["HEALTH_CHECK_SECRET", "HEALTH_CHECK_SECRET"],
+];
+
+const isProduction =
+  process.env.NODE_ENV === "production" ||
+  process.env.REQUIRE_PRODUCTION_ENV === "1";
 
 console.log("");
 console.log("  Рекомендуемые security-переменные:");
@@ -104,7 +122,36 @@ for (const [key, hint] of securityRecommended) {
 }
 
 if (process.env.E2E_ENABLED === "1") {
-  console.warn("  ⚠ E2E_ENABLED=1 — отключите на production (тестовый seed API)");
+  if (isProduction) {
+    console.error("  ✗ E2E_ENABLED=1 — отключите на production (тестовый seed API)");
+    failed = true;
+  } else {
+    console.warn("  ⚠ E2E_ENABLED=1 — только для dev/CI");
+  }
+}
+
+if (isProduction) {
+  console.log("");
+  console.log("  Обязательные security-переменные (production):");
+  for (const [key, hint] of productionSecurityRequired) {
+    const v = process.env[key]?.trim();
+    if (!v) {
+      console.error(`  ✗ ${key} — не задано (${hint})`);
+      failed = true;
+    } else {
+      console.log(`  ✓ ${key} = (скрыто)`);
+    }
+  }
+
+  const internal = process.env.INTERNAL_API_SECRET?.trim();
+  const nextAuth = process.env.NEXTAUTH_SECRET?.trim();
+  if (!internal) {
+    console.warn("  ⚠ INTERNAL_API_SECRET — не задан, fallback на NEXTAUTH_SECRET (лучше разделить)");
+  } else if (internal === nextAuth) {
+    console.warn("  ⚠ INTERNAL_API_SECRET совпадает с NEXTAUTH_SECRET — задайте отдельный секрет");
+  } else {
+    console.log("  ✓ INTERNAL_API_SECRET = (скрыто)");
+  }
 }
 
 console.log("");

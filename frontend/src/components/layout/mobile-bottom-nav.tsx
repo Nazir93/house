@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Home, LayoutGrid, Images, Phone } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
@@ -29,7 +30,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     href: "/portfolio",
-    label: "Портфолио",
+    label: BUILT_HOMES_SECTION_LABEL,
     Icon: Images,
     isActive: (p) => p.startsWith("/portfolio"),
   },

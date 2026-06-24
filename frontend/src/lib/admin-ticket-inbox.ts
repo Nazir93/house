@@ -37,6 +37,29 @@ export function countTicketsNeedingStaffReply(tickets: AdminTicketRow[]): number
   return tickets.filter(ticketNeedsStaffReply).length;
 }
 
+/** SQL COUNT — без загрузки сообщений (для polling админки). */
+export async function countTicketsNeedingStaffReplyDb(): Promise<number> {
+  const { prisma } = await import("@/lib/db");
+  const rows = await prisma.$queryRaw<{ count: number }[]>`
+    SELECT COUNT(*)::int AS count
+    FROM "ClientSupportTicket" t
+    WHERE t.status <> 'CLOSED'
+      AND EXISTS (
+        SELECT 1
+        FROM "ClientSupportTicketMessage" m
+        WHERE m."ticketId" = t.id
+          AND m."authorType" = 'CLIENT'
+          AND m."createdAt" = (
+            SELECT MAX(m2."createdAt")
+            FROM "ClientSupportTicketMessage" m2
+            WHERE m2."ticketId" = t.id
+          )
+          AND (t."staffLastReadAt" IS NULL OR m."createdAt" > t."staffLastReadAt")
+      )
+  `;
+  return rows[0]?.count ?? 0;
+}
+
 export function previewTicketBody(body: string, max = 120): string {
   const oneLine = body.replace(/\s+/g, " ").trim();
   if (oneLine.length <= max) return oneLine;

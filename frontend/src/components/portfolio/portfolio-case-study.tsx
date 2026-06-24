@@ -22,6 +22,7 @@ import {
   type CaseStudyViewMode,
 } from "@/lib/portfolio-case-study";
 import { PAGE_INTRO_PROSE_CLASS } from "@/lib/html-content";
+import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 import { CmsImage } from "@/components/ui/cms-image";
 import {
   collectAllCaseStudyImages,
@@ -586,7 +587,7 @@ export function PortfolioCaseStudy({
 
         <CaseStudyGallery
           images={images}
-          altBase={phase?.title ?? "Портфолио"}
+          altBase={phase?.title ?? BUILT_HOMES_SECTION_LABEL}
           mode={viewMode}
           onImageClick={onGalleryImageClick}
         />

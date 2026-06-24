@@ -34,6 +34,7 @@ import { BuiltObjectHistoryEditor } from "@/components/admin/built-object-histor
 import { historyStagesForAdmin } from "@/lib/built-object-detail";
 import type { AdminHouseProjectOption } from "@/lib/load-admin-house-project-options";
 import { uploadAdminMedia } from "@/lib/admin-upload";
+import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 
 const MATERIALS = [
   ["GAS_BLOCK", "Газобетон"],
@@ -252,7 +253,7 @@ export function BuiltObjectForm({
       setError("Сначала сохраните раздел «Основное»");
       return;
     }
-    if (!confirm("Опубликовать объект в портфолио на сайте?")) return;
+    if (!confirm(`Опубликовать объект в раздел «${BUILT_HOMES_SECTION_LABEL}» на сайте?`)) return;
 
     setPublishing(true);
     setError("");
@@ -265,7 +266,7 @@ export function BuiltObjectForm({
         return;
       }
       setHasUnpublishedDraft(Boolean(data.hasUnpublishedDraft));
-      setMsg("Объект опубликован в портфолио на сайте.");
+      setMsg(`Объект опубликован в раздел «${BUILT_HOMES_SECTION_LABEL}» на сайте.`);
       router.refresh();
     } catch {
       setError("Сеть");
@@ -403,7 +404,9 @@ export function BuiltObjectForm({
           <ArrowLeft size={18} />
         </Link>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold tracking-tight">{form.id ? "Объект портфолио" : "Новый объект портфолио"}</h1>
+          <h1 className="text-2xl font-bold tracking-tight">
+            {form.id ? `Карточка: ${BUILT_HOMES_SECTION_LABEL}` : `Новый: ${BUILT_HOMES_SECTION_LABEL}`}
+          </h1>
           {form.id ? (
             <p className="mt-1 text-xs text-white/40">
               {initial?.published ? "На сайте опубликован" : "Черновик — не виден на сайте"}
@@ -536,7 +539,7 @@ export function BuiltObjectForm({
                 uploading={uploading === "renders"}
                 uploadProgress={uploadProgress}
                 onUploadFiles={(files) => void uploadMany("renders", files)}
-                emptyHint="Первое фото станет обложкой в каталоге портфолио."
+                emptyHint={`Первое фото станет обложкой в каталоге «${BUILT_HOMES_SECTION_LABEL}».`}
               />
             </div>
 

@@ -347,6 +347,17 @@ model LeadIpRateBucket {
   @@index([bucketStart])
 }
 
+/// Универсальный счётчик rate limit (отзывы, engagement, auth, log-404) — общий для PM2 cluster.
+model PublicRateBucket {
+  scopeKey    String
+  bucketStart DateTime
+  count       Int      @default(1)
+  updatedAt   DateTime @updatedAt
+
+  @@id([scopeKey, bucketStart])
+  @@index([bucketStart])
+}
+
 model Lead {
   id          String     @id @default(cuid())
   name        String
@@ -372,6 +383,7 @@ model Lead {
 
   @@index([status])
   @@index([createdAt])
+  @@index([proposalStatus, createdAt])
   @@index([service])
 }
 

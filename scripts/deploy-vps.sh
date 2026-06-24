@@ -113,6 +113,15 @@ else
   npm run db:verify
 fi
 
+if [[ "${SKIP_ENV_CHECK:-}" == "1" ]]; then
+  echo "==> SKIP_ENV_CHECK=1 — env:check пропущен"
+else
+  echo "==> npm run env:check"
+  NODE_ENV=production npm run env:check || {
+    echo "WARN: env:check не прошёл — задайте captcha/HEALTH_CHECK_SECRET/ADMIN_EMAIL в frontend/.env"
+  }
+fi
+
 if [[ "${SKIP_TESTS:-}" == "1" ]]; then
   echo "==> SKIP_TESTS=1 — npm run check пропущен"
 else
@@ -133,9 +142,26 @@ bash "$ROOT/scripts/setup-nginx-house.sh"
 echo "==> cron: фоновые КП (fallback)"
 bash "$ROOT/scripts/setup-proposal-cron.sh" 2>/dev/null || echo "WARN: cron proposal worker не настроен (нет crontab?)"
 
+echo "==> cron: health + pg backup"
+bash "$ROOT/scripts/setup-vps-cron.sh" 2>/dev/null || echo "WARN: cron health/backup не настроен"
+
 echo "==> pm2 startOrReload house-next --update-env && pm2 save"
 cd "$ROOT/frontend"
 pm2 startOrReload ecosystem.config.cjs --update-env
 pm2 save
 
-echo "OK: деплой завершён (house-next перезагружен). ЛК: /account/login, админка: /admin/client-projects"
+echo "==> post-deploy smoke"
+HEALTH_URL="${HEALTH_URL:-https://chastdushi.ru/api/health}"
+if curl -fsS --max-time 20 "$HEALTH_URL" >/dev/null; then
+  echo "OK: $HEALTH_URL"
+else
+  echo "WARN: health check failed — проверьте pm2 logs house-next"
+fi
+
+BUILD_ID="$(git -C "$ROOT" rev-parse --short HEAD)"
+echo "OK: деплой завершён (build $BUILD_ID, house-next перезагружен). ЛК: /account/login, админка: /admin/client-projects"
+
+if [[ "${SKIP_LOAD_SMOKE:-}" != "1" ]]; then
+  echo "==> load smoke (port 8080)"
+  bash "$ROOT/scripts/load-smoke.sh" 2>/dev/null || echo "WARN: load-smoke не прошёл (не критично)"
+fi

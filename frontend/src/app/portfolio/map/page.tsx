@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getPageMeta, getPageMetaFields } from "@/lib/get-page-meta";
 import { getBuiltObjects } from "@/lib/construction-data";
-import { SITE_NAME } from "@/lib/constants";
+import { SITE_NAME, BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 import { PortfolioObjectMapExplorer } from "@/components/portfolio/portfolio-object-map-explorer";
 
 export const revalidate = 60;
@@ -9,7 +9,7 @@ export const revalidate = 60;
 export async function generateMetadata() {
   return getPageMeta({
     title: `Карта построенных объектов | ${SITE_NAME}`,
-    description: `Интерактивная карта реализованных объектов ${SITE_NAME}: фильтры по региону, площади и этажности. Выберите маркер и откройте полный кейс в портфолио.`,
+    description: `Интерактивная карта реализованных объектов ${SITE_NAME}: фильтры по региону, площади и этажности. Выберите маркер и откройте карточку построенного дома.`,
     path: "/portfolio/map",
     keywords: ["карта объектов", "построенные дома", "стройплощадка", SITE_NAME],
   });
@@ -33,7 +33,7 @@ export default async function PortfolioMapPage(props: { searchParams?: Promise<{
               {" > "}
             </span>
             <Link href="/portfolio" className="transition-colors hover:text-[var(--accent)]">
-              Портфолио
+              {BUILT_HOMES_SECTION_LABEL}
             </Link>
             <span className="mx-1.5 text-[var(--text-subtle)] sm:mx-2" aria-hidden>
               {" > "}
