@@ -23,7 +23,10 @@ fi
 STAMP="$(date +%Y%m%d-%H%M%S)"
 OUT="$BACKUP_DIR/house-$STAMP.sql.gz"
 
-pg_dump "$DATABASE_URL" | gzip -9 > "$OUT"
+# pg_dump не принимает query-параметр schema= из Prisma DATABASE_URL
+DUMP_URL="${DATABASE_URL%%\?*}"
+
+pg_dump "$DUMP_URL" | gzip -9 > "$OUT"
 echo "OK: backup $OUT ($(du -h "$OUT" | awk '{print $1}'))"
 
 find "$BACKUP_DIR" -name 'house-*.sql.gz' -mtime +"$RETENTION_DAYS" -delete 2>/dev/null || true
