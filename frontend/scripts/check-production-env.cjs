@@ -38,6 +38,10 @@ function normUrl(u) {
 
 let failed = false;
 
+const isProduction =
+  process.env.NODE_ENV === "production" ||
+  process.env.REQUIRE_PRODUCTION_ENV === "1";
+
 console.log("");
 console.log("  Проверка переменных окружения (production-ready)");
 console.log("");
@@ -105,10 +109,6 @@ const productionSecurityRequired = [
   ["NEXT_PUBLIC_YANDEX_SMARTCAPTCHA_CLIENT_KEY", "SmartCaptcha client key"],
   ["HEALTH_CHECK_SECRET", "HEALTH_CHECK_SECRET"],
 ];
-
-const isProduction =
-  process.env.NODE_ENV === "production" ||
-  process.env.REQUIRE_PRODUCTION_ENV === "1";
 
 console.log("");
 console.log("  Рекомендуемые security-переменные:");
