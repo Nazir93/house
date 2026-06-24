@@ -28,11 +28,32 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO ${DB_USER};
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO ${DB_USER};
 SQL
 
-echo "==> ownership: postgres → ${DB_USER}"
+echo "==> ownership: postgres → ${DB_USER} (только public, без системных объектов)"
 sudo -u postgres psql -d "$DB_NAME" -v ON_ERROR_STOP=1 <<SQL
 ALTER DATABASE ${DB_NAME} OWNER TO ${DB_USER};
 ALTER SCHEMA public OWNER TO ${DB_USER};
-REASSIGN OWNED BY postgres TO ${DB_USER};
+
+DO \$\$
+DECLARE
+  stmt text;
+BEGIN
+  FOR stmt IN
+    SELECT format('ALTER TABLE %I.%I OWNER TO ${DB_USER}', schemaname, tablename)
+    FROM pg_tables
+    WHERE schemaname = 'public' AND tableowner <> '${DB_USER}'
+  LOOP
+    EXECUTE stmt;
+  END LOOP;
+
+  FOR stmt IN
+    SELECT format('ALTER SEQUENCE %I.%I OWNER TO ${DB_USER}', schemaname, sequencename)
+    FROM pg_sequences
+    WHERE schemaname = 'public' AND sequenceowner <> '${DB_USER}'
+  LOOP
+    EXECUTE stmt;
+  END LOOP;
+END
+\$\$;
 SQL
 
 echo "==> verify"
