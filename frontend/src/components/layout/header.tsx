@@ -534,7 +534,7 @@ export function Header() {
               <button
                 type="button"
                 onClick={closeMenu}
-                className="mobile-fs-menu__close flex h-11 w-11 shrink-0 items-center justify-center rounded-full border transition hover:border-[var(--accent)] hover:text-[var(--accent)]"
+                className="mobile-fs-menu__close flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-0 transition hover:text-[var(--accent)]"
                 style={{ color: "var(--text)" }}
                 aria-label="Закрыть меню"
               >

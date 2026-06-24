@@ -1597,20 +1597,24 @@ html.reveal-animations-ready [data-reveal="card"]:not(.is-visible) {
 }
 
 .mobile-fs-menu__close {
-  border-color: color-mix(in srgb, var(--text) 14%, transparent);
-  background: color-mix(in srgb, var(--bg) 72%, transparent);
+  border: none;
+  background: color-mix(in srgb, var(--text) 7%, var(--bg));
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    0 6px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.mobile-fs-menu__close:hover {
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg));
 }
 
 [data-theme="dark"] .mobile-fs-menu__close {
-  background: color-mix(in srgb, var(--bg) 65%, transparent);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 8px 24px rgba(0, 0, 0, 0.35);
+  background: color-mix(in srgb, var(--text) 10%, var(--bg));
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
+}
+
+[data-theme="dark"] .mobile-fs-menu__close:hover {
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg));
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -224,19 +224,10 @@ export function SiteHeaderBar() {
             <Link
               href="/mortgage"
               className={cn(
-                "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 xl:gap-1.5 xl:px-3.5 xl:py-1.5 xl:text-[10px]",
-                heroGlassLightInk &&
-                  "border border-white/25 bg-white/95 text-[#0f3d2e] shadow-[0_8px_28px_rgba(0,0,0,0.22)] backdrop-blur-sm hover:bg-white hover:shadow-[0_10px_32px_rgba(0,0,0,0.26)] focus-visible:outline-white/80",
-                heroGlassDarkInk &&
-                  "border border-white/30 bg-black/45 text-white shadow-[0_8px_28px_rgba(0,0,0,0.35)] backdrop-blur-md hover:border-white/40 hover:bg-black/55 focus-visible:outline-[var(--accent)]",
-                !heroGlassLightInk &&
-                  !heroGlassDarkInk &&
-                  theme === "light" &&
-                  "border border-[rgba(26,30,29,0.14)] bg-white text-[#1a1e1d] shadow-[0_1px_3px_rgba(15,61,46,0.08)] hover:border-[rgba(26,30,29,0.22)] hover:bg-[#fafaf8] focus-visible:outline-[var(--accent)]",
-                !heroGlassLightInk &&
-                  !heroGlassDarkInk &&
-                  theme === "dark" &&
-                  "border border-white/14 bg-white/[0.07] text-[#f1f5f3] shadow-none hover:border-white/22 hover:bg-white/[0.11] focus-visible:outline-[var(--accent)]",
+                "inline-flex shrink-0 items-center gap-1 rounded-full border-0 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 xl:gap-1.5 xl:px-3.5 xl:py-1.5 xl:text-[10px]",
+                "bg-[var(--accent)] text-[var(--accent-contrast)] shadow-[0_4px_14px_rgba(var(--accent-rgb),0.26)] hover:bg-[var(--accent-hover)] focus-visible:outline-[var(--accent)]",
+                (heroGlassLightInk || heroGlassDarkInk) &&
+                  "shadow-[0_8px_22px_rgba(0,0,0,0.28)] hover:shadow-[0_10px_26px_rgba(0,0,0,0.32)]",
               )}
             >
               <Percent className="h-3 w-3 shrink-0 opacity-95" strokeWidth={2} aria-hidden />
