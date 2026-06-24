@@ -113,6 +113,7 @@ export default async function RootLayout({
         ) : null}
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <JsonLd />
+        <AnalyticsScripts />
       </head>
       <body className="font-body antialiased theme-bg theme-text transition-colors duration-500">
         <Script id="house-theme-init" strategy="beforeInteractive">
@@ -131,7 +132,6 @@ export default async function RootLayout({
             </SessionProvider>
           </ThemeProvider>
         </PwaSerwistProvider>
-        <AnalyticsScripts />
       </body>
     </html>
   );

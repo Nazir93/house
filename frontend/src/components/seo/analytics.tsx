@@ -31,12 +31,15 @@ function pickGaId(raw: string | undefined): string {
   return "";
 }
 
+/** ID счётчика по умолчанию (Яндекс.Метрика). Переопределяется через админку или NEXT_PUBLIC_YANDEX_METRIKA_ID. */
+export const DEFAULT_YANDEX_METRIKA_ID = "110112800";
+
 export async function AnalyticsScripts() {
   const ids = await getAnalyticsIds();
   const ymId =
     pickYandexMetrikaId(ids.yandex_metrika_id) ||
     pickYandexMetrikaId(process.env.NEXT_PUBLIC_YANDEX_METRIKA_ID) ||
-    "";
+    DEFAULT_YANDEX_METRIKA_ID;
   const gaId =
     pickGaId(ids.google_analytics_id) ||
     pickGaId(process.env.NEXT_PUBLIC_GA_ID) ||
@@ -44,16 +47,28 @@ export async function AnalyticsScripts() {
 
   return (
     <>
-      {ymId && (
-        <Script id="yandex-metrika" strategy="afterInteractive">
-          {`(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+      {ymId ? (
+        <>
+          <Script id="yandex-metrika" strategy="beforeInteractive">
+            {`(function(m,e,t,r,i,k,a){
+m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
 m[i].l=1*new Date();
-for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r)return;}
-k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
-(window,document,"script","https://mc.yandex.ru/metrika/tag.js","ym");
-ym(${ymId},"init",{clickmap:true,trackLinks:true,accurateTrackBounce:true,webvisor:true});`}
-        </Script>
-      )}
+for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}
+k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+})(window,document,"script","https://mc.yandex.ru/metrika/tag.js?id=${ymId}","ym");
+ym(${ymId},"init",{ssr:true,webvisor:true,clickmap:true,ecommerce:"dataLayer",referrer:document.referrer,url:location.href,accurateTrackBounce:true,trackLinks:true});`}
+          </Script>
+          <noscript>
+            <div>
+              <img
+                src={`https://mc.yandex.ru/watch/${ymId}`}
+                style={{ position: "absolute", left: "-9999px" }}
+                alt=""
+              />
+            </div>
+          </noscript>
+        </>
+      ) : null}
       {gaId && (
         <>
           <Script
