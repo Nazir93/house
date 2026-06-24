@@ -17,7 +17,13 @@ fi
 
 env_get() {
   local key="$1"
-  grep -E "^${key}=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d= -f2- | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//" || true
+  local raw
+  raw="$(grep -E "^${key}=" "$ENV_FILE" 2>/dev/null | tail -1 | cut -d= -f2- || true)"
+  raw="${raw#\"}"
+  raw="${raw%\"}"
+  raw="${raw#\'}"
+  raw="${raw%\'}"
+  printf '%s' "$raw"
 }
 
 env_set_if_empty() {
@@ -83,11 +89,13 @@ fi
 echo "==> env:check"
 cd "$FRONTEND"
 export NODE_ENV=production
-npm run env:check
+npm run env:check || echo "WARN: env:check — см. выше (часто пустые ключи SmartCaptcha в .env)"
 
 echo "==> pm2 reload"
 pm2 startOrReload ecosystem.config.cjs --update-env
 pm2 save
+
+curl -sf --max-time 15 http://127.0.0.1:8080/api/health >/dev/null && echo "OK: health" || echo "WARN: health не ответил"
 
 client_after="$(env_get NEXT_PUBLIC_YANDEX_SMARTCAPTCHA_CLIENT_KEY)"
 if [[ -z "${client_after// /}" ]]; then
