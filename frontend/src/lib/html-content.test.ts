@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { sanitizeArticleHtml } from "./html-content";
+import { formatArticleBody, sanitizeArticleHtml } from "./html-content";
 
 describe("sanitizeArticleHtml", () => {
   it("removes scripts, handlers and dangerous urls", () => {
@@ -19,5 +19,20 @@ describe("sanitizeArticleHtml", () => {
     expect(html).toContain("<h2>Title</h2>");
     expect(html).toContain("<strong>Text</strong>");
     expect(html).toContain('href="https://example.com"');
+  });
+
+  it("converts br to paragraph breaks", () => {
+    const html = sanitizeArticleHtml(
+      "<p>Вступление</p><p><strong>Локация:</strong> Деревня<br><strong>Статус:</strong> Готов</p>",
+    );
+    expect(html).toContain("<p><strong>Локация:</strong> Деревня</p>");
+    expect(html).toContain("<p><strong>Статус:</strong> Готов</p>");
+  });
+});
+
+describe("formatArticleBody", () => {
+  it("splits plain text on single newlines", () => {
+    const html = formatArticleBody("Первая строка\nВторая строка");
+    expect(html).toBe("<p>Первая строка</p><p>Вторая строка</p>");
   });
 });

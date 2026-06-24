@@ -296,11 +296,19 @@ model BuiltObject {
   worksDescription    String?             @db.Text
   /// Этапы «История строительства» на публичной карточке: [{ id, title, description }]
   constructionHistoryJson Json?
+  /// Разделы таймлайна кейса: [{ id, title, order }] — названия и порядок этапов в админке.
+  caseStudyPhasesJson    Json?
+  /// Текстовый отзыв клиента на карточке портфолио.
+  clientReviewText       String?             @db.Text
+  /// Один видеоотзыв (URL файла на сервере или внешняя ссылка).
+  clientReviewVideoUrl   String?
   telegramUrl         String?
   vkUrl               String?
   houseProjectId      String?
   houseProject        HouseProject?       @relation(fields: [houseProjectId], references: [id], onDelete: SetNull)
   published           Boolean             @default(false)
+  /// Когда объект последний раз выводили на публичный сайт (для индикатора черновика).
+  sitePublishedAt     DateTime?
   order               Int                 @default(0)
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt

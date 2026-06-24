@@ -5,7 +5,9 @@ import {
   builtObjectCharacteristics,
   formatImplementationDays,
   formatFloorsLabel,
+  getBuiltObjectConstructionPhotos,
   getBuiltObjectHistoryCards,
+  getBuiltObjectNavItems,
   houseTypeSubtitle,
   parseConstructionHistoryJson,
   serializeConstructionHistory,
@@ -21,8 +23,8 @@ describe("built-object-detail", () => {
   });
 
   it("formatFloorsLabel", () => {
-    expect(formatFloorsLabel(1.5)).toBe("1,5 этажа");
-    expect(formatFloorsLabel(2)).toBe("2 этажа");
+    expect(formatFloorsLabel(1.5)).toBe("1,5");
+    expect(formatFloorsLabel(2)).toBe("2");
     expect(formatFloorsLabel(0)).toBeNull();
   });
 
@@ -63,6 +65,9 @@ describe("built-object-detail", () => {
       "Санузлы",
       "Реализация проекта",
     ]);
+    expect(rows[2]?.value).toBe("2");
+    expect(rows[3]?.value).toBe("3");
+    expect(rows[4]?.value).toBe("2");
     expect(rows[5]?.value).toBe("211 дней");
     expect(rows.some((r) => /под ключ/i.test(r.label + r.value))).toBe(false);
   });
@@ -99,7 +104,60 @@ describe("built-object-detail", () => {
       linkedProjectBathrooms: 2,
     } as BuiltObjectItem);
     expect(rows.find((r) => r.label === "Площадь дома")?.value).toBe("142 м²");
-    expect(rows.find((r) => r.label === "Спальни")?.value).toContain("3");
+    expect(rows.find((r) => r.label === "Спальни")?.value).toBe("3");
+  });
+
+  it("getBuiltObjectConstructionPhotos sorts by phase order, not colliding order field", () => {
+    const object = {
+      id: "1",
+      slug: "test",
+      title: "Тест",
+      material: "Газобетон",
+      description: "",
+      published: true,
+      order: 0,
+      caseStudyPhasesJson: [
+        { id: "foundation", title: "Фундамент", order: 0 },
+        { id: "walls", title: "Стены", order: 1 },
+        { id: "roof", title: "Кровля", order: 2 },
+      ],
+      media: [
+        { id: "w1", type: "BUILD_STAGE", url: "/w1.webp", alt: "", order: 0, phaseKey: "walls" },
+        { id: "f1", type: "BUILD_STAGE", url: "/f1.webp", alt: "", order: 0, phaseKey: "foundation" },
+        { id: "r1", type: "BUILD_STAGE", url: "/r1.webp", alt: "", order: 0, phaseKey: "roof" },
+        { id: "f2", type: "BUILD_STAGE", url: "/f2.webp", alt: "", order: 1, phaseKey: "foundation" },
+      ],
+    } as BuiltObjectItem;
+
+    expect(getBuiltObjectConstructionPhotos(object).map((p) => p.url)).toEqual([
+      "/f1.webp",
+      "/f2.webp",
+      "/w1.webp",
+      "/r1.webp",
+    ]);
+  });
+
+  it("getBuiltObjectConstructionPhotos maps legacy phaseKey (partitions → walls)", () => {
+    const object = {
+      id: "1",
+      slug: "test",
+      title: "Тест",
+      material: "Газобетон",
+      description: "",
+      published: true,
+      order: 0,
+      media: [
+        { id: "p1", type: "BUILD_STAGE", url: "/part.webp", alt: "", order: 0, phaseKey: "partitions" },
+        { id: "f1", type: "BUILD_STAGE", url: "/f1.webp", alt: "", order: 0, phaseKey: "foundation" },
+        { id: "w1", type: "BUILD_STAGE", url: "/w1.webp", alt: "", order: 0, phaseKey: "walls" },
+      ],
+    } as BuiltObjectItem;
+
+    expect(getBuiltObjectConstructionPhotos(object).map((p) => p.url)).toEqual([
+      "/f1.webp",
+      "/part.webp",
+      "/w1.webp",
+    ]);
   });
 
   it("по умолчанию 8 этапов истории", () => {
@@ -132,5 +190,35 @@ describe("built-object-detail", () => {
     const cards = getBuiltObjectHistoryCards(object);
     expect(cards[0]?.title).toBe("Кровля");
     expect(cards[0]?.description).toContain("стропила");
+  });
+
+  it("getBuiltObjectNavItems adds client-review when review present", () => {
+    const object = {
+      id: "1",
+      slug: "test",
+      title: "Test",
+      material: "GAS_BLOCK",
+      description: "",
+      published: true,
+      order: 0,
+      media: [],
+      clientReviewText: "Спасибо!",
+    } as BuiltObjectItem;
+    expect(getBuiltObjectNavItems(object).map((i) => i.id)).toContain("client-review");
+  });
+
+  it("getBuiltObjectNavItems adds client-review for video only", () => {
+    const object = {
+      id: "1",
+      slug: "test",
+      title: "Test",
+      material: "GAS_BLOCK",
+      description: "",
+      published: true,
+      order: 0,
+      media: [],
+      clientReviewVideoUrl: "/uploads/review.mp4",
+    } as BuiltObjectItem;
+    expect(getBuiltObjectNavItems(object).some((i) => i.id === "client-review")).toBe(true);
   });
 });

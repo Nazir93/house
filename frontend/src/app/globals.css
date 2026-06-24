@@ -1895,6 +1895,12 @@ html.reveal-animations-ready [data-reveal="card"]:not(.is-visible) {
 [data-theme="light"] .admin-main-surface .text-white {
   color: var(--adm-main-fg) !important;
 }
+[data-theme="light"] .admin-main-surface .text-white\/85 {
+  color: var(--adm-main-fg-muted) !important;
+}
+[data-theme="light"] .admin-main-surface .text-white\/50 {
+  color: var(--adm-main-fg-subtle) !important;
+}
 [data-theme="light"] .admin-main-surface .hover\:text-white:hover {
   color: var(--adm-main-fg) !important;
 }

@@ -74,13 +74,17 @@ type AdminDraftSectionSaveButtonProps = {
   className?: string;
 };
 
-export function AdminDraftSectionSaveButton({
-  section,
+export function AdminSectionSaveButton({
+  saveLabel,
   uiState,
   onClick,
   className = "",
-}: AdminDraftSectionSaveButtonProps) {
-  const label = `Сохранить: ${CLIENT_PROJECT_DRAFT_SECTION_LABELS[section]}`;
+}: {
+  saveLabel: string;
+  uiState: DraftSectionSaveUiState;
+  onClick: () => void | Promise<void>;
+  className?: string;
+}) {
   const saving = uiState === "saving";
 
   const buttonTone =
@@ -97,8 +101,8 @@ export function AdminDraftSectionSaveButton({
       type="button"
       onClick={() => void onClick()}
       disabled={saving}
-      title={label}
-      aria-label={label}
+      title={saveLabel}
+      aria-label={saveLabel}
       aria-busy={saving}
       className={
         "inline-flex items-center justify-center p-2 rounded-lg border transition-colors disabled:opacity-60 " +
@@ -109,6 +113,39 @@ export function AdminDraftSectionSaveButton({
     >
       {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
     </button>
+  );
+}
+
+export function AdminSectionSaveControl({
+  saveLabel,
+  uiState,
+  errorMessage,
+  onSave,
+}: {
+  saveLabel: string;
+  uiState: DraftSectionSaveUiState;
+  errorMessage?: string;
+  onSave: () => void | Promise<void>;
+}) {
+  return (
+    <div className="flex flex-col items-end gap-1 min-w-[10rem]">
+      <div className="flex items-center gap-2">
+        <AdminDraftSectionStatus state={uiState} errorMessage={errorMessage} className="text-right" />
+        <AdminSectionSaveButton saveLabel={saveLabel} uiState={uiState} onClick={onSave} />
+      </div>
+    </div>
+  );
+}
+
+export function AdminDraftSectionSaveButton({
+  section,
+  uiState,
+  onClick,
+  className = "",
+}: AdminDraftSectionSaveButtonProps) {
+  const label = `Сохранить: ${CLIENT_PROJECT_DRAFT_SECTION_LABELS[section]}`;
+  return (
+    <AdminSectionSaveButton saveLabel={label} uiState={uiState} onClick={onClick} className={className} />
   );
 }
 
@@ -124,12 +161,12 @@ export function AdminDraftSectionSaveControl({
   onSave: () => void | Promise<void>;
 }) {
   return (
-    <div className="flex flex-col items-end gap-1 min-w-[10rem]">
-      <div className="flex items-center gap-2">
-        <AdminDraftSectionStatus state={uiState} errorMessage={errorMessage} className="text-right" />
-        <AdminDraftSectionSaveButton section={section} uiState={uiState} onClick={onSave} />
-      </div>
-    </div>
+    <AdminSectionSaveControl
+      saveLabel={`Сохранить: ${CLIENT_PROJECT_DRAFT_SECTION_LABELS[section]}`}
+      uiState={uiState}
+      errorMessage={errorMessage}
+      onSave={onSave}
+    />
   );
 }
 

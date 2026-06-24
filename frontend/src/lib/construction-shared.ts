@@ -1,3 +1,5 @@
+import { parseCaseStudyPhasesJson, normalizeCaseStudyPhaseKey } from "@/lib/portfolio-case-study-phases";
+
 export type ConstructionMediaType = "RENDER" | "PLAN" | "BUILD_STAGE" | "VIDEO";
 
 export interface ConstructionMedia {
@@ -86,6 +88,9 @@ export interface BuiltObjectItem {
   description: string;
   worksDescription?: string | null;
   constructionHistoryJson?: { id?: string; title: string; description: string }[] | null;
+  caseStudyPhasesJson?: { id: string; title: string; order: number }[] | null;
+  clientReviewText?: string | null;
+  clientReviewVideoUrl?: string | null;
   telegramUrl?: string | null;
   vkUrl?: string | null;
   houseProjectSlug?: string | null;
@@ -102,6 +107,39 @@ export interface BuiltObjectItem {
 
 function mediaOf(media: ConstructionMedia[], type: ConstructionMediaType) {
   return media.filter((item) => item.type === type).sort((a, b) => a.order - b.order);
+}
+
+function buildStagePhaseRank(
+  phaseKey: string | null | undefined,
+  phases: { id: string; order: number }[],
+): number {
+  const normalized = normalizeCaseStudyPhaseKey(phaseKey);
+  if (!normalized) return 1_000_000;
+  const phase = phases.find((p) => p.id === normalized);
+  return phase?.order ?? 999_999;
+}
+
+function compareBuildStageMediaOrder(
+  a: ConstructionMedia,
+  b: ConstructionMedia,
+  phases: { id: string; order: number }[],
+): number {
+  const phaseDiff = buildStagePhaseRank(a.phaseKey, phases) - buildStagePhaseRank(b.phaseKey, phases);
+  if (phaseDiff !== 0) return phaseDiff;
+  const orderDiff = a.order - b.order;
+  if (orderDiff !== 0) return orderDiff;
+  return a.id.localeCompare(b.id);
+}
+
+/** Фото стройки: сначала по порядку этапов, внутри этапа — по order. */
+export function sortBuiltObjectBuildStageMedia(
+  media: ConstructionMedia[],
+  caseStudyPhasesJson: BuiltObjectItem["caseStudyPhasesJson"],
+): ConstructionMedia[] {
+  const phases = parseCaseStudyPhasesJson(caseStudyPhasesJson);
+  return [...media]
+    .filter((item) => item.type === "BUILD_STAGE")
+    .sort((a, b) => compareBuildStageMediaOrder(a, b, phases));
 }
 
 export function builtObjectMaterialLabel(value: string): string {
@@ -135,7 +173,7 @@ export function getBuiltObjectCover(object: BuiltObjectItem) {
   return object.media.find((item) => item.type === "RENDER") ?? object.media[0] ?? null;
 }
 
-/** Фото этапов без привязки к разделу кейса (legacy). */
+/** Фото этапов без привязки к разделу кейса (legacy, только чтение старых объектов). */
 export function getBuiltObjectStages(object: BuiltObjectItem) {
   return object.media
     .filter((item) => item.type === "BUILD_STAGE" && !item.phaseKey)
@@ -144,9 +182,13 @@ export function getBuiltObjectStages(object: BuiltObjectItem) {
 
 /** Фото конкретного раздела таймлайна кейса из админки. */
 export function getBuiltObjectPhaseMedia(object: BuiltObjectItem, phaseKey: string) {
+  const phases = parseCaseStudyPhasesJson(object.caseStudyPhasesJson);
   return object.media
-    .filter((item) => item.type === "BUILD_STAGE" && item.phaseKey === phaseKey)
-    .sort((a, b) => a.order - b.order);
+    .filter(
+      (item) =>
+        item.type === "BUILD_STAGE" && normalizeCaseStudyPhaseKey(item.phaseKey) === phaseKey,
+    )
+    .sort((a, b) => compareBuildStageMediaOrder(a, b, phases));
 }
 
 /** Рендеры / обложки (порядок как в админке). */

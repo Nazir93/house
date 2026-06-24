@@ -1,4 +1,8 @@
-import { CASE_STUDY_CONSTRUCTION_PHASES } from "@/lib/portfolio-case-study-phases";
+import {
+  parseCaseStudyPhasesJson,
+  type CaseStudyPhaseDefinition,
+  normalizeCaseStudyPhaseKey,
+} from "@/lib/portfolio-case-study-phases";
 
 type MediaType = "RENDER" | "PLAN" | "BUILD_STAGE" | "VIDEO";
 
@@ -38,13 +42,32 @@ function planRows(plans: unknown) {
     .filter((row): row is NonNullable<typeof row> => row != null);
 }
 
+export function resolveCaseStudyPhaseIdsFromBody(body: Record<string, unknown>): string[] {
+  const fromJson = parseCaseStudyPhasesJson(body.caseStudyPhasesJson ?? body.caseStudyPhases);
+  const ids = fromJson.map((phase) => phase.id);
+  const phaseMedia = body.phaseMedia;
+  if (phaseMedia && typeof phaseMedia === "object" && !Array.isArray(phaseMedia)) {
+    for (const key of Object.keys(phaseMedia as Record<string, unknown>)) {
+      if (!ids.includes(key)) ids.push(key);
+    }
+  }
+  return ids;
+}
+
 /** Сборка записей BuiltObjectMedia из тела запроса админки. */
 export function builtObjectMediaCreatePayload(body: Record<string, unknown>) {
   const phaseMedia = body.phaseMedia;
+  const phaseIds = resolveCaseStudyPhaseIdsFromBody(body);
+  let buildStageOrder = 0;
   const phaseRows =
     phaseMedia && typeof phaseMedia === "object" && !Array.isArray(phaseMedia)
-      ? CASE_STUDY_CONSTRUCTION_PHASES.flatMap(({ id }) =>
-          mediaRows((phaseMedia as Record<string, unknown>)[id], "BUILD_STAGE", id)
+      ? phaseIds.flatMap((id) =>
+          splitUrls((phaseMedia as Record<string, unknown>)[id]).map((url) => ({
+            type: "BUILD_STAGE" as const,
+            url,
+            order: buildStageOrder++,
+            phaseKey: id,
+          })),
         )
       : [];
 
@@ -52,7 +75,6 @@ export function builtObjectMediaCreatePayload(body: Record<string, unknown>) {
     ...mediaRows(body.renders, "RENDER"),
     ...planRows(body.plans),
     ...phaseRows,
-    ...mediaRows(body.stages, "BUILD_STAGE"),
     ...mediaRows(body.videos, "VIDEO"),
   ];
 }
@@ -61,7 +83,6 @@ export function builtObjectFormHasMediaPayload(body: Record<string, unknown>) {
   if (
     body.renders !== undefined ||
     body.plans !== undefined ||
-    body.stages !== undefined ||
     body.videos !== undefined ||
     body.phaseMedia !== undefined
   ) {
@@ -70,53 +91,46 @@ export function builtObjectFormHasMediaPayload(body: Record<string, unknown>) {
   return false;
 }
 
-/** Строки URL для textarea в форме (по типу и опциональному phaseKey). */
-export function mediaUrlsForForm(
-  media: { type: string; url: string; phaseKey?: string | null }[] | undefined,
-  type: string,
-  phaseKey?: string | null
-): string {
-  return (media ?? [])
-    .filter((item) => {
-      if (item.type !== type) return false;
-      if (phaseKey === undefined) return true;
-      if (phaseKey === null) return !item.phaseKey;
-      return item.phaseKey === phaseKey;
-    })
-    .map((item) => item.url)
-    .join("\n");
-}
-
-export function initialPhaseMediaForm(
-  media: { type: string; url: string; phaseKey?: string | null }[] | undefined
-): Record<string, string> {
-  return Object.fromEntries(
-    CASE_STUDY_CONSTRUCTION_PHASES.map(({ id }) => [id, mediaUrlsForForm(media, "BUILD_STAGE", id)])
-  );
-}
-
 export function initialPhaseMediaArrays(
-  media: { type: string; url: string; phaseKey?: string | null }[] | undefined
+  media: { type: string; url: string; order?: number; phaseKey?: string | null }[] | undefined,
+  phaseIds: string[],
 ): Record<string, string[]> {
+  const keys = [
+    ...new Set([
+      ...phaseIds,
+      ...(media ?? [])
+        .filter((item) => item.type === "BUILD_STAGE" && item.phaseKey)
+        .map((item) => String(item.phaseKey)),
+    ]),
+  ];
+
   return Object.fromEntries(
-    CASE_STUDY_CONSTRUCTION_PHASES.map(({ id }) => [
+    keys.map((id) => [
       id,
       (media ?? [])
-        .filter((item) => item.type === "BUILD_STAGE" && item.phaseKey === id)
+        .filter(
+          (item) =>
+            item.type === "BUILD_STAGE" && normalizeCaseStudyPhaseKey(item.phaseKey) === id,
+        )
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
         .map((item) => item.url),
-    ])
+    ]),
   );
 }
 
-export function mapBuiltObjectMediaToForm(media: { type: string; url: string; label?: string | null; phaseKey?: string | null }[] | undefined) {
+export function mapBuiltObjectMediaToForm(
+  media:
+    | { type: string; url: string; order?: number; label?: string | null; phaseKey?: string | null }[]
+    | undefined,
+  caseStudyPhases: CaseStudyPhaseDefinition[],
+) {
   const list = media ?? [];
   return {
     renders: list.filter((item) => item.type === "RENDER").map((item) => item.url),
     plans: list
       .filter((item) => item.type === "PLAN")
       .map((item) => ({ url: item.url, label: item.label || "" })),
-    phaseMedia: initialPhaseMediaArrays(list),
-    stages: list.filter((item) => item.type === "BUILD_STAGE" && !item.phaseKey).map((item) => item.url),
+    phaseMedia: initialPhaseMediaArrays(list, caseStudyPhases.map((phase) => phase.id)),
     videos: list.filter((item) => item.type === "VIDEO").map((item) => item.url),
   };
 }

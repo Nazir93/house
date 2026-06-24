@@ -4,7 +4,9 @@ import {
   getBuiltObjectPhaseMedia,
   getBuiltObjectPlans,
   getBuiltObjectStages,
+  sortBuiltObjectBuildStageMedia,
 } from "@/lib/construction-shared";
+import { hasBuiltObjectClientReview } from "@/lib/built-object-client-review";
 
 /** Разделы «История строительства» на публичной карточке (соответствие phaseKey в админке). */
 export const BUILT_OBJECT_HISTORY_SECTIONS = [
@@ -58,6 +60,7 @@ export type BuiltObjectNavSectionId =
   | "plans"
   | "construction-photos"
   | "history"
+  | "client-review"
   | "video";
 
 export type BuiltObjectNavItem = {
@@ -135,6 +138,7 @@ const NAV_LABELS: Record<BuiltObjectNavSectionId, string> = {
   plans: "Планировки",
   "construction-photos": "Фото строительства",
   history: "История строительства",
+  "client-review": "Отзыв клиента",
   video: "Видео",
 };
 
@@ -148,10 +152,8 @@ export function houseTypeSubtitle(material: string): string {
 
 export function formatFloorsLabel(floors: number | null | undefined): string | null {
   if (floors == null || !Number.isFinite(floors) || floors <= 0) return null;
-  if (floors === 1) return "1 этаж";
-  if (floors === 1.5) return "1,5 этажа";
-  if (floors === 2) return "2 этажа";
-  return `${floors} этаж${floors > 1 ? "а" : ""}`;
+  if (floors === 1.5) return "1,5";
+  return String(floors);
 }
 
 export function formatImplementationDays(buildTerm: string | null | undefined): string | null {
@@ -228,9 +230,7 @@ export function getBuiltObjectHistoryCards(object: BuiltObjectItem): BuiltObject
 
 /** Все фото хода стройки для сетки 5×5 (без рендеров и планировок). */
 export function getBuiltObjectConstructionPhotos(object: BuiltObjectItem): ConstructionMedia[] {
-  const items = object.media
-    .filter((m) => m.type === "BUILD_STAGE")
-    .sort((a, b) => a.order - b.order);
+  const items = sortBuiltObjectBuildStageMedia(object.media, object.caseStudyPhasesJson);
   if (items.length > 0) return items;
   return getBuiltObjectStages(object);
 }
@@ -271,10 +271,6 @@ export function resolveBuiltObjectBathrooms(object: BuiltObjectItem): number | n
   return null;
 }
 
-function roomCountLabel(count: number, one: string, few: string, many: string): string {
-  return `${count} ${count === 1 ? one : count < 5 ? few : many}`;
-}
-
 export function builtObjectCharacteristics(object: BuiltObjectItem) {
   const materialLabel = object.material?.trim() || null;
   const area = resolveBuiltObjectArea(object);
@@ -287,14 +283,8 @@ export function builtObjectCharacteristics(object: BuiltObjectItem) {
     { label: "Площадь дома", value: area != null ? `${area} м²` : "—" },
     { label: "Материал стен", value: materialLabel || "—" },
     { label: "Этажность", value: floorsLabel || "—" },
-    {
-      label: "Спальни",
-      value: rooms != null ? roomCountLabel(rooms, "спальня", "спальни", "спален") : "—",
-    },
-    {
-      label: "Санузлы",
-      value: bathrooms != null ? roomCountLabel(bathrooms, "санузел", "санузла", "санузлов") : "—",
-    },
+    { label: "Спальни", value: rooms != null ? String(rooms) : "—" },
+    { label: "Санузлы", value: bathrooms != null ? String(bathrooms) : "—" },
     { label: "Реализация проекта", value: implementationLabel || "—" },
   ];
 }
@@ -306,6 +296,9 @@ export function getBuiltObjectNavItems(object: BuiltObjectItem): BuiltObjectNavI
     { id: "construction-photos", label: NAV_LABELS["construction-photos"] },
     { id: "history", label: NAV_LABELS.history },
   ];
+  if (hasBuiltObjectClientReview(object)) {
+    items.push({ id: "client-review", label: NAV_LABELS["client-review"] });
+  }
   if (getBuiltObjectVideos(object).length > 0) {
     items.push({ id: "video", label: NAV_LABELS.video });
   }

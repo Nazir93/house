@@ -1,8 +1,9 @@
 "use client";
 
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Plus, Trash2 } from "lucide-react";
+import { useRef } from "react";
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, GripVertical, Plus, Trash2 } from "lucide-react";
 import { CmsImage } from "@/components/ui/cms-image";
-import { moveListItem } from "@/lib/reorder-list";
+import { moveItemInArray, moveListItem } from "@/lib/reorder-list";
 
 type AdminImageUrlListProps = {
   title: string;
@@ -192,6 +193,104 @@ export function AdminPlanImageList({
             </div>
           ))}
         </div>
+      ) : null}
+    </div>
+  );
+}
+
+type AdminDragImageUrlListProps = {
+  title: string;
+  items: string[];
+  onItemsChange: (items: string[]) => void;
+  uploading: boolean;
+  uploadProgress: string;
+  onUploadFiles: (files: File[]) => void;
+  accept?: string;
+  emptyHint?: string;
+};
+
+/** Список фото с drag-and-drop, как фотоотчёты в ЛК. */
+export function AdminDragImageUrlList({
+  title,
+  items,
+  onItemsChange,
+  uploading,
+  uploadProgress,
+  onUploadFiles,
+  accept = "image/*",
+  emptyHint,
+}: AdminDragImageUrlListProps) {
+  const dragIndex = useRef<number | null>(null);
+
+  function handleDragStart(index: number) {
+    dragIndex.current = index;
+  }
+
+  function handleDragOver(e: React.DragEvent, index: number) {
+    e.preventDefault();
+    const from = dragIndex.current;
+    if (from === null || from === index) return;
+    onItemsChange(moveItemInArray(items, from, index));
+    dragIndex.current = index;
+  }
+
+  function handleDragEnd() {
+    dragIndex.current = null;
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-sm font-semibold adm-muted">
+          {title} ({items.length})
+        </p>
+        <label className="adm-btn-media shrink-0 cursor-pointer text-xs">
+          <Plus size={14} aria-hidden />
+          {uploading ? (uploadProgress ? `Загрузка ${uploadProgress}…` : "Загрузка…") : "Добавить"}
+          <input
+            type="file"
+            accept={accept}
+            multiple
+            className="hidden"
+            disabled={uploading}
+            onChange={(e) => {
+              const files = Array.from(e.target.files ?? []);
+              if (files.length) onUploadFiles(files);
+              e.target.value = "";
+            }}
+          />
+        </label>
+      </div>
+      {emptyHint && items.length === 0 ? (
+        <p className="text-xs leading-relaxed adm-faint">{emptyHint}</p>
+      ) : null}
+      {items.length > 0 ? (
+        <ul className="m-0 grid list-none grid-cols-2 gap-2 sm:grid-cols-4">
+          {items.map((url, index) => (
+            <li
+              key={`${url}-${index}`}
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragEnd={handleDragEnd}
+              className="group relative aspect-square cursor-grab overflow-hidden rounded-lg border border-white/[0.08] active:cursor-grabbing"
+            >
+              <CmsImage src={url} alt="" fill className="pointer-events-none object-cover" sizes="160px" />
+              <span className="absolute left-1 top-1 flex items-center gap-0.5 rounded bg-black/55 px-1 py-0.5 text-[10px] text-white/80">
+                <GripVertical size={12} aria-hidden />
+                {index + 1}
+              </span>
+              <button
+                type="button"
+                onClick={() => onItemsChange(items.filter((_, i) => i !== index))}
+                className="absolute right-1 top-1 rounded bg-black/60 p-1 text-red-300 opacity-0 transition group-hover:opacity-100"
+                aria-label="Удалить фото"
+              >
+                <Trash2 size={14} />
+              </button>
+            </li>
+          ))}
+        </ul>
       ) : null}
     </div>
   );

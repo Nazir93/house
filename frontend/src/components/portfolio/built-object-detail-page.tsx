@@ -31,8 +31,13 @@ import {
   houseTypeSubtitle,
   type BuiltObjectNavSectionId,
 } from "@/lib/built-object-detail";
+import {
+  formatClientReviewText,
+  hasBuiltObjectClientReview,
+  isBuiltObjectClientReviewVideoInline,
+} from "@/lib/built-object-client-review";
 import { BuiltObjectHistoryCards } from "@/components/portfolio/built-object-history-cards";
-import { formatArticleBody } from "@/lib/html-content";
+import { formatArticleBody, PAGE_INTRO_PROSE_CLASS } from "@/lib/html-content";
 import type { BuiltObjectItem } from "@/lib/construction-shared";
 import { cn } from "@/lib/utils";
 
@@ -147,6 +152,12 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
   }
 
   const primaryVideo = videos[0];
+  const clientReviewHtml = useMemo(
+    () => formatClientReviewText(object.clientReviewText ?? ""),
+    [object.clientReviewText],
+  );
+  const clientReviewVideoUrl = object.clientReviewVideoUrl?.trim() || "";
+  const showClientReview = hasBuiltObjectClientReview(object);
 
   return (
     <>
@@ -295,7 +306,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
               descriptionHtml ? (
                 descOpen ? (
                   <div
-                    className="prose prose-sm max-w-none md:prose-base"
+                    className={cn(PAGE_INTRO_PROSE_CLASS, "max-w-none")}
                     style={{ color: "var(--text-muted)" }}
                     dangerouslySetInnerHTML={{ __html: descriptionHtml }}
                   />
@@ -400,6 +411,51 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
             )}
 
             {sectionShell("history", "История строительства", <BuiltObjectHistoryCards cards={historyCards} />)}
+
+            {showClientReview
+              ? sectionShell(
+                  "client-review",
+                  "Отзыв клиента",
+                  <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:items-start">
+                    {clientReviewHtml ? (
+                      <div
+                        className={cn(PAGE_INTRO_PROSE_CLASS, "max-w-none")}
+                        style={{ color: "var(--text-muted)" }}
+                        dangerouslySetInnerHTML={{ __html: clientReviewHtml }}
+                      />
+                    ) : null}
+                    {clientReviewVideoUrl ? (
+                      <div className={clientReviewHtml ? "" : "md:col-span-2"}>
+                        {isBuiltObjectClientReviewVideoInline(clientReviewVideoUrl) ? (
+                          <video
+                            src={clientReviewVideoUrl}
+                            controls
+                            preload="metadata"
+                            playsInline
+                            className="aspect-video w-full rounded-2xl bg-black/90"
+                          />
+                        ) : (
+                          <div className="flex flex-col gap-4 rounded-2xl border border-[color-mix(in_srgb,var(--border)_72%,transparent)] bg-[var(--bg)] p-5">
+                            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                              Видеоотзыв доступен по ссылке.
+                            </p>
+                            <a
+                              href={clientReviewVideoUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex w-fit items-center gap-2 rounded-full px-5 py-2.5 text-sm font-bold text-[var(--accent-contrast)] transition hover:opacity-95"
+                              style={{ backgroundColor: "var(--accent)" }}
+                            >
+                              Смотреть видеоотзыв
+                              <ChevronRight className="h-4 w-4" aria-hidden />
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>,
+                )
+              : null}
 
             {primaryVideo
               ? sectionShell(

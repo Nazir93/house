@@ -1,19 +1,37 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Save } from "lucide-react";
-import { AdminFormSection } from "@/components/admin/admin-form-section";
+import { ArrowLeft, Plus } from "lucide-react";
+import {
+  AdminSectionHeader,
+  AdminSectionSaveControl,
+  draftSectionSurfaceClass,
+} from "@/components/admin/admin-draft-section-save";
+import { AdminBuiltObjectPublishBar } from "@/components/admin/admin-built-object-publish-bar";
+import { useAdminBuiltObjectSectionSave } from "@/components/admin/use-admin-built-object-section-save";
+import { BuiltObjectCaseStudyPhasesEditor } from "@/components/admin/built-object-case-study-phases-editor";
 import { AdminImageUrlList, AdminPlanImageList } from "@/components/admin/admin-image-list-field";
 import { RichEditor } from "@/components/admin/rich-editor";
 import { AdminSelect } from "@/components/admin/admin-select";
-import { CASE_STUDY_CONSTRUCTION_PHASES } from "@/lib/portfolio-case-study-phases";
+import { createCaseStudyPhaseDefinition, normalizeCaseStudyPhaseDefinitions, parseCaseStudyPhasesJson, remapLegacyPhaseMedia } from "@/lib/portfolio-case-study-phases";
 import { mapBuiltObjectMediaToForm } from "@/lib/built-object-admin-media";
+import {
+  BUILT_OBJECT_ADMIN_SECTION_LABELS,
+  buildBuiltObjectAdminBaselineKey,
+  buildBuiltObjectSectionPayload,
+  hasUnpublishedBuiltObjectSiteDraft,
+  type BuiltObjectAdminSection,
+} from "@/lib/built-object-admin-sections";
 import { BUILT_OBJECT_MAP_DISTRICTS, BUILT_OBJECT_MAP_REGIONS } from "@/lib/built-object-map-taxonomy";
+import {
+  parseCoordinate,
+  buildBuiltObjectLocationFieldsFromInputs,
+} from "@/lib/built-object-location-from-coords";
 import { BuiltObjectMapPicker } from "@/components/admin/built-object-map-picker";
 import { BuiltObjectHistoryEditor } from "@/components/admin/built-object-history-editor";
-import { historyStagesForAdmin, serializeConstructionHistory } from "@/lib/built-object-detail";
+import { historyStagesForAdmin } from "@/lib/built-object-detail";
 import type { AdminHouseProjectOption } from "@/lib/load-admin-house-project-options";
 import { uploadAdminMedia } from "@/lib/admin-upload";
 
@@ -37,7 +55,7 @@ const SITE_STATUS_OPTIONS = [
   { value: "UNDER_CONSTRUCTION", label: "Строится (стройплощадка)" },
 ];
 
-type UploadTarget = "renders" | "plans" | "stages" | "videos" | `phase:${string}`;
+type UploadTarget = "renders" | "plans" | "videos" | "client-review-video" | `phase:${string}`;
 
 const inputClass =
   "w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white";
@@ -60,7 +78,12 @@ function AdminField({
 }
 
 function mapBuiltObjectToForm(initial?: any) {
-  const media = mapBuiltObjectMediaToForm(initial?.media);
+  const caseStudyPhases = parseCaseStudyPhasesJson(initial?.caseStudyPhasesJson);
+  const rawMedia = mapBuiltObjectMediaToForm(initial?.media, caseStudyPhases);
+  const phaseMedia =
+    initial?.caseStudyPhasesJson == null
+      ? remapLegacyPhaseMedia(rawMedia.phaseMedia)
+      : rawMedia.phaseMedia;
   return {
     id: initial?.id || "",
     title: initial?.title || "",
@@ -70,9 +93,6 @@ function mapBuiltObjectToForm(initial?: any) {
     rooms: String(initial?.rooms ?? ""),
     bathrooms: String(initial?.bathrooms ?? ""),
     buildTerm: initial?.buildTerm || "",
-    foundation: initial?.foundation || "",
-    walls: initial?.walls || "",
-    roof: initial?.roof || "",
     floors: String(initial?.floors ?? ""),
     location: initial?.location || "",
     latitude: String(initial?.latitude ?? ""),
@@ -84,15 +104,16 @@ function mapBuiltObjectToForm(initial?: any) {
     worksDescription: initial?.worksDescription || "",
     telegramUrl: initial?.telegramUrl || "",
     vkUrl: initial?.vkUrl || "",
+    clientReviewText: initial?.clientReviewText || "",
+    clientReviewVideoUrl: initial?.clientReviewVideoUrl || "",
     houseProjectId: initial?.houseProjectId || "",
-    published: Boolean(initial?.published),
     order: String(initial?.order ?? 0),
-    renders: media.renders,
-    plans: media.plans,
-    phaseMedia: media.phaseMedia,
-    stages: media.stages,
-    videos: media.videos,
+    renders: rawMedia.renders,
+    plans: rawMedia.plans,
+    phaseMedia,
+    videos: rawMedia.videos,
     historyStages: historyStagesForAdmin(initial ?? {}),
+    caseStudyPhases,
   };
 }
 
@@ -104,11 +125,61 @@ export function BuiltObjectForm({
   houseProjects?: AdminHouseProjectOption[];
 }) {
   const router = useRouter();
-  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState("");
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState<UploadTarget | null>(null);
   const [uploadProgress, setUploadProgress] = useState("");
   const [form, setForm] = useState(() => mapBuiltObjectToForm(initial));
+  const [hasUnpublishedDraft, setHasUnpublishedDraft] = useState(
+    initial ? hasUnpublishedBuiltObjectSiteDraft(initial) : true,
+  );
+  const [publishing, setPublishing] = useState(false);
+  const coordsAutoFillReady = useRef(false);
+  const locationResolveSeq = useRef(0);
+
+  useEffect(() => {
+    if (initial) {
+      setHasUnpublishedDraft(hasUnpublishedBuiltObjectSiteDraft(initial));
+    }
+  }, [initial]);
+
+  useEffect(() => {
+    if (!coordsAutoFillReady.current) {
+      coordsAutoFillReady.current = true;
+      return;
+    }
+
+    const lat = parseCoordinate(form.latitude);
+    const lon = parseCoordinate(form.longitude);
+    if (lat == null || lon == null) return;
+
+    const seq = ++locationResolveSeq.current;
+    const timer = window.setTimeout(() => {
+      const patch = buildBuiltObjectLocationFieldsFromInputs(form.latitude, form.longitude);
+      if (!patch || seq !== locationResolveSeq.current) return;
+
+      setForm((prev) => {
+        if (
+          prev.latitude === patch.latitude &&
+          prev.longitude === patch.longitude &&
+          prev.regionSlug === patch.regionSlug &&
+          prev.district === patch.district
+        ) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          latitude: patch.latitude,
+          longitude: patch.longitude,
+          regionSlug: patch.regionSlug,
+          district: patch.district,
+        };
+      });
+    }, 400);
+
+    return () => window.clearTimeout(timer);
+  }, [form.latitude, form.longitude]);
 
   function set(field: string, value: string | boolean) {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -116,6 +187,91 @@ export function BuiltObjectForm({
 
   function setHistoryStages(stages: typeof form.historyStages) {
     setForm((prev) => ({ ...prev, historyStages: stages }));
+  }
+
+  const buildFormSnapshot = useCallback(() => form, [form]);
+
+  const buildSectionPayload = useCallback(
+    (section: BuiltObjectAdminSection) => buildBuiltObjectSectionPayload(section, form),
+    [form],
+  );
+
+  const baselineKey = useMemo(
+    () => (initial?.id ? buildBuiltObjectAdminBaselineKey(initial.id, initial) : `new:${form.id || "draft"}`),
+    [initial, form.id],
+  );
+
+  const { getUiState, getErrorMessage, saveSection, sectionsReady } = useAdminBuiltObjectSectionSave({
+    objectId: form.id,
+    baselineKey,
+    buildSectionPayload,
+    buildFormSnapshot,
+    router,
+    setGlobalErr: setError,
+    onObjectCreated: (id) => {
+      setForm((prev) => ({ ...prev, id }));
+      router.replace(`/admin/built-objects/${id}`);
+    },
+  });
+
+  const handleSaveSection = useCallback(
+    async (section: BuiltObjectAdminSection) => {
+      if (section === "main" && !form.title.trim()) {
+        setError("Укажите название объекта");
+        return;
+      }
+      if (section !== "main" && !form.id) {
+        setError("Сначала сохраните раздел «Основное»");
+        return;
+      }
+
+      setMsg("");
+      const result = await saveSection(section);
+      if (result.ok) {
+        setHasUnpublishedDraft(result.hasUnpublishedDraft);
+        setMsg(`Раздел «${BUILT_OBJECT_ADMIN_SECTION_LABELS[section]}» сохранён.`);
+      }
+    },
+    [form.id, form.title, saveSection],
+  );
+
+  const sectionSaveControl = (section: BuiltObjectAdminSection) => (
+    <AdminSectionSaveControl
+      saveLabel={`Сохранить: ${BUILT_OBJECT_ADMIN_SECTION_LABELS[section]}`}
+      uiState={getUiState(section)}
+      errorMessage={getErrorMessage(section)}
+      onSave={() => handleSaveSection(section)}
+    />
+  );
+
+  const sectionClass = (section: BuiltObjectAdminSection) =>
+    `space-y-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5 transition-shadow ${draftSectionSurfaceClass(getUiState(section))}`;
+
+  async function publishToSite() {
+    if (!form.id) {
+      setError("Сначала сохраните раздел «Основное»");
+      return;
+    }
+    if (!confirm("Опубликовать объект в портфолио на сайте?")) return;
+
+    setPublishing(true);
+    setError("");
+    setMsg("");
+    try {
+      const res = await fetch(`/api/admin/built-objects/${form.id}/publish`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data?.error || "Не удалось опубликовать");
+        return;
+      }
+      setHasUnpublishedDraft(Boolean(data.hasUnpublishedDraft));
+      setMsg("Объект опубликован в портфолио на сайте.");
+      router.refresh();
+    } catch {
+      setError("Сеть");
+    } finally {
+      setPublishing(false);
+    }
   }
 
   const houseProjectOptions = useMemo(
@@ -186,8 +342,8 @@ export function BuiltObjectForm({
               plans: [...prev.plans, ...uploadedUrls.map((url) => ({ url, label: "" }))],
             };
           }
-          if (target === "stages") {
-            return { ...prev, stages: [...prev.stages, ...uploadedUrls] };
+          if (target === "client-review-video" && uploadedUrls[0]) {
+            return { ...prev, clientReviewVideoUrl: uploadedUrls[0]! };
           }
           if (target === "videos") {
             return { ...prev, videos: [...prev.videos, ...uploadedUrls] };
@@ -218,48 +374,52 @@ export function BuiltObjectForm({
     }));
   }
 
-  async function save() {
-    if (!form.title.trim()) return;
-    setSaving(true);
-    setError("");
-    const endpoint = form.id ? `/api/admin/built-objects/${form.id}` : "/api/admin/built-objects";
-    const method = form.id ? "PUT" : "POST";
-    try {
-      const res = await fetch(endpoint, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          constructionHistoryJson: serializeConstructionHistory(form.historyStages),
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) setError(data?.error || "Не удалось сохранить объект.");
-      else router.push(`/admin/built-objects/${data.id || form.id}`);
-    } catch {
-      setError("Не удалось отправить данные.");
-    } finally {
-      setSaving(false);
-    }
+  function setCaseStudyPhases(phases: typeof form.caseStudyPhases) {
+    setForm((prev) => ({ ...prev, caseStudyPhases: phases }));
   }
+
+  function addCaseStudyPhase() {
+    const next = createCaseStudyPhaseDefinition("Новый этап");
+    setForm((prev) => ({
+      ...prev,
+      caseStudyPhases: normalizeCaseStudyPhaseDefinitions([...prev.caseStudyPhases, next]),
+      phaseMedia: { ...prev.phaseMedia, [next.id]: prev.phaseMedia[next.id] ?? [] },
+    }));
+  }
+
+  const uploadingPhaseId = uploading?.startsWith("phase:") ? uploading.slice("phase:".length) : null;
 
   return (
     <div className="max-w-4xl space-y-6">
+      <AdminBuiltObjectPublishBar
+        publishing={publishing}
+        hasUnpublishedDraft={hasUnpublishedDraft}
+        disabled={!sectionsReady}
+        onPublish={() => void publishToSite()}
+      />
+
       <div className="flex items-center gap-3">
         <Link href="/admin/built-objects" className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors">
           <ArrowLeft size={18} />
         </Link>
         <div className="flex-1">
           <h1 className="text-2xl font-bold tracking-tight">{form.id ? "Объект портфолио" : "Новый объект портфолио"}</h1>
+          {form.id ? (
+            <p className="mt-1 text-xs text-white/40">
+              {initial?.published ? "На сайте опубликован" : "Черновик — не виден на сайте"}
+              {hasUnpublishedDraft ? " · есть неопубликованные изменения" : ""}
+            </p>
+          ) : (
+            <p className="mt-1 text-xs text-white/40">Сохраните «Основное», затем остальные разделы и опубликуйте на сайт.</p>
+          )}
         </div>
-        <button onClick={save} disabled={saving || !form.title.trim()} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0F3D2E] text-white text-sm font-semibold disabled:opacity-50">
-          <Save size={16} /> {saving ? "Сохранение..." : "Сохранить"}
-        </button>
       </div>
 
+      {msg ? <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-200">{msg}</div> : null}
       {error ? <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-300">{error}</div> : null}
 
-      <AdminFormSection title="Основное">
+      <section className={sectionClass("main")}>
+        <AdminSectionHeader title="Основное" actions={sectionSaveControl("main")} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <AdminField label="Название объекта">
             <input value={form.title} onChange={(e) => set("title", e.target.value)} placeholder="Дом в д. Вырица" className={inputClass} />
@@ -295,17 +455,6 @@ export function BuiltObjectForm({
           </AdminField>
           <AdminField label="Срок строительства">
             <input value={form.buildTerm} onChange={(e) => set("buildTerm", e.target.value)} placeholder="211 или 211 дней" className={inputClass} />
-          </AdminField>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <AdminField label="Фундамент">
-            <input value={form.foundation} onChange={(e) => set("foundation", e.target.value)} placeholder="Монолитная плита" className={inputClass} />
-          </AdminField>
-          <AdminField label="Стены">
-            <input value={form.walls} onChange={(e) => set("walls", e.target.value)} placeholder="Газобетон D400" className={inputClass} />
-          </AdminField>
-          <AdminField label="Кровля">
-            <input value={form.roof} onChange={(e) => set("roof", e.target.value)} placeholder="Металлочерепица" className={inputClass} />
           </AdminField>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -350,99 +499,166 @@ export function BuiltObjectForm({
         <AdminField label="Описание работ">
           <RichEditor value={form.worksDescription} onChange={(value) => set("worksDescription", value)} minHeight="120px" />
         </AdminField>
-        <div className="flex flex-wrap items-end gap-5 text-sm text-white/70">
-          <label className="inline-flex items-center gap-2">
-            <input type="checkbox" checked={form.published} onChange={(e) => set("published", e.target.checked)} /> Опубликован
-          </label>
-          <AdminField label="Порядок в каталоге" className="block w-28 space-y-1">
-            <input value={form.order} onChange={(e) => set("order", e.target.value)} placeholder="0" className={inputClass} />
-          </AdminField>
-        </div>
-      </AdminFormSection>
+        <AdminField label="Порядок в каталоге" className="block w-28 space-y-1">
+          <input value={form.order} onChange={(e) => set("order", e.target.value)} placeholder="0" className={inputClass} />
+        </AdminField>
+      </section>
 
-      <AdminFormSection title="История строительства на сайте">
-        <BuiltObjectHistoryEditor stages={form.historyStages} onChange={setHistoryStages} />
-      </AdminFormSection>
+      <section className={sectionClass("history")}>
+        <AdminSectionHeader
+          title="История строительства на сайте"
+          actions={sectionsReady ? sectionSaveControl("history") : undefined}
+        />
+        {!sectionsReady ? (
+          <p className="text-sm text-white/45">Сначала сохраните раздел «Основное».</p>
+        ) : (
+          <BuiltObjectHistoryEditor stages={form.historyStages} onChange={setHistoryStages} />
+        )}
+      </section>
 
-      <AdminFormSection title="Кейс на сайте — медиа по разделам" subtitle="Загружайте файлы — превью, порядок и удаление как в админке проектов.">
-        <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
-          <AdminImageUrlList
-            title="Рендеры и фото объекта"
-            items={form.renders}
-            onItemsChange={(renders) => setForm((prev) => ({ ...prev, renders }))}
-            uploading={uploading === "renders"}
-            uploadProgress={uploadProgress}
-            onUploadFiles={(files) => void uploadMany("renders", files)}
-            emptyHint="Первое фото станет обложкой в каталоге портфолио."
-          />
-        </div>
+      <section className={sectionClass("media")}>
+        <AdminSectionHeader
+          title="Кейс на сайте — медиа по разделам"
+          actions={sectionsReady ? sectionSaveControl("media") : undefined}
+        />
+        {!sectionsReady ? (
+          <p className="text-sm text-white/45">Сначала сохраните раздел «Основное».</p>
+        ) : (
+          <>
+            <p className="text-[11px] text-white/35 leading-relaxed">
+              Загружайте файлы — превью, порядок и удаление как в админке проектов.
+            </p>
+            <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
+              <AdminImageUrlList
+                title="Рендеры и фото объекта"
+                items={form.renders}
+                onItemsChange={(renders) => setForm((prev) => ({ ...prev, renders }))}
+                uploading={uploading === "renders"}
+                uploadProgress={uploadProgress}
+                onUploadFiles={(files) => void uploadMany("renders", files)}
+                emptyHint="Первое фото станет обложкой в каталоге портфолио."
+              />
+            </div>
 
-        <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
-          <AdminPlanImageList
-            title="Планировки"
-            plans={form.plans}
-            onPlansChange={(plans) => setForm((prev) => ({ ...prev, plans }))}
-            uploading={uploading === "plans"}
-            uploadProgress={uploadProgress}
-            onUploadFiles={(files) => void uploadMany("plans", files)}
-          />
-        </div>
+            <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
+              <AdminPlanImageList
+                title="Планировки"
+                plans={form.plans}
+                onPlansChange={(plans) => setForm((prev) => ({ ...prev, plans }))}
+                uploading={uploading === "plans"}
+                uploadProgress={uploadProgress}
+                onUploadFiles={(files) => void uploadMany("plans", files)}
+              />
+            </div>
 
-        <div className="space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-white/50">Этапы строительства (таймлайн кейса)</p>
-          <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-            {CASE_STUDY_CONSTRUCTION_PHASES.map(({ id, title }) => (
-              <div key={id} className="space-y-2 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
-                <p className="text-sm font-medium text-white/85">{title}</p>
-                <AdminImageUrlList
-                  title="Фото этапа"
-                  items={form.phaseMedia[id] ?? []}
-                  onItemsChange={(items) => setPhaseMedia(id, items)}
-                  uploading={uploading === `phase:${id}`}
-                  uploadProgress={uploadProgress}
-                  onUploadFiles={(files) => void uploadMany(`phase:${id}`, files)}
+            <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
+              <p className="text-sm font-semibold adm-muted">Отзыв клиента</p>
+              <p className="text-[11px] leading-relaxed adm-faint">
+                Текст и один видеоотзыв — отображаются на карточке объекта в разделе «Отзыв клиента».
+              </p>
+              <AdminField label="Текст отзыва">
+                <textarea
+                  value={form.clientReviewText}
+                  onChange={(e) => set("clientReviewText", e.target.value)}
+                  rows={5}
+                  placeholder="«Строили с Everhouse — всё чётко по срокам…»"
+                  className={`${inputClass} min-h-[120px] resize-y text-[color:var(--adm-main-fg)]`}
                 />
-              </div>
-            ))}
-          </div>
-        </div>
+              </AdminField>
+              <AdminField label="Видеоотзыв">
+                <div className="space-y-3">
+                  {form.clientReviewVideoUrl ? (
+                    <div className="flex flex-wrap items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] p-3">
+                      <span className="max-w-full truncate font-mono text-xs adm-faint">{form.clientReviewVideoUrl}</span>
+                      <button
+                        type="button"
+                        onClick={() => set("clientReviewVideoUrl", "")}
+                        className="rounded-lg border border-white/[0.12] px-3 py-1.5 text-xs adm-muted hover:bg-white/[0.06]"
+                      >
+                        Удалить
+                      </button>
+                    </div>
+                  ) : null}
+                  <div className="flex flex-wrap items-end gap-3">
+                    <label className="adm-btn-media cursor-pointer text-xs">
+                      {uploading === "client-review-video" ? "Загрузка…" : "Загрузить видео"}
+                      <input
+                        type="file"
+                        accept="video/*"
+                        className="hidden"
+                        disabled={uploading === "client-review-video"}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) void uploadMany("client-review-video", [file]);
+                          e.target.value = "";
+                        }}
+                      />
+                    </label>
+                    <input
+                      value={form.clientReviewVideoUrl}
+                      onChange={(e) => set("clientReviewVideoUrl", e.target.value)}
+                      placeholder="или вставьте ссылку на MP4 /uploads/…"
+                      className={`${inputClass} min-w-[220px] flex-1 font-mono text-xs`}
+                    />
+                  </div>
+                  <p className="text-[10px] adm-faint">Один файл до ~100 МБ. Для YouTube/Rutube — вставьте прямую ссылку на файл или оставьте только текст.</p>
+                </div>
+              </AdminField>
+            </div>
 
-        <div className="space-y-3 rounded-xl border border-dashed border-white/[0.1] bg-white/[0.01] p-4">
-          <p className="text-xs font-semibold text-white/45">Прочие фото этапов (без раздела)</p>
-          <p className="text-[11px] leading-relaxed text-white/35">
-            Старое поле: попадает в раздел «Фото этапов строительства» в конце таймлайна. Для новых объектов лучше загружать в разделы выше.
-          </p>
-          <AdminImageUrlList
-            title="Прочие этапы"
-            items={form.stages}
-            onItemsChange={(stages) => setForm((prev) => ({ ...prev, stages }))}
-            uploading={uploading === "stages"}
-            uploadProgress={uploadProgress}
-            onUploadFiles={(files) => void uploadMany("stages", files)}
-          />
-        </div>
+            <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
+              <AdminImageUrlList
+                title="Видео"
+                items={form.videos}
+                onItemsChange={(videos) => setForm((prev) => ({ ...prev, videos }))}
+                uploading={uploading === "videos"}
+                uploadProgress={uploadProgress}
+                onUploadFiles={(files) => void uploadMany("videos", files)}
+                accept="video/*"
+                emptyHint="MP4 или другие видеофайлы с сервера."
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <AdminField label="Telegram">
+                <input value={form.telegramUrl} onChange={(e) => set("telegramUrl", e.target.value)} placeholder="https://t.me/..." className={inputClass} />
+              </AdminField>
+              <AdminField label="VK">
+                <input value={form.vkUrl} onChange={(e) => set("vkUrl", e.target.value)} placeholder="https://vk.com/..." className={inputClass} />
+              </AdminField>
+            </div>
+          </>
+        )}
+      </section>
 
-        <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
-          <AdminImageUrlList
-            title="Видео"
-            items={form.videos}
-            onItemsChange={(videos) => setForm((prev) => ({ ...prev, videos }))}
-            uploading={uploading === "videos"}
+      <section className={sectionClass("phases")}>
+        <AdminSectionHeader
+          title="Этапы строительства (таймлайн кейса)"
+          actions={
+            sectionsReady ? (
+              <>
+                <button type="button" onClick={addCaseStudyPhase} className="adm-btn-media text-xs">
+                  <Plus size={14} aria-hidden />
+                  Этап
+                </button>
+                {sectionSaveControl("phases")}
+              </>
+            ) : undefined
+          }
+        />
+        {!sectionsReady ? (
+          <p className="text-sm adm-faint">Сначала сохраните раздел «Основное».</p>
+        ) : (
+          <BuiltObjectCaseStudyPhasesEditor
+            phases={form.caseStudyPhases}
+            phaseMedia={form.phaseMedia}
+            onPhasesChange={setCaseStudyPhases}
+            onPhaseMediaChange={setPhaseMedia}
+            uploadingPhaseId={uploadingPhaseId}
             uploadProgress={uploadProgress}
-            onUploadFiles={(files) => void uploadMany("videos", files)}
-            accept="video/*"
-            emptyHint="MP4 или другие видеофайлы с сервера."
+            onUploadFiles={(phaseId, files) => void uploadMany(`phase:${phaseId}`, files)}
           />
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <AdminField label="Telegram">
-            <input value={form.telegramUrl} onChange={(e) => set("telegramUrl", e.target.value)} placeholder="https://t.me/..." className={inputClass} />
-          </AdminField>
-          <AdminField label="VK">
-            <input value={form.vkUrl} onChange={(e) => set("vkUrl", e.target.value)} placeholder="https://vk.com/..." className={inputClass} />
-          </AdminField>
-        </div>
-      </AdminFormSection>
+        )}
+      </section>
     </div>
   );
 }

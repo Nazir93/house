@@ -581,6 +581,11 @@ function mapBuiltObject(row: any): BuiltObjectItem {
     constructionHistoryJson: Array.isArray(row.constructionHistoryJson)
       ? (row.constructionHistoryJson as { id?: string; title: string; description: string }[])
       : null,
+    caseStudyPhasesJson: Array.isArray(row.caseStudyPhasesJson)
+      ? (row.caseStudyPhasesJson as { id: string; title: string; order: number }[])
+      : null,
+    clientReviewText: row.clientReviewText ?? null,
+    clientReviewVideoUrl: row.clientReviewVideoUrl ?? null,
     telegramUrl: row.telegramUrl,
     vkUrl: row.vkUrl,
     houseProjectSlug:

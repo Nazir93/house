@@ -2,28 +2,26 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { generateSlug } from "@/lib/utils";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
-import { revalidatePublicConstructionCatalog } from "@/lib/revalidate-public-content";
-import { builtObjectMediaCreatePayload } from "@/lib/built-object-admin-media";
+import {
+  builtObjectSectionSavedResponse,
+  builtObjectSectionUpdateData,
+  n,
+  nf,
+  ni,
+  parseBuiltObjectDraftSection,
+} from "@/lib/built-object-admin-patch";
 import { builtObjectCoordinatesFromBody } from "@/lib/built-object-coordinates";
+import { hasUnpublishedBuiltObjectSiteDraft } from "@/lib/built-object-admin-sections";
 
 export const dynamic = "force-dynamic";
 
-function n(value: unknown) {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function nf(value: unknown): number | null {
-  if (value === "" || value == null) return null;
-  const s = String(value).trim().replace(",", ".");
-  const parsed = parseFloat(s);
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function ni(value: unknown): number | null {
-  if (value === "" || value == null) return null;
-  const parsed = parseInt(String(value), 10);
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+function selectPublishedMeta() {
+  return {
+    id: true,
+    published: true,
+    updatedAt: true,
+    sitePublishedAt: true,
+  };
 }
 
 export async function GET(request: NextRequest) {
@@ -50,6 +48,14 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
+    const section = parseBuiltObjectDraftSection(body);
+    if (section !== "main") {
+      return NextResponse.json({ error: "Сначала сохраните раздел «Основное»" }, { status: 400 });
+    }
+    if (!String(body.title ?? "").trim()) {
+      return NextResponse.json({ error: "Укажите название объекта" }, { status: 400 });
+    }
+
     const coords = builtObjectCoordinatesFromBody(body);
     const object = await (prisma as any).builtObject.create({
       data: {
@@ -72,19 +78,23 @@ export async function POST(request: NextRequest) {
         longitude: coords?.longitude ?? n(body.longitude),
         description: body.description || "",
         worksDescription: body.worksDescription || null,
-        constructionHistoryJson: Array.isArray(body.constructionHistoryJson) ? body.constructionHistoryJson : null,
-        telegramUrl: body.telegramUrl || null,
-        vkUrl: body.vkUrl || null,
         houseProjectId: body.houseProjectId || null,
-        published: Boolean(body.published),
+        published: false,
         order: Number(body.order) || 0,
-        media: {
-          create: builtObjectMediaCreatePayload(body),
-        },
       },
+      select: selectPublishedMeta(),
     });
-    revalidatePublicConstructionCatalog();
-    return NextResponse.json(object, { status: 201 });
+
+    return NextResponse.json(
+      {
+        ...object,
+        ok: true,
+        savedSection: section,
+        message: builtObjectSectionSavedResponse(section),
+        hasUnpublishedDraft: hasUnpublishedBuiltObjectSiteDraft(object),
+      },
+      { status: 201 },
+    );
   } catch (error) {
     console.error("[ADMIN BUILT OBJECT CREATE]", error);
     return NextResponse.json({ error: "DB error" }, { status: 500 });

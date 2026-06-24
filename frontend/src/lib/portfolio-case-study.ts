@@ -1,11 +1,13 @@
 import type { BuiltObjectItem } from "@/lib/construction-shared";
 import {
-  getBuiltObjectStages,
   getBuiltObjectRenders,
   getBuiltObjectPlans,
   getBuiltObjectPhaseMedia,
 } from "@/lib/construction-shared";
-import { CASE_STUDY_CONSTRUCTION_PHASES } from "@/lib/portfolio-case-study-phases";
+import {
+  parseCaseStudyPhasesJson,
+  type CaseStudyPhaseDefinition,
+} from "@/lib/portfolio-case-study-phases";
 import { formatArticleBody } from "@/lib/html-content";
 
 /** Конкретный подпункт с галереей (второй ряд чипов на референсе). */
@@ -84,7 +86,8 @@ function prependCmsMediaPhases(object: BuiltObjectItem, phases: CaseStudyPhase[]
 
 /** Разделы стройки: только если в админке загружены фото для phaseKey. */
 function constructionPhasesFromAdmin(object: BuiltObjectItem): CaseStudyPhase[] {
-  return CASE_STUDY_CONSTRUCTION_PHASES.flatMap(({ id, title }) => {
+  const definitions: CaseStudyPhaseDefinition[] = parseCaseStudyPhasesJson(object.caseStudyPhasesJson);
+  return definitions.flatMap(({ id, title }) => {
     const urls = getBuiltObjectPhaseMedia(object, id)
       .map((m) => m.url)
       .filter(Boolean);
@@ -93,51 +96,8 @@ function constructionPhasesFromAdmin(object: BuiltObjectItem): CaseStudyPhase[] 
   });
 }
 
-/** Legacy: общее поле «этапы стройки» без phaseKey — отдельный раздел в конце. */
-function appendLegacyStagesPhase(object: BuiltObjectItem, phases: CaseStudyPhase[]): CaseStudyPhase[] {
-  const stages = getBuiltObjectStages(object);
-  const images = stages.map((s) => s.url).filter(Boolean);
-  if (images.length === 0) return phases;
-
-  const tier2: CaseStudyChipNode[] = stages.map((s, i) => ({
-    id: `stage-${s.id}`,
-    label: s.label?.trim() || `Этап ${i + 1}`,
-    description: s.alt || undefined,
-    images: [s.url],
-  }));
-
-  const archive: CaseStudyPhase = {
-    id: "_build_stages",
-    title: "Фото этапов строительства",
-    tier1: [
-      {
-        id: "_all_stages",
-        label: "Все этапы",
-        tier2:
-          tier2.length === 1
-            ? tier2
-            : [
-                {
-                  id: "_all_in_one",
-                  label: "Все фотографии",
-                  description: "Снимки без привязки к разделу кейса.",
-                  images,
-                },
-                ...tier2,
-              ],
-      },
-    ],
-  };
-
-  return [...phases, archive];
-}
-
-/**
- * Таймлайн кейса: только разделы с контентом из админки
- * (рендеры, описание, планировки, фото по phaseKey, legacy-этапы).
- */
 export function getCaseStudyPhasesForObject(object: BuiltObjectItem): CaseStudyPhase[] {
   const withConstruction = constructionPhasesFromAdmin(object);
   const withMedia = prependCmsMediaPhases(object, withConstruction);
-  return appendLegacyStagesPhase(object, withMedia);
+  return withMedia;
 }

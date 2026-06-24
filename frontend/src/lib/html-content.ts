@@ -73,11 +73,12 @@ export function sanitizeArticleHtml(html: string): string {
     },
     disallowedTagsMode: "discard",
   })
-    /** Переносы из Word/редактора внутри абзаца — в пробел, иначе «одно слово на строку» */
-    .replace(/<br\s*\/?>/gi, " ")
+    /** Shift+Enter и переносы из редактора — граница абзаца, не пробел */
+    .replace(/(?:<br\s*\/?>\s*)+/gi, "</p><p>")
     /** Убираем лишние пробелы в начале/конце абзацев после вставки из документов */
     .replace(/<p(\s[^>]*)?>\s+/gi, "<p$1>")
-    .replace(/\s+<\/p>/gi, "</p>");
+    .replace(/\s+<\/p>/gi, "</p>")
+    .replace(/<p(\s[^>]*)?>\s*<\/p>/gi, "");
 }
 
 /** Текст статьи или блока: HTML как есть (после sanitize) или абзацы через пустую строку. */
@@ -90,9 +91,9 @@ export function formatArticleBody(raw: string): string {
   if (t.startsWith("<")) {
     return sanitizeArticleHtml(t);
   }
-  /** Пустая строка = новый абзац; одиночный Enter внутри абзаца не даём — склеиваем в нормальный текст */
+  /** Любой перенос строки — новый абзац (как Enter в админке) */
   return t
-    .split(/\n\s*\n+/)
+    .split(/\n+/)
     .filter(Boolean)
     .map((block) => {
       const oneLine = block.replace(/[\s\n\r]+/g, " ").trim();

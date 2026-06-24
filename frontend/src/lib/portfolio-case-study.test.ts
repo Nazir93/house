@@ -34,8 +34,30 @@ describe("getCaseStudyPhasesForObject", () => {
     expect(phases.map((p) => p.id)).toEqual(["_cms_renders", "foundation"]);
   });
 
+  it("shows custom phase title from json", () => {
+    const phases = getCaseStudyPhasesForObject(
+      object({
+        caseStudyPhasesJson: [{ id: "foundation", title: "Монолитная плита", order: 0 }],
+        media: [
+          { id: "f1", type: "BUILD_STAGE", url: "/f.jpg", alt: "", order: 0, phaseKey: "foundation" },
+        ],
+      }),
+    );
+    expect(phases.find((p) => p.id === "foundation")?.title).toBe("Монолитная плита");
+  });
+
   it("показывает рендеры при описании без фото", () => {
     const phases = getCaseStudyPhasesForObject(object({ description: "<p>Описание</p>" }));
     expect(phases.map((p) => p.id)).toEqual(["_cms_renders"]);
+  });
+
+  it("legacy BUILD_STAGE без phaseKey не попадает в таймлайн кейса", () => {
+    const phases = getCaseStudyPhasesForObject(
+      object({
+        media: [{ id: "legacy", type: "BUILD_STAGE", url: "/old.jpg", alt: "", order: 0 }],
+      }),
+    );
+    expect(phases.map((p) => p.id)).not.toContain("_build_stages");
+    expect(phases).toHaveLength(0);
   });
 });
