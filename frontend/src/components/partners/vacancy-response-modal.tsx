@@ -11,6 +11,7 @@ import { FunnelInputField as InputField } from "@/components/ui/funnel-ui";
 import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { vacancyResponseFormSchema, type VacancyResponseFormData } from "@/lib/schemas";
+import { collectCurrentTrafficParams, trackLeadSuccess } from "@/lib/analytics-goals";
 import { cn } from "@/lib/utils";
 
 async function readLeadError(response: Response): Promise<string> {
@@ -99,7 +100,8 @@ export function VacancyResponseModal({ position, open, onClose }: Props) {
     setLoading(true);
     try {
       const recaptchaToken = await getSmartCaptchaToken();
-      const params = new URLSearchParams(window.location.search);
+      const source = "partner-vacancy";
+      const trafficParams = collectCurrentTrafficParams();
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -109,13 +111,11 @@ export function VacancyResponseModal({ position, open, onClose }: Props) {
           email: data.email || undefined,
           message: data.message || undefined,
           service: `Отклик: ${position}`,
-          source: "partner-vacancy",
+          source,
           pageUrl: window.location.href,
           honeypot: data.honeypot || "",
           recaptchaToken: recaptchaToken || undefined,
-          utmSource: params.get("utm_source"),
-          utmMedium: params.get("utm_medium"),
-          utmCampaign: params.get("utm_campaign"),
+          ...trafficParams,
           calcData: {
             kind: "vacancy-response",
             position,
@@ -126,6 +126,7 @@ export function VacancyResponseModal({ position, open, onClose }: Props) {
       });
       if (response.ok) {
         const result = (await response.json()) as { redirectUrl?: string };
+        trackLeadSuccess(source, { pageUrl: window.location.href, position });
         if (result.redirectUrl) {
           window.location.assign(result.redirectUrl);
         }

@@ -19,6 +19,10 @@ describe("leadSourceFilterWhere", () => {
     expect(leadSourceFilterWhere("services")).toEqual({ source: { startsWith: "service-" } });
   });
 
+  it("matches advertising landing leads by prefix", () => {
+    expect(leadSourceFilterWhere("lp")).toEqual({ source: { startsWith: "lp-" } });
+  });
+
   it("falls back to exact source match", () => {
     expect(leadSourceFilterWhere("service-foundation")).toEqual({ source: "service-foundation" });
   });

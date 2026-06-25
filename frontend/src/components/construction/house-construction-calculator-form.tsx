@@ -34,6 +34,12 @@ import { formatRub } from "@/lib/construction-shared";
 import { readLeadError } from "@/lib/read-lead-error";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { useHouseConstructionCalculatorConfig } from "@/lib/use-house-construction-calculator-config";
+import {
+  METRIKA_GOALS,
+  collectCurrentTrafficParams,
+  trackLeadSuccess,
+  trackMetrikaGoal,
+} from "@/lib/analytics-goals";
 import { FunnelInputField as InputField, FunnelSelect } from "@/components/ui/funnel-ui";
 
 const catalogFloorOptions = (["1", "1.5", "2"] as CatalogFloorId[]).map((id) => ({
@@ -162,6 +168,7 @@ export function HouseConstructionCalculatorForm({
   promoServiceRequired,
   leadSourceOverride,
   leadServiceLabelOverride,
+  initialWallMaterial,
   submitButtonLabel,
   /** Узкая вёрстка для встраивания (страница промо QR, шаг 2) — без полноэкранной высоты и лишних отступов */
   compactLayout,
@@ -179,6 +186,7 @@ export function HouseConstructionCalculatorForm({
   promoServiceRequired?: boolean;
   leadSourceOverride?: string;
   leadServiceLabelOverride?: string;
+  initialWallMaterial?: WallMaterialId;
   submitButtonLabel?: string;
   compactLayout?: boolean;
   hideObjectType?: boolean;
@@ -189,6 +197,7 @@ export function HouseConstructionCalculatorForm({
   const contact = useContactConfig();
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [quizStarted, setQuizStarted] = useState(false);
 
   const form = useForm<HouseConstructionFormData>({
     resolver: zodResolver(houseConstructionSchema),
@@ -197,7 +206,7 @@ export function HouseConstructionCalculatorForm({
       area: "",
       catalogFloor: "1",
       roof: "dual",
-      wallMaterial: "gas",
+      wallMaterial: initialWallMaterial ?? "gas",
       engineering: defaultEngineeringSelection(),
       facadeFinish: "none",
       name: "",
@@ -286,7 +295,6 @@ export function HouseConstructionCalculatorForm({
     setLoading(true);
     try {
       const recaptchaToken = getRecaptchaToken ? await getRecaptchaToken("submit") : "";
-      const params = new URLSearchParams(window.location.search);
       const rawAreaSubmit = parseFloat(String(data.area ?? "").replace(",", "."));
       const areaForPayload = Number.isFinite(rawAreaSubmit) && rawAreaSubmit > 0 ? rawAreaSubmit : 0;
       const payload = buildHouseConstructionCalcPayload(data, areaForPayload, config, {
@@ -303,6 +311,7 @@ export function HouseConstructionCalculatorForm({
             }
           : payload;
       const source = leadSourceOverride ?? "calculator";
+      const trafficParams = collectCurrentTrafficParams();
       const serviceLine =
         leadServiceLabelOverride ??
         (promoFreeService?.title
@@ -319,14 +328,16 @@ export function HouseConstructionCalculatorForm({
           pageUrl: window.location.href,
           honeypot: data.honeypot || "",
           recaptchaToken: recaptchaToken || undefined,
-          utmSource: params.get("utm_source"),
-          utmMedium: params.get("utm_medium"),
-          utmCampaign: params.get("utm_campaign"),
+          ...trafficParams,
           calcData,
         }),
       });
       if (response.ok) {
         const result = await response.json();
+        trackLeadSuccess(source, {
+          pageUrl: window.location.href,
+          estimate: calcData.quote?.grandTotalRub ?? calcData.estimate ?? null,
+        });
         form.reset();
         onSuccess(result.followupToken || "", data.name, data.phone);
       } else {
@@ -372,7 +383,15 @@ export function HouseConstructionCalculatorForm({
               {heading}
             </h2>
           </header>
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            onFocusCapture={() => {
+              if (quizStarted) return;
+              setQuizStarted(true);
+              trackMetrikaGoal(METRIKA_GOALS.quizStart, { source: leadSourceOverride ?? "calculator" });
+            }}
+            className="flex flex-col gap-5"
+          >
             {!hideObjectType ? (
               <InputField label="Тип объекта (по желанию)">
                 <input

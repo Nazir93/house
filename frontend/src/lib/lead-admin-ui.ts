@@ -34,6 +34,7 @@ export const LEAD_STATUS_BUTTON_STYLES: Record<string, string> = {
 export const LEAD_SOURCE_FILTERS = [
   { value: "", label: "Все формы" },
   { value: "calculator", label: "Калькулятор и расчёт" },
+  { value: "lp", label: "Рекламные LP" },
   { value: "design", label: "Проектирование" },
   { value: "mortgage", label: "Ипотека" },
   { value: "services", label: "Страницы услуг" },
@@ -57,6 +58,8 @@ export function leadSourceFilterWhere(filterId: string): Prisma.LeadWhereInput |
   switch (filterId) {
     case "calculator":
       return { source: { in: [...CALCULATOR_SOURCES] } };
+    case "lp":
+      return { source: { startsWith: "lp-" } };
     case "design":
       return { source: { in: ["individual-design", "house-project-design"] } };
     case "mortgage":

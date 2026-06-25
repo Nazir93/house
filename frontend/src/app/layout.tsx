@@ -15,6 +15,7 @@ import { ProjectCompareProvider } from "@/lib/project-compare-context";
 import { SITE_NAME, CITY, SITE_URL, getDefaultSiteGeoDescription } from "@/lib/constants";
 import { toAbsoluteSiteUrl } from "@/lib/absolute-site-url";
 import { AnalyticsScripts } from "@/components/seo/analytics";
+import { AnalyticsEventListener } from "@/components/seo/analytics-event-listener";
 import { JsonLd } from "@/components/seo/json-ld";
 import { ContactConfigProvider } from "@/lib/contact-config-context";
 import { loadContactConfig } from "@/lib/load-contact-config";
@@ -132,6 +133,7 @@ export default async function RootLayout({
             </SessionProvider>
           </ThemeProvider>
         </PwaSerwistProvider>
+        <AnalyticsEventListener />
       </body>
     </html>
   );

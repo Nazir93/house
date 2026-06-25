@@ -2,6 +2,7 @@
 
 import { forwardRef, useState, type CSSProperties, type FormEvent } from "react";
 import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
+import { collectCurrentTrafficParams, trackLeadSuccess } from "@/lib/analytics-goals";
 
 export const LeadMiniForm = forwardRef<HTMLFormElement, {
   source: string;
@@ -32,6 +33,7 @@ export const LeadMiniForm = forwardRef<HTMLFormElement, {
     if (honeypot) return;
     setStatus("Отправляем...");
     const recaptchaToken = await getSmartCaptchaToken();
+    const trafficParams = collectCurrentTrafficParams();
     const res = await fetch("/api/leads", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -44,10 +46,12 @@ export const LeadMiniForm = forwardRef<HTMLFormElement, {
         calcData,
         honeypot,
         recaptchaToken: recaptchaToken || undefined,
+        ...trafficParams,
       }),
     });
     const data = await res.json();
     if (res.ok && data.redirectUrl) {
+      trackLeadSuccess(source, { pageUrl: typeof window !== "undefined" ? window.location.href : "" });
       window.location.href = data.redirectUrl;
       return;
     }

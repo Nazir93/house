@@ -22,9 +22,21 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
   const isAccount = pathname.startsWith("/account");
+  const isAdvertisingLanding = pathname.startsWith("/lp");
 
   if (isAdmin || isAccount) {
     return <>{children}</>;
+  }
+
+  if (isAdvertisingLanding) {
+    return (
+      <SmartCaptchaGate>
+        <RouteScrollReset />
+        <RevealObserver />
+        <main className="min-h-screen">{children}</main>
+        <CookieBanner />
+      </SmartCaptchaGate>
+    );
   }
 
   return (

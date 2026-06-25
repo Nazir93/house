@@ -28,6 +28,9 @@ function serviceLeadOptions(): { value: string; label: string; hint?: string }[]
 export const LEAD_SOURCE_OPTIONS: { value: string; label: string; hint?: string }[] = [
   { value: "promo-qr-banner", label: "Промо: QR с баннера", hint: "Страница /promo только по QR, не в меню сайта" },
   { value: "calculator", label: "Ориентировочный расчёт", hint: "Модалка и страница калькулятора" },
+  { value: "lp-dom-pod-klyuch", label: "LP: дом под ключ", hint: "/lp/dom-pod-klyuch" },
+  { value: "lp-kirpich", label: "LP: кирпичные дома", hint: "/lp/kirpich" },
+  { value: "lp-stoimost", label: "LP: стоимость строительства", hint: "/lp/stoimost" },
   { value: "project-calculator", label: "Расчёт с карточки проекта", hint: "Модалка на /projects/[slug]" },
   { value: "individual-design", label: "Индивидуальное проектирование", hint: "/individual-design" },
   { value: "house-project-design", label: "Проект (карточка дома)", hint: "Калькулятор на странице типового проекта" },

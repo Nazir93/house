@@ -37,6 +37,15 @@ vi.mock("@/lib/proposal/schedule-proposal-job", () => ({
   scheduleLeadProposalPdf: (...args: unknown[]) => scheduleLeadProposalPdf(...args),
 }));
 
+vi.mock("@/lib/smart-captcha-config", () => ({
+  isSmartCaptchaConfigured: () => false,
+  requireSmartCaptchaOnProduction: () => false,
+  smartCaptchaUnavailableResponse: () => ({
+    error: "Форма временно недоступна.",
+    status: 503 as const,
+  }),
+}));
+
 import { POST } from "@/app/api/leads/route";
 
 describe("POST /api/leads", () => {
@@ -71,6 +80,9 @@ describe("POST /api/leads", () => {
         name: "Иван",
         phone: "+7 999 000 00 00",
         source: "calculator",
+        utm_content: "ignored-snake-case",
+        utmContent: "ad-variant-a",
+        yclid: "1234567890",
         calcData: { kind: "house-construction-quote", area: "114" },
       }),
       headers: { "Content-Type": "application/json" },
@@ -85,6 +97,13 @@ describe("POST /api/leads", () => {
     expect(json.proposalStatus).toBe("PENDING");
     expect(scheduleLeadProposalPdf).toHaveBeenCalledOnce();
     expect(scheduleLeadProposalPdf).toHaveBeenCalledWith("lead-1");
+    expect(txLeadCreate).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        source: "calculator",
+        utmContent: "ad-variant-a",
+        yclid: "1234567890",
+      }),
+    });
   });
 });
 

@@ -7,6 +7,7 @@ import { useContactConfig } from "@/lib/contact-config-context";
 import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
 import { BackNavButton } from "@/components/ui/back-nav";
 import { HouseConstructionCalculatorForm } from "@/components/construction/house-construction-calculator-form";
+import { collectCurrentTrafficParams, trackLeadSuccess } from "@/lib/analytics-goals";
 
 type Step = "form-calculator" | "success";
 
@@ -73,7 +74,8 @@ function ProjectEstimateLeadForm({
 
     try {
       const recaptchaToken = getRecaptchaToken ? await getRecaptchaToken("submit") : "";
-      const params = new URLSearchParams(window.location.search);
+      const source = estimatePayload?.source ?? "project-calculator";
+      const trafficParams = collectCurrentTrafficParams();
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -81,17 +83,16 @@ function ProjectEstimateLeadForm({
           name,
           phone,
           service: estimatePayload?.service ?? "Детальная смета проекта",
-          source: estimatePayload?.source ?? "project-calculator",
+          source,
           pageUrl: window.location.href,
           recaptchaToken: recaptchaToken || undefined,
-          utmSource: params.get("utm_source"),
-          utmMedium: params.get("utm_medium"),
-          utmCampaign: params.get("utm_campaign"),
+          ...trafficParams,
           calcData: estimatePayload?.calcData ?? null,
         }),
       });
 
       if (response.ok) {
+        trackLeadSuccess(source, { pageUrl: window.location.href });
         onSuccess();
         return;
       }

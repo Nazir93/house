@@ -11,6 +11,7 @@ import { FunnelInputField as InputField, FunnelFillButton as FillButton } from "
 import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
 import { partnerFeedbackFormSchema, type PartnerFeedbackFormData } from "@/lib/schemas";
 import { useContactConfig } from "@/lib/contact-config-context";
+import { collectCurrentTrafficParams, trackLeadSuccess } from "@/lib/analytics-goals";
 
 async function readLeadError(response: Response): Promise<string> {
   try {
@@ -65,7 +66,7 @@ export function PartnerFeedbackForm({
     setLoading(true);
     try {
       const recaptchaToken = await getSmartCaptchaToken();
-      const params = new URLSearchParams(window.location.search);
+      const trafficParams = collectCurrentTrafficParams();
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -79,9 +80,7 @@ export function PartnerFeedbackForm({
           pageUrl: window.location.href,
           honeypot: data.honeypot || "",
           recaptchaToken: recaptchaToken || undefined,
-          utmSource: params.get("utm_source"),
-          utmMedium: params.get("utm_medium"),
-          utmCampaign: params.get("utm_campaign"),
+          ...trafficParams,
           calcData: {
             kind: "partner-feedback",
             topic,
@@ -91,6 +90,7 @@ export function PartnerFeedbackForm({
       });
       if (response.ok) {
         const result = (await response.json()) as { redirectUrl?: string };
+        trackLeadSuccess(source, { pageUrl: window.location.href });
         if (result.redirectUrl) {
           window.location.assign(result.redirectUrl);
         }

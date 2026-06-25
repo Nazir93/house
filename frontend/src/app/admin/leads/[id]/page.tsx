@@ -20,6 +20,8 @@ type Lead = {
   utmMedium: string | null;
   utmCampaign: string | null;
   utmTerm: string | null;
+  utmContent: string | null;
+  yclid: string | null;
   calcData: unknown;
   status: string;
   proposalStatus?: "NONE" | "PENDING" | "READY" | "FAILED" | "UNSUPPORTED";
@@ -163,6 +165,8 @@ export default function AdminLeadDetailPage() {
     { label: "Medium", value: lead.utmMedium },
     { label: "Campaign", value: lead.utmCampaign },
     { label: "Term", value: lead.utmTerm },
+    { label: "Content", value: lead.utmContent },
+    { label: "yclid", value: lead.yclid },
   ].filter((r) => r.value?.trim());
 
   return (

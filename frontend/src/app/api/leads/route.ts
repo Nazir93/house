@@ -196,6 +196,8 @@ async function handleLeadPost(request: NextRequest) {
             utmMedium: parsed.data.utmMedium || null,
             utmCampaign: parsed.data.utmCampaign || null,
             utmTerm: parsed.data.utmTerm || null,
+            utmContent: parsed.data.utmContent || null,
+            yclid: parsed.data.yclid || null,
             proposalStatus: "PENDING",
             ...(parsed.data.calcData !== undefined
               ? { calcData: parsed.data.calcData as object }

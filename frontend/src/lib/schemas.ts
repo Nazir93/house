@@ -42,6 +42,8 @@ export const leadFormSchema = z.object({
   utmMedium: z.string().trim().max(120).optional().nullable(),
   utmCampaign: z.string().trim().max(160).optional().nullable(),
   utmTerm: z.string().trim().max(160).optional().nullable(),
+  utmContent: z.string().trim().max(160).optional().nullable(),
+  yclid: z.string().trim().max(160).optional().nullable(),
   calcData: z.unknown().optional().refine((value) => jsonByteLength(value) <= 16_384, {
     message: "Данные расчёта слишком большие",
   }),

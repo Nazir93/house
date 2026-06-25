@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Star } from "lucide-react";
 
 import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
+import { METRIKA_GOALS, trackMetrikaGoal } from "@/lib/analytics-goals";
 import { reviewSubmitSchema, type ReviewSubmitInput } from "@/lib/review-content";
 
 const fieldClass =
@@ -72,6 +73,7 @@ export function ReviewSubmitForm() {
         setError(await readSubmitError(res));
         return;
       }
+      trackMetrikaGoal(METRIKA_GOALS.reviewSubmit, { rating });
       setDone(true);
     } catch {
       setError("Сеть недоступна. Попробуйте позже.");

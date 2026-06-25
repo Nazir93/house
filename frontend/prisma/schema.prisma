@@ -370,6 +370,8 @@ model Lead {
   utmMedium   String?
   utmCampaign String?
   utmTerm     String?
+  utmContent  String?
+  yclid       String?
   calcData    Json?
   status      LeadStatus @default(NEW)
   proposalStatus LeadProposalStatus @default(NONE)
