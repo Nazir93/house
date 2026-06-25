@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
 const upsertRateBucket = vi.fn();
@@ -9,6 +9,8 @@ const dbTransaction = vi.fn();
 const sendTelegramNotification = vi.fn();
 const sendBitrixLead = vi.fn();
 const scheduleLeadProposalPdf = vi.fn();
+const originalSmartCaptchaSecret = process.env.YANDEX_SMARTCAPTCHA_SERVER_KEY;
+const originalNextAuthSecret = process.env.NEXTAUTH_SECRET;
 
 vi.mock("uuid", () => ({
   v4: () => "uuid-test-token",
@@ -51,6 +53,8 @@ import { POST } from "@/app/api/leads/route";
 describe("POST /api/leads", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.YANDEX_SMARTCAPTCHA_SERVER_KEY = "";
+    process.env.NEXTAUTH_SECRET = "test-nextauth-secret";
     upsertRateBucket.mockResolvedValue({ count: 1 });
     deleteRateBuckets.mockResolvedValue({ count: 0 });
     txLeadCreate.mockResolvedValue({
@@ -71,6 +75,11 @@ describe("POST /api/leads", () => {
     sendTelegramNotification.mockResolvedValue(undefined);
     sendBitrixLead.mockResolvedValue(undefined);
     scheduleLeadProposalPdf.mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    process.env.YANDEX_SMARTCAPTCHA_SERVER_KEY = originalSmartCaptchaSecret;
+    process.env.NEXTAUTH_SECRET = originalNextAuthSecret;
   });
 
   it("schedules proposal generation without blocking the response", async () => {
