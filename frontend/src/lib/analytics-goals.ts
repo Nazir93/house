@@ -10,6 +10,9 @@ export const METRIKA_GOALS = {
   leadLpKirpich: "lead_lp_kirpich",
   leadLpDomPodKlyuch: "lead_lp_dom_pod_klyuch",
   leadLpStoimost: "lead_lp_stoimost",
+  leadLpGazobeton: "lead_lp_gazobeton",
+  leadLpOdnoetazhnye: "lead_lp_odnoetazhnye",
+  leadLpKeramoblok: "lead_lp_keramoblok",
   phoneClick: "phone_click",
   telegramClick: "telegram_click",
   maxClick: "max_click",
@@ -76,6 +79,9 @@ function goalForLeadSource(source: string): MetrikaGoalName | null {
   if (source === "lp-kirpich") return METRIKA_GOALS.leadLpKirpich;
   if (source === "lp-dom-pod-klyuch") return METRIKA_GOALS.leadLpDomPodKlyuch;
   if (source === "lp-stoimost") return METRIKA_GOALS.leadLpStoimost;
+  if (source === "lp-gazobeton") return METRIKA_GOALS.leadLpGazobeton;
+  if (source === "lp-odnoetazhnye") return METRIKA_GOALS.leadLpOdnoetazhnye;
+  if (source === "lp-keramoblok") return METRIKA_GOALS.leadLpKeramoblok;
   return null;
 }
 

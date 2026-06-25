@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { getHouseProjects } from "@/lib/construction-data";
+import { getBuiltObjects, getHouseProjects } from "@/lib/construction-data";
 import {
   getAdvertisingLandingConfig,
+  pickAdvertisingLandingPortfolio,
   pickAdvertisingLandingProjects,
   type AdvertisingLandingSlug,
 } from "@/lib/advertising-landing";
@@ -33,9 +34,15 @@ export async function AdvertisingLandingPage({ slug }: { slug: AdvertisingLandin
   const config = getAdvertisingLandingConfig(slug);
   if (!config) notFound();
 
-  const projects = await getHouseProjects("author");
+  const [projects, builtObjects] = await Promise.all([
+    getHouseProjects("author"),
+    getBuiltObjects(),
+  ]);
   const selectedProjects = pickAdvertisingLandingProjects(projects, config);
+  const portfolio = pickAdvertisingLandingPortfolio(builtObjects, config);
 
-  return <AdvertisingLandingClient config={config} projects={selectedProjects} />;
+  return (
+    <AdvertisingLandingClient config={config} projects={selectedProjects} portfolio={portfolio} />
+  );
 }
 

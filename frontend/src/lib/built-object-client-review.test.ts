@@ -29,6 +29,12 @@ describe("built-object-client-review", () => {
     expect(html).toContain("<p>Вторая мысль.</p>");
   });
 
+  it("formatClientReviewText converts single newlines to br without escaping tags", () => {
+    const html = formatClientReviewText("Строка один.\nСтрока два.");
+    expect(html).toBe("<p>Строка один.<br />Строка два.</p>");
+    expect(html).not.toContain("&lt;br");
+  });
+
   it("hasBuiltObjectClientReview with whitespace-only text is false", () => {
     expect(hasBuiltObjectClientReview({ clientReviewText: "   ", clientReviewVideoUrl: null })).toBe(false);
   });

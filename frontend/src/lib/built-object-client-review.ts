@@ -21,9 +21,13 @@ export function formatClientReviewText(text: string): string {
     .map((p) => p.trim())
     .filter(Boolean);
   if (paragraphs.length <= 1) {
-    return `<p>${escapeHtml(trimmed.replace(/\n/g, "<br />"))}</p>`;
+    return `<p>${plainTextToHtml(trimmed)}</p>`;
   }
-  return paragraphs.map((p) => `<p>${escapeHtml(p.replace(/\n/g, "<br />"))}</p>`).join("");
+  return paragraphs.map((p) => `<p>${plainTextToHtml(p)}</p>`).join("");
+}
+
+function plainTextToHtml(value: string): string {
+  return escapeHtml(value).replace(/\n/g, "<br />");
 }
 
 function escapeHtml(value: string): string {

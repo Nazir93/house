@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  ADVERTISING_LANDING_SLUGS,
+  budgetLabelById,
   getAdvertisingLandingConfig,
+  mortgageLabelById,
+  pickAdvertisingLandingPortfolio,
   pickAdvertisingLandingProjects,
 } from "@/lib/advertising-landing";
-import type { HouseProjectItem } from "@/lib/construction-data";
+import type { BuiltObjectItem, HouseProjectItem } from "@/lib/construction-data";
 
 function project(partial: Partial<HouseProjectItem>): HouseProjectItem {
   return {
@@ -13,7 +17,7 @@ function project(partial: Partial<HouseProjectItem>): HouseProjectItem {
     title: partial.title ?? "Проект",
     shortDescription: "",
     description: "",
-    floors: 1,
+    floors: partial.floors ?? 1,
     area: partial.area ?? 100,
     price: partial.price ?? 10_000_000,
     rooms: 3,
@@ -34,9 +38,35 @@ function project(partial: Partial<HouseProjectItem>): HouseProjectItem {
   };
 }
 
+function builtObject(partial: Partial<BuiltObjectItem>): BuiltObjectItem {
+  return {
+    id: partial.slug ?? "id",
+    slug: partial.slug ?? "o",
+    title: partial.title ?? "Объект",
+    material: partial.material ?? "GAS_BLOCK",
+    description: "",
+    published: partial.published ?? true,
+    order: 0,
+    media: [],
+    ...partial,
+  };
+}
+
 describe("advertising landing config", () => {
   it("returns no config for unknown advertising slug", () => {
-    expect(getAdvertisingLandingConfig("gazobeton")).toBeNull();
+    expect(getAdvertisingLandingConfig("unknown-slug")).toBeNull();
+  });
+
+  it("exposes all six phase-1 and phase-2 slugs", () => {
+    expect(ADVERTISING_LANDING_SLUGS).toEqual([
+      "dom-pod-klyuch",
+      "kirpich",
+      "stoimost",
+      "gazobeton",
+      "odnoetazhnye",
+      "keramoblok",
+    ]);
+    expect(getAdvertisingLandingConfig("gazobeton")?.source).toBe("lp-gazobeton");
   });
 
   it("picks only brick projects for /lp/kirpich and sorts by price", () => {
@@ -54,5 +84,49 @@ describe("advertising landing config", () => {
 
     expect(picked.map((item) => item.slug)).toEqual(["brick-cheap", "brick-expensive"]);
   });
-});
 
+  it("filters one-storey projects for /lp/odnoetazhnye", () => {
+    const config = getAdvertisingLandingConfig("odnoetazhnye");
+    const picked = pickAdvertisingLandingProjects(
+      [
+        project({ slug: "one", floors: 1 }),
+        project({ slug: "two", floors: 2 }),
+      ],
+      config!,
+    );
+    expect(picked.map((item) => item.slug)).toEqual(["one"]);
+  });
+
+  it("prefers portfolio objects by material with fallback when too few matches", () => {
+    const config = getAdvertisingLandingConfig("kirpich");
+    const picked = pickAdvertisingLandingPortfolio(
+      [
+        builtObject({ slug: "gas-1", material: "GAS_BLOCK" }),
+        builtObject({ slug: "gas-2", material: "GAS_BLOCK" }),
+        builtObject({ slug: "brick-1", material: "BRICK" }),
+      ],
+      config!,
+      2,
+    );
+    expect(picked.map((item) => item.slug)).toEqual(["gas-1", "gas-2"]);
+  });
+
+  it("returns filtered portfolio when enough material matches exist", () => {
+    const config = getAdvertisingLandingConfig("kirpich");
+    const picked = pickAdvertisingLandingPortfolio(
+      [
+        builtObject({ slug: "gas", material: "GAS_BLOCK" }),
+        builtObject({ slug: "brick-1", material: "BRICK" }),
+        builtObject({ slug: "brick-2", material: "BRICK" }),
+      ],
+      config!,
+      2,
+    );
+    expect(picked.map((item) => item.slug)).toEqual(["brick-1", "brick-2"]);
+  });
+
+  it("maps budget and mortgage ids to labels", () => {
+    expect(budgetLabelById("8-12")).toBe("8–12 млн ₽");
+    expect(mortgageLabelById("yes")).toBe("Да, нужна консультация по ипотеке");
+  });
+});
