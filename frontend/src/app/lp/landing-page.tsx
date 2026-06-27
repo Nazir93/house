@@ -9,6 +9,7 @@ import {
   type AdvertisingLandingSlug,
 } from "@/lib/advertising-landing";
 import { SITE_NAME } from "@/lib/constants";
+import { getPublicReviews } from "@/lib/get-public-reviews";
 import { AdvertisingLandingClient } from "./advertising-landing-client";
 
 export const revalidate = 60;
@@ -34,15 +35,21 @@ export async function AdvertisingLandingPage({ slug }: { slug: AdvertisingLandin
   const config = getAdvertisingLandingConfig(slug);
   if (!config) notFound();
 
-  const [projects, builtObjects] = await Promise.all([
+  const [projects, builtObjects, reviews] = await Promise.all([
     getHouseProjects("author"),
     getBuiltObjects(),
+    getPublicReviews(),
   ]);
   const selectedProjects = pickAdvertisingLandingProjects(projects, config);
   const portfolio = pickAdvertisingLandingPortfolio(builtObjects, config);
 
   return (
-    <AdvertisingLandingClient config={config} projects={selectedProjects} portfolio={portfolio} />
+    <AdvertisingLandingClient
+      config={config}
+      projects={selectedProjects}
+      portfolio={portfolio}
+      reviews={reviews}
+    />
   );
 }
 

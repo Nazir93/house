@@ -15,7 +15,9 @@
 | Дом под ключ | `/lp/dom-pod-klyuch` | `lp-dom-pod-klyuch` |
 | Кирпичный дом | `/lp/kirpich` | `lp-kirpich` |
 | Стоимость / смета | `/lp/stoimost` | `lp-stoimost` |
-| Газобетон, фаза 2 | `/projects/gazobeton` или будущий `/lp/gazobeton` | `project-calculator` / будущий `lp-gazobeton` |
+| Газобетон | `/lp/gazobeton` | `lp-gazobeton` |
+| Одноэтажные дома | `/lp/odnoetazhnye` | `lp-odnoetazhnye` |
+| Керамоблок | `/lp/keramoblok` | `lp-keramoblok` |
 | Органика и бренд | `/`, `/projects`, `/calculator` | существующие источники |
 
 ## Кампании поиска
@@ -45,7 +47,7 @@
 ### 4. Search_Gazobeton_SPB_Phase2
 
 - Запуск: только после первых данных по трём основным кампаниям.
-- Посадочная: сначала `/projects/gazobeton`, затем отдельный `/lp/gazobeton`, если подтвердится спрос.
+- Посадочная: `/lp/gazobeton`
 - KPI: снизить CPL с исторических 63 569 ₽ до 40 000-45 000 ₽.
 - Бюджет: не более 10-15% до подтверждения качества.
 

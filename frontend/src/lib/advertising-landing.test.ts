@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   ADVERTISING_LANDING_SLUGS,
+  advertisingLandingCatalogIntro,
+  advertisingLandingFactsIntro,
   budgetLabelById,
   getAdvertisingLandingConfig,
   mortgageLabelById,
@@ -128,5 +130,11 @@ describe("advertising landing config", () => {
   it("maps budget and mortgage ids to labels", () => {
     expect(budgetLabelById("8-12")).toBe("8–12 млн ₽");
     expect(mortgageLabelById("yes")).toBe("Да, нужна консультация по ипотеке");
+  });
+
+  it("builds default facts and catalog copy for LP", () => {
+    const config = getAdvertisingLandingConfig("kirpich")!;
+    expect(advertisingLandingFactsIntro(config).toLowerCase()).toContain("\u043a\u0438\u0440\u043f\u0438\u0447");
+    expect(advertisingLandingCatalogIntro(config).toLowerCase()).toContain("\u043a\u0430\u0442\u0430\u043b\u043e\u0433");
   });
 });

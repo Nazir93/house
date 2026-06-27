@@ -1,5 +1,14 @@
 import type { BuiltObjectItem, HouseProjectItem } from "@/lib/construction-data";
 import { ADDRESS, CITY, SERVICE_REGIONS, STATS, YANDEX_MAPS_RATING_SCORE } from "@/lib/constants";
+import {
+  LP_THEME_BY_SLUG,
+  resolveLpSectionOrder,
+  resolveLpTheme,
+  type LpSectionId,
+  type LpThemeId,
+} from "@/lib/lp-themes";
+
+export type { LpSectionId, LpThemeId } from "@/lib/lp-themes";
 
 export type AdvertisingLandingSlug =
   | "dom-pod-klyuch"
@@ -38,7 +47,49 @@ export type AdvertisingLandingConfig = {
   faq: Array<{ question: string; answer: string }>;
   excursionTitle: string;
   excursionLead: string;
+  /** Подзаголовок на полноэкранном hero */
+  heroSubtitle?: string;
+  /** Главная кнопка на hero (по умолчанию — secondaryCta → #projects) */
+  heroMainCta?: string;
+  heroMainHref?: string;
+  /** Запасное фото hero, если нет рендера проекта / портфолио */
+  heroImageFallback?: string;
+  /** Блок «Факты о компании» — вступление (цифры общие) */
+  factsIntro?: string;
+  /** Блок «Каталог проектов» — вступление и примечание */
+  catalogIntro?: string;
+  catalogNote?: string;
+  /** Визуальная тема LP */
+  theme: LpThemeId;
+  /** Порядок секций (hero и contacts — вне списка) */
+  sectionOrder: LpSectionId[];
+  /** Вступление блока «Как мы работаем» */
+  stepsIntro?: string;
+  /** Вступление блока отзывов */
+  reviewsIntro?: string;
 };
+
+export type LpFactStat = {
+  value: string;
+  label: string;
+};
+
+/** Цифры для сетки «Факты о компании» — данные компании */
+export const ADVERTISING_LP_FACT_STATS: LpFactStat[] = [
+  { value: "13", label: "лет на рынке" },
+  { value: "120+", label: "объектов построено" },
+  { value: YANDEX_MAPS_RATING_SCORE, label: "рейтинг на Яндекс.Картах" },
+  { value: "85+", label: "типовых проектов" },
+  { value: "3", label: "региона присутствия" },
+  { value: "Под ключ", label: "смета и строительство" },
+];
+
+export const ADVERTISING_LP_NAV = [
+  { label: "Проекты", href: "#projects" },
+  { label: "Комплектация", href: "#includes" },
+  { label: "Объекты", href: "#portfolio" },
+  { label: "Вопросы", href: "#faq" },
+] as const;
 
 export const ADVERTISING_TRUST_STATS = [
   ...STATS.map((stat) => ({
@@ -137,10 +188,18 @@ const BASE_FAQ_GENERAL = [
 ];
 
 function config(
-  partial: Omit<AdvertisingLandingConfig, "path" | "source"> & { slug: AdvertisingLandingSlug }
+  partial: Omit<AdvertisingLandingConfig, "path" | "source" | "theme" | "sectionOrder"> & {
+    slug: AdvertisingLandingSlug;
+    theme?: LpThemeId;
+    sectionOrder?: LpSectionId[];
+  },
 ): AdvertisingLandingConfig {
+  const theme = partial.theme ?? LP_THEME_BY_SLUG[partial.slug];
+  const sectionOrder = partial.sectionOrder ?? resolveLpSectionOrder({ slug: partial.slug, theme });
   return {
     ...partial,
+    theme,
+    sectionOrder,
     path: `/lp/${partial.slug}`,
     source: `lp-${partial.slug}`,
   };
@@ -153,11 +212,26 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
     description:
       "Строительство домов под ключ: проекты, расчёт стоимости, комплектация, ипотека, портфолио и заявка на консультацию.",
     h1: "Строительство домов под ключ в Санкт-Петербурге и Ленинградской области",
+    heroSubtitle:
+      "Подберём проект, материал и комплектацию — от первого расчёта до сдачи дома на участке",
+    heroMainCta: "Смотреть проекты",
+    heroMainHref: "#projects",
+    heroImageFallback: "/images/banner/banner-hero-01.png",
     eyebrow: "Дом под ключ · СПб и ЛО",
     lead:
       "Подберём проект, материал стен и комплектацию под ваш участок и бюджет. Ориентировочный расчёт — за несколько минут, точная смета — после консультации с инженером.",
     primaryCta: "Рассчитать стоимость",
     secondaryCta: "Смотреть проекты",
+    factsIntro:
+      "Строим частные дома под ключ в Санкт-Петербурге и Ленинградской области: проект, смета, организация работ и контроль качества на площадке. Работаем с газобетоном, кирпичом и керамоблоком — с прозрачной комплектацией и понятными этапами.",
+    catalogIntro:
+      "В каталоге — типовые проекты с ценой под ключ: планировка, площадь и этажность. Любой дом можно адаптировать под участок, состав семьи и материал стен — затем сравнить комплектации и получить расчёт.",
+    catalogNote:
+      "Строительство можно оформить с ипотекой на ИЖС — подскажем по программам и этапам финансирования.",
+    stepsIntro:
+      "От первой заявки до ключей — с фиксированной сметой, понятным графиком и сопровождением на каждом этапе.",
+    reviewsIntro:
+      "Клиенты отмечают прозрачную смету, внимание к деталям и возможность посмотреть дом на объекте до принятия решения.",
     quizDefaults: { serviceLabel: "LP: дом под ключ" },
     includes: [
       "Подбор проекта под участок и состав семьи",
@@ -187,15 +261,30 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
     title: "Кирпичный дом под ключ — проекты и стоимость | Часть души",
     description:
       "Кирпичные дома под ключ: проекты, цена, комплектация, сравнение материалов, портфолио и расчёт сметы.",
-    h1: "Кирпичный дом под ключ: проекты, комплектация и расчёт стоимости",
-    eyebrow: "Кирпич · лучший ROI в рекламе",
+    h1: "Строим кирпичные дома для комфортной жизни",
+    heroSubtitle:
+      "Проекты, комплектация и строительство под ключ в Санкт-Петербурге и Ленинградской области",
+    heroMainCta: "Выбрать проект дома",
+    heroMainHref: "#projects",
+    heroImageFallback: "/images/banner/banner-hero-03.png",
+    eyebrow: "Кирпичные дома под ключ",
     lead:
-      "Кирпич — сильный кластер по конверсии. Здесь собраны проекты под кирпичную комплектацию, реальные объекты и понятный маршрут от расчёта до стройки.",
+      "Подберём проект под участок и бюджет, покажем реальные объекты и рассчитаем комплектацию — от коробки до инженерии и фасада.",
     primaryCta: "Получить расчёт кирпичного дома",
-    secondaryCta: "Проекты из кирпича",
+    secondaryCta: "Смотреть проекты",
     projectMaterial: "Кирпич",
     portfolioMaterial: "BRICK",
     highlightMaterial: "brick",
+    factsIntro:
+      "Строим кирпичные дома под ключ в Санкт-Петербурге и Ленинградской области. Проверяем конструктив, теплотехнику и узлы под кирпичную комплектацию, ведём стройку поэтапно и фиксируем состав работ в смете до договора.",
+    catalogIntro:
+      "В каталоге — проекты кирпичных домов с ценой под ключ: планировка, площадь и этажность. Любой проект можно адаптировать под участок, фасад и инженерию — затем сравнить комплектации и получить расчёт сметы.",
+    catalogNote:
+      "Кирпичный дом можно строить с ипотекой на ИЖС — подскажем по программам и этапам финансирования.",
+    stepsIntro:
+      "Кирпичный дом требует точного конструктива — сначала согласуем проект и смету, затем ведём стройку поэтапно с контролем узлов и фасада.",
+    reviewsIntro:
+      "Владельцы кирпичных домов отмечают комфорт круглый год, качество кладки и возможность увидеть аналогичные объекты на экскурсии.",
     quizDefaults: { wallMaterial: "brick", serviceLabel: "LP: кирпичный дом" },
     includes: [
       "Подбор проекта с кирпичной комплектацией",
@@ -238,11 +327,26 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
     description:
       "Рассчитайте стоимость строительства дома: материал, площадь, комплектация, ипотека и предварительная смета.",
     h1: "Сколько стоит построить дом под ключ",
+    heroSubtitle:
+      "Соберём ориентир за несколько шагов — материал, площадь, этажность и бюджет влияют на итог",
+    heroMainCta: "Состав сметы",
+    heroMainHref: "#includes",
+    heroImageFallback: "/images/banner/banner-hero-02.png",
     eyebrow: "Цена · смета · калькулятор",
     lead:
       "Цена зависит не только от площади: материал, фундамент, кровля, инженерия и участок меняют итог. Соберём ориентир за несколько шагов и покажем, из чего складывается смета.",
     primaryCta: "Начать расчёт",
     secondaryCta: "Состав сметы",
+    factsIntro:
+      "Помогаем понять, из чего складывается стоимость дома под ключ: материал стен, фундамент, кровля, инженерия и участок. Ориентир — за несколько минут в квизе, точная смета — после консультации.",
+    catalogIntro:
+      "После расчёта можно выбрать типовой проект из каталога и сравнить комплектации — цена зависит не только от площади, но и от состава работ.",
+    catalogNote:
+      "Ипотека на ИЖС доступна — подскажем по программам после первичного расчёта.",
+    stepsIntro:
+      "Сначала собираем параметры в квизе, затем уточняем проект и участок, фиксируем смету в договоре и ведём стройку по графику.",
+    reviewsIntro:
+      "Заказчики ценят, что стоимость объясняют до договора — без скрытых работ и с понятным составом сметы.",
     quizDefaults: { serviceLabel: "LP: стоимость строительства" },
     includes: [
       "Расчёт по площади, этажности и материалу",
@@ -283,14 +387,29 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
     description:
       "Строительство домов из газобетона: проекты, стоимость, сравнение с кирпichом, портфолио и расчёт сметы.",
     h1: "Дом из газобетона под ключ: проекты, цена и комплектация",
-    eyebrow: "Газобетон · большой спрос",
+    heroSubtitle:
+      "Быстрая кладка, хорошая теплотехника и понятная смета — подберём проект под ваш участок",
+    heroMainCta: "Проекты из газобетона",
+    heroMainHref: "#projects",
+    heroImageFallback: "/images/banner/banner-hero-04.png",
+    eyebrow: "Газобетон · скорость и комфорт",
     lead:
-      "Газобетон — самый объёмный кластер спроса. Здесь проекты под газобетонную комплектацию, сравнение материалов, реальные объекты и расчёт с понятной сметой.",
+      "Газобетон — популярный выбор для загородного дома. Здесь проекты под газобетонную комплектацию, сравнение материалов, реальные объекты и расчёт с понятной сметой.",
     primaryCta: "Рассчитать дом из газобетона",
     secondaryCta: "Проекты из газобетона",
     projectMaterial: "Газобетон",
     portfolioMaterial: "GAS_BLOCK",
     highlightMaterial: "gas",
+    factsIntro:
+      "Строим дома из газобетона под ключ в Санкт-Петербурге и Ленинградской области: подбираем проект, считаем теплотехнику, фасад и фундамент, ведём стройку с прозрачной сметой.",
+    catalogIntro:
+      "В каталоге — проекты с допуском газобетонной комплектации: площадь, этажность и цена под ключ. Любой проект можно адаптировать под участок и инженерию.",
+    catalogNote:
+      "Газобетонный дом можно строить с ипотекой на ИЖС — расскажем по программам на консультации.",
+    stepsIntro:
+      "Подбираем проект под газобетон, согласуем фасад и фундамент, фиксируем смету и ведём стройку с контролем узлов и теплотехники.",
+    reviewsIntro:
+      "Клиенты отмечают скорость возведения коробки, комфорт в доме и возможность сравнить материалы на экскурсии.",
     quizDefaults: { wallMaterial: "gas", serviceLabel: "LP: газобетон" },
     includes: [
       "Подбор проекта под газобетонную комплектацию",
@@ -330,12 +449,27 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
     description:
       "Одноэтажные дома под ключ: проекты до 150–220 м², цена, комплектация, ипотека и расчёт сметы.",
     h1: "Одноэтажный дом под ключ: удобные планировки и понятная смета",
+    heroSubtitle:
+      "Без лестниц — удобные планировки для семьи, прозрачная смета и выбор материала в одном квизе",
+    heroMainCta: "Смотреть планировки",
+    heroMainHref: "#projects",
+    heroImageFallback: "/images/banner/banner-hero-05.png",
     eyebrow: "1 этаж · комфорт и бюджет",
     lead:
       "Одноэтажный дом — удобный формат для постоянного проживания: без лестниц, с продуманными планировками и прозрачной сметой под ваш бюджет.",
     primaryCta: "Подобрать одноэтажный проект",
     secondaryCta: "Смотреть планировки",
     projectMaxFloors: 1,
+    factsIntro:
+      "Строим одноэтажные дома под ключ в СПб и Ленинградской области: продуманные планировки без лестниц, выбор материала и прозрачная смета под ваш бюджет.",
+    catalogIntro:
+      "В каталоге — одноэтажные проекты до 150–220 м²: спальни, кухня-гостиная, террасы. Любой план можно адаптировать под участок и состав семьи.",
+    catalogNote:
+      "Одноэтажный дом можно оформить с ипотекой на ИЖС — подскажем по программам и этапам.",
+    stepsIntro:
+      "Подбираем одноэтажную планировку, согласуем материал и смету, затем ведём стройку с возможностью посмотреть аналогичные дома на объекте.",
+    reviewsIntro:
+      "Семьи выбирают одноэтажный формат за удобство планировки и отсутствие лестниц — на экскурсии можно оценить это вживую.",
     quizDefaults: { serviceLabel: "LP: одноэтажный дом" },
     includes: [
       "Подбор одноэтажных проектов до 150–220 м²",
@@ -375,7 +509,12 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
     description:
       "Строительство домов из керамоблока: проекты, стоимость, сравнение материалов и расчёт сметы.",
     h1: "Дом из керамоблока под ключ: проекты и расчёт стоимости",
-    eyebrow: "Керамоблок · тестовый кластер",
+    heroSubtitle:
+      "Каменная инерция и скорость блоковой кладки — подберём проект и комплектацию под ваш участок",
+    heroMainCta: "Проекты из керамоблока",
+    heroMainHref: "#projects",
+    heroImageFallback: "/images/banner/banner-hero-06.png",
+    eyebrow: "Керамоблок · камень и блок",
     lead:
       "Керамоблок сочетает инерцию кирпicha и скорость блоковой кладки. Подберём проект, сравним материалы и рассчитаем комплектацию под ваш участок.",
     primaryCta: "Получить расчёт по керамоблоку",
@@ -383,6 +522,16 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
     projectMaterial: "Керамический блок",
     portfolioMaterial: "CERAMIC_BLOCK",
     highlightMaterial: "ceramic",
+    factsIntro:
+      "Строим дома из керамоблока под ключ: проверяем конструктив под массу стен, подбираем фундамент и фасад, ведём стройку с прозрачной сметой.",
+    catalogIntro:
+      "В каталоге — проекты с допуском керамоблочной комплектации. Сравним с газобетоном и кирпичом по бюджету, скорости и комфорту.",
+    catalogNote:
+      "Керамоблочный дом можно строить с ипотекой — подскажем по программам после расчёта.",
+    stepsIntro:
+      "Согласуем проект под керамоблок, проверим узлы и фундамент, зафиксируем смету и проведём стройку с контролем качества кладки.",
+    reviewsIntro:
+      "Заказчики ценят «каменный» характер дома и возможность увидеть аналогичные решения на экскурсии.",
     quizDefaults: { wallMaterial: "ceramic", serviceLabel: "LP: керамоблок" },
     includes: [
       "Подбор проекта под керамоблочную комплектацию",
@@ -476,4 +625,52 @@ export function budgetLabelById(id: string): string {
 
 export function mortgageLabelById(id: string): string {
   return LP_MORTGAGE_OPTIONS.find((option) => option.id === id)?.label ?? id;
+}
+
+function firstMediaUrl(
+  media: Array<{ type: string; url: string }> | undefined,
+): string | null {
+  if (!media?.length) return null;
+  return media.find((item) => item.type === "RENDER")?.url ?? media[0]?.url ?? null;
+}
+
+export function pickAdvertisingLandingHeroImage(
+  config: AdvertisingLandingConfig,
+  projects: HouseProjectItem[],
+  portfolio: BuiltObjectItem[],
+): string {
+  const fromProject = firstMediaUrl(projects[0]?.media);
+  if (fromProject) return fromProject;
+
+  const fromPortfolio = firstMediaUrl(portfolio[0]?.media);
+  if (fromPortfolio) return fromPortfolio;
+
+  return config.heroImageFallback ?? "/images/banner/banner-hero-01.png";
+}
+
+export function advertisingLandingFactsIntro(config: AdvertisingLandingConfig): string {
+  if (config.factsIntro) return config.factsIntro;
+  return `Строим частные дома под ключ в ${CITY} и ${SERVICE_REGIONS}: от подбора проекта и сметы до организации работ на площадке и контроля качества. Прозрачная комплектация, понятные этапы и сопровождение на каждом шаге.`;
+}
+
+export function advertisingLandingCatalogIntro(config: AdvertisingLandingConfig): string {
+  if (config.catalogIntro) return config.catalogIntro;
+  return "В каталоге — типовые проекты с ценой и планировкой. Каждый дом можно адаптировать под участок, состав семьи и выбранный материал стен — затем передать в расчёт сметы.";
+}
+
+export function advertisingLandingCatalogNote(config: AdvertisingLandingConfig): string | null {
+  if (config.catalogNote === "") return null;
+  return (
+    config.catalogNote ??
+    "Строительство можно оформить с ипотекой на ИЖС — подскажем по программам и этапам финансирования."
+  );
+}
+
+
+export function advertisingLandingTheme(config: AdvertisingLandingConfig): LpThemeId {
+  return resolveLpTheme(config);
+}
+
+export function advertisingLandingSectionOrder(config: AdvertisingLandingConfig): LpSectionId[] {
+  return config.sectionOrder ?? resolveLpSectionOrder(config);
 }
