@@ -1,11 +1,14 @@
 "use client";
 
+import { resolveClientYandexMetrikaCounterId } from "@/lib/analytics-metrika-config";
+
 export const METRIKA_GOALS = {
   leadSubmit: "lead_submit",
   leadCalculator: "lead_calculator",
   leadProject: "lead_project",
   leadCompare: "lead_compare",
   leadMortgage: "lead_mortgage",
+  leadMortgageProject: "lead_mortgage_project",
   leadDesign: "lead_design",
   leadLpKirpich: "lead_lp_kirpich",
   leadLpDomPodKlyuch: "lead_lp_dom_pod_klyuch",
@@ -13,6 +16,13 @@ export const METRIKA_GOALS = {
   leadLpGazobeton: "lead_lp_gazobeton",
   leadLpOdnoetazhnye: "lead_lp_odnoetazhnye",
   leadLpKeramoblok: "lead_lp_keramoblok",
+  leadPartnerPartner: "lead_partner_partner",
+  leadPartnerSupplier: "lead_partner_supplier",
+  leadPartnerVacancy: "lead_partner_vacancy",
+  leadService: "lead_service",
+  leadServiceConsult: "lead_service_consult",
+  leadAbout: "lead_about",
+  leadPortfolio: "lead_portfolio",
   phoneClick: "phone_click",
   telegramClick: "telegram_click",
   maxClick: "max_click",
@@ -23,7 +33,9 @@ export const METRIKA_GOALS = {
   reviewSubmit: "review_submit",
 } as const;
 
-type MetrikaGoalName = (typeof METRIKA_GOALS)[keyof typeof METRIKA_GOALS];
+export type MetrikaGoalName = (typeof METRIKA_GOALS)[keyof typeof METRIKA_GOALS];
+
+export const METRIKA_GOAL_IDS = Object.values(METRIKA_GOALS);
 
 export type TrafficParams = {
   utmSource: string | null;
@@ -70,11 +82,13 @@ export function collectCurrentTrafficParams(): TrafficParams {
   return collectTrafficParams(window.location.search);
 }
 
-function goalForLeadSource(source: string): MetrikaGoalName | null {
+/** Цель Метрики для каждого Lead.source — см. lead-sources.ts */
+export function metrikaGoalForLeadSource(source: string): MetrikaGoalName | null {
   if (source === "calculator" || source === "promo-qr-banner") return METRIKA_GOALS.leadCalculator;
   if (source === "project-calculator") return METRIKA_GOALS.leadProject;
   if (source === "compare") return METRIKA_GOALS.leadCompare;
   if (source === "mortgage") return METRIKA_GOALS.leadMortgage;
+  if (source === "house-project-mortgage") return METRIKA_GOALS.leadMortgageProject;
   if (source === "individual-design" || source === "house-project-design") return METRIKA_GOALS.leadDesign;
   if (source === "lp-kirpich") return METRIKA_GOALS.leadLpKirpich;
   if (source === "lp-dom-pod-klyuch") return METRIKA_GOALS.leadLpDomPodKlyuch;
@@ -82,22 +96,33 @@ function goalForLeadSource(source: string): MetrikaGoalName | null {
   if (source === "lp-gazobeton") return METRIKA_GOALS.leadLpGazobeton;
   if (source === "lp-odnoetazhnye") return METRIKA_GOALS.leadLpOdnoetazhnye;
   if (source === "lp-keramoblok") return METRIKA_GOALS.leadLpKeramoblok;
+  if (source === "partner-partner") return METRIKA_GOALS.leadPartnerPartner;
+  if (source === "partner-supplier") return METRIKA_GOALS.leadPartnerSupplier;
+  if (source === "partner-vacancy") return METRIKA_GOALS.leadPartnerVacancy;
+  if (source === "about-leadership-feedback") return METRIKA_GOALS.leadAbout;
+  if (source === "portfolio-case-cta") return METRIKA_GOALS.leadPortfolio;
+  if (source.startsWith("service-consult-")) return METRIKA_GOALS.leadServiceConsult;
+  if (source.startsWith("service-")) return METRIKA_GOALS.leadService;
   return null;
 }
 
 export function trackMetrikaGoal(goal: MetrikaGoalName, params?: Record<string, unknown>) {
   if (typeof window === "undefined") return;
-  const counterId = Number(process.env.NEXT_PUBLIC_YANDEX_METRIKA_ID || "110112800");
+  const counterId = resolveClientYandexMetrikaCounterId();
   const ym = (window as MetrikaWindow).ym;
   if (!Number.isFinite(counterId) || !ym) return;
   ym(counterId, "reachGoal", goal, params);
 }
 
+function shouldTrackQuizComplete(source: string): boolean {
+  if (source.startsWith("lp-")) return true;
+  return source === "calculator" || source === "promo-qr-banner";
+}
+
 export function trackLeadSuccess(source: string, params?: Record<string, unknown>) {
   const payload = { source, ...params };
   trackMetrikaGoal(METRIKA_GOALS.leadSubmit, payload);
-  const sourceGoal = goalForLeadSource(source);
+  const sourceGoal = metrikaGoalForLeadSource(source);
   if (sourceGoal) trackMetrikaGoal(sourceGoal, payload);
-  if (source.startsWith("lp-")) trackMetrikaGoal(METRIKA_GOALS.quizComplete, payload);
+  if (shouldTrackQuizComplete(source)) trackMetrikaGoal(METRIKA_GOALS.quizComplete, payload);
 }
-

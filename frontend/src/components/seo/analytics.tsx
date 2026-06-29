@@ -2,6 +2,14 @@ import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import Script from "next/script";
 
+import {
+  DEFAULT_YANDEX_METRIKA_ID,
+  pickYandexMetrikaId,
+  YM_COUNTER_WINDOW_KEY,
+} from "@/lib/analytics-metrika-config";
+
+export { DEFAULT_YANDEX_METRIKA_ID } from "@/lib/analytics-metrika-config";
+
 const getAnalyticsIds = unstable_cache(
   async () => {
     try {
@@ -16,13 +24,8 @@ const getAnalyticsIds = unstable_cache(
     }
   },
   ["analytics-ids"],
-  { revalidate: 60 }
+  { revalidate: 60 },
 );
-
-function pickYandexMetrikaId(raw: string | undefined): string {
-  const s = raw?.trim() ?? "";
-  return /^\d{5,20}$/.test(s) ? s : "";
-}
 
 function pickGaId(raw: string | undefined): string {
   const s = raw?.trim() ?? "";
@@ -30,9 +33,6 @@ function pickGaId(raw: string | undefined): string {
   if (/^UA-\d+-\d+$/.test(s)) return s;
   return "";
 }
-
-/** ID счётчика по умолчанию (Яндекс.Метрика). Переопределяется через админку или NEXT_PUBLIC_YANDEX_METRIKA_ID. */
-export const DEFAULT_YANDEX_METRIKA_ID = "110112800";
 
 export async function AnalyticsScripts() {
   const ids = await getAnalyticsIds();
@@ -50,7 +50,8 @@ export async function AnalyticsScripts() {
       {ymId ? (
         <>
           <Script id="yandex-metrika" strategy="beforeInteractive">
-            {`(function(m,e,t,r,i,k,a){
+            {`window["${YM_COUNTER_WINDOW_KEY}"]=${ymId};
+(function(m,e,t,r,i,k,a){
 m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
 m[i].l=1*new Date();
 for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}
