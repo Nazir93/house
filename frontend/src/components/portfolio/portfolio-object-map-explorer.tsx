@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useMemo, useState } from "react";
 import type { BuiltObjectItem } from "@/lib/construction-shared";
+import { builtObjectMaterialLabel, normalizeBuiltObjectMaterialEnum } from "@/lib/construction-shared";
 import {
   BUILT_OBJECT_MAP_REGIONS,
   districtOptionsForRegion,
@@ -32,10 +33,15 @@ const PortfolioBuiltMap = dynamic(
 );
 
 function materialOptions(objects: BuiltObjectItem[]): { value: string; label: string }[] {
-  return ["Все", ...Array.from(new Set(objects.map((o) => o.material)))].map((m) => ({
-    value: m,
-    label: m,
-  }));
+  const seen = new Set<string>();
+  const out: { value: string; label: string }[] = [{ value: "all", label: "Все" }];
+  for (const object of objects) {
+    const value = normalizeBuiltObjectMaterialEnum(object.material);
+    if (!value || seen.has(value)) continue;
+    seen.add(value);
+    out.push({ value, label: builtObjectMaterialLabel(value) });
+  }
+  return out;
 }
 
 type Layout = "page" | "embedded";
@@ -65,7 +71,7 @@ export function PortfolioObjectMapExplorer({
   /** Slug объекта — открыть маркер и карточку при загрузке (/portfolio/map?object=…) */
   initialObjectSlug?: string | null;
 }) {
-  const [material, setMaterial] = useState("Все");
+  const [material, setMaterial] = useState("all");
   const [region, setRegion] = useState<"all" | BuiltObjectMapRegionSlug>("all");
   const [district, setDistrict] = useState("all");
   const [area, setArea] = useState<BuiltObjectMapFilterState["area"]>("all");

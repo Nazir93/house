@@ -1,5 +1,5 @@
 import type { BuiltObjectItem } from "@/lib/construction-shared";
-import { builtObjectMaterialLabel } from "@/lib/construction-shared";
+import { builtObjectMaterialLabel, normalizeBuiltObjectMaterialEnum } from "@/lib/construction-shared";
 
 export type PortfolioMaterialFilterOption = { value: string; label: string };
 export type PortfolioFloorFilterOption = { id: string; label: string; floors: number };
@@ -117,7 +117,9 @@ export function filterPortfolioObjects(
   let list = objects;
 
   if (filters.material !== "all") {
-    list = list.filter((o) => o.material === filters.material);
+    list = list.filter(
+      (o) => normalizeBuiltObjectMaterialEnum(o.material) === filters.material
+    );
   }
 
   if (filters.floorId !== "all") {

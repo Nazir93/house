@@ -4,12 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
-import { getBuiltObjectCover, type BuiltObjectItem } from "@/lib/construction-shared";
+import { getBuiltObjectCover, builtObjectMaterialLabel, type BuiltObjectItem } from "@/lib/construction-shared";
 import { revealDelayStyle } from "@/lib/reveal-animation";
 import { cn } from "@/lib/utils";
 
 function caseCategory(object: BuiltObjectItem): string {
-  const mat = object.material.toUpperCase();
+  const mat = builtObjectMaterialLabel(object.material).toUpperCase();
   const loc = object.location?.trim();
   if (loc) {
     const head = loc.split(",")[0]?.trim() ?? loc;

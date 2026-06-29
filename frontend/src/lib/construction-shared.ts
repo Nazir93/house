@@ -142,15 +142,46 @@ export function sortBuiltObjectBuildStageMedia(
     .sort((a, b) => compareBuildStageMediaOrder(a, b, phases));
 }
 
+export const BUILT_OBJECT_MATERIAL_ENUMS = [
+  "GAS_BLOCK",
+  "BRICK",
+  "CERAMIC_BLOCK",
+  "FRAME",
+  "OTHER",
+] as const;
+
+export type BuiltObjectMaterialEnum = (typeof BUILT_OBJECT_MATERIAL_ENUMS)[number];
+
+const BUILT_OBJECT_MATERIAL_LABELS: Record<BuiltObjectMaterialEnum, string> = {
+  GAS_BLOCK: "Газобетон",
+  BRICK: "Кирпич",
+  CERAMIC_BLOCK: "Керамический блок",
+  FRAME: "Каркас",
+  OTHER: "Другое",
+};
+
+const BUILT_OBJECT_MATERIAL_LABEL_TO_ENUM: Record<string, BuiltObjectMaterialEnum> = {
+  газобетон: "GAS_BLOCK",
+  кирпич: "BRICK",
+  "керамический блок": "CERAMIC_BLOCK",
+  керамоблок: "CERAMIC_BLOCK",
+  каркас: "FRAME",
+  другое: "OTHER",
+};
+
+/** Приводит enum или русскую подпись к значению BuiltObjectMaterial. */
+export function normalizeBuiltObjectMaterialEnum(value: string | null | undefined): string {
+  const raw = (value ?? "").trim();
+  if (!raw) return "";
+  const upper = raw.toUpperCase();
+  if ((BUILT_OBJECT_MATERIAL_ENUMS as readonly string[]).includes(upper)) return upper;
+  return BUILT_OBJECT_MATERIAL_LABEL_TO_ENUM[raw.toLowerCase()] ?? upper;
+}
+
 export function builtObjectMaterialLabel(value: string): string {
-  const labels: Record<string, string> = {
-    GAS_BLOCK: "Газобетон",
-    BRICK: "Кирпич",
-    CERAMIC_BLOCK: "Керамический блок",
-    FRAME: "Каркас",
-    OTHER: "Другое",
-  };
-  return labels[value] ?? value;
+  const enumValue = normalizeBuiltObjectMaterialEnum(value);
+  const label = BUILT_OBJECT_MATERIAL_LABELS[enumValue as BuiltObjectMaterialEnum];
+  return label ?? value;
 }
 
 export function formatRub(price: number): string {

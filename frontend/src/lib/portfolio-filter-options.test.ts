@@ -48,6 +48,21 @@ describe("portfolio-filter-options", () => {
     expect(floorMatchesFilterOption(1, two)).toBe(false);
   });
 
+  it("filterPortfolioObjects matches legacy Russian material labels", () => {
+    const objects = [
+      sampleObject({ id: "a", material: "Газобетон", floors: 1, area: 100 }),
+      sampleObject({ id: "b", material: "GAS_BLOCK", floors: 2, area: 200 }),
+    ];
+    const floorOptions = mergeFloorFilterOptions();
+
+    const filtered = filterPortfolioObjects(
+      objects,
+      { material: "GAS_BLOCK", floorId: "all", areaId: "all" },
+      floorOptions
+    );
+    expect(filtered.map((o) => o.id)).toEqual(["a", "b"]);
+  });
+
   it("filterPortfolioObjects filters by material, floor and area", () => {
     const objects = [
       sampleObject({ id: "a", material: "BRICK", floors: 1, area: 100 }),

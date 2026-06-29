@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { SITE_NAME, BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 import { getBuiltObjectBySlug } from "@/lib/construction-data";
 import { getPublicFaqs } from "@/lib/get-public-faqs";
-import { getBuiltObjectCover } from "@/lib/construction-shared";
+import { getBuiltObjectCover, builtObjectMaterialLabel } from "@/lib/construction-shared";
 import { getPageMeta } from "@/lib/get-page-meta";
 import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 import { BuiltObjectDetailContent } from "./built-content";
@@ -20,7 +20,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   if (!object) return {};
 
   const path = `/portfolio/${object.slug}`;
-  const keywords = [object.title, object.material, object.location, SITE_NAME].filter(
+  const keywords = [object.title, builtObjectMaterialLabel(object.material), object.location, SITE_NAME].filter(
     (k): k is string => Boolean(k && String(k).trim())
   );
   const cover = getBuiltObjectCover(object);

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Home, MapPin, X } from "lucide-react";
 import type { BuiltObjectItem } from "@/lib/construction-shared";
-import { getBuiltObjectCover } from "@/lib/construction-shared";
+import { getBuiltObjectCover, builtObjectMaterialLabel } from "@/lib/construction-shared";
 import {
   formatImplementationDays,
   resolveBuiltObjectArea,
@@ -123,7 +123,7 @@ export function PortfolioObjectMapDrawer({ object, onClose }: Props) {
             </div>
           </dl>
 
-          <p className="mt-3 text-xs text-[var(--text-muted)]">{object.material}</p>
+          <p className="mt-3 text-xs text-[var(--text-muted)]">{builtObjectMaterialLabel(object.material)}</p>
 
           <div className="mt-6 flex flex-col gap-2">
             <Link

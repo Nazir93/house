@@ -1,4 +1,5 @@
 import type { BuiltObjectItem, HouseProjectItem } from "@/lib/construction-data";
+import { normalizeBuiltObjectMaterialEnum } from "@/lib/construction-shared";
 import { ADDRESS, CITY, SERVICE_REGIONS, STATS, YANDEX_MAPS_RATING_SCORE } from "@/lib/constants";
 import {
   LP_THEME_BY_SLUG,
@@ -609,7 +610,9 @@ export function pickAdvertisingLandingPortfolio(
   let filtered = published;
 
   if (config.portfolioMaterial) {
-    filtered = filtered.filter((object) => object.material === config.portfolioMaterial);
+    filtered = filtered.filter(
+      (object) => normalizeBuiltObjectMaterialEnum(object.material) === config.portfolioMaterial
+    );
   }
 
   if (filtered.length < 2 && config.portfolioMaterial) {

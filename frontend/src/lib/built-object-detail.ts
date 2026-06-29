@@ -5,6 +5,7 @@ import {
   getBuiltObjectPlans,
   getBuiltObjectStages,
   sortBuiltObjectBuildStageMedia,
+  builtObjectMaterialLabel,
 } from "@/lib/construction-shared";
 import { hasBuiltObjectClientReview } from "@/lib/built-object-client-review";
 
@@ -143,7 +144,7 @@ const NAV_LABELS: Record<BuiltObjectNavSectionId, string> = {
 };
 
 export function houseTypeSubtitle(material: string): string {
-  const label = material.trim() || "Дом";
+  const label = builtObjectMaterialLabel(material).trim() || "Дом";
   if (/дом$/i.test(label)) return label;
   if (/ный$/i.test(label)) return `${label} дом`;
   if (/блок|кирпич|бетон|каркас/i.test(label)) return `${label}ный дом`;
@@ -272,7 +273,7 @@ export function resolveBuiltObjectBathrooms(object: BuiltObjectItem): number | n
 }
 
 export function builtObjectCharacteristics(object: BuiltObjectItem) {
-  const materialLabel = object.material?.trim() || null;
+  const materialLabel = builtObjectMaterialLabel(object.material ?? "").trim() || null;
   const area = resolveBuiltObjectArea(object);
   const rooms = resolveBuiltObjectRooms(object);
   const bathrooms = resolveBuiltObjectBathrooms(object);
