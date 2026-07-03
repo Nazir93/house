@@ -6,6 +6,7 @@ import { collectNotificationsForPublish } from "@/lib/client-notification-sync";
 import { createClientNotifications } from "@/lib/client-notifications";
 import { publishDraftMediaWithNotifications } from "@/lib/client-project-draft-media";
 import { parseClientProjectDraftData, type ClientProjectDraftData } from "@/lib/client-project-draft";
+import { syncClientProjectPublicSite } from "@/lib/client-project-public-site-sync";
 import { formatCurrentStageLabel } from "@/lib/client-project-stage-status";
 import { replaceClientProjectStages } from "@/lib/client-project-stages-persist";
 import { hashPassword } from "@/lib/password";
@@ -111,6 +112,32 @@ export async function publishClientProjectToCabinet(projectId: string): Promise<
           : {}),
       },
     });
+
+    const publishedProject = await tx.clientConstructionProject.findUnique({
+      where: { id: projectId },
+      include: { stages: { orderBy: { order: "asc" } } },
+    });
+    if (publishedProject) {
+      await syncClientProjectPublicSite(tx, {
+        id: publishedProject.id,
+        title: publishedProject.title,
+        contractNumber: publishedProject.contractNumber,
+        area: publishedProject.area,
+        wallMaterial: publishedProject.wallMaterial,
+        location: publishedProject.location,
+        latitude: publishedProject.latitude,
+        longitude: publishedProject.longitude,
+        coverImageUrl: publishedProject.coverImageUrl,
+        houseProjectId: publishedProject.houseProjectId,
+        showOnPublicSite: publishedProject.showOnPublicSite,
+        builtObjectId: publishedProject.builtObjectId,
+        stages: publishedProject.stages.map((s) => ({
+          id: s.id,
+          parentId: s.parentId,
+          status: s.status,
+        })),
+      });
+    }
   });
 }
 
@@ -155,6 +182,14 @@ async function applyDraftFields(
       ...(draft.foremanName !== undefined ? { foremanName: draft.foremanName } : {}),
       ...(draft.cameraStreamUrl !== undefined ? { cameraStreamUrl: draft.cameraStreamUrl } : {}),
       ...(draft.houseProjectId !== undefined ? { houseProjectId: draft.houseProjectId } : {}),
+      ...(draft.showOnPublicSite !== undefined ? { showOnPublicSite: draft.showOnPublicSite } : {}),
+      ...(draft.location !== undefined ? { location: draft.location } : {}),
+      ...(draft.latitude !== undefined
+        ? { latitude: draft.latitude ? parseFloat(draft.latitude) || null : null }
+        : {}),
+      ...(draft.longitude !== undefined
+        ? { longitude: draft.longitude ? parseFloat(draft.longitude) || null : null }
+        : {}),
     },
   });
 }

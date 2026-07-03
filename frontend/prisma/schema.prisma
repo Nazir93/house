@@ -313,6 +313,7 @@ model BuiltObject {
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
   media               BuiltObjectMedia[]
+  clientProject       ClientConstructionProject?
 
   @@index([published, material])
   @@index([published, order])
@@ -630,6 +631,15 @@ model ClientConstructionProject {
   cameraStreamUrl   String?
   houseProjectId    String?
   houseProject      HouseProject?        @relation(fields: [houseProjectId], references: [id], onDelete: SetNull)
+  /// Показывать на публичном сайте (строящиеся / карта) после публикации в ЛК.
+  showOnPublicSite  Boolean              @default(false)
+  /// Адрес для карточки на сайте (может отличаться от title).
+  location          String?
+  latitude          Float?
+  longitude         Float?
+  /// Связанная карточка портфолио на сайте.
+  builtObjectId     String?              @unique
+  builtObject       BuiltObject?         @relation(fields: [builtObjectId], references: [id], onDelete: SetNull)
   /// Черновик админки (поля, этапы, платежи) до публикации в ЛК
   draftData         Json?
   draftSavedAt      DateTime?

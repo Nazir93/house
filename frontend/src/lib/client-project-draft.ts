@@ -16,6 +16,10 @@ export type ClientProjectDraftData = {
   foremanName?: string | null;
   cameraStreamUrl?: string | null;
   houseProjectId?: string | null;
+  showOnPublicSite?: boolean;
+  location?: string | null;
+  latitude?: string | null;
+  longitude?: string | null;
   stages?: AdminStagePayload[];
   payments?: Array<{
     order: number;
@@ -75,6 +79,10 @@ const MAIN_DRAFT_KEYS = [
   "foremanName",
   "cameraStreamUrl",
   "houseProjectId",
+  "showOnPublicSite",
+  "location",
+  "latitude",
+  "longitude",
 ] as const satisfies readonly (keyof ClientProjectDraftData)[];
 
 function assignDefinedMainFields(
@@ -166,6 +174,11 @@ export function buildDraftDataFromAdminBody(body: Record<string, unknown>): Clie
     cameraStreamUrl:
       body.cameraStreamUrl !== undefined ? body.cameraStreamUrl?.toString().trim() || null : undefined,
     houseProjectId: body.houseProjectId !== undefined ? body.houseProjectId?.toString().trim() || null : undefined,
+    showOnPublicSite:
+      body.showOnPublicSite === undefined ? undefined : Boolean(body.showOnPublicSite),
+    location: body.location !== undefined ? body.location?.toString().trim() || null : undefined,
+    latitude: body.latitude === undefined ? undefined : body.latitude ? String(body.latitude) : null,
+    longitude: body.longitude === undefined ? undefined : body.longitude ? String(body.longitude) : null,
     stages: Array.isArray(body.stages) ? (body.stages as AdminStagePayload[]) : undefined,
     payments: Array.isArray(body.payments)
       ? body.payments.map((p: Record<string, unknown>, i: number) => ({

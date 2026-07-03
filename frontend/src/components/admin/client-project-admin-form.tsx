@@ -40,6 +40,7 @@ import type { ClientProjectDraftSection } from "@/lib/client-project-draft";
 import { buildClientProjectDraftBaselineKey } from "@/lib/draft-section-baseline";
 import { CLIENT_STAGE_STATUS_OPTIONS } from "@/lib/client-stage-status";
 import { formatDateTimeRu, ticketStatusLabel } from "@/lib/client-portal-labels";
+import { BuiltObjectMapPicker } from "@/components/admin/built-object-map-picker";
 
 const ADMIN_COMPACT_SELECT_TRIGGER =
   "rounded-lg border border-white/[0.1] bg-white/[0.05] px-3 py-2 text-sm text-white focus:outline-none focus:border-[#0F3D2E]";
@@ -66,6 +67,11 @@ export type ClientProjectAdminInitial = {
   foremanName: string | null;
   cameraStreamUrl: string | null;
   houseProjectId: string | null;
+  showOnPublicSite: boolean;
+  location: string | null;
+  latitude: string | null;
+  longitude: string | null;
+  builtObjectId: string | null;
   hasUnpublishedDraft?: boolean;
   draftSavedAt?: string | null;
   cabinetPublishedAt?: string | null;
@@ -130,6 +136,10 @@ export function ClientProjectAdminForm({
   const [foremanName, setForemanName] = useState(initial.foremanName ?? "");
   const [cameraStreamUrl, setCameraStreamUrl] = useState(initial.cameraStreamUrl ?? "");
   const [houseProjectId, setHouseProjectId] = useState(initial.houseProjectId ?? "");
+  const [showOnPublicSite, setShowOnPublicSite] = useState(initial.showOnPublicSite);
+  const [location, setLocation] = useState(initial.location ?? "");
+  const [latitude, setLatitude] = useState(initial.latitude ?? "");
+  const [longitude, setLongitude] = useState(initial.longitude ?? "");
 
   const [stages, setStages] = useState<AdminStageRow[]>(
     initial.stages.length > 0
@@ -221,6 +231,10 @@ export function ClientProjectAdminForm({
             foremanName: foremanName.trim() || null,
             cameraStreamUrl: cameraStreamUrl.trim() || null,
             houseProjectId: houseProjectId.trim() || null,
+            showOnPublicSite,
+            location: location.trim() || null,
+            latitude: latitude.trim() || null,
+            longitude: longitude.trim() || null,
           };
         case "stages":
           return {
@@ -263,6 +277,10 @@ export function ClientProjectAdminForm({
       foremanName,
       cameraStreamUrl,
       houseProjectId,
+      showOnPublicSite,
+      location,
+      latitude,
+      longitude,
       stages,
       payments,
     ]
@@ -451,6 +469,61 @@ export function ClientProjectAdminForm({
           <div className="sm:col-span-2">
             <label className="block text-[11px] uppercase text-white/40 mb-1">HouseProject id (каталог)</label>
             <input className={inp} value={houseProjectId} onChange={(e) => setHouseProjectId(e.target.value)} />
+          </div>
+          <div className="sm:col-span-2 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 space-y-3">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showOnPublicSite}
+                onChange={(e) => setShowOnPublicSite(e.target.checked)}
+                className="mt-1"
+              />
+              <span>
+                <span className="block text-sm font-semibold text-white">Показывать на сайте</span>
+                <span className="block text-xs text-white/45 mt-1">
+                  После «Опубликовать» объект появится в разделе «Строящиеся объекты» и на карте. Статус «Сдан» выставится автоматически, когда все этапы сданы клиенту.
+                </span>
+              </span>
+            </label>
+            {showOnPublicSite ? (
+              <>
+                <div>
+                  <label className="block text-[11px] uppercase text-white/40 mb-1">Адрес на сайте</label>
+                  <input
+                    className={inp}
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder={title || "Ленинградская область, д. …"}
+                  />
+                </div>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] uppercase text-white/40 mb-1">Широта</label>
+                    <input className={inp + " font-mono"} value={latitude} onChange={(e) => setLatitude(e.target.value)} placeholder="59.93" />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] uppercase text-white/40 mb-1">Долгота</label>
+                    <input className={inp + " font-mono"} value={longitude} onChange={(e) => setLongitude(e.target.value)} placeholder="30.33" />
+                  </div>
+                </div>
+                <BuiltObjectMapPicker
+                  latitude={latitude}
+                  longitude={longitude}
+                  onCoordinatesChange={(lat, lon) => {
+                    setLatitude(lat);
+                    setLongitude(lon);
+                  }}
+                />
+                {initial.builtObjectId ? (
+                  <p className="text-xs text-emerald-300/80">
+                    Связан с карточкой на сайте.{" "}
+                    <Link href={`/admin/built-objects/${initial.builtObjectId}`} className="underline">
+                      Открыть в портфолио
+                    </Link>
+                  </p>
+                ) : null}
+              </>
+            ) : null}
           </div>
         </div>
       </section>

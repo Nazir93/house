@@ -59,6 +59,21 @@ export async function loadAdminClientProjectInitial(
     foremanName: draft?.foremanName !== undefined ? draft.foremanName : project.foremanName,
     cameraStreamUrl: draft?.cameraStreamUrl !== undefined ? draft.cameraStreamUrl : project.cameraStreamUrl,
     houseProjectId: draft?.houseProjectId !== undefined ? draft.houseProjectId : project.houseProjectId,
+    showOnPublicSite: draft?.showOnPublicSite !== undefined ? draft.showOnPublicSite : project.showOnPublicSite,
+    location: draft?.location !== undefined ? draft.location : project.location,
+    latitude:
+      draft?.latitude !== undefined
+        ? draft.latitude
+        : project.latitude != null
+          ? String(project.latitude)
+          : null,
+    longitude:
+      draft?.longitude !== undefined
+        ? draft.longitude
+        : project.longitude != null
+          ? String(project.longitude)
+          : null,
+    builtObjectId: project.builtObjectId,
     hasUnpublishedDraft: hasUnpublishedDraft(project),
     draftSavedAt: project.draftSavedAt?.toISOString() ?? null,
     cabinetPublishedAt: project.cabinetPublishedAt?.toISOString() ?? null,

@@ -21,6 +21,10 @@ export function buildClientProjectDraftBaselineKey(
     foremanName: string | null;
     cameraStreamUrl: string | null;
     houseProjectId: string | null;
+    showOnPublicSite: boolean;
+    location: string | null;
+    latitude: string | null;
+    longitude: string | null;
     stages: {
       id: string;
       parentId: string | null;
@@ -58,6 +62,10 @@ export function buildClientProjectDraftBaselineKey(
       foremanName: initial.foremanName,
       cameraStreamUrl: initial.cameraStreamUrl,
       houseProjectId: initial.houseProjectId,
+      showOnPublicSite: initial.showOnPublicSite,
+      location: initial.location,
+      latitude: initial.latitude,
+      longitude: initial.longitude,
     },
     stages: initial.stages.map((s) => ({
       id: s.id,
