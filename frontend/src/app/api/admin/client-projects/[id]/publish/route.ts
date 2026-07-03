@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { publishClientProjectToCabinet } from "@/lib/client-project-publish";
+import { prisma } from "@/lib/db";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
+import { revalidatePublicConstructionCatalog } from "@/lib/revalidate-public-content";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +17,27 @@ export async function POST(
   const { id } = await params;
   try {
     await publishClientProjectToCabinet(id);
-    return NextResponse.json({ ok: true, publishedAt: new Date().toISOString() });
+    const project = await prisma.clientConstructionProject.findUnique({
+      where: { id },
+      select: {
+        showOnPublicSite: true,
+        builtObject: { select: { slug: true, siteStatus: true } },
+      },
+    });
+    if (project?.showOnPublicSite && project.builtObject) {
+      revalidatePublicConstructionCatalog();
+    }
+    return NextResponse.json({
+      ok: true,
+      publishedAt: new Date().toISOString(),
+      publicSite:
+        project?.showOnPublicSite && project.builtObject
+          ? {
+              slug: project.builtObject.slug,
+              siteStatus: project.builtObject.siteStatus,
+            }
+          : null,
+    });
   } catch (e) {
     const msg = (e as Error)?.message;
     if (msg === "NOT_FOUND") {

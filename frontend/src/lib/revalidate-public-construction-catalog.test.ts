@@ -31,5 +31,7 @@ describe("revalidatePublicConstructionCatalog", () => {
     expect(revalidatePathMock).toHaveBeenCalledWith("/", "layout");
     expect(revalidatePathMock).toHaveBeenCalledWith("/projects");
     expect(revalidatePathMock).toHaveBeenCalledWith("/portfolio");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/portfolio/under-construction");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/portfolio/map");
   });
 });

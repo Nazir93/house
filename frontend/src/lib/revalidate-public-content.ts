@@ -47,4 +47,6 @@ export function revalidatePublicConstructionCatalog(): void {
   revalidatePath("/projects");
   revalidatePath("/typical-projects");
   revalidatePath("/portfolio");
+  revalidatePath("/portfolio/under-construction");
+  revalidatePath("/portfolio/map");
 }

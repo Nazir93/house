@@ -340,7 +340,22 @@ export function ClientProjectAdminForm({
         return;
       }
       setHasUnpublishedDraft(false);
-      setMsg("Опубликовано в личный кабинет. Клиент видит актуальные данные и получает уведомления по изменениям.");
+      const publicSite = data?.publicSite as { slug?: string; siteStatus?: string } | null | undefined;
+      if (publicSite?.slug) {
+        const section =
+          publicSite.siteStatus === "UNDER_CONSTRUCTION"
+            ? "«Строящиеся объекты» (/portfolio/under-construction)"
+            : "«Реализованные объекты» (/portfolio)";
+        setMsg(
+          `Опубликовано в личный кабинет. Объект на сайте: ${section}, карта /portfolio/map. Карточка: /portfolio/${publicSite.slug}`
+        );
+      } else if (showOnPublicSite) {
+        setMsg(
+          "Опубликовано в личный кабинет. Галочка «Показывать на сайте» включена — объект должен появиться в разделе «Строящиеся объекты»."
+        );
+      } else {
+        setMsg("Опубликовано в личный кабинет. Клиент видит актуальные данные и получает уведомления по изменениям.");
+      }
       router.refresh();
     } catch {
       setErr("Сеть");
