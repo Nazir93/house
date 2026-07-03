@@ -204,14 +204,14 @@ export function ProjectsConstructorSection() {
                   priority={i === 0}
                 />
                 <div
-                  className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent"
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/45 to-transparent"
                   aria-hidden
                 />
                 <div className="pointer-events-none absolute bottom-3 left-4 right-4 md:bottom-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/70">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/90 [text-shadow:0_1px_4px_rgba(0,0,0,0.75)]">
                     Старт за м² · {card.labelShort}
                   </p>
-                  <p className="mt-1 font-heading text-xl font-bold tabular-nums tracking-tight text-white drop-shadow-md md:text-2xl">
+                  <p className="mt-1 font-heading text-xl font-bold tabular-nums tracking-tight text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.85),0_2px_12px_rgba(0,0,0,0.55)] md:text-2xl">
                     {card.pricePerM2}
                   </p>
                 </div>

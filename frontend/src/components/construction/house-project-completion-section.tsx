@@ -39,6 +39,7 @@ import {
 } from "@/lib/project-calculator-stage-images";
 import { toggleConstructionOptionSelection } from "@/lib/project-calculator-option-selection";
 import { useProjectCalculatorQuote } from "@/lib/use-project-calculator-quote";
+import { ConstructionStageButtonIcon } from "@/components/construction/construction-stage-button-icon";
 import { cn } from "@/lib/utils";
 
 /** Граница без яркой белой обводки в тёмной теме */
@@ -78,16 +79,17 @@ const STAGES: Array<{
   id: CalculatorStageId;
   label: string;
   Icon: LucideIcon;
+  iconKey?: string;
   keywords: string[];
   fallback: string;
 }> = [
   { id: "prep", label: "Подготовка", Icon: Hammer, keywords: ["подготов", "разметк", "участ", "проект", "бти", "документ"], fallback: "Организация подготовки стройплощадки по проекту." },
-  { id: "foundation", label: "Фундамент", Icon: Layers, keywords: ["фундамент", "плит", "лент"], fallback: "Устройство основания согласно геологии участка." },
-  { id: "walls", label: "Стены", Icon: BrickWall, keywords: ["стен", "коробк", "газобетон", "блок", "кирпич"], fallback: "Возведение несущих и ненесущих стен по проекту." },
+  { id: "foundation", label: "Фундамент", Icon: Layers, iconKey: "foundation", keywords: ["фундамент", "плит", "лент"], fallback: "Устройство основания согласно геологии участка." },
+  { id: "walls", label: "Стены", Icon: BrickWall, iconKey: "walls", keywords: ["стен", "коробк", "газобетон", "блок", "кирпич"], fallback: "Возведение несущих и ненесущих стен по проекту." },
   { id: "belt", label: "Пояс", Icon: Minus, keywords: ["пояс", "монолит", "армопояс"], fallback: "Монолитный пояс для распределения нагрузки." },
   { id: "floors", label: "Перекрытия", Icon: LayoutGrid, keywords: ["перекрыт", "плит перек"], fallback: "Перекрытия по несущей схеме дома." },
-  { id: "roof", label: "Кровля", Icon: Home, keywords: ["кровл", "стропил"], fallback: "Стропильная система и кровельное покрытие." },
-  { id: "windows", label: "Окна", Icon: AppWindow, keywords: ["окн"], fallback: "Остекление по спецификации проекта." },
+  { id: "roof", label: "Кровля", Icon: Home, iconKey: "roof", keywords: ["кровл", "стропил"], fallback: "Стропильная система и кровельное покрытие." },
+  { id: "windows", label: "Окна", Icon: AppWindow, iconKey: "windows", keywords: ["окн"], fallback: "Остекление по спецификации проекта." },
   { id: "doors", label: "Двери", Icon: DoorOpen, keywords: ["двер"], fallback: "Входная группа и технические проёмы по комплектации." },
 ];
 
@@ -329,8 +331,6 @@ export function HouseProjectCompletionSection({
     scrollArea.scrollTop = nextScrollTop;
   }
 
-  const StageIcon = stage.Icon;
-
   return (
     <div className="lg:grid lg:gap-10 xl:gap-12 lg:[grid-template-columns:minmax(0,1fr)_minmax(300px,380px)]">
       <div className="min-w-0 space-y-10">
@@ -394,7 +394,6 @@ export function HouseProjectCompletionSection({
           </p>
           <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-8 gap-2 sm:gap-2.5">
             {STAGES.map((s, i) => {
-              const Icon = s.Icon;
               const active = i === stageIndex;
               return (
                 <button
@@ -413,10 +412,10 @@ export function HouseProjectCompletionSection({
                         )
                   )}
                 >
-                  <Icon
-                    className={cn("h-5 w-5 sm:h-6 sm:w-6 shrink-0", active ? "opacity-95" : "opacity-80")}
-                    strokeWidth={1.75}
-                    aria-hidden
+                  <ConstructionStageButtonIcon
+                    iconKey={s.iconKey}
+                    Lucide={s.Icon}
+                    active={active}
                   />
                   <span className="text-[10px] sm:text-[11px] font-semibold leading-tight px-0.5">{s.label}</span>
                 </button>
@@ -461,7 +460,12 @@ export function HouseProjectCompletionSection({
                 aria-label="Открыть изображение в новой вкладке"
               />
               <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-md sm:bottom-4 sm:left-4 sm:px-3 sm:py-1.5 sm:text-xs">
-                <StageIcon className="h-3.5 w-3.5" aria-hidden />
+                <ConstructionStageButtonIcon
+                  iconKey={stage.iconKey}
+                  Lucide={stage.Icon}
+                  active
+                  size="sm"
+                />
                 {stage.label}
               </div>
             </div>

@@ -1,8 +1,10 @@
 import { cn } from "@/lib/utils";
+import { ConstructionStageIconImage } from "@/components/construction/construction-stage-icon-image";
 import {
   CONSTRUCTION_STAGE_GLYPHS,
   resolveConstructionStageGlyphKey,
 } from "@/components/account/construction-stage-glyphs";
+import { hasConstructionStageImageIcon } from "@/lib/construction-stage-icon-images";
 import { resolveStageIconKeyForDisplay } from "@/lib/client-project-stage-icons";
 
 /** Цвета иконок этапов: light / dark (globals.css .stage-icon-tint--*). */
@@ -48,6 +50,11 @@ export function StageIcon({
 }) {
   const resolvedIconKey = title ? resolveStageIconKeyForDisplay(title, iconKey) : iconKey;
   const key = resolveConstructionStageGlyphKey(resolvedIconKey);
+
+  if (hasConstructionStageImageIcon(key)) {
+    return <ConstructionStageIconImage iconKey={key} className={className} />;
+  }
+
   const Glyph = CONSTRUCTION_STAGE_GLYPHS[key];
   const tint = COLORED_CLASS[key] ?? COLORED_CLASS.default;
 

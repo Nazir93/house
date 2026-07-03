@@ -2,19 +2,16 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactElement } from "react";
 import {
-  Anchor,
-  BrickWall,
   ChevronDown,
   DraftingCompass,
-  Home,
   Images,
-  Layers,
   LayoutGrid,
   LayoutList,
   List,
   RectangleHorizontal,
   X,
 } from "lucide-react";
+import { ConstructionStageIconImage } from "@/components/construction/construction-stage-icon-image";
 import {
   type CaseStudyPhase,
   type CaseStudyTier1Chip,
@@ -64,10 +61,31 @@ function phaseMobileIcon(phaseId: string): ReactElement {
   const c = "h-[18px] w-[18px] shrink-0";
   if (id === "_cms_renders") return <Images className={c} strokeWidth={iconStroke} aria-hidden />;
   if (id === "_cms_plans") return <DraftingCompass className={c} strokeWidth={iconStroke} aria-hidden />;
-  if (id === "foundation" || id.includes("foundation")) return <Anchor className={c} strokeWidth={iconStroke} aria-hidden />;
-  if (id === "walls" || id.includes("wall")) return <BrickWall className={c} strokeWidth={iconStroke} aria-hidden />;
-  if (id === "roof" || id.includes("roof")) return <Home className={c} strokeWidth={iconStroke} aria-hidden />;
-  return <Layers className={c} strokeWidth={iconStroke} aria-hidden />;
+  if (id === "foundation" || id.includes("foundation")) {
+    return <ConstructionStageIconImage iconKey="foundation" className={c} />;
+  }
+  if (id === "walls" || id.includes("wall")) {
+    return <ConstructionStageIconImage iconKey="walls" className={c} />;
+  }
+  if (id === "windows" || id.includes("window") || id.includes("окн")) {
+    return <ConstructionStageIconImage iconKey="windows" className={c} />;
+  }
+  if (id === "roof" || id.includes("roof") || id.includes("кровл")) {
+    return <ConstructionStageIconImage iconKey="roof" className={c} />;
+  }
+  if (id === "engineering" || id.includes("engineering") || id.includes("mep") || id.includes("power")) {
+    return <ConstructionStageIconImage iconKey="engineering" className={c} />;
+  }
+  if (id === "facade" || id.includes("facade") || id.includes("фасад")) {
+    return <ConstructionStageIconImage iconKey="facade" className={c} />;
+  }
+  if (id === "interior" || id.includes("interior") || id.includes("внутр")) {
+    return <ConstructionStageIconImage iconKey="interior" className={c} />;
+  }
+  if (id === "landscaping" || id.includes("landscap") || id.includes("благоустрой")) {
+    return <ConstructionStageIconImage iconKey="landscaping" className={c} />;
+  }
+  return <LayoutGrid className={c} strokeWidth={iconStroke} aria-hidden />;
 }
 
 function MobileCaseStudyPhaseRail({

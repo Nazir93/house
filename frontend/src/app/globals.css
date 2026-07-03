@@ -2332,6 +2332,26 @@ html.reveal-animations-ready [data-reveal="card"]:not(.is-visible) {
   color: color-mix(in srgb, var(--accent) 88%, white 12%);
 }
 
+/* PNG-иконки этапов: light / dark + акцентная кнопка */
+.stage-icon-img--theme-light {
+  display: block;
+}
+.stage-icon-img--theme-dark {
+  display: none;
+}
+[data-theme="dark"] .stage-icon-img--theme-light {
+  display: none;
+}
+[data-theme="dark"] .stage-icon-img--theme-dark {
+  display: block;
+}
+.stage-icon-on-accent .stage-icon-img--theme-light {
+  display: none !important;
+}
+.stage-icon-on-accent .stage-icon-img--theme-dark {
+  display: block !important;
+}
+
 .account-premium-sidebar--collapsed .account-sidebar-label,
 .account-premium-sidebar--collapsed .account-sidebar-support-text,
 .account-premium-sidebar--collapsed .account-sidebar-subtitle {
