@@ -1,5 +1,7 @@
 import type { BuiltObjectItem } from "@/lib/construction-shared";
 import { builtObjectMaterialLabel, normalizeBuiltObjectMaterialEnum } from "@/lib/construction-shared";
+import type { BuiltObjectSiteStatusFilter } from "@/lib/built-object-site-status";
+import { matchesBuiltObjectSiteStatusFilter } from "@/lib/built-object-site-status";
 
 /** Регионы для фильтров карты и админки (slug → подпись). */
 export const BUILT_OBJECT_MAP_REGIONS = [
@@ -109,10 +111,12 @@ export interface BuiltObjectMapFilterState {
   district: string;
   area: MapAreaBucketId;
   floors: MapFloorBucketId;
+  siteStatus: BuiltObjectSiteStatusFilter;
 }
 
 export function filterBuiltObjectsForMap(objects: BuiltObjectItem[], f: BuiltObjectMapFilterState): BuiltObjectItem[] {
   return objects.filter((o) => {
+    if (!matchesBuiltObjectSiteStatusFilter(o, f.siteStatus)) return false;
     if (f.material !== "all" && normalizeBuiltObjectMaterialEnum(o.material) !== f.material) return false;
     if (f.region !== "all" && effectiveBuiltObjectRegionSlug(o) !== f.region) return false;
     if (f.region !== "all" && f.district !== "all") {

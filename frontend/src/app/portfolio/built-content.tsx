@@ -14,8 +14,13 @@ import {
   PORTFOLIO_AREA_FILTER_OPTIONS,
   type PortfolioAreaFilterId,
 } from "@/lib/portfolio-filter-options";
+import {
+  builtObjectSiteStatusFilterToParam,
+  filterBuiltObjectsBySiteStatus,
+  type BuiltObjectSiteStatusFilter,
+} from "@/lib/built-object-site-status";
 import { cn } from "@/lib/utils";
-import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
+import { BUILT_HOMES_SECTION_LABEL, UNDER_CONSTRUCTION_SECTION_LABEL } from "@/lib/constants";
 import { CmsImage } from "@/components/ui/cms-image";
 
 const PortfolioObjectMapExplorer = dynamic(
@@ -47,9 +52,18 @@ function chipClass(active: boolean) {
 export function BuiltPortfolioContent({
   objects,
   initialView = "grid",
+  siteScope = "COMPLETED",
+  pageTitle,
+  pageDescription,
+  breadcrumbLabel,
 }: {
   objects: BuiltObjectItem[];
   initialView?: ViewMode;
+  /** Какие объекты показывать: готовые, строящиеся или все. */
+  siteScope?: BuiltObjectSiteStatusFilter;
+  pageTitle?: string;
+  pageDescription?: string;
+  breadcrumbLabel?: string;
 }) {
   const [material, setMaterial] = useState("all");
   const [floorId, setFloorId] = useState("all");
@@ -60,6 +74,24 @@ export function BuiltPortfolioContent({
   const explorerRef = useRef<HTMLDivElement>(null);
   const mobileFiltersDrawerRef = useRef<HTMLDivElement>(null);
   const drawerTouchStartY = useRef(0);
+
+  const scopedObjects = useMemo(
+    () => filterBuiltObjectsBySiteStatus(objects, siteScope),
+    [objects, siteScope]
+  );
+
+  const resolvedTitle =
+    pageTitle ??
+    (siteScope === "UNDER_CONSTRUCTION" ? UNDER_CONSTRUCTION_SECTION_LABEL : BUILT_HOMES_SECTION_LABEL);
+  const resolvedBreadcrumb = breadcrumbLabel ?? resolvedTitle;
+  const resolvedDescription =
+    pageDescription ??
+    (siteScope === "UNDER_CONSTRUCTION"
+      ? "Дома в процессе строительства: можно отфильтровать по материалу, этажности и площади, посмотреть на карте."
+      : "Реализованные дома, которые можно отфильтровать по материалу, этажности и площади.");
+  const mapStatusParam = builtObjectSiteStatusFilterToParam(siteScope) ?? "all";
+  const mapHref =
+    mapStatusParam === "all" ? "/portfolio/map" : `/portfolio/map?status=${mapStatusParam}`;
 
   useEffect(() => {
     setMobileFiltersPortalReady(true);
@@ -95,8 +127,8 @@ export function BuiltPortfolioContent({
   );
 
   const filtered = useMemo(
-    () => filterPortfolioObjects(objects, { material, floorId, areaId }, floorOptions),
-    [areaId, floorId, floorOptions, material, objects]
+    () => filterPortfolioObjects(scopedObjects, { material, floorId, areaId }, floorOptions),
+    [areaId, floorId, floorOptions, material, scopedObjects]
   );
 
   const filtersAreDefault = material === "all" && floorId === "all" && areaId === "all";
@@ -106,18 +138,6 @@ export function BuiltPortfolioContent({
     setMaterial("all");
     setFloorId("all");
     setAreaId("all");
-  }
-
-  function scrollToExplorer() {
-    requestAnimationFrame(() => {
-      explorerRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }
-
-  function showMapView() {
-    setView("map");
-    setMobileFiltersOpen(false);
-    setTimeout(scrollToExplorer, 80);
   }
 
   function onDrawerTouchStart(e: React.TouchEvent) {
@@ -171,15 +191,14 @@ export function BuiltPortfolioContent({
   );
 
   const mapButton = (
-    <button
-      type="button"
-      onClick={() => showMapView()}
+    <Link
+      href={mapHref}
       className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--bg)] px-3 py-1.5 text-[12px] font-semibold text-[var(--text)] transition-colors hover:border-[var(--accent)] hover:text-[var(--accent)] dark:bg-[var(--card-bg)] sm:text-[13px]"
     >
       <MapPinned size={15} strokeWidth={2} className="shrink-0 text-[var(--accent)]" aria-hidden />
       Показать на карте
       <span className="text-[11px] font-normal text-[var(--text-muted)]">({mappedCount})</span>
-    </button>
+    </Link>
   );
 
   const filtersPanel = (
@@ -300,15 +319,27 @@ export function BuiltPortfolioContent({
           <span className="mx-1.5 text-[var(--text-subtle)] sm:mx-2" aria-hidden>
             {" > "}
           </span>
-          <span className="text-[var(--text)]">{BUILT_HOMES_SECTION_LABEL}</span>
+          {siteScope === "UNDER_CONSTRUCTION" ? (
+            <>
+              <Link href="/portfolio" className="transition-colors hover:text-[var(--accent)]">
+                {BUILT_HOMES_SECTION_LABEL}
+              </Link>
+              <span className="mx-1.5 text-[var(--text-subtle)] sm:mx-2" aria-hidden>
+                {" > "}
+              </span>
+              <span className="text-[var(--text)]">{resolvedBreadcrumb}</span>
+            </>
+          ) : (
+            <span className="text-[var(--text)]">{resolvedBreadcrumb}</span>
+          )}
         </nav>
 
         <div className="mt-5 max-w-3xl md:mt-6">
           <h1 className="font-heading text-3xl font-bold tracking-tight text-[var(--accent)] md:text-[2.75rem] md:leading-[1.06] lg:text-[3.15rem] dark:text-[var(--text)]">
-            {BUILT_HOMES_SECTION_LABEL}
+            {resolvedTitle}
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--text-muted)] md:text-base">
-            Реализованные дома, которые можно отфильтровать по материалу, этажности и площади.
+            {resolvedDescription}
           </p>
         </div>
 
@@ -321,7 +352,7 @@ export function BuiltPortfolioContent({
                   К сетке
                 </button>
                 <Link
-                  href="/portfolio/map"
+                  href={mapHref}
                   className="inline-flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-1.5 text-[12px] font-semibold text-[var(--accent)] transition-colors hover:border-[var(--accent)] dark:bg-[var(--card-bg)] sm:text-[13px]"
                 >
                   <MapPinned size={15} strokeWidth={2} aria-hidden />
@@ -329,7 +360,11 @@ export function BuiltPortfolioContent({
                 </Link>
               </div>
               <div className="overflow-hidden rounded-[1.5rem]">
-                <PortfolioObjectMapExplorer objects={objects} layout="embedded" />
+                <PortfolioObjectMapExplorer
+                  objects={scopedObjects}
+                  layout="embedded"
+                  initialSiteStatus={siteScope}
+                />
               </div>
             </div>
           ) : (
@@ -358,8 +393,12 @@ export function BuiltPortfolioContent({
                 </span>
               </div>
 
-              {objects.length === 0 ? (
-                <p className="py-16 text-center text-sm text-[var(--text-muted)]">Построенные дома пока не добавлены.</p>
+              {scopedObjects.length === 0 ? (
+                <p className="py-16 text-center text-sm text-[var(--text-muted)]">
+                  {siteScope === "UNDER_CONSTRUCTION"
+                    ? "Строящиеся объекты пока не добавлены."
+                    : "Построенные дома пока не добавлены."}
+                </p>
               ) : filtered.length === 0 ? (
                 <p className="py-16 text-center text-sm text-[var(--text-muted)]">Нет объектов с выбранными фильтрами.</p>
               ) : (

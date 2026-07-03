@@ -3,6 +3,7 @@ import { getPageMeta, getPageMetaFields } from "@/lib/get-page-meta";
 import { getBuiltObjects } from "@/lib/construction-data";
 import { SITE_NAME, BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
 import { PortfolioObjectMapExplorer } from "@/components/portfolio/portfolio-object-map-explorer";
+import { parseBuiltObjectSiteStatusFilterParam } from "@/lib/built-object-site-status";
 
 export const revalidate = 60;
 
@@ -15,11 +16,14 @@ export async function generateMetadata() {
   });
 }
 
-export default async function PortfolioMapPage(props: { searchParams?: Promise<{ object?: string }> }) {
+export default async function PortfolioMapPage(props: {
+  searchParams?: Promise<{ object?: string; status?: string }>;
+}) {
   const searchParams = await props.searchParams;
   await getPageMetaFields("/portfolio/map");
   const objects = await getBuiltObjects();
   const initialObjectSlug = searchParams?.object?.trim() || null;
+  const initialSiteStatus = parseBuiltObjectSiteStatusFilterParam(searchParams?.status);
 
   return (
     <>
@@ -42,7 +46,12 @@ export default async function PortfolioMapPage(props: { searchParams?: Promise<{
           </nav>
 
           <div className="mt-8">
-            <PortfolioObjectMapExplorer objects={objects} layout="page" initialObjectSlug={initialObjectSlug} />
+            <PortfolioObjectMapExplorer
+              objects={objects}
+              layout="page"
+              initialObjectSlug={initialObjectSlug}
+              initialSiteStatus={initialSiteStatus}
+            />
           </div>
         </div>
       </section>

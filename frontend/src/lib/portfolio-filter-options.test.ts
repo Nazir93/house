@@ -87,6 +87,20 @@ describe("portfolio-filter-options", () => {
     expect(gtArea.map((o) => o.id)).toEqual(["c"]);
   });
 
+  it("filterPortfolioObjects filters by siteStatus", () => {
+    const objects = [
+      sampleObject({ id: "done", siteStatus: "COMPLETED" }),
+      sampleObject({ id: "build", siteStatus: "UNDER_CONSTRUCTION" }),
+    ];
+    const floorOptions = mergeFloorFilterOptions();
+    const building = filterPortfolioObjects(
+      objects,
+      { material: "all", floorId: "all", areaId: "all", siteStatus: "UNDER_CONSTRUCTION" },
+      floorOptions
+    );
+    expect(building.map((o) => o.id)).toEqual(["build"]);
+  });
+
   it("filterPortfolioObjects has no region filter", () => {
     const objects = [
       sampleObject({ id: "nw", regionSlug: "north-west" }),

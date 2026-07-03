@@ -16,6 +16,11 @@ import {
 import { PortfolioObjectMapDrawer } from "@/components/portfolio/portfolio-object-map-drawer";
 import { SiteSelect } from "@/components/ui/site-select";
 import { cn } from "@/lib/utils";
+import {
+  BUILT_OBJECT_SITE_STATUS_FILTER_OPTIONS,
+  builtObjectSiteStatusFilterToParam,
+  type BuiltObjectSiteStatusFilter,
+} from "@/lib/built-object-site-status";
 
 const PortfolioBuiltMap = dynamic(
   () => import("@/components/portfolio/portfolio-built-map").then((m) => m.PortfolioBuiltMap),
@@ -46,6 +51,15 @@ function materialOptions(objects: BuiltObjectItem[]): { value: string; label: st
 
 type Layout = "page" | "embedded";
 
+function statusChipClass(active: boolean) {
+  return cn(
+    "inline-flex shrink-0 items-center rounded-full border px-3 py-1.5 text-[12px] font-semibold transition-colors sm:text-[13px]",
+    active
+      ? "border-[var(--accent)] bg-[var(--accent)] text-white"
+      : "border-[var(--border)] bg-[var(--bg-secondary)] text-[var(--text)] hover:border-[var(--accent)]/50 dark:bg-[var(--card-bg)]"
+  );
+}
+
 function FilterField({
   label,
   children,
@@ -65,17 +79,21 @@ export function PortfolioObjectMapExplorer({
   objects,
   layout = "page",
   initialObjectSlug,
+  initialSiteStatus = "all",
 }: {
   objects: BuiltObjectItem[];
   layout?: Layout;
   /** Slug объекта — открыть маркер и карточку при загрузке (/portfolio/map?object=…) */
   initialObjectSlug?: string | null;
+  /** Начальный фильтр: все / готовые / строящиеся (/portfolio/map?status=building) */
+  initialSiteStatus?: BuiltObjectSiteStatusFilter;
 }) {
   const [material, setMaterial] = useState("all");
   const [region, setRegion] = useState<"all" | BuiltObjectMapRegionSlug>("all");
   const [district, setDistrict] = useState("all");
   const [area, setArea] = useState<BuiltObjectMapFilterState["area"]>("all");
   const [floors, setFloors] = useState<BuiltObjectMapFilterState["floors"]>("all");
+  const [siteStatus, setSiteStatus] = useState<BuiltObjectSiteStatusFilter>(initialSiteStatus);
   const initialId =
     initialObjectSlug?.trim()
       ? objects.find((o) => o.slug === initialObjectSlug.trim())?.id ?? null
@@ -83,8 +101,8 @@ export function PortfolioObjectMapExplorer({
   const [selectedId, setSelectedId] = useState<string | null>(initialId);
 
   const filters = useMemo<BuiltObjectMapFilterState>(
-    () => ({ material, region, district, area, floors }),
-    [material, region, district, area, floors]
+    () => ({ material, region, district, area, floors, siteStatus }),
+    [material, region, district, area, floors, siteStatus]
   );
 
   const filtered = useMemo(() => filterBuiltObjectsForMap(objects, filters), [objects, filters]);
@@ -106,6 +124,22 @@ export function PortfolioObjectMapExplorer({
   }, [region]);
 
   useEffect(() => {
+    setSiteStatus(initialSiteStatus);
+  }, [initialSiteStatus]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || layout !== "page") return;
+    const url = new URL(window.location.href);
+    const param = builtObjectSiteStatusFilterToParam(siteStatus);
+    if (param) url.searchParams.set("status", param);
+    else url.searchParams.delete("status");
+    const next = `${url.pathname}${url.search}${url.hash}`;
+    if (`${window.location.pathname}${window.location.search}${window.location.hash}` !== next) {
+      window.history.replaceState(null, "", next);
+    }
+  }, [layout, siteStatus]);
+
+  useEffect(() => {
     if (!selectedId) return;
     if (!filtered.some((o) => o.id === selectedId)) setSelectedId(null);
   }, [filtered, selectedId]);
@@ -124,6 +158,20 @@ export function PortfolioObjectMapExplorer({
           </h1>
         </header>
       ) : null}
+
+      <div className="flex flex-wrap items-center gap-2">
+        {BUILT_OBJECT_SITE_STATUS_FILTER_OPTIONS.map((opt) => (
+          <button
+            key={opt.id}
+            type="button"
+            onClick={() => setSiteStatus(opt.id)}
+            className={statusChipClass(siteStatus === opt.id)}
+            aria-pressed={siteStatus === opt.id}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
 
       <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-end">
         <FilterField label="Материал">

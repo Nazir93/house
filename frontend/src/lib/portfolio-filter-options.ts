@@ -1,5 +1,7 @@
 import type { BuiltObjectItem } from "@/lib/construction-shared";
 import { builtObjectMaterialLabel, normalizeBuiltObjectMaterialEnum } from "@/lib/construction-shared";
+import type { BuiltObjectSiteStatusFilter } from "@/lib/built-object-site-status";
+import { matchesBuiltObjectSiteStatusFilter } from "@/lib/built-object-site-status";
 
 export type PortfolioMaterialFilterOption = { value: string; label: string };
 export type PortfolioFloorFilterOption = { id: string; label: string; floors: number };
@@ -111,10 +113,15 @@ export function filterPortfolioObjects(
     material: string;
     floorId: string;
     areaId: PortfolioAreaFilterId;
+    siteStatus?: BuiltObjectSiteStatusFilter;
   },
   floorOptions: PortfolioFloorFilterOption[]
 ): BuiltObjectItem[] {
   let list = objects;
+
+  if (filters.siteStatus && filters.siteStatus !== "all") {
+    list = list.filter((o) => matchesBuiltObjectSiteStatusFilter(o, filters.siteStatus!));
+  }
 
   if (filters.material !== "all") {
     list = list.filter(

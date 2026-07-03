@@ -3,6 +3,9 @@ export const SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME || "Часть душ
 /** Публичное название раздела `/portfolio` в меню, заголовках и хлебных крошках. */
 export const BUILT_HOMES_SECTION_LABEL = "Построенные дома";
 
+/** Публичное название раздела строящихся объектов. */
+export const UNDER_CONSTRUCTION_SECTION_LABEL = "Строящиеся объекты";
+
 /** Слоган под логотипом в шапке (как на лендинге застройщика). */
 export const HEADER_TAGLINE =
   process.env.NEXT_PUBLIC_HEADER_TAGLINE?.trim() ||
