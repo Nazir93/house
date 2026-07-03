@@ -1,7 +1,6 @@
 /**
- * Нормализация PNG этапов:
- * 1) light — оставляем только зелёные штрихи (+ 1px сглаживание), фон прозрачный
- * 2) dark — из light: штрихи → белые
+ * Нормализация PNG этапов для CSS-маски:
+ * оставляем только контур (alpha), RGB → чёрный, фон полностью прозрачный.
  */
 import fs from "fs";
 import path from "path";
@@ -9,10 +8,6 @@ import { fileURLToPath } from "url";
 import sharp from "sharp";
 
 const DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "../public/images/stage-icons");
-
-function lum(r, g, b) {
-  return 0.299 * r + 0.587 * g + 0.114 * b;
-}
 
 function isGreenStroke(r, g, b) {
   return g >= r - 12 && g >= b - 12 && g > 22 && g - Math.min(r, b) > 4;
@@ -55,25 +50,22 @@ function dilateGreenMask(data, w, h, radius = 1) {
 async function processLight(filePath) {
   const { data, info } = await sharp(filePath).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const { width: w, height: h } = info;
-  const keep = dilateGreenMask(data, w, h, 2);
+  const keep = dilateGreenMask(data, w, h, 1);
 
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       const i = idx(x, y, w);
       if (!keep[y * w + x]) {
+        data[i] = 0;
+        data[i + 1] = 0;
+        data[i + 2] = 0;
         data[i + 3] = 0;
         continue;
       }
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
-      if (isGreenStroke(r, g, b)) continue;
-      const l = lum(r, g, b);
-      if (l > 200) {
-        data[i] = Math.min(255, Math.round(g * 0.55));
-        data[i + 1] = g;
-        data[i + 2] = Math.min(255, Math.round(g * 0.45));
-      }
+      data[i] = 0;
+      data[i + 1] = 0;
+      data[i + 2] = 0;
+      data[i + 3] = 255;
     }
   }
 
@@ -104,8 +96,6 @@ async function deriveDarkFromLight(lightPath, darkPath) {
   }
 
   const buf = await sharp(out, { raw: { width: info.width, height: info.height, channels: 4 } })
-    .trim({ threshold: 1 })
-    .resize(320, 320, { fit: "inside", withoutEnlargement: true })
     .png({ compressionLevel: 9 })
     .toBuffer();
 
@@ -118,9 +108,9 @@ async function report(filePath) {
   const { data, info } = await sharp(filePath).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   let transparent = 0;
   let white = 0;
-  for (let i = 0; i < data.length; i += 4) {
-    if (data[i + 3] < 16) transparent++;
-    else if (data[i] > 230 && data[i + 1] > 230 && data[i + 2] > 230) white++;
+  for (let i = 3; i < data.length; i += 4) {
+    if (data[i] < 16) transparent++;
+    else if (data[i - 3] > 230 && data[i - 2] > 230 && data[i - 1] > 230) white++;
   }
   const n = data.length / 4;
   console.log(
@@ -152,5 +142,4 @@ for (const key of keys) {
 console.log("\nAfter normalize:");
 for (const key of keys) {
   await report(path.join(DIR, `${key}-light.png`));
-  await report(path.join(DIR, `${key}-dark.png`));
 }

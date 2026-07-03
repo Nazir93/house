@@ -2262,17 +2262,13 @@ html.reveal-animations-ready [data-reveal="card"]:not(.is-visible) {
   box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.06);
 }
 
-/* PNG-иконки этапов: маска + цвет темы (light / dark) */
-.stage-icon-mask--theme {
-  color: rgb(28 32 36 / 0.88);
+/* PNG-иконки этапов: маска (alpha PNG) + цвет темы, без фоновой плашки */
+.stage-icon-mask--light {
+  color: var(--accent);
 }
 
-[data-theme="dark"] .stage-icon-mask--theme {
-  color: rgb(255 255 255 / 0.9);
-}
-
-.admin-app .stage-icon-mask--theme {
-  color: rgb(255 255 255 / 0.88);
+.stage-icon-mask--dark {
+  color: rgb(255 255 255 / 0.92);
 }
 
 /* ЛК: компактные цветные иконки этапов (light / dark) */

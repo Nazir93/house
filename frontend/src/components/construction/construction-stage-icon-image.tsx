@@ -1,21 +1,13 @@
 "use client";
 
-import { useLayoutEffect, useState } from "react";
-
 import { useTheme } from "@/lib/theme-context";
 import { cn } from "@/lib/utils";
 import {
   hasConstructionStageImageIcon,
-  resolveConstructionStageIconSrc,
+  resolveConstructionStageIconAssets,
 } from "@/lib/construction-stage-icon-images";
-import type { ResolvedSiteTheme } from "@/lib/theme-preference";
 
-function readDomTheme(): ResolvedSiteTheme {
-  if (typeof document === "undefined") return "light";
-  return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
-}
-
-/** PNG-иконка этапа: один прозрачный файл под текущую тему. */
+/** PNG-иконка этапа: маска без фона, цвет задаёт тема (зелёный / белый). */
 export function ConstructionStageIconImage({
   iconKey,
   className,
@@ -24,30 +16,45 @@ export function ConstructionStageIconImage({
 }: {
   iconKey: string;
   className?: string;
-  /** Белая версия на тёмном/акцентном фоне (активная кнопка этапа). */
+  /** Белая иконка на акцентном (зелёном) фоне кнопки. */
   onAccent?: boolean;
   alt?: string;
 }) {
-  const { theme } = useTheme();
-  const [domTheme, setDomTheme] = useState<ResolvedSiteTheme>(theme);
-
-  useLayoutEffect(() => {
-    setDomTheme(readDomTheme());
-  }, [theme]);
+  const { resolvedTheme } = useTheme();
 
   if (!hasConstructionStageImageIcon(iconKey)) return null;
 
-  const resolvedTheme = onAccent ? "dark" : domTheme;
-  const src = resolveConstructionStageIconSrc(iconKey, resolvedTheme, onAccent ? "accent" : "default");
-  if (!src) return null;
+  const assets = resolveConstructionStageIconAssets(iconKey);
+  if (!assets) return null;
+
+  const maskSrc = assets.light;
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={src}
-      alt={alt}
-      className={cn("shrink-0 object-contain", className)}
+    <span
+      role={alt ? "img" : undefined}
+      aria-label={alt || undefined}
       aria-hidden={alt ? undefined : true}
+      className={cn(
+        "inline-block shrink-0 bg-current",
+        onAccent
+          ? "text-[var(--accent-contrast)]"
+          : resolvedTheme === "dark"
+            ? "stage-icon-mask--dark"
+            : "stage-icon-mask--light",
+        className,
+      )}
+      style={{
+        WebkitMaskImage: `url("${maskSrc}")`,
+        maskImage: `url("${maskSrc}")`,
+        WebkitMaskSize: "contain",
+        maskSize: "contain",
+        WebkitMaskRepeat: "no-repeat",
+        maskRepeat: "no-repeat",
+        WebkitMaskPosition: "center",
+        maskPosition: "center",
+        WebkitMaskMode: "alpha",
+        maskMode: "alpha",
+      }}
     />
   );
 }
