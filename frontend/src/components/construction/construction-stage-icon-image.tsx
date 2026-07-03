@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useTheme } from "@/lib/theme-context";
 import { cn } from "@/lib/utils";
 import {
@@ -52,9 +53,8 @@ export function ConstructionStageIconImage({
         maskRepeat: "no-repeat",
         WebkitMaskPosition: "center",
         maskPosition: "center",
-        WebkitMaskMode: "alpha",
         maskMode: "alpha",
-      }}
+      } as CSSProperties}
     />
   );
 }
