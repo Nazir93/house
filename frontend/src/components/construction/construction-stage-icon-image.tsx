@@ -1,10 +1,13 @@
+"use client";
+
+import { useTheme } from "@/lib/theme-context";
 import { cn } from "@/lib/utils";
 import {
   hasConstructionStageImageIcon,
-  resolveConstructionStageIconAssets,
+  resolveConstructionStageIconSrc,
 } from "@/lib/construction-stage-icon-images";
 
-/** PNG-иконка этапа с переключением light/dark через data-theme. */
+/** PNG-иконка этапа: один прозрачный файл под текущую тему. */
 export function ConstructionStageIconImage({
   iconKey,
   className,
@@ -17,31 +20,24 @@ export function ConstructionStageIconImage({
   onAccent?: boolean;
   alt?: string;
 }) {
+  const { theme } = useTheme();
+
   if (!hasConstructionStageImageIcon(iconKey)) return null;
 
-  const assets = resolveConstructionStageIconAssets(iconKey)!;
+  const src = resolveConstructionStageIconSrc(
+    iconKey,
+    theme,
+    onAccent ? "accent" : "default",
+  );
+  if (!src) return null;
 
   return (
-    <span
-      className={cn(
-        "relative inline-flex shrink-0 items-center justify-center",
-        onAccent && "stage-icon-on-accent",
-        className,
-      )}
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={src}
+      alt={alt}
+      className={cn("shrink-0 object-contain", className)}
       aria-hidden={alt ? undefined : true}
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={assets.light}
-        alt={alt}
-        className="stage-icon-img stage-icon-img--theme-light h-full w-full object-contain"
-      />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src={assets.dark}
-        alt={alt}
-        className="stage-icon-img stage-icon-img--theme-dark absolute inset-0 h-full w-full object-contain"
-      />
-    </span>
+    />
   );
 }
