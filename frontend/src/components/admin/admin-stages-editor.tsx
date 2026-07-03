@@ -85,7 +85,7 @@ export function AdminStagesEditor({ stages, onChange, progressHint }: AdminStage
                     onChange={(e) => patchRow(index, { order: parseInt(e.target.value, 10) || 0 })}
                     aria-label="Порядок этапа"
                   />
-                  <StageIcon iconKey={row.iconKey} className="h-7 w-7 shrink-0" colored />
+                  <StageIcon iconKey={row.iconKey} className="h-8 w-8 shrink-0" colored />
                 </div>
                 <button
                   type="button"
@@ -115,7 +115,7 @@ export function AdminStagesEditor({ stages, onChange, progressHint }: AdminStage
                 <label className={labelCls}>Иконка</label>
                 {isStandardStageTitle(row.title) ? (
                   <div className="flex items-center gap-2 py-1">
-                    <StageIcon iconKey={row.iconKey} className="h-7 w-7 shrink-0" colored />
+                    <StageIcon iconKey={row.iconKey} className="h-8 w-8 shrink-0" colored />
                     <span className="text-[10px] text-white/45 leading-snug">
                       Подставляется автоматически для типового этапа
                     </span>

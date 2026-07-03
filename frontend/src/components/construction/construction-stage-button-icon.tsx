@@ -18,7 +18,7 @@ export function ConstructionStageButtonIcon({
   className?: string;
   size?: "sm" | "md";
 }) {
-  const sizeClass = size === "sm" ? "h-3.5 w-3.5" : "h-5 w-5 sm:h-6 sm:w-6";
+  const sizeClass = size === "sm" ? "h-4 w-4" : "h-7 w-7 sm:h-8 sm:w-8";
 
   if (iconKey && hasConstructionStageImageIcon(iconKey)) {
     return (
@@ -33,8 +33,13 @@ export function ConstructionStageButtonIcon({
   const Icon = Lucide;
   return (
     <Icon
-      className={cn(sizeClass, "shrink-0", active ? "opacity-95" : "opacity-80", className)}
-      strokeWidth={1.75}
+      className={cn(
+        sizeClass,
+        "shrink-0 text-current",
+        active ? "opacity-100" : "opacity-90",
+        className,
+      )}
+      strokeWidth={2}
       aria-hidden
     />
   );
