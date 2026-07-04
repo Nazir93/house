@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, MapPinned, Pencil, Plus, Trash2 } from "lucide-react";
 import { builtObjectMaterialLabel } from "@/lib/construction-shared";
 import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
@@ -10,7 +11,9 @@ import {
   BUILT_OBJECT_SITE_STATUS_FILTER_OPTIONS,
   builtObjectSiteStatusAdminLabel,
   builtObjectSiteStatusLabel,
+  builtObjectSiteStatusFilterToParam,
   filterBuiltObjectsBySiteStatus,
+  parseBuiltObjectSiteStatusFilterParam,
   type BuiltObjectSiteStatusFilter,
 } from "@/lib/built-object-site-status";
 import { cn } from "@/lib/utils";
@@ -42,10 +45,19 @@ function statusBadgeClass(status?: BuiltObjectAdminItem["siteStatus"]) {
 }
 
 export default function AdminBuiltObjectsPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialStatusFilter =
+    parseBuiltObjectSiteStatusFilterParam(searchParams.get("status")) ?? "all";
+
   const [objects, setObjects] = useState<BuiltObjectAdminItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [statusFilter, setStatusFilter] = useState<BuiltObjectSiteStatusFilter>("all");
+  const [statusFilter, setStatusFilter] = useState<BuiltObjectSiteStatusFilter>(initialStatusFilter);
+
+  useEffect(() => {
+    setStatusFilter(initialStatusFilter);
+  }, [initialStatusFilter]);
 
   const load = useCallback(() => {
     fetch("/api/admin/built-objects")
@@ -66,12 +78,20 @@ export default function AdminBuiltObjectsPage() {
   );
 
   async function toggle(object: BuiltObjectAdminItem) {
-    await fetch(`/api/admin/built-objects/${object.id}`, {
+    const res = await fetch(`/api/admin/built-objects/${object.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ published: !object.published }),
     });
-    setObjects((prev) => prev.map((item) => item.id === object.id ? { ...item, published: !item.published } : item));
+    if (!res.ok) return;
+    setObjects((prev) => prev.map((item) => (item.id === object.id ? { ...item, published: !item.published } : item)));
+  }
+
+  function setStatusFilterAndUrl(next: BuiltObjectSiteStatusFilter) {
+    setStatusFilter(next);
+    const param = builtObjectSiteStatusFilterToParam(next);
+    const href = param ? `/admin/built-objects?status=${param}` : "/admin/built-objects";
+    router.replace(href);
   }
 
   async function remove(id: string) {
@@ -97,7 +117,7 @@ export default function AdminBuiltObjectsPage() {
           <button
             key={opt.id}
             type="button"
-            onClick={() => setStatusFilter(opt.id)}
+            onClick={() => setStatusFilterAndUrl(opt.id)}
             className={statusFilterChipClass(statusFilter === opt.id)}
             aria-pressed={statusFilter === opt.id}
           >

@@ -39,7 +39,7 @@ import {
 import { BuiltObjectHistoryCards } from "@/components/portfolio/built-object-history-cards";
 import { formatArticleBody, PAGE_INTRO_PROSE_CLASS } from "@/lib/html-content";
 import type { BuiltObjectItem } from "@/lib/construction-shared";
-import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
+import { BUILT_HOMES_SECTION_LABEL, UNDER_CONSTRUCTION_SECTION_LABEL } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 /** Сетка 5×3 на странице; остальное — «Смотреть все». */
@@ -189,8 +189,13 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                 <span className="mx-1.5" aria-hidden>
                   {" › "}
                 </span>
-                <Link href="/portfolio" className="hover:text-[var(--accent)]">
-                  {BUILT_HOMES_SECTION_LABEL}
+                <Link
+                  href={object.siteStatus === "UNDER_CONSTRUCTION" ? "/portfolio/under-construction" : "/portfolio"}
+                  className="hover:text-[var(--accent)]"
+                >
+                  {object.siteStatus === "UNDER_CONSTRUCTION"
+                    ? UNDER_CONSTRUCTION_SECTION_LABEL
+                    : BUILT_HOMES_SECTION_LABEL}
                 </Link>
                 <span className="mx-1.5" aria-hidden>
                   {" › "}

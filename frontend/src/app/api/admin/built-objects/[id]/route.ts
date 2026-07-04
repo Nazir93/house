@@ -51,6 +51,14 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       return NextResponse.json({ error: "Укажите название объекта" }, { status: 400 });
     }
 
+    const existing =
+      body.published !== undefined
+        ? await (prisma as any).builtObject.findUnique({
+            where: { id: params.id },
+            select: { published: true },
+          })
+        : null;
+
     const data = builtObjectSectionUpdateData(body, section);
     if (Object.keys(data).length === 0) {
       return NextResponse.json({ error: "Нет данных для сохранения" }, { status: 400 });
@@ -61,6 +69,10 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
       data,
       select: selectPublishedMeta(),
     });
+
+    if (body.published !== undefined && existing && existing.published !== object.published) {
+      revalidatePublicConstructionCatalog();
+    }
 
     return NextResponse.json({
       ...object,

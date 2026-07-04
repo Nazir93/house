@@ -19,10 +19,11 @@ import {
   Calculator,
   PanelTop,
   Settings,
+  HardHat,
 } from "lucide-react";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
-import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
+import { BUILT_HOMES_SECTION_LABEL, UNDER_CONSTRUCTION_HOMES_ADMIN_LABEL } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -37,7 +38,8 @@ type ContentStats = {
   reviews: number;
   teamMembers: number;
   vacancies: number;
-  builtObjects: number;
+  completedBuiltObjects: number;
+  underConstructionObjects: number;
   clientProjects: number;
   partners: number;
   services: number;
@@ -55,7 +57,8 @@ const EMPTY_STATS: ContentStats = {
   reviews: 0,
   teamMembers: 0,
   vacancies: 0,
-  builtObjects: 0,
+  completedBuiltObjects: 0,
+  underConstructionObjects: 0,
   clientProjects: 0,
   partners: 0,
   services: 0,
@@ -75,7 +78,8 @@ async function getStats(): Promise<ContentStats> {
       reviews,
       teamMembers,
       vacancies,
-      builtObjects,
+      completedBuiltObjects,
+      underConstructionObjects,
       clientProjects,
       partners,
       services,
@@ -93,7 +97,8 @@ async function getStats(): Promise<ContentStats> {
       prisma.review.count(),
       prisma.teamMember.count(),
       prisma.vacancy.count(),
-      prisma.builtObject.count(),
+      prisma.builtObject.count({ where: { siteStatus: "COMPLETED", published: true } }),
+      prisma.builtObject.count({ where: { siteStatus: "UNDER_CONSTRUCTION", published: true } }),
       prisma.clientConstructionProject.count(),
       prisma.partner.count(),
       prisma.service.count(),
@@ -109,7 +114,8 @@ async function getStats(): Promise<ContentStats> {
       reviews,
       teamMembers,
       vacancies,
-      builtObjects,
+      completedBuiltObjects,
+      underConstructionObjects,
       clientProjects,
       partners,
       services,
@@ -305,8 +311,14 @@ export default async function AdminDashboard() {
           <CompactStatCard
             href="/admin/built-objects"
             label={BUILT_HOMES_SECTION_LABEL}
-            value={stats.builtObjects}
+            value={stats.completedBuiltObjects}
             icon={Images}
+          />
+          <CompactStatCard
+            href="/admin/built-objects?status=building"
+            label={UNDER_CONSTRUCTION_HOMES_ADMIN_LABEL}
+            value={stats.underConstructionObjects}
+            icon={HardHat}
           />
           <CompactStatCard
             href="/admin/faq"

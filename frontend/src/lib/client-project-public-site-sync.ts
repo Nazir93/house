@@ -1,6 +1,5 @@
 import type { BuiltObjectSiteStatus, Prisma } from "@prisma/client";
 import type { BuiltObjectMaterial } from "@prisma/client";
-import { prisma } from "@/lib/db";
 import {
   getTopLevelStages,
   isStageSubtreeComplete,
@@ -101,7 +100,11 @@ export async function syncClientProjectPublicSite(
       ? buildBuiltObjectLocationFieldsFromInputs(String(input.latitude), String(input.longitude))
       : null;
 
-  const description = `<p>Объект в работе. Договор ${input.contractNumber}.</p>`;
+  const description =
+    siteStatus === "COMPLETED"
+      ? `<p>Дом сдан. Договор ${input.contractNumber}.</p>`
+      : `<p>Объект в работе. Договор ${input.contractNumber}.</p>`;
+
   const commonData = {
     title: input.title.trim() || `Объект ${input.contractNumber}`,
     material,
@@ -115,13 +118,19 @@ export async function syncClientProjectPublicSite(
     houseProjectId: input.houseProjectId,
     description,
     published: true,
-    sitePublishedAt: new Date(),
   };
 
   if (input.builtObjectId) {
+    const existing = await tx.builtObject.findUnique({
+      where: { id: input.builtObjectId },
+      select: { published: true },
+    });
     const updated = await tx.builtObject.update({
       where: { id: input.builtObjectId },
-      data: commonData,
+      data: {
+        ...commonData,
+        ...(!existing?.published ? { sitePublishedAt: new Date() } : {}),
+      },
     });
     await syncCoverMedia(tx, updated.id, input.coverImageUrl);
     return updated.id;
@@ -135,6 +144,7 @@ export async function syncClientProjectPublicSite(
     data: {
       slug,
       ...commonData,
+      sitePublishedAt: new Date(),
     },
   });
   await syncCoverMedia(tx, created.id, input.coverImageUrl);
@@ -143,33 +153,4 @@ export async function syncClientProjectPublicSite(
     data: { builtObjectId: created.id },
   });
   return created.id;
-}
-
-export async function loadClientProjectPublicSiteInput(projectId: string): Promise<ClientProjectPublicSiteInput | null> {
-  const project = await prisma.clientConstructionProject.findUnique({
-    where: { id: projectId },
-    include: {
-      stages: { orderBy: { order: "asc" } },
-    },
-  });
-  if (!project) return null;
-  return {
-    id: project.id,
-    title: project.title,
-    contractNumber: project.contractNumber,
-    area: project.area,
-    wallMaterial: project.wallMaterial,
-    location: project.location,
-    latitude: project.latitude,
-    longitude: project.longitude,
-    coverImageUrl: project.coverImageUrl,
-    houseProjectId: project.houseProjectId,
-    showOnPublicSite: project.showOnPublicSite,
-    builtObjectId: project.builtObjectId,
-    stages: project.stages.map((s) => ({
-      id: s.id,
-      parentId: s.parentId,
-      status: s.status,
-    })),
-  };
 }

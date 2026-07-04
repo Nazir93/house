@@ -251,7 +251,9 @@ export function getBuiltObjectVideos(object: BuiltObjectItem) {
 export function builtObjectMapHref(object: BuiltObjectItem): string | null {
   const slug = object.slug?.trim();
   if (!slug) return null;
-  return `/portfolio/map?object=${encodeURIComponent(slug)}`;
+  const status =
+    object.siteStatus === "UNDER_CONSTRUCTION" ? "&status=building" : "";
+  return `/portfolio/map?object=${encodeURIComponent(slug)}${status}`;
 }
 
 export function resolveBuiltObjectArea(object: BuiltObjectItem): number | null {

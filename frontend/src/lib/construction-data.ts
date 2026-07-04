@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { resolveHouseProjectEngagement } from "@/lib/house-project-engagement";
 import { prisma } from "@/lib/db";
 import { CACHE_TAG_PUBLIC_BUILT_OBJECTS, CACHE_TAG_PUBLIC_HOUSE_PROJECTS } from "@/lib/cache-tags-public";
+import { filterBuiltObjectsBySiteStatus } from "@/lib/built-object-site-status";
 import { AURORA_PROJECT_CALCULATOR_UI } from "@/lib/project-calculator-aurora-defaults";
 import type { ProjectCalculatorUi } from "@/lib/project-calculator-types";
 import {
@@ -600,17 +601,6 @@ function mapBuiltObject(row: any): BuiltObjectItem {
   };
 }
 
-export function builtObjectMaterialLabel(value: string): string {
-  const labels: Record<string, string> = {
-    GAS_BLOCK: "Газобетон",
-    BRICK: "Кирпич",
-    CERAMIC_BLOCK: "Керамический блок",
-    FRAME: "Каркас",
-    OTHER: "Другое",
-  };
-  return labels[value] ?? value;
-}
-
 export function formatRub(price: number): string {
   return new Intl.NumberFormat("ru-RU", { style: "currency", currency: "RUB", maximumFractionDigits: 0 }).format(price);
 }
@@ -762,10 +752,10 @@ export async function getBuiltObjects(): Promise<BuiltObjectItem[]> {
 
 const HOME_BUILT_PORTFOLIO_MAX = 5;
 
-/** Построенные объекты для блока на главной (тот же каталог, что и /portfolio). */
+/** Построенные объекты для блока на главной (только сданные, без строящихся). */
 export async function getHomeBuiltPortfolio(): Promise<BuiltObjectItem[]> {
   const list = await getBuiltObjects();
-  return list.slice(0, HOME_BUILT_PORTFOLIO_MAX);
+  return filterBuiltObjectsBySiteStatus(list, "COMPLETED").slice(0, HOME_BUILT_PORTFOLIO_MAX);
 }
 
 const getBuiltObjectBySlugCached = unstable_cache(

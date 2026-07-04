@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
@@ -26,15 +26,22 @@ import {
   PanelTop,
   ExternalLink,
   MessageCircle,
+  HardHat,
 } from "lucide-react";
 import { useState } from "react";
-import { SITE_NAME, BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
+import { SITE_NAME, BUILT_HOMES_SECTION_LABEL, UNDER_CONSTRUCTION_HOMES_ADMIN_LABEL } from "@/lib/constants";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { cn } from "@/lib/utils";
 import { useAdminNewLeadsNotify } from "@/hooks/use-admin-new-leads-notify";
 import { useAdminPendingTicketsNotify } from "@/hooks/use-admin-pending-tickets-notify";
 
-const NAV_ITEMS = [
+const NAV_ITEMS: {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  exact?: boolean;
+  builtObjectsStatus?: "building" | "completed";
+}[] = [
   { href: "/admin", label: "Дашборд", icon: LayoutDashboard, exact: true },
   { href: "/admin/leads", label: "Заявки", icon: Inbox },
   { href: "/admin/tickets", label: "Чат с клиентами", icon: MessageCircle },
@@ -43,7 +50,13 @@ const NAV_ITEMS = [
   { href: "/admin/calculator", label: "Калькулятор проектов", icon: Calculator },
   { href: "/admin/design-project-pricing", label: "Калькулятор проектирования", icon: Calculator },
   { href: "/admin/home-banner", label: "Главный баннер", icon: PanelTop },
-  { href: "/admin/built-objects", label: BUILT_HOMES_SECTION_LABEL, icon: Images },
+  { href: "/admin/built-objects", label: BUILT_HOMES_SECTION_LABEL, icon: Images, builtObjectsStatus: "completed" },
+  {
+    href: "/admin/built-objects?status=building",
+    label: UNDER_CONSTRUCTION_HOMES_ADMIN_LABEL,
+    icon: HardHat,
+    builtObjectsStatus: "building",
+  },
   { href: "/admin/client-projects", label: "Клиенты (кабинет)", icon: UserRound },
   { href: "/admin/posts", label: "Новости", icon: FileText },
   { href: "/admin/services", label: "Услуги", icon: Briefcase },
@@ -64,6 +77,8 @@ type AdminSidebarProps = {
 
 export function AdminSidebar({ collapsed: collapsedProp, onCollapsedChange }: AdminSidebarProps = {}) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const builtObjectsStatusParam = searchParams.get("status");
   const [collapsedLocal, setCollapsedLocal] = useState(false);
   const isControlled = collapsedProp !== undefined && onCollapsedChange !== undefined;
   const collapsed = isControlled ? collapsedProp! : collapsedLocal;
@@ -163,9 +178,14 @@ export function AdminSidebar({ collapsed: collapsedProp, onCollapsedChange }: Ad
             const isTickets = item.href === "/admin/tickets";
             const badgeCount = isLeads ? leadsNewCount : isTickets ? ticketsPendingCount : 0;
             const badgeHighlight = isLeads ? leadsHighlight : isTickets ? ticketsHighlight : false;
-            const isActive = item.exact
-              ? pathname === item.href
-              : pathname.startsWith(item.href);
+            const isActive = item.builtObjectsStatus
+              ? pathname.startsWith("/admin/built-objects") &&
+                (item.builtObjectsStatus === "building"
+                  ? builtObjectsStatusParam === "building"
+                  : builtObjectsStatusParam !== "building")
+              : item.exact
+                ? pathname === item.href
+                : pathname.startsWith(item.href);
 
             return (
               <Link

@@ -21,10 +21,11 @@ export async function POST(
       where: { id },
       select: {
         showOnPublicSite: true,
+        builtObjectId: true,
         builtObject: { select: { slug: true, siteStatus: true } },
       },
     });
-    if (project?.showOnPublicSite && project.builtObject) {
+    if (project?.builtObjectId) {
       revalidatePublicConstructionCatalog();
     }
     return NextResponse.json({

@@ -6,6 +6,9 @@ export const BUILT_HOMES_SECTION_LABEL = "Построенные дома";
 /** Публичное название раздела строящихся объектов. */
 export const UNDER_CONSTRUCTION_SECTION_LABEL = "Строящиеся объекты";
 
+/** Название раздела строящихся домов в админке (дашборд, меню). */
+export const UNDER_CONSTRUCTION_HOMES_ADMIN_LABEL = "Строящие дома";
+
 /** Слоган под логотипом в шапке (как на лендинге застройщика). */
 export const HEADER_TAGLINE =
   process.env.NEXT_PUBLIC_HEADER_TAGLINE?.trim() ||

@@ -59,6 +59,7 @@ export function builtObjectSectionUpdateData(
         ...(body.worksDescription !== undefined && { worksDescription: body.worksDescription || null }),
         ...(body.houseProjectId !== undefined && { houseProjectId: body.houseProjectId || null }),
         ...(body.order !== undefined && { order: Number(body.order) || 0 }),
+        ...(body.published !== undefined && { published: Boolean(body.published) }),
       };
     case "history":
       return {

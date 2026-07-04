@@ -8,6 +8,7 @@ import {
   getBuiltObjectConstructionPhotos,
   getBuiltObjectHistoryCards,
   getBuiltObjectNavItems,
+  builtObjectMapHref,
   houseTypeSubtitle,
   parseConstructionHistoryJson,
   serializeConstructionHistory,
@@ -30,6 +31,21 @@ describe("built-object-detail", () => {
 
   it("houseTypeSubtitle", () => {
     expect(houseTypeSubtitle("Кирпич")).toBe("Кирпичный дом");
+  });
+
+  it("builtObjectMapHref — строящийся объект с фильтром на карте", () => {
+    expect(
+      builtObjectMapHref({
+        slug: "dom-vartemyagi",
+        siteStatus: "UNDER_CONSTRUCTION",
+      } as BuiltObjectItem)
+    ).toBe("/portfolio/map?object=dom-vartemyagi&status=building");
+    expect(
+      builtObjectMapHref({
+        slug: "dom-gotov",
+        siteStatus: "COMPLETED",
+      } as BuiltObjectItem)
+    ).toBe("/portfolio/map?object=dom-gotov");
   });
 
   it("serializeConstructionHistory и parse", () => {

@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { SITE_NAME, BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
+import {
+  SITE_NAME,
+  BUILT_HOMES_SECTION_LABEL,
+  UNDER_CONSTRUCTION_SECTION_LABEL,
+} from "@/lib/constants";
 import { getBuiltObjectBySlug } from "@/lib/construction-data";
 import { getPublicFaqs } from "@/lib/get-public-faqs";
 import { getBuiltObjectCover, builtObjectMaterialLabel } from "@/lib/construction-shared";
@@ -14,11 +18,21 @@ interface Props {
   params: Promise<{ slug: string }>;
 }
 
+function portfolioSectionForObject(object: { siteStatus?: string | null }) {
+  const isConstruction = object.siteStatus === "UNDER_CONSTRUCTION";
+  return {
+    label: isConstruction ? UNDER_CONSTRUCTION_SECTION_LABEL : BUILT_HOMES_SECTION_LABEL,
+    path: isConstruction ? "/portfolio/under-construction" : "/portfolio",
+    titleSuffix: isConstruction ? "строящийся объект" : "построенный дом",
+  };
+}
+
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params;
   const object = await getBuiltObjectBySlug(params.slug);
   if (!object) return {};
 
+  const section = portfolioSectionForObject(object);
   const path = `/portfolio/${object.slug}`;
   const keywords = [object.title, builtObjectMaterialLabel(object.material), object.location, SITE_NAME].filter(
     (k): k is string => Boolean(k && String(k).trim())
@@ -26,7 +40,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const cover = getBuiltObjectCover(object);
 
   return getPageMeta({
-    title: `${object.title} — построенный дом | ${SITE_NAME}`,
+    title: `${object.title} — ${section.titleSuffix} | ${SITE_NAME}`,
     description: object.description.replace(/<[^>]*>/g, "").slice(0, 180),
     path,
     keywords,
@@ -38,12 +52,13 @@ export default async function CasePage(props: Props) {
   const params = await props.params;
   const [object, faqItems] = await Promise.all([getBuiltObjectBySlug(params.slug), getPublicFaqs()]);
   if (!object) notFound();
+  const section = portfolioSectionForObject(object);
   return (
     <>
       <BreadcrumbJsonLd
         items={[
           { name: "Главная", path: "/" },
-          { name: BUILT_HOMES_SECTION_LABEL, path: "/portfolio" },
+          { name: section.label, path: section.path },
           { name: object.title, path: `/portfolio/${object.slug}` },
         ]}
       />

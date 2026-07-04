@@ -38,6 +38,10 @@ describe("client-project-public-site-sync", () => {
     expect(resolvePublicSiteStatusFromStages(stages)).toBe("UNDER_CONSTRUCTION");
   });
 
+  it("resolvePublicSiteStatusFromStages — без этапов строится", () => {
+    expect(resolvePublicSiteStatusFromStages([])).toBe("UNDER_CONSTRUCTION");
+  });
+
   it("buildClientProjectPublicSiteSlug — из названия", () => {
     expect(buildClientProjectPublicSiteSlug("Дом в Токсово", "DOG-12", "abc")).toMatch(/toksovo|dom/);
   });

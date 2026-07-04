@@ -21,6 +21,7 @@ import {
   builtObjectSiteStatusFilterToParam,
   type BuiltObjectSiteStatusFilter,
 } from "@/lib/built-object-site-status";
+import { BUILT_HOMES_SECTION_LABEL, UNDER_CONSTRUCTION_SECTION_LABEL } from "@/lib/constants";
 
 const PortfolioBuiltMap = dynamic(
   () => import("@/components/portfolio/portfolio-built-map").then((m) => m.PortfolioBuiltMap),
@@ -148,13 +149,29 @@ export function PortfolioObjectMapExplorer({
 
   const mappedCount = filtered.filter((o) => o.latitude != null && o.longitude != null).length;
 
+  const mapHeader =
+    siteStatus === "UNDER_CONSTRUCTION"
+      ? {
+          kicker: UNDER_CONSTRUCTION_SECTION_LABEL,
+          title: "Карта строящихся объектов",
+        }
+      : siteStatus === "COMPLETED"
+        ? {
+            kicker: BUILT_HOMES_SECTION_LABEL,
+            title: "Карта построенных объектов",
+          }
+        : {
+            kicker: "Портфолио",
+            title: "Карта объектов",
+          };
+
   return (
     <div className={cn("space-y-5", layout === "page" && "pb-8")}>
       {layout === "page" ? (
         <header className="text-center">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">Построенные дома</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">{mapHeader.kicker}</p>
           <h1 className="mt-2 font-heading text-2xl font-bold tracking-tight text-[var(--accent)] md:text-3xl dark:text-[var(--text)]">
-            Карта построенных объектов
+            {mapHeader.title}
           </h1>
         </header>
       ) : null}
