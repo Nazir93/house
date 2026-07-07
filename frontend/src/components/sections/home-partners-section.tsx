@@ -36,6 +36,19 @@ function PartnerLogo({ partner }: { partner: HomePartner }) {
   return inner;
 }
 
+function PartnersGrid({ partners }: { partners: HomePartner[] }) {
+  return (
+    <div className="mt-10 border-t border-[color-mix(in_srgb,var(--border)_65%,transparent)] pt-8 sm:mt-11 sm:pt-9">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">С кем работаем</p>
+      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 md:gap-5">
+        {partners.map((p) => (
+          <PartnerLogo key={p.id} partner={p} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function HomePartnersSection({ partners }: { partners: HomePartner[] }) {
   const hasPartners = partners.length > 0;
 
@@ -44,45 +57,14 @@ export function HomePartnersSection({ partners }: { partners: HomePartner[] }) {
       id="partners"
       className="py-16 sm:py-20 md:py-28"
       style={{ backgroundColor: "var(--bg)", borderTop: "1px solid var(--border)" }}
-      aria-labelledby="partners-trust-heading"
+      aria-labelledby="trust-us-subheading"
     >
       <div className="container mx-auto">
         <TrustLeadCardShell>
-          <div className="mb-8 flex flex-col gap-3 border-b border-[color-mix(in_srgb,var(--border)_65%,transparent)] pb-8 md:mb-10 md:pb-10">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
-              Надёжные партнёры · нам доверяют
-            </p>
-            <h2
-              id="partners-trust-heading"
-              className="max-w-4xl text-balance font-heading text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl md:text-[2.35rem] md:leading-[1.1]"
-            >
-              Проверенные бренды и&nbsp;тысячи семей, которые выбрали честную стройку
-            </h2>
-            <p className="max-w-2xl text-[13px] leading-relaxed text-[var(--text-muted)] sm:text-sm">
-              Поставщики и подрядчики с прозрачными условиями — и клиенты, для которых мы ведём объект от проекта до сдачи.
-            </p>
-          </div>
-
-          {hasPartners ? (
-            <>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">С кем работаем</p>
-              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4 md:gap-5">
-                {partners.map((p) => (
-                  <PartnerLogo key={p.id} partner={p} />
-                ))}
-              </div>
-              <div
-                className="my-10 h-px w-full md:my-11"
-                style={{
-                  background:
-                    "linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 35%, var(--border)), transparent)",
-                }}
-                aria-hidden
-              />
-            </>
-          ) : null}
-
-          <TrustLeadCardBody variant="embedded" />
+          <TrustLeadCardBody
+            variant="embedded"
+            afterIntro={hasPartners ? <PartnersGrid partners={partners} /> : undefined}
+          />
         </TrustLeadCardShell>
       </div>
     </section>

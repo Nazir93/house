@@ -9,7 +9,7 @@ import {
   TRUST_SECTION_INTRO,
   TRUST_SECTION_QUOTE,
   TRUST_SECTION_QUOTE_ATTRIBUTION,
-  TRUST_SECTION_TITLE,
+  TRUST_SECTION_TITLE_LINES,
   TRUST_STATS,
   TRUST_WHY_EYEBROW,
   TRUST_WHY_INTRO,
@@ -49,10 +49,12 @@ export function TrustLeadCardShell({ children }: { children: ReactNode }) {
 
 type TrustLeadCardBodyProps = {
   variant: "standalone" | "embedded";
+  /** Вставка между шапкой и блоком «Почему нас выбирают» (логотипы партнёров на главной). */
+  afterIntro?: ReactNode;
 };
 
-export function TrustLeadCardBody({ variant }: TrustLeadCardBodyProps) {
-  const HeadingTag = variant === "standalone" ? "h2" : "h3";
+export function TrustLeadCardBody({ variant, afterIntro }: TrustLeadCardBodyProps) {
+  const HeadingTag = variant === "standalone" ? "h2" : "h2";
   const headingId = variant === "standalone" ? "trust-us-heading" : "trust-us-subheading";
   const WhyHeadingTag = variant === "standalone" ? "h3" : "h4";
 
@@ -65,9 +67,13 @@ export function TrustLeadCardBody({ variant }: TrustLeadCardBodyProps) {
           </p>
           <HeadingTag
             id={headingId}
-            className="mt-2.5 text-balance font-heading text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl md:text-[2.25rem] md:leading-[1.12]"
+            className="mt-2.5 text-balance font-heading text-2xl font-bold uppercase tracking-tight text-[var(--text)] sm:text-3xl md:text-[2.25rem] md:leading-[1.12]"
           >
-            {TRUST_SECTION_TITLE}
+            {TRUST_SECTION_TITLE_LINES.map((line, index) => (
+              <span key={line} className={index > 0 ? "block" : undefined}>
+                {line}
+              </span>
+            ))}
           </HeadingTag>
           <p className="mt-3 max-w-xl text-[13px] leading-relaxed text-[var(--text-muted)] sm:text-sm md:text-[15px]">
             {TRUST_SECTION_INTRO}
@@ -96,6 +102,8 @@ export function TrustLeadCardBody({ variant }: TrustLeadCardBodyProps) {
           </Link>
         </div>
       </div>
+
+      {afterIntro}
 
       <div className="mt-10 border-t border-[color-mix(in_srgb,var(--border)_65%,transparent)] pt-8 sm:mt-11 sm:pt-9">
         <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">

@@ -6,6 +6,7 @@ import {
   TRUST_SECTION_QUOTE,
   TRUST_SECTION_QUOTE_ATTRIBUTION,
   TRUST_SECTION_TITLE,
+  TRUST_SECTION_TITLE_LINES,
   TRUST_STATS,
   TRUST_WHY_INTRO,
   TRUST_WHY_TITLE,
@@ -14,6 +15,7 @@ import {
 describe("trust-block-data", () => {
   it("верхний блок «Нам доверяют»", () => {
     expect(TRUST_SECTION_TITLE).toContain("Доверие строится");
+    expect(TRUST_SECTION_TITLE_LINES.join(" ")).toBe(TRUST_SECTION_TITLE);
     expect(TRUST_SECTION_INTRO).toContain("материалы проверенных производителей");
   });
 
