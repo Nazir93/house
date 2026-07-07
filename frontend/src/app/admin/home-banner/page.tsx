@@ -82,6 +82,9 @@ export default function AdminHomeBannerPage() {
     const payload: HomeHeroBanner = {
       ...data,
       headlineLines: data.headlineLines.map((line) => line.trim()).filter((line) => line.length > 0),
+      subheadline: data.subheadline.trim(),
+      steps: data.steps.map((step) => ({ ...step, text: step.text.trim() })),
+      badges: data.badges.map((badge) => badge.trim()),
     };
     const validated = homeHeroBannerSchema.safeParse(payload);
     if (!validated.success) {
@@ -183,6 +186,68 @@ export default function AdminHomeBannerPage() {
             }}
             placeholder={"Строим дома,\nв которые хочется\nвозвращаться"}
           />
+        </div>
+        <div>
+          <label className={labelClass}>Текст под заголовком</label>
+          <textarea
+            className={`${inputClass} min-h-[88px] resize-y`}
+            value={data.subheadline}
+            onChange={(e) => {
+              setData((prev) => ({ ...prev, subheadline: e.target.value }));
+              setSaved(false);
+            }}
+            placeholder="От идеи до готового дома: …"
+          />
+        </div>
+      </section>
+
+      <section className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-5 space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-white/90">Три шага под кнопками</h2>
+          <p className="text-sm text-white/40 mt-1">Блок 01 / 02 / 03 под кнопками «Смотреть проекты» и «Рассчитать стоимость».</p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {data.steps.map((step, index) => (
+            <div key={step.num}>
+              <label className={labelClass}>{step.num}</label>
+              <input
+                className={inputClass}
+                value={step.text}
+                onChange={(e) => {
+                  setData((prev) => ({
+                    ...prev,
+                    steps: prev.steps.map((s, i) => (i === index ? { ...s, text: e.target.value } : s)),
+                  }));
+                  setSaved(false);
+                }}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-5 space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-white/90">Преимущества внизу баннера</h2>
+          <p className="text-sm text-white/40 mt-1">Четыре плашки в нижней полосе главного баннера.</p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {data.badges.map((badge, index) => (
+            <div key={index}>
+              <label className={labelClass}>Преимущество {index + 1}</label>
+              <input
+                className={inputClass}
+                value={badge}
+                onChange={(e) => {
+                  setData((prev) => ({
+                    ...prev,
+                    badges: prev.badges.map((b, i) => (i === index ? e.target.value : b)),
+                  }));
+                  setSaved(false);
+                }}
+              />
+            </div>
+          ))}
         </div>
       </section>
 

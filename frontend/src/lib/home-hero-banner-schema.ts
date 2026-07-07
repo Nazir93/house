@@ -12,6 +12,29 @@ export const homeHeroPromoSlideSchema = z.object({
 
 export type HomeHeroPromoSlide = z.infer<typeof homeHeroPromoSlideSchema>;
 
+export const homeHeroStepSchema = z.object({
+  num: z.string().regex(/^\d{2}$/),
+  text: z.string().min(1).max(80),
+});
+
+export type HomeHeroStep = z.infer<typeof homeHeroStepSchema>;
+
+export const DEFAULT_HOME_HERO_SUBHEADLINE =
+  "От идеи до готового дома: продуманная архитектура, понятная смета, последовательный процесс и внимание к качеству на каждом этапе.";
+
+export const DEFAULT_HOME_HERO_STEPS: HomeHeroStep[] = [
+  { num: "01", text: "Проектируем дом" },
+  { num: "02", text: "Фиксируем смету" },
+  { num: "03", text: "Строим по этапам" },
+];
+
+export const DEFAULT_HOME_HERO_BADGES = [
+  "10+ лет опыта команды",
+  "85+ построенных домов",
+  "25 лет гарантии",
+  "Контроль качества на каждом этапе",
+] as const;
+
 export const homeHeroBannerSchema = z.object({
   /** Строки главного заголовка на баннере (каждая — отдельная строка в h1) */
   headlineLines: z
@@ -19,6 +42,15 @@ export const homeHeroBannerSchema = z.object({
     .min(1)
     .max(5)
     .default(["Строим дома,", "в которые хочется", "возвращаться"]),
+  /** Текст под заголовком слева на баннере */
+  subheadline: z.string().min(1).max(400).default(DEFAULT_HOME_HERO_SUBHEADLINE),
+  /** Три шага под кнопками */
+  steps: z.array(homeHeroStepSchema).length(3).default(DEFAULT_HOME_HERO_STEPS),
+  /** Четыре преимущества в нижней полосе баннера */
+  badges: z
+    .array(z.string().min(1).max(120))
+    .length(4)
+    .default([...DEFAULT_HOME_HERO_BADGES]),
   backgrounds: z.object({
     /** Светлая тема сайта */
     light: z.string().min(1).max(500),
@@ -32,6 +64,9 @@ export type HomeHeroBanner = z.infer<typeof homeHeroBannerSchema>;
 
 export const DEFAULT_HOME_HERO_BANNER: HomeHeroBanner = {
   headlineLines: ["Строим дома,", "в которые хочется", "возвращаться"],
+  subheadline: DEFAULT_HOME_HERO_SUBHEADLINE,
+  steps: DEFAULT_HOME_HERO_STEPS,
+  badges: [...DEFAULT_HOME_HERO_BADGES],
   backgrounds: {
     light: "/images/banner/hero-theme-day.png",
     dark: "/images/banner/hero-theme-night.png",

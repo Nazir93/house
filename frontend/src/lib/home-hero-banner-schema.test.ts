@@ -1,17 +1,23 @@
 import { describe, expect, it } from "vitest";
 import {
+  DEFAULT_HOME_HERO_BADGES,
   DEFAULT_HOME_HERO_BANNER,
+  DEFAULT_HOME_HERO_STEPS,
+  DEFAULT_HOME_HERO_SUBHEADLINE,
   homeHeroBannerSchema,
   parseHomeHeroBanner,
 } from "@/lib/home-hero-banner-schema";
 
 describe("home-hero-banner-schema", () => {
-  it("дефолт: заголовок, фоны день/ночь и промо-слайды", () => {
+  it("дефолт: заголовок, подзаголовок, шаги, преимущества, фоны и промо-слайды", () => {
     expect(DEFAULT_HOME_HERO_BANNER.headlineLines).toEqual([
       "Строим дома,",
       "в которые хочется",
       "возвращаться",
     ]);
+    expect(DEFAULT_HOME_HERO_BANNER.subheadline).toBe(DEFAULT_HOME_HERO_SUBHEADLINE);
+    expect(DEFAULT_HOME_HERO_BANNER.steps).toEqual(DEFAULT_HOME_HERO_STEPS);
+    expect(DEFAULT_HOME_HERO_BANNER.badges).toEqual([...DEFAULT_HOME_HERO_BADGES]);
     expect(DEFAULT_HOME_HERO_BANNER.backgrounds.light).toContain("hero-theme-day");
     expect(DEFAULT_HOME_HERO_BANNER.backgrounds.dark).toContain("hero-theme-night");
     expect(DEFAULT_HOME_HERO_BANNER.promos.length).toBeGreaterThanOrEqual(1);
@@ -48,6 +54,9 @@ describe("home-hero-banner-schema", () => {
     const parsed = parseHomeHeroBanner(legacy);
     expect(parsed.backgrounds.light).toBe("/uploads/day.webp");
     expect(parsed.headlineLines).toEqual(DEFAULT_HOME_HERO_BANNER.headlineLines);
+    expect(parsed.subheadline).toBe(DEFAULT_HOME_HERO_SUBHEADLINE);
+    expect(parsed.steps).toEqual(DEFAULT_HOME_HERO_STEPS);
+    expect(parsed.badges).toEqual([...DEFAULT_HOME_HERO_BADGES]);
   });
 
   it("homeHeroBannerSchema: не меньше одного промо", () => {

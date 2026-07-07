@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import {
+  Award,
   Calculator,
   ChevronLeft,
   ChevronRight,
+  ClipboardCheck,
   Home,
   LayoutGrid,
-  MapPinned,
-  Percent,
   ShieldCheck,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -20,24 +20,7 @@ import { HOME_HERO_BANNER_ID } from "@/lib/site-anchors";
 import type { HomeHeroBanner } from "@/lib/home-hero-banner-schema";
 import { cn } from "@/lib/utils";
 
-const BADGES = [
-  {
-    icon: MapPinned,
-    text: "Находимся в\u00A06\u00A0регионах России",
-  },
-  {
-    icon: Home,
-    text: "Построили более\u00A0540\u00A0домов с\u00A02016\u00A0года",
-  },
-  {
-    icon: Percent,
-    text: "Ипотечное кредитование от\u00A03%",
-  },
-  {
-    icon: ShieldCheck,
-    text: "Предоставляем гарантии на\u00A0все\u00A0работы",
-  },
-] as const;
+const BADGE_ICONS = [Award, Home, ShieldCheck, ClipboardCheck] as const;
 
 /** Едва заметная «стеклянная» обводка на тёмном баннере */
 const edgeGlass = "border border-white/[0.07]";
@@ -89,18 +72,19 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
   }, [carouselPaused, goNext, promos.length, autoCycleKey]);
 
   useEffect(() => {
-    if (!slide) return;
-    const preload = (src: string) => {
+    const preload = (src: string, priority: "high" | "auto" = "auto") => {
       if (!src.trim()) return;
       const img = new window.Image();
       img.decoding = "async";
-      img.fetchPriority = "high";
+      img.fetchPriority = priority;
       img.src = src;
     };
 
-    preload(theme === "dark" ? config.backgrounds.dark : config.backgrounds.light);
-    preload(slide.image);
-  }, [config.backgrounds.dark, config.backgrounds.light, slide, theme]);
+    preload(theme === "dark" ? config.backgrounds.dark : config.backgrounds.light, "high");
+    for (const promo of promos) {
+      preload(promo.image);
+    }
+  }, [config.backgrounds.dark, config.backgrounds.light, promos, theme]);
 
   if (!slide) return null;
 
@@ -200,8 +184,7 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                 edgeGlass,
               )}
             >
-              От идеи и выбора проекта до коробки, инженерии и отделки под ключ. Работаем с
-              прозрачной сметой, понятными этапами и личным сопровождением.
+              {config.subheadline}
             </p>
 
             <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -233,11 +216,7 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                 edgeGlass,
               )}
             >
-              {[
-                ["01", "Фиксируем смету"],
-                ["02", "Проект + стройка"],
-                ["03", "Гарантия по договору"],
-              ].map(([num, text]) => (
+              {config.steps.map(({ num, text }) => (
                 <div key={num} className="rounded-xl bg-black/25 px-2 py-2 sm:px-2.5 sm:py-2.5">
                   <p
                     className={cn(
@@ -285,16 +264,16 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
               )}
             >
               <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-4 md:pr-5 lg:pr-6">
-                <div className="flex flex-col gap-3 md:flex-row md:items-center md:gap-4 lg:gap-5">
+                <div className="flex flex-col gap-3 md:flex-row md:items-start md:gap-4 lg:gap-5">
                   <div className="flex min-w-0 flex-1 flex-col justify-between md:max-w-[240px] md:basis-[46%] md:min-w-0 md:flex-none md:pr-1.5 lg:pr-2">
-                    <div key={`copy-${slideIndex}`}>
+                    <div className="min-h-[5.75rem] sm:min-h-[6rem]">
                       <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-white/45">
                         {String(slideIndex + 1).padStart(2, "0")} · {slide.label}
                       </p>
                       <h2 className="mt-1 font-heading text-[0.9rem] font-bold leading-[1.2] tracking-tight text-white sm:text-[0.95rem] md:text-[1rem]">
                         {slide.title}
                       </h2>
-                      <p className="mt-1 text-[12px] leading-snug text-white/[0.62]">
+                      <p className="mt-1 line-clamp-3 text-[12px] leading-snug text-white/[0.62]">
                         {slide.caption.trim()
                           ? slide.caption
                           : `Фрагмент серии — ${slide.label.toLowerCase()}.`}
@@ -317,17 +296,27 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                       "border border-white/[0.05]",
                     )}
                   >
-                    <CmsImage
-                      key={slide.image}
-                      src={slide.image}
-                      alt={slide.label}
-                      fill
-                      quality={75}
-                      sizes="(max-width: 1023px) 96vw, 380px"
-                      priority={slideIndex === 0}
-                      fetchPriority={slideIndex === 0 ? "high" : "low"}
-                      className="object-cover object-center transition-opacity duration-500"
-                    />
+                    {promos.map((promo, index) => {
+                      const isActive = index === slideIndex;
+                      return (
+                        <CmsImage
+                          key={promo.image}
+                          src={promo.image}
+                          alt={isActive ? promo.label : ""}
+                          fill
+                          quality={75}
+                          sizes="(max-width: 1023px) 96vw, 380px"
+                          priority={index === 0}
+                          fetchPriority={index === 0 ? "high" : "auto"}
+                          loading="eager"
+                          aria-hidden={!isActive}
+                          className={cn(
+                            "object-cover object-center transition-opacity duration-500 ease-out",
+                            isActive ? "opacity-100" : "pointer-events-none opacity-0",
+                          )}
+                        />
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -370,7 +359,9 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
         </div>
 
         <div className="pointer-events-auto mt-auto grid grid-cols-1 gap-2 pt-3 min-[400px]:grid-cols-2 sm:gap-2 lg:grid-cols-4 lg:gap-2.5">
-          {BADGES.map(({ icon: Icon, text }) => (
+          {config.badges.map((text, index) => {
+            const Icon = BADGE_ICONS[index] ?? Award;
+            return (
             <div
               key={text}
               className={cn(
@@ -385,7 +376,8 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                 {text}
               </p>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
