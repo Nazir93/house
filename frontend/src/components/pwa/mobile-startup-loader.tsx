@@ -36,8 +36,8 @@ export function MobileStartupLoader() {
 
     startedAtRef.current = performance.now();
 
-    let hideTimer: ReturnType<typeof setTimeout> | undefined;
-    let removeTimer: ReturnType<typeof setTimeout> | undefined;
+    let hideTimer: number | undefined;
+    let removeTimer: number | undefined;
 
     const startHide = () => {
       const remainingDelay = getRemainingLoaderDelay(
