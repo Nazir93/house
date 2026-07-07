@@ -6,21 +6,25 @@ import {
   TRUST_SECTION_QUOTE,
   TRUST_SECTION_QUOTE_ATTRIBUTION,
   TRUST_SECTION_TITLE,
-  TRUST_SECTION_TITLE_LINES,
   TRUST_STATS,
+  TRUST_WHY_EYEBROW,
   TRUST_WHY_INTRO,
   TRUST_WHY_TITLE,
+  TRUST_WHY_TITLE_LINES,
 } from "@/lib/trust-block-data";
 
 describe("trust-block-data", () => {
-  it("верхний блок «Нам доверяют»", () => {
+  it("блок «Нам доверяют» (константы для других страниц)", () => {
     expect(TRUST_SECTION_TITLE).toContain("Доверие строится");
-    expect(TRUST_SECTION_TITLE_LINES.join(" ")).toBe(TRUST_SECTION_TITLE);
     expect(TRUST_SECTION_INTRO).toContain("материалы проверенных производителей");
   });
 
-  it("блок «Почему нас выбирают»", () => {
+  it("шапка блока доверия на главной — «Почему нас выбирают»", () => {
+    expect(TRUST_WHY_EYEBROW).toBe("Почему нас выбирают");
     expect(TRUST_WHY_TITLE).toBe("Когда каждый этап понятен, строить гораздо спокойнее.");
+    expect(TRUST_WHY_TITLE_LINES.join(" ").replace(/\s+/g, " ")).toBe(
+      TRUST_WHY_TITLE.replace(/\.$/, "").trim() + ".",
+    );
     expect(TRUST_WHY_INTRO).toContain("какие этапы предстоят дальше");
   });
 

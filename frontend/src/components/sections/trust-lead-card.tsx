@@ -5,15 +5,12 @@ import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   TRUST_BENEFITS,
-  TRUST_SECTION_EYEBROW,
-  TRUST_SECTION_INTRO,
   TRUST_SECTION_QUOTE,
   TRUST_SECTION_QUOTE_ATTRIBUTION,
-  TRUST_SECTION_TITLE_LINES,
   TRUST_STATS,
   TRUST_WHY_EYEBROW,
   TRUST_WHY_INTRO,
-  TRUST_WHY_TITLE,
+  TRUST_WHY_TITLE_LINES,
 } from "@/lib/trust-block-data";
 
 export function TrustLeadCardShell({ children }: { children: ReactNode }) {
@@ -49,34 +46,33 @@ export function TrustLeadCardShell({ children }: { children: ReactNode }) {
 
 type TrustLeadCardBodyProps = {
   variant: "standalone" | "embedded";
-  /** Вставка между шапкой и блоком «Почему нас выбирают» (логотипы партнёров на главной). */
+  /** Вставка после шапки (логотипы партнёров на главной). */
   afterIntro?: ReactNode;
 };
 
 export function TrustLeadCardBody({ variant, afterIntro }: TrustLeadCardBodyProps) {
-  const HeadingTag = variant === "standalone" ? "h2" : "h2";
+  const HeadingTag = "h2";
   const headingId = variant === "standalone" ? "trust-us-heading" : "trust-us-subheading";
-  const WhyHeadingTag = variant === "standalone" ? "h3" : "h4";
 
   return (
     <>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
         <div className="max-w-2xl">
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--accent)]">
-            {TRUST_SECTION_EYEBROW}
+            {TRUST_WHY_EYEBROW}
           </p>
           <HeadingTag
             id={headingId}
             className="mt-2.5 text-balance font-heading text-2xl font-bold uppercase tracking-tight text-[var(--text)] sm:text-3xl md:text-[2.25rem] md:leading-[1.12]"
           >
-            {TRUST_SECTION_TITLE_LINES.map((line, index) => (
+            {TRUST_WHY_TITLE_LINES.map((line, index) => (
               <span key={line} className={index > 0 ? "block" : undefined}>
                 {line}
               </span>
             ))}
           </HeadingTag>
           <p className="mt-3 max-w-xl text-[13px] leading-relaxed text-[var(--text-muted)] sm:text-sm md:text-[15px]">
-            {TRUST_SECTION_INTRO}
+            {TRUST_WHY_INTRO}
           </p>
         </div>
         <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap lg:flex-col xl:flex-row">
@@ -104,18 +100,6 @@ export function TrustLeadCardBody({ variant, afterIntro }: TrustLeadCardBodyProp
       </div>
 
       {afterIntro}
-
-      <div className="mt-10 border-t border-[color-mix(in_srgb,var(--border)_65%,transparent)] pt-8 sm:mt-11 sm:pt-9">
-        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
-          {TRUST_WHY_EYEBROW}
-        </p>
-        <WhyHeadingTag className="mt-2.5 max-w-3xl text-balance font-heading text-xl font-bold tracking-tight text-[var(--text)] sm:text-2xl md:text-[1.75rem] md:leading-[1.15]">
-          {TRUST_WHY_TITLE}
-        </WhyHeadingTag>
-        <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-[var(--text-muted)] sm:text-sm md:text-[15px]">
-          {TRUST_WHY_INTRO}
-        </p>
-      </div>
 
       <ul className="mt-8 grid gap-4 sm:mt-9 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
         {TRUST_BENEFITS.map(({ title, description }) => (
