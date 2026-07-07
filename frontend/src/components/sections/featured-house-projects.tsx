@@ -15,6 +15,7 @@ import { ProjectEngagementBadges } from "@/components/projects/project-engagemen
 import type { HeroPricingTier, HouseProjectItem } from "@/lib/construction-data";
 import { getProjectRenders } from "@/lib/construction-shared";
 import { resolveProjectListingPriceRub } from "@/lib/project-listing-price";
+import { HOME_FEATURED_PROJECTS_INTRO } from "@/lib/home-featured-projects-section";
 import { revealDelayStyle } from "@/lib/reveal-animation";
 import { cn } from "@/lib/utils";
 
@@ -150,8 +151,8 @@ export function FeaturedHouseProjectsSection({
                 </button>
               </div>
             </div>
-            <p className="max-w-xl text-sm leading-relaxed text-[var(--text-muted)] sm:text-[15px] lg:max-w-[440px] lg:text-right">
-              Вы можете выбрать одно из 500+ готовых решений или заказать индивидуальный проект под участок и привычки семьи.
+            <p className="max-w-xl text-sm leading-relaxed text-[var(--text-muted)] sm:text-[15px] lg:max-w-[480px] lg:text-right">
+              {HOME_FEATURED_PROJECTS_INTRO}
             </p>
           </div>
         </div>

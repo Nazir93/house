@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { ArrowRight, UserRound } from "lucide-react";
 
+import { ACCOUNT_SHOWCASE_FOOTER_GUEST_TEXT } from "@/lib/account-showcase";
+
 type ClientDashboardPreview = {
   clientName: string | null;
   title: string | null;
@@ -65,8 +67,7 @@ export function AccountShowcaseFooter() {
     return (
       <div className="mt-10 flex flex-col gap-3 border-t border-[var(--border)] pt-10 sm:flex-row sm:items-center sm:justify-between">
         <p className="max-w-2xl text-sm leading-relaxed text-[var(--text-muted)]">
-          Такой подход помогает продавать не обещание, а управляемый процесс: клиент видит, что стройка ведётся
-          системно.
+          {ACCOUNT_SHOWCASE_FOOTER_GUEST_TEXT}
         </p>
         <Link
           href="/account/login"

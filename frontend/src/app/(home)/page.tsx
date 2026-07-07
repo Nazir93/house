@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { getPageMeta } from "@/lib/get-page-meta";
 import { getHouseProjects, getHomeBuiltPortfolio } from "@/lib/construction-data";
 import { getHeroShellTiersForProject } from "@/lib/project-hero-shell-tiers";
@@ -89,61 +87,6 @@ export default async function HomePage() {
           <ConstructionServicesStagesSection sectionClassName="mt-0" />
         </div>
       </div>
-      <section className="border-t border-[var(--border)]" style={{ backgroundColor: "var(--bg)" }}>
-        <div className="container mx-auto max-w-[1100px] px-5 py-12 md:py-16">
-          <div className="grid gap-8 md:grid-cols-[1.1fr_0.9fr] md:items-start">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--text-subtle)" }}>
-                Семантика: дом под ключ
-              </p>
-              <h2 className="mt-3 font-heading text-2xl font-bold md:text-3xl" style={{ color: "var(--text)" }}>
-                {homeSeo.h1}
-              </h2>
-              <p className="mt-4 text-sm leading-relaxed md:text-base" style={{ color: "var(--text-muted)" }}>
-                {homeSeo.intro}
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  href="/calculator"
-                  className="rounded-full px-5 py-3 text-sm font-semibold transition hover:opacity-90"
-                  style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
-                >
-                  Рассчитать стоимость
-                </Link>
-                <Link
-                  href="/projects"
-                  className="rounded-full border px-5 py-3 text-sm font-semibold transition hover:border-[color-mix(in_srgb,var(--accent)_45%,transparent)]"
-                  style={{
-                    borderColor: "color-mix(in srgb, var(--text) 14%, transparent)",
-                    color: "var(--text)",
-                  }}
-                >
-                  Выбрать проект
-                </Link>
-              </div>
-            </div>
-            <div className="space-y-3">
-              {homeSeo.faq.map((item) => (
-                <details
-                  key={item.question}
-                  className="rounded-2xl border p-4"
-                  style={{
-                    borderColor: "color-mix(in srgb, var(--text) 10%, transparent)",
-                    backgroundColor: "var(--bg-secondary)",
-                  }}
-                >
-                  <summary className="cursor-pointer text-sm font-semibold" style={{ color: "var(--text)" }}>
-                    {item.question}
-                  </summary>
-                  <p className="mt-3 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                    {item.answer}
-                  </p>
-                </details>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
       <HomeNewsFeed posts={newsPreview} />
       <div className="border-t border-[var(--border)]" style={{ backgroundColor: "var(--bg)" }}>
         <div className="container mx-auto max-w-[1100px] pb-14 pt-9 md:pb-16 md:pt-12">

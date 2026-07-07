@@ -8,6 +8,8 @@ describe("commercial page SEO core", () => {
     expect(home.path).toBe("/");
     expect(home.title).toContain("строительство домов под ключ");
     expect(home.keywords).toEqual(expect.arrayContaining(["дом под ключ", "построить дом под ключ"]));
+    expect(home.intro).not.toContain("рекламной статистике");
+    expect(home.intro).toContain("под ключ");
   });
 
   it("keeps calculator focused on cost and estimate intent", () => {

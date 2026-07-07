@@ -1,7 +1,13 @@
 import type { CSSProperties } from "react";
 import { CheckCircle2, ShieldCheck } from "lucide-react";
 
-import { ACCOUNT_SHOWCASE_ITEMS } from "@/lib/account-showcase";
+import {
+  ACCOUNT_SHOWCASE_ITEMS,
+  ACCOUNT_SHOWCASE_SECTION_CALLOUT,
+  ACCOUNT_SHOWCASE_SECTION_EYEBROW,
+  ACCOUNT_SHOWCASE_SECTION_INTRO,
+  ACCOUNT_SHOWCASE_SECTION_TITLE,
+} from "@/lib/account-showcase";
 import { ACCOUNT_SHOWCASE_ICON_BY_ID } from "@/lib/account-showcase-icons";
 import { AccountShowcaseFooter } from "@/components/sections/account-showcase-footer";
 import { AccountShowcaseMockup } from "@/components/sections/account-showcase-mockup";
@@ -21,25 +27,23 @@ export function AccountShowcaseSection() {
         >
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)] sm:text-[11px]">
-              Личный кабинет клиента
+              {ACCOUNT_SHOWCASE_SECTION_EYEBROW}
             </p>
             <h2
               id="account-showcase-heading"
               className="mt-3 max-w-4xl text-balance font-heading text-[clamp(1.35rem,5.4vw,2.45rem)] font-bold leading-[1.12] tracking-tight text-[var(--text)] sm:mt-3.5 sm:leading-[1.08]"
             >
-              Показываем стройку так, чтобы клиент видел порядок, сроки и деньги
+              {ACCOUNT_SHOWCASE_SECTION_TITLE}
             </h2>
             <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--text-muted)] sm:mt-5 sm:text-[15px]">
-              Это не просто вход по договору. В кабинете собраны этапы, фотоотчёты, документы и платежи — поэтому
-              заказчик понимает, что происходит на объекте, а компания выглядит системно и прозрачно.
+              {ACCOUNT_SHOWCASE_SECTION_INTRO}
             </p>
           </div>
           <div className="rounded-[1.25rem] border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg-secondary)_72%,transparent)] p-4 shadow-[0_16px_50px_rgba(15,61,46,0.08)] sm:rounded-[1.4rem] sm:p-5">
             <div className="flex items-start gap-3">
               <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[var(--accent)]" strokeWidth={1.9} aria-hidden />
               <p className="text-sm leading-relaxed text-[var(--text-muted)]">
-                Сильная сторона ЛК — он снимает тревогу клиента: всё видно, всё хранится, по каждому объекту есть
-                понятная история.
+                {ACCOUNT_SHOWCASE_SECTION_CALLOUT}
               </p>
             </div>
           </div>

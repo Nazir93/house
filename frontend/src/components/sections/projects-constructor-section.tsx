@@ -6,8 +6,13 @@ import { ArrowRight, ArrowUpRight, LayoutGrid } from "lucide-react";
 
 import { CmsImage } from "@/components/ui/cms-image";
 
-import type { MaterialFilterId } from "@/lib/project-filters";
 import { minCatalogRubPerM2ByMaterial } from "@/lib/house-construction-calculator";
+import {
+  HOME_MATERIALS_SECTION_EYEBROW,
+  HOME_MATERIALS_SECTION_SUBTITLE,
+  HOME_MATERIALS_SECTION_TITLE,
+  HOME_MATERIAL_CARDS,
+} from "@/lib/home-materials-section";
 import { useHouseConstructionCalculatorConfig } from "@/lib/use-house-construction-calculator-config";
 import { useTheme } from "@/lib/theme-context";
 import { cn } from "@/lib/utils";
@@ -104,41 +109,26 @@ function formatPricePerM2(n: number) {
   return `от ${n.toLocaleString("ru-RU")} ₽ / м²`;
 }
 
+const MATERIAL_PRICE_KEY = {
+  gazobeton: "gas",
+  keramoblok: "ceramic",
+  kirpich: "brick",
+} as const;
+
 export function ProjectsConstructorSection() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const { config } = useHouseConstructionCalculatorConfig();
   const mins = useMemo(() => minCatalogRubPerM2ByMaterial(config), [config]);
 
-  const materialCards: {
-    id: Exclude<MaterialFilterId, "all">;
-    title: string;
-    pricePerM2: string;
-    image: string;
-    labelShort: string;
-  }[] = [
-    {
-      id: "gazobeton",
-      title: "Дома из газобетона",
-      pricePerM2: formatPricePerM2(mins.gas),
-      image: "/images/materials/gazobeton.webp",
-      labelShort: "Газобетон",
-    },
-    {
-      id: "keramoblok",
-      title: "Дома из керамоблока",
-      pricePerM2: formatPricePerM2(mins.ceramic),
-      image: "/images/materials/keramoblok.webp",
-      labelShort: "Керамоблок",
-    },
-    {
-      id: "kirpich",
-      title: "Дома из кирпича",
-      pricePerM2: formatPricePerM2(mins.brick),
-      image: "/images/materials/kirpich.webp",
-      labelShort: "Кирпич",
-    },
-  ];
+  const materialCards = useMemo(
+    () =>
+      HOME_MATERIAL_CARDS.map((card) => ({
+        ...card,
+        pricePerM2: formatPricePerM2(mins[MATERIAL_PRICE_KEY[card.id]]),
+      })),
+    [mins],
+  );
 
   return (
     <section
@@ -163,10 +153,10 @@ export function ProjectsConstructorSection() {
           <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
             <div className="min-w-0 w-full flex-1">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[var(--text-muted)]">
-                Материалы и старт цены
+                {HOME_MATERIALS_SECTION_EYEBROW}
               </p>
               <h2 className="mt-3 w-full max-w-none text-balance font-heading text-[clamp(1.05rem,2.85vw,1.85rem)] font-bold uppercase leading-[1.15] tracking-[-0.03em] text-[var(--text)] sm:text-[clamp(1.12rem,3vw,2.05rem)]">
-                Из чего строим и стартовая цена за м²
+                {HOME_MATERIALS_SECTION_TITLE}
               </h2>
             </div>
             <div className="flex flex-col gap-3 sm:mt-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-x-5 sm:gap-y-2">
@@ -179,9 +169,8 @@ export function ProjectsConstructorSection() {
               </Link>
             </div>
           </div>
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--text)]/88 dark:text-[var(--text-muted)] md:text-[15px]">
-            Ориентир по стоимости работ за квадратный метр для стен из разных материалов.
-            Итог по договору — после замера участка, проекта и выбранной комплектации.
+          <p className="mt-4 max-w-3xl text-sm leading-relaxed text-[var(--text)]/88 dark:text-[var(--text-muted)] md:text-[15px]">
+            {HOME_MATERIALS_SECTION_SUBTITLE}
           </p>
         </div>
 
@@ -194,13 +183,13 @@ export function ProjectsConstructorSection() {
                 "dark:border-white/[0.08] dark:bg-[var(--card-bg)] dark:shadow-[0_16px_48px_rgba(0,0,0,0.35)]",
               )}
             >
-              <div className="relative aspect-[4/3] w-full shrink-0 overflow-hidden border-b border-[var(--border)] sm:aspect-[5/4]">
+              <div className="relative aspect-video w-full shrink-0 overflow-hidden border-b border-[var(--border)] bg-[var(--bg-secondary)]">
                 <CmsImage
                   src={card.image}
                   alt={card.title}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 560px"
-                  className="object-cover object-center transition duration-700 ease-out hover:scale-[1.03]"
+                  className="object-contain object-center transition duration-700 ease-out hover:scale-[1.02]"
                   priority={i === 0}
                 />
                 <div
@@ -222,7 +211,7 @@ export function ProjectsConstructorSection() {
                   {card.title}
                 </h3>
                 <p className="text-[13px] leading-snug text-[var(--text)]/85 dark:text-[var(--text-muted)]">
-                  Типовые решения и индивидуальная планировка — смотрите каталог и комплектации.
+                  {card.description}
                 </p>
                 <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                   <Link
