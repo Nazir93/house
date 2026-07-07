@@ -7,6 +7,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 
 import { PwaSerwistProvider } from "@/components/pwa/serwist-provider";
+import { MobileStartupLoader } from "@/components/pwa/mobile-startup-loader";
 import { SiteShell } from "@/components/layout/site-shell";
 import { SessionProvider } from "@/components/admin/session-provider";
 import { ThemeProvider } from "@/lib/theme-context";
@@ -120,6 +121,7 @@ export default async function RootLayout({
         <Script id="house-theme-init" strategy="beforeInteractive">
           {`(function(){try{var k="house-theme";var t=localStorage.getItem(k);var pref=(t==="light"||t==="dark"||t==="system")?t:"system";var sys=window.matchMedia("(prefers-color-scheme: dark)").matches;var resolved=pref==="system"?(sys?"dark":"light"):pref;document.documentElement.setAttribute("data-theme",resolved);document.documentElement.style.colorScheme=resolved;}catch(e){var sys=window.matchMedia("(prefers-color-scheme: dark)").matches;var resolved=sys?"dark":"light";document.documentElement.setAttribute("data-theme",resolved);document.documentElement.style.colorScheme=resolved;}})();`}
         </Script>
+        <MobileStartupLoader />
         <PwaSerwistProvider>
           <ThemeProvider>
             <SessionProvider>
