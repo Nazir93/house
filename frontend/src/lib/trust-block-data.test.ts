@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   TRUST_BENEFITS,
+  TRUST_SECTION_EYEBROW,
   TRUST_SECTION_INTRO,
   TRUST_SECTION_QUOTE,
   TRUST_SECTION_QUOTE_ATTRIBUTION,
   TRUST_SECTION_TITLE,
+  TRUST_SECTION_TITLE_LINES,
   TRUST_STATS,
   TRUST_WHY_EYEBROW,
   TRUST_WHY_INTRO,
@@ -14,12 +16,14 @@ import {
 } from "@/lib/trust-block-data";
 
 describe("trust-block-data", () => {
-  it("блок «Нам доверяют» (константы для других страниц)", () => {
+  it("блок №1–3 «Нам доверяют»", () => {
+    expect(TRUST_SECTION_EYEBROW).toBe("Нам доверяют");
     expect(TRUST_SECTION_TITLE).toContain("Доверие строится");
+    expect(TRUST_SECTION_TITLE_LINES.join(" ")).toBe(TRUST_SECTION_TITLE);
     expect(TRUST_SECTION_INTRO).toContain("материалы проверенных производителей");
   });
 
-  it("шапка блока доверия на главной — «Почему нас выбирают»", () => {
+  it("блок №4–6 «Почему нас выбирают»", () => {
     expect(TRUST_WHY_EYEBROW).toBe("Почему нас выбирают");
     expect(TRUST_WHY_TITLE).toBe("Когда каждый этап понятен, строить гораздо спокойнее.");
     expect(TRUST_WHY_TITLE_LINES.join(" ").replace(/\s+/g, " ")).toBe(

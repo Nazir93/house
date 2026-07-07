@@ -5,8 +5,11 @@ import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   TRUST_BENEFITS,
+  TRUST_SECTION_EYEBROW,
+  TRUST_SECTION_INTRO,
   TRUST_SECTION_QUOTE,
   TRUST_SECTION_QUOTE_ATTRIBUTION,
+  TRUST_SECTION_TITLE_LINES,
   TRUST_STATS,
   TRUST_WHY_EYEBROW,
   TRUST_WHY_INTRO,
@@ -46,33 +49,34 @@ export function TrustLeadCardShell({ children }: { children: ReactNode }) {
 
 type TrustLeadCardBodyProps = {
   variant: "standalone" | "embedded";
-  /** Вставка после шапки (логотипы партнёров на главной). */
+  /** Вставка между блоками №1–3 и «Почему нас выбирают» (логотипы партнёров на главной). */
   afterIntro?: ReactNode;
 };
 
 export function TrustLeadCardBody({ variant, afterIntro }: TrustLeadCardBodyProps) {
   const HeadingTag = "h2";
   const headingId = variant === "standalone" ? "trust-us-heading" : "trust-us-subheading";
+  const WhyHeadingTag = variant === "standalone" ? "h3" : "h4";
 
   return (
     <>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
         <div className="max-w-2xl">
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--accent)]">
-            {TRUST_WHY_EYEBROW}
+            {TRUST_SECTION_EYEBROW}
           </p>
           <HeadingTag
             id={headingId}
             className="mt-2.5 text-balance font-heading text-2xl font-bold uppercase tracking-tight text-[var(--text)] sm:text-3xl md:text-[2.25rem] md:leading-[1.12]"
           >
-            {TRUST_WHY_TITLE_LINES.map((line, index) => (
+            {TRUST_SECTION_TITLE_LINES.map((line, index) => (
               <span key={line} className={index > 0 ? "block" : undefined}>
                 {line}
               </span>
             ))}
           </HeadingTag>
           <p className="mt-3 max-w-xl text-[13px] leading-relaxed text-[var(--text-muted)] sm:text-sm md:text-[15px]">
-            {TRUST_WHY_INTRO}
+            {TRUST_SECTION_INTRO}
           </p>
         </div>
         <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap lg:flex-col xl:flex-row">
@@ -101,6 +105,22 @@ export function TrustLeadCardBody({ variant, afterIntro }: TrustLeadCardBodyProp
 
       {afterIntro}
 
+      <div className="mt-10 border-t border-[color-mix(in_srgb,var(--border)_65%,transparent)] pt-8 sm:mt-11 sm:pt-9">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
+          {TRUST_WHY_EYEBROW}
+        </p>
+        <WhyHeadingTag className="mt-2.5 max-w-3xl text-balance font-heading text-xl font-bold uppercase tracking-tight text-[var(--text)] sm:text-2xl md:text-[1.75rem] md:leading-[1.15]">
+          {TRUST_WHY_TITLE_LINES.map((line, index) => (
+            <span key={line} className={index > 0 ? "block" : undefined}>
+              {line}
+            </span>
+          ))}
+        </WhyHeadingTag>
+        <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-[var(--text-muted)] sm:text-sm md:text-[15px]">
+          {TRUST_WHY_INTRO}
+        </p>
+      </div>
+
       <ul className="mt-8 grid gap-4 sm:mt-9 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
         {TRUST_BENEFITS.map(({ title, description }) => (
           <li
@@ -113,7 +133,7 @@ export function TrustLeadCardBody({ variant, afterIntro }: TrustLeadCardBodyProp
         ))}
       </ul>
 
-      <div className="mt-8 grid gap-3 sm:mt-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+      <div className="mt-8 grid gap-3 sm:mt-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4">
         {TRUST_STATS.map(({ icon: Icon, value, label, hint }) => (
           <div
             key={label}
@@ -136,21 +156,22 @@ export function TrustLeadCardBody({ variant, afterIntro }: TrustLeadCardBodyProp
             ) : null}
           </div>
         ))}
-      </div>
 
-      <blockquote
-        className={cn(
-          "mt-8 rounded-2xl border border-[color-mix(in_srgb,var(--accent)_22%,var(--border))] bg-[color-mix(in_srgb,var(--accent)_6%,var(--bg))] px-5 py-5 sm:mt-10 sm:px-6 sm:py-6",
-          "dark:bg-[color-mix(in_srgb,var(--accent)_10%,var(--bg))]",
-        )}
-      >
-        <p className="text-[15px] font-medium leading-relaxed text-[var(--text)] sm:text-base md:text-[17px]">
-          «{TRUST_SECTION_QUOTE}»
-        </p>
-        <footer className="mt-3 text-[13px] font-semibold tracking-tight text-[var(--text-muted)] sm:text-sm">
-          {TRUST_SECTION_QUOTE_ATTRIBUTION}
-        </footer>
-      </blockquote>
+        <blockquote
+          className={cn(
+            "col-span-full rounded-2xl border border-[color-mix(in_srgb,var(--accent)_22%,var(--border))] bg-[color-mix(in_srgb,var(--accent)_6%,var(--bg))] px-5 py-5 sm:col-span-2",
+            "dark:bg-[color-mix(in_srgb,var(--accent)_10%,var(--bg))]",
+            "lg:col-span-2 lg:col-start-3 lg:row-start-2 lg:mt-0 lg:border-0 lg:bg-transparent lg:px-0 lg:py-0 lg:text-right lg:dark:bg-transparent",
+          )}
+        >
+          <p className="text-[15px] font-medium leading-relaxed text-[var(--text)] sm:text-base md:text-[17px] lg:ml-auto lg:max-w-md">
+            «{TRUST_SECTION_QUOTE}»
+          </p>
+          <footer className="mt-3 text-[13px] font-semibold tracking-tight text-[var(--text-muted)] sm:text-sm lg:text-right">
+            {TRUST_SECTION_QUOTE_ATTRIBUTION}
+          </footer>
+        </blockquote>
+      </div>
     </>
   );
 }
