@@ -61,13 +61,13 @@ export function TrustLeadCardBody({ variant, afterIntro }: TrustLeadCardBodyProp
   return (
     <>
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
-        <div className="max-w-2xl">
+        <div className="max-w-2xl lg:min-w-0 lg:max-w-none lg:flex-1 lg:pr-8 xl:pr-10">
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--accent)]">
             {TRUST_SECTION_EYEBROW}
           </p>
           <HeadingTag
             id={headingId}
-            className="mt-2.5 text-balance font-heading text-2xl font-bold uppercase tracking-tight text-[var(--text)] sm:text-3xl md:text-[2.25rem] md:leading-[1.12]"
+            className="mt-2.5 max-w-3xl text-balance font-heading text-2xl font-bold uppercase tracking-tight text-[var(--text)] sm:text-3xl md:text-[2.25rem] md:leading-[1.12] lg:max-w-4xl lg:text-pretty xl:max-w-5xl"
           >
             {TRUST_SECTION_TITLE_LINES.map((line, index) => (
               <span key={line} className={index > 0 ? "block" : undefined}>
@@ -109,7 +109,7 @@ export function TrustLeadCardBody({ variant, afterIntro }: TrustLeadCardBodyProp
         <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
           {TRUST_WHY_EYEBROW}
         </p>
-        <WhyHeadingTag className="mt-2.5 max-w-3xl text-balance font-heading text-xl font-bold uppercase tracking-tight text-[var(--text)] sm:text-2xl md:text-[1.75rem] md:leading-[1.15]">
+        <WhyHeadingTag className="mt-2.5 max-w-3xl text-balance font-heading text-xl font-bold uppercase tracking-tight text-[var(--text)] sm:text-2xl md:text-[1.75rem] md:leading-[1.15] lg:max-w-4xl lg:text-pretty xl:max-w-5xl">
           {TRUST_WHY_TITLE_LINES.map((line, index) => (
             <span key={line} className={index > 0 ? "block" : undefined}>
               {line}

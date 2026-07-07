@@ -17,11 +17,11 @@ export const TRUST_SECTION_INTRO =
 
 export const TRUST_WHY_EYEBROW = "Почему нас выбирают";
 
-export const TRUST_WHY_TITLE = "Когда каждый этап понятен, строить гораздо спокойнее.";
+export const TRUST_WHY_TITLE = "Когда каждый этап понятен, строить гораздо спокойнее";
 
 export const TRUST_WHY_TITLE_LINES = [
   "Когда каждый этап понятен, строить гораздо",
-  "спокойнее.",
+  "спокойнее",
 ] as const;
 
 export const TRUST_WHY_INTRO =

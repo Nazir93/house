@@ -25,10 +25,8 @@ describe("trust-block-data", () => {
 
   it("блок №4–6 «Почему нас выбирают»", () => {
     expect(TRUST_WHY_EYEBROW).toBe("Почему нас выбирают");
-    expect(TRUST_WHY_TITLE).toBe("Когда каждый этап понятен, строить гораздо спокойнее.");
-    expect(TRUST_WHY_TITLE_LINES.join(" ").replace(/\s+/g, " ")).toBe(
-      TRUST_WHY_TITLE.replace(/\.$/, "").trim() + ".",
-    );
+    expect(TRUST_WHY_TITLE).toBe("Когда каждый этап понятен, строить гораздо спокойнее");
+    expect(TRUST_WHY_TITLE_LINES.join(" ").replace(/\s+/g, " ")).toBe(TRUST_WHY_TITLE);
     expect(TRUST_WHY_INTRO).toContain("какие этапы предстоят дальше");
   });
 
