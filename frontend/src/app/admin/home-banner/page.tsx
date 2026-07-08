@@ -284,9 +284,7 @@ export default function AdminHomeBannerPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold text-white/90">Промо и акции</h2>
-            <p className="text-sm text-white/40 mt-1">
-              Карусель справа на баннере — листается стрелками на сайте. Для акций загружайте горизонтальный баннер (примерно 4:3 или 16:9) — он показывается целиком, без обрезки.
-            </p>
+            <p className="text-sm text-white/40 mt-1">Карусель справа на баннере — листается стрелками на сайте.</p>
           </div>
           <button
             type="button"
