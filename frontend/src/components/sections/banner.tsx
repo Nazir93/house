@@ -158,7 +158,7 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
       </div>
 
       <div className="section-inline-pad relative z-10 flex w-full min-h-[100svh] min-h-[100dvh] flex-col pointer-events-none pb-[max(1rem,env(safe-area-inset-bottom,0px))] pt-[calc(var(--site-header-sticky-offset)+var(--site-header-banner-overlap)+0.75rem+env(safe-area-inset-top,0px))] md:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] md:pt-[calc(var(--site-header-sticky-offset)+var(--site-header-banner-overlap)+1rem+env(safe-area-inset-top,0px))]">
-        <div className="grid w-full flex-1 gap-4 pointer-events-none min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(260px,min(520px,40vw))] min-[1100px]:items-end min-[1100px]:gap-6 min-[1100px]:pb-2 xl:gap-8">
+        <div className="grid w-full flex-1 gap-4 pointer-events-none min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(280px,min(560px,42vw))] min-[1100px]:items-end min-[1100px]:gap-6 min-[1100px]:pb-2 xl:gap-8">
           <div className="pointer-events-auto max-w-3xl justify-self-start self-end pt-0 min-[1100px]:pr-4">
             <div
               className={cn(
@@ -232,7 +232,7 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
             </div>
           </div>
 
-          <div className="pointer-events-auto w-full min-w-0 min-[1100px]:w-full min-[1100px]:max-w-[min(520px,40vw)] min-[1100px]:justify-self-end min-[1100px]:self-end">
+          <div className="pointer-events-auto w-full min-w-0 min-[1100px]:w-full min-[1100px]:max-w-[min(560px,42vw)] min-[1100px]:justify-self-end min-[1100px]:self-end">
             <div
               ref={carouselRef}
               role="region"
@@ -264,8 +264,8 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
               )}
             >
               <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-4 md:pr-5 lg:pr-6">
-                <div className="flex flex-col gap-3 md:flex-row md:items-start md:gap-4 lg:gap-5">
-                  <div className="flex min-w-0 flex-1 flex-col justify-between md:max-w-[240px] md:basis-[46%] md:min-w-0 md:flex-none md:pr-1.5 lg:pr-2">
+                <div className="flex flex-col gap-3">
+                  <div className="flex min-w-0 flex-col">
                     <div className="min-h-[5.75rem] sm:min-h-[6rem]">
                       <p className="text-[9px] font-semibold uppercase tracking-[0.1em] text-white/45">
                         {String(slideIndex + 1).padStart(2, "0")} · {slide.label}
@@ -281,7 +281,7 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                     </div>
                     <Link
                       href={slide.href}
-                      className="mt-3 inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-white transition hover:text-white/85 md:mt-5"
+                      className="mt-3 inline-flex w-fit items-center gap-1 text-[11px] font-semibold text-white transition hover:text-white/85"
                     >
                       Подробнее
                       <span aria-hidden className="-mt-px text-sm font-light leading-none">
@@ -291,8 +291,7 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                   </div>
                   <div
                     className={cn(
-                      "hero-carousel-media relative h-[min(48vw,280px)] w-full min-h-[200px] min-w-0 shrink-0 overflow-hidden rounded-xl bg-black/35 sm:h-[260px] sm:min-h-[230px]",
-                      "md:h-[200px] md:min-h-[200px] md:max-h-[200px] md:min-w-[54%] md:flex-1",
+                      "hero-carousel-media relative aspect-[16/9] w-full min-w-0 shrink-0 overflow-hidden rounded-xl bg-black/35",
                       "border border-white/[0.05]",
                     )}
                   >
@@ -305,7 +304,7 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                           alt={isActive ? promo.label : ""}
                           fill
                           quality={75}
-                          sizes="(max-width: 1023px) 96vw, 380px"
+                          sizes="(max-width: 1099px) 96vw, 520px"
                           priority={index === 0}
                           fetchPriority={index === 0 ? "high" : "auto"}
                           loading="eager"
