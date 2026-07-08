@@ -291,8 +291,8 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                   </div>
                   <div
                     className={cn(
-                      "hero-carousel-media relative h-[min(48vw,280px)] w-full min-h-[200px] min-w-0 shrink-0 overflow-hidden rounded-xl bg-black/35 sm:h-[260px] sm:min-h-[230px]",
-                      "md:h-[200px] md:min-h-[200px] md:max-h-[200px] md:min-w-[54%] md:flex-1",
+                      "hero-carousel-media relative h-[min(56vw,320px)] w-full min-h-[220px] min-w-0 shrink-0 overflow-hidden rounded-xl bg-black/35 sm:h-[300px] sm:min-h-[260px]",
+                      "md:h-[min(24vw,300px)] md:min-h-[240px] md:max-h-[300px] md:min-w-[54%] md:flex-1",
                       "border border-white/[0.05]",
                     )}
                   >
@@ -305,13 +305,13 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                           alt={isActive ? promo.label : ""}
                           fill
                           quality={75}
-                          sizes="(max-width: 1023px) 96vw, 380px"
+                          sizes="(max-width: 1023px) 96vw, 420px"
                           priority={index === 0}
                           fetchPriority={index === 0 ? "high" : "auto"}
                           loading="eager"
                           aria-hidden={!isActive}
                           className={cn(
-                            "object-cover object-center transition-opacity duration-500 ease-out",
+                            "object-contain object-center p-1 transition-opacity duration-500 ease-out sm:p-1.5",
                             isActive ? "opacity-100" : "pointer-events-none opacity-0",
                           )}
                         />

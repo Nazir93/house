@@ -151,7 +151,7 @@ export function EditorialBanner({
               src={current.url}
               alt={slides.length > 1 ? `${alt} — ${index + 1}` : alt}
               fill
-              className={`object-cover transition-opacity duration-500 ease-out ${
+              className={`object-contain object-center p-1 sm:p-1.5 transition-opacity duration-500 ease-out ${
                 slideReady ? "opacity-100" : "opacity-0"
               }`}
               sizes={fullBleed ? "100vw" : "(max-width: 768px) 100vw, 720px"}
@@ -180,7 +180,7 @@ export function EditorialBanner({
               onLoadedMetadata={() => setSlideReady(true)}
               onLoadedData={() => setSlideReady(true)}
               onCanPlay={() => setSlideReady(true)}
-              className={`absolute inset-0 z-[2] w-full h-full object-cover transition-opacity duration-500 ease-out ${
+              className={`absolute inset-0 z-[2] w-full h-full object-contain object-center transition-opacity duration-500 ease-out ${
                 slideReady ? "opacity-100" : "opacity-0"
               }`}
               aria-label={slides.length > 1 ? `${alt} — видео ${index + 1}` : `${alt} — видео`}
