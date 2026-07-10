@@ -447,7 +447,7 @@
 
 @layer components {
   .font-heading {
-    font-family: Montserrat, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-family: var(--font-montserrat), Montserrat, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
     text-transform: uppercase;
     letter-spacing: 0.03em;
     font-weight: 700;

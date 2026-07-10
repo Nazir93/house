@@ -28,6 +28,7 @@ const config: Config = {
       },
       fontFamily: {
         heading: [
+          "var(--font-montserrat)",
           "Montserrat",
           "ui-sans-serif",
           "system-ui",
@@ -37,6 +38,7 @@ const config: Config = {
           "sans-serif",
         ],
         body: [
+          "var(--font-montserrat)",
           "Montserrat",
           "ui-sans-serif",
           "system-ui",

@@ -1,10 +1,9 @@
-import "@fontsource/montserrat/400.css";
-import "@fontsource/montserrat/500.css";
-import "@fontsource/montserrat/700.css";
 import "./globals.css";
 
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+
+import { montserrat } from "@/lib/fonts";
 
 import { PwaSerwistProvider } from "@/components/pwa/serwist-provider";
 import { MobileStartupLoader } from "@/components/pwa/mobile-startup-loader";
@@ -106,7 +105,7 @@ export default async function RootLayout({
 }) {
   const contactConfig = await loadContactConfig();
   return (
-    <html lang="ru" suppressHydrationWarning>
+    <html lang="ru" suppressHydrationWarning className={montserrat.variable}>
       <head>
         <meta name="theme-color" content={PWA_THEME_COLORS.light} />
         <meta name="format-detection" content="telephone=no" />
@@ -117,7 +116,7 @@ export default async function RootLayout({
         <JsonLd />
         <AnalyticsScripts />
       </head>
-      <body className="font-body antialiased theme-bg theme-text transition-colors duration-500">
+      <body className={`${montserrat.className} font-body antialiased theme-bg theme-text transition-colors duration-500`}>
         <Script id="house-theme-init" strategy="beforeInteractive">
           {`(function(){try{var k="house-theme";var t=localStorage.getItem(k);var pref=(t==="light"||t==="dark"||t==="system")?t:"system";var sys=window.matchMedia("(prefers-color-scheme: dark)").matches;var resolved=pref==="system"?(sys?"dark":"light"):pref;document.documentElement.setAttribute("data-theme",resolved);document.documentElement.style.colorScheme=resolved;}catch(e){var sys=window.matchMedia("(prefers-color-scheme: dark)").matches;var resolved=sys?"dark":"light";document.documentElement.setAttribute("data-theme",resolved);document.documentElement.style.colorScheme=resolved;}})();`}
         </Script>

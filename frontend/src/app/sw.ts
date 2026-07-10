@@ -11,7 +11,7 @@ declare global {
 
 declare const self: ServiceWorkerGlobalScope;
 
-const RUNTIME_CACHE_VERSION = "v5";
+const RUNTIME_CACHE_VERSION = "v6";
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
