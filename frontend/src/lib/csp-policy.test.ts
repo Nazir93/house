@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildContentSecurityPolicyEnforced,
   buildContentSecurityPolicyReportOnly,
-} from "@/lib/csp-policy";
+} from "../../csp-policy.mjs";
 
 describe("csp-policy", () => {
   it("report-only не содержит upgrade-insecure-requests", () => {

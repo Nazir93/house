@@ -5,7 +5,7 @@ import { fileURLToPath } from "url";
 import {
   buildContentSecurityPolicyEnforced,
   buildContentSecurityPolicyReportOnly,
-} from "./src/lib/csp-policy.ts";
+} from "./csp-policy.mjs";
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 

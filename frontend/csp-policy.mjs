@@ -43,14 +43,14 @@ const CSP_DIRECTIVES = [
   ].join(" "),
   "media-src 'self' blob:",
   "worker-src 'self' blob:",
-] as const;
+];
 
 /** Report-only CSP: без upgrade-insecure-requests (браузер его игнорирует и шумит в консоли). */
-export function buildContentSecurityPolicyReportOnly(): string {
+export function buildContentSecurityPolicyReportOnly() {
   return CSP_DIRECTIVES.join("; ");
 }
 
 /** Enforced CSP: upgrade-insecure-requests имеет смысл только здесь. */
-export function buildContentSecurityPolicyEnforced(): string {
+export function buildContentSecurityPolicyEnforced() {
   return [...CSP_DIRECTIVES, "upgrade-insecure-requests"].join("; ");
 }
