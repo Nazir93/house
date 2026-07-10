@@ -289,34 +289,47 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                       </span>
                     </Link>
                   </div>
-                  <div
-                    className={cn(
-                      "hero-carousel-media relative h-[min(48vw,280px)] w-full min-h-[200px] min-w-0 shrink-0 overflow-hidden rounded-xl bg-black/35 sm:h-[260px] sm:min-h-[230px]",
-                      "md:h-[200px] md:min-h-[200px] md:max-h-[200px] md:min-w-[54%] md:flex-1",
-                      "border border-white/[0.05]",
-                    )}
-                  >
-                    {promos.map((promo, index) => {
-                      const isActive = index === slideIndex;
-                      return (
-                        <CmsImage
-                          key={promo.image}
-                          src={promo.image}
-                          alt={isActive ? promo.label : ""}
-                          fill
-                          quality={75}
-                          sizes="(max-width: 1023px) 96vw, 380px"
-                          priority={index === 0}
-                          fetchPriority={index === 0 ? "high" : "auto"}
-                          loading="eager"
-                          aria-hidden={!isActive}
-                          className={cn(
-                            "object-cover object-center transition-opacity duration-500 ease-out",
-                            isActive ? "opacity-100" : "pointer-events-none opacity-0",
-                          )}
-                        />
-                      );
-                    })}
+                  <div className="w-full min-w-0 md:flex md:flex-1 md:justify-end">
+                    <div
+                      className={cn(
+                        "hero-carousel-media relative inline-block max-w-full overflow-hidden rounded-xl bg-black/35",
+                        "border border-white/[0.05]",
+                      )}
+                    >
+                      <CmsImage
+                        src={slide.image}
+                        alt=""
+                        aria-hidden
+                        width={1600}
+                        height={900}
+                        sizes="(max-width: 1023px) 96vw, 380px"
+                        loading="eager"
+                        className="invisible block h-auto w-full max-h-[min(48vw,280px)] sm:max-h-[260px] md:max-h-[200px] md:w-auto md:max-w-[min(100%,380px)]"
+                      />
+                      <div className="absolute inset-0">
+                        {promos.map((promo, index) => {
+                          const isActive = index === slideIndex;
+                          return (
+                            <CmsImage
+                              key={promo.image}
+                              src={promo.image}
+                              alt={isActive ? promo.label : ""}
+                              fill
+                              quality={75}
+                              sizes="(max-width: 1023px) 96vw, 380px"
+                              priority={index === 0}
+                              fetchPriority={index === 0 ? "high" : "auto"}
+                              loading="eager"
+                              aria-hidden={!isActive}
+                              className={cn(
+                                "object-contain object-center transition-opacity duration-500 ease-out",
+                                isActive ? "opacity-100" : "pointer-events-none opacity-0",
+                              )}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
