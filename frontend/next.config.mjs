@@ -2,24 +2,12 @@ import { withSerwist } from "@serwist/turbopack";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+import {
+  buildContentSecurityPolicyEnforced,
+  buildContentSecurityPolicyReportOnly,
+} from "./src/lib/csp-policy.ts";
 
-const cspReportOnly = [
-  "default-src 'self'",
-  "base-uri 'self'",
-  "object-src 'none'",
-  "frame-ancestors 'none'",
-  "form-action 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://smartcaptcha.yandexcloud.net https://*.yandex.ru https://*.yandex.net https://*.yandex.com https://api-maps.yandex.ru",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https: http://localhost http://127.0.0.1",
-  "font-src 'self' data:",
-  "connect-src 'self' https://api.telegram.org https://smartcaptcha.yandexcloud.net https://*.yandex.ru https://*.yandex.net https://*.yandex.com https://*.bitrix24.ru https://*.bitrix24.com",
-  "frame-src 'self' https://smartcaptcha.yandexcloud.net https://*.yandex.ru https://*.yandex.net https://*.yandex.com https://rtsp.me https://*.rtsp.me https://ivideon.com https://*.ivideon.com",
-  "media-src 'self' blob:",
-  "worker-src 'self' blob:",
-  "upgrade-insecure-requests",
-].join("; ");
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -97,6 +85,9 @@ const nextConfig = {
   },
   async headers() {
     const cspEnforced = process.env.CSP_ENFORCE === "1";
+    const cspValue = cspEnforced
+      ? buildContentSecurityPolicyEnforced()
+      : buildContentSecurityPolicyReportOnly();
     return [
       {
         source: "/(.*)",
@@ -110,7 +101,7 @@ const nextConfig = {
           },
           {
             key: cspEnforced ? "Content-Security-Policy" : "Content-Security-Policy-Report-Only",
-            value: cspReportOnly,
+            value: cspValue,
           },
           {
             key: "Strict-Transport-Security",

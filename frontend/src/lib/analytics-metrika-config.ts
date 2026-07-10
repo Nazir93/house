@@ -23,3 +23,42 @@ export function resolveClientYandexMetrikaCounterId(): number {
   }
   return parseYandexMetrikaCounterId(process.env.NEXT_PUBLIC_YANDEX_METRIKA_ID) ?? Number(DEFAULT_YANDEX_METRIKA_ID);
 }
+
+type MetrikaInitOptions = {
+  ssr: boolean;
+  webvisor: boolean;
+  clickmap: boolean;
+  ecommerce: string;
+  accurateTrackBounce: boolean;
+  trackLinks: boolean;
+};
+
+/** Вебвизор сильно нагружает слабые ПК — отключаем по эвристике железа. */
+export function shouldEnableMetrikaWebvisor(input: {
+  hardwareConcurrency?: number;
+  deviceMemory?: number;
+}): boolean {
+  const cores = input.hardwareConcurrency ?? 4;
+  const memory = input.deviceMemory ?? 8;
+  if (cores <= 2) return false;
+  if (memory > 0 && memory <= 4) return false;
+  return true;
+}
+
+export function buildMetrikaInitOptions(input: {
+  hardwareConcurrency?: number;
+  deviceMemory?: number;
+}): MetrikaInitOptions {
+  return {
+    ssr: true,
+    webvisor: shouldEnableMetrikaWebvisor(input),
+    clickmap: true,
+    ecommerce: "dataLayer",
+    accurateTrackBounce: true,
+    trackLinks: true,
+  };
+}
+
+/** Inline-выражение для init в браузере (эвристика железа на клиенте). */
+export const METRIKA_WEBVISOR_INLINE_EXPR =
+  "(function(){var n=navigator,c=n.hardwareConcurrency||4,m=n.deviceMemory||8;return c>2&&(!m||m>4);})()";

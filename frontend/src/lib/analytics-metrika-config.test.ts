@@ -4,6 +4,7 @@ import {
   DEFAULT_YANDEX_METRIKA_ID,
   parseYandexMetrikaCounterId,
   pickYandexMetrikaId,
+  shouldEnableMetrikaWebvisor,
 } from "@/lib/analytics-metrika-config";
 
 describe("analytics-metrika-config", () => {
@@ -20,5 +21,11 @@ describe("analytics-metrika-config", () => {
 
   it("falls back to default counter id constant", () => {
     expect(DEFAULT_YANDEX_METRIKA_ID).toBe("110112800");
+  });
+
+  it("shouldEnableMetrikaWebvisor отключает webvisor на слабом железе", () => {
+    expect(shouldEnableMetrikaWebvisor({ hardwareConcurrency: 2, deviceMemory: 8 })).toBe(false);
+    expect(shouldEnableMetrikaWebvisor({ hardwareConcurrency: 8, deviceMemory: 4 })).toBe(false);
+    expect(shouldEnableMetrikaWebvisor({ hardwareConcurrency: 8, deviceMemory: 8 })).toBe(true);
   });
 });
