@@ -20,10 +20,14 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { ContactConfigProvider } from "@/lib/contact-config-context";
 import { loadContactConfig } from "@/lib/load-contact-config";
 import { PWA_ICON_PATHS, PWA_THEME_COLORS, SITE_DEFAULT_ICON_PATH } from "@/lib/pwa-config";
+import { buildYandexVerificationMetadata } from "@/lib/yandex-verification";
 
 function buildSiteVerification(): Metadata["verification"] | undefined {
   const google = process.env.GOOGLE_SITE_VERIFICATION?.trim();
-  const yandex = process.env.YANDEX_VERIFICATION?.trim();
+  const yandex = buildYandexVerificationMetadata(
+    process.env.YANDEX_VERIFICATION,
+    process.env.YANDEX_VERIFICATION_RF,
+  );
   const fb = process.env.FACEBOOK_DOMAIN_VERIFICATION?.trim();
   const out: Metadata["verification"] = {};
   if (google) out.google = google;
