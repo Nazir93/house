@@ -71,6 +71,38 @@ describe("buildPublicCatalog", () => {
     expect(cat.construction.find((o) => o.slug === "gutter")?.name).toBe("Водосточная система");
   });
 
+  it("отдаёт состав работ для облицовки фасада кирпичом", () => {
+    const cat = buildPublicCatalog(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG, "a");
+    const brick = cat.facades.find((f) => f.slug === "brick");
+    expect(brick?.name).toBe("Облицовка фасада кирпичом");
+    expect(brick?.description).toContain("½ кирпича");
+    expect(brick?.description?.split("\n")).toHaveLength(9);
+  });
+
+  it("отдаёт состав работ для мокрого фасада с утеплением", () => {
+    const cat = buildPublicCatalog(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG, "a");
+    const plaster = cat.facades.find((f) => f.slug === "plaster");
+    expect(plaster?.name).toBe("Мокрый фасад с утеплением");
+    expect(plaster?.description).toContain("Короед");
+    expect(plaster?.description?.split("\n")).toHaveLength(9);
+  });
+
+  it("отдаёт состав работ для фасадных термопанелей", () => {
+    const cat = buildPublicCatalog(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG, "a");
+    const thermo = cat.facades.find((f) => f.slug === "thermo");
+    expect(thermo?.name).toBe("Фасадные термопанели");
+    expect(thermo?.description).toContain("клинкерная плитка");
+    expect(thermo?.description?.split("\n")).toHaveLength(7);
+  });
+
+  it("отдаёт состав работ для облицовки кирпичом с утеплением", () => {
+    const cat = buildPublicCatalog(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG, "a");
+    const brickIns = cat.facades.find((f) => f.slug === "brick_insulated");
+    expect(brickIns?.name).toBe("Облицовка кирпичом с утеплением");
+    expect(brickIns?.description).toContain("каменной ваты");
+    expect(brickIns?.description?.split("\n")).toHaveLength(10);
+  });
+
   it("shows custom options added from admin", () => {
     const config = structuredClone(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG);
     config.engineering.custom_engineering_signal = {

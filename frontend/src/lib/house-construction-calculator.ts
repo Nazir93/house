@@ -239,9 +239,9 @@ export function engineeringFloorTier(catalogFloor: CatalogFloorId): EngineeringF
 export type FacadeFinishId = "none" | "brick" | "plaster" | "thermo" | "brick_insulated";
 
 export const FACADE_FINISH_LABELS: Record<Exclude<FacadeFinishId, "none">, string> = {
-  brick: "Облицовка кирпичом",
-  plaster: "Штукатурка с утеплением",
-  thermo: "Термопанели",
+  brick: "Облицовка фасада кирпичом",
+  plaster: "Мокрый фасад с утеплением",
+  thermo: "Фасадные термопанели",
   brick_insulated: "Облицовка кирпичом с утеплением",
 };
 

@@ -108,9 +108,9 @@ function con(
 export const DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG: HouseProjectCalculatorConfig = {
   categories: buildDefaultCategories(),
   facades: {
-    brick: { label: "Облицовка кирпичом", pricePerM2: 0 },
-    plaster: { label: "Фасадная штукатурка с утеплением", pricePerM2: 0 },
-    thermo: { label: "Термопанели", pricePerM2: 0 },
+    brick: { label: "Облицовка фасада кирпичом", pricePerM2: 0 },
+    plaster: { label: "Мокрый фасад с утеплением", pricePerM2: 0 },
+    thermo: { label: "Фасадные термопанели", pricePerM2: 0 },
     brick_insulated: { label: "Облицовка кирпичом с утеплением", pricePerM2: 0 },
   },
   engineering: {
@@ -118,9 +118,9 @@ export const DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG: HouseProjectCalculatorConf
     radiators: eng("radiators", "Радиаторы", "per_area", 0, optionMeta("radiators")),
     water: eng("water", "Разводка воды", "per_area", 0, optionMeta("water")),
     heatedFloor: eng("heatedFloor", "Тёплый пол", "per_area", 0, optionMeta("heatedFloor")),
-    sewer: eng("sewer", "Канализация", "per_area", 0, optionMeta("sewer")),
+    sewer: eng("sewer", "Разводка внутренней канализации", "per_area", 0, optionMeta("sewer")),
     boiler: eng("boiler", "Котельная", "fixed", 0, optionMeta("boiler")),
-    bio: eng("bio", "Станция биоочистки", "fixed", 0, optionMeta("bio")),
+    bio: eng("bio", "Станция биологической очистки", "fixed", 0, optionMeta("bio")),
   },
   construction: {
     interior_plaster: con("Внутренняя штукатурка", "per_area", 0, true, optionMeta("interior_plaster")),

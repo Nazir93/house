@@ -104,6 +104,58 @@ export function ProjectCalculatorCatalogOptions({
             {quoteLoading ? "…" : formatRub(facadePrice)}
           </p>
         ) : null}
+        {(() => {
+          const selected = catalog.facades.find((f) => f.slug === facadeSlug);
+          const description = selected?.description?.trim();
+          const imageUrl = selected?.imageUrl?.trim();
+          if (!description && !imageUrl) return null;
+          return (
+            <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-3 sm:p-4">
+              <div
+                className={cn(
+                  "grid items-start gap-3 sm:gap-4",
+                  imageUrl
+                    ? "grid-cols-[minmax(84px,104px)_minmax(0,1fr)] sm:grid-cols-[minmax(120px,148px)_minmax(0,1fr)]"
+                    : "grid-cols-1",
+                )}
+              >
+                {imageUrl ? (
+                  <div
+                    className={cn(
+                      "relative overflow-hidden rounded-lg",
+                      isCalculatorOptionDiagramUrl(imageUrl)
+                        ? "aspect-square bg-transparent"
+                        : "aspect-[4/3] bg-[var(--stone)]",
+                    )}
+                  >
+                    <CmsImage
+                      src={imageUrl}
+                      alt={selected?.name ?? "Фасад"}
+                      fill
+                      unoptimized={isCalculatorOptionDiagramUrl(imageUrl)}
+                      className={cn(
+                        isCalculatorOptionDiagramUrl(imageUrl)
+                          ? "object-contain object-center"
+                          : "object-cover object-center",
+                      )}
+                      sizes="(max-width: 640px) 104px, 148px"
+                    />
+                  </div>
+                ) : null}
+                {description ? (
+                  <div className="min-w-0 self-center sm:self-start">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--accent)] sm:text-[11px]">
+                      Состав работ
+                    </p>
+                    <p className="mt-1.5 whitespace-pre-line text-[11px] leading-relaxed text-[var(--text-muted)] sm:mt-2 sm:text-xs">
+                      {description}
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          );
+        })()}
       </OptionSection>
 
       <OptionSection
@@ -309,7 +361,7 @@ function OptionRow({
                 <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--accent)] sm:text-[11px]">
                   Состав работ
                 </p>
-                <p className="mt-1.5 text-[11px] leading-relaxed text-[var(--text-muted)] sm:mt-2 sm:text-xs">
+                <p className="mt-1.5 whitespace-pre-line text-[11px] leading-relaxed text-[var(--text-muted)] sm:mt-2 sm:text-xs">
                   {description}
                 </p>
               </div>

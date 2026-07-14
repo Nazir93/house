@@ -26,6 +26,8 @@ const CATEGORY_LIMITED_CONSTRUCTION_SLUGS = new Set<string>([
 export type PublicCatalogFacade = {
   slug: PartOfSoulFacadeVariant;
   name: string;
+  description?: string | null;
+  imageUrl?: string | null;
 };
 
 export type PublicCatalogOption = {
@@ -206,10 +208,22 @@ export function buildPublicCatalog(
 ): PublicCalculatorCatalog {
   const disabled = new Set(disabledOptionIds);
 
-  const facades = (Object.keys(config.facades) as PartOfSoulFacadeVariant[]).map((slug) => ({
-    slug,
-    name: config.facades[slug].label,
-  }));
+  const facades = (Object.keys(config.facades) as PartOfSoulFacadeVariant[]).map((slug) => {
+    const description = resolveOptionDisplayDescription({
+      slug,
+      groupSlug: "facade",
+    });
+    const imageUrl = resolveOptionDisplayImageUrl({
+      slug,
+      groupSlug: "facade",
+    });
+    return {
+      slug,
+      name: config.facades[slug].label,
+      ...(description ? { description } : {}),
+      ...(imageUrl ? { imageUrl } : {}),
+    };
+  });
 
   const engineering = Object.keys(config.engineering)
     .filter((slug) => config.engineering[slug]?.enabled)
