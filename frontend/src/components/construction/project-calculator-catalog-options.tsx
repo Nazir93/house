@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { formatRub } from "@/lib/construction-data";
 import type { PublicCalculatorCatalog } from "@/lib/calculator-catalog";
@@ -37,6 +37,20 @@ export function ProjectCalculatorCatalogOptions({
   const [engineeringOpen, setEngineeringOpen] = useState(true);
   const [constructionOpen, setConstructionOpen] = useState(true);
   const facadePrice = facadeSlug ? lineAmounts.get(`facade:${facadeSlug}`) : undefined;
+
+  useEffect(() => {
+    const urls = [
+      ...catalog.engineering.map((o) => o.imageUrl),
+      ...catalog.construction.map((o) => o.imageUrl),
+      ...catalog.facades.map((f) => f.imageUrl),
+    ].filter((url): url is string => Boolean(url?.trim()));
+
+    for (const url of urls) {
+      const img = new window.Image();
+      img.decoding = "async";
+      img.src = url;
+    }
+  }, [catalog]);
 
   const engTotal = useMemo(() => {
     let s = 0;

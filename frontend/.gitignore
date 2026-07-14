@@ -17,5 +17,8 @@ next-env.d.ts
 public/uploads/*
 !public/uploads/.gitkeep
 
+# Тяжёлые исходники схем опций — в репозитории только WebP
+public/images/calculator/options/*.png
+
 # Приватные документы клиентов (только на сервере)
 storage/private/
