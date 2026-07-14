@@ -39,7 +39,7 @@ describe("buildProjectCalculatorLeadPayload", () => {
     expect(payload.selectionSummaryRu).toContain("Электроснабжение —");
     expect(payload.selectionSummaryRu).toMatch(/264[\s\u00a0]?891/);
     expect(payload.selectionSummaryRu).toContain("Мягкая кровля —");
-    expect(payload.selectionSummaryRu).toMatch(/Транспорт: 125[\s\u00a0]?000/);
+    expect(payload.selectionSummaryRu).toMatch(/Транспортные расходы: 125[\s\u00a0]?000/);
 
     const rows = houseConstructionCalcDisplayRows(payload);
     expect(rows).not.toBeNull();
@@ -48,7 +48,7 @@ describe("buildProjectCalculatorLeadPayload", () => {
       { label: "Электроснабжение", amountRub: 264_891 },
       { label: "Радиаторы", amountRub: 324_162 },
     ]);
-    const transport = rows!.find((row) => row.label === "Транспорт");
+    const transport = rows!.find((row) => row.label === "Транспортные расходы");
     expect(transport?.value).toMatch(/125[\s\u00a0]000/);
   });
 });

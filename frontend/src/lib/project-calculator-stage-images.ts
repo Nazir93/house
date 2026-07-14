@@ -5,14 +5,22 @@ import type { CalculatorStageId } from "@/lib/project-calculator-types";
 export const LEGACY_STAGE_PLACEHOLDER_IMAGE = "/images/banner/banner-hero-01.png";
 
 /**
- * Схема фундамента: монолитная плита 300 мм (1,5- и 2-этажные дома).
+ * Схема «пирога» фундамента: монолитная плита 300 мм (1,5- и 2-этажные дома).
+ * Общая для газобетона, керамического блока и кирпича.
  * Файл: public/images/calculator/foundation-multi-story-300mm.png
  */
 export const FOUNDATION_STAGE_IMAGE_MULTI_STORY =
   "/images/calculator/foundation-multi-story-300mm.png";
 
 /**
- * Схема фундамента: монолитная плита 250 мм (одноэтажные) — зарезервировано под следующий файл.
+ * Схема «пирога» фундамента: одноэтажные дома из керамического блока и кирпича.
+ * Файл: public/images/calculator/foundation-single-story-ceramic-brick-300mm.png
+ */
+export const FOUNDATION_STAGE_IMAGE_SINGLE_STORY_CERAMIC_BRICK =
+  "/images/calculator/foundation-single-story-ceramic-brick-300mm.png";
+
+/**
+ * Схема фундамента: монолитная плита 250 мм (одноэтажные, газобетон) — зарезервировано.
  * Файл: public/images/calculator/foundation-single-story-250mm.png
  */
 export const FOUNDATION_STAGE_IMAGE_SINGLE_STORY =
@@ -68,6 +76,27 @@ export const FLOORS_STAGE_IMAGE_MULTI_STORY_GAS =
   "/images/calculator/floors-multi-story-gas.png";
 
 /**
+ * Схема чердачного перекрытия: 1,5 и 2 этажа, газобетон.
+ * Файл: public/images/calculator/floors-attic-multi-story-gas.png
+ */
+export const FLOORS_STAGE_IMAGE_ATTIC_MULTI_STORY_GAS =
+  "/images/calculator/floors-attic-multi-story-gas.png";
+
+/**
+ * Схема чердачного перекрытия: 1,5 и 2 этажа, керамический блок.
+ * Файл: public/images/calculator/floors-attic-multi-story-ceramic.png
+ */
+export const FLOORS_STAGE_IMAGE_ATTIC_MULTI_STORY_CERAMIC =
+  "/images/calculator/floors-attic-multi-story-ceramic.png";
+
+/**
+ * Схема чердачного перекрытия: 1,5 и 2 этажа, керамический кирпич.
+ * Файл: public/images/calculator/floors-attic-multi-story-brick.png
+ */
+export const FLOORS_STAGE_IMAGE_ATTIC_MULTI_STORY_BRICK =
+  "/images/calculator/floors-attic-multi-story-brick.png";
+
+/**
  * Схема перекрытий: 1,5 и 2 этажа, керамический блок.
  * Файл: public/images/calculator/floors-multi-story-ceramic.png
  */
@@ -111,12 +140,19 @@ export const WINDOWS_STAGE_IMAGE_ALL = "/images/calculator/windows-all.png";
  */
 export const DOORS_STAGE_IMAGE_ALL = "/images/calculator/doors-all.png";
 
-/** Картинка этапа «Фундамент» по этажности проекта (сайтовая привязка). */
-export function resolveFoundationStageImageUrl(
-  floors: PartOfSoulPricingFloors,
-): string | null {
+/** Картинка этапа «Фундамент» по этажности и материалу коробки. */
+export function resolveFoundationStageImageUrl(params: {
+  floors: PartOfSoulPricingFloors;
+  tierKey?: string;
+}): string | null {
+  const { floors, tierKey } = params;
   if (floors === 1.5 || floors === 2) return FOUNDATION_STAGE_IMAGE_MULTI_STORY;
-  if (floors === 1) return FOUNDATION_STAGE_IMAGE_SINGLE_STORY;
+  if (floors === 1) {
+    if (tierKey === "ceramic" || tierKey === "brick") {
+      return FOUNDATION_STAGE_IMAGE_SINGLE_STORY_CERAMIC_BRICK;
+    }
+    return FOUNDATION_STAGE_IMAGE_SINGLE_STORY;
+  }
   return null;
 }
 
@@ -152,6 +188,20 @@ export function resolveFloorsStageImageUrl(params: {
   return null;
 }
 
+/**
+ * Вторая схема перекрытий (чердачное) для 1,5 и 2 этажей.
+ */
+export function resolveFloorsAtticStageImageUrl(params: {
+  floors: PartOfSoulPricingFloors;
+  tierKey: string;
+}): string | null {
+  if (params.floors !== 1.5 && params.floors !== 2) return null;
+  if (params.tierKey === "gas") return FLOORS_STAGE_IMAGE_ATTIC_MULTI_STORY_GAS;
+  if (params.tierKey === "ceramic") return FLOORS_STAGE_IMAGE_ATTIC_MULTI_STORY_CERAMIC;
+  if (params.tierKey === "brick") return FLOORS_STAGE_IMAGE_ATTIC_MULTI_STORY_BRICK;
+  return null;
+}
+
 /** Картинка этапа «Стены» по материалу коробки. */
 export function resolveWallsStageImageUrl(tierKey: string): string | null {
   if (tierKey === "gas") return WALLS_STAGE_IMAGE_GAS;
@@ -180,6 +230,11 @@ export function isCalculatorStageDiagramUrl(url: string | null | undefined): boo
   return !!url?.includes("/images/calculator/");
 }
 
+/** Этапы без иллюстрации — только текст (длинный список пунктов). */
+export function isCalculatorStageTextOnly(stageId: CalculatorStageId): boolean {
+  return stageId === "prep";
+}
+
 /** Итоговый URL картинки этапа в блоке «Состав работ по этапам». */
 export function resolveStageDisplayImageUrl(params: {
   stageId: CalculatorStageId;
@@ -192,7 +247,10 @@ export function resolveStageDisplayImageUrl(params: {
   const fallback = params.fallbackImageUrl ?? LEGACY_STAGE_PLACEHOLDER_IMAGE;
 
   if (params.stageId === "foundation") {
-    const bound = resolveFoundationStageImageUrl(params.floors);
+    const bound = resolveFoundationStageImageUrl({
+      floors: params.floors,
+      tierKey: params.tierKey,
+    });
     if (bound && isLegacyStagePlaceholderImage(params.tableImageUrl)) return bound;
   }
 

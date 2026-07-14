@@ -18,7 +18,12 @@ export type CalculatorStageId =
 export interface CalculatorStageTable {
   /** Иллюстрация этапа; если нет — подставляется обложка проекта. */
   imageUrl?: string | null;
-  rows: { label: string; value: string }[];
+  /**
+   * Вторая схема (1,5 и 2 этажа: межэтажное + чердачное).
+   * Пока картинки рисуются — поле опционально.
+   */
+  secondaryImageUrl?: string | null;
+  rows: { label: string; value: string; /** Заголовок подраздела (межэтажное / чердачное). */ section?: boolean }[];
 }
 
 /** Режим строки калькулятора по PDF («Часть души»). Обычные проекты — только price. */

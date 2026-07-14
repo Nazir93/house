@@ -4,11 +4,15 @@ import {
   FLOORS_STAGE_IMAGE_MULTI_STORY_BRICK,
   FLOORS_STAGE_IMAGE_MULTI_STORY_CERAMIC,
   FLOORS_STAGE_IMAGE_MULTI_STORY_GAS,
+  FLOORS_STAGE_IMAGE_ATTIC_MULTI_STORY_GAS,
+  FLOORS_STAGE_IMAGE_ATTIC_MULTI_STORY_CERAMIC,
+  FLOORS_STAGE_IMAGE_ATTIC_MULTI_STORY_BRICK,
   FLOORS_STAGE_IMAGE_SINGLE_STORY_BRICK,
   FLOORS_STAGE_IMAGE_SINGLE_STORY_CERAMIC,
   FLOORS_STAGE_IMAGE_SINGLE_STORY_GAS,
   FOUNDATION_STAGE_IMAGE_MULTI_STORY,
   FOUNDATION_STAGE_IMAGE_SINGLE_STORY,
+  FOUNDATION_STAGE_IMAGE_SINGLE_STORY_CERAMIC_BRICK,
   ROOF_STAGE_IMAGE_MANSARD_BRICK_1_5,
   ROOF_STAGE_IMAGE_MANSARD_CERAMIC_1_5,
   ROOF_STAGE_IMAGE_MANSARD_GAS_1_5,
@@ -19,22 +23,63 @@ import {
   WINDOWS_STAGE_IMAGE_ALL,
   resolveDoorsStageImageUrl,
   resolveFloorsStageImageUrl,
+  resolveFloorsAtticStageImageUrl,
   resolveFoundationStageImageUrl,
   resolveRoofStageImageUrl,
   resolveStageDisplayImageUrl,
   isCalculatorStageDiagramUrl,
+  isCalculatorStageTextOnly,
   resolveWallsStageImageUrl,
   resolveWindowsStageImageUrl,
 } from "@/lib/project-calculator-stage-images";
 
 describe("project-calculator-stage-images", () => {
-  it("1,5- и 2-этажные — схема плиты 300 мм", () => {
-    expect(resolveFoundationStageImageUrl(1.5)).toBe(FOUNDATION_STAGE_IMAGE_MULTI_STORY);
-    expect(resolveFoundationStageImageUrl(2)).toBe(FOUNDATION_STAGE_IMAGE_MULTI_STORY);
+  it("этап «Подготовка» — без иллюстрации (только текст)", () => {
+    expect(isCalculatorStageTextOnly("prep")).toBe(true);
+    expect(isCalculatorStageTextOnly("foundation")).toBe(false);
   });
 
-  it("одноэтажные — схема плиты 250 мм (зарезервировано)", () => {
-    expect(resolveFoundationStageImageUrl(1)).toBe(FOUNDATION_STAGE_IMAGE_SINGLE_STORY);
+  it("1,5- и 2-этажные — схема плиты 300 мм", () => {
+    expect(resolveFoundationStageImageUrl({ floors: 1.5 })).toBe(FOUNDATION_STAGE_IMAGE_MULTI_STORY);
+    expect(resolveFoundationStageImageUrl({ floors: 2 })).toBe(FOUNDATION_STAGE_IMAGE_MULTI_STORY);
+  });
+
+  it("1,5- и 2-этажные — одна схема фундамента для газобетона, керамоблока и кирпича", () => {
+    for (const tierKey of ["gas", "ceramic", "brick"] as const) {
+      for (const floors of [1.5, 2] as const) {
+        expect(
+          resolveStageDisplayImageUrl({
+            stageId: "foundation",
+            floors,
+            tierKey,
+            tableImageUrl: "/images/banner/banner-hero-01.png",
+          }),
+        ).toBe(FOUNDATION_STAGE_IMAGE_MULTI_STORY);
+      }
+    }
+  });
+
+  it("одноэтажные — керамоблок и кирпич: схема плиты 300 мм", () => {
+    expect(resolveFoundationStageImageUrl({ floors: 1, tierKey: "ceramic" })).toBe(
+      FOUNDATION_STAGE_IMAGE_SINGLE_STORY_CERAMIC_BRICK,
+    );
+    expect(resolveFoundationStageImageUrl({ floors: 1, tierKey: "brick" })).toBe(
+      FOUNDATION_STAGE_IMAGE_SINGLE_STORY_CERAMIC_BRICK,
+    );
+    expect(
+      resolveStageDisplayImageUrl({
+        stageId: "foundation",
+        floors: 1,
+        tierKey: "ceramic",
+        tableImageUrl: "/images/banner/banner-hero-01.png",
+      }),
+    ).toBe(FOUNDATION_STAGE_IMAGE_SINGLE_STORY_CERAMIC_BRICK);
+  });
+
+  it("одноэтажные — газобетон: схема плиты 250 мм (зарезервировано)", () => {
+    expect(resolveFoundationStageImageUrl({ floors: 1, tierKey: "gas" })).toBe(
+      FOUNDATION_STAGE_IMAGE_SINGLE_STORY,
+    );
   });
 
   it("на фундаменте подставляет привязку вместо заглушки баннера", () => {
@@ -92,6 +137,35 @@ describe("project-calculator-stage-images", () => {
     );
     expect(resolveFloorsStageImageUrl({ floors: 2, tierKey: "gas" })).toBe(
       FLOORS_STAGE_IMAGE_MULTI_STORY_GAS,
+    );
+  });
+
+  it("1,5 и 2 этажа + газоблок — схема чердачного перекрытия (вторая картинка)", () => {
+    expect(resolveFloorsAtticStageImageUrl({ floors: 1.5, tierKey: "gas" })).toBe(
+      FLOORS_STAGE_IMAGE_ATTIC_MULTI_STORY_GAS,
+    );
+    expect(resolveFloorsAtticStageImageUrl({ floors: 2, tierKey: "gas" })).toBe(
+      FLOORS_STAGE_IMAGE_ATTIC_MULTI_STORY_GAS,
+    );
+    expect(resolveFloorsAtticStageImageUrl({ floors: 1, tierKey: "gas" })).toBeNull();
+    expect(resolveFloorsAtticStageImageUrl({ floors: 2, tierKey: "keramzit" })).toBeNull();
+  });
+
+  it("1,5 и 2 этажа + керамоблок — схема чердачного перекрытия", () => {
+    expect(resolveFloorsAtticStageImageUrl({ floors: 1.5, tierKey: "ceramic" })).toBe(
+      FLOORS_STAGE_IMAGE_ATTIC_MULTI_STORY_CERAMIC,
+    );
+    expect(resolveFloorsAtticStageImageUrl({ floors: 2, tierKey: "ceramic" })).toBe(
+      FLOORS_STAGE_IMAGE_ATTIC_MULTI_STORY_CERAMIC,
+    );
+  });
+
+  it("1,5 и 2 этажа + кирпич — схема чердачного перекрытия", () => {
+    expect(resolveFloorsAtticStageImageUrl({ floors: 1.5, tierKey: "brick" })).toBe(
+      FLOORS_STAGE_IMAGE_ATTIC_MULTI_STORY_BRICK,
+    );
+    expect(resolveFloorsAtticStageImageUrl({ floors: 2, tierKey: "brick" })).toBe(
+      FLOORS_STAGE_IMAGE_ATTIC_MULTI_STORY_BRICK,
     );
   });
 

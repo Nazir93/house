@@ -204,7 +204,7 @@ describe("house-project-calculator-engine (TZ)", () => {
     expect(m.perimeter).toBeCloseTo(120 * 0.42, 5);
   });
 
-  it("§3 категория определяет коэффициенты водосточки, софитов и перекрытия", () => {
+  it("§3 категория определяет коэффициенты водостока, софитов и перекрытия", () => {
     const m = deriveMetrics(120, C.categories.e.coefficients, C.settings.blindAreaWidthM);
     const perimeter = 120 * C.categories.e.coefficients.perimeter;
     expect(m.gutterLength).toBeCloseTo(perimeter * C.categories.e.coefficients.gutter, 5);
@@ -341,7 +341,7 @@ describe("house-project-calculator-engine (TZ)", () => {
     expect(quote?.constructionLines[0]?.amountRub).toBe(Math.round(m.soffitLength * 3_750));
   });
 
-  it("§12 водосточка: perimeter × gutter_coef × 4143", () => {
+  it("§12 водосточная система: perimeter × gutter_coef × 4143", () => {
     const quote = computeHouseProjectQuote(
       {
         buildingArea: 120,

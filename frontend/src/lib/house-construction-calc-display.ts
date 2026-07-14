@@ -179,7 +179,7 @@ export function houseConstructionCalcDisplayRows(calc: unknown): HouseConstructi
       rows.push({ label: "Фасад", value: formatCalcRubPlain(h.facadeTotalRub) });
     }
     if (typeof h.transportSurchargeRub === "number" && h.transportSurchargeRub > 0) {
-      rows.push({ label: "Транспорт", value: formatCalcRubPlain(h.transportSurchargeRub) });
+      rows.push({ label: "Транспортные расходы", value: formatCalcRubPlain(h.transportSurchargeRub) });
     }
     if (typeof h.grandTotalRub === "number") {
       rows.push({ label: "Итого ориентир", value: formatCalcRubPlain(h.grandTotalRub) });

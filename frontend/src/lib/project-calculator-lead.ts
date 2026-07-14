@@ -51,7 +51,7 @@ export function buildProjectCalculatorLeadPayload(params: {
     `Коробка: ${formatCalcRubPlain(params.quote.shellTotalRub)}`,
     ...(params.quote.facadeTotalRub > 0 ? [`Фасад: ${formatCalcRubPlain(params.quote.facadeTotalRub)}`] : []),
     ...(params.quote.transportSurchargeRub > 0 ?
-      [`Транспорт: ${formatCalcRubPlain(params.quote.transportSurchargeRub)}`]
+      [`Транспортные расходы: ${formatCalcRubPlain(params.quote.transportSurchargeRub)}`]
     : []),
     `Итого ориентир: ${formatCalcRubPlain(params.quote.grandTotalRub)}`,
   ];

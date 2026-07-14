@@ -31,6 +31,6 @@ describe("houseConstructionCalcDisplayRows", () => {
       { label: "Разводка воды по дому", amountRub: 50_000 },
     ]);
     expect(rows!.find((r) => r.label === "Доп. опции")?.items).toEqual([{ label: "Дренаж", amountRub: 80_000 }]);
-    expect(rows!.find((r) => r.label === "Транспорт")?.value).toMatch(/125[\s\u00a0]000/);
+    expect(rows!.find((r) => r.label === "Транспортные расходы")?.value).toMatch(/125[\s\u00a0]000/);
   });
 });

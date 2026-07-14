@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AppWindow,
   BrickWall,
@@ -35,11 +35,21 @@ import type { HouseCalculatorCategoryId } from "@/lib/house-project-calculator-e
 import { buildProjectCalculatorLeadPayload } from "@/lib/project-calculator-lead";
 import {
   isCalculatorStageDiagramUrl,
+  isCalculatorStageTextOnly,
   resolveStageDisplayImageUrl,
 } from "@/lib/project-calculator-stage-images";
-import { toggleConstructionOptionSelection } from "@/lib/project-calculator-option-selection";
+import { resolveFloorsStageTable } from "@/lib/project-calculator-floors-stage";
+import {
+  applyEngineeringNetworksPreset,
+  applyPrefinishFinishPreset,
+} from "@/lib/project-calculator-engineering-preset";
+import {
+  sanitizeConstructionOptionSelection,
+  toggleConstructionOptionSelection,
+} from "@/lib/project-calculator-option-selection";
 import { useProjectCalculatorQuote } from "@/lib/use-project-calculator-quote";
 import { ConstructionStageButtonIcon } from "@/components/construction/construction-stage-button-icon";
+import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { cn } from "@/lib/utils";
 
 /** Граница без яркой белой обводки в тёмной теме */
@@ -103,8 +113,12 @@ function resolveStageTable(
   ui: ProjectCalculatorUi,
   tierKey: string,
   stageId: CalculatorStageId,
-  fallbackLines: string[]
+  fallbackLines: string[],
+  floors: PartOfSoulPricingFloors,
 ): CalculatorStageTable {
+  if (stageId === "floors") {
+    return resolveFloorsStageTable(ui, floors, tierKey, fallbackLines);
+  }
   const fromTier = ui.stagesByTier?.[tierKey]?.[stageId];
   const shared = ui.stages?.[stageId];
   const block = fromTier ?? shared;
@@ -114,6 +128,7 @@ function resolveStageTable(
     : [{ label: "Состав работ", value: fallbackLines.join("\n\n") }];
   return {
     imageUrl: block?.imageUrl ?? shared?.imageUrl,
+    secondaryImageUrl: block?.secondaryImageUrl ?? shared?.secondaryImageUrl,
     rows,
   };
 }
@@ -141,7 +156,8 @@ export function HouseProjectCompletionSection({
   };
 }) {
   const { openModalToEstimate } = useModal();
-  const summaryScrollRef = useRef<HTMLDivElement | null>(null);
+  const [stageLightboxOpen, setStageLightboxOpen] = useState(false);
+  const [stageLightboxIndex, setStageLightboxIndex] = useState(0);
 
   const defaultTierDefs = useMemo(
     () => tiersFromMaterials(project.materials.length ? project.materials : DEFAULT_TIERS.map((t) => t.label)),
@@ -174,8 +190,8 @@ export function HouseProjectCompletionSection({
   const fallbackLines = useMemo(() => stageDetails(stage, flat), [flat, stage]);
 
   const table = useMemo(
-    () => resolveStageTable(calculatorUi, tierKey, stage.id, fallbackLines),
-    [calculatorUi, fallbackLines, stage.id, tierKey]
+    () => resolveStageTable(calculatorUi, tierKey, stage.id, fallbackLines, partOfSoulContext.pricingFloors),
+    [calculatorUi, fallbackLines, partOfSoulContext.pricingFloors, stage.id, tierKey]
   );
 
   const imgSrc = useMemo(
@@ -191,6 +207,24 @@ export function HouseProjectCompletionSection({
   );
 
   const isStageDiagram = isCalculatorStageDiagramUrl(imgSrc);
+  const secondaryImgSrc = table.secondaryImageUrl?.trim() || null;
+  const showSecondaryDiagram =
+    Boolean(secondaryImgSrc) && isCalculatorStageDiagramUrl(secondaryImgSrc);
+  const isTextOnlyStage = isCalculatorStageTextOnly(stage.id);
+  const isCompactList = isStageDiagram || isTextOnlyStage;
+
+  const stageLightboxSlides = useMemo(() => {
+    const slides = [{ type: "image" as const, url: imgSrc }];
+    if (showSecondaryDiagram && secondaryImgSrc) {
+      slides.push({ type: "image" as const, url: secondaryImgSrc });
+    }
+    return slides;
+  }, [imgSrc, secondaryImgSrc, showSecondaryDiagram]);
+
+  const openStageLightbox = (index: number) => {
+    setStageLightboxIndex(index);
+    setStageLightboxOpen(true);
+  };
 
   const transportBands = useMemo(
     () => normalizeTransportBands(calculatorUi.transportBands),
@@ -305,7 +339,15 @@ export function HouseProjectCompletionSection({
     });
   }
 
-  function scrollAddons() {
+  function selectEngineeringNetworksAndScroll() {
+    setEngineeringSlugs(applyEngineeringNetworksPreset());
+    document.getElementById("completion-addons")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function selectPrefinishFinishAndScroll() {
+    const preset = applyPrefinishFinishPreset();
+    setEngineeringSlugs(preset.engineering);
+    setConstructionSlugs(new Set(sanitizeConstructionOptionSelection(preset.construction)));
     document.getElementById("completion-addons")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
@@ -317,22 +359,17 @@ export function HouseProjectCompletionSection({
     });
   }
 
-  function scrollSummaryFromCard(event: React.WheelEvent<HTMLElement>) {
-    const scrollArea = summaryScrollRef.current;
-    if (!scrollArea || event.deltaY === 0) return;
-
-    const maxScrollTop = scrollArea.scrollHeight - scrollArea.clientHeight;
-    if (maxScrollTop <= 0) return;
-
-    const nextScrollTop = Math.min(Math.max(scrollArea.scrollTop + event.deltaY, 0), maxScrollTop);
-    if (nextScrollTop === scrollArea.scrollTop) return;
-
-    event.preventDefault();
-    scrollArea.scrollTop = nextScrollTop;
-  }
-
   return (
-    <div className="lg:grid lg:gap-10 xl:gap-12 lg:[grid-template-columns:minmax(0,1fr)_minmax(300px,380px)]">
+    <>
+      <ImageLightbox
+        slides={stageLightboxSlides}
+        index={stageLightboxIndex}
+        open={stageLightboxOpen}
+        onClose={() => setStageLightboxOpen(false)}
+        onIndexChange={setStageLightboxIndex}
+        alt={stage.label}
+      />
+      <div className="lg:grid lg:gap-10 xl:gap-12 lg:[grid-template-columns:minmax(0,1fr)_minmax(300px,380px)]">
       <div className="min-w-0 space-y-10">
         {/* Вводный блок */}
         <div
@@ -433,47 +470,76 @@ export function HouseProjectCompletionSection({
         >
           <div
             className={cn(
-              isStageDiagram ? "flex flex-col" : "grid md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]",
+              isTextOnlyStage || isStageDiagram
+                ? "flex flex-col"
+                : "grid md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]",
             )}
           >
-            <div
-              className={cn(
-                "relative w-full",
-                isStageDiagram
-                  ? "aspect-[16/10] bg-[var(--bg)] p-3 sm:aspect-[16/9] sm:p-4 md:aspect-[2/1]"
-                  : "aspect-[4/3] bg-[var(--stone)] md:aspect-auto md:min-h-[320px]",
-              )}
-            >
-              <CmsImage
-                src={imgSrc}
-                alt=""
-                fill
-                className={cn(
-                  isStageDiagram ? "object-contain object-center" : "object-cover",
-                )}
-                sizes={isStageDiagram ? "100vw" : "(max-width: 768px) 100vw, 50vw"}
-              />
-              <button
-                type="button"
-                onClick={() => window.open(imgSrc, "_blank")}
-                className="absolute inset-0 z-10 cursor-zoom-in bg-transparent"
-                aria-label="Открыть изображение в новой вкладке"
-              />
-              <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-md sm:bottom-4 sm:left-4 sm:px-3 sm:py-1.5 sm:text-xs">
-                <ConstructionStageButtonIcon
-                  iconKey={stage.iconKey}
-                  Lucide={stage.Icon}
-                  active
-                  size="sm"
-                />
-                {stage.label}
+            {!isTextOnlyStage ? (
+              <div className={cn("w-full", showSecondaryDiagram && "flex flex-col gap-2 bg-[var(--bg)] p-2 sm:gap-3 sm:p-3")}>
+                <div
+                  className={cn(
+                    "relative w-full",
+                    isStageDiagram
+                      ? showSecondaryDiagram
+                        ? "aspect-[16/10] bg-[var(--bg)] sm:aspect-[16/9]"
+                        : "aspect-[16/10] bg-[var(--bg)] p-3 sm:aspect-[16/9] sm:p-4 md:aspect-[2/1]"
+                      : "aspect-[4/3] bg-[var(--stone)] md:aspect-auto md:min-h-[320px]",
+                  )}
+                >
+                  <CmsImage
+                    src={imgSrc}
+                    alt=""
+                    fill
+                    className={cn(
+                      isStageDiagram ? "object-contain object-center" : "object-cover",
+                    )}
+                    sizes={isStageDiagram ? "100vw" : "(max-width: 768px) 100vw, 50vw"}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => openStageLightbox(0)}
+                    className="absolute inset-0 z-10 cursor-zoom-in bg-transparent"
+                    aria-label="Открыть изображение"
+                  />
+                  <div className="absolute bottom-3 left-3 z-20 flex items-center gap-2 rounded-full bg-black/55 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-md sm:bottom-4 sm:left-4 sm:px-3 sm:py-1.5 sm:text-xs">
+                    <ConstructionStageButtonIcon
+                      iconKey={stage.iconKey}
+                      Lucide={stage.Icon}
+                      active
+                      size="sm"
+                    />
+                    {stage.label}
+                  </div>
+                </div>
+                {showSecondaryDiagram && secondaryImgSrc ? (
+                  <div className="relative w-full aspect-[16/10] bg-[var(--bg)] sm:aspect-[16/9]">
+                    <CmsImage
+                      src={secondaryImgSrc}
+                      alt=""
+                      fill
+                      className="object-contain object-center"
+                      sizes="100vw"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => openStageLightbox(1)}
+                      className="absolute inset-0 z-10 cursor-zoom-in bg-transparent"
+                      aria-label="Открыть второе изображение"
+                    />
+                  </div>
+                ) : null}
               </div>
-            </div>
+            ) : null}
             <div
               className={cn(
                 "flex flex-col",
-                isStageDiagram ? "border-t p-4 sm:p-5 md:p-6" : "border-t p-6 md:border-t-0 md:border-l md:p-8 lg:p-9",
-                softDivide
+                isTextOnlyStage
+                  ? "p-4 sm:p-5 md:p-6 lg:p-8"
+                  : isStageDiagram
+                    ? "border-t p-4 sm:p-5 md:p-6"
+                    : "border-t p-6 md:border-t-0 md:border-l md:p-8 lg:p-9",
+                !isTextOnlyStage && softDivide,
               )}
             >
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -483,41 +549,71 @@ export function HouseProjectCompletionSection({
                 <h4
                   className={cn(
                     "font-heading leading-tight text-[var(--graphite)]",
-                    isStageDiagram ? "text-lg sm:text-xl" : "text-2xl md:text-[1.65rem]",
+                    isCompactList ? "text-lg sm:text-xl" : "text-2xl md:text-[1.65rem]",
                   )}
                 >
                   {stage.label}
                 </h4>
               </div>
-              <div className={cn("flex-1", isStageDiagram ? "mt-3 space-y-2.5 sm:mt-4" : "mt-6 space-y-5")}>
-                {table.rows.map((row) => (
-                  <div
-                    key={`${row.label}-${row.value.slice(0, 24)}`}
-                    className={cn(
-                      "rounded-xl bg-[color-mix(in_srgb,var(--bg-secondary)_70%,var(--bg))]",
-                      isStageDiagram ? "p-3 sm:p-3.5" : "rounded-2xl p-4",
-                    )}
-                  >
-                    <p
+              <div className={cn("flex-1", isCompactList ? "mt-3 space-y-2.5 sm:mt-4" : "mt-6 space-y-5")}>
+                {table.rows.map((row) =>
+                  row.section ? (
+                    <div
+                      key={`section-${row.label}`}
                       className={cn(
-                        "font-semibold text-[var(--text)]",
-                        isStageDiagram ? "text-xs sm:text-[13px]" : "text-sm",
+                        "border-b pb-2",
+                        softDivide,
+                        isCompactList ? "pt-1 first:pt-0" : "pt-2 first:pt-0",
                       )}
                     >
-                      {row.label}
-                    </p>
-                    <p
+                      <p
+                        className={cn(
+                          "font-heading font-semibold uppercase tracking-[0.06em] text-[var(--accent)]",
+                          isCompactList ? "text-xs sm:text-[13px]" : "text-sm",
+                        )}
+                      >
+                        {row.label}
+                      </p>
+                      {row.value ? (
+                        <p
+                          className={cn(
+                            "mt-1 text-[var(--text-muted)]",
+                            isCompactList ? "text-[11px] sm:text-xs" : "text-sm",
+                          )}
+                        >
+                          {row.value}
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <div
+                      key={`${row.label}-${row.value.slice(0, 24)}`}
                       className={cn(
-                        "whitespace-pre-line text-[var(--text-muted)]",
-                        isStageDiagram
-                          ? "mt-1.5 text-[11px] leading-[1.55] sm:text-xs sm:leading-relaxed"
-                          : "mt-2 text-sm leading-relaxed",
+                        "rounded-xl bg-[color-mix(in_srgb,var(--bg-secondary)_70%,var(--bg))]",
+                        isCompactList ? "p-3 sm:p-3.5" : "rounded-2xl p-4",
                       )}
                     >
-                      {row.value}
-                    </p>
-                  </div>
-                ))}
+                      <p
+                        className={cn(
+                          "font-semibold text-[var(--text)]",
+                          isCompactList ? "text-xs sm:text-[13px]" : "text-sm",
+                        )}
+                      >
+                        {row.label}
+                      </p>
+                      <p
+                        className={cn(
+                          "whitespace-pre-line text-[var(--text-muted)]",
+                          isCompactList
+                            ? "mt-1.5 text-[11px] leading-[1.55] sm:text-xs sm:leading-relaxed"
+                            : "mt-2 text-sm leading-relaxed",
+                        )}
+                      >
+                        {row.value}
+                      </p>
+                    </div>
+                  ),
+                )}
               </div>
               <button
                 type="button"
@@ -535,16 +631,16 @@ export function HouseProjectCompletionSection({
           <button
             type="button"
             className="flex-1 rounded-2xl border-2 border-[var(--accent)] bg-transparent px-5 py-4 text-sm font-semibold text-[var(--accent)] transition hover:bg-[color-mix(in_srgb,var(--accent)_8%,transparent)]"
-            onClick={scrollAddons}
+            onClick={selectEngineeringNetworksAndScroll}
           >
             + Инженерные сети и опции
           </button>
           <button
             type="button"
             className="flex-1 rounded-2xl bg-[var(--accent)] px-5 py-4 text-sm font-semibold text-[var(--accent-contrast)] shadow-[0_8px_28px_rgb(var(--accent-rgb)/0.28)] transition hover:bg-[var(--accent-hover)]"
-            onClick={() => openModalToEstimate()}
+            onClick={selectPrefinishFinishAndScroll}
           >
-            Расчёт White Box
+            Предчистовая отделка
           </button>
         </div>
 
@@ -567,13 +663,12 @@ export function HouseProjectCompletionSection({
       {/* Сайдбар итога */}
       <aside className="mt-10 lg:mt-0 lg:sticky lg:top-28 lg:self-start">
         <div
-          onWheel={scrollSummaryFromCard}
           className={cn(
-            "overflow-hidden rounded-[28px] bg-[var(--bg)] shadow-[0_20px_50px_rgb(0_0_0/0.08)] lg:flex lg:max-h-[calc(100dvh_-_8rem)] lg:flex-col",
+            "overflow-hidden rounded-[28px] bg-[var(--bg)] shadow-[0_20px_50px_rgb(0_0_0/0.08)]",
             softBorder
           )}
         >
-          <div className={cn("shrink-0 p-6 border-b", softDivide)}>
+          <div className={cn("p-6 border-b", softDivide)}>
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">Проект</p>
             <h3 className="mt-1 font-heading text-xl text-[var(--graphite)]">{project.title}</h3>
             <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
@@ -597,10 +692,7 @@ export function HouseProjectCompletionSection({
             </dl>
           </div>
 
-          <div
-            ref={summaryScrollRef}
-            className="min-h-0 px-6 py-5 lg:overflow-y-auto lg:overscroll-contain lg:[-webkit-overflow-scrolling:touch]"
-          >
+          <div className="px-6 py-5">
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">Смета ориентир</p>
             <ul className="mt-4 space-y-3 text-sm">
               <li className="flex justify-between gap-3">
@@ -689,7 +781,7 @@ export function HouseProjectCompletionSection({
                 />
                 <div className="mt-3 flex justify-between gap-3 text-sm">
                   <span className="text-[var(--text-muted)]">
-                    Транспорт
+                    Транспортные расходы
                   </span>
                   <span className="tabular-nums font-semibold text-[var(--text)]">{formatRub(surcharge)}</span>
                 </div>
@@ -697,7 +789,7 @@ export function HouseProjectCompletionSection({
             </ul>
           </div>
 
-          <div className={cn("shrink-0 border-t px-6 pb-6 pt-5", softDivide)}>
+          <div className={cn("border-t px-6 pb-6 pt-5", softDivide)}>
             <div className="rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[color-mix(in_srgb,var(--accent)_75%,#1a5c45)] p-5 text-[var(--accent-contrast)] shadow-[0_12px_36px_rgb(var(--accent-rgb)/0.35)]">
               <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/80">Ориентир итого</p>
               <p className="mt-2 font-heading text-3xl md:text-[2rem] font-bold tabular-nums tracking-tight">
@@ -708,7 +800,7 @@ export function HouseProjectCompletionSection({
                 {catalogMode ?
                   ` + ${formatRub(facadeTotal + engTotal + conTotal)} опции`
                 : ""}
-                {` + ${formatRub(surcharge)} транспорт`}
+                {` + ${formatRub(surcharge)} транспортные расходы`}
               </p>
             </div>
 
@@ -726,5 +818,6 @@ export function HouseProjectCompletionSection({
         </div>
       </aside>
     </div>
+    </>
   );
 }

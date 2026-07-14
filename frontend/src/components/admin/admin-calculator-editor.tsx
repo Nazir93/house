@@ -18,7 +18,7 @@ const CATEGORY_COEFFICIENT_FIELDS = [
   { key: "roofCoef", label: "Коэф. кровли" },
   { key: "perimeterCoef", label: "Коэф. периметра" },
   { key: "insulationCoef", label: "Коэф. утепления" },
-  { key: "gutterCoef", label: "Коэф. водосточки" },
+  { key: "gutterCoef", label: "Коэф. водосточной системы" },
   { key: "soffitCoef", label: "Коэф. софитов" },
   { key: "overlapCoef", label: "Коэф. перекрытия" },
   { key: "crossCoef", label: "Коэф. перекрестного" },

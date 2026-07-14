@@ -6,5 +6,8 @@ describe("proposal-row-labels", () => {
     expect(proposalRowLabel("Разводка воды")).toBe("Разводка воды по дому");
     expect(proposalRowLabel("Внутренняя штукатурка")).toBe("Штукатурка стен");
     expect(PROPOSAL_ROW_LABEL_OVERRIDES["Утепление кровли 250 мм"]).toBe("Утепление перекрестное");
+    expect(proposalRowLabel("Водосточка")).toBe("Водосточная система");
+    expect(proposalRowLabel("Водосточная система")).toBe("Водосточная система");
   });
 });
+

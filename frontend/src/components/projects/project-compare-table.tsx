@@ -370,7 +370,7 @@ export function ProjectCompareTable({
               { label: "Фасад", pick: (c: CompareQuoteCell) => c.facadeTotalRub },
               { label: "Инженерия", pick: (c: CompareQuoteCell) => c.engineeringTotalRub },
               { label: "Отделка", pick: (c: CompareQuoteCell) => c.constructionTotalRub },
-              { label: "Транспорт", pick: (c: CompareQuoteCell) => c.transportSurchargeRub },
+              { label: "Транспортные расходы", pick: (c: CompareQuoteCell) => c.transportSurchargeRub },
             ] as const
           ).map(({ label, pick }) => (
             <PriceBreakdownRow

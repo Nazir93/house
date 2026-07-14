@@ -127,7 +127,7 @@ export const DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG: HouseProjectCalculatorConf
     blind_area: con("Отмостка", "per_blind_area", 0, true, optionMeta("blind_area")),
     drainage: con("Дренаж", "per_perimeter", 0, true, optionMeta("drainage")),
     soffits: con("Софиты", "per_soffit_length", 0, true, optionMeta("soffits")),
-    gutter: con("Водосточка", "per_gutter_length", 0, true, optionMeta("gutter")),
+    gutter: con("Водосточная система", "per_gutter_length", 0, true, optionMeta("gutter")),
     roof_folding: con("Фальцевая кровля", "per_roof", 0, true, optionMeta("roof_folding")),
     roof_soft: con("Мягкая кровля", "per_roof", 0, true, optionMeta("roof_soft")),
     roof_insulation_200: con("Утепление кровли 200 мм", "per_roof", 0, true, optionMeta("roof_insulation_200")),

@@ -66,6 +66,11 @@ describe("buildPublicCatalog", () => {
     });
   });
 
+  it("водосток в каталоге называется «Водосточная система»", () => {
+    const cat = buildPublicCatalog(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG, "a");
+    expect(cat.construction.find((o) => o.slug === "gutter")?.name).toBe("Водосточная система");
+  });
+
   it("shows custom options added from admin", () => {
     const config = structuredClone(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG);
     config.engineering.custom_engineering_signal = {

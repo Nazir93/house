@@ -74,6 +74,7 @@ function lightboxImageUnoptimized(url: string): boolean {
   if (t.startsWith("data:") || /\.(gif|svg)($|\?)/i.test(t)) return true;
   /** Локальные файлы: без `/_next/image` — не ждём ресайз на сервере при открытии модалки. */
   if (t.startsWith("/uploads/")) return true;
+  if (t.includes("/images/calculator/")) return true;
   return false;
 }
 
