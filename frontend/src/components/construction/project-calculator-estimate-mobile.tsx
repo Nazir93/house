@@ -67,8 +67,7 @@ export function ProjectCalculatorEstimateMobile({
   const [portalReady, setPortalReady] = useState(false);
   const [open, setOpen] = useState(false);
   const [inView, setInView] = useState(false);
-  const drawerRef = useRef<HTMLDivElement>(null);
-  const touchStartY = useRef(0);
+  const bodyRef = useRef<HTMLDivElement>(null);
 
   const selectedCount = countSelectedCalculatorOptions({
     facadeSlug,
@@ -103,19 +102,6 @@ export function ProjectCalculatorEstimateMobile({
       document.body.style.overflow = prev;
     };
   }, [open]);
-
-  function onDrawerTouchStart(event: React.TouchEvent) {
-    touchStartY.current = event.touches[0]?.clientY ?? 0;
-  }
-
-  function onDrawerTouchMove(event: React.TouchEvent) {
-    const el = drawerRef.current;
-    if (!el) return;
-    const y = event.touches[0]?.clientY ?? 0;
-    if (el.scrollTop <= 0 && y - touchStartY.current > 48) {
-      setOpen(false);
-    }
-  }
 
   if (!portalReady || !catalogMode) return null;
 
@@ -167,7 +153,6 @@ export function ProjectCalculatorEstimateMobile({
         />
         <aside
           id="project-calculator-estimate-drawer"
-          ref={drawerRef}
           role="dialog"
           aria-modal="true"
           aria-labelledby="project-calculator-estimate-heading"
@@ -175,8 +160,6 @@ export function ProjectCalculatorEstimateMobile({
             "projects-catalog-filters-drawer",
             open && "projects-catalog-filters-drawer--open",
           )}
-          onTouchStart={onDrawerTouchStart}
-          onTouchMove={onDrawerTouchMove}
         >
           <div className="projects-catalog-filters-drawer__head">
             <span
@@ -205,15 +188,7 @@ export function ProjectCalculatorEstimateMobile({
               <X size={18} />
             </button>
           </div>
-          <div
-            className="projects-catalog-filters-drawer__body"
-            onWheel={(event) => {
-              const el = drawerRef.current;
-              if (el && el.scrollTop <= 0 && event.deltaY < 0) {
-                setOpen(false);
-              }
-            }}
-          >
+          <div ref={bodyRef} className="projects-catalog-filters-drawer__body overscroll-contain">
             <ProjectCalculatorEstimatePanel
               compact
               projectTitle={projectTitle}
