@@ -124,50 +124,11 @@ export function ProjectCalculatorCatalogOptions({
           const imageUrl = selected?.imageUrl?.trim();
           if (!description && !imageUrl) return null;
           return (
-            <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-3 sm:p-4">
-              <div
-                className={cn(
-                  "grid items-start gap-3 sm:gap-4",
-                  imageUrl
-                    ? "grid-cols-[minmax(84px,104px)_minmax(0,1fr)] sm:grid-cols-[minmax(120px,148px)_minmax(0,1fr)]"
-                    : "grid-cols-1",
-                )}
-              >
-                {imageUrl ? (
-                  <div
-                    className={cn(
-                      "relative overflow-hidden rounded-lg",
-                      isCalculatorOptionDiagramUrl(imageUrl)
-                        ? "aspect-square bg-transparent"
-                        : "aspect-[4/3] bg-[var(--stone)]",
-                    )}
-                  >
-                    <CmsImage
-                      src={imageUrl}
-                      alt={selected?.name ?? "Фасад"}
-                      fill
-                      unoptimized={isCalculatorOptionDiagramUrl(imageUrl)}
-                      className={cn(
-                        isCalculatorOptionDiagramUrl(imageUrl)
-                          ? "object-contain object-center"
-                          : "object-cover object-center",
-                      )}
-                      sizes="(max-width: 640px) 104px, 148px"
-                    />
-                  </div>
-                ) : null}
-                {description ? (
-                  <div className="min-w-0 self-center sm:self-start">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--accent)] sm:text-[11px]">
-                      Состав работ
-                    </p>
-                    <p className="mt-1.5 whitespace-pre-line text-[11px] leading-relaxed text-[var(--text-muted)] sm:mt-2 sm:text-xs">
-                      {description}
-                    </p>
-                  </div>
-                ) : null}
-              </div>
-            </div>
+            <OptionWorkScope
+              name={selected?.name ?? "Фасад"}
+              description={description}
+              imageUrl={imageUrl}
+            />
           );
         })()}
       </OptionSection>
@@ -330,59 +291,73 @@ function OptionRow({
         </div>
       </div>
       {open && hasFootnote ? (
-        <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-3 sm:p-4">
-          <div
-            className={cn(
-              "grid items-start gap-3 sm:gap-4",
-              imageUrl?.trim()
-                ? "grid-cols-[minmax(84px,104px)_minmax(0,1fr)] sm:grid-cols-[minmax(120px,148px)_minmax(0,1fr)]"
-                : "grid-cols-1",
-            )}
-          >
-            {imageUrl?.trim() ? (
-              <div
-                className={cn(
-                  "relative overflow-hidden rounded-lg",
-                  isCalculatorOptionDiagramUrl(imageUrl)
-                    ? "aspect-square bg-transparent"
-                    : "aspect-[4/3] bg-[var(--stone)]",
-                )}
-              >
-                <CmsImage
-                  src={imageUrl}
-                  alt={name}
-                  fill
-                  unoptimized={isCalculatorOptionDiagramUrl(imageUrl)}
-                  className={cn(
-                    isCalculatorOptionDiagramUrl(imageUrl)
-                      ? "object-contain object-center"
-                      : "object-cover object-center",
-                  )}
-                  sizes="(max-width: 640px) 104px, 148px"
-                />
-                {!isCalculatorOptionDiagramUrl(imageUrl) ? (
-                  <button
-                    type="button"
-                    onClick={() => window.open(imageUrl, "_blank")}
-                    className="absolute inset-0 z-10 cursor-zoom-in bg-transparent"
-                    aria-label={`Открыть схему: ${name}`}
-                  />
-                ) : null}
-              </div>
-            ) : null}
-            {description?.trim() ? (
-              <div className="min-w-0 self-center sm:self-start">
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--accent)] sm:text-[11px]">
-                  Состав работ
-                </p>
-                <p className="mt-1.5 whitespace-pre-line text-[11px] leading-relaxed text-[var(--text-muted)] sm:mt-2 sm:text-xs">
-                  {description}
-                </p>
-              </div>
-            ) : null}
-          </div>
-        </div>
+        <OptionWorkScope name={name} description={description} imageUrl={imageUrl} zoomable={!isCalculatorOptionDiagramUrl(imageUrl)} />
       ) : null}
     </li>
+  );
+}
+
+function OptionWorkScope({
+  name,
+  description,
+  imageUrl,
+  zoomable = false,
+}: {
+  name: string;
+  description?: string | null;
+  imageUrl?: string | null;
+  zoomable?: boolean;
+}) {
+  const src = imageUrl?.trim() || "";
+  const text = description?.trim() || "";
+  const isDiagram = isCalculatorOptionDiagramUrl(src);
+
+  return (
+    <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-3 sm:p-4">
+      <div
+        className={cn(
+          "grid gap-2.5 sm:items-start sm:gap-4",
+          src ? "grid-cols-1 sm:grid-cols-[minmax(120px,160px)_minmax(0,1fr)]" : "grid-cols-1",
+        )}
+      >
+        {src ? (
+          <div
+            className={cn(
+              "relative mx-auto w-full overflow-hidden rounded-lg sm:mx-0",
+              isDiagram
+                ? "aspect-[4/3] max-w-[280px] bg-transparent sm:aspect-square sm:max-w-none"
+                : "aspect-[4/3] max-w-[280px] bg-[var(--stone)] sm:max-w-none",
+            )}
+          >
+            <CmsImage
+              src={src}
+              alt={name}
+              fill
+              unoptimized={isDiagram}
+              className={cn(isDiagram ? "object-contain object-center" : "object-cover object-center")}
+              sizes="(max-width: 640px) 280px, 160px"
+            />
+            {zoomable && !isDiagram ? (
+              <button
+                type="button"
+                onClick={() => window.open(src, "_blank")}
+                className="absolute inset-0 z-10 cursor-zoom-in bg-transparent"
+                aria-label={`Открыть схему: ${name}`}
+              />
+            ) : null}
+          </div>
+        ) : null}
+        {text ? (
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--accent)] sm:text-[11px]">
+              Состав работ
+            </p>
+            <p className="mt-1.5 whitespace-pre-line text-[11px] leading-[1.45] text-[var(--text-muted)] sm:mt-2 sm:text-xs sm:leading-relaxed">
+              {text}
+            </p>
+          </div>
+        ) : null}
+      </div>
+    </div>
   );
 }
