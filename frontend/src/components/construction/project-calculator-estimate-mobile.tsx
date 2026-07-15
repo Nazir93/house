@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ClipboardList, X } from "lucide-react";
 import { formatRub } from "@/lib/construction-data";
@@ -67,7 +67,6 @@ export function ProjectCalculatorEstimateMobile({
   const [portalReady, setPortalReady] = useState(false);
   const [open, setOpen] = useState(false);
   const [inView, setInView] = useState(false);
-  const bodyRef = useRef<HTMLDivElement>(null);
 
   const selectedCount = countSelectedCalculatorOptions({
     facadeSlug,
@@ -188,7 +187,7 @@ export function ProjectCalculatorEstimateMobile({
               <X size={18} />
             </button>
           </div>
-          <div ref={bodyRef} className="projects-catalog-filters-drawer__body overscroll-contain">
+          <div className="projects-catalog-filters-drawer__body overscroll-contain">
             <ProjectCalculatorEstimatePanel
               compact
               projectTitle={projectTitle}
