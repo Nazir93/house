@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   AppWindow,
   BrickWall,
-  ChevronDown,
   DoorOpen,
   Hammer,
   Home,
@@ -23,13 +22,13 @@ import {
 import type { CalculatorStageId, CalculatorStageTable, ProjectCalculatorUi } from "@/lib/project-calculator-types";
 import { useModal } from "@/lib/modal-context";
 import { CmsImage } from "@/components/ui/cms-image";
-import { partOfSoulRoofLabels, type PartOfSoulPricingFloors, type PartOfSoulRoofPitch } from "@/lib/part-of-soul-pricing";
+import { type PartOfSoulPricingFloors, type PartOfSoulRoofPitch } from "@/lib/part-of-soul-pricing";
 import {
   normalizeTransportBands,
-  transportBandIndex,
 } from "@/lib/project-transport-surcharge";
-import { TransportDistanceSlider } from "@/components/construction/transport-distance-slider";
 import { ProjectCalculatorCatalogOptions } from "@/components/construction/project-calculator-catalog-options";
+import { ProjectCalculatorEstimateMobile } from "@/components/construction/project-calculator-estimate-mobile";
+import { ProjectCalculatorEstimatePanel } from "@/components/construction/project-calculator-estimate-panel";
 import type { PublicCalculatorCatalog } from "@/lib/calculator-catalog";
 import type { HouseCalculatorCategoryId } from "@/lib/house-project-calculator-engine";
 import { buildProjectCalculatorLeadPayload } from "@/lib/project-calculator-lead";
@@ -158,6 +157,12 @@ export function HouseProjectCompletionSection({
   const { openModalToEstimate } = useModal();
   const [stageLightboxOpen, setStageLightboxOpen] = useState(false);
   const [stageLightboxIndex, setStageLightboxIndex] = useState(0);
+  const calculatorRootRef = useRef<HTMLDivElement>(null);
+  const [calculatorRootEl, setCalculatorRootEl] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setCalculatorRootEl(calculatorRootRef.current);
+  }, []);
 
   const defaultTierDefs = useMemo(
     () => tiersFromMaterials(project.materials.length ? project.materials : DEFAULT_TIERS.map((t) => t.label)),
@@ -369,7 +374,10 @@ export function HouseProjectCompletionSection({
         onIndexChange={setStageLightboxIndex}
         alt={stage.label}
       />
-      <div className="lg:grid lg:gap-10 xl:gap-12 lg:[grid-template-columns:minmax(0,1fr)_minmax(300px,380px)]">
+      <div
+        ref={calculatorRootRef}
+        className="lg:grid lg:gap-10 xl:gap-12 lg:[grid-template-columns:minmax(0,1fr)_minmax(300px,380px)]"
+      >
       <div className="min-w-0 space-y-10">
         {/* Вводный блок */}
         <div
@@ -660,164 +668,58 @@ export function HouseProjectCompletionSection({
 
       </div>
 
-      {/* Сайдбар итога */}
-      <aside className="mt-10 lg:mt-0 lg:sticky lg:top-28 lg:self-start">
-        <div
-          className={cn(
-            "overflow-hidden rounded-[28px] bg-[var(--bg)] shadow-[0_20px_50px_rgb(0_0_0/0.08)]",
-            softBorder
-          )}
-        >
-          <div className={cn("p-6 border-b", softDivide)}>
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">Проект</p>
-            <h3 className="mt-1 font-heading text-xl text-[var(--graphite)]">{project.title}</h3>
-            <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
-              <div className="rounded-xl bg-[color-mix(in_srgb,var(--bg-secondary)_80%,var(--bg))] px-3 py-2.5">
-                <dt className="text-[var(--text-muted)]">Площадь</dt>
-                <dd className="mt-0.5 font-bold tabular-nums text-[var(--text)]">{project.area} м²</dd>
-              </div>
-              {partOfSoulContext ? (
-                <div className="rounded-xl bg-[color-mix(in_srgb,var(--bg-secondary)_80%,var(--bg))] px-3 py-2.5">
-                  <dt className="text-[var(--text-muted)]">Кровля</dt>
-                  <dd className="mt-0.5 font-semibold text-[var(--text)] leading-snug">
-                    {partOfSoulRoofLabels(partOfSoulContext.roofPitch)}
-                  </dd>
-                </div>
-              ) : (
-                <div className="rounded-xl bg-[color-mix(in_srgb,var(--bg-secondary)_80%,var(--bg))] px-3 py-2.5">
-                  <dt className="text-[var(--text-muted)]">Комплектация</dt>
-                  <dd className="mt-0.5 font-semibold text-[var(--text)] leading-snug">{tier.label}</dd>
-                </div>
-              )}
-            </dl>
-          </div>
-
-          <div className="px-6 py-5">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">Смета ориентир</p>
-            <ul className="mt-4 space-y-3 text-sm">
-              <li className="flex justify-between gap-3">
-                <span className="text-[var(--text-muted)]">Коробка</span>
-                <span className="shrink-0 tabular-nums font-semibold text-[var(--text)]">
-                  {quoteLoading && catalogMode ? "…" : formatRub(shellPrice)}
-                </span>
-              </li>
-              {catalogMode && facadeTotal > 0 ? (
-                <li className="flex justify-between gap-3">
-                  <span className="text-[var(--text-muted)]">Фасад</span>
-                  <span className="shrink-0 tabular-nums font-semibold text-[var(--text)]">{formatRub(facadeTotal)}</span>
-                </li>
-              ) : null}
-              {catalogMode && engTotal > 0 ? (
-                <li className={cn("pt-2 border-t", softDivide)}>
-                  <p className="text-xs font-semibold text-[var(--text)] mb-2">Инженерия</p>
-                  <ul className="space-y-1.5">
-                    {quoteData?.quote.engineeringLines.map((row) => (
-                      <li key={row.id} className="flex justify-between gap-2 text-xs">
-                        <span className="min-w-0 text-[var(--text-muted)] truncate">{row.label}</span>
-                        <span className="tabular-nums font-medium text-[var(--text)]">{formatRub(row.amountRub)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ) : null}
-              {catalogMode && conTotal > 0 ? (
-                <li className={cn("pt-2 border-t", softDivide)}>
-                  <button
-                    type="button"
-                    className={cn(
-                      "flex w-full items-center justify-between gap-2 rounded-xl px-2 py-2 text-left text-xs font-semibold text-[var(--text)] transition",
-                      "hover:bg-[color-mix(in_srgb,var(--accent)_7%,transparent)]"
-                    )}
-                    onClick={() => setConstructionSummaryOpen((value) => !value)}
-                    aria-expanded={constructionSummaryOpen}
-                  >
-                    <span className="min-w-0">
-                      <span>
-                        Доп. опции
-                        <span className="ml-1 font-medium text-[var(--text-muted)]">
-                          ({quoteData?.quote.constructionLines.length ?? 0})
-                        </span>
-                      </span>
-                      <span className="mt-0.5 block text-[11px] font-medium tabular-nums text-[var(--text-muted)]">
-                        {formatRub(conTotal)}
-                      </span>
-                    </span>
-                    <ChevronDown
-                      className={cn(
-                        "h-4 w-4 shrink-0 text-[var(--text-muted)] transition-transform",
-                        constructionSummaryOpen && "rotate-180"
-                      )}
-                      strokeWidth={2}
-                      aria-hidden
-                    />
-                  </button>
-                  {constructionSummaryOpen ? (
-                    <ul className="mt-2 space-y-1.5">
-                      {quoteData?.quote.constructionLines.map((row) => (
-                        <li key={row.id} className="flex justify-between gap-2 text-xs">
-                          <span className="min-w-0 text-[var(--text-muted)] truncate">{row.label}</span>
-                          <span className="tabular-nums font-medium text-[var(--text)]">{formatRub(row.amountRub)}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </li>
-              ) : catalogMode ? (
-                <li className={cn("pt-2 border-t", softDivide)}>
-                  <p className="text-xs text-[var(--text-muted)]">Доп. опции не выбраны</p>
-                </li>
-              ) : null}
-              <li className={cn("pt-3 border-t", softDivide)}>
-                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--text-muted)] mb-3">
-                  Расстояние до объекта
-                </p>
-                <TransportDistanceSlider
-                  bands={transportBands}
-                  valueIndex={transportBandIndex(transportBands, transportId)}
-                  onChangeIndex={(index) => {
-                    const band = transportBands[index];
-                    if (band) setTransportId(band.id);
-                  }}
-                />
-                <div className="mt-3 flex justify-between gap-3 text-sm">
-                  <span className="text-[var(--text-muted)]">
-                    Транспортные расходы
-                  </span>
-                  <span className="tabular-nums font-semibold text-[var(--text)]">{formatRub(surcharge)}</span>
-                </div>
-              </li>
-            </ul>
-          </div>
-
-          <div className={cn("border-t px-6 pb-6 pt-5", softDivide)}>
-            <div className="rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[color-mix(in_srgb,var(--accent)_75%,#1a5c45)] p-5 text-[var(--accent-contrast)] shadow-[0_12px_36px_rgb(var(--accent-rgb)/0.35)]">
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/80">Ориентир итого</p>
-              <p className="mt-2 font-heading text-3xl md:text-[2rem] font-bold tabular-nums tracking-tight">
-                {quoteLoading && catalogMode ? "…" : formatRub(grandTotal)}
-              </p>
-              <p className="mt-2 text-[11px] leading-snug text-white/75">
-                {formatRub(shellPrice)} коробка
-                {catalogMode ?
-                  ` + ${formatRub(facadeTotal + engTotal + conTotal)} опции`
-                : ""}
-                {` + ${formatRub(surcharge)} транспортные расходы`}
-              </p>
-            </div>
-
-            <button
-              type="button"
-              className="mt-4 w-full rounded-2xl bg-[var(--graphite)] py-4 text-sm font-bold text-[var(--bg)] transition hover:opacity-90 dark:bg-[var(--accent-contrast)] dark:text-[var(--graphite)]"
-              onClick={scrollDetailLeadForm}
-            >
-              Получить детальную смету
-            </button>
-            <p className="mt-3 text-center text-[11px] text-[var(--text-muted)] leading-snug">
-              Точная стоимость — после замера участка и согласования комплектации.
-            </p>
-          </div>
-        </div>
+      {/* Сайдбар итога — на десктопе; на мобилке — боковая вкладка «Смета» */}
+      <aside className="mt-10 hidden lg:mt-0 lg:block lg:sticky lg:top-28 lg:self-start">
+        <ProjectCalculatorEstimatePanel
+          projectTitle={project.title}
+          areaM2={project.area}
+          roofPitch={partOfSoulContext.roofPitch}
+          shellPrice={shellPrice}
+          facadeTotal={facadeTotal}
+          engTotal={engTotal}
+          conTotal={conTotal}
+          surcharge={surcharge}
+          grandTotal={grandTotal}
+          quoteLoading={quoteLoading}
+          catalogMode={catalogMode}
+          engineeringLines={quoteData?.quote.engineeringLines ?? []}
+          constructionLines={quoteData?.quote.constructionLines ?? []}
+          constructionSummaryOpen={constructionSummaryOpen}
+          onConstructionSummaryToggle={() => setConstructionSummaryOpen((value) => !value)}
+          transportBands={transportBands}
+          transportId={transportId}
+          onTransportIdChange={setTransportId}
+          onRequestEstimate={scrollDetailLeadForm}
+        />
       </aside>
-    </div>
+      </div>
+      {catalogMode ? (
+        <ProjectCalculatorEstimateMobile
+          observeRoot={calculatorRootEl}
+          projectTitle={project.title}
+          areaM2={project.area}
+          roofPitch={partOfSoulContext.roofPitch}
+          shellPrice={shellPrice}
+          facadeTotal={facadeTotal}
+          engTotal={engTotal}
+          conTotal={conTotal}
+          surcharge={surcharge}
+          grandTotal={grandTotal}
+          quoteLoading={quoteLoading}
+          catalogMode={catalogMode}
+          facadeSlug={facadeSlug}
+          engineeringSlugs={engineeringSlugs}
+          constructionSlugs={constructionSlugs}
+          engineeringLines={quoteData?.quote.engineeringLines ?? []}
+          constructionLines={quoteData?.quote.constructionLines ?? []}
+          constructionSummaryOpen={constructionSummaryOpen}
+          onConstructionSummaryToggle={() => setConstructionSummaryOpen((value) => !value)}
+          transportBands={transportBands}
+          transportId={transportId}
+          onTransportIdChange={setTransportId}
+          onRequestEstimate={scrollDetailLeadForm}
+        />
+      ) : null}
     </>
   );
 }

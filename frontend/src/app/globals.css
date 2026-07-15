@@ -1174,6 +1174,109 @@
     }
   }
 
+  /* Калькулятор комплектации — вкладка «Смета» на правом крае (мобилка) */
+  .project-calculator-estimate-fab {
+    position: fixed;
+    right: 0;
+    top: 42%;
+    z-index: 44;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    width: auto;
+    max-width: min(11.5rem, calc(100vw - 1rem));
+    height: auto;
+    min-height: 3.25rem;
+    padding: 0.55rem 0.65rem 0.55rem 0.7rem;
+    border: 1px solid color-mix(in srgb, var(--text) 10%, transparent);
+    border-right: none;
+    border-radius: 999px 0 0 999px;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.2)),
+      color-mix(in srgb, var(--bg) 78%, transparent);
+    color: var(--text);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      -4px 8px 28px rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(18px) saturate(1.45);
+    -webkit-backdrop-filter: blur(18px) saturate(1.45);
+    transform: translateY(-50%);
+    transition:
+      transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.28s ease,
+      visibility 0.28s ease;
+  }
+
+  [data-theme="dark"] .project-calculator-estimate-fab {
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)),
+      color-mix(in srgb, var(--bg) 82%, transparent);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      -4px 10px 32px rgba(0, 0, 0, 0.35);
+  }
+
+  .project-calculator-estimate-fab--hidden {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-50%) translateX(110%);
+    pointer-events: none;
+  }
+
+  .project-calculator-estimate-fab__meta {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.05rem;
+    text-align: left;
+  }
+
+  .project-calculator-estimate-fab__label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    line-height: 1.1;
+  }
+
+  .project-calculator-estimate-fab__total {
+    max-width: 7.5rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--text);
+  }
+
+  .project-calculator-estimate-fab__badge {
+    position: absolute;
+    top: -0.2rem;
+    left: -0.15rem;
+    display: inline-flex;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.28rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--accent-contrast);
+    font-size: 0.62rem;
+    font-weight: 800;
+    line-height: 1;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--bg) 88%, transparent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .project-calculator-estimate-fab {
+      transition: none;
+    }
+  }
+
   .page-top-offset {
     padding-top: calc(var(--page-top-offset) + env(safe-area-inset-top, 0px));
   }
