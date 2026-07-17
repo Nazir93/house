@@ -7,6 +7,7 @@ import { AUTHOR_HOUSE_PROJECT_CATALOG } from "@/lib/house-project-catalog";
 import { getHeroShellTiersForProject } from "@/lib/project-hero-shell-tiers";
 import { getProjectRenders } from "@/lib/construction-shared";
 import { houseProjectHeroTeaser } from "@/lib/house-project-teaser";
+import { buildMetaDescription } from "@/lib/seo/build-meta-description";
 import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 import { HouseProjectDetailContent } from "./content";
 
@@ -20,7 +21,12 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   const cover = getProjectRenders(project)[0]?.url;
   return getPageMeta({
     title: `${project.title} — проект дома ${project.area} м² | ${SITE_NAME}`,
-    description: houseProjectHeroTeaser(project.shortDescription, project.description),
+    description: buildMetaDescription({
+      primary: houseProjectHeroTeaser(project.shortDescription, project.description),
+      title: project.title,
+      kind: "project",
+      fallback: `${project.title} — проект дома ${project.area} м² от ${SITE_NAME}. Планировки и комплектация.`,
+    }),
     path: `${catalog.basePath}/${project.slug}`,
     keywords: [project.title, "проект дома", `${project.area} м2`, SITE_NAME],
     ...(cover ? { ogImage: cover } : {}),

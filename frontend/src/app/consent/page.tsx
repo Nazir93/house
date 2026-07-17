@@ -7,7 +7,7 @@ import { getPublicSiteUrl, LEGAL_DOCUMENT_EFFECTIVE_DATE } from "@/lib/legal-sit
 export const metadata: Metadata = {
   title: "Согласие на обработку персональных данных",
   description:
-    "Согласие на обработку персональных данных при использовании сайта chastdushi.ru. 152-ФЗ.",
+    "Согласие на обработку персональных данных при отправке заявок и использовании сайта chastdushi.ru. Цели обработки, срок действия и права субъекта по 152-ФЗ.",
   robots: { index: true, follow: true },
 };
 

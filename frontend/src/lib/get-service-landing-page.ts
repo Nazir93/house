@@ -8,6 +8,7 @@ import type { ServiceLandingDocument } from "@/lib/service-landing-schema";
 import { enrichProektirovanieLandingDocument } from "@/lib/service-proektirovanie-landing";
 import { getServiceLandingHeroBannerFields } from "@/lib/service-card-media";
 import { getServiceSeoBySlug } from "@/lib/seo/service-seo-defaults";
+import { buildMetaDescription } from "@/lib/seo/build-meta-description";
 
 function mergeHeroBannersFromDb(
   document: ServiceLandingDocument,
@@ -115,10 +116,13 @@ export async function getServiceMetadataDefaults(slug: string): Promise<{
       select: { title: true, shortDescription: true },
     });
     if (s) {
-      const description = s.shortDescription.replace(/\s+/g, " ").trim();
       return {
         title: `${s.title} | ${SITE_NAME}`,
-        description: description.length > 200 ? `${description.slice(0, 197)}…` : description,
+        description: buildMetaDescription({
+          primary: s.shortDescription,
+          title: s.title,
+          kind: "service",
+        }),
         keywords: [s.title, SITE_NAME],
       };
     }
@@ -128,10 +132,13 @@ export async function getServiceMetadataDefaults(slug: string): Promise<{
 
   const fromConstants = SERVICES.find((x) => x.slug === `/services/${slug}`);
   if (fromConstants) {
-    const description = fromConstants.shortDescription.replace(/\s+/g, " ").trim();
     return {
       title: `${fromConstants.title} | ${SITE_NAME}`,
-      description: description.length > 200 ? `${description.slice(0, 197)}…` : description,
+      description: buildMetaDescription({
+        primary: fromConstants.shortDescription,
+        title: fromConstants.title,
+        kind: "service",
+      }),
       keywords: [fromConstants.title, SITE_NAME],
     };
   }
@@ -141,7 +148,11 @@ export async function getServiceMetadataDefaults(slug: string): Promise<{
     const title = SERVICE_TYPE_LABEL_BY_VALUE[st] ?? slug;
     return {
       title: `${title} | ${SITE_NAME}`,
-      description: `Услуги загородного строительства: ${title.toLowerCase()}. ${SITE_NAME}.`,
+      description: buildMetaDescription({
+        title,
+        kind: "service",
+        fallback: `Услуги загородного строительства: ${title.toLowerCase()}. ${SITE_NAME}.`,
+      }),
       keywords: [title, SITE_NAME],
     };
   }

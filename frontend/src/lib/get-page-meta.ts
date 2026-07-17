@@ -4,6 +4,10 @@ import { prisma } from "@/lib/db";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { toAbsoluteSiteUrl } from "@/lib/absolute-site-url";
 import { SITE_DEFAULT_ICON_PATH } from "@/lib/pwa-config";
+import {
+  pickNonEmptyMetaText,
+  resolvePageMetaDescription,
+} from "@/lib/seo/build-meta-description";
 
 const DEFAULT_OG_PATH = process.env.NEXT_PUBLIC_DEFAULT_OG_IMAGE?.trim() || SITE_DEFAULT_ICON_PATH;
 
@@ -59,17 +63,17 @@ const getCachedPageMetaRow = unstable_cache(
 export async function getPageMeta(defaults: MetaDefaults): Promise<Metadata> {
   const dbMeta = await getCachedPageMetaRow(defaults.path);
 
-  const title = dbMeta?.title || defaults.title;
-  const description = dbMeta?.description || defaults.description;
+  const title = pickNonEmptyMetaText(dbMeta?.title, defaults.title) || SITE_NAME;
+  const description = resolvePageMetaDescription(dbMeta?.description, defaults.description);
   const keywords = dbMeta?.keywords
-    ? dbMeta.keywords.split(",").map((k) => k.trim())
+    ? dbMeta.keywords.split(",").map((k) => k.trim()).filter(Boolean)
     : defaults.keywords;
 
   const baseUrl = SITE_URL.replace(/\/$/, "");
   const canonical = `${baseUrl}${defaults.path === "/" ? "" : defaults.path}`;
   const noindex = Boolean(dbMeta?.noindex);
 
-  const explicitOg = (dbMeta?.ogImage || defaults.ogImage || "").trim();
+  const explicitOg = pickNonEmptyMetaText(dbMeta?.ogImage, defaults.ogImage);
   const fallbackRel = defaults.skipDefaultOgImage ? "" : DEFAULT_OG_PATH;
   const ogHref = explicitOg || fallbackRel;
   const ogAbs = ogHref ? toAbsoluteSiteUrl(ogHref) : undefined;
@@ -87,16 +91,16 @@ export async function getPageMeta(defaults: MetaDefaults): Promise<Metadata> {
       ...(art.tags?.length ? { tags: art.tags } : {}),
     };
 
-  const twitterTitle = dbMeta?.ogTitle?.trim() || title;
-  const twitterDescription = dbMeta?.ogDescription?.trim() || description;
+  const ogTitle = pickNonEmptyMetaText(dbMeta?.ogTitle, title);
+  const ogDescription = pickNonEmptyMetaText(dbMeta?.ogDescription, description);
 
   return {
     title: { absolute: title },
     description,
     ...(keywords && keywords.length > 0 && { keywords }),
     openGraph: {
-      title: dbMeta?.ogTitle || title,
-      description: dbMeta?.ogDescription || description,
+      title: ogTitle,
+      description: ogDescription,
       type: (defaults.openGraphType ?? "website") as "website" | "article",
       locale: "ru_RU",
       siteName: SITE_NAME,
@@ -106,8 +110,8 @@ export async function getPageMeta(defaults: MetaDefaults): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: twitterTitle,
-      description: twitterDescription,
+      title: ogTitle,
+      description: ogDescription,
       ...(ogAbs ? { images: [ogAbs] } : {}),
     },
     alternates: { canonical },

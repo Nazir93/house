@@ -35,6 +35,7 @@ import { historyStagesForAdmin } from "@/lib/built-object-detail";
 import type { AdminHouseProjectOption } from "@/lib/load-admin-house-project-options";
 import { uploadAdminMedia } from "@/lib/admin-upload";
 import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
+import { sortFilesForGalleryOrder } from "@/lib/sort-files-for-gallery-order";
 
 const MATERIALS = [
   ["GAS_BLOCK", "Газобетон"],
@@ -310,6 +311,7 @@ export function BuiltObjectForm({
 
   async function uploadMany(target: UploadTarget, files: File[]) {
     if (files.length === 0) return;
+    const ordered = files.length > 1 ? sortFilesForGalleryOrder(files) : files;
     setUploading(target);
     setUploadProgress("");
     setError("");
@@ -317,9 +319,9 @@ export function BuiltObjectForm({
     const uploadedUrls: string[] = [];
 
     try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i]!;
-        if (files.length > 1) setUploadProgress(`${i + 1} / ${files.length}`);
+      for (let i = 0; i < ordered.length; i++) {
+        const file = ordered[i]!;
+        if (ordered.length > 1) setUploadProgress(`${i + 1} / ${ordered.length}`);
         const { url, error: uploadError } = await uploadAdminMedia(file);
         if (uploadError || !url) {
           errors.push(

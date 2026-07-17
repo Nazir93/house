@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { SITE_NAME } from "@/lib/constants";
 import { getPageMeta, getPageH1 } from "@/lib/get-page-meta";
+import { buildMetaDescription } from "@/lib/seo/build-meta-description";
 import { BlogArticleJsonLd } from "@/components/seo/blog-article-json-ld";
 import { BlogPostContent } from "./content";
 
@@ -47,7 +48,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   return getPageMeta({
     title: `${post.title} | ${SITE_NAME}`,
-    description: post.excerpt,
+    description: buildMetaDescription({
+      primary: post.excerpt,
+      title: post.title,
+      kind: "blog",
+    }),
     path,
     keywords,
     ogImage: post.coverImage || undefined,

@@ -1,9 +1,24 @@
 "use client";
 
 import { useRef } from "react";
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, GripVertical, Plus, Trash2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  ArrowUpDown,
+  GripVertical,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { CmsImage } from "@/components/ui/cms-image";
 import { moveItemInArray, moveListItem } from "@/lib/reorder-list";
+import { reverseGalleryUrls, sortFilesForGalleryOrder } from "@/lib/sort-files-for-gallery-order";
+
+function pickFilesForUpload(list: FileList | null): File[] {
+  const files = Array.from(list ?? []);
+  return files.length > 1 ? sortFilesForGalleryOrder(files) : files;
+}
 
 type AdminImageUrlListProps = {
   title: string;
@@ -46,7 +61,7 @@ export function AdminImageUrlList({
             className="hidden"
             disabled={uploading}
             onChange={(e) => {
-              const files = Array.from(e.target.files ?? []);
+              const files = pickFilesForUpload(e.target.files);
               if (files.length) onUploadFiles(files);
               e.target.value = "";
             }}
@@ -139,7 +154,7 @@ export function AdminPlanImageList({
             className="hidden"
             disabled={uploading}
             onChange={(e) => {
-              const files = Array.from(e.target.files ?? []);
+              const files = pickFilesForUpload(e.target.files);
               if (files.length) onUploadFiles(files);
               e.target.value = "";
             }}
@@ -244,22 +259,36 @@ export function AdminDragImageUrlList({
         <p className="text-sm font-semibold adm-muted">
           {title} ({items.length})
         </p>
-        <label className="adm-btn-media shrink-0 cursor-pointer text-xs">
-          <Plus size={14} aria-hidden />
-          {uploading ? (uploadProgress ? `Загрузка ${uploadProgress}…` : "Загрузка…") : "Добавить"}
-          <input
-            type="file"
-            accept={accept}
-            multiple
-            className="hidden"
-            disabled={uploading}
-            onChange={(e) => {
-              const files = Array.from(e.target.files ?? []);
-              if (files.length) onUploadFiles(files);
-              e.target.value = "";
-            }}
-          />
-        </label>
+        <div className="flex shrink-0 items-center gap-1.5">
+          {items.length > 1 ? (
+            <button
+              type="button"
+              onClick={() => onItemsChange(reverseGalleryUrls(items))}
+              className="adm-btn-media text-xs"
+              title="Перевернуть порядок: с конца в начало и наоборот"
+              aria-label="Перевернуть порядок фото"
+            >
+              <ArrowUpDown size={14} aria-hidden />
+              Порядок
+            </button>
+          ) : null}
+          <label className="adm-btn-media cursor-pointer text-xs">
+            <Plus size={14} aria-hidden />
+            {uploading ? (uploadProgress ? `Загрузка ${uploadProgress}…` : "Загрузка…") : "Добавить"}
+            <input
+              type="file"
+              accept={accept}
+              multiple
+              className="hidden"
+              disabled={uploading}
+              onChange={(e) => {
+                const files = pickFilesForUpload(e.target.files);
+                if (files.length) onUploadFiles(files);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        </div>
       </div>
       {emptyHint && items.length === 0 ? (
         <p className="text-xs leading-relaxed adm-faint">{emptyHint}</p>

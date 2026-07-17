@@ -9,6 +9,7 @@ import { getBuiltObjectBySlug } from "@/lib/construction-data";
 import { getPublicFaqs } from "@/lib/get-public-faqs";
 import { getBuiltObjectCover, builtObjectMaterialLabel } from "@/lib/construction-shared";
 import { getPageMeta } from "@/lib/get-page-meta";
+import { buildMetaDescription } from "@/lib/seo/build-meta-description";
 import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 import { BuiltObjectDetailContent } from "./built-content";
 
@@ -41,7 +42,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 
   return getPageMeta({
     title: `${object.title} — ${section.titleSuffix} | ${SITE_NAME}`,
-    description: object.description.replace(/<[^>]*>/g, "").slice(0, 180),
+    description: buildMetaDescription({
+      html: object.description,
+      title: object.title,
+      kind: "portfolio",
+      fallback: `${object.title} — ${section.titleSuffix} ${SITE_NAME}. Фото, этапы строительства и характеристики объекта.`,
+    }),
     path,
     keywords,
     ...(cover?.url ? { ogImage: cover.url } : {}),

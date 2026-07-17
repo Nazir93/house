@@ -8,7 +8,7 @@ import { Construction } from "lucide-react";
 export async function generateMetadata() {
   return getPageMeta({
     title: `Аренда и ремонт | ${SITE_NAME}`,
-    description: `Раздел в разработке. ${SITE_NAME}, ${CITY}.`,
+    description: `Аренда спецтехники и ремонт для партнёров ${SITE_NAME} в ${CITY}. Раздел готовится — оставьте заявку через контакты или партнёрские формы на сайте.`,
     path: "/partners/rent-repair",
     keywords: ["аренда", "ремонт", SITE_NAME, CITY],
   });

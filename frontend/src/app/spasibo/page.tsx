@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { SITE_NAME } from "@/lib/constants";
 import { ThankYouContent } from "./content";
 
 export const metadata: Metadata = {
   title: "Спасибо за заявку",
+  description: `Заявка отправлена. Специалист ${SITE_NAME} свяжется с вами, чтобы уточнить детали проекта и ответить на вопросы.`,
   robots: { index: false, follow: false },
 };
 
