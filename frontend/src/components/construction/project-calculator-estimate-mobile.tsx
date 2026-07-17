@@ -111,7 +111,7 @@ export function ProjectCalculatorEstimateMobile({
       <button
         type="button"
         className={cn(
-          "project-calculator-estimate-fab lg:hidden",
+          "project-calculator-estimate-fab",
           !showFab && "project-calculator-estimate-fab--hidden",
         )}
         onClick={() => setOpen(true)}
@@ -138,7 +138,7 @@ export function ProjectCalculatorEstimateMobile({
 
       <div
         className={cn(
-          "projects-catalog-filters-overlay lg:hidden",
+          "projects-catalog-filters-overlay project-calculator-estimate-overlay",
           open && "projects-catalog-filters-overlay--open",
         )}
         aria-hidden={!open}
@@ -156,7 +156,7 @@ export function ProjectCalculatorEstimateMobile({
           aria-modal="true"
           aria-labelledby="project-calculator-estimate-heading"
           className={cn(
-            "projects-catalog-filters-drawer",
+            "projects-catalog-filters-drawer project-calculator-estimate-drawer",
             open && "projects-catalog-filters-drawer--open",
           )}
         >

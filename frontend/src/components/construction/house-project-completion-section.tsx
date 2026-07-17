@@ -28,7 +28,6 @@ import {
 } from "@/lib/project-transport-surcharge";
 import { ProjectCalculatorCatalogOptions } from "@/components/construction/project-calculator-catalog-options";
 import { ProjectCalculatorEstimateMobile } from "@/components/construction/project-calculator-estimate-mobile";
-import { ProjectCalculatorEstimatePanel } from "@/components/construction/project-calculator-estimate-panel";
 import type { PublicCalculatorCatalog } from "@/lib/calculator-catalog";
 import type { HouseCalculatorCategoryId } from "@/lib/house-project-calculator-engine";
 import { buildProjectCalculatorLeadPayload } from "@/lib/project-calculator-lead";
@@ -374,10 +373,7 @@ export function HouseProjectCompletionSection({
         onIndexChange={setStageLightboxIndex}
         alt={stage.label}
       />
-      <div
-        ref={calculatorRootRef}
-        className="lg:grid lg:gap-10 xl:gap-12 lg:[grid-template-columns:minmax(0,1fr)_minmax(300px,380px)]"
-      >
+      <div ref={calculatorRootRef} className="min-w-0">
       <div className="min-w-0 space-y-10">
         {/* Вводный блок */}
         <div
@@ -667,31 +663,6 @@ export function HouseProjectCompletionSection({
         ) : null}
 
       </div>
-
-      {/* Сайдбар итога — на десктопе; на мобилке — боковая вкладка «Смета» */}
-      <aside className="mt-10 hidden lg:mt-0 lg:block lg:sticky lg:top-28 lg:self-start">
-        <ProjectCalculatorEstimatePanel
-          projectTitle={project.title}
-          areaM2={project.area}
-          roofPitch={partOfSoulContext.roofPitch}
-          shellPrice={shellPrice}
-          facadeTotal={facadeTotal}
-          engTotal={engTotal}
-          conTotal={conTotal}
-          surcharge={surcharge}
-          grandTotal={grandTotal}
-          quoteLoading={quoteLoading}
-          catalogMode={catalogMode}
-          engineeringLines={quoteData?.quote.engineeringLines ?? []}
-          constructionLines={quoteData?.quote.constructionLines ?? []}
-          constructionSummaryOpen={constructionSummaryOpen}
-          onConstructionSummaryToggle={() => setConstructionSummaryOpen((value) => !value)}
-          transportBands={transportBands}
-          transportId={transportId}
-          onTransportIdChange={setTransportId}
-          onRequestEstimate={scrollDetailLeadForm}
-        />
-      </aside>
       </div>
       {catalogMode ? (
         <ProjectCalculatorEstimateMobile

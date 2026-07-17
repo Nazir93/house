@@ -1174,7 +1174,7 @@
     }
   }
 
-  /* Калькулятор комплектации — вкладка «Смета» на правом крае (мобилка) */
+  /* Калькулятор комплектации — вкладка «Смета» на правом крае */
   .project-calculator-estimate-fab {
     position: fixed;
     right: 0;
@@ -1205,6 +1205,29 @@
       transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
       opacity 0.28s ease,
       visibility 0.28s ease;
+  }
+
+  @media (min-width: 1024px) {
+    .project-calculator-estimate-fab {
+      top: 46%;
+      max-width: 13rem;
+      min-height: 3.5rem;
+      gap: 0.55rem;
+      padding: 0.7rem 0.85rem 0.7rem 0.9rem;
+    }
+
+    .project-calculator-estimate-fab__label {
+      font-size: 0.68rem;
+    }
+
+    .project-calculator-estimate-fab__total {
+      max-width: 8.5rem;
+      font-size: 0.82rem;
+    }
+
+    .project-calculator-estimate-drawer.projects-catalog-filters-drawer {
+      width: min(100vw - 4rem, 26rem);
+    }
   }
 
   [data-theme="dark"] .project-calculator-estimate-fab {
