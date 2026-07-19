@@ -1,25 +1,41 @@
-/** PNG-иконки этапов: светлая и тёмная тема (файлы в public/images/stage-icons). */
+/** Иконки этапов: light = чёрный контур (светлый фон), dark = белый (тёмный/акцент). */
 export type ConstructionStageImageIconAssets = {
   light: string;
   dark: string;
 };
 
 export const CONSTRUCTION_STAGE_ICON_IMAGES = {
+  prep: {
+    light: "/images/stage-icons/prep-light.svg",
+    dark: "/images/stage-icons/prep-dark.svg",
+  },
   foundation: {
-    light: "/images/stage-icons/foundation-light.png",
-    dark: "/images/stage-icons/foundation-dark.png",
+    light: "/images/stage-icons/foundation-light.svg",
+    dark: "/images/stage-icons/foundation-dark.svg",
   },
   walls: {
-    light: "/images/stage-icons/walls-light.png",
-    dark: "/images/stage-icons/walls-dark.png",
+    light: "/images/stage-icons/walls-light.svg",
+    dark: "/images/stage-icons/walls-dark.svg",
   },
-  windows: {
-    light: "/images/stage-icons/windows-light.png",
-    dark: "/images/stage-icons/windows-dark.png",
+  belt: {
+    light: "/images/stage-icons/belt-light.svg",
+    dark: "/images/stage-icons/belt-dark.svg",
+  },
+  floors: {
+    light: "/images/stage-icons/floors-light.svg",
+    dark: "/images/stage-icons/floors-dark.svg",
   },
   roof: {
-    light: "/images/stage-icons/roof-light.png",
-    dark: "/images/stage-icons/roof-dark.png",
+    light: "/images/stage-icons/roof-light.svg",
+    dark: "/images/stage-icons/roof-dark.svg",
+  },
+  windows: {
+    light: "/images/stage-icons/windows-light.svg",
+    dark: "/images/stage-icons/windows-dark.svg",
+  },
+  doors: {
+    light: "/images/stage-icons/doors-light.svg",
+    dark: "/images/stage-icons/doors-dark.svg",
   },
   interior: {
     light: "/images/stage-icons/interior-light.png",
@@ -54,7 +70,7 @@ export function resolveConstructionStageIconAssets(
   return CONSTRUCTION_STAGE_ICON_IMAGES[iconKey];
 }
 
-/** На акцентном фоне (зелёная кнопка) всегда белая версия иконки. */
+/** На акцентном фоне (зелёная кнопка) всегда светлая (белая) версия иконки. */
 export function resolveConstructionStageIconSrc(
   iconKey: string,
   theme: "light" | "dark",

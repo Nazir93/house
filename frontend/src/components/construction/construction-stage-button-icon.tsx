@@ -4,7 +4,7 @@ import { ConstructionStageIconImage } from "@/components/construction/constructi
 import { hasConstructionStageImageIcon } from "@/lib/construction-stage-icon-images";
 import { cn } from "@/lib/utils";
 
-/** Иконка этапа в кнопке калькулятора: PNG при наличии, иначе Lucide. */
+/** Иконка этапа в кнопке калькулятора: SVG/PNG при наличии, иначе Lucide. */
 export function ConstructionStageButtonIcon({
   iconKey,
   Lucide,

@@ -91,14 +91,14 @@ const STAGES: Array<{
   keywords: string[];
   fallback: string;
 }> = [
-  { id: "prep", label: "Подготовка", Icon: Hammer, keywords: ["подготов", "разметк", "участ", "проект", "бти", "документ"], fallback: "Организация подготовки стройплощадки по проекту." },
+  { id: "prep", label: "Подготовка", Icon: Hammer, iconKey: "prep", keywords: ["подготов", "разметк", "участ", "проект", "бти", "документ"], fallback: "Организация подготовки стройплощадки по проекту." },
   { id: "foundation", label: "Фундамент", Icon: Layers, iconKey: "foundation", keywords: ["фундамент", "плит", "лент"], fallback: "Устройство основания согласно геологии участка." },
   { id: "walls", label: "Стены", Icon: BrickWall, iconKey: "walls", keywords: ["стен", "коробк", "газобетон", "блок", "кирпич"], fallback: "Возведение несущих и ненесущих стен по проекту." },
-  { id: "belt", label: "Пояс", Icon: Minus, keywords: ["пояс", "монолит", "армопояс"], fallback: "Монолитный пояс для распределения нагрузки." },
-  { id: "floors", label: "Перекрытия", Icon: LayoutGrid, keywords: ["перекрыт", "плит перек"], fallback: "Перекрытия по несущей схеме дома." },
+  { id: "belt", label: "Пояс", Icon: Minus, iconKey: "belt", keywords: ["пояс", "монолит", "армопояс"], fallback: "Монолитный пояс для распределения нагрузки." },
+  { id: "floors", label: "Перекрытия", Icon: LayoutGrid, iconKey: "floors", keywords: ["перекрыт", "плит перек"], fallback: "Перекрытия по несущей схеме дома." },
   { id: "roof", label: "Кровля", Icon: Home, iconKey: "roof", keywords: ["кровл", "стропил"], fallback: "Стропильная система и кровельное покрытие." },
   { id: "windows", label: "Окна", Icon: AppWindow, iconKey: "windows", keywords: ["окн"], fallback: "Остекление по спецификации проекта." },
-  { id: "doors", label: "Двери", Icon: DoorOpen, keywords: ["двер"], fallback: "Входная группа и технические проёмы по комплектации." },
+  { id: "doors", label: "Двери", Icon: DoorOpen, iconKey: "doors", keywords: ["двер"], fallback: "Входная группа и технические проёмы по комплектации." },
 ];
 
 function stageDetails(stage: (typeof STAGES)[0], flat: string[]): string[] {

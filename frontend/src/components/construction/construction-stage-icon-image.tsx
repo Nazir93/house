@@ -8,7 +8,7 @@ import {
   resolveConstructionStageIconAssets,
 } from "@/lib/construction-stage-icon-images";
 
-/** PNG-иконка этапа: маска без фона, цвет задаёт тема (зелёный / белый). */
+/** Иконка этапа (SVG/PNG): маска без фона, цвет задаёт тема (акцент / белый). */
 export function ConstructionStageIconImage({
   iconKey,
   className,
