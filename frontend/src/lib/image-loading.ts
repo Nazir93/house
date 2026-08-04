@@ -1,5 +1,4 @@
 const UNOPTIMIZED_IMAGE_RE = /\.(gif|svg)($|\?)/i;
-const BROWSER_READY_UPLOAD_RE = /\.(avif|webp|jpe?g|png)($|\?)/i;
 
 function cleanImageSrc(src: string): string {
   return src.trim();
@@ -13,12 +12,16 @@ export function isPublicStaticImageSrc(src: string): boolean {
   return cleanImageSrc(src).startsWith("/images/");
 }
 
+/**
+ * Когда true — next/image не ресайзит файл (отдаём как есть).
+ * SVG/GIF/data всегда напрямую. Растры /images и /uploads идут через оптимизатор —
+ * иначе на мобильном 4G LCP раздувается до десятков секунд (полноразмерные webp/png).
+ */
 export function shouldUseBrowserImageDirectly(src: string): boolean {
   const value = cleanImageSrc(src);
   if (!value) return false;
   if (value.startsWith("data:") || UNOPTIMIZED_IMAGE_RE.test(value)) return true;
-  if (!BROWSER_READY_UPLOAD_RE.test(value)) return false;
-  return isUploadImageSrc(value) || isPublicStaticImageSrc(value);
+  return false;
 }
 
 export function buildNextImagePrefetchHref(src: string, width: number, quality: number): string {

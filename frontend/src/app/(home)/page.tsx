@@ -1,3 +1,4 @@
+import dynamic from "next/dynamic";
 import { getPageMeta } from "@/lib/get-page-meta";
 import { getHouseProjects, getHomeBuiltPortfolio } from "@/lib/construction-data";
 import { getHeroShellTiersForProject } from "@/lib/project-hero-shell-tiers";
@@ -10,16 +11,64 @@ import { BannerSection } from "@/components/sections/banner";
 import { getHomeHeroBannerConfig } from "@/lib/home-hero-banner-config";
 import { ProjectsConstructorSection } from "@/components/sections/projects-constructor-section";
 import { FeaturedHouseProjectsSection } from "@/components/sections/featured-house-projects";
-import { ClientsChooseVideoSection } from "@/components/sections/clients-choose-video-section";
-import { AccountShowcaseSection } from "@/components/sections/account-showcase-section";
-import { HomePartnersSection } from "@/components/sections/home-partners-section";
-import { PortfolioSection } from "@/components/sections/portfolio";
-import { HomeNewsFeed } from "@/components/sections/home-news-feed";
-import {
-  CaseStudyFaqSectionClient,
-  ConstructionServicesStagesSection,
-} from "@/components/sections/case-study-landing-sections";
-import { BankPartnersMarqueeSection } from "@/components/sections/bank-partners-marquee-section";
+
+/** Ниже первого экрана — отдельные чанки, не блокируют LCP баннера. */
+const ClientsChooseVideoSection = dynamic(
+  () =>
+    import("@/components/sections/clients-choose-video-section").then((m) => ({
+      default: m.ClientsChooseVideoSection,
+    })),
+  { loading: () => <div className="min-h-[50vh]" aria-hidden /> },
+);
+const AccountShowcaseSection = dynamic(
+  () =>
+    import("@/components/sections/account-showcase-section").then((m) => ({
+      default: m.AccountShowcaseSection,
+    })),
+  { loading: () => null },
+);
+const HomePartnersSection = dynamic(
+  () =>
+    import("@/components/sections/home-partners-section").then((m) => ({
+      default: m.HomePartnersSection,
+    })),
+  { loading: () => null },
+);
+const PortfolioSection = dynamic(
+  () =>
+    import("@/components/sections/portfolio").then((m) => ({
+      default: m.PortfolioSection,
+    })),
+  { loading: () => <div className="min-h-[40vh]" aria-hidden /> },
+);
+const ConstructionServicesStagesSection = dynamic(
+  () =>
+    import("@/components/sections/case-study-landing-sections").then((m) => ({
+      default: m.ConstructionServicesStagesSection,
+    })),
+  { loading: () => null },
+);
+const HomeNewsFeed = dynamic(
+  () =>
+    import("@/components/sections/home-news-feed").then((m) => ({
+      default: m.HomeNewsFeed,
+    })),
+  { loading: () => null },
+);
+const BankPartnersMarqueeSection = dynamic(
+  () =>
+    import("@/components/sections/bank-partners-marquee-section").then((m) => ({
+      default: m.BankPartnersMarqueeSection,
+    })),
+  { loading: () => null },
+);
+const CaseStudyFaqSectionClient = dynamic(
+  () =>
+    import("@/components/sections/case-study-landing-sections").then((m) => ({
+      default: m.CaseStudyFaqSectionClient,
+    })),
+  { loading: () => null },
+);
 
 export const revalidate = 60;
 
@@ -50,8 +99,8 @@ export default async function HomePage() {
       houseProjects.map(async (project) => [
         project.id,
         await getHeroShellTiersForProject(project),
-      ])
-    )
+      ]),
+    ),
   );
 
   return (

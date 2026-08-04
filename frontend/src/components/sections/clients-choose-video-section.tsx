@@ -6,12 +6,16 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { isLowPerfDevice } from "@/lib/use-perf";
 import { CLIENTS_CHOOSE_SERVICES } from "@/lib/clients-choose-services";
 import {
   getClientsChooseScrollState,
   resolveClientsChooseSlideVisual,
   resolveClientsChooseVideoProgress,
 } from "@/lib/clients-choose-scroll-state";
+
+/** Минимальный интервал seek по видео — чаще даёт jank на слабых CPU/GPU. */
+const VIDEO_SEEK_MIN_MS = 120;
 
 /** Высота скролл-трека на один пункт услуги (vh). */
 const SCROLL_VH_PER_ITEM_MOBILE = 72;
@@ -156,14 +160,27 @@ function ServiceSlideStack({
   );
 }
 
+function shouldScrubServicesVideo(): boolean {
+  if (typeof window === "undefined") return false;
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
+  if (isLowPerfDevice()) return false;
+  return true;
+}
+
 export function ClientsChooseVideoSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const lastSeekRef = useRef<number>(NaN);
+  const lastSeekAtRef = useRef(0);
+  const scrubAllowedRef = useRef(true);
   const [, setActiveIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(false);
+
+  useEffect(() => {
+    scrubAllowedRef.current = shouldScrubServicesVideo();
+  }, []);
 
   const syncScrollToServices = useCallback(() => {
     const section = sectionRef.current;
@@ -183,12 +200,17 @@ export function ClientsChooseVideoSection() {
       return prev === baseIndex ? prev : baseIndex;
     });
 
+    if (!scrubAllowedRef.current) return;
+
     const video = videoRef.current;
     if (!video || !videoEnabled) return;
     if (!video.duration || Number.isNaN(video.duration) || !Number.isFinite(video.duration)) {
       warmUpVideo(video);
       return;
     }
+
+    const now = performance.now();
+    if (now - lastSeekAtRef.current < VIDEO_SEEK_MIN_MS) return;
 
     const videoNorm = resolveClientsChooseVideoProgress(progress, SERVICES.length);
     let t = videoNorm * video.duration;
@@ -204,9 +226,10 @@ export function ClientsChooseVideoSection() {
 
     try {
       video.pause();
-      if (!Number.isFinite(lastSeekRef.current) || Math.abs(t - lastSeekRef.current) >= 0.03) {
+      if (!Number.isFinite(lastSeekRef.current) || Math.abs(t - lastSeekRef.current) >= 0.05) {
         video.currentTime = t;
         lastSeekRef.current = t;
+        lastSeekAtRef.current = now;
       }
     } catch {
       /* ignore */
@@ -256,11 +279,14 @@ export function ClientsChooseVideoSection() {
     const io = new IntersectionObserver(
       ([entry]) => {
         const next = entry.isIntersecting;
-        if (next) setVideoEnabled(true);
+        // На слабых устройствах не грузим 4+ MB видео и не крутим rAF-seek.
+        if (next && scrubAllowedRef.current) setVideoEnabled(true);
         if (next && !active) {
           active = true;
           syncScrollToServices();
-          raf = requestAnimationFrame(tick);
+          if (scrubAllowedRef.current) {
+            raf = requestAnimationFrame(tick);
+          }
         } else if (!next && active) {
           active = false;
           cancelAnimationFrame(raf);

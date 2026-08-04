@@ -114,7 +114,6 @@ function CaseRow({
                   fill
                   className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                   sizes="(max-width: 768px) 100vw, 540px"
-                  unoptimized={imgUrl.startsWith("/uploads/")}
                 />
               ) : (
                 <div className="flex h-full items-center justify-center text-[11px] uppercase tracking-wider text-[var(--text-subtle)]">

@@ -81,10 +81,13 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
     };
 
     preload(theme === "dark" ? config.backgrounds.dark : config.backgrounds.light, "high");
-    for (const promo of promos) {
-      preload(promo.image);
-    }
-  }, [config.backgrounds.dark, config.backgrounds.light, promos, theme]);
+    // Только текущий и следующий слайд — прелоад всех промо конкурирует с LCP на слабых сетях.
+    if (promos.length === 0) return;
+    const current = promos[slideIndex];
+    const next = promos[(slideIndex + 1) % promos.length];
+    if (current?.image) preload(current.image, "high");
+    if (next?.image && next !== current) preload(next.image, "auto");
+  }, [config.backgrounds.dark, config.backgrounds.light, promos, slideIndex, theme]);
 
   if (!slide) return null;
 
@@ -103,33 +106,17 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
         )}
         aria-hidden
       >
+        {/* Только активная тема — не грузим оба полноэкранных фона сразу (бьёт по LCP). */}
         <CmsImage
-          src={config.backgrounds.dark}
+          key={theme === "dark" ? config.backgrounds.dark : config.backgrounds.light}
+          src={theme === "dark" ? config.backgrounds.dark : config.backgrounds.light}
           alt=""
           fill
-          unoptimized
-          priority={theme === "dark"}
-          fetchPriority={theme === "dark" ? "high" : "low"}
-          loading={theme === "dark" ? "eager" : "lazy"}
+          priority
+          fetchPriority="high"
+          quality={75}
           sizes="100vw"
-          className={cn(
-            "object-cover object-center transition-opacity duration-700 ease-out",
-            theme === "dark" ? "opacity-100" : "opacity-0",
-          )}
-        />
-        <CmsImage
-          src={config.backgrounds.light}
-          alt=""
-          fill
-          unoptimized
-          priority={theme === "light"}
-          fetchPriority={theme === "light" ? "high" : "low"}
-          loading={theme === "light" ? "eager" : "lazy"}
-          sizes="100vw"
-          className={cn(
-            "object-cover object-center transition-opacity duration-700 ease-out",
-            theme === "light" ? "opacity-100" : "opacity-0",
-          )}
+          className="object-cover object-center"
         />
         <div
           className={cn(
@@ -298,6 +285,11 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                   >
                     {promos.map((promo, index) => {
                       const isActive = index === slideIndex;
+                      const isAdjacent =
+                        index === (slideIndex + 1) % promos.length ||
+                        index === (slideIndex - 1 + promos.length) % promos.length;
+                      // Не монтируем дальние слайды — иначе на 4G качаются все промо сразу.
+                      if (!isActive && !isAdjacent) return null;
                       return (
                         <CmsImage
                           key={promo.image}
@@ -306,9 +298,9 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                           fill
                           quality={75}
                           sizes="(max-width: 1023px) 96vw, 380px"
-                          priority={index === 0}
-                          fetchPriority={index === 0 ? "high" : "auto"}
-                          loading="eager"
+                          priority={isActive}
+                          fetchPriority={isActive ? "high" : "low"}
+                          loading={isActive ? "eager" : "lazy"}
                           aria-hidden={!isActive}
                           className={cn(
                             "object-cover object-center transition-opacity duration-500 ease-out",

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   DEFAULT_YANDEX_METRIKA_ID,
+  buildMetrikaInitOptions,
   parseYandexMetrikaCounterId,
   pickYandexMetrikaId,
   shouldEnableMetrikaWebvisor,
@@ -27,5 +28,15 @@ describe("analytics-metrika-config", () => {
     expect(shouldEnableMetrikaWebvisor({ hardwareConcurrency: 2, deviceMemory: 8 })).toBe(false);
     expect(shouldEnableMetrikaWebvisor({ hardwareConcurrency: 8, deviceMemory: 4 })).toBe(false);
     expect(shouldEnableMetrikaWebvisor({ hardwareConcurrency: 8, deviceMemory: 8 })).toBe(true);
+  });
+
+  it("на слабом железе отключает и webvisor, и clickmap", () => {
+    const low = buildMetrikaInitOptions({ hardwareConcurrency: 2, deviceMemory: 8 });
+    expect(low.webvisor).toBe(false);
+    expect(low.clickmap).toBe(false);
+
+    const ok = buildMetrikaInitOptions({ hardwareConcurrency: 8, deviceMemory: 8 });
+    expect(ok.webvisor).toBe(true);
+    expect(ok.clickmap).toBe(true);
   });
 });

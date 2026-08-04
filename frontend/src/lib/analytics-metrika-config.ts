@@ -49,10 +49,12 @@ export function buildMetrikaInitOptions(input: {
   hardwareConcurrency?: number;
   deviceMemory?: number;
 }): MetrikaInitOptions {
+  const heavyUi = shouldEnableMetrikaWebvisor(input);
   return {
     ssr: true,
-    webvisor: shouldEnableMetrikaWebvisor(input),
-    clickmap: true,
+    webvisor: heavyUi,
+    /** Clickmap тоже дорого на слабых телефонах — та же эвристика, что у webvisor. */
+    clickmap: heavyUi,
     ecommerce: "dataLayer",
     accurateTrackBounce: true,
     trackLinks: true,
@@ -62,3 +64,6 @@ export function buildMetrikaInitOptions(input: {
 /** Inline-выражение для init в браузере (эвристика железа на клиенте). */
 export const METRIKA_WEBVISOR_INLINE_EXPR =
   "(function(){var n=navigator,c=n.hardwareConcurrency||4,m=n.deviceMemory||8;return c>2&&(!m||m>4);})()";
+
+/** Тот же gate для clickmap в inline-init AnalyticsScripts. */
+export const METRIKA_CLICKMAP_INLINE_EXPR = METRIKA_WEBVISOR_INLINE_EXPR;

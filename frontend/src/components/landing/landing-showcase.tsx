@@ -56,7 +56,6 @@ export function LandingShowcase({
                 fill
                 className="object-cover"
                 sizes="100vw"
-                unoptimized={imageUrl.startsWith("/uploads/")}
               />
               <div
                 className="absolute inset-0 z-[1]"

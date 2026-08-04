@@ -10,7 +10,7 @@ export type CmsImageProps = Omit<ImageProps, "src" | "alt"> & {
   alt: string;
 };
 
-/** Картинки из CMS/загрузок: uploads и /images/* отдаём напрямую, remote — через next/image. */
+/** Картинки CMS/public: растры через next/image (avif/webp + ресайз), SVG/GIF — как есть. */
 export function CmsImage({
   src,
   alt,

@@ -4,6 +4,7 @@ import Script from "next/script";
 
 import {
   DEFAULT_YANDEX_METRIKA_ID,
+  METRIKA_CLICKMAP_INLINE_EXPR,
   METRIKA_WEBVISOR_INLINE_EXPR,
   pickYandexMetrikaId,
   YM_COUNTER_WINDOW_KEY,
@@ -50,7 +51,7 @@ export async function AnalyticsScripts() {
     <>
       {ymId ? (
         <>
-          <Script id="yandex-metrika" strategy="afterInteractive">
+          <Script id="yandex-metrika" strategy="lazyOnload">
             {`window["${YM_COUNTER_WINDOW_KEY}"]=${ymId};
 (function(m,e,t,r,i,k,a){
 m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
@@ -58,7 +59,7 @@ m[i].l=1*new Date();
 for(var j=0;j<document.scripts.length;j++){if(document.scripts[j].src===r){return;}}
 k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
 })(window,document,"script","https://mc.yandex.ru/metrika/tag.js?id=${ymId}","ym");
-ym(${ymId},"init",{ssr:true,webvisor:${METRIKA_WEBVISOR_INLINE_EXPR},clickmap:true,ecommerce:"dataLayer",referrer:document.referrer,url:location.href,accurateTrackBounce:true,trackLinks:true});`}
+ym(${ymId},"init",{ssr:true,webvisor:${METRIKA_WEBVISOR_INLINE_EXPR},clickmap:${METRIKA_CLICKMAP_INLINE_EXPR},ecommerce:"dataLayer",referrer:document.referrer,url:location.href,accurateTrackBounce:true,trackLinks:true});`}
           </Script>
           <noscript>
             <div>
@@ -75,9 +76,9 @@ ym(${ymId},"init",{ssr:true,webvisor:${METRIKA_WEBVISOR_INLINE_EXPR},clickmap:tr
         <>
           <Script
             src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
-            strategy="afterInteractive"
+            strategy="lazyOnload"
           />
-          <Script id="google-analytics" strategy="afterInteractive">
+          <Script id="google-analytics" strategy="lazyOnload">
             {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
 gtag('js',new Date());gtag('config','${gaId}');`}
           </Script>

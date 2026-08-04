@@ -18,7 +18,7 @@ function listCardThumbSrc(project: ProjectListItem): string | null {
 }
 
 function thumbUnoptimized(src: string): boolean {
-  return src.startsWith("/uploads/") || isGifUrl(src) || /\.gif(\?.*)?$/i.test(src);
+  return isGifUrl(src) || /\.gif(\?.*)?$/i.test(src) || /\.svg(\?.*)?$/i.test(src);
 }
 
 /** Карточка списка портфолио (дизайн страницы «Наши проекты» / старый формат Гарант Монтаж). */
