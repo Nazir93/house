@@ -2,10 +2,7 @@
 
 import type { CSSProperties } from "react";
 
-const LOGO_ASSET_V = "6";
-
-/** Пропорции исходного logo.png (ширина / высота). */
-const LOGO_AR = 1024 / 442;
+import { BRAND_LOGO_AR, BRAND_LOGO_SRC } from "@/lib/brand-logo";
 
 type Props = {
   height: number;
@@ -20,9 +17,8 @@ type Props = {
 };
 
 export function BrandLogo({ height, className, brightOnBackdrop, variant = "header" }: Props) {
-  const q = `v=${LOGO_ASSET_V}`;
-  const logoUrl = `/images/brand/logo.png?${q}`;
-  const w = Math.round(height * LOGO_AR);
+  const logoUrl = BRAND_LOGO_SRC;
+  const w = Math.round(height * BRAND_LOGO_AR);
   const mask: CSSProperties = {
     height,
     width: w,

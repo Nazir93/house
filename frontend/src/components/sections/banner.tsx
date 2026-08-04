@@ -18,6 +18,8 @@ import { useTheme } from "@/lib/theme-context";
 import { useModal } from "@/lib/modal-context";
 import { HOME_HERO_BANNER_ID } from "@/lib/site-anchors";
 import type { HomeHeroBanner } from "@/lib/home-hero-banner-schema";
+import { HOME_HERO_LCP_QUALITY, HOME_HERO_LCP_WIDTH } from "@/lib/home-hero-lcp";
+import { buildImagePrefetchSrc } from "@/lib/image-loading";
 import { cn } from "@/lib/utils";
 
 const BADGE_ICONS = [Award, Home, ShieldCheck, ClipboardCheck] as const;
@@ -72,22 +74,16 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
   }, [carouselPaused, goNext, promos.length, autoCycleKey]);
 
   useEffect(() => {
-    const preload = (src: string, priority: "high" | "auto" = "auto") => {
-      if (!src.trim()) return;
-      const img = new window.Image();
-      img.decoding = "async";
-      img.fetchPriority = priority;
-      img.src = src;
-    };
-
-    preload(theme === "dark" ? config.backgrounds.dark : config.backgrounds.light, "high");
-    // Только текущий и следующий слайд — прелоад всех промо конкурирует с LCP на слабых сетях.
-    if (promos.length === 0) return;
-    const current = promos[slideIndex];
+    // Фон уже priority в <CmsImage> + <link rel=preload> на главной.
+    // Здесь только соседний промо-слайд через /_next/image — без полноразмерного webp.
+    if (promos.length <= 1) return;
     const next = promos[(slideIndex + 1) % promos.length];
-    if (current?.image) preload(current.image, "high");
-    if (next?.image && next !== current) preload(next.image, "auto");
-  }, [config.backgrounds.dark, config.backgrounds.light, promos, slideIndex, theme]);
+    if (!next?.image?.trim()) return;
+    const img = new window.Image();
+    img.decoding = "async";
+    img.fetchPriority = "low";
+    img.src = buildImagePrefetchSrc(next.image, 640, 75);
+  }, [promos, slideIndex]);
 
   if (!slide) return null;
 
@@ -114,8 +110,8 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
           fill
           priority
           fetchPriority="high"
-          quality={75}
-          sizes="100vw"
+          quality={HOME_HERO_LCP_QUALITY}
+          sizes={`(max-width: ${HOME_HERO_LCP_WIDTH}px) 100vw, 100vw`}
           className="object-cover object-center"
         />
         <div

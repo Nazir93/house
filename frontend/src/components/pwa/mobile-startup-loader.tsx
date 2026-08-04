@@ -16,7 +16,8 @@ type MaybeStandaloneNavigator = Navigator & {
 };
 
 export function MobileStartupLoader() {
-  const [visible, setVisible] = useState(true);
+  // false на SSR/первом paint: иначе полноэкранный оверлей перекрывает hero и LCP = логотип в PSI.
+  const [visible, setVisible] = useState(false);
   const [fadingOut, setFadingOut] = useState(false);
   const startedAtRef = useRef<number>(0);
 
@@ -29,11 +30,9 @@ export function MobileStartupLoader() {
       isStandaloneMode: isStandaloneDisplayMode(displayModeStandalone, legacyStandalone),
     });
 
-    if (!show) {
-      setVisible(false);
-      return;
-    }
+    if (!show) return;
 
+    setVisible(true);
     startedAtRef.current = performance.now();
 
     let hideTimer: number | undefined;

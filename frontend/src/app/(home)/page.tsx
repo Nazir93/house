@@ -9,6 +9,7 @@ import { getCommercialPageSeo } from "@/lib/seo/commercial-page-seo";
 import { JsonLdInline } from "@/components/seo/json-ld-inline";
 import { BannerSection } from "@/components/sections/banner";
 import { getHomeHeroBannerConfig } from "@/lib/home-hero-banner-config";
+import { buildHomeHeroLcpPreloadHref } from "@/lib/home-hero-lcp";
 import { ProjectsConstructorSection } from "@/components/sections/projects-constructor-section";
 import { FeaturedHouseProjectsSection } from "@/components/sections/featured-house-projects";
 
@@ -103,8 +104,12 @@ export default async function HomePage() {
     ),
   );
 
+  const heroLcpHref = buildHomeHeroLcpPreloadHref(heroBanner.backgrounds.light);
+
   return (
     <>
+      {/* LCP: фон баннера в HTML head до CSS mask логотипа и нижеfold-чанков. */}
+      <link rel="preload" as="image" href={heroLcpHref} fetchPriority="high" />
       <JsonLdInline
         schema={{
           "@context": "https://schema.org",

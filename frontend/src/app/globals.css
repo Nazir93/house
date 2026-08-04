@@ -1448,17 +1448,20 @@
   }
 }
 
+/* Только лёгкий сдвиг — без opacity:0 (иначе LCP уезжает с hero на логотип шапки). */
 .page-content-ready {
-  animation: pageContentFadeIn 0.48s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: pageContentFadeIn 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+html[data-low-perf] .page-content-ready {
+  animation: none;
 }
 
 @keyframes pageContentFadeIn {
   from {
-    opacity: 0;
     transform: translateY(6px);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
   }
 }
