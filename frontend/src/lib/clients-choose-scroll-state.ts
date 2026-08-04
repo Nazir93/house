@@ -110,3 +110,17 @@ export function resolveClientsChooseSlideVisual(
 
   return hidden;
 }
+
+/**
+ * Куда прокрутить, чтобы разом выйти из sticky-истории «Наши услуги»
+ * (низ секции — под липкий хедер).
+ */
+export function resolveClientsChooseSkipScrollY(params: {
+  scrollY: number;
+  sectionTop: number;
+  sectionHeight: number;
+  headerOffset?: number;
+}): number {
+  const header = Math.max(0, params.headerOffset ?? 0);
+  return Math.max(0, params.scrollY + params.sectionTop + params.sectionHeight - header);
+}

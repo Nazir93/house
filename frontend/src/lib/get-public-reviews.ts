@@ -13,6 +13,7 @@ export type PublicReviewItem = {
   rating: number;
   text: string;
   videoUrl: string | null;
+  photoUrls: string[];
 };
 
 function serviceLabel(service: string | null): string | null {
@@ -30,6 +31,7 @@ const FALLBACK_REVIEWS: PublicReviewItem[] = [
     rating: 5,
     text: "Помогли выбрать проект, адаптировали планировку и поэтапно показывали работы без лишней суеты.",
     videoUrl: null,
+    photoUrls: [],
   },
   {
     id: "demo-2",
@@ -40,6 +42,7 @@ const FALLBACK_REVIEWS: PublicReviewItem[] = [
     rating: 5,
     text: "Сроки и комплектация были понятны до старта строительства — удобно сравнивать с другими подрядчиками.",
     videoUrl: null,
+    photoUrls: [],
   },
   {
     id: "demo-3",
@@ -50,6 +53,7 @@ const FALLBACK_REVIEWS: PublicReviewItem[] = [
     rating: 5,
     text: "После экскурсии по объекту проще было решить по материалам и планировке.",
     videoUrl: null,
+    photoUrls: [],
   },
 ];
 
@@ -68,6 +72,7 @@ export const getPublicReviews = unstable_cache(
           rating: true,
           text: true,
           videoUrl: true,
+          photoUrls: true,
         },
       });
       if (rows.length > 0) {
@@ -80,6 +85,7 @@ export const getPublicReviews = unstable_cache(
           rating: Math.min(5, Math.max(1, r.rating)),
           text: htmlToPlainText(r.text) || r.text,
           videoUrl: r.videoUrl,
+          photoUrls: Array.isArray(r.photoUrls) ? r.photoUrls.filter(Boolean) : [],
         }));
       }
     } catch {

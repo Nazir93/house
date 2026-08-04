@@ -250,7 +250,7 @@ export function ServicesHub({
             Как мы строим
           </h2>
           <div className="mt-10 overflow-x-auto pb-2 [-webkit-overflow-scrolling:touch] lg:overflow-visible">
-            <ol className="flex min-w-[min(100%,920px)] flex-row flex-nowrap items-start gap-2 lg:mx-auto lg:max-w-5xl lg:justify-between lg:gap-1">
+            <ol className="flex min-w-[min(100%,1020px)] flex-row flex-nowrap items-start gap-2 lg:mx-auto lg:max-w-6xl lg:justify-between lg:gap-1">
               {SERVICES_PROCESS_STEPS.map((step, i) => (
                 <Fragment key={step.title}>
                   <li className="flex w-[120px] shrink-0 flex-col items-center text-center sm:w-[140px] lg:w-auto lg:min-w-0 lg:flex-1">

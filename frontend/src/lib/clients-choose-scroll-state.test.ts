@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   CLIENTS_CHOOSE_EXIT_FRACTION,
   getClientsChooseScrollState,
+  resolveClientsChooseSkipScrollY,
   resolveClientsChooseVideoProgress,
 } from "@/lib/clients-choose-scroll-state";
 
@@ -44,5 +45,16 @@ describe("clients-choose-scroll-state", () => {
     const video = resolveClientsChooseVideoProgress(progress, COUNT);
     expect(video).toBeGreaterThan(0.6);
     expect(video).toBeLessThan(0.75);
+  });
+
+  it("skip scroll target ставит низ секции под хедер", () => {
+    expect(
+      resolveClientsChooseSkipScrollY({
+        scrollY: 1000,
+        sectionTop: -200,
+        sectionHeight: 2500,
+        headerOffset: 64,
+      }),
+    ).toBe(1000 - 200 + 2500 - 64);
   });
 });

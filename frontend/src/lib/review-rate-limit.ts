@@ -12,3 +12,13 @@ export async function checkReviewSubmitRateLimit(ip: string): Promise<boolean> {
     windowMs: RATE_LIMIT_WINDOW_MS,
   });
 }
+
+/** Лимит загрузок фото к отзыву с одного IP. */
+export async function checkReviewUploadRateLimit(ip: string): Promise<boolean> {
+  return checkPublicRateLimitDb({
+    scope: "review-upload",
+    key: ip,
+    max: 20,
+    windowMs: RATE_LIMIT_WINDOW_MS,
+  });
+}

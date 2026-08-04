@@ -1,13 +1,19 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Star } from "lucide-react";
+import { ImagePlus, Loader2, Star, X } from "lucide-react";
 
 import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
+import { CmsImage } from "@/components/ui/cms-image";
 import { METRIKA_GOALS, trackMetrikaGoal } from "@/lib/analytics-goals";
-import { reviewSubmitSchema, type ReviewSubmitInput } from "@/lib/review-content";
+import {
+  REVIEW_PHOTO_MAX_BYTES,
+  REVIEW_PHOTO_MAX_COUNT,
+  reviewSubmitSchema,
+  type ReviewSubmitInput,
+} from "@/lib/review-content";
 
 const fieldClass =
   "w-full min-w-0 rounded-xl border px-3 py-3 text-base outline-none transition focus:border-[var(--accent)] sm:py-2.5 sm:text-sm";
@@ -24,6 +30,20 @@ async function readSubmitError(response: Response): Promise<string> {
   return "Не удалось отправить отзыв. Попробуйте ещё раз.";
 }
 
+async function uploadReviewPhoto(file: File): Promise<{ url?: string; error?: string }> {
+  const fd = new FormData();
+  fd.append("file", file);
+  try {
+    const res = await fetch("/api/reviews/upload", { method: "POST", body: fd });
+    const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+    if (!res.ok) return { error: data.error || "Не удалось загрузить фото" };
+    if (!data.url) return { error: "Сервер не вернул адрес файла" };
+    return { url: data.url };
+  } catch {
+    return { error: "Сеть недоступна при загрузке фото" };
+  }
+}
+
 function FormShell({ children }: { children: ReactNode }) {
   return (
     <div
@@ -37,10 +57,13 @@ function FormShell({ children }: { children: ReactNode }) {
 
 export function ReviewSubmitForm() {
   const getSmartCaptchaToken = useSmartCaptchaToken();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rating, setRating] = useState(5);
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
 
   const {
     register,
@@ -54,9 +77,53 @@ export function ReviewSubmitForm() {
       objectName: "",
       rating: 5,
       text: "",
+      photoUrls: [],
       honeypot: "",
     },
   });
+
+  const onPickPhotos = async (list: FileList | null) => {
+    if (!list?.length) return;
+    setError(null);
+    const remaining = REVIEW_PHOTO_MAX_COUNT - photoUrls.length;
+    if (remaining <= 0) {
+      setError(`Можно прикрепить не больше ${REVIEW_PHOTO_MAX_COUNT} фото.`);
+      return;
+    }
+
+    const files = Array.from(list).slice(0, remaining);
+    setUploading(true);
+    const next = [...photoUrls];
+    try {
+      for (const file of files) {
+        if (!file.type.startsWith("image/")) {
+          setError("Допустимы только изображения (JPEG, PNG, WebP).");
+          continue;
+        }
+        if (file.size > REVIEW_PHOTO_MAX_BYTES) {
+          setError(`Фото «${file.name}» больше ${REVIEW_PHOTO_MAX_BYTES / 1024 / 1024} МБ.`);
+          continue;
+        }
+        const result = await uploadReviewPhoto(file);
+        if (result.error || !result.url) {
+          setError(result.error || "Не удалось загрузить фото");
+          continue;
+        }
+        if (!next.includes(result.url)) next.push(result.url);
+      }
+      setPhotoUrls(next);
+      setValue("photoUrls", next, { shouldValidate: true });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const removePhoto = (url: string) => {
+    const next = photoUrls.filter((item) => item !== url);
+    setPhotoUrls(next);
+    setValue("photoUrls", next, { shouldValidate: true });
+  };
 
   const onSubmit = async (data: ReviewSubmitInput) => {
     if (data.honeypot) return;
@@ -67,7 +134,12 @@ export function ReviewSubmitForm() {
       const res = await fetch("/api/reviews/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, rating, recaptchaToken: recaptchaToken || undefined }),
+        body: JSON.stringify({
+          ...data,
+          rating,
+          photoUrls,
+          recaptchaToken: recaptchaToken || undefined,
+        }),
       });
       if (!res.ok) {
         setError(await readSubmitError(res));
@@ -170,11 +242,64 @@ export function ReviewSubmitForm() {
             {errors.text ? <p className="mt-1 text-xs text-red-600">{errors.text.message}</p> : null}
           </div>
 
+          <div className="min-w-0">
+            <div className="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+              <label className="text-xs font-medium text-[var(--text-muted)]" htmlFor="review-photos">
+                Фото (необязательно)
+              </label>
+              <span className="text-[11px] text-[var(--text-subtle)]">
+                до {REVIEW_PHOTO_MAX_COUNT} шт., JPEG/PNG/WebP
+              </span>
+            </div>
+
+            {photoUrls.length > 0 ? (
+              <ul className="mb-3 grid grid-cols-3 gap-2 sm:grid-cols-5">
+                {photoUrls.map((url) => (
+                  <li key={url} className="relative aspect-square overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg)]">
+                    <CmsImage src={url} alt="" fill className="object-cover" sizes="120px" />
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(url)}
+                      className="absolute right-1 top-1 flex h-7 w-7 items-center justify-center rounded-full bg-black/65 text-white transition hover:bg-black/80"
+                      aria-label="Удалить фото"
+                    >
+                      <X className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+
+            <input
+              ref={fileInputRef}
+              id="review-photos"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              className="sr-only"
+              onChange={(e) => void onPickPhotos(e.target.files)}
+            />
+            <button
+              type="button"
+              disabled={uploading || photoUrls.length >= REVIEW_PHOTO_MAX_COUNT}
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl border border-dashed px-4 py-3 text-sm font-semibold transition hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-55 sm:w-auto"
+              style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+            >
+              {uploading ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <ImagePlus className="h-4 w-4" strokeWidth={1.75} aria-hidden />
+              )}
+              {uploading ? "Загрузка…" : "Добавить фото"}
+            </button>
+          </div>
+
           {error ? <p className="text-sm text-red-600 break-words">{error}</p> : null}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || uploading}
             className="flex w-full min-h-[48px] touch-manipulation items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 py-3 text-sm font-bold uppercase tracking-[0.06em] text-[var(--accent-contrast)] transition hover:opacity-95 disabled:opacity-60 sm:tracking-[0.08em] md:w-auto md:min-w-[240px]"
           >
             {loading ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden /> : null}

@@ -162,10 +162,10 @@ export function LandingHeroCinematic({
             ) : null}
             <h1
               className={cn(
-                "font-heading font-bold leading-[1.02] tracking-tight",
+                "font-heading font-bold tracking-tight text-balance",
                 fullBleed
-                  ? "max-w-[25rem] text-[clamp(2.2rem,5.2vw,4.6rem)] font-bold tracking-[-0.04em]"
-                  : "max-w-3xl text-[clamp(1.65rem,4.5vw,3.15rem)]"
+                  ? "max-w-[17.5rem] text-[1.5rem] leading-[1.15] sm:max-w-xl sm:text-[1.75rem] md:max-w-2xl md:text-[2rem] md:leading-[1.12] lg:max-w-3xl lg:text-[2.25rem] xl:text-[2.5rem]"
+                  : "max-w-3xl text-[clamp(1.65rem,4.5vw,3.15rem)] leading-[1.02]"
               )}
               style={{ color: "var(--text)" }}
             >
@@ -176,7 +176,7 @@ export function LandingHeroCinematic({
                 className={cn(
                   "leading-relaxed",
                   fullBleed
-                    ? "mt-14 max-w-[18rem] text-sm sm:text-[15px] md:leading-[1.7]"
+                    ? "mt-5 max-w-md text-sm sm:mt-6 sm:max-w-lg sm:text-[15px] md:mt-7 md:leading-[1.7]"
                     : "mt-4 max-w-2xl text-sm sm:text-base md:mt-5"
                 )}
                 style={{ color: fullBleed ? "color-mix(in srgb, var(--text) 72%, transparent)" : "color-mix(in srgb, var(--text) 78%, transparent)" }}

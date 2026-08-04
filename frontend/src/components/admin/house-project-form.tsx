@@ -574,11 +574,11 @@ export function HouseProjectForm({
         </div>
       </AdminFormSection>
 
-      <div className="sticky bottom-4 z-20 rounded-2xl border border-white/[0.08] bg-[#101614]/95 p-4 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur">
+      <div className="admin-sticky-save-bar sticky bottom-4 z-20 rounded-2xl border p-4 backdrop-blur">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm font-semibold text-white">Готово к сохранению?</p>
-            <p className="mt-1 text-xs text-white/45">Дубль кнопки для длинной формы, чтобы не подниматься наверх.</p>
+            <p className="text-sm font-semibold">Готово к сохранению?</p>
+            <p className="adm-subtle mt-1 text-xs">Дубль кнопки для длинной формы, чтобы не подниматься наверх.</p>
           </div>
           <SaveButton
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#0F3D2E] px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#143f32] disabled:opacity-50"

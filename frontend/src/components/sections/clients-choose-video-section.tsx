@@ -3,23 +3,27 @@
 import type { CSSProperties, Ref } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ChevronsDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { isLowPerfDevice } from "@/lib/use-perf";
 import { CLIENTS_CHOOSE_SERVICES } from "@/lib/clients-choose-services";
 import {
   getClientsChooseScrollState,
+  resolveClientsChooseSkipScrollY,
   resolveClientsChooseSlideVisual,
   resolveClientsChooseVideoProgress,
 } from "@/lib/clients-choose-scroll-state";
 
-/** Минимальный интервал seek по видео — чаще даёт jank на слабых CPU/GPU. */
-const VIDEO_SEEK_MIN_MS = 120;
+/** Минимальный интервал постановки seek — при быстрой прокрутке догоняем последний кадр. */
+const VIDEO_SEEK_MIN_MS = 90;
 
-/** Высота скролл-трека на один пункт услуги (vh). */
-const SCROLL_VH_PER_ITEM_MOBILE = 72;
-const SCROLL_VH_PER_ITEM_DESKTOP = 100;
+/**
+ * Высота скролл-трека на один пункт услуги (vh).
+ * Короче прежних 72/100 — история не «запирает» страницу надолго.
+ */
+const SCROLL_VH_PER_ITEM_MOBILE = 48;
+const SCROLL_VH_PER_ITEM_DESKTOP = 58;
 
 const SERVICES_VIDEO_SRC = "/videos/14654251600401.mp4";
 
@@ -30,6 +34,20 @@ function warmUpVideo(v: HTMLVideoElement) {
   (v as unknown as { _warmedUp?: boolean })._warmedUp = true;
   const p = v.play();
   if (p) p.then(() => v.pause()).catch(() => {});
+}
+
+function readHeaderStickyOffsetPx(): number {
+  if (typeof window === "undefined") return 0;
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue("--site-header-sticky-offset")
+    .trim();
+  if (!raw) return 0;
+  const probe = document.createElement("div");
+  probe.style.cssText = `position:absolute;visibility:hidden;height:${raw}`;
+  document.body.appendChild(probe);
+  const px = probe.getBoundingClientRect().height;
+  probe.remove();
+  return Number.isFinite(px) ? px : 0;
 }
 
 function ServicesScrollCue({ visible }: { visible: boolean }) {
@@ -94,10 +112,7 @@ function ServiceProgressBars({
         const fill = Math.max(0, Math.min(scrollProgress * SERVICES.length - i, 1));
         return (
           <div key={i} className="h-0.5 flex-1 overflow-hidden rounded-full bg-[var(--border)]/65 md:h-1">
-            <div
-              className="h-full bg-[var(--accent)] transition-[width] duration-200 ease-linear"
-              style={{ width: `${fill * 100}%` }}
-            />
+            <div className="h-full bg-[var(--accent)]" style={{ width: `${fill * 100}%` }} />
           </div>
         );
       })}
@@ -172,7 +187,12 @@ export function ClientsChooseVideoSection() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const lastSeekRef = useRef<number>(NaN);
   const lastSeekAtRef = useRef(0);
+  const pendingSeekRef = useRef<number | null>(null);
+  const seekingRef = useRef(false);
   const scrubAllowedRef = useRef(true);
+  const progressRafRef = useRef(0);
+  const pendingProgressRef = useRef(0);
+  const pendingBaseIndexRef = useRef(0);
   const [, setActiveIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [hasScrolled, setHasScrolled] = useState(false);
@@ -181,6 +201,74 @@ export function ClientsChooseVideoSection() {
   useEffect(() => {
     scrubAllowedRef.current = shouldScrubServicesVideo();
   }, []);
+
+  const flushVideoSeek = useCallback(() => {
+    const video = videoRef.current;
+    const t = pendingSeekRef.current;
+    if (!video || t == null || seekingRef.current) return;
+    if (!video.duration || Number.isNaN(video.duration) || !Number.isFinite(video.duration)) {
+      warmUpVideo(video);
+      return;
+    }
+
+    if (Number.isFinite(lastSeekRef.current) && Math.abs(t - lastSeekRef.current) < 0.06) {
+      pendingSeekRef.current = null;
+      return;
+    }
+
+    const now = performance.now();
+    if (now - lastSeekAtRef.current < VIDEO_SEEK_MIN_MS && Number.isFinite(lastSeekRef.current)) {
+      return;
+    }
+
+    seekingRef.current = true;
+    pendingSeekRef.current = null;
+    lastSeekRef.current = t;
+    lastSeekAtRef.current = now;
+
+    const onSeeked = () => {
+      video.removeEventListener("seeked", onSeeked);
+      seekingRef.current = false;
+      if (pendingSeekRef.current != null) flushVideoSeek();
+    };
+    video.addEventListener("seeked", onSeeked);
+
+    try {
+      video.pause();
+      video.currentTime = t;
+    } catch {
+      seekingRef.current = false;
+      video.removeEventListener("seeked", onSeeked);
+    }
+  }, []);
+
+  const queueVideoSeek = useCallback(
+    (progress: number) => {
+      if (!scrubAllowedRef.current || !videoEnabled) return;
+      const video = videoRef.current;
+      if (!video) return;
+      if (!video.duration || Number.isNaN(video.duration) || !Number.isFinite(video.duration)) {
+        warmUpVideo(video);
+        return;
+      }
+
+      const videoNorm = resolveClientsChooseVideoProgress(progress, SERVICES.length);
+      let t = videoNorm * video.duration;
+      try {
+        const sb = video.seekable;
+        if (sb && sb.length > 0) {
+          const end = sb.end(sb.length - 1);
+          if (Number.isFinite(end) && end > 0) t = Math.min(t, Math.max(0, end - 0.04));
+        }
+      } catch {
+        /* ignore */
+      }
+
+      pendingSeekRef.current = t;
+      flushVideoSeek();
+    },
+    [flushVideoSeek, videoEnabled],
+  );
 
   const syncScrollToServices = useCallback(() => {
     const section = sectionRef.current;
@@ -193,48 +281,45 @@ export function ClientsChooseVideoSection() {
     const scrollRange = Math.max(sectionHeight - viewportH, 1);
     const progress = Math.max(0, Math.min(scrolled / scrollRange, 1));
     const { baseIndex } = getClientsChooseScrollState(progress, SERVICES.length);
-    setScrollProgress(progress);
-    if (progress > 0.04) setHasScrolled(true);
-    setActiveIndex((prev) => {
-      if (prev !== baseIndex) lastSeekRef.current = NaN;
-      return prev === baseIndex ? prev : baseIndex;
+
+    pendingProgressRef.current = progress;
+    pendingBaseIndexRef.current = baseIndex;
+    queueVideoSeek(progress);
+
+    if (!progressRafRef.current) {
+      progressRafRef.current = requestAnimationFrame(() => {
+        progressRafRef.current = 0;
+        const p = pendingProgressRef.current;
+        const idx = pendingBaseIndexRef.current;
+        setScrollProgress(p);
+        if (p > 0.04) setHasScrolled(true);
+        setActiveIndex((prev) => {
+          if (prev !== idx) lastSeekRef.current = NaN;
+          return prev === idx ? prev : idx;
+        });
+      });
+    }
+  }, [queueVideoSeek]);
+
+  const skipStory = useCallback(() => {
+    const section = sectionRef.current;
+    if (!section) return;
+    const rect = section.getBoundingClientRect();
+    const targetY = resolveClientsChooseSkipScrollY({
+      scrollY: window.scrollY || document.documentElement.scrollTop,
+      sectionTop: rect.top,
+      sectionHeight: section.offsetHeight,
+      headerOffset: readHeaderStickyOffsetPx(),
     });
-
-    if (!scrubAllowedRef.current) return;
-
-    const video = videoRef.current;
-    if (!video || !videoEnabled) return;
-    if (!video.duration || Number.isNaN(video.duration) || !Number.isFinite(video.duration)) {
-      warmUpVideo(video);
-      return;
+    const lenis = typeof window !== "undefined" ? window.__lenis : undefined;
+    if (lenis) {
+      lenis.scrollTo(targetY, { immediate: true });
+    } else {
+      window.scrollTo({ top: targetY, behavior: "auto" });
     }
-
-    const now = performance.now();
-    if (now - lastSeekAtRef.current < VIDEO_SEEK_MIN_MS) return;
-
-    const videoNorm = resolveClientsChooseVideoProgress(progress, SERVICES.length);
-    let t = videoNorm * video.duration;
-    try {
-      const sb = video.seekable;
-      if (sb && sb.length > 0) {
-        const end = sb.end(sb.length - 1);
-        if (Number.isFinite(end) && end > 0) t = Math.min(t, Math.max(0, end - 0.04));
-      }
-    } catch {
-      /* ignore */
-    }
-
-    try {
-      video.pause();
-      if (!Number.isFinite(lastSeekRef.current) || Math.abs(t - lastSeekRef.current) >= 0.05) {
-        video.currentTime = t;
-        lastSeekRef.current = t;
-        lastSeekAtRef.current = now;
-      }
-    } catch {
-      /* ignore */
-    }
-  }, [videoEnabled]);
+    setHasScrolled(true);
+    setScrollProgress(1);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => syncScrollToServices();
@@ -261,46 +346,26 @@ export function ClientsChooseVideoSection() {
       offLenis?.();
       window.clearInterval(poll);
       window.clearTimeout(stopPoll);
+      if (progressRafRef.current) cancelAnimationFrame(progressRafRef.current);
     };
   }, [syncScrollToServices]);
 
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
-    let raf = 0;
-    let active = false;
-
-    const tick = () => {
-      if (!active) return;
-      syncScrollToServices();
-      raf = requestAnimationFrame(tick);
-    };
 
     const io = new IntersectionObserver(
       ([entry]) => {
-        const next = entry.isIntersecting;
-        // На слабых устройствах не грузим 4+ MB видео и не крутим rAF-seek.
-        if (next && scrubAllowedRef.current) setVideoEnabled(true);
-        if (next && !active) {
-          active = true;
+        if (entry.isIntersecting && scrubAllowedRef.current) {
+          setVideoEnabled(true);
           syncScrollToServices();
-          if (scrubAllowedRef.current) {
-            raf = requestAnimationFrame(tick);
-          }
-        } else if (!next && active) {
-          active = false;
-          cancelAnimationFrame(raf);
-          raf = 0;
         }
       },
       { root: null, rootMargin: "40% 0px", threshold: 0 },
     );
     io.observe(el);
 
-    return () => {
-      io.disconnect();
-      cancelAnimationFrame(raf);
-    };
+    return () => io.disconnect();
   }, [syncScrollToServices]);
 
   useEffect(() => {
@@ -316,6 +381,15 @@ export function ClientsChooseVideoSection() {
       video.removeEventListener("canplay", onReady);
     };
   }, [videoEnabled, syncScrollToServices]);
+
+  // Если seek ждали из‑за throttle — догоняем после паузы в скролле.
+  useEffect(() => {
+    if (!videoEnabled || !scrubAllowedRef.current) return;
+    const id = window.setInterval(() => {
+      if (pendingSeekRef.current != null && !seekingRef.current) flushVideoSeek();
+    }, 160);
+    return () => window.clearInterval(id);
+  }, [flushVideoSeek, videoEnabled]);
 
   const showScrollCue = !hasScrolled;
 
@@ -359,7 +433,7 @@ export function ClientsChooseVideoSection() {
 
             <ServiceSlideStack scrollProgress={scrollProgress} className="mt-5 md:mt-8" />
 
-            <div className="mt-6 md:mt-10">
+            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-3 md:mt-10">
               <Link
                 href="/services"
                 className="inline-flex w-fit items-center gap-1.5 text-sm font-semibold text-[var(--text)] underline-offset-4 transition hover:text-[var(--accent)] hover:underline sm:text-[15px]"
@@ -367,6 +441,14 @@ export function ClientsChooseVideoSection() {
                 Все услуги
                 <ArrowUpRight className="h-4 w-4 shrink-0 opacity-80" strokeWidth={2} aria-hidden />
               </Link>
+              <button
+                type="button"
+                onClick={skipStory}
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--text-muted)] underline-offset-4 transition hover:text-[var(--accent)] hover:underline sm:text-[15px]"
+              >
+                Пропустить
+                <ChevronsDown className="h-4 w-4 shrink-0 opacity-80" strokeWidth={2} aria-hidden />
+              </button>
             </div>
           </div>
 

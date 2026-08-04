@@ -5,6 +5,7 @@ import { CompanyPageHeader } from "@/components/company/company-page-header";
 import { getPublicReviews } from "@/lib/get-public-reviews";
 import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 import { RoundAvatar } from "@/components/ui/round-avatar";
+import { CmsImage } from "@/components/ui/cms-image";
 import { ReviewSubmitForm } from "@/components/reviews/review-submit-form";
 import { YandexReviewsCta } from "@/components/reviews/yandex-reviews-cta";
 import type { PublicReviewItem } from "@/lib/get-public-reviews";
@@ -79,6 +80,15 @@ function ReviewCard({ r }: { r: PublicReviewItem }) {
       >
         {r.text}
       </p>
+      {r.photoUrls.length > 0 ? (
+        <ul className="mt-3 grid grid-cols-3 gap-1.5 sm:mt-4 sm:gap-2">
+          {r.photoUrls.slice(0, 5).map((url) => (
+            <li key={url} className="relative aspect-square overflow-hidden rounded-lg bg-[var(--bg)]">
+              <CmsImage src={url} alt="" fill className="object-cover" sizes="120px" />
+            </li>
+          ))}
+        </ul>
+      ) : null}
       {r.videoUrl ? (
         <p className="mt-3 sm:mt-4">
           <a

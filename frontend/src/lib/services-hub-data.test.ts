@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { getServiceHubCopy, resolveServiceHubCtaAction } from "@/lib/services-hub-data";
+import {
+  getServiceHubCopy,
+  resolveServiceHubCtaAction,
+  SERVICES_PROCESS_STEPS,
+} from "@/lib/services-hub-data";
 
 describe("resolveServiceHubCtaAction", () => {
   it("proektirovanie: «Обсудить проект» открывает форму заявки", () => {
@@ -25,5 +29,20 @@ describe("resolveServiceHubCtaAction", () => {
         ctaLabel: "Обсудить что-то",
       }),
     ).toBe("modal");
+  });
+});
+
+describe("SERVICES_PROCESS_STEPS", () => {
+  it("includes wall erection between foundation and roofing", () => {
+    const titles = SERVICES_PROCESS_STEPS.map((s) => s.title);
+    expect(titles).toEqual([
+      "Проектирование",
+      "Фундамент под ключ",
+      "Возведение стен",
+      "Монтаж кровли",
+      "Инженерные сети",
+      "Отделка под ключ",
+      "Сдача и подключение",
+    ]);
   });
 });

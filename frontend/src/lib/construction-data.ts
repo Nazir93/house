@@ -661,7 +661,12 @@ const getHouseProjectsCached = unstable_cache(
     } catch {
       // Database may not be migrated yet.
     }
-    if (catalogKind === "author") return FALLBACK_HOUSE_PROJECTS;
+    if (catalogKind === "author") {
+      return FALLBACK_HOUSE_PROJECTS.map((project) => ({
+        ...project,
+        ...resolveHouseProjectEngagement(project),
+      }));
+    }
     return [];
   },
   ["house-projects-published"],
@@ -689,7 +694,9 @@ const getHouseProjectBySlugCached = unstable_cache(
       // Database may not be migrated yet.
     }
     if (catalogKind === "author") {
-      return FALLBACK_HOUSE_PROJECTS.find((project) => project.slug === slug) ?? null;
+      const project = FALLBACK_HOUSE_PROJECTS.find((item) => item.slug === slug) ?? null;
+      if (!project) return null;
+      return { ...project, ...resolveHouseProjectEngagement(project) };
     }
     return null;
   },

@@ -6,6 +6,11 @@ import { FULL_SERVICE_TYPE_DROPDOWN_OPTIONS } from "@/lib/service-type-admin-opt
 const CONTROL_CHARS = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g;
 const TAG_RE = /<[^>]*>/g;
 
+export const REVIEW_PHOTO_MAX_COUNT = 5;
+export const REVIEW_PHOTO_MAX_BYTES = 8 * 1024 * 1024;
+/** Публичные фото отзывов лежат только в этом префиксе. */
+export const REVIEW_PHOTO_URL_PREFIX = "/uploads/reviews/";
+
 /** Убираем HTML/скрипты и управляющие символы из пользовательского текста. */
 export function sanitizeReviewPlainText(raw: string, maxLen: number): string {
   const stripped = raw
@@ -19,6 +24,52 @@ export function sanitizeReviewPlainText(raw: string, maxLen: number): string {
     .trim();
   if (!stripped) return "";
   return stripped.length > maxLen ? `${stripped.slice(0, maxLen - 1)}…` : stripped;
+}
+
+/** Разрешены только локальные URL из /uploads/reviews/… (без .. и внешних схем). */
+export function isAllowedReviewPhotoUrl(raw: string): boolean {
+  const url = raw.trim();
+  if (!url.startsWith(REVIEW_PHOTO_URL_PREFIX)) return false;
+  if (url.includes("..") || url.includes("\\") || url.includes("//", 1)) return false;
+  if (!/^\/uploads\/reviews\/[a-zA-Z0-9._-]+$/i.test(url)) return false;
+  return true;
+}
+
+/** В админке можно хранить любой безопасный путь из /uploads/. */
+export function isAllowedAdminReviewPhotoUrl(raw: string): boolean {
+  const url = raw.trim();
+  if (!url.startsWith("/uploads/")) return false;
+  if (url.includes("..") || url.includes("\\") || url.includes("//", 1)) return false;
+  if (!/^\/uploads\/[a-zA-Z0-9/._-]+$/i.test(url)) return false;
+  return true;
+}
+
+export function normalizeReviewPhotoUrls(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const out: string[] = [];
+  for (const item of raw) {
+    if (typeof item !== "string") continue;
+    const url = item.trim();
+    if (!isAllowedReviewPhotoUrl(url)) continue;
+    if (out.includes(url)) continue;
+    out.push(url);
+    if (out.length >= REVIEW_PHOTO_MAX_COUNT) break;
+  }
+  return out;
+}
+
+export function normalizeAdminReviewPhotoUrls(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  const out: string[] = [];
+  for (const item of raw) {
+    if (typeof item !== "string") continue;
+    const url = item.trim();
+    if (!isAllowedAdminReviewPhotoUrl(url)) continue;
+    if (out.includes(url)) continue;
+    out.push(url);
+    if (out.length >= REVIEW_PHOTO_MAX_COUNT) break;
+  }
+  return out;
 }
 
 export const reviewSubmitSchema = z.object({
@@ -38,6 +89,12 @@ export const reviewSubmitSchema = z.object({
     .min(20, "Минимум 20 символов")
     .max(2000, "Слишком длинный текст")
     .transform((v) => sanitizeReviewPlainText(v, 2000)),
+  photoUrls: z
+    .array(z.string())
+    .max(REVIEW_PHOTO_MAX_COUNT)
+    .optional()
+    .default([])
+    .transform((v) => normalizeReviewPhotoUrls(v)),
   honeypot: z.string().optional().default(""),
   recaptchaToken: z.string().optional(),
 });
@@ -62,6 +119,9 @@ export function sanitizeReviewAdminFields(body: Record<string, unknown>): Record
   }
   if (body.service !== undefined) {
     out.service = parseReviewServiceType(body.service);
+  }
+  if (body.photoUrls !== undefined) {
+    out.photoUrls = normalizeAdminReviewPhotoUrls(body.photoUrls);
   }
   return out;
 }

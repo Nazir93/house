@@ -423,6 +423,8 @@ model Review {
   rating      Int          @default(5)
   text        String       @db.Text
   videoUrl    String?
+  /// Фото к отзыву (объект / стройка), загруженные клиентом или админом.
+  photoUrls   String[]     @default([])
   visible     Boolean      @default(true)
   order       Int          @default(0)
   createdAt   DateTime     @default(now())

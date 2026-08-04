@@ -83,6 +83,7 @@ export async function POST(request: NextRequest) {
         objectName: parsed.data.objectName || null,
         rating: parsed.data.rating,
         text: parsed.data.text,
+        photoUrls: parsed.data.photoUrls,
         visible: false,
         order: 0,
       },

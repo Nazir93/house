@@ -2223,6 +2223,26 @@ html.reveal-animations-ready [data-reveal="card"]:not(.is-visible) {
   color: #f6f6f4 !important;
 }
 
+/* Липкая панель «Сохранить» в длинных формах — контраст в обеих темах */
+.admin-main-surface .admin-sticky-save-bar {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, #101614 95%, transparent);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.35);
+  color: rgba(243, 244, 240, 0.96);
+}
+.admin-main-surface .admin-sticky-save-bar .adm-subtle {
+  color: rgba(255, 255, 255, 0.55);
+}
+[data-theme="light"] .admin-main-surface .admin-sticky-save-bar {
+  border-color: var(--adm-card-border);
+  background: color-mix(in srgb, #ffffff 96%, transparent);
+  box-shadow: 0 14px 48px rgba(22, 26, 25, 0.14);
+  color: var(--adm-main-fg);
+}
+[data-theme="light"] .admin-main-surface .admin-sticky-save-bar .adm-subtle {
+  color: var(--adm-main-fg-subtle);
+}
+
 /* Семантические классы рабочей зоны (не зависят от text-white/…) */
 .admin-main-surface .adm-muted {
   color: var(--adm-main-fg-muted);

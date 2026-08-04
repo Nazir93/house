@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
         rating: (safe.rating as number) ?? 5,
         text: safe.text as string,
         videoUrl: (safe.videoUrl as string) || null,
+        photoUrls: Array.isArray(safe.photoUrls) ? (safe.photoUrls as string[]) : [],
         visible: body.visible !== false,
         order: (safe.order as number) ?? 0,
       },

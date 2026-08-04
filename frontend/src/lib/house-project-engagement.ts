@@ -6,6 +6,21 @@ export type HouseProjectEngagementSeed = {
   isNew: boolean;
 };
 
+/** Стабильный «рандом» 40…100 от параметров проекта (не прыгает между запросами). */
+export function engagementBoost(
+  p: HouseProjectEngagementSeed,
+  kind: "view" | "like",
+): number {
+  const salt = kind === "view" ? 0x9e3779b9 : 0x85ebca6b;
+  const mixed =
+    ((Math.imul(p.area, 0x45d9f3b) ^
+      Math.imul(p.order, 0x27d4eb2d) ^
+      (p.isNew ? 0x165667b1 : 0) ^
+      salt) >>>
+      0);
+  return 40 + (mixed % 61);
+}
+
 /** Стартовые значения (как в старой вёрстке), если в БД ещё нули. */
 export function seedHouseProjectEngagement(p: HouseProjectEngagementSeed): {
   viewCount: number;
@@ -23,7 +38,10 @@ export function resolveHouseProjectEngagement(
   const seed = seedHouseProjectEngagement(row);
   const views = typeof row.viewCount === "number" && row.viewCount > 0 ? row.viewCount : seed.viewCount;
   const likes = typeof row.likeCount === "number" && row.likeCount > 0 ? row.likeCount : seed.likeCount;
-  return { viewCount: views, likeCount: likes };
+  return {
+    viewCount: views + engagementBoost(row, "view"),
+    likeCount: likes + engagementBoost(row, "like"),
+  };
 }
 
 export function engagementCookieKey(kind: "view" | "like", slug: string): string {

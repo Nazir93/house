@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
 import { AdminSelect } from "@/components/admin/admin-select";
+import { CmsImage } from "@/components/ui/cms-image";
 import { FULL_SERVICE_TYPE_DROPDOWN_OPTIONS } from "@/lib/service-type-admin-options";
 
 interface ReviewItem {
@@ -25,6 +26,7 @@ interface ReviewItem {
   rating: number;
   text: string;
   videoUrl: string | null;
+  photoUrls?: string[];
   visible: boolean;
   order: number;
 }
@@ -42,6 +44,7 @@ const emptyForm = {
   rating: 5,
   text: "",
   videoUrl: "",
+  photoUrls: [] as string[],
   visible: true,
   order: 0,
 };
@@ -77,6 +80,7 @@ export default function AdminReviewsPage() {
       rating: r.rating,
       text: r.text,
       videoUrl: r.videoUrl || "",
+      photoUrls: Array.isArray(r.photoUrls) ? r.photoUrls : [],
       visible: r.visible,
       order: r.order,
     });
@@ -173,6 +177,9 @@ export default function AdminReviewsPage() {
               ) : null}
             </div>
             <p className="text-sm text-white/60 whitespace-pre-line">{isPending ? r.text : `${r.text.slice(0, 200)}${r.text.length > 200 ? "…" : ""}`}</p>
+            {r.photoUrls && r.photoUrls.length > 0 ? (
+              <p className="mt-2 text-[11px] text-white/35">{r.photoUrls.length} фото к отзыву</p>
+            ) : null}
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 flex-shrink-0">
             {isPending ? (
@@ -307,6 +314,31 @@ export default function AdminReviewsPage() {
               onChange={(url) => set("videoUrl", url)}
             />
           </div>
+          {form.photoUrls.length > 0 ? (
+            <div>
+              <p className="mb-2 text-xs text-white/40">Фото объекта ({form.photoUrls.length})</p>
+              <ul className="flex flex-wrap gap-2">
+                {form.photoUrls.map((url) => (
+                  <li key={url} className="relative h-16 w-16 overflow-hidden rounded-lg border border-white/10">
+                    <CmsImage src={url} alt="" fill className="object-cover" sizes="64px" />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setForm((prev) => ({
+                          ...prev,
+                          photoUrls: prev.photoUrls.filter((item) => item !== url),
+                        }))
+                      }
+                      className="absolute right-0.5 top-0.5 rounded bg-black/70 p-0.5 text-white/80"
+                      aria-label="Удалить фото"
+                    >
+                      <X size={12} />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           <div className="flex items-center justify-between pt-2">
             <label className="flex items-center gap-2 text-sm text-white/60">
               <input type="checkbox" checked={form.visible} onChange={(e) => set("visible", e.target.checked)} className="rounded" />

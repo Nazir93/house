@@ -205,9 +205,14 @@ export const SERVICES_PROCESS_STEPS = [
     description: "Концепция, планы и рабочая документация.",
   },
   {
-    Icon: BrickWall,
+    Icon: Landmark,
     title: "Фундамент под ключ",
     description: "Основание под ваш участок и проект.",
+  },
+  {
+    Icon: BrickWall,
+    title: "Возведение стен",
+    description: "Стены, перекрытия и несущие конструкции.",
   },
   {
     Icon: Home,

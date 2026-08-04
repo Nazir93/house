@@ -23,6 +23,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         ...(safe.rating !== undefined && { rating: safe.rating as number }),
         ...(safe.text !== undefined && { text: safe.text as string }),
         ...(safe.videoUrl !== undefined && { videoUrl: (safe.videoUrl as string) || null }),
+        ...(safe.photoUrls !== undefined && { photoUrls: safe.photoUrls as string[] }),
         ...(body.visible !== undefined && { visible: Boolean(body.visible) }),
         ...(safe.order !== undefined && { order: safe.order as number }),
       },
