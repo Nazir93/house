@@ -1,14 +1,14 @@
 import { Montserrat } from "next/font/google";
 
-import { MONTSERRAT_DISPLAY, MONTSERRAT_WEIGHTS } from "@/lib/fonts-config";
-
-export { MONTSERRAT_DISPLAY, MONTSERRAT_WEIGHTS } from "@/lib/fonts-config";
-
-/** Self-host через next/font — без отдельного CSS-чанка @fontsource. */
+/**
+ * Self-host через next/font.
+ * Важно: аргументы loader — только литералы (Turbopack/next/font).
+ * Веса/display продублированы в fonts-config.ts для тестов LCP.
+ */
 export const montserrat = Montserrat({
   subsets: ["latin", "cyrillic"],
-  weight: [...MONTSERRAT_WEIGHTS],
-  display: MONTSERRAT_DISPLAY,
+  weight: ["400", "700"],
+  display: "optional",
   variable: "--font-montserrat",
   adjustFontFallback: true,
 });
