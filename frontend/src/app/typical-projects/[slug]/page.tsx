@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getPageMeta } from "@/lib/get-page-meta";
 import { SITE_NAME } from "@/lib/constants";
@@ -8,6 +9,7 @@ import { getHeroShellTiersForProject } from "@/lib/project-hero-shell-tiers";
 import { getProjectRenders } from "@/lib/construction-shared";
 import { houseProjectHeroTeaser } from "@/lib/house-project-teaser";
 import { buildMetaDescription } from "@/lib/seo/build-meta-description";
+import { parseMaterialParam } from "@/lib/project-filters";
 import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 import { HouseProjectDetailContent } from "@/app/projects/[slug]/content";
 
@@ -34,12 +36,20 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
   });
 }
 
-export default async function TypicalHouseProjectPage(props: { params: Promise<{ slug: string }> }) {
+export default async function TypicalHouseProjectPage(props: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ material?: string | string[] }>;
+}) {
   const params = await props.params;
+  const searchParams = await props.searchParams;
   const project = await getHouseProjectBySlug(params.slug, catalog.kind);
   if (!project) notFound();
   const similarProjects = await getSimilarHouseProjects(project);
   const heroShellTiers = await getHeroShellTiersForProject(project);
+  const materialRaw = Array.isArray(searchParams.material)
+    ? searchParams.material[0]
+    : searchParams.material;
+  const initialMaterial = parseMaterialParam(materialRaw ?? null);
   return (
     <>
       <BreadcrumbJsonLd
@@ -49,12 +59,15 @@ export default async function TypicalHouseProjectPage(props: { params: Promise<{
           { name: project.title, path: `${catalog.basePath}/${project.slug}` },
         ]}
       />
-      <HouseProjectDetailContent
-        project={project}
-        similarProjects={similarProjects}
-        heroShellTiers={heroShellTiers}
-        catalog={catalog}
-      />
+      <Suspense fallback={null}>
+        <HouseProjectDetailContent
+          project={project}
+          similarProjects={similarProjects}
+          heroShellTiers={heroShellTiers}
+          catalog={catalog}
+          initialMaterial={initialMaterial}
+        />
+      </Suspense>
     </>
   );
 }

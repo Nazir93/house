@@ -7,6 +7,7 @@ import {
   computePartOfSoulShellTotalRub,
   inferPartOfSoulFloors,
   resolveProjectRoofPitch,
+  tierIdToWallMaterial,
   type PartOfSoulWallMaterial,
 } from "@/lib/part-of-soul-pricing";
 
@@ -14,6 +15,20 @@ export function listingWallForMaterialFilter(material: MaterialFilterId): PartOf
   if (material === "keramoblok") return "ceramic";
   if (material === "kirpich") return "brick";
   return "gas";
+}
+
+/**
+ * Индекс тарифа стен в герое/калькуляторе по фильтру каталога (?material=).
+ * Если материал не найден в списке тарифов — 0 (как раньше).
+ */
+export function heroTierIndexForMaterialFilter(
+  tiers: ReadonlyArray<{ id: string; label: string }>,
+  material: MaterialFilterId,
+): number {
+  if (!tiers.length || material === "all") return 0;
+  const wall = listingWallForMaterialFilter(material);
+  const idx = tiers.findIndex((t) => tierIdToWallMaterial(t.id, t.label) === wall);
+  return idx >= 0 ? idx : 0;
 }
 
 /**

@@ -465,7 +465,7 @@ export function ClientProjectAdminForm({
             </div>
           </div>
           <div>
-            <label className="block text-[11px] uppercase text-white/40 mb-1">Бригадир</label>
+            <label className="block text-[11px] uppercase text-white/40 mb-1">Руководитель проекта</label>
             <input className={inp} value={foremanName} onChange={(e) => setForemanName(e.target.value)} />
           </div>
           <div className="sm:col-span-2">

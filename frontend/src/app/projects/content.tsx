@@ -848,6 +848,7 @@ export function ProjectsCatalogContent({
                       priceRub={listingPriceRub(project)}
                       projectBasePath={basePath}
                       catalogKind={catalog.kind}
+                      materialFilter={material}
                       imageSizes="(max-width: 1280px) 50vw, 400px"
                     />
                   );
@@ -859,7 +860,7 @@ export function ProjectsCatalogContent({
                     className="group grid overflow-hidden rounded-[28px] border md:grid-cols-[minmax(260px,420px)_1fr]"
                     style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)" }}
                   >
-                    <Link href={houseProjectDetailPath(catalog, project.slug)} className="relative min-h-[260px] overflow-hidden bg-[var(--stone)]">
+                    <Link href={houseProjectDetailPath(catalog, project.slug, { material })} className="relative min-h-[260px] overflow-hidden bg-[var(--stone)]">
                       {cover ? (
                         <CmsImage
                           src={cover.url}
@@ -886,7 +887,7 @@ export function ProjectsCatalogContent({
                       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                         <div>
                           <Link
-                            href={houseProjectDetailPath(catalog, project.slug)}
+                            href={houseProjectDetailPath(catalog, project.slug, { material })}
                             className="font-heading text-3xl transition-colors group-hover:text-[var(--accent)]"
                             style={{ color: "var(--text)" }}
                           >
@@ -925,7 +926,7 @@ export function ProjectsCatalogContent({
                       </div>
                       <div className="flex flex-wrap items-center gap-3">
                         <Link
-                          href={houseProjectDetailPath(catalog, project.slug)}
+                          href={houseProjectDetailPath(catalog, project.slug, { material })}
                           className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white"
                           style={{ backgroundColor: "var(--accent)" }}
                         >

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { HouseProjectItem } from "@/lib/construction-data";
 import {
+  heroTierIndexForMaterialFilter,
   listingWallForMaterialFilter,
   resolveDefaultGasShellPriceRub,
   resolveDefaultShellPriceRub,
@@ -78,5 +79,18 @@ describe("project-listing-price", () => {
     const project = stubProject({ area: 128, floors: 1, price: 0 });
     expect(resolveProjectListingPriceRub(project, "gazobeton")).toBe(8_425_600);
     expect(resolveProjectListingPriceRub(project, "keramoblok")).toBe(8_710_912);
+  });
+
+  it("heroTierIndexForMaterialFilter выбирает тариф по фильтру каталога", () => {
+    const tiers = [
+      { id: "gas", label: "Газобетон" },
+      { id: "ceramic", label: "Керамоблок" },
+      { id: "brick", label: "Кирпич" },
+    ];
+    expect(heroTierIndexForMaterialFilter(tiers, "all")).toBe(0);
+    expect(heroTierIndexForMaterialFilter(tiers, "gazobeton")).toBe(0);
+    expect(heroTierIndexForMaterialFilter(tiers, "keramoblok")).toBe(1);
+    expect(heroTierIndexForMaterialFilter(tiers, "kirpich")).toBe(2);
+    expect(heroTierIndexForMaterialFilter([{ id: "gas", label: "Газобетон" }], "kirpich")).toBe(0);
   });
 });

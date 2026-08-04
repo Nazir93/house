@@ -121,7 +121,7 @@ export default async function AccountDashboardPage() {
                 <span className="font-medium" style={{ color: "var(--text)" }}>Стены:</span> {project.wallMaterial || "—"}
               </p>
               <p>
-                <span className="font-medium" style={{ color: "var(--text)" }}>Бригадир:</span> {project.foremanName || "—"}
+                <span className="font-medium" style={{ color: "var(--text)" }}>Руководитель проекта:</span> {project.foremanName || "—"}
               </p>
             </div>
           </div>

@@ -1,3 +1,5 @@
+import type { MaterialFilterId } from "@/lib/project-filters";
+
 export type HouseProjectCatalogKind = "author" | "partner";
 
 export type HouseProjectCatalogConfig = {
@@ -54,8 +56,15 @@ export function getHouseProjectCatalog(kind: HouseProjectCatalogKind): HouseProj
   return kind === "partner" ? PARTNER_HOUSE_PROJECT_CATALOG : AUTHOR_HOUSE_PROJECT_CATALOG;
 }
 
-export function houseProjectDetailPath(catalog: HouseProjectCatalogConfig, slug: string): string {
-  return `${catalog.basePath}/${slug}`;
+export function houseProjectDetailPath(
+  catalog: HouseProjectCatalogConfig,
+  slug: string,
+  options?: { material?: MaterialFilterId },
+): string {
+  const base = `${catalog.basePath}/${slug}`;
+  const material = options?.material;
+  if (!material || material === "all") return base;
+  return `${base}?material=${encodeURIComponent(material)}`;
 }
 
 export function parseHouseProjectCatalogKind(value: unknown): HouseProjectCatalogKind {

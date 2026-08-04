@@ -6,7 +6,12 @@ import type { CSSProperties } from "react";
 
 import { ProjectEngagementBadges } from "@/components/projects/project-engagement-badges";
 import { ProjectCompareButton } from "@/components/projects/project-compare-button";
-import type { HouseProjectCatalogKind } from "@/lib/house-project-catalog";
+import {
+  getHouseProjectCatalog,
+  houseProjectDetailPath,
+  type HouseProjectCatalogKind,
+} from "@/lib/house-project-catalog";
+import type { MaterialFilterId } from "@/lib/project-filters";
 import { CmsImage } from "@/components/ui/cms-image";
 import type { HouseProjectItem } from "@/lib/construction-data";
 import { getProjectRenders } from "@/lib/construction-shared";
@@ -44,6 +49,7 @@ export function HouseProjectGridCard({
   imageSizes = "(max-width: 768px) 100vw, 50vw",
   projectBasePath = "/projects",
   catalogKind = "author",
+  materialFilter = "all",
 }: {
   project: HouseProjectItem;
   priceRub?: number;
@@ -51,8 +57,19 @@ export function HouseProjectGridCard({
   imageSizes?: string;
   projectBasePath?: string;
   catalogKind?: HouseProjectCatalogKind;
+  /** Материал из фильтра каталога — прокидываем в карточку проекта. */
+  materialFilter?: MaterialFilterId;
 }) {
-  const href = `${projectBasePath}/${project.slug}`;
+  const catalog = getHouseProjectCatalog(catalogKind);
+  const href =
+    projectBasePath === catalog.basePath
+      ? houseProjectDetailPath(catalog, project.slug, { material: materialFilter })
+      : (() => {
+          const base = `${projectBasePath}/${project.slug}`;
+          return materialFilter && materialFilter !== "all"
+            ? `${base}?material=${encodeURIComponent(materialFilter)}`
+            : base;
+        })();
   const cover = getProjectRenders(project)[0];
   const price = priceRub ?? project.price;
   const mats = materialsLine(project.materials);

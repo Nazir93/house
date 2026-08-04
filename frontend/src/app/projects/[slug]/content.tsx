@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import {
   ArrowRight,
   Bath,
@@ -30,7 +31,11 @@ import {
   type HouseCalculatorCategoryId,
 } from "@/lib/house-project-calculator-engine";
 import { resolveProjectPriceOffer } from "@/lib/project-price-offer";
-import { resolveProjectListingPriceRub } from "@/lib/project-listing-price";
+import {
+  heroTierIndexForMaterialFilter,
+  resolveProjectListingPriceRub,
+} from "@/lib/project-listing-price";
+import { parseMaterialParam, type MaterialFilterId } from "@/lib/project-filters";
 import { HouseProjectCompletionSection } from "@/components/construction/house-project-completion-section";
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { CmsImage } from "@/components/ui/cms-image";
@@ -71,12 +76,17 @@ export function HouseProjectDetailContent({
   similarProjects,
   heroShellTiers,
   catalog = AUTHOR_HOUSE_PROJECT_CATALOG,
+  initialMaterial = "all",
 }: {
   project: HouseProjectItem;
   similarProjects: HouseProjectItem[];
   heroShellTiers: HeroPricingTier[];
   catalog?: HouseProjectCatalogConfig;
+  /** Материал из URL каталога (?material=), если searchParams ещё не гидратировались. */
+  initialMaterial?: MaterialFilterId;
 }) {
+  const searchParams = useSearchParams();
+  const materialFromUrl = parseMaterialParam(searchParams.get("material") ?? initialMaterial);
   const renders = getProjectRenders(project);
   const plans = getProjectPlans(project);
   const calculatorUi = useMemo(() => getEffectiveCalculatorUi(project), [project]);
@@ -131,9 +141,15 @@ export function HouseProjectDetailContent({
       roofPitch,
     });
   }, [project.calculatorCategory, pricingFloors, roofPitch]);
-  const [materialTierIndex, setMaterialTierIndex] = useState(0);
+  const [materialTierIndex, setMaterialTierIndex] = useState(() =>
+    heroTierIndexForMaterialFilter(heroShellTiers, materialFromUrl),
+  );
   const tierMax = Math.max(0, effectiveHeroTiers.length - 1);
   const tierIdx = Math.min(materialTierIndex, tierMax);
+
+  useEffect(() => {
+    setMaterialTierIndex(heroTierIndexForMaterialFilter(effectiveHeroTiers, materialFromUrl));
+  }, [effectiveHeroTiers, materialFromUrl]);
   const [activeRender, setActiveRender] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
