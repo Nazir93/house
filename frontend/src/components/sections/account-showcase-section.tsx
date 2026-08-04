@@ -56,7 +56,7 @@ export function AccountShowcaseSection() {
               <article
                 key={item.id}
                 data-reveal="card"
-                className="group relative sticky grid min-h-[calc(100dvh-var(--site-header-sticky-offset)-var(--mobile-bottom-nav-offset))] grid-rows-[auto_minmax(22rem,1fr)] overflow-hidden rounded-[1.5rem] border border-[var(--border)] bg-[var(--bg-secondary)] sm:rounded-[1.75rem] lg:min-h-[38rem] lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:grid-rows-none lg:gap-6 lg:rounded-[2rem]"
+                className="group relative sticky grid min-h-[calc(100dvh-var(--site-header-sticky-offset)-var(--mobile-bottom-nav-offset))] grid-rows-[auto_minmax(22rem,1fr)] overflow-hidden bg-[var(--bg)] lg:min-h-[38rem] lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:grid-rows-none lg:gap-6"
                 style={{
                   top: "var(--site-header-sticky-offset)",
                   zIndex: index + 1,
