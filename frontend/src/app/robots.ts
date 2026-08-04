@@ -16,6 +16,7 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
   if (customRules) {
     const rules: MetadataRoute.Robots = {
       rules: [],
+      host: SITE_URL.replace(/^https?:\/\//i, ""),
       sitemap: `${SITE_URL}/sitemap.xml`,
     };
 
@@ -25,11 +26,14 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
     const disallow: string[] = [];
 
     for (const line of lines) {
-      if (line.toLowerCase().startsWith("user-agent:")) {
+      const lower = line.toLowerCase();
+      // Host/Sitemap из админки игнорируем — всегда канон SITE_URL (chastdushi.ru)
+      if (lower.startsWith("host:") || lower.startsWith("sitemap:")) continue;
+      if (lower.startsWith("user-agent:")) {
         currentAgent = line.split(":")[1]?.trim() || "*";
-      } else if (line.toLowerCase().startsWith("disallow:")) {
+      } else if (lower.startsWith("disallow:")) {
         disallow.push(line.split(":").slice(1).join(":").trim());
-      } else if (line.toLowerCase().startsWith("allow:")) {
+      } else if (lower.startsWith("allow:")) {
         allow.push(line.split(":").slice(1).join(":").trim());
       }
     }
@@ -47,6 +51,6 @@ export default async function robots(): Promise<MetadataRoute.Robots> {
       },
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
-    host: SITE_URL,
+    host: SITE_URL.replace(/^https?:\/\//i, ""),
   };
 }

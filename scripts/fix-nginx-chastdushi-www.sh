@@ -17,4 +17,4 @@ cp "$REPO" "$CONF"
 
 nginx -t
 systemctl reload nginx
-echo "OK: nginx перезагружен, www → chastdushi.ru"
+echo "OK: nginx перезагружен (www + частьдуши.рф → chastdushi.ru)"

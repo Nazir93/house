@@ -10,6 +10,16 @@
 | chastdushi.ru, www.chastdushi.ru | как есть |
 | частьдуши.рф | `xn--80aim8afhxn7a.xn--p1ai` |
 
+## Зеркала
+
+| Домен | Поведение |
+|-------|-----------|
+| `chastdushi.ru` | канонический сайт |
+| `www.chastdushi.ru` | **301** → `https://chastdushi.ru…` |
+| `частьдуши.рф` (`xn--80aim8afhxn7a.xn--p1ai`) | **301** → `https://chastdushi.ru…` |
+
+В `robots.txt` / canonical / sitemap всегда `chastdushi.ru`.
+
 ## TLS
 
 На VPS используется стандартный **`/etc/letsencrypt/options-ssl-nginx.conf`** (TLS 1.2 + 1.3). В `listen` включён **http2** — меньше параллельных TLS-соединений, реже срабатывает фильтр ТСПУ на тяжёлых страницах.
