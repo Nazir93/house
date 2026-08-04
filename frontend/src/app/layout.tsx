@@ -118,7 +118,6 @@ export default async function RootLayout({
         ) : null}
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
         <JsonLd />
-        <AnalyticsScripts />
       </head>
       <body className={`${montserrat.className} font-body antialiased theme-bg theme-text transition-colors duration-500`}>
         <Script id="house-theme-init" strategy="beforeInteractive">
@@ -138,6 +137,8 @@ export default async function RootLayout({
             </SessionProvider>
           </ThemeProvider>
         </PwaSerwistProvider>
+        {/* Метрика/GA после контента — не в <head>, чтобы не шуметь в critical path. */}
+        <AnalyticsScripts />
         <AnalyticsEventListener />
       </body>
     </html>

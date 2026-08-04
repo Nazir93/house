@@ -150,13 +150,10 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                 edgeGlass,
               )}
             >
-              <h1 className="text-balance font-heading text-[clamp(1.35rem,3.35vw,3.05rem)] font-bold uppercase leading-[0.92] tracking-[-0.04em] text-white [text-shadow:0_0_1px_rgba(0,0,0,0.95),0_1px_2px_rgba(0,0,0,0.92),0_2px_16px_rgba(0,0,0,0.72),0_4px_36px_rgba(0,0,0,0.45)]">
+              <h1 className="home-hero-lcp-title text-[clamp(1.35rem,3.35vw,3.05rem)] leading-[0.92] text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.9),0_4px_24px_rgba(0,0,0,0.55)]">
                 {config.headlineLines[0]}
                 {config.headlineLines.slice(1).map((line, index) => (
-                  <span
-                    key={`${index}-${line}`}
-                    className="block text-white/95 [text-shadow:0_0_1px_rgba(0,0,0,0.95),0_1px_3px_rgba(0,0,0,0.88),0_3px_22px_rgba(0,0,0,0.65)]"
-                  >
+                  <span key={`${index}-${line}`} className="block text-white/95">
                     {line}
                   </span>
                 ))}

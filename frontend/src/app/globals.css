@@ -460,6 +460,18 @@
     font-weight: 700;
   }
 
+  /**
+   * LCP-заголовок героя: системный стек без ожидания Montserrat.
+   * text-balance / тяжёлые multi-shadow здесь нельзя — раздувают element render delay.
+   */
+  .home-hero-lcp-title {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: -0.04em;
+    font-weight: 700;
+    text-wrap: pretty;
+  }
+
   /** Карусель на экранах входа (админ / ЛК): полоса таймера слева направо */
   @keyframes login-showcase-progress {
     from {
