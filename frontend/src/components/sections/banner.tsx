@@ -145,7 +145,8 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
           <div className="pointer-events-auto max-w-3xl justify-self-start self-end pt-0 min-[1100px]:pr-4">
             <div
               className={cn(
-                "max-w-4xl rounded-2xl bg-black/42 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_12px_48px_rgba(0,0,0,0.55)] backdrop-blur-sm sm:rounded-[1.35rem] sm:px-5 sm:py-4",
+                // Без backdrop-blur на LCP-блоке: blur на слабых CPU даёт forced layout / долгий render delay.
+                "max-w-4xl rounded-2xl bg-black/58 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_12px_48px_rgba(0,0,0,0.55)] sm:rounded-[1.35rem] sm:px-5 sm:py-4",
                 edgeGlass,
               )}
             >
@@ -163,7 +164,7 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
             </div>
             <p
               className={cn(
-                "mt-2.5 max-w-2xl text-balance rounded-lg bg-black/50 px-3 py-2 text-[13px] font-medium leading-relaxed text-neutral-100 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm md:mt-3 md:px-3.5 md:py-2.5 md:text-[15px]",
+                "mt-2.5 max-w-2xl text-balance rounded-lg bg-black/62 px-3 py-2 text-[13px] font-medium leading-relaxed text-neutral-100 shadow-[0_12px_40px_rgba(0,0,0,0.35)] md:mt-3 md:px-3.5 md:py-2.5 md:text-[15px]",
                 edgeGlass,
               )}
             >
@@ -183,7 +184,7 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                 onClick={() => openModalToEstimate()}
                 aria-label="Открыть ориентировочный расчёт стоимости строительства"
                 className={cn(
-                  "inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-black/55 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-white shadow-[0_12px_36px_rgba(0,0,0,0.25)] backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-black/70 md:px-5",
+                  "inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-black/62 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-white shadow-[0_12px_36px_rgba(0,0,0,0.25)] transition hover:-translate-y-0.5 hover:bg-black/75 md:px-5",
                   edgeGlassStrong,
                   "hover:border-white/[0.14]",
                 )}

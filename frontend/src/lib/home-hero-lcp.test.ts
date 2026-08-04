@@ -8,7 +8,9 @@ import {
 } from "@/lib/home-hero-lcp";
 
 describe("home-hero-lcp", () => {
-  it("preload указывает на оптимизированный /_next/image под мобильный LCP", () => {
+  it("preload: компактный w/q под мобильный LCP (PSI Moto G)", () => {
+    expect(HOME_HERO_LCP_WIDTH).toBe(750);
+    expect(HOME_HERO_LCP_QUALITY).toBe(60);
     expect(buildHomeHeroLcpPreloadHref("/uploads/1_Post-mplljowr.webp")).toBe(
       buildNextImagePrefetchHref("/uploads/1_Post-mplljowr.webp", HOME_HERO_LCP_WIDTH, HOME_HERO_LCP_QUALITY),
     );

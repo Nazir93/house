@@ -1,10 +1,10 @@
 import { buildImagePrefetchSrc } from "@/lib/image-loading";
 
-/** Типичная ширина LCP на Moto G / mid-mobile в Lighthouse. */
-export const HOME_HERO_LCP_WIDTH = 828;
+/** Ширина LCP под Moto G / mid-mobile — ближе к реальному CSS-пиксельному вьюпорту. */
+export const HOME_HERO_LCP_WIDTH = 750;
 
-/** Чуть сильнее сжатие для полноэкранного фона — меньше байт на 4G. */
-export const HOME_HERO_LCP_QUALITY = 70;
+/** Сильнее сжатие полноэкранного фона (PSI: q=70 ещё ~24 KiB spare). */
+export const HOME_HERO_LCP_QUALITY = 60;
 
 /** Href для `<link rel="preload" as="image">` светлого фона баннера (дефолтная тема). */
 export function buildHomeHeroLcpPreloadHref(lightBackgroundSrc: string): string {

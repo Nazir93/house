@@ -10,10 +10,22 @@ import { JsonLdInline } from "@/components/seo/json-ld-inline";
 import { BannerSection } from "@/components/sections/banner";
 import { getHomeHeroBannerConfig } from "@/lib/home-hero-banner-config";
 import { buildHomeHeroLcpPreloadHref } from "@/lib/home-hero-lcp";
-import { ProjectsConstructorSection } from "@/components/sections/projects-constructor-section";
-import { FeaturedHouseProjectsSection } from "@/components/sections/featured-house-projects";
 
 /** Ниже первого экрана — отдельные чанки, не блокируют LCP баннера. */
+const ProjectsConstructorSection = dynamic(
+  () =>
+    import("@/components/sections/projects-constructor-section").then((m) => ({
+      default: m.ProjectsConstructorSection,
+    })),
+  { loading: () => <div className="min-h-[40vh]" aria-hidden /> },
+);
+const FeaturedHouseProjectsSection = dynamic(
+  () =>
+    import("@/components/sections/featured-house-projects").then((m) => ({
+      default: m.FeaturedHouseProjectsSection,
+    })),
+  { loading: () => <div className="min-h-[50vh]" aria-hidden /> },
+);
 const ClientsChooseVideoSection = dynamic(
   () =>
     import("@/components/sections/clients-choose-video-section").then((m) => ({
