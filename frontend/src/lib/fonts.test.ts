@@ -6,17 +6,14 @@ import {
   MONTSERRAT_WEIGHTS,
 } from "@/lib/fonts-config";
 
-describe("fonts (LCP)", () => {
-  it("не тянет weight 500 в критический путь", () => {
+describe("fonts", () => {
+  it("не тянет weight 500", () => {
     expect(MONTSERRAT_WEIGHTS).toEqual(["400", "700"]);
     expect(MONTSERRAT_WEIGHTS).not.toContain("500");
   });
 
-  it("display=optional — текст не ждёт webfont на медленной сети", () => {
-    expect(MONTSERRAT_DISPLAY).toBe("optional");
-  });
-
-  it("preload=false — woff2 не в critical path Lighthouse", () => {
-    expect(MONTSERRAT_PRELOAD).toBe(false);
+  it("Montserrat с display=swap и preload — бренд на первом экране", () => {
+    expect(MONTSERRAT_DISPLAY).toBe("swap");
+    expect(MONTSERRAT_PRELOAD).toBe(true);
   });
 });
