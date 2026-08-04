@@ -193,6 +193,7 @@ export function ClientsChooseVideoSection() {
   const progressRafRef = useRef(0);
   const pendingProgressRef = useRef(0);
   const pendingBaseIndexRef = useRef(0);
+  const flushVideoSeekRef = useRef<() => void>(() => {});
   const [, setActiveIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [hasScrolled, setHasScrolled] = useState(false);
@@ -229,7 +230,7 @@ export function ClientsChooseVideoSection() {
     const onSeeked = () => {
       video.removeEventListener("seeked", onSeeked);
       seekingRef.current = false;
-      if (pendingSeekRef.current != null) flushVideoSeek();
+      if (pendingSeekRef.current != null) flushVideoSeekRef.current();
     };
     video.addEventListener("seeked", onSeeked);
 
@@ -241,6 +242,10 @@ export function ClientsChooseVideoSection() {
       video.removeEventListener("seeked", onSeeked);
     }
   }, []);
+
+  useEffect(() => {
+    flushVideoSeekRef.current = flushVideoSeek;
+  }, [flushVideoSeek]);
 
   const queueVideoSeek = useCallback(
     (progress: number) => {
