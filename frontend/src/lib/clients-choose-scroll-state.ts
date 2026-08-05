@@ -1,6 +1,35 @@
 /** Доля скролл-сегмента: сначала уход текущей услуги, затем появление следующей. */
 export const CLIENTS_CHOOSE_EXIT_FRACTION = 0.42;
 
+/** Высота скролл-трека на один пункт услуги (vh). */
+export const CLIENTS_CHOOSE_SCROLL_VH_PER_ITEM_MOBILE = 48;
+export const CLIENTS_CHOOSE_SCROLL_VH_PER_ITEM_DESKTOP = 58;
+
+/** Полная высота sticky-истории в vh — только простое число, без CSS calc(*). */
+export function resolveClientsChooseTrackHeightVh(
+  serviceCount: number,
+  isDesktop: boolean,
+): number {
+  const perItem = isDesktop
+    ? CLIENTS_CHOOSE_SCROLL_VH_PER_ITEM_DESKTOP
+    : CLIENTS_CHOOSE_SCROLL_VH_PER_ITEM_MOBILE;
+  return Math.max(1, serviceCount) * perItem;
+}
+
+/**
+ * Прогресс 0..1 по положению секции в вьюпорте.
+ * Если трек схлопнулся до ~одного экрана — progress почти всегда 0 (баг «залипли слайды»).
+ */
+export function resolveClientsChooseScrollProgress(params: {
+  sectionTop: number;
+  sectionHeight: number;
+  viewportHeight: number;
+}): number {
+  const scrollRange = Math.max(params.sectionHeight - params.viewportHeight, 1);
+  const scrolled = -params.sectionTop;
+  return Math.max(0, Math.min(scrolled / scrollRange, 1));
+}
+
 /**
  * Hold-кадры ролика для первых двух услуг.
  * Разрез с фундаментом — в начале ролика; на «Проекте» показываем более поздний кадр.

@@ -10,20 +10,15 @@ import { isLowPerfDevice } from "@/lib/use-perf";
 import { CLIENTS_CHOOSE_SERVICES } from "@/lib/clients-choose-services";
 import {
   getClientsChooseScrollState,
+  resolveClientsChooseScrollProgress,
   resolveClientsChooseSkipScrollY,
   resolveClientsChooseSlideVisual,
+  resolveClientsChooseTrackHeightVh,
   resolveClientsChooseVideoProgress,
 } from "@/lib/clients-choose-scroll-state";
 
 /** Минимальный интервал постановки seek — при быстрой прокрутке догоняем последний кадр. */
 const VIDEO_SEEK_MIN_MS = 90;
-
-/**
- * Высота скролл-трека на один пункт услуги (vh).
- * Короче прежних 72/100 — история не «запирает» страницу надолго.
- */
-const SCROLL_VH_PER_ITEM_MOBILE = 48;
-const SCROLL_VH_PER_ITEM_DESKTOP = 58;
 
 const SERVICES_VIDEO_SRC = "/videos/14654251600401.mp4";
 
@@ -282,16 +277,31 @@ export function ClientsChooseVideoSection() {
     [flushVideoSeek, videoEnabled],
   );
 
+  const [trackHeightVh, setTrackHeightVh] = useState(() =>
+    resolveClientsChooseTrackHeightVh(SERVICES.length, false),
+  );
+
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const apply = () => {
+      setTrackHeightVh(resolveClientsChooseTrackHeightVh(SERVICES.length, mq.matches));
+    };
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
   const syncScrollToServices = useCallback(() => {
     const section = sectionRef.current;
     if (!section) return;
 
     const rect = section.getBoundingClientRect();
-    const sectionHeight = section.offsetHeight;
     const viewportH = window.visualViewport?.height ?? window.innerHeight;
-    const scrolled = -rect.top;
-    const scrollRange = Math.max(sectionHeight - viewportH, 1);
-    const progress = Math.max(0, Math.min(scrolled / scrollRange, 1));
+    const progress = resolveClientsChooseScrollProgress({
+      sectionTop: rect.top,
+      sectionHeight: section.offsetHeight,
+      viewportHeight: viewportH,
+    });
     const { baseIndex } = getClientsChooseScrollState(progress, SERVICES.length);
 
     pendingProgressRef.current = progress;
@@ -341,7 +351,9 @@ export function ClientsChooseVideoSection() {
     let offLenis: (() => void) | undefined;
     const attachLenis = () => {
       const L = typeof window !== "undefined" ? window.__lenis : undefined;
-      if (L && !offLenis) offLenis = L.on("scroll", onScroll);
+      if (L && !offLenis) {
+        offLenis = L.on("scroll", onScroll);
+      }
     };
     attachLenis();
     const poll = window.setInterval(() => {
@@ -362,22 +374,41 @@ export function ClientsChooseVideoSection() {
     };
   }, [syncScrollToServices]);
 
+  // Пока секция в кадре — синхронизируем прогресс каждый кадр (Lenis/sticky надёжнее, чем один scroll-event).
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
 
+    let inView = false;
+    let rafId = 0;
+    const tick = () => {
+      syncScrollToServices();
+      if (inView) rafId = requestAnimationFrame(tick);
+    };
+
     const io = new IntersectionObserver(
       ([entry]) => {
+        inView = entry.isIntersecting;
         if (entry.isIntersecting && scrubAllowedRef.current) {
           setVideoEnabled(true);
-          syncScrollToServices();
+        }
+        if (inView) {
+          cancelAnimationFrame(rafId);
+          rafId = requestAnimationFrame(tick);
+        } else {
+          cancelAnimationFrame(rafId);
+          rafId = 0;
         }
       },
-      { root: null, rootMargin: "40% 0px", threshold: 0 },
+      { root: null, rootMargin: "20% 0px", threshold: 0 },
     );
     io.observe(el);
 
-    return () => io.disconnect();
+    return () => {
+      inView = false;
+      cancelAnimationFrame(rafId);
+      io.disconnect();
+    };
   }, [syncScrollToServices]);
 
   useEffect(() => {
@@ -408,12 +439,11 @@ export function ClientsChooseVideoSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative touch-pan-y scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)] clients-choose-scroll-track"
+      className="relative touch-pan-y scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)]"
       style={
         {
-          "--clients-choose-count": String(SERVICES.length),
-          "--clients-choose-scroll-vh-mobile": String(SCROLL_VH_PER_ITEM_MOBILE),
-          "--clients-choose-scroll-vh-desktop": String(SCROLL_VH_PER_ITEM_DESKTOP),
+          // Явный vh — без CSS calc(var * vh * var), из‑за него трек схлопывался и слайды залипали на 01/05.
+          height: `${trackHeightVh}vh`,
           backgroundColor: "var(--bg)",
         } as CSSProperties
       }

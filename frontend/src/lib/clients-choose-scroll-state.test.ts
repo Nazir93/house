@@ -4,8 +4,10 @@ import {
   CLIENTS_CHOOSE_EXIT_FRACTION,
   getClientsChooseScrollState,
   hasVisibleClientsChooseSlide,
+  resolveClientsChooseScrollProgress,
   resolveClientsChooseSkipScrollY,
   resolveClientsChooseSlideVisual,
+  resolveClientsChooseTrackHeightVh,
   resolveClientsChooseVideoProgress,
 } from "@/lib/clients-choose-scroll-state";
 
@@ -76,5 +78,49 @@ describe("clients-choose-scroll-state", () => {
     for (let i = 0; i <= 100; i += 1) {
       expect(hasVisibleClientsChooseSlide(i / 100, COUNT)).toBe(true);
     }
+  });
+
+  it("высота трека в vh кратна числу услуг (не схлопывается до одного экрана)", () => {
+    expect(resolveClientsChooseTrackHeightVh(5, false)).toBe(240);
+    expect(resolveClientsChooseTrackHeightVh(5, true)).toBe(290);
+    expect(resolveClientsChooseTrackHeightVh(5, true)).toBeGreaterThan(100);
+  });
+
+  it("при высоком треке progress растёт по мере ухода sectionTop вверх", () => {
+    const viewportHeight = 800;
+    const sectionHeight = 2900;
+    expect(
+      resolveClientsChooseScrollProgress({
+        sectionTop: 0,
+        sectionHeight,
+        viewportHeight,
+      }),
+    ).toBe(0);
+    expect(
+      resolveClientsChooseScrollProgress({
+        sectionTop: -sectionHeight / 2 + viewportHeight / 2,
+        sectionHeight,
+        viewportHeight,
+      }),
+    ).toBeGreaterThan(0.4);
+    expect(
+      resolveClientsChooseScrollProgress({
+        sectionTop: -(sectionHeight - viewportHeight),
+        sectionHeight,
+        viewportHeight,
+      }),
+    ).toBe(1);
+  });
+
+  it("схлопнутый трек (~viewport) даёт почти нулевой progress на большей части pin — это баг-сценарий", () => {
+    const viewportHeight = 800;
+    const sectionHeight = 820;
+    expect(
+      resolveClientsChooseScrollProgress({
+        sectionTop: -5,
+        sectionHeight,
+        viewportHeight,
+      }),
+    ).toBeLessThan(0.3);
   });
 });
