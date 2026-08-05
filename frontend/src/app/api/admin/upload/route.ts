@@ -4,6 +4,7 @@ import path from "path";
 import sharp from "sharp";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 import { validateUploadMagicBytes } from "@/lib/upload-file-validation";
+import { getUploadImageOptimizeLimits } from "@/lib/upload-image-optimize";
 
 const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "webp", "gif", "avif", "svg"]);
 const DOCUMENT_EXT = new Set(["pdf", "xlsx", "xls", "doc", "docx", "txt", "csv", "zip", "rar"]);
@@ -164,16 +165,16 @@ export async function POST(request: NextRequest) {
     if (useSharp) {
       const webpName = `${fileName}.webp`;
       const webpPath = path.join(uploadsDir, webpName);
-      const heroProfile = profile === "hero";
+      const limits = getUploadImageOptimizeLimits(profile === "hero" ? "hero" : "default");
       try {
         await sharp(buffer)
           .resize({
-            width: heroProfile ? 3840 : 1920,
-            height: heroProfile ? 3840 : 1920,
+            width: limits.maxEdgePx,
+            height: limits.maxEdgePx,
             fit: "inside",
             withoutEnlargement: true,
           })
-          .webp({ quality: heroProfile ? 88 : 78 })
+          .webp({ quality: limits.webpQuality })
           .toFile(webpPath);
         savedPath = `/uploads/${webpName}`;
       } catch (sharpError) {

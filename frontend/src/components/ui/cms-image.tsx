@@ -30,7 +30,7 @@ export function CmsImage({
       src={cleanSrc}
       alt={alt}
       unoptimized={uo}
-      quality={quality ?? 78}
+      quality={quality ?? 72}
       decoding={decoding ?? "async"}
       className={cn(className)}
       {...rest}

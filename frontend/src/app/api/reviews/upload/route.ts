@@ -6,6 +6,7 @@ import sharp from "sharp";
 import { REVIEW_PHOTO_MAX_BYTES, REVIEW_PHOTO_URL_PREFIX } from "@/lib/review-content";
 import { checkReviewUploadRateLimit } from "@/lib/review-rate-limit";
 import { validateUploadMagicBytes } from "@/lib/upload-file-validation";
+import { getUploadImageOptimizeLimits } from "@/lib/upload-image-optimize";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -71,10 +72,16 @@ export async function POST(request: NextRequest) {
     const webpPath = path.join(uploadsDir, webpName);
 
     try {
+      const limits = getUploadImageOptimizeLimits("default");
       await sharp(buffer)
         .rotate()
-        .resize({ width: 1600, height: 1600, fit: "inside", withoutEnlargement: true })
-        .webp({ quality: 78 })
+        .resize({
+          width: limits.maxEdgePx,
+          height: limits.maxEdgePx,
+          fit: "inside",
+          withoutEnlargement: true,
+        })
+        .webp({ quality: limits.webpQuality })
         .toFile(webpPath);
     } catch (sharpError) {
       console.warn("[REVIEW UPLOAD] Sharp failed, saving original:", sharpError);
