@@ -154,13 +154,22 @@ export function getServicesIndexSeo(): ServicesIndexSeoBundle {
       "инженерные сети коттедж",
       S,
     ],
-    h1: `Услуги — проектирование и строительство в ${C}`,
+    h1: "УСЛУГИ — ПРОЕКТИРОВАНИЕ И СТРОИТЕЛЬСТВО ЗАГОРОДНЫХ ДОМОВ",
     landingTheses: [
       "Главная услуг — обзор направлений: проектирование, фундамент, кровля, инженерия, отделка.",
       "Карточки ведут на отдельные страницы /services/proektirovanie, fundament, karkas, krovlya, inzheneriya, otdelka.",
       "Гео: город офиса и регионы из констант.",
     ],
   };
+}
+
+/** H1 /services: новый текст; старый шаблон «… в {город}» из сида/БД заменяем. */
+export function resolveServicesIndexH1(dbH1: string | null | undefined): string {
+  const fallback = getServicesIndexSeo().h1;
+  const raw = dbH1?.trim();
+  if (!raw) return fallback;
+  if (/^услуги\s*[—–-]\s*проектирование и строительство в\s+/i.test(raw)) return fallback;
+  return raw;
 }
 
 /** Значения для записи PageMeta (путь → поля). Устаревшие URL услуг не сеем. */

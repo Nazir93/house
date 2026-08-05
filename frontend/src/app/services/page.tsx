@@ -1,7 +1,7 @@
 import { getHeroGeoSubtitle } from "@/lib/constants";
 import { getPageMeta, getPageMetaFields } from "@/lib/get-page-meta";
 import { getServicesList } from "@/lib/get-services";
-import { getServicesIndexSeo } from "@/lib/seo/service-seo-defaults";
+import { getServicesIndexSeo, resolveServicesIndexH1 } from "@/lib/seo/service-seo-defaults";
 import { ServicesPageContent } from "./content";
 
 export const revalidate = 60;
@@ -21,7 +21,7 @@ export async function generateMetadata() {
 export default async function ServicesPage() {
   const [services, meta] = await Promise.all([getServicesList(), getPageMetaFields("/services")]);
 
-  const pageH1 = meta.h1 || "Услуги";
+  const pageH1 = resolveServicesIndexH1(meta.h1);
   const introText = meta.description || SERVICES_INTRO_FALLBACK;
 
   return (

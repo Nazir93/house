@@ -3,6 +3,8 @@ import {
   getKnownServiceSeoSlugs,
   getServicePageMetaSeeds,
   getServiceSeoBySlug,
+  getServicesIndexSeo,
+  resolveServicesIndexH1,
 } from "@/lib/seo/service-seo-defaults";
 
 describe("service SEO semantic defaults", () => {
@@ -17,7 +19,9 @@ describe("service SEO semantic defaults", () => {
 
     expect(seo?.title).toContain("Фундамент под ключ");
     expect(seo?.description).toContain("Фундамент для загородного дома");
-    expect(seo?.keywords).toEqual(expect.arrayContaining(["фундамент для дома", "строительство фундамента"]));
+    expect(seo?.keywords).toEqual(
+      expect.arrayContaining(["фундамент для дома", "строительство фундамента"]),
+    );
   });
 
   it("seeds the services index and each known service page without overwriting admin edits later", () => {
@@ -28,5 +32,15 @@ describe("service SEO semantic defaults", () => {
     expect(paths).toContain("/services/proektirovanie");
     expect(paths).toContain("/services/fundament");
     expect(new Set(paths).size).toBe(paths.length);
+  });
+
+  it("H1 /services — загородные дома; старый шаблон с городом заменяется", () => {
+    const expected = "УСЛУГИ — ПРОЕКТИРОВАНИЕ И СТРОИТЕЛЬСТВО ЗАГОРОДНЫХ ДОМОВ";
+    expect(getServicesIndexSeo().h1).toBe(expected);
+    expect(resolveServicesIndexH1(null)).toBe(expected);
+    expect(resolveServicesIndexH1("Услуги — проектирование и строительство в Санкт-Петербург")).toBe(
+      expected,
+    );
+    expect(resolveServicesIndexH1("Свой заголовок из админки")).toBe("Свой заголовок из админки");
   });
 });
