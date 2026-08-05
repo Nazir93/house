@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Lenis from "lenis";
+import { scrollPageToElement } from "@/lib/scroll-page-to-element";
 import { isLowPerfDevice } from "@/lib/use-perf";
 
 declare global {
@@ -17,22 +18,11 @@ export function SmoothScroll() {
       const target = (e.target as HTMLElement).closest("a");
       if (!target) return;
       const href = target.getAttribute("href");
-      if (!href?.startsWith("#")) return;
+      if (!href?.startsWith("#") || href === "#") return;
       const el = document.querySelector(href);
-      if (!el) return;
+      if (!(el instanceof HTMLElement)) return;
       e.preventDefault();
-      const L = window.__lenis;
-      if (L) {
-        L.scrollTo(el as HTMLElement, { offset: -80 });
-        return;
-      }
-      const prefersReduced =
-        typeof window.matchMedia === "function" &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      el.scrollIntoView({
-        behavior: prefersReduced ? "auto" : "smooth",
-        block: "start",
-      });
+      scrollPageToElement(el);
     };
     document.addEventListener("click", handleAnchor);
     return () => document.removeEventListener("click", handleAnchor);

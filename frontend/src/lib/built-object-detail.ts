@@ -69,6 +69,11 @@ export type BuiltObjectNavItem = {
   label: string;
 };
 
+/** DOM id секции на публичной карточке портфолио (якорь навигации). */
+export function builtObjectSectionDomId(id: BuiltObjectNavSectionId): string {
+  return `built-section-${id}`;
+}
+
 export type BuiltObjectHistoryCard = {
   id: string;
   title: string;

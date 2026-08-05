@@ -22,6 +22,7 @@ import { ImageLightbox } from "@/components/ui/image-lightbox";
 import {
   builtObjectCharacteristics,
   builtObjectMapHref,
+  builtObjectSectionDomId,
   getBuiltObjectConstructionPhotos,
   getBuiltObjectHeroImage,
   getBuiltObjectHistoryCards,
@@ -32,6 +33,10 @@ import {
   type BuiltObjectNavSectionId,
 } from "@/lib/built-object-detail";
 import {
+  builtObjectNavScrollPlan,
+  isBuiltObjectNavScrollLocked,
+} from "@/lib/built-object-nav-scroll";
+import {
   formatClientReviewText,
   hasBuiltObjectClientReview,
   isBuiltObjectClientReviewVideoInline,
@@ -40,6 +45,7 @@ import { BuiltObjectHistoryCards } from "@/components/portfolio/built-object-his
 import { formatArticleBody, PAGE_INTRO_PROSE_CLASS } from "@/lib/html-content";
 import type { BuiltObjectItem } from "@/lib/construction-shared";
 import { BUILT_HOMES_SECTION_LABEL, UNDER_CONSTRUCTION_SECTION_LABEL } from "@/lib/constants";
+import { scrollPageToElement } from "@/lib/scroll-page-to-element";
 import { cn } from "@/lib/utils";
 
 /** Сетка 5×3 на странице; остальное — «Смотреть все». */
@@ -51,10 +57,6 @@ const DETAIL_CARD =
   "rounded-[1.75rem] border bg-[var(--bg-secondary)] p-4 shadow-[0_16px_46px_rgba(15,61,46,0.07)] sm:p-5 md:p-6";
 const DETAIL_CARD_BORDER = "border-[color-mix(in_srgb,var(--border)_82%,transparent)]";
 
-function sectionDomId(id: BuiltObjectNavSectionId): string {
-  return `built-section-${id}`;
-}
-
 export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
   const [descOpen, setDescOpen] = useState(false);
   const [activeNav, setActiveNav] = useState<BuiltObjectNavSectionId>("description");
@@ -64,6 +66,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
   const [lightboxSlides, setLightboxSlides] = useState<{ type: "image"; url: string }[]>([]);
   const [showAllPhotos, setShowAllPhotos] = useState(false);
   const flashTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const programmaticScrollUntil = useRef(0);
 
   const hero = getBuiltObjectHeroImage(object);
   const plans = useMemo(() => getBuiltObjectPlansForPage(object), [object]);
@@ -84,24 +87,37 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
     : constructionPhotos.slice(0, CONSTRUCTION_GRID_LIMIT);
 
   const scrollToSection = useCallback((id: BuiltObjectNavSectionId) => {
-    const el = document.getElementById(sectionDomId(id));
-    if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    const plan = builtObjectNavScrollPlan(id);
+    if (plan.expandDescription) setDescOpen(true);
     setActiveNav(id);
-    if (flashTimer.current) clearTimeout(flashTimer.current);
-    setFlashSection(id);
-    flashTimer.current = setTimeout(() => setFlashSection(null), HIGHLIGHT_MS);
+    programmaticScrollUntil.current = Date.now() + plan.lockMs;
+
+    const runScroll = () => {
+      const el = document.getElementById(plan.sectionDomId);
+      if (!el) return;
+      scrollPageToElement(el);
+      if (flashTimer.current) clearTimeout(flashTimer.current);
+      setFlashSection(id);
+      flashTimer.current = setTimeout(() => setFlashSection(null), HIGHLIGHT_MS);
+    };
+
+    if (plan.deferScrollForLayout) {
+      requestAnimationFrame(() => requestAnimationFrame(runScroll));
+      return;
+    }
+    runScroll();
   }, []);
 
   useEffect(() => {
     const ids = navItems.map((n) => n.id);
     const observers: IntersectionObserver[] = [];
     for (const id of ids) {
-      const el = document.getElementById(sectionDomId(id));
+      const el = document.getElementById(builtObjectSectionDomId(id));
       if (!el) continue;
       const obs = new IntersectionObserver(
         (entries) => {
           for (const entry of entries) {
+            if (isBuiltObjectNavScrollLocked(Date.now(), programmaticScrollUntil.current)) return;
             if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
               setActiveNav(id);
             }
@@ -133,7 +149,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
     const highlighted = flashSection === id;
     return (
       <section
-        id={sectionDomId(id)}
+        id={builtObjectSectionDomId(id)}
         className={cn(
           DETAIL_CARD,
           DETAIL_CARD_BORDER,
@@ -255,18 +271,23 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
               </div>
 
               <nav
-                className="mt-6 flex gap-2 overflow-x-auto border-t border-[color-mix(in_srgb,var(--border)_70%,transparent)] pt-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:flex-col lg:gap-0 lg:space-y-1 lg:overflow-visible lg:pb-0"
+                className="mt-6 flex flex-col gap-1 border-t border-[color-mix(in_srgb,var(--border)_70%,transparent)] pt-4"
                 aria-label="Разделы объекта"
               >
                 {navItems.map((item) => {
                   const active = activeNav === item.id;
+                  const { href } = builtObjectNavScrollPlan(item.id);
                   return (
-                    <button
+                    <a
                       key={item.id}
-                      type="button"
-                      onClick={() => scrollToSection(item.id)}
+                      href={href}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        scrollToSection(item.id);
+                      }}
                       className={cn(
-                        "flex shrink-0 items-center justify-between gap-2 rounded-xl px-3.5 py-2.5 text-left text-sm font-medium transition-colors lg:w-full",
+                        "flex w-full items-center justify-between gap-2 rounded-xl px-3.5 py-2.5 text-left text-sm font-medium transition-colors",
                         active ? "text-[var(--accent)]" : "text-[var(--text-muted)] hover:text-[var(--text)]",
                       )}
                       style={{
@@ -274,10 +295,11 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                           ? "color-mix(in srgb, var(--accent) 12%, var(--bg))"
                           : "transparent",
                       }}
+                      aria-current={active ? "location" : undefined}
                     >
                       <span>{item.label}</span>
                       <ChevronRight className={cn("h-4 w-4 shrink-0 opacity-50", active && "opacity-100")} aria-hidden />
-                    </button>
+                    </a>
                   );
                 })}
               </nav>
