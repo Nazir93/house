@@ -144,7 +144,8 @@ export function getKnownServiceSeoSlugs(): KnownServiceSeoSlug[] {
 export function getServicesIndexSeo(): ServicesIndexSeoBundle {
   return {
     title: `Услуги строительства домов — ${C} и регионы | ${S}`,
-    description: `Проектирование, фундамент, кровля, инженерные сети и отделка под ключ для загородных домов.${GEO_TAIL}`,
+    description:
+      "Строительство загородных домов как единая система: проектирование, конструктив, инженерия и отделка. Комплексные и отдельные работы.",
     keywords: [
       `строительство домов ${C}`,
       `проектирование дома ${C}`,
@@ -163,12 +164,28 @@ export function getServicesIndexSeo(): ServicesIndexSeoBundle {
   };
 }
 
+/** Текст под H2 на /services (не путать с коротким meta description). */
+export const SERVICES_INDEX_INTRO = [
+  "Строительство дома — это единая система, в которой каждый этап связан с последующими работами и влияет на итоговый результат. Именно поэтому мы рассматриваем каждую услугу не отдельно, а как часть общего процесса, где проектирование, конструктивные решения, инженерные системы и отделка должны быть взаимосвязаны и реализованы последовательно.",
+  "Мы выполняем как комплексное строительство загородных домов, так и отдельные виды строительных работ. Ниже представлены основные направления нашей работы. Выберите интересующую услугу, чтобы подробнее ознакомиться с её составом, особенностями выполнения и применяемыми технологиями.",
+].join("\n\n");
+
 /** H1 /services: новый текст; старый шаблон «… в {город}» из сида/БД заменяем. */
 export function resolveServicesIndexH1(dbH1: string | null | undefined): string {
   const fallback = getServicesIndexSeo().h1;
   const raw = dbH1?.trim();
   if (!raw) return fallback;
   if (/^услуги\s*[—–-]\s*проектирование и строительство в\s+/i.test(raw)) return fallback;
+  return raw;
+}
+
+/** Intro /services: длинный новый текст вместо короткого geo-описания из SEO/БД. */
+export function resolveServicesIndexIntro(dbDescription: string | null | undefined): string {
+  const raw = dbDescription?.trim();
+  if (!raw) return SERVICES_INDEX_INTRO;
+  if (/проектирование,\s*фундамент,\s*кровля/i.test(raw)) return SERVICES_INDEX_INTRO;
+  if (/полный спектр:\s*проектирование/i.test(raw)) return SERVICES_INDEX_INTRO;
+  if (/офис в\s+/i.test(raw) && /проекты в\s+/i.test(raw)) return SERVICES_INDEX_INTRO;
   return raw;
 }
 

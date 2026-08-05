@@ -80,11 +80,17 @@ export function ServicesHub({
       <div className="container mx-auto max-w-[1380px] px-4 sm:px-6 lg:px-10">
         <div className="mt-10">
           <h2 className="font-heading text-[clamp(1.35rem,2.2vw,1.85rem)] font-semibold leading-[1.15] tracking-tight text-[var(--text)]">
-            Услуги как система дома
+            Каждая услуга влияет на качество будущего дома
           </h2>
-          <p className="mt-4 max-w-3xl text-[14px] leading-relaxed text-[var(--text-muted)] sm:text-[15px]">
-            {introText}
-          </p>
+          <div className="mt-4 max-w-3xl space-y-3 text-[14px] leading-relaxed text-[var(--text-muted)] sm:text-[15px]">
+            {introText
+              .split(/\n\n+/)
+              .map((paragraph) => paragraph.trim())
+              .filter(Boolean)
+              .map((paragraph) => (
+                <p key={paragraph.slice(0, 48)}>{paragraph}</p>
+              ))}
+          </div>
           <Link
             href="/portfolio"
             className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[var(--accent)] transition-colors hover:text-[var(--accent-hover)]"
@@ -195,18 +201,13 @@ export function ServicesHub({
             <div className="mt-6 border-t border-[var(--border)] pt-6">
               {features.length > 0 ? (
                 <div>
-                  <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
-                        Что входит в услугу
-                      </p>
-                      <h4 className="mt-1 font-heading text-lg font-semibold leading-tight text-[var(--text)] md:text-xl">
-                        Состав выбранного направления
-                      </h4>
-                    </div>
-                    <p className="text-xs text-[var(--text-muted)]">
-                      {features.length} {features.length === 1 ? "пункт" : features.length < 5 ? "пункта" : "пунктов"}
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--accent)]">
+                      Что входит в услугу
                     </p>
+                    <h4 className="mt-1 font-heading text-lg font-semibold leading-tight text-[var(--text)] md:text-xl">
+                      СОСТАВ УСЛУГИ
+                    </h4>
                   </div>
 
                   <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">

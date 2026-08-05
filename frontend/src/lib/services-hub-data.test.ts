@@ -7,15 +7,15 @@ import {
 } from "@/lib/services-hub-data";
 
 describe("resolveServiceHubCtaAction", () => {
-  it("proektirovanie: «Обсудить проект» открывает форму заявки", () => {
+  it("proektirovanie: «Перейти к услуге» ведёт на страницу услуги", () => {
     const hub = getServiceHubCopy("proektirovanie");
-    expect(hub?.ctaLabel).toBe("Обсудить проект");
-    expect(resolveServiceHubCtaAction(hub)).toBe("modal");
+    expect(hub?.ctaLabel).toBe("Перейти к услуге");
+    expect(resolveServiceHubCtaAction(hub)).toBe("link");
   });
 
-  it("fundament: «Рассчитать фундамент» ведёт на страницу услуги", () => {
+  it("fundament: «Перейти к услуге» ведёт на страницу услуги", () => {
     const hub = getServiceHubCopy("fundament");
-    expect(hub?.ctaLabel).toBe("Рассчитать фундамент");
+    expect(hub?.ctaLabel).toBe("Перейти к услуге");
     expect(resolveServiceHubCtaAction(hub)).toBe("link");
   });
 

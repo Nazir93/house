@@ -1,12 +1,13 @@
-import { getHeroGeoSubtitle } from "@/lib/constants";
 import { getPageMeta, getPageMetaFields } from "@/lib/get-page-meta";
 import { getServicesList } from "@/lib/get-services";
-import { getServicesIndexSeo, resolveServicesIndexH1 } from "@/lib/seo/service-seo-defaults";
+import {
+  getServicesIndexSeo,
+  resolveServicesIndexH1,
+  resolveServicesIndexIntro,
+} from "@/lib/seo/service-seo-defaults";
 import { ServicesPageContent } from "./content";
 
 export const revalidate = 60;
-
-const SERVICES_INTRO_FALLBACK = `${getHeroGeoSubtitle()} Полный спектр: проектирование, фундамент, кровля, инженерные сети и отделка под ключ.`;
 
 export async function generateMetadata() {
   const seo = getServicesIndexSeo();
@@ -22,7 +23,8 @@ export default async function ServicesPage() {
   const [services, meta] = await Promise.all([getServicesList(), getPageMetaFields("/services")]);
 
   const pageH1 = resolveServicesIndexH1(meta.h1);
-  const introText = meta.description || SERVICES_INTRO_FALLBACK;
+  const introText = resolveServicesIndexIntro(meta.description);
+
 
   return (
     <ServicesPageContent

@@ -5,6 +5,7 @@ import {
   getServiceSeoBySlug,
   getServicesIndexSeo,
   resolveServicesIndexH1,
+  resolveServicesIndexIntro,
 } from "@/lib/seo/service-seo-defaults";
 
 describe("service SEO semantic defaults", () => {
@@ -42,5 +43,15 @@ describe("service SEO semantic defaults", () => {
       expected,
     );
     expect(resolveServicesIndexH1("Свой заголовок из админки")).toBe("Свой заголовок из админки");
+  });
+
+  it("intro /services — единая система; старое geo-описание заменяется", () => {
+    expect(resolveServicesIndexIntro(null)).toContain("единая система");
+    expect(
+      resolveServicesIndexIntro(
+        "Проектирование, фундамент, кровля, инженерные сети и отделка под ключ для загородных домов. Офис в Санкт-Петербург, проекты в Ленинградская область, Санкт-Петербург.",
+      ),
+    ).toContain("комплексное строительство загородных домов");
+    expect(resolveServicesIndexIntro("Свой текст из админки")).toBe("Свой текст из админки");
   });
 });
