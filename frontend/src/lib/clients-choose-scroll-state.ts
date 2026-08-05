@@ -1,6 +1,35 @@
 /** Доля скролл-сегмента: сначала уход текущей услуги, затем появление следующей. */
 export const CLIENTS_CHOOSE_EXIT_FRACTION = 0.42;
 
+/** Высота скролл-трека на один пункт услуги (vh). */
+export const CLIENTS_CHOOSE_SCROLL_VH_PER_ITEM_MOBILE = 48;
+export const CLIENTS_CHOOSE_SCROLL_VH_PER_ITEM_DESKTOP = 58;
+
+/** Полная высота sticky-истории в vh — только простое число, без CSS calc(*). */
+export function resolveClientsChooseTrackHeightVh(
+  serviceCount: number,
+  isDesktop: boolean,
+): number {
+  const perItem = isDesktop
+    ? CLIENTS_CHOOSE_SCROLL_VH_PER_ITEM_DESKTOP
+    : CLIENTS_CHOOSE_SCROLL_VH_PER_ITEM_MOBILE;
+  return Math.max(1, serviceCount) * perItem;
+}
+
+/**
+ * Прогресс 0..1 по положению секции в вьюпорте.
+ * Если трек схлопнулся до ~одного экрана — progress почти всегда 0 (баг «залипли слайды»).
+ */
+export function resolveClientsChooseScrollProgress(params: {
+  sectionTop: number;
+  sectionHeight: number;
+  viewportHeight: number;
+}): number {
+  const scrollRange = Math.max(params.sectionHeight - params.viewportHeight, 1);
+  const scrolled = -params.sectionTop;
+  return Math.max(0, Math.min(scrolled / scrollRange, 1));
+}
+
 /**
  * Hold-кадры ролика для первых двух услуг.
  * Разрез с фундаментом — в начале ролика; на «Проекте» показываем более поздний кадр.
@@ -83,16 +112,17 @@ export function resolveClientsChooseSlideVisual(
     if (baseIndex >= total - 1) {
       return { opacity: 1, translateY: 0, visible: true, zIndex: 2 };
     }
+    // Держим текущий слайд до начала кроссфейда — иначе посередине сегмента пустота.
     if (localProgress <= exitFraction) {
-      const t = localProgress / exitFraction;
-      return {
-        opacity: 1 - t,
-        translateY: -28 * t,
-        visible: 1 - t > 0.02,
-        zIndex: 2,
-      };
+      return { opacity: 1, translateY: 0, visible: true, zIndex: 2 };
     }
-    return { opacity: 0, translateY: -28, visible: false, zIndex: 0 };
+    const t = (localProgress - exitFraction) / (1 - exitFraction);
+    return {
+      opacity: 1 - t,
+      translateY: -28 * t,
+      visible: 1 - t > 0.02,
+      zIndex: 2,
+    };
   }
 
   if (idx === baseIndex + 1) {
@@ -104,9 +134,42 @@ export function resolveClientsChooseSlideVisual(
       opacity: t,
       translateY: 28 * (1 - t),
       visible: t > 0.02,
-      zIndex: 2,
+      zIndex: 3,
     };
   }
 
   return hidden;
+}
+
+/** На любом progress должен быть виден хотя бы один слайд (нет «пустого» кадра). */
+export function hasVisibleClientsChooseSlide(
+  progress: number,
+  serviceCount: number,
+  exitFraction = CLIENTS_CHOOSE_EXIT_FRACTION,
+): boolean {
+  const { baseIndex, localProgress } = getClientsChooseScrollState(
+    progress,
+    serviceCount,
+    exitFraction,
+  );
+  for (let idx = 0; idx < serviceCount; idx += 1) {
+    if (resolveClientsChooseSlideVisual(idx, baseIndex, localProgress, serviceCount, exitFraction).visible) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Куда прокрутить, чтобы разом выйти из sticky-истории «Наши услуги»
+ * (низ секции — под липкий хедер).
+ */
+export function resolveClientsChooseSkipScrollY(params: {
+  scrollY: number;
+  sectionTop: number;
+  sectionHeight: number;
+  headerOffset?: number;
+}): number {
+  const header = Math.max(0, params.headerOffset ?? 0);
+  return Math.max(0, params.scrollY + params.sectionTop + params.sectionHeight - header);
 }
