@@ -35,6 +35,7 @@ import {
 import {
   builtObjectNavScrollPlan,
   isBuiltObjectNavScrollLocked,
+  resolveActiveNavSectionId,
 } from "@/lib/built-object-nav-scroll";
 import {
   formatClientReviewText,
@@ -45,7 +46,7 @@ import { BuiltObjectHistoryCards } from "@/components/portfolio/built-object-his
 import { formatArticleBody, PAGE_INTRO_PROSE_CLASS } from "@/lib/html-content";
 import type { BuiltObjectItem } from "@/lib/construction-shared";
 import { BUILT_HOMES_SECTION_LABEL, UNDER_CONSTRUCTION_SECTION_LABEL } from "@/lib/constants";
-import { scrollPageToElement } from "@/lib/scroll-page-to-element";
+import { scrollPageToElement, siteHeaderStickyOffsetPx } from "@/lib/scroll-page-to-element";
 import { cn } from "@/lib/utils";
 
 /** Сетка 5×3 на странице; остальное — «Смотреть все». */
@@ -110,26 +111,28 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
 
   useEffect(() => {
     const ids = navItems.map((n) => n.id);
-    const observers: IntersectionObserver[] = [];
-    for (const id of ids) {
-      const el = document.getElementById(builtObjectSectionDomId(id));
-      if (!el) continue;
-      const obs = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (isBuiltObjectNavScrollLocked(Date.now(), programmaticScrollUntil.current)) return;
-            if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
-              setActiveNav(id);
-            }
-          }
-        },
-        { rootMargin: "-20% 0px -55% 0px", threshold: [0.25, 0.5] },
-      );
-      obs.observe(el);
-      observers.push(obs);
-    }
+
+    const syncActiveFromScroll = () => {
+      if (isBuiltObjectNavScrollLocked(Date.now(), programmaticScrollUntil.current)) return;
+      const line = siteHeaderStickyOffsetPx() + 16;
+      const positions = ids
+        .map((id) => {
+          const el = document.getElementById(builtObjectSectionDomId(id));
+          if (!el) return null;
+          return { id, top: el.getBoundingClientRect().top };
+        })
+        .filter((row): row is { id: BuiltObjectNavSectionId; top: number } => row != null);
+      const next = resolveActiveNavSectionId(positions, line);
+      if (next) setActiveNav(next);
+    };
+
+    syncActiveFromScroll();
+    window.addEventListener("scroll", syncActiveFromScroll, { passive: true });
+    const lenis = window.__lenis;
+    const offLenis = lenis?.on?.("scroll", syncActiveFromScroll);
     return () => {
-      for (const obs of observers) obs.disconnect();
+      window.removeEventListener("scroll", syncActiveFromScroll);
+      if (typeof offLenis === "function") offLenis();
       if (flashTimer.current) clearTimeout(flashTimer.current);
     };
   }, [navItems]);
@@ -189,13 +192,13 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
 
       <article className="page-top-offset pb-20" style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}>
         <div className="container mx-auto max-w-[1320px] px-4 sm:px-5">
-          {/* Верхний блок: на мобиле сначала фото, затем инфо */}
-          <div className="grid gap-6 sm:gap-8 lg:grid-cols-[minmax(280px,340px)_minmax(0,1fr)] lg:items-start lg:gap-10">
+          {/* Мобила: фото → сайдбар → разделы. Десктоп: сайдбар | (фото + разделы) — без пустоты под одним фото */}
+          <div className="flex flex-col gap-6 sm:gap-8 lg:grid lg:grid-cols-[minmax(280px,340px)_minmax(0,1fr)] lg:items-start lg:gap-x-10 lg:gap-y-8">
             <aside
               className={cn(
                 DETAIL_CARD,
                 DETAIL_CARD_BORDER,
-                "order-2 min-w-0 lg:order-1 lg:sticky lg:top-[calc(var(--site-header-sticky-offset)+0.75rem)]",
+                "order-2 min-w-0 lg:order-none lg:col-start-1 lg:row-span-2 lg:sticky lg:top-[calc(var(--site-header-sticky-offset)+0.75rem)]",
               )}
             >
               <nav className="text-[11px] tracking-[0.02em] sm:text-[12px]" style={{ color: "var(--text-muted)" }} aria-label="Хлебные крошки">
@@ -305,9 +308,9 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
               </nav>
             </aside>
 
-            <div className="order-1 min-w-0 lg:order-2">
+            <div className="order-1 min-w-0 lg:order-none lg:col-start-2 lg:row-start-1">
               <div className={cn(DETAIL_CARD, DETAIL_CARD_BORDER, "p-2 sm:p-3")}>
-                <div className="relative aspect-[4/3] overflow-hidden rounded-[1.25rem] bg-[var(--stone)] sm:aspect-[16/10] sm:rounded-[1.35rem] md:aspect-[16/9] lg:min-h-[420px] lg:aspect-auto lg:h-[min(520px,58vh)]">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-[1.25rem] bg-[var(--stone)] sm:aspect-[16/10] sm:rounded-[1.35rem] md:aspect-[16/9]">
                 {hero ? (
                   <CmsImage
                     src={hero.url}
@@ -324,10 +327,9 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Контентные блоки */}
-          <div className="mt-10 space-y-6 md:mt-12 md:space-y-8">
+          {/* Контентные блоки — на десктопе под фото в правой колонке */}
+          <div className="order-3 min-w-0 space-y-6 md:space-y-8 lg:order-none lg:col-start-2 lg:row-start-2">
             {sectionShell(
               "description",
               "Описание",
@@ -522,6 +524,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                   </div>,
                 )
               : null}
+          </div>
           </div>
         </div>
       </article>

@@ -4,6 +4,7 @@ import {
   builtObjectNavItemsHaveUniqueTargets,
   builtObjectNavScrollPlan,
   isBuiltObjectNavScrollLocked,
+  resolveActiveNavSectionId,
 } from "@/lib/built-object-nav-scroll";
 import { getBuiltObjectNavItems } from "@/lib/built-object-detail";
 import {
@@ -109,6 +110,34 @@ describe("ТЗ п.3: навигация разделов портфолио", ()
   it("во время программного скролла IO не перебивает activeNav", () => {
     expect(isBuiltObjectNavScrollLocked(100, 200)).toBe(true);
     expect(isBuiltObjectNavScrollLocked(200, 200)).toBe(false);
+  });
+
+  it("подсветка меню: активен последний раздел выше линии шапки, не залипает на Описании", () => {
+    expect(
+      resolveActiveNavSectionId(
+        [
+          { id: "description" as const, top: -120 },
+          { id: "plans" as const, top: 40 },
+          { id: "construction-photos" as const, top: 400 },
+          { id: "history" as const, top: 900 },
+        ],
+        64,
+      ),
+    ).toBe("plans");
+    expect(
+      resolveActiveNavSectionId(
+        [
+          { id: "description" as const, top: -500 },
+          { id: "plans" as const, top: -200 },
+          { id: "construction-photos" as const, top: 50 },
+          { id: "history" as const, top: 600 },
+        ],
+        64,
+      ),
+    ).toBe("construction-photos");
+    expect(resolveActiveNavSectionId([{ id: "description" as const, top: 120 }], 64)).toBe(
+      "description",
+    );
   });
 
   it("offset шапки и Y считаются без DOM-probe", () => {
