@@ -83,7 +83,7 @@ function VideoPanel({
 }) {
   return (
     <div className="relative w-full overflow-hidden rounded-[22px] shadow-[0_20px_56px_rgba(0,0,0,0.08)] md:rounded-[30px]">
-      <div className="relative aspect-[16/10] max-h-[min(46vh,320px)] w-full overflow-hidden rounded-[inherit] md:aspect-[4/3] md:max-h-[min(52vh,480px)] lg:max-h-none">
+      <div className="relative aspect-[16/10] max-h-[min(42vh,300px)] w-full overflow-hidden rounded-[inherit] md:aspect-[4/3] md:max-h-[min(48vh,440px)] lg:max-h-[min(52vh,500px)]">
         <video
           ref={videoRef}
           src={enabled ? SERVICES_VIDEO_SRC : undefined}
@@ -227,19 +227,26 @@ export function ClientsChooseVideoSection() {
     lastSeekRef.current = t;
     lastSeekAtRef.current = now;
 
-    const onSeeked = () => {
+    let settled = false;
+    const settle = () => {
+      if (settled) return;
+      settled = true;
+      window.clearTimeout(safetyTimer);
       video.removeEventListener("seeked", onSeeked);
       seekingRef.current = false;
       if (pendingSeekRef.current != null) flushVideoSeekRef.current();
     };
+
+    const onSeeked = () => settle();
+    // Если браузер не шлёт seeked (тот же кадр / глюк) — не блокируем scrub навсегда.
+    const safetyTimer = window.setTimeout(settle, 450);
     video.addEventListener("seeked", onSeeked);
 
     try {
       video.pause();
       video.currentTime = t;
     } catch {
-      seekingRef.current = false;
-      video.removeEventListener("seeked", onSeeked);
+      settle();
     }
   }, []);
 
@@ -401,16 +408,12 @@ export function ClientsChooseVideoSection() {
   return (
     <section
       ref={sectionRef}
-      className={cn(
-        "relative touch-pan-y scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)]",
-        "h-[calc(var(--clients-choose-scroll-vh-mobile)*1vh*var(--clients-choose-count))]",
-        "md:h-[calc(var(--clients-choose-scroll-vh-desktop)*1vh*var(--clients-choose-count))]",
-      )}
+      className="relative touch-pan-y scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)] clients-choose-scroll-track"
       style={
         {
-          "--clients-choose-count": SERVICES.length,
-          "--clients-choose-scroll-vh-mobile": SCROLL_VH_PER_ITEM_MOBILE,
-          "--clients-choose-scroll-vh-desktop": SCROLL_VH_PER_ITEM_DESKTOP,
+          "--clients-choose-count": String(SERVICES.length),
+          "--clients-choose-scroll-vh-mobile": String(SCROLL_VH_PER_ITEM_MOBILE),
+          "--clients-choose-scroll-vh-desktop": String(SCROLL_VH_PER_ITEM_DESKTOP),
           backgroundColor: "var(--bg)",
         } as CSSProperties
       }

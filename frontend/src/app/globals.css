@@ -1608,6 +1608,21 @@ html.reveal-animations-ready [data-reveal="card"]:not(.is-visible) {
   animation: services-scroll-cue-dot 1.45s ease-in-out infinite;
 }
 
+/* Sticky-история «Наши услуги»: высота трека через CSS vars (не зависит от Tailwind arbitrary calc). */
+.clients-choose-scroll-track {
+  height: calc(
+    var(--clients-choose-scroll-vh-mobile) * 1vh * var(--clients-choose-count)
+  );
+}
+
+@media (min-width: 768px) {
+  .clients-choose-scroll-track {
+    height: calc(
+      var(--clients-choose-scroll-vh-desktop) * 1vh * var(--clients-choose-count)
+    );
+  }
+}
+
 @keyframes menuFadeIn {
   from {
     opacity: 0;

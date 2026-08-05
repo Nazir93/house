@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import {
   CLIENTS_CHOOSE_EXIT_FRACTION,
   getClientsChooseScrollState,
+  hasVisibleClientsChooseSlide,
   resolveClientsChooseSkipScrollY,
+  resolveClientsChooseSlideVisual,
   resolveClientsChooseVideoProgress,
 } from "@/lib/clients-choose-scroll-state";
 
@@ -56,5 +58,23 @@ describe("clients-choose-scroll-state", () => {
         headerOffset: 64,
       }),
     ).toBe(1000 - 200 + 2500 - 64);
+  });
+
+  it("на границе exitFraction текущий слайд ещё виден (нет пустого кадра)", () => {
+    const { baseIndex, localProgress } = getClientsChooseScrollState(
+      CLIENTS_CHOOSE_EXIT_FRACTION / COUNT,
+      COUNT,
+    );
+    expect(baseIndex).toBe(0);
+    expect(localProgress).toBeCloseTo(CLIENTS_CHOOSE_EXIT_FRACTION, 5);
+    const current = resolveClientsChooseSlideVisual(0, baseIndex, localProgress, COUNT);
+    expect(current.visible).toBe(true);
+    expect(current.opacity).toBe(1);
+  });
+
+  it("на любом шаге progress виден хотя бы один слайд", () => {
+    for (let i = 0; i <= 100; i += 1) {
+      expect(hasVisibleClientsChooseSlide(i / 100, COUNT)).toBe(true);
+    }
   });
 });

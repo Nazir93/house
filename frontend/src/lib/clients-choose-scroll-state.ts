@@ -83,16 +83,17 @@ export function resolveClientsChooseSlideVisual(
     if (baseIndex >= total - 1) {
       return { opacity: 1, translateY: 0, visible: true, zIndex: 2 };
     }
+    // Держим текущий слайд до начала кроссфейда — иначе посередине сегмента пустота.
     if (localProgress <= exitFraction) {
-      const t = localProgress / exitFraction;
-      return {
-        opacity: 1 - t,
-        translateY: -28 * t,
-        visible: 1 - t > 0.02,
-        zIndex: 2,
-      };
+      return { opacity: 1, translateY: 0, visible: true, zIndex: 2 };
     }
-    return { opacity: 0, translateY: -28, visible: false, zIndex: 0 };
+    const t = (localProgress - exitFraction) / (1 - exitFraction);
+    return {
+      opacity: 1 - t,
+      translateY: -28 * t,
+      visible: 1 - t > 0.02,
+      zIndex: 2,
+    };
   }
 
   if (idx === baseIndex + 1) {
@@ -104,11 +105,30 @@ export function resolveClientsChooseSlideVisual(
       opacity: t,
       translateY: 28 * (1 - t),
       visible: t > 0.02,
-      zIndex: 2,
+      zIndex: 3,
     };
   }
 
   return hidden;
+}
+
+/** На любом progress должен быть виден хотя бы один слайд (нет «пустого» кадра). */
+export function hasVisibleClientsChooseSlide(
+  progress: number,
+  serviceCount: number,
+  exitFraction = CLIENTS_CHOOSE_EXIT_FRACTION,
+): boolean {
+  const { baseIndex, localProgress } = getClientsChooseScrollState(
+    progress,
+    serviceCount,
+    exitFraction,
+  );
+  for (let idx = 0; idx < serviceCount; idx += 1) {
+    if (resolveClientsChooseSlideVisual(idx, baseIndex, localProgress, serviceCount, exitFraction).visible) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
