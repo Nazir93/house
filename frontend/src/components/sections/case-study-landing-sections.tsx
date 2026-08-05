@@ -4,42 +4,17 @@ import { useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { SERVICE_REGIONS } from "@/lib/constants";
+import {
+  CONSTRUCTION_SERVICE_STAGES,
+  getConstructionServiceStage,
+} from "@/lib/construction-services-stages";
 import { TrustLeadCardBody, TrustLeadCardShell } from "@/components/sections/trust-lead-card";
 
 export { CaseStudyFaqSectionClient } from "./case-study-faq-section-client";
 
-const STAGE_SERVICES: { id: string; title: string; description: string; image: string }[] = [
-  {
-    id: "site-check",
-    title: "Комплексная проверка участка",
-    description: "Геодезия, геология и юридическая проверка",
-    image: "/images/banner/banner-hero-03.png",
-  },
-  {
-    id: "utilities",
-    title: "Наружные сети и участок",
-    description:
-      "Дренаж, отмостка, ливневая канализация, скважины, очистные сооружения, газгольдеры, проведение воды и электричества, теплотрасса, сбросной колодец",
-    image: "/images/banner/banner-hero-05.png",
-  },
-  {
-    id: "facade",
-    title: "Отделка фасадов",
-    description: "Покраска деревянных домов, отделка фасадов каменных домов",
-    image: "/images/banner/banner-hero-06.png",
-  },
-  {
-    id: "interior",
-    title: "Внутренняя отделка и внутренние инженерные коммуникации",
-    description:
-      "Перегородки, скрытые работы, монтаж отопления, вентиляции, водоснабжения и канализации, электрика, кондиционирование, отопительные приборы, отделка полов по лагам, тёплые полы, стяжка, котельная, отделка стен и потолка, внутренняя покраска.",
-    image: "/images/banner/banner-hero-01.png",
-  },
-];
-
 export function ConstructionServicesStagesSection({ sectionClassName }: { sectionClassName?: string }) {
-  const [previewId, setPreviewId] = useState(STAGE_SERVICES[0].id);
-  const activeStage = STAGE_SERVICES.find((s) => s.id === previewId) ?? STAGE_SERVICES[0];
+  const [previewId, setPreviewId] = useState(CONSTRUCTION_SERVICE_STAGES[0]!.id);
+  const activeStage = getConstructionServiceStage(CONSTRUCTION_SERVICE_STAGES, previewId);
 
   return (
     <section className={sectionClassName ?? "mt-16 md:mt-20"} aria-labelledby="case-stages-heading">
@@ -57,7 +32,7 @@ export function ConstructionServicesStagesSection({ sectionClassName }: { sectio
 
       <div className="mt-6 md:mt-8 lg:grid lg:grid-cols-[minmax(0,1fr)_min(340px,40%)] lg:items-start lg:gap-8 xl:gap-11">
         <ul className="flex min-w-0 flex-col border-t border-[var(--border)]">
-          {STAGE_SERVICES.map((row) => {
+          {CONSTRUCTION_SERVICE_STAGES.map((row) => {
             const active = row.id === previewId;
             return (
               <li key={row.id}>
