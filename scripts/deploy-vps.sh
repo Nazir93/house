@@ -54,11 +54,13 @@ REMOTE_REV="$(git rev-parse "origin/${BRANCH}")"
 echo "==> текущий коммит: $(git rev-parse --short HEAD)"
 echo "==> origin/${BRANCH}: $(git rev-parse --short "origin/${BRANCH}")"
 
+NEED_REEXEC=0
 if [[ "$LOCAL_REV" == "$REMOTE_REV" ]]; then
   echo "==> код уже актуален"
 elif git merge-base --is-ancestor "$LOCAL_REV" "$REMOTE_REV"; then
   echo "==> git pull --ff-only origin ${BRANCH}"
   git pull --ff-only origin "$BRANCH"
+  NEED_REEXEC=1
 elif git merge-base --is-ancestor "$REMOTE_REV" "$LOCAL_REV"; then
   echo "==> текущий код впереди origin/${BRANCH}; деплоим локальный HEAD"
 else
@@ -66,6 +68,13 @@ else
   exit 1
 fi
 
+# После pull файл deploy-vps.sh на диске новый, а текущий bash всё ещё со старым телом —
+# без re-exec проверки BUILD_ID/health из нового коммита не выполнятся.
+if [[ "$NEED_REEXEC" == "1" && "${DEPLOY_VPS_REEXEC:-}" != "1" ]]; then
+  echo "==> re-exec deploy-vps.sh после pull (чтобы подхватить обновлённый скрипт)"
+  export DEPLOY_VPS_REEXEC=1
+  exec bash "$ROOT/scripts/deploy-vps.sh"
+fi
 cd "$ROOT/frontend"
 
 if [[ -f .env ]]; then

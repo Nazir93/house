@@ -7,7 +7,10 @@ const host = process.env.VPS_HOST || "46.173.26.108";
 const username = process.env.VPS_SSH_USER || "root";
 const keyPath =
   process.env.SSH_KEY_PATH || join(homedir(), ".ssh", "carcas_vps_ed25519");
-const cmd = `bash ${process.env.HOUSE_ROOT || "/var/www/house"}/scripts/deploy-vps.sh`;
+const houseRoot = process.env.HOUSE_ROOT || "/var/www/house";
+const branch = process.env.DEPLOY_BRANCH || "main";
+// Сначала pull, потом запуск скрипта — иначе bash читает старый deploy-vps.sh до обновления.
+const cmd = `cd ${houseRoot} && git fetch origin ${branch} && git pull --ff-only origin ${branch} && bash ${houseRoot}/scripts/deploy-vps.sh`;
 
 let privateKey;
 try {
