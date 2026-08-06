@@ -22,6 +22,9 @@
 # Без lint/typecheck/unit перед сборкой (не рекомендуется):
 #   SKIP_TESTS=1 bash /var/www/house/scripts/deploy-vps.sh
 #
+# После build обязателен .next/BUILD_ID; после pm2 — health 200 (local + public).
+# Иначе скрипт завершится с кодом 1 и НЕ напишет «OK: деплой завершён».
+#
 set -euo pipefail
 
 ROOT="${HOUSE_ROOT:-/var/www/house}"
@@ -136,6 +139,9 @@ echo "==> build id: ${NEXT_PUBLIC_BUILD_ID} (${GIT_COMMIT_SHA})"
 echo "==> npm run build"
 npm run build
 
+echo "==> assert Next build artifacts (.next/BUILD_ID)"
+bash "$ROOT/scripts/assert-deploy-ready.sh" build
+
 echo "==> nginx (gzip, keepalive, static cache, uploads)"
 bash "$ROOT/scripts/setup-nginx-house.sh"
 
@@ -150,18 +156,14 @@ cd "$ROOT/frontend"
 pm2 startOrReload ecosystem.config.cjs --update-env
 pm2 save
 
-echo "==> post-deploy smoke"
-HEALTH_URL="${HEALTH_URL:-https://chastdushi.ru/api/health}"
-if curl -fsS --max-time 20 "$HEALTH_URL" >/dev/null; then
-  echo "OK: $HEALTH_URL"
-else
-  echo "WARN: health check failed — проверьте pm2 logs house-next"
-fi
+echo "==> post-deploy health (обязателен 200, иначе деплой FAILED)"
+bash "$ROOT/scripts/assert-deploy-ready.sh" health
 
 BUILD_ID="$(git -C "$ROOT" rev-parse --short HEAD)"
-echo "OK: деплой завершён (build $BUILD_ID, house-next перезагружен). ЛК: /account/login, админка: /admin/client-projects"
+NEXT_BUILD_ID="$(tr -d '\r\n' < "$ROOT/frontend/.next/BUILD_ID" 2>/dev/null || echo "?")"
+echo "OK: деплой завершён (git $BUILD_ID, next BUILD_ID=$NEXT_BUILD_ID, health 200). ЛК: /account/login, админка: /admin/client-projects"
 
 if [[ "${SKIP_LOAD_SMOKE:-}" != "1" ]]; then
   echo "==> load smoke (port 8080)"
-  bash "$ROOT/scripts/load-smoke.sh" 2>/dev/null || echo "WARN: load-smoke не прошёл (не критично)"
+  bash "$ROOT/scripts/load-smoke.sh" 2>/dev/null || echo "WARN: load-smoke не прошёл (не критично для успеха деплоя; health уже 200)"
 fi
