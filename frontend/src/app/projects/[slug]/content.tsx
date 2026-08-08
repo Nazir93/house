@@ -234,7 +234,7 @@ export function HouseProjectDetailContent({
               <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold text-white">Новый проект</span>
             ) : null}
           </div>
-          <h1 className="mt-3 font-heading text-4xl leading-tight md:text-5xl lg:text-6xl" style={{ color: "var(--graphite)" }}>
+          <h1 className="mt-3 font-heading text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl" style={{ color: "var(--graphite)" }}>
             {project.title}
           </h1>
           {heroTeaser ? (
@@ -726,11 +726,11 @@ export function HouseProjectDetailContent({
         >
           <div className="container mx-auto px-5 max-w-6xl">
             <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--accent)]">Интерактивный расчёт</p>
-            <h2 className="mt-2 font-heading text-3xl md:text-4xl lg:text-[2.75rem] text-[var(--graphite)]">
+            <h2 className="mt-2 font-heading text-2xl font-bold leading-tight tracking-tight text-[var(--graphite)] sm:text-3xl md:text-4xl">
               Комплектация и бюджет
             </h2>
             <p className="mt-3 max-w-2xl text-sm md:text-base text-[var(--text-muted)] leading-relaxed">
-              Соберите ориентир стоимости дома «{project.title}»: материал стен, этапы работ, дополнительные опции и транспорт.
+              Соберите стоимость дома «{project.title}»: материал стен, этапы работ, дополнительные опции.
             </p>
             <div className="mt-10 md:mt-12">
               <HouseProjectCompletionSection
@@ -750,7 +750,9 @@ export function HouseProjectDetailContent({
         <section className="container mx-auto px-5 py-16">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h2 className="font-heading text-3xl md:text-4xl">Похожие проекты</h2>
+              <h2 className="font-heading text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl">
+                Похожие проекты
+              </h2>
             </div>
             {project.builtObjectSlug ? (
               <Link

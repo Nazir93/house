@@ -252,7 +252,7 @@ export function ProjectCalculatorEstimatePanel({
               compact ? "text-[9px] tracking-[0.12em]" : "text-[11px] tracking-[0.14em]",
             )}
           >
-            Ориентир итого
+            Итого
           </p>
           <p
             className={cn(
