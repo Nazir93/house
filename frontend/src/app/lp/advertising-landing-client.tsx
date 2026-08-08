@@ -127,7 +127,7 @@ export function AdvertisingLandingClient({
   }, [config, portfolio, projects, reviews, sectionOrder, submittedName, theme]);
 
   return (
-    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
+    <div className="lp-page min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <AdvertisingLandingHero config={config} heroImage={heroImage} priceFromRub={priceFromRub} />
 
       <main>

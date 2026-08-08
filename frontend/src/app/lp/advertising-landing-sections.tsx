@@ -267,8 +267,8 @@ export function LpProjectsSection({
 export function LpIncludesSection({ items }: { items: string[] }) {
   return (
     <section id="includes" className="scroll-mt-24 py-12 sm:py-16 md:py-24" style={{ backgroundColor: "var(--bg-secondary)" }}>
-      <div className="container mx-auto grid gap-8 px-4 sm:px-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start lg:gap-10" data-reveal="section">
-        <div className="w-full">
+      <div className="container mx-auto px-4 sm:px-5" data-reveal="section">
+        <div className="w-full max-w-3xl">
           <SectionEyebrow>Что входит в стоимость</SectionEyebrow>
           <h2 className="mt-3 w-full font-heading text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
             Прозрачная смета до договора
@@ -277,12 +277,12 @@ export function LpIncludesSection({ items }: { items: string[] }) {
             Показываем состав работ и комплектацию заранее — без «сюрпризов» на этапе стройки.
           </p>
         </div>
-        <div className="grid gap-3">
+        <div className="mt-8 grid gap-3 sm:mt-10 sm:grid-cols-2 lg:grid-cols-2 xl:gap-4">
           {items.map((item, index) => (
             <div
               key={item}
               data-reveal="card"
-              style={revealDelayStyle(index, 50, 350)}
+              style={revealDelayStyle(index, 70, 480)}
               className={cn(lpSoftCard, "flex gap-3 p-4 sm:gap-4 md:p-5")}
             >
               <span
@@ -739,6 +739,39 @@ export function LpExcursionSection({
   );
 }
 
+function LpFaqItem({ question, answer, index }: { question: string; answer: string; index: number }) {
+  return (
+    <details
+      data-reveal="card"
+      style={revealDelayStyle(index, 70, 480)}
+      className={cn(lpSoftCardAlt, "group p-4 sm:p-5")}
+      onToggle={(e) => {
+        const el = e.currentTarget;
+        if (!el.open) return;
+        window.setTimeout(() => {
+          el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }, 80);
+      }}
+    >
+      <summary className="cursor-pointer list-none text-sm font-semibold leading-snug marker:content-none sm:text-base [&::-webkit-details-marker]:hidden">
+        <span className="flex items-start gap-3">
+          <span
+            className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-bold transition group-open:rotate-90"
+            style={{ backgroundColor: "color-mix(in srgb, var(--accent) 14%, transparent)", color: "var(--accent)" }}
+            aria-hidden
+          >
+            ›
+          </span>
+          <span className="flex-1">{question}</span>
+        </span>
+      </summary>
+      <p className="mt-3 pl-9 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
+        {answer}
+      </p>
+    </details>
+  );
+}
+
 export function LpFaqSection({ faq }: { faq: AdvertisingLandingConfig["faq"] }) {
   return (
     <section id="faq" className="scroll-mt-28 py-12 sm:scroll-mt-32 sm:py-16 md:py-24">
@@ -749,21 +782,9 @@ export function LpFaqSection({ faq }: { faq: AdvertisingLandingConfig["faq"] }) 
             Ответы перед расчётом
           </h2>
         </div>
-        <div className="mt-8 grid gap-3 sm:mt-10 md:grid-cols-2 md:gap-4">
+        <div className="mx-auto mt-8 flex max-w-3xl flex-col gap-3 sm:mt-10">
           {faq.map((item, index) => (
-            <details
-              key={item.question}
-              data-reveal="card"
-              style={revealDelayStyle(index, 45, 360)}
-              className={cn(lpSoftCardAlt, "p-4 sm:p-5")}
-            >
-              <summary className="cursor-pointer text-sm font-semibold leading-snug sm:text-base">
-                {item.question}
-              </summary>
-              <p className="mt-3 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                {item.answer}
-              </p>
-            </details>
+            <LpFaqItem key={item.question} question={item.question} answer={item.answer} index={index} />
           ))}
         </div>
       </div>
