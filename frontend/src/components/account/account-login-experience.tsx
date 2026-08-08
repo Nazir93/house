@@ -192,20 +192,20 @@ function ClientShowcaseCarousel() {
       </div>
 
       <div className="relative z-10 flex min-h-[300px] min-w-0 flex-1 flex-col justify-between p-6 sm:min-h-[380px] sm:p-8 lg:min-h-0 lg:flex-1 lg:p-10">
-        <div className="max-w-lg rounded-2xl border border-white/10 bg-[#0a1210]/92 p-4 shadow-[0_16px_48px_rgba(0,0,0,0.4)] sm:p-5">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-white">
+        <div className="max-w-lg rounded-2xl border border-white/12 bg-[#040807]/95 p-4 shadow-[0_20px_56px_rgba(0,0,0,0.55)] sm:p-5">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-white">
             <Icon className="h-3.5 w-3.5 text-emerald-200" strokeWidth={2.1} aria-hidden />
             Личный кабинет
           </div>
           <h2 className="font-heading text-2xl font-bold leading-[1.15] tracking-tight text-white sm:text-3xl">
             {slide.title}
           </h2>
-          <p className="mt-3 max-w-md text-sm leading-relaxed text-white/95 sm:text-[15px]">{slide.text}</p>
+          <p className="mt-3 max-w-md text-sm leading-relaxed text-white/90 sm:text-[15px]">{slide.text}</p>
           <div className="mt-5 grid max-w-md gap-2 sm:grid-cols-3">
             {slide.features.map((feature) => (
               <span
                 key={feature}
-                className="inline-flex min-h-[2.75rem] items-center gap-2 rounded-2xl border border-white/15 bg-[#06100c] px-3 py-2 text-[11px] font-semibold leading-snug text-white shadow-[0_8px_24px_rgba(0,0,0,0.25)]"
+                className="inline-flex min-h-[2.75rem] items-center gap-2 rounded-2xl border border-white/12 bg-white/[0.08] px-3 py-2 text-[11px] font-semibold leading-snug text-white"
               >
                 <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-300" strokeWidth={2.1} aria-hidden />
                 {feature}
