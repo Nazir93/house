@@ -8,6 +8,7 @@ import {
   type LpSectionId,
   type LpThemeId,
 } from "@/lib/lp-themes";
+import { resolveProjectListingPriceRub } from "@/lib/project-listing-price";
 
 export type { LpSectionId, LpThemeId } from "@/lib/lp-themes";
 
@@ -96,13 +97,12 @@ export const ADVERTISING_LP_NAV = [
   { label: "Вопросы", href: "#faq" },
 ] as const;
 
-/** Минимальная цена «от» среди проектов каталога LP (руб.). */
-export function advertisingLandingMinProjectPrice(
-  projects: Array<{ price: number; published?: boolean }>,
-): number | null {
+/** Минимальная цена «от» среди проектов каталога LP (руб.) — как в каталоге сайта. */
+export function advertisingLandingMinProjectPrice(projects: HouseProjectItem[]): number | null {
   const prices = projects
-    .filter((p) => p.published !== false && typeof p.price === "number" && p.price > 0)
-    .map((p) => p.price);
+    .filter((p) => p.published !== false)
+    .map((p) => resolveProjectListingPriceRub(p, "all"))
+    .filter((p) => p > 0);
   if (prices.length === 0) return null;
   return Math.min(...prices);
 }
@@ -324,12 +324,12 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
           "Обычно да, но итог зависит от площади, фундамента, фасада и инженерии. На консультации сравним несколько комплектаций в одной логике.",
       },
       {
-        question: "Можно ли адаптировать типовой проект под кирпich?",
+        question: "Можно ли адаптировать типовой проект под кирпич?",
         answer:
           "Да. Проверяем конструктив, толщину стен, узлы, фундамент и фасадные решения под выбранный материал.",
       },
       {
-        question: "Подходит ли кирпich для постоянного проживания?",
+        question: "Подходит ли кирпич для постоянного проживания?",
         answer:
           "Да, при грамотной теплотехнике, кровле, окнах и инженерии кирпичный дом комфортен круглый год.",
       },
@@ -391,7 +391,7 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
       },
       {
         question: "Можно ли сравнить несколько материалов?",
-        answer: "Да. В квизе можно выбрать газобетон, кирпich или керамоблок и сравнить комплектации.",
+        answer: "Да. В квизе можно выбрать газобетон, кирпич или керамоблок и сравнить комплектации.",
       },
       {
         question: "Что влияет на итог сильнее всего?",
@@ -410,7 +410,7 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
     slug: "gazobeton",
     title: "Дом из газобетона под ключ — проекты и цена | Часть души",
     description:
-      "Строительство домов из газобетона: проекты, стоимость, сравнение с кирпichом, портфолио и расчёт сметы.",
+      "Строительство домов из газобетона: проекты, стоимость, сравнение с кирпичом, портфолио и расчёт сметы.",
     h1: "Дом из газобетона под ключ: проекты, цена и комплектация",
     heroSubtitle:
       "Быстрая кладка, хорошая теплотехника и понятная смета — подберём проект под ваш участок",
@@ -439,7 +439,7 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
     includes: [
       "Подбор проекта под газобетонную комплектацию",
       "Теплотехника, фасад и защита цоколя",
-      "Сравнение с кирпichом и керамоблоком",
+      "Сравнение с кирпичом и керамоблоком",
       "Ипотека и поэтапная оплата строительства",
     ],
     faq: [
@@ -448,7 +448,7 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
         answer: "Да, при правильной толщине стен, фасаде и инженерии.",
       },
       {
-        question: "Чем газобетон отличается от кирпicha по бюджету?",
+        question: "Чем газобетон отличается от кирпичa по бюджету?",
         answer: "Обычно быстрее и экономичнее по коробке, но фасад и фундамент всё равно индивидуальны.",
       },
       {
@@ -498,7 +498,7 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
     quizDefaults: { serviceLabel: "LP: одноэтажный дом" },
     includes: [
       "Подбор одноэтажных проектов до 150–220 м²",
-      "Выбор материала: газобетон, кирпich, керамоблок",
+      "Выбор материала: газобетон, кирпич, керамоблок",
       "Расчёт с учётом участка и инженерии",
       "Ипотека и экскурсия на готовые объекты",
     ],
@@ -517,7 +517,7 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
       },
       {
         question: "Какие материалы доступны?",
-        answer: "Газобетон, кирпich и керамоблок — сравним в квизе и на консультации.",
+        answer: "Газобетон, кирпич и керамоблок — сравним в квизе и на консультации.",
       },
       {
         question: "Можно посмотреть одноэтажные дома на объекте?",
@@ -541,7 +541,7 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
     heroImageFallback: "/images/banner/banner-hero-06.png",
     eyebrow: "Керамоблок · камень и блок",
     lead:
-      "Керамоблок сочетает инерцию кирпicha и скорость блоковой кладки. Подберём проект, сравним материалы и рассчитаем комплектацию под ваш участок.",
+      "Керамоблок сочетает инерцию кирпичa и скорость блоковой кладки. Подберём проект, сравним материалы и рассчитаем комплектацию под ваш участок.",
     primaryCta: "Получить расчёт по керамоблоку",
     secondaryCta: "Проекты из керамоблока",
     projectMaterial: "Керамический блок",
@@ -560,7 +560,7 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
     quizDefaults: { wallMaterial: "ceramic", serviceLabel: "LP: керамоблок" },
     includes: [
       "Подбор проекта под керамоблочную комплектацию",
-      "Сравнение с газобетоном и кирпichом",
+      "Сравнение с газобетоном и кирпичом",
       "Фундамент и фасад под выбранный материал",
       "Ипотека и сопровождение строительства",
     ],
@@ -578,7 +578,7 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
         answer: "Да, в каталоге есть проекты с допуском керамоблочной комплектации.",
       },
       {
-        question: "Можно ли комбинировать с облицовочным кирпichом?",
+        question: "Можно ли комбинировать с облицовочным кирпичом?",
         answer: "Да, часто используют керамоблок как несущий слой с облицовкой.",
       },
       {

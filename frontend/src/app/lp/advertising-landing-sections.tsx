@@ -38,7 +38,15 @@ import {
 import type { HouseProjectItem } from "@/lib/construction-data";
 import { METRIKA_GOALS, trackMetrikaGoal } from "@/lib/analytics-goals";
 import { PHONE, PHONE_RAW, SOCIAL_LINKS } from "@/lib/constants";
+import { resolveProjectListingPriceRub } from "@/lib/project-listing-price";
+import { revealDelayStyle } from "@/lib/reveal-animation";
 import { cn } from "@/lib/utils";
+
+/** Премиальная карточка без обводки — только мягкая тень и фон. */
+const lpSoftCard =
+  "rounded-[1.6rem] bg-[var(--bg)] shadow-[0_18px_48px_rgba(15,61,46,0.07)]";
+const lpSoftCardAlt =
+  "rounded-[1.6rem] bg-[color-mix(in_srgb,var(--bg-secondary)_92%,var(--accent)_4%)] shadow-[0_16px_44px_rgba(15,61,46,0.06)]";
 
 function SectionEyebrow({ children }: { children: React.ReactNode }) {
   return (
@@ -58,7 +66,7 @@ export function LpFactsSection({ config, theme }: { config: AdvertisingLandingCo
 
   return (
     <section className="py-14 md:py-20" style={{ backgroundColor: spec.sectionAltBg }}>
-      <div className="container mx-auto max-w-4xl px-5 text-center">
+      <div className="container mx-auto max-w-4xl px-5 text-center" data-reveal="section">
         <SectionEyebrow>Факты о компании</SectionEyebrow>
         <h2 className="mx-auto mt-3 max-w-3xl text-balance font-heading text-xl font-bold leading-snug tracking-tight md:text-2xl">
           {config.h1}
@@ -68,8 +76,13 @@ export function LpFactsSection({ config, theme }: { config: AdvertisingLandingCo
         </p>
 
         <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-12">
-          {ADVERTISING_LP_FACT_STATS.map((stat) => (
-            <article key={stat.label} className="flex flex-col items-center text-center">
+          {ADVERTISING_LP_FACT_STATS.map((stat, index) => (
+            <article
+              key={stat.label}
+              data-reveal="card"
+              style={revealDelayStyle(index)}
+              className="flex flex-col items-center text-center"
+            >
               <p className="font-heading text-[clamp(1.75rem,3.5vw,2.75rem)] font-bold leading-none tracking-tight text-[var(--text)] whitespace-nowrap">
                 {stat.value}
               </p>
@@ -115,7 +128,7 @@ const LP_GUARANTEE_ITEMS = [
 export function LpGuaranteesSection() {
   return (
     <section id="guarantees" className="scroll-mt-24 py-14 md:py-20" style={{ backgroundColor: "var(--bg)" }}>
-      <div className="container mx-auto px-5">
+      <div className="container mx-auto px-5" data-reveal="section">
         <div className="max-w-3xl">
           <SectionEyebrow>Гарантии и сроки</SectionEyebrow>
           <h2 className="mt-3 font-heading text-2xl font-bold tracking-tight md:text-3xl">
@@ -125,12 +138,13 @@ export function LpGuaranteesSection() {
             Дом под ключ — это не только стены, а понятные обязательства: смета, график и гарантия на конструктив.
           </p>
         </div>
-        <div className="mt-10 grid gap-4 md:grid-cols-3">
-          {LP_GUARANTEE_ITEMS.map(({ Icon, title, text }) => (
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {LP_GUARANTEE_ITEMS.map(({ Icon, title, text }, index) => (
             <article
               key={title}
-              className="rounded-[1.5rem] border p-5 md:p-6"
-              style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-secondary)" }}
+              data-reveal="card"
+              style={revealDelayStyle(index)}
+              className={cn(lpSoftCardAlt, "p-5 md:p-6")}
             >
               <span
                 className="flex h-11 w-11 items-center justify-center rounded-2xl"
@@ -168,9 +182,9 @@ export function LpProjectsSection({
 
   return (
     <section id="projects" className="scroll-mt-24 py-14 md:py-20" style={{ backgroundColor: "var(--bg-secondary)" }}>
-      <div className="container mx-auto px-5">
+      <div className="container mx-auto px-5" data-reveal="section">
         <div className="max-w-3xl">
-          <h2 className="font-heading text-2xl font-bold uppercase tracking-[0.06em] md:text-3xl">
+          <h2 className="font-heading text-2xl font-bold tracking-tight md:text-3xl">
             Каталог проектов
           </h2>
           <p className="mt-5 text-sm leading-relaxed md:text-base" style={{ color: "var(--text-muted)" }}>
@@ -190,14 +204,18 @@ export function LpProjectsSection({
               : "mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3"
           }
         >
-          {projects.map((project) => (
+          {projects.map((project, index) => {
+            const listingPrice = resolveProjectListingPriceRub(project, "all");
+            return (
             <article
               key={project.slug}
+              data-reveal="card"
+              style={revealDelayStyle(index)}
               className={cn(
-                "group overflow-hidden rounded-[1.75rem] border bg-[var(--bg)] shadow-[0_16px_48px_rgba(0,0,0,0.06)] transition hover:-translate-y-0.5",
+                "group overflow-hidden transition hover:-translate-y-1",
+                lpSoftCard,
                 isCarousel && "min-w-[min(85vw,320px)] shrink-0 snap-start md:min-w-[360px]",
               )}
-              style={{ borderColor: "var(--border)" }}
             >
               <Link href={`/projects/${project.slug}`} className="block">
                 <div className="relative min-h-56 overflow-hidden">
@@ -206,7 +224,7 @@ export function LpProjectsSection({
                     alt={project.title}
                     fill
                     sizes={isCarousel ? "360px" : "(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw"}
-                    className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                    className="object-cover transition duration-700 group-hover:scale-[1.04]"
                   />
                 </div>
               </Link>
@@ -217,12 +235,14 @@ export function LpProjectsSection({
                 <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
                   {project.area} м² · {project.floors} этаж · {project.rooms} комн.
                 </p>
-                <p className="mt-4 text-lg font-bold text-[var(--accent)]">от {formatRub(project.price)}</p>
+                <p className="mt-4 text-lg font-bold text-[var(--accent)]">
+                  {listingPrice > 0 ? `от ${formatRub(listingPrice)}` : "Цена по запросу"}
+                </p>
                 <div className="mt-5 flex flex-col gap-2 sm:flex-row">
                   <Link
                     href={`/projects/${project.slug}`}
-                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border px-4 text-sm font-bold transition hover:border-[var(--accent)]"
-                    style={{ borderColor: "var(--border)", color: "var(--text)" }}
+                    className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--bg-secondary)_80%,transparent)] px-4 text-sm font-bold transition hover:bg-[color-mix(in_srgb,var(--accent)_12%,var(--bg-secondary))]"
+                    style={{ color: "var(--text)" }}
                   >
                     Подробнее
                   </Link>
@@ -236,7 +256,8 @@ export function LpProjectsSection({
                 </div>
               </div>
             </article>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
@@ -246,7 +267,7 @@ export function LpProjectsSection({
 export function LpIncludesSection({ items }: { items: string[] }) {
   return (
     <section id="includes" className="scroll-mt-24 py-16 md:py-24" style={{ backgroundColor: "var(--bg-secondary)" }}>
-      <div className="container mx-auto grid gap-10 px-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
+      <div className="container mx-auto grid gap-10 px-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start" data-reveal="section">
         <div>
           <SectionEyebrow>Что входит в стоимость</SectionEyebrow>
           <h2 className="mt-3 font-heading text-2xl font-bold tracking-tight md:text-3xl">
@@ -260,8 +281,9 @@ export function LpIncludesSection({ items }: { items: string[] }) {
           {items.map((item, index) => (
             <div
               key={item}
-              className="flex gap-4 rounded-2xl border p-4 md:p-5"
-              style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
+              data-reveal="card"
+              style={revealDelayStyle(index, 50, 350)}
+              className={cn(lpSoftCard, "flex gap-4 p-4 md:p-5")}
             >
               <span
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold"
@@ -290,11 +312,11 @@ export function LpMaterialComparisonSection({
 
   return (
     <section className="py-16 md:py-24" style={{ backgroundColor: useColumns ? "var(--bg)" : undefined }}>
-      <div className="container mx-auto px-5">
+      <div className="container mx-auto px-5" data-reveal="section">
         <div className="max-w-3xl">
           <SectionEyebrow>Сравнение материалов</SectionEyebrow>
-          <h2 className="mt-3 font-heading text-3xl font-bold tracking-tight md:text-5xl">
-            Газобетон, кирpич и керамоблок
+          <h2 className="mt-3 font-heading text-2xl font-bold tracking-tight md:text-3xl">
+            Газобетон, кирпич и керамоблок
           </h2>
           <p className="mt-4 leading-relaxed" style={{ color: "var(--text-muted)" }}>
             Сравним по бюджету, скорости строительства, долговечности и комфорту — и подберём оптимальный вариант под ваш участок.
@@ -308,16 +330,12 @@ export function LpMaterialComparisonSection({
               return (
                 <article
                   key={row.id}
+                  data-reveal="card"
                   className={cn(
-                    "rounded-[1.75rem] border p-6 transition",
-                    highlighted && "ring-2 ring-[var(--accent)]",
+                    "p-6 transition",
+                    highlighted ? lpSoftCard : lpSoftCardAlt,
+                    highlighted && "ring-2 ring-[var(--accent)]/35",
                   )}
-                  style={{
-                    borderColor: highlighted ? "var(--accent)" : "var(--border)",
-                    backgroundColor: highlighted
-                      ? "color-mix(in srgb, var(--accent) 8%, var(--bg))"
-                      : "var(--bg-secondary)",
-                  }}
                 >
                   <p className="font-heading text-xl font-bold">
                     {row.label}
@@ -353,7 +371,7 @@ export function LpMaterialComparisonSection({
             })}
           </div>
         ) : (
-          <div className="mt-10 overflow-x-auto rounded-[1.75rem] border" style={{ borderColor: "var(--border)" }}>
+          <div className={cn(lpSoftCard, "mt-10 overflow-x-auto")} data-reveal="card">
             <table className="min-w-[760px] w-full border-collapse text-left text-sm">
               <thead style={{ backgroundColor: "var(--bg-secondary)" }}>
                 <tr>
@@ -366,7 +384,7 @@ export function LpMaterialComparisonSection({
                 </tr>
               </thead>
               <tbody>
-                {MATERIAL_COMPARISON_ROWS.map((row) => {
+                {MATERIAL_COMPARISON_ROWS.map((row, index) => {
                   const highlighted = highlightMaterial === row.id;
                   return (
                     <tr
@@ -374,8 +392,9 @@ export function LpMaterialComparisonSection({
                       style={{
                         backgroundColor: highlighted
                           ? "color-mix(in srgb, var(--accent) 8%, var(--bg))"
-                          : "var(--bg)",
-                        borderTop: "1px solid var(--border)",
+                          : index % 2 === 0
+                            ? "var(--bg)"
+                            : "color-mix(in srgb, var(--bg-secondary) 55%, var(--bg))",
                       }}
                     >
                       <td className="px-5 py-4 font-bold">
@@ -437,11 +456,11 @@ export function LpPortfolioSection({ objects }: { objects: BuiltObjectItem[] }) 
       className="scroll-mt-24 py-16 md:py-24"
       style={{ backgroundColor: "var(--bg-secondary)" }}
     >
-      <div className="container mx-auto px-5">
+      <div className="container mx-auto px-5" data-reveal="section">
         <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div className="max-w-3xl">
             <SectionEyebrow>Портфолио</SectionEyebrow>
-            <h2 className="mt-3 font-heading text-3xl font-bold tracking-tight md:text-5xl">
+            <h2 className="mt-3 font-heading text-2xl font-bold tracking-tight md:text-3xl">
               Построенные дома
             </h2>
             <p className="mt-4 leading-relaxed" style={{ color: "var(--text-muted)" }}>
@@ -458,12 +477,13 @@ export function LpPortfolioSection({ objects }: { objects: BuiltObjectItem[] }) 
         </div>
 
         <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-          {objects.map((object) => (
+          {objects.map((object, index) => (
             <Link
               key={object.slug}
               href={`/portfolio/${object.slug}`}
-              className="group overflow-hidden rounded-[1.5rem] border bg-[var(--bg)] transition hover:-translate-y-0.5"
-              style={{ borderColor: "var(--border)" }}
+              data-reveal="card"
+              style={revealDelayStyle(index)}
+              className={cn(lpSoftCard, "group overflow-hidden transition hover:-translate-y-1")}
             >
               <div className="relative min-h-44 overflow-hidden">
                 <CmsImage
@@ -471,7 +491,7 @@ export function LpPortfolioSection({ objects }: { objects: BuiltObjectItem[] }) 
                   alt={object.title}
                   fill
                   sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw"
-                  className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                  className="object-cover transition duration-700 group-hover:scale-[1.04]"
                 />
               </div>
               <div className="p-4">
@@ -493,18 +513,17 @@ export function LpPortfolioSection({ objects }: { objects: BuiltObjectItem[] }) 
 export function LpMortgageSection() {
   return (
     <section id="mortgage" className="scroll-mt-24 py-16 md:py-24">
-      <div className="container mx-auto px-5">
+      <div className="container mx-auto px-5" data-reveal="section">
         <div
-          className="grid gap-8 overflow-hidden rounded-[2rem] border p-8 md:grid-cols-[1fr_0.9fr] md:p-10"
+          className="grid gap-8 overflow-hidden rounded-[2rem] p-8 shadow-[0_22px_60px_rgba(15,61,46,0.08)] md:grid-cols-[1fr_0.9fr] md:p-10"
           style={{
-            borderColor: "var(--border)",
             background:
               "linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, var(--bg)) 0%, var(--bg-secondary) 55%, var(--bg) 100%)",
           }}
         >
           <div>
             <SectionEyebrow>Ипотека на строительство</SectionEyebrow>
-            <h2 className="mt-3 font-heading text-3xl font-bold tracking-tight md:text-4xl">
+            <h2 className="mt-3 font-heading text-2xl font-bold tracking-tight md:text-3xl">
               Можно строить дом с ипотекой
             </h2>
             <p className="mt-4 max-w-xl leading-relaxed" style={{ color: "var(--text-muted)" }}>
@@ -534,17 +553,14 @@ export function LpMortgageSection() {
               </Link>
               <a
                 href="#lead-form"
-                className="inline-flex min-h-12 items-center justify-center rounded-full border px-6 text-sm font-bold"
-                style={{ borderColor: "var(--border)", color: "var(--text)" }}
+                className="inline-flex min-h-12 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--bg)_88%,transparent)] px-6 text-sm font-bold shadow-sm transition hover:bg-[var(--bg)]"
+                style={{ color: "var(--text)" }}
               >
                 Консультация по ипотеке
               </a>
             </div>
           </div>
-          <div
-            className="flex flex-col justify-center rounded-[1.5rem] border p-6"
-            style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
-          >
+          <div className={cn(lpSoftCard, "flex flex-col justify-center p-6")} data-reveal="card">
             <Star className="h-8 w-8 text-[var(--accent)]" aria-hidden />
             <p className="mt-4 font-heading text-2xl font-bold">Сначала расчёт — потом банк</p>
             <p className="mt-3 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
@@ -564,10 +580,10 @@ export function LpStepsSection({ config }: { config: AdvertisingLandingConfig })
 
   return (
     <section className="py-16 md:py-24" style={{ backgroundColor: "var(--bg)" }}>
-      <div className="container mx-auto px-5">
+      <div className="container mx-auto px-5" data-reveal="section">
         <div className="max-w-3xl">
           <SectionEyebrow>Как мы работаем</SectionEyebrow>
-          <h2 className="mt-3 font-heading text-3xl font-bold tracking-tight md:text-5xl">
+          <h2 className="mt-3 font-heading text-2xl font-bold tracking-tight md:text-3xl">
             4 этапа до готового дома
           </h2>
           <p className="mt-4 leading-relaxed" style={{ color: "var(--text-muted)" }}>
@@ -575,11 +591,12 @@ export function LpStepsSection({ config }: { config: AdvertisingLandingConfig })
           </p>
         </div>
         <div className="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {LP_WORK_STEPS.map((step) => (
+          {LP_WORK_STEPS.map((step, index) => (
             <article
               key={step.step}
-              className="rounded-[1.5rem] border p-5 md:p-6"
-              style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-secondary)" }}
+              data-reveal="card"
+              style={revealDelayStyle(index)}
+              className={cn(lpSoftCardAlt, "p-5 md:p-6")}
             >
               <p className="font-heading text-3xl font-bold text-[var(--accent)]">{step.step}</p>
               <h3 className="mt-3 font-heading text-lg font-bold">{step.title}</h3>
@@ -620,10 +637,10 @@ export function LpReviewsSection({
 
   return (
     <section className="py-16 md:py-24" style={{ backgroundColor: "var(--bg-secondary)" }}>
-      <div className="container mx-auto px-5">
+      <div className="container mx-auto px-5" data-reveal="section">
         <div className="max-w-3xl">
           <SectionEyebrow>Отзывы клиентов</SectionEyebrow>
-          <h2 className="mt-3 font-heading text-3xl font-bold tracking-tight md:text-5xl">
+          <h2 className="mt-3 font-heading text-2xl font-bold tracking-tight md:text-3xl">
             Что говорят заказчики
           </h2>
           <p className="mt-4 leading-relaxed" style={{ color: "var(--text-muted)" }}>
@@ -631,14 +648,15 @@ export function LpReviewsSection({
           </p>
         </div>
         <div className="mt-10 grid gap-5 md:grid-cols-3">
-          {items.map((review) => {
+          {items.map((review, index) => {
             const initial = review.authorName.trim().charAt(0).toUpperCase();
             const meta = [review.objectName, review.serviceLabel].filter(Boolean).join(" · ");
             return (
               <article
                 key={review.id}
-                className="flex h-full flex-col rounded-[1.5rem] border p-5 md:p-6"
-                style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
+                data-reveal="card"
+                style={revealDelayStyle(index)}
+                className={cn(lpSoftCard, "flex h-full flex-col p-5 md:p-6")}
               >
                 <div className="flex items-start gap-3">
                   <div
@@ -691,20 +709,17 @@ export function LpExcursionSection({
 }) {
   return (
     <section className="py-16 md:py-24" style={{ backgroundColor: "var(--bg-secondary)" }}>
-      <div className="container mx-auto px-5">
-        <div
-          className="grid gap-8 rounded-[2rem] border p-8 md:grid-cols-[1.05fr_0.95fr] md:p-10"
-          style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}
-        >
+      <div className="container mx-auto px-5" data-reveal="section">
+        <div className={cn(lpSoftCard, "grid gap-8 p-8 md:grid-cols-[1.05fr_0.95fr] md:p-10")}>
           <div>
             <SectionEyebrow>Экскурсия на объект</SectionEyebrow>
-            <h2 className="mt-3 font-heading text-3xl font-bold tracking-tight md:text-4xl">{title}</h2>
+            <h2 className="mt-3 font-heading text-2xl font-bold tracking-tight md:text-3xl">{title}</h2>
             <p className="mt-4 max-w-2xl leading-relaxed" style={{ color: "var(--text-muted)" }}>
               {lead}
             </p>
           </div>
           <div className="flex flex-col justify-center gap-3">
-            <div className="flex items-start gap-3 rounded-2xl border p-4" style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-secondary)" }}>
+            <div className={cn(lpSoftCardAlt, "flex items-start gap-3 p-4")} data-reveal="card">
               <CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-[var(--accent)]" aria-hidden />
               <p className="text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
                 Экскурсии проводим по записи после короткого созвона — подберём объект близкий к вашему запросу по материалу и площади.
@@ -727,19 +742,20 @@ export function LpExcursionSection({
 export function LpFaqSection({ faq }: { faq: AdvertisingLandingConfig["faq"] }) {
   return (
     <section id="faq" className="scroll-mt-24 py-16 md:py-24">
-      <div className="container mx-auto grid gap-8 px-5 lg:grid-cols-[0.85fr_1.15fr]">
+      <div className="container mx-auto grid gap-8 px-5 lg:grid-cols-[0.85fr_1.15fr]" data-reveal="section">
         <div>
           <SectionEyebrow>FAQ</SectionEyebrow>
-          <h2 className="mt-3 font-heading text-3xl font-bold tracking-tight md:text-5xl">
+          <h2 className="mt-3 font-heading text-2xl font-bold tracking-tight md:text-3xl">
             Ответы перед расчётом
           </h2>
         </div>
         <div className="space-y-3">
-          {faq.map((item) => (
+          {faq.map((item, index) => (
             <details
               key={item.question}
-              className="rounded-2xl border p-5"
-              style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-secondary)" }}
+              data-reveal="card"
+              style={revealDelayStyle(index, 45, 360)}
+              className={cn(lpSoftCardAlt, "p-5")}
             >
               <summary className="cursor-pointer font-semibold">{item.question}</summary>
               <p className="mt-3 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
@@ -755,11 +771,11 @@ export function LpFaqSection({ faq }: { faq: AdvertisingLandingConfig["faq"] }) 
 
 export function LpFinalContactsSection() {
   return (
-    <section className="border-t py-16 md:py-20" style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-secondary)" }}>
-      <div className="container mx-auto px-5">
+    <section className="py-16 md:py-20" style={{ backgroundColor: "var(--bg-secondary)" }}>
+      <div className="container mx-auto px-5" data-reveal="section">
         <div className="mx-auto max-w-3xl text-center">
           <SectionEyebrow>Связаться с нами</SectionEyebrow>
-          <h2 className="mt-3 font-heading text-3xl font-bold tracking-tight md:text-4xl">
+          <h2 className="mt-3 font-heading text-2xl font-bold tracking-tight md:text-3xl">
             Остались вопросы? Напишите или позвоните
           </h2>
           <p className="mt-4 text-sm leading-relaxed md:text-base" style={{ color: "var(--text-muted)" }}>
@@ -768,7 +784,7 @@ export function LpFinalContactsSection() {
           <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap sm:items-center">
             <a
               href={`tel:${PHONE_RAW}`}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 text-sm font-bold"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 text-sm font-bold shadow-[0_12px_28px_rgba(15,61,46,0.18)]"
               style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
             >
               <Phone className="h-4 w-4" aria-hidden />
@@ -778,8 +794,8 @@ export function LpFinalContactsSection() {
               href={SOCIAL_LINKS.telegram}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border px-6 text-sm font-bold"
-              style={{ borderColor: "var(--border)", color: "var(--text)", backgroundColor: "var(--bg)" }}
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--bg)] px-6 text-sm font-bold shadow-[0_10px_28px_rgba(15,61,46,0.06)]"
+              style={{ color: "var(--text)" }}
             >
               <MessageCircle className="h-4 w-4" aria-hidden />
               Telegram
@@ -788,8 +804,8 @@ export function LpFinalContactsSection() {
               href={SOCIAL_LINKS.maxChat}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border px-6 text-sm font-bold"
-              style={{ borderColor: "var(--border)", color: "var(--text)", backgroundColor: "var(--bg)" }}
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--bg)] px-6 text-sm font-bold shadow-[0_10px_28px_rgba(15,61,46,0.06)]"
+              style={{ color: "var(--text)" }}
             >
               <MessageCircle className="h-4 w-4" aria-hidden />
               Max

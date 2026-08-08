@@ -18,6 +18,7 @@ import {
 } from "@/lib/advertising-landing";
 import { readLeadError } from "@/lib/read-lead-error";
 import { WALL_MATERIAL_LABELS, type WallMaterialId } from "@/lib/house-construction-calculator";
+import { cn } from "@/lib/utils";
 
 const LP_AREA_OPTIONS = [
   { id: "80-100", label: "80–100 м²" },
@@ -76,10 +77,14 @@ function ChoiceGrid({
             key={option.id}
             type="button"
             onClick={() => onChange(option.id)}
-            className="rounded-2xl border px-4 py-3 text-left text-sm font-semibold transition"
+            className={cn(
+              "rounded-2xl px-4 py-3 text-left text-sm font-semibold shadow-sm transition",
+              active && "ring-2 ring-[var(--accent)]/40",
+            )}
             style={{
-              borderColor: active ? "var(--accent)" : "var(--border)",
-              backgroundColor: active ? "color-mix(in srgb, var(--accent) 12%, var(--bg))" : "var(--bg-secondary)",
+              backgroundColor: active
+                ? "color-mix(in srgb, var(--accent) 14%, var(--bg))"
+                : "var(--bg-secondary)",
               color: "var(--text)",
             }}
           >
@@ -211,7 +216,7 @@ export function AdvertisingLandingQuiz({
   }
 
   return (
-    <div className="rounded-[1.75rem] border bg-[var(--bg)] p-5 md:p-6" style={{ borderColor: "var(--border)" }}>
+    <div className="rounded-[1.75rem] bg-[var(--bg)] p-5 shadow-[0_18px_48px_rgba(15,61,46,0.07)] md:p-6">
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>
@@ -298,8 +303,8 @@ export function AdvertisingLandingQuiz({
               onChange={(e) => setName(e.target.value)}
               required
               placeholder="Ваше имя"
-              className="rounded-2xl border px-4 py-3 text-base"
-              style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-secondary)", color: "var(--text)" }}
+              className="rounded-2xl px-4 py-3 text-base shadow-inner outline-none ring-0 transition focus:ring-2 focus:ring-[var(--accent)]/30"
+              style={{ backgroundColor: "var(--bg-secondary)", color: "var(--text)" }}
             />
             <input
               value={phone}
@@ -307,8 +312,8 @@ export function AdvertisingLandingQuiz({
               required
               type="tel"
               placeholder="Телефон"
-              className="rounded-2xl border px-4 py-3 text-base"
-              style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-secondary)", color: "var(--text)" }}
+              className="rounded-2xl px-4 py-3 text-base shadow-inner outline-none ring-0 transition focus:ring-2 focus:ring-[var(--accent)]/30"
+              style={{ backgroundColor: "var(--bg-secondary)", color: "var(--text)" }}
             />
             <label className="flex items-start gap-3 text-sm" style={{ color: "var(--text-muted)" }}>
               <input
@@ -342,8 +347,8 @@ export function AdvertisingLandingQuiz({
             <button
               type="button"
               onClick={goBack}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border px-5 text-sm font-bold"
-              style={{ borderColor: "var(--border)", color: "var(--text)" }}
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--bg-secondary)] px-5 text-sm font-bold"
+              style={{ color: "var(--text)" }}
             >
               <ArrowLeft className="h-4 w-4" aria-hidden />
               Назад
@@ -381,7 +386,7 @@ export function AdvertisingLandingQuiz({
 
 export function AdvertisingLandingQuizSuccess({ name }: { name: string }) {
   return (
-    <div className="rounded-[1.75rem] border p-8 text-center" style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}>
+    <div className="rounded-[1.75rem] bg-[var(--bg)] p-8 text-center shadow-[0_18px_48px_rgba(15,61,46,0.07)]">
       <CheckCircle2 className="mx-auto h-12 w-12 text-[var(--accent)]" aria-hidden />
       <h3 className="mt-4 font-heading text-2xl font-bold">Заявка отправлена</h3>
       <p className="mt-3 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>

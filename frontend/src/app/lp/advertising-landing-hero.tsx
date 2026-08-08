@@ -51,68 +51,91 @@ function HeroPriceLine({
   );
 }
 
-function LpHeroHeader({ config, headerGlass }: { config: AdvertisingLandingConfig; headerGlass: boolean }) {
+function LpHeroHeader({
+  headerGlass,
+  scrolled,
+}: {
+  headerGlass: boolean;
+  scrolled: boolean;
+}) {
   return (
-    <header
-      className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-all duration-300",
-        headerGlass
-          ? "border-b border-white/[0.08] backdrop-blur-md"
-          : "border-b bg-[color-mix(in_srgb,var(--bg)_94%,transparent)] shadow-sm backdrop-blur-xl",
-      )}
-      style={{
-        borderColor: headerGlass ? undefined : "var(--border)",
-        backgroundColor: headerGlass ? "color-mix(in srgb, #0e1814 80%, transparent)" : undefined,
-      }}
-    >
-      <div className="container mx-auto flex min-h-[72px] items-center justify-between gap-4 px-5 lg:min-h-[80px]">
-        <Link href="/" className="shrink-0" aria-label="Часть души — на главную">
-          <BrandLogo height={34} brightOnBackdrop={headerGlass} className="lg:h-[38px]" />
-        </Link>
+    <header className="fixed inset-x-0 top-0 z-50 pt-[max(0.5rem,env(safe-area-inset-top,0px))]">
+      <div className="container mx-auto px-4 sm:px-5">
+        <div
+          className={cn(
+            "relative flex min-h-[64px] items-center justify-between gap-3 rounded-2xl px-3 transition-all duration-500 sm:min-h-[72px] sm:px-4 lg:min-h-[76px] lg:px-5",
+            headerGlass
+              ? "bg-[color-mix(in_srgb,#0e1814_72%,transparent)] shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-xl"
+              : "bg-[color-mix(in_srgb,var(--bg)_92%,transparent)] shadow-[0_16px_40px_rgba(15,61,46,0.1)] backdrop-blur-xl",
+            scrolled && "min-h-[58px] sm:min-h-[64px]",
+          )}
+        >
+          <div
+            className="pointer-events-none absolute inset-x-6 bottom-0 h-px opacity-80"
+            style={{
+              background: headerGlass
+                ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)"
+                : "linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 45%, transparent), transparent)",
+            }}
+            aria-hidden
+          />
 
-        <nav className="hidden items-center gap-6 xl:flex" aria-label="Разделы страницы">
-          {ADVERTISING_LP_NAV.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "text-[13px] font-semibold tracking-wide transition hover:opacity-85",
-                headerGlass ? "text-white/90" : "text-[var(--text)]",
-              )}
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
+          <Link href="/" className="relative z-10 shrink-0 pl-1" aria-label="Часть души — на главную">
+            <BrandLogo height={32} brightOnBackdrop={headerGlass} className="lg:h-[36px]" />
+          </Link>
 
-        <div className="flex shrink-0 items-center gap-3 sm:gap-4">
-          <a
-            href={`tel:${PHONE_RAW}`}
+          <nav
             className={cn(
-              "hidden items-center gap-2 text-right sm:flex",
-              headerGlass ? "text-white" : "text-[var(--text)]",
+              "relative z-10 hidden items-center gap-1 rounded-full px-1.5 py-1 xl:flex",
+              headerGlass ? "bg-white/[0.06]" : "bg-[color-mix(in_srgb,var(--bg-secondary)_70%,transparent)]",
             )}
+            aria-label="Разделы страницы"
           >
-            <Phone className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
-            <span>
-              <span className="block text-sm font-bold leading-tight">{PHONE}</span>
-              <span
+            {ADVERTISING_LP_NAV.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
                 className={cn(
-                  "block text-[11px] leading-tight",
-                  headerGlass ? "text-white/70" : "text-[var(--text-muted)]",
+                  "rounded-full px-3.5 py-2 text-[12px] font-semibold tracking-wide transition",
+                  headerGlass
+                    ? "text-white/88 hover:bg-white/[0.1] hover:text-white"
+                    : "text-[var(--text)] hover:bg-[color-mix(in_srgb,var(--accent)_10%,var(--bg))] hover:text-[var(--accent)]",
                 )}
               >
-                {WORKING_HOURS}
+                {item.label}
+              </a>
+            ))}
+          </nav>
+
+          <div className="relative z-10 flex shrink-0 items-center gap-2.5 sm:gap-3">
+            <a
+              href={`tel:${PHONE_RAW}`}
+              className={cn(
+                "hidden items-center gap-2 rounded-xl px-2.5 py-1.5 text-right transition sm:flex",
+                headerGlass ? "text-white hover:bg-white/[0.06]" : "text-[var(--text)] hover:bg-[var(--bg-secondary)]",
+              )}
+            >
+              <Phone className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+              <span>
+                <span className="block text-sm font-bold leading-tight">{PHONE}</span>
+                <span
+                  className={cn(
+                    "block text-[11px] leading-tight",
+                    headerGlass ? "text-white/70" : "text-[var(--text-muted)]",
+                  )}
+                >
+                  {WORKING_HOURS}
+                </span>
               </span>
-            </span>
-          </a>
-          <a
-            href="#lead-form"
-            className="inline-flex min-h-10 items-center justify-center rounded-xl px-4 text-[11px] font-bold uppercase tracking-[0.08em] transition hover:opacity-95 sm:min-h-11 sm:px-5 sm:text-xs"
-            style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
-          >
-            Перезвоните мне
-          </a>
+            </a>
+            <a
+              href="#lead-form"
+              className="inline-flex min-h-10 items-center justify-center rounded-xl px-4 text-[11px] font-bold uppercase tracking-[0.08em] shadow-[0_10px_28px_rgba(15,61,46,0.28)] transition hover:-translate-y-0.5 hover:opacity-95 sm:min-h-11 sm:px-5 sm:text-xs"
+              style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
+            >
+              Перезвоните мне
+            </a>
+          </div>
         </div>
       </div>
     </header>
@@ -143,8 +166,8 @@ function HeroCtas({
         </a>
         <a
           href={heroMainHref}
-          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border px-5 text-xs font-bold uppercase tracking-[0.1em] transition hover:-translate-y-0.5 sm:w-auto"
-          style={{ borderColor: "var(--border)", color: "var(--text)", backgroundColor: "var(--bg)" }}
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--bg)] px-5 text-xs font-bold uppercase tracking-[0.1em] shadow-[0_10px_28px_rgba(15,61,46,0.08)] transition hover:-translate-y-0.5 sm:w-auto"
+          style={{ color: "var(--text)" }}
         >
           <LayoutGrid className="h-4 w-4 shrink-0" aria-hidden />
           {heroMainCta}
@@ -254,31 +277,31 @@ function FlagshipSplitHero({ config, heroImage, theme, priceFromRub }: HeroProps
     <section className="relative isolate min-h-[100svh] min-h-[100dvh] w-full overflow-hidden bg-[#07110e]">
       <DarkHeroBackdrop heroImage={heroImage} theme={theme} />
       <div className="container relative z-10 mx-auto grid min-h-[100svh] min-h-[100dvh] items-center gap-8 px-5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] pt-[calc(5.5rem+env(safe-area-inset-top,0px))] lg:grid-cols-[1.05fr_0.95fr] lg:pt-[calc(6rem+env(safe-area-inset-top,0px))]">
-        <div>
+        <div data-reveal="section">
           {config.eyebrow ? (
-            <span className={cn("mb-4 inline-block rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-white/88", edgeGlass, "bg-black/35 backdrop-blur-sm")}>
+            <span className="mb-4 inline-block rounded-full bg-black/35 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-white/88 backdrop-blur-sm">
               {config.eyebrow}
             </span>
           ) : null}
-          <div className={cn("max-w-2xl rounded-2xl bg-black/42 p-5 backdrop-blur-sm sm:rounded-[1.35rem] sm:p-6", edgeGlass)}>
+          <div className="max-w-2xl rounded-2xl bg-black/38 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.35)] backdrop-blur-md sm:rounded-[1.35rem] sm:p-6">
             <h1 className="text-balance font-heading text-[clamp(1.15rem,2.4vw,1.85rem)] font-bold uppercase leading-[1.15] tracking-[-0.02em] text-white">
               {config.h1}
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-neutral-100 md:text-[15px]">{heroSubtitle}</p>
             <HeroPriceLine config={config} priceFromRub={priceFromRub} />
             <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-              <a href="#lead-form" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-xs font-bold uppercase tracking-[0.1em]" style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}>
+              <a href="#lead-form" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-xs font-bold uppercase tracking-[0.1em] shadow-[0_12px_32px_rgba(15,61,46,0.35)]" style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}>
                 <Calculator className="h-4 w-4" aria-hidden />
                 {config.primaryCta}
               </a>
-              <a href={heroMainHref} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-5 text-xs font-bold uppercase tracking-[0.1em] text-[#0f3d2e]">
+              <a href={heroMainHref} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-5 text-xs font-bold uppercase tracking-[0.1em] text-[#0f3d2e] shadow-[0_12px_32px_rgba(0,0,0,0.2)]">
                 <LayoutGrid className="h-4 w-4" aria-hidden />
                 {heroMainCta}
               </a>
             </div>
           </div>
         </div>
-        <div className={cn("rounded-[1.75rem] p-6 backdrop-blur-sm sm:p-8", edgeGlass, "bg-black/40")}>
+        <div className="rounded-[1.75rem] bg-black/36 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.3)] backdrop-blur-md sm:p-8" data-reveal="card">
           <ShieldCheck className="h-8 w-8 text-white/90" aria-hidden />
           <p className="mt-4 font-heading text-xl font-bold text-white sm:text-2xl">Дом под ключ — без сюрпризов в смете</p>
           <ul className="mt-5 space-y-3 text-sm text-neutral-200">
@@ -306,9 +329,9 @@ function CalculatorLightHero({ config }: HeroProps) {
   const heroMainHref = config.heroMainHref ?? "#includes";
 
   return (
-    <section className="relative overflow-hidden border-b pt-[calc(5.5rem+env(safe-area-inset-top,0px))] md:pt-[calc(6rem+env(safe-area-inset-top,0px))]" style={{ borderColor: "var(--border)", backgroundColor: "var(--bg)" }}>
+    <section className="relative overflow-hidden pt-[calc(5.5rem+env(safe-area-inset-top,0px))] md:pt-[calc(6rem+env(safe-area-inset-top,0px))]" style={{ backgroundColor: "var(--bg)" }}>
       <div className="pointer-events-none absolute inset-0" aria-hidden style={{ background: "radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 45%)" }} />
-      <div className="container relative z-10 mx-auto px-5 py-14 md:py-20 lg:py-24">
+      <div className="container relative z-10 mx-auto px-5 py-14 md:py-20 lg:py-24" data-reveal="section">
         <div className="mx-auto max-w-3xl text-center">
           {config.eyebrow ? (
             <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: "var(--accent)" }}>
@@ -323,7 +346,7 @@ function CalculatorLightHero({ config }: HeroProps) {
           </p>
           <HeroCtas config={config} heroMainCta={heroMainCta} heroMainHref={heroMainHref} light />
         </div>
-        <div className="mx-auto mt-10 max-w-xl rounded-[1.75rem] border p-5 md:p-6" style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-secondary)" }}>
+        <div className="mx-auto mt-10 max-w-xl rounded-[1.75rem] bg-[var(--bg-secondary)] p-5 shadow-[0_18px_48px_rgba(15,61,46,0.07)] md:p-6" data-reveal="card">
           <p className="text-xs font-bold uppercase tracking-[0.14em]" style={{ color: "var(--accent)" }}>
             Мини-квиз · 6 шагов
           </p>
@@ -485,7 +508,10 @@ export function AdvertisingLandingHero({
 
   return (
     <>
-      <LpHeroHeader config={config} headerGlass={theme.heroDark ? headerGlass : false} />
+      <LpHeroHeader
+        headerGlass={theme.heroDark ? headerGlass : false}
+        scrolled={scrolled}
+      />
       <HeroBody config={config} heroImage={heroImage} theme={theme} priceFromRub={priceFromRub} />
     </>
   );

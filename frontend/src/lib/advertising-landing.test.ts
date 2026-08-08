@@ -157,12 +157,12 @@ describe("advertising landing config", () => {
     expect(config.includes.some((i) => /инженер/i.test(i))).toBe(true);
   });
 
-  it("advertisingLandingMinProjectPrice берёт минимум из опубликованных", () => {
+  it("advertisingLandingMinProjectPrice берёт минимум из опубликованных с ценой", () => {
     expect(
       advertisingLandingMinProjectPrice([
-        { price: 12_000_000 },
-        { price: 9_500_000 },
-        { price: 8_000_000, published: false },
+        project({ slug: "a", price: 12_000_000 }),
+        project({ slug: "b", price: 9_500_000 }),
+        project({ slug: "c", price: 8_000_000, published: false }),
       ]),
     ).toBe(9_500_000);
     expect(advertisingLandingMinProjectPrice([])).toBeNull();
