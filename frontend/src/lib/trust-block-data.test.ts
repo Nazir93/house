@@ -44,7 +44,7 @@ describe("trust-block-data", () => {
 
   it("три статистические карточки", () => {
     expect(TRUST_STATS).toHaveLength(3);
-    expect(TRUST_STATS.map((s) => s.value)).toEqual(["10+", "85+", "5 лет"]);
+    expect(TRUST_STATS.map((s) => s.value)).toEqual(["10+", "85+", "от 5 лет"]);
     expect(TRUST_STATS[2]?.label).toBe("Гарантии на конструктив");
   });
 });

@@ -7,28 +7,9 @@ import { resolveServiceLandingDocument, stripShowcaseSections } from "@/lib/serv
 import type { ServiceLandingDocument } from "@/lib/service-landing-schema";
 import { enrichProektirovanieLandingDocument } from "@/lib/service-proektirovanie-landing";
 import { getServiceLandingHeroBannerFields } from "@/lib/service-card-media";
+import { mergeHeroBannersFromDb } from "@/lib/service-landing-banners";
 import { getServiceSeoBySlug } from "@/lib/seo/service-seo-defaults";
 import { buildMetaDescription } from "@/lib/seo/build-meta-description";
-
-function mergeHeroBannersFromDb(
-  document: ServiceLandingDocument,
-  bannerImageDesktop: string | null | undefined,
-  bannerImageMobile: string | null | undefined
-): ServiceLandingDocument {
-  const d = bannerImageDesktop?.trim() || undefined;
-  const m = bannerImageMobile?.trim() || undefined;
-  if (!d && !m) return document;
-  return {
-    sections: document.sections.map((section) => {
-      if (section.type !== "hero" && section.type !== "heroCinematic") return section;
-      return {
-        ...section,
-        bannerImageDesktop: section.bannerImageDesktop ?? d,
-        bannerImageMobile: section.bannerImageMobile ?? m,
-      };
-    }),
-  };
-}
 
 /** Если в hero нет баннера (старый JSON из админки) — те же картинки, что на главной в карточке услуги. */
 function fillMissingHeroBannersFromSiteAssets(slug: string, document: ServiceLandingDocument): ServiceLandingDocument {

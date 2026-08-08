@@ -1,6 +1,17 @@
 import type { Prisma } from "@prisma/client";
 
-/** Статусы заявки в админке. */
+/** Статусы заявки, которые можно выставить вручную (список и карточка). */
+export const LEAD_EDITABLE_STATUSES = ["NEW", "IN_PROGRESS", "DONE", "CANCELLED"] as const;
+export type LeadEditableStatus = (typeof LEAD_EDITABLE_STATUSES)[number];
+
+export const LEAD_EDITABLE_STATUS_OPTIONS = [
+  { value: "NEW", label: "Новая" },
+  { value: "IN_PROGRESS", label: "В работе" },
+  { value: "DONE", label: "Завершена" },
+  { value: "CANCELLED", label: "Отменена" },
+] as const;
+
+/** Статусы заявки в админке (фильтр списка). */
 export const LEAD_STATUS_OPTIONS = [
   { value: "ALL", label: "Все статусы" },
   { value: "NEW", label: "Новые" },
@@ -15,6 +26,14 @@ export const LEAD_STATUS_LABELS: Record<string, string> = {
   DONE: "Завершена",
   CANCELLED: "Отменена",
 };
+
+/** Проверка статуса для PATCH из списка/карточки. */
+export function parseLeadEditableStatus(value: unknown): LeadEditableStatus | null {
+  if (typeof value !== "string") return null;
+  return (LEAD_EDITABLE_STATUSES as readonly string[]).includes(value)
+    ? (value as LeadEditableStatus)
+    : null;
+}
 
 export const LEAD_STATUS_STYLES: Record<string, string> = {
   NEW: "bg-blue-500/20 text-blue-400",

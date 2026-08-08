@@ -172,7 +172,8 @@ export default function AdminEditServicePage() {
           <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required
             className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white focus:outline-none focus:border-[#0F3D2E]/50 transition-colors" />
           <p className="mt-1.5 text-[11px] text-white/30 leading-relaxed">
-            Карточки на главной и списке услуг, большой заголовок на странице услуги (если не задан H1 в SEO).
+            Название в админ-списке и запасной H1 на странице услуги (если не задан H1 в SEO). Тексты вкладки на
+            /services задаются в блоке ниже и в шаблоне хаба.
           </p>
         </div>
 
@@ -213,6 +214,10 @@ export default function AdminEditServicePage() {
           value={coverImage}
           onChange={setCoverImage}
         />
+        <p className="-mt-2 text-[11px] text-white/30 leading-relaxed">
+          Показывается слева на странице списка услуг (/services) для этой вкладки. Если пусто — берётся картинка
+          по умолчанию или видео ниже.
+        </p>
 
         <AdminMediaUpload
           label="Видео для карточки (фон)"
@@ -220,6 +225,9 @@ export default function AdminEditServicePage() {
           value={videoUrl}
           onChange={setVideoUrl}
         />
+        <p className="-mt-2 text-[11px] text-white/30 leading-relaxed">
+          Фон вкладки на /services, если нет изображения услуги.
+        </p>
 
         <AdminMediaUpload
           label="Баннер лендинга (один для всех экранов)"
@@ -227,6 +235,10 @@ export default function AdminEditServicePage() {
           value={bannerImage}
           onChange={setBannerImage}
         />
+        <p className="-mt-2 text-[11px] text-white/30 leading-relaxed">
+          Большой баннер в шапке страницы услуги (/services/{slug || "…"}). Перекрывает картинку из шаблона
+          текстов.
+        </p>
 
         <div>
           <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Краткое описание</label>

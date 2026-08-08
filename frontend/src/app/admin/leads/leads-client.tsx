@@ -6,12 +6,13 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Search, X, Inbox, ChevronLeft, ChevronRight } from "lucide-react";
 import { AdminSelect } from "@/components/admin/admin-select";
 import {
+  LEAD_EDITABLE_STATUS_OPTIONS,
   LEAD_SOURCE_FILTERS,
-  LEAD_STATUS_LABELS,
   LEAD_STATUS_OPTIONS,
   LEAD_STATUS_STYLES,
 } from "@/lib/lead-admin-ui";
 import { getLeadSourceLabel } from "@/lib/lead-sources";
+import { cn } from "@/lib/utils";
 
 type Lead = {
   id: string;
@@ -36,6 +37,7 @@ export function AdminLeadsClient() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [statusSavingId, setStatusSavingId] = useState<string | null>(null);
 
   const setSourceFilter = useCallback(
     (next: string) => {
@@ -81,6 +83,45 @@ export function AdminLeadsClient() {
   useEffect(() => {
     setPage(1);
   }, [status, search, sourceFromUrl]);
+
+  const updateLeadStatus = useCallback(
+    async (leadId: string, nextStatus: string) => {
+      let previousStatus: string | undefined;
+      setLeads((list) => {
+        const prev = list.find((l) => l.id === leadId);
+        if (!prev || prev.status === nextStatus) return list;
+        previousStatus = prev.status;
+        return list.map((l) => (l.id === leadId ? { ...l, status: nextStatus } : l));
+      });
+      if (previousStatus === undefined) return;
+
+      setStatusSavingId(leadId);
+      setError("");
+
+      try {
+        const res = await fetch(`/api/admin/leads/${leadId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status: nextStatus }),
+        });
+        if (!res.ok) throw new Error("status");
+
+        // Если активен фильтр по статусу — строка больше не подходит, убираем из списка.
+        if (status !== "ALL" && status !== nextStatus) {
+          setLeads((list) => list.filter((l) => l.id !== leadId));
+          setTotal((t) => Math.max(0, t - 1));
+        }
+      } catch {
+        setLeads((list) =>
+          list.map((l) => (l.id === leadId ? { ...l, status: previousStatus! } : l))
+        );
+        setError("Не удалось сменить статус. Попробуйте ещё раз.");
+      } finally {
+        setStatusSavingId(null);
+      }
+    },
+    [status]
+  );
 
   const activeSourceLabel = LEAD_SOURCE_FILTERS.find((f) => f.value === sourceFromUrl)?.label;
 
@@ -175,10 +216,19 @@ export function AdminLeadsClient() {
                       <p className="text-white/35 text-xs mt-1 sm:hidden">{getLeadSourceLabel(lead.source)}</p>
                     </td>
                     <td className="px-4 py-3 text-white/45 hidden sm:table-cell">{getLeadSourceLabel(lead.source)}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-block px-2 py-0.5 rounded-md text-[11px] font-medium ${LEAD_STATUS_STYLES[lead.status] || ""}`}>
-                        {LEAD_STATUS_LABELS[lead.status] || lead.status}
-                      </span>
+                    <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                      <AdminSelect
+                        value={lead.status}
+                        onValueChange={(value) => void updateLeadStatus(lead.id, value)}
+                        options={LEAD_EDITABLE_STATUS_OPTIONS.map((s) => ({ value: s.value, label: s.label }))}
+                        disabled={statusSavingId === lead.id}
+                        className="w-[9.5rem] min-w-[9.5rem]"
+                        triggerClassName={cn(
+                          "rounded-md px-2 py-1 text-[11px] font-medium border-transparent",
+                          LEAD_STATUS_STYLES[lead.status] || "bg-white/[0.06] text-white/70"
+                        )}
+                        placeholder="Статус"
+                      />
                     </td>
                     <td className="px-4 py-3 text-white/40 hidden md:table-cell whitespace-nowrap">
                       {new Date(lead.createdAt).toLocaleDateString("ru-RU", {

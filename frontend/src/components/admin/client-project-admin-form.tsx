@@ -250,7 +250,7 @@ export function ClientProjectAdminForm({
         case "payments":
           return {
             payments: payments.map((p, i) => ({
-              order: p.order ?? i,
+              order: i,
               label: p.label,
               amountRubles: p.amountRubles,
               dueDate: p.dueDate || null,

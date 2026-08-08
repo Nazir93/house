@@ -52,11 +52,11 @@ export const TRUST_STATS: {
   {
     icon: Home,
     value: "85+",
-    label: "Домов в опыте команды",
+    label: "Реализованных проектов в опыте команды",
   },
   {
     icon: ShieldCheck,
-    value: "5 лет",
+    value: "от 5 лет",
     label: "Гарантии на конструктив",
   },
 ];

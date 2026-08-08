@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { mergeServiceTitleIntoLandingJson } from "@/lib/merge-service-title-into-landing";
+import { revalidatePublicServices } from "@/lib/revalidate-public-content";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export async function GET(_request: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -53,6 +54,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         ...(body.landingJson !== undefined && { landingJson: landingJsonOut }),
       } as unknown as Prisma.ServiceUpdateInput,
     });
+    revalidatePublicServices(service.slug);
     return NextResponse.json(service);
   } catch (error) {
     console.error("[ADMIN SERVICE UPDATE]", error);
@@ -66,7 +68,12 @@ export async function DELETE(_request: NextRequest, props: { params: Promise<{ i
   if (!gate.ok) return gate.response;
 
   try {
+    const existing = await prisma.service.findUnique({
+      where: { id: params.id },
+      select: { slug: true },
+    });
     await prisma.service.delete({ where: { id: params.id } });
+    revalidatePublicServices(existing?.slug);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[ADMIN SERVICE DELETE]", error);

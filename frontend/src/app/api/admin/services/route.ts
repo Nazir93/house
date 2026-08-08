@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { revalidatePublicServices } from "@/lib/revalidate-public-content";
 import { ensureDefaultServicePageMetaIfNeeded } from "@/lib/seed-default-page-meta";
 import { ensureDefaultServicesIfNeeded } from "@/lib/seed-default-services";
 import { generateSlug } from "@/lib/utils";
@@ -66,6 +67,7 @@ export async function POST(request: NextRequest) {
       } as unknown as Prisma.ServiceCreateInput,
     });
 
+    revalidatePublicServices(service.slug);
     return NextResponse.json(service, { status: 201 });
   } catch (error) {
     console.error("[ADMIN SERVICE CREATE]", error);

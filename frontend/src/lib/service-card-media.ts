@@ -54,6 +54,24 @@ export function resolveServiceCardMedia(s: ServiceItem): {
   return { coverImage: null, videoUrl: null };
 }
 
+/**
+ * Визуал хаба `/services`: обложка/видео из админки → картинка хаба → fallback карточки.
+ */
+export function resolveServiceHubVisual(
+  s: ServiceItem,
+  hubCenterImageSrc?: string | null
+): { coverImage: string | null; videoUrl: string | null } {
+  if (s.coverImage?.trim()) {
+    return { coverImage: s.coverImage.trim(), videoUrl: null };
+  }
+  if (s.videoUrl?.trim()) {
+    return { coverImage: null, videoUrl: s.videoUrl.trim() };
+  }
+  const hub = hubCenterImageSrc?.trim();
+  if (hub) return { coverImage: hub, videoUrl: null };
+  return resolveServiceCardMedia(s);
+}
+
 /** Для LCP: есть ли что показать в карточке (в т.ч. fallback-картинка). */
 export function serviceCardHasVisualMedia(s: ServiceItem): boolean {
   const m = resolveServiceCardMedia(s);

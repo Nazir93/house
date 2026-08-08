@@ -2,9 +2,10 @@
 
 import type { ChangeEvent, ReactNode } from "react";
 import { useCallback, useRef, useState } from "react";
-import { FileUp, Loader2, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, FileUp, Loader2, Plus, Trash2 } from "lucide-react";
 import { AdminSelect } from "@/components/admin/admin-select";
 import { CLIENT_PAYMENT_STATUS_OPTIONS } from "@/lib/client-payment-status";
+import { movePaymentScheduleRow, reindexPaymentScheduleRows } from "@/lib/payment-schedule-order";
 
 export type AdminPaymentRow = {
   order: number;
@@ -127,16 +128,24 @@ export function AdminPaymentsEditorTable({
     [rows.length]
   );
 
+  function commit(next: AdminPaymentRow[]) {
+    onChange(reindexPaymentScheduleRows(next));
+  }
+
   function patchRow(index: number, patch: Partial<AdminPaymentRow>) {
-    onChange(rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
+    commit(rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
   }
 
   function removeRow(index: number) {
-    onChange(rows.filter((_, i) => i !== index));
+    commit(rows.filter((_, i) => i !== index));
   }
 
   function addRow() {
-    onChange([...rows, createEmptyRow(rows.length)]);
+    commit([...rows, createEmptyRow(rows.length)]);
+  }
+
+  function moveRow(index: number, direction: -1 | 1) {
+    commit(movePaymentScheduleRow(rows, index, direction));
   }
 
   return (
@@ -185,28 +194,64 @@ export function AdminPaymentsEditorTable({
         </button>
       </div>
       {importNote ? <p className="text-xs text-white/35">{importNote}</p> : null}
+      {rows.length > 1 ? (
+        <p className="text-[11px] text-white/30 leading-relaxed">
+          Порядок строк в кабинете клиента — как в таблице. Стрелки ↑↓ поднимают и опускают строку (удобно после
+          импорта).
+        </p>
+      ) : null}
 
       <div className="overflow-x-auto rounded-xl border border-white/[0.06]">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="w-full min-w-[700px] text-sm">
           <thead>
             <tr className="border-b border-white/[0.08] text-left text-[11px] uppercase tracking-wide text-white/45">
+              <th className="px-1.5 py-2 font-semibold w-12 text-center" title="Порядок">
+                №
+              </th>
               <th className="px-2 py-2 font-semibold min-w-[9rem] max-w-[14rem]">Название / этап</th>
               <th className="px-2 py-2 font-semibold w-[7.5rem]">Сумма, ₽</th>
               <th className="px-2 py-2 font-semibold w-[9.5rem]">Дата</th>
               <th className="px-2 py-2 font-semibold w-[10.5rem]">Статус</th>
-              <th className="px-2 py-2 w-10" aria-label="Действия" />
+              <th className="px-2 py-2 w-[4.5rem]" aria-label="Действия" />
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-2 py-6 text-center text-white/40">
+                <td colSpan={6} className="px-2 py-6 text-center text-white/40">
                   Нет платежей
                 </td>
               </tr>
             ) : (
               rows.map((row, i) => (
                 <tr key={i} className="border-b border-white/[0.05] align-top last:border-0">
+                  <td className="px-1 py-1.5">
+                    <div className="flex flex-col items-center gap-0.5 pt-0.5">
+                      <span className="text-[10px] tabular-nums text-white/35">{i + 1}</span>
+                      <div className="flex flex-col gap-0.5">
+                        <button
+                          type="button"
+                          disabled={i === 0}
+                          onClick={() => moveRow(i, -1)}
+                          className="inline-flex rounded-md p-1 text-white/50 hover:bg-white/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-25"
+                          aria-label={`Поднять строку ${i + 1}`}
+                          title="Выше"
+                        >
+                          <ArrowUp size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={i >= rows.length - 1}
+                          onClick={() => moveRow(i, 1)}
+                          className="inline-flex rounded-md p-1 text-white/50 hover:bg-white/[0.06] hover:text-white disabled:cursor-not-allowed disabled:opacity-25"
+                          aria-label={`Опустить строку ${i + 1}`}
+                          title="Ниже"
+                        >
+                          <ArrowDown size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </td>
                   <td className="px-2 py-1.5 min-w-[9rem] max-w-[14rem] w-[30%]">
                     <textarea
                       rows={2}

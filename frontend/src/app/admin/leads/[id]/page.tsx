@@ -4,7 +4,11 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink, Save, Trash2 } from "lucide-react";
-import { LEAD_STATUS_BUTTON_STYLES, LEAD_STATUS_LABELS } from "@/lib/lead-admin-ui";
+import {
+  LEAD_EDITABLE_STATUS_OPTIONS,
+  LEAD_STATUS_BUTTON_STYLES,
+  LEAD_STATUS_LABELS,
+} from "@/lib/lead-admin-ui";
 import { getLeadSourceLabel } from "@/lib/lead-sources";
 import { houseConstructionCalcDisplayRows } from "@/lib/house-construction-calc-display";
 
@@ -32,12 +36,6 @@ type Lead = {
   createdAt: string;
 };
 
-const EDITABLE_STATUSES = [
-  { value: "NEW", label: "Новая" },
-  { value: "IN_PROGRESS", label: "В работе" },
-  { value: "DONE", label: "Завершена" },
-  { value: "CANCELLED", label: "Отменена" },
-];
 
 function pageHref(pageUrl: string): string | null {
   const trimmed = pageUrl.trim();
@@ -275,7 +273,7 @@ export default function AdminLeadDetailPage() {
         <div>
           <h2 className="text-[11px] uppercase tracking-wider text-white/35">Статус</h2>
           <div className="mt-3 flex flex-wrap gap-2">
-            {EDITABLE_STATUSES.map((s) => (
+            {LEAD_EDITABLE_STATUS_OPTIONS.map((s) => (
               <button
                 key={s.value}
                 type="button"

@@ -50,3 +50,14 @@ export function revalidatePublicConstructionCatalog(): void {
   revalidatePath("/portfolio/under-construction");
   revalidatePath("/portfolio/map");
 }
+
+/** После изменений услуг в админке: хаб `/services` и лендинги `/services/[slug]`. */
+export function revalidatePublicServices(slug?: string | null): void {
+  revalidatePath("/services");
+  const segment = slug?.trim().replace(/^\/services\//, "").replace(/^\//, "");
+  if (segment) {
+    revalidatePath(`/services/${segment}`);
+  } else {
+    revalidatePath("/services", "layout");
+  }
+}

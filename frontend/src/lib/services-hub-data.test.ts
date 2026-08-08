@@ -36,6 +36,22 @@ describe("resolveServiceHubCtaAction", () => {
 });
 
 describe("getServiceHubCopy — тексты вкладок /services", () => {
+  it("proektirovanie: состав с иконками по смыслу пунктов", () => {
+    const hub = getServiceHubCopy("proektirovanie");
+    expect(hub?.features.map((f) => f.label)).toEqual([
+      "Архитектурные решения",
+      "Планировки и объёмно-планировочные решения",
+      "Рабочая документация",
+      "3D-визуализация и детализация",
+    ]);
+    expect(hub?.features.map((f) => f.Icon.displayName ?? f.Icon.name)).toEqual([
+      "Building2",
+      "Grid2x2",
+      "FileText",
+      "Box",
+    ]);
+  });
+
   it("karkas: описание, состав и CTA", () => {
     const hub = getServiceHubCopy("karkas");
     expect(hub?.navTitle).toBe("Возведение коробки дома");

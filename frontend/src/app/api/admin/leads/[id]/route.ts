@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { parseLeadEditableStatus } from "@/lib/lead-admin-ui";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 
 export async function GET(_request: NextRequest, props: { params: Promise<{ id: string }> }) {
@@ -28,9 +29,19 @@ export async function PATCH(request: NextRequest, props: { params: Promise<{ id:
     const body = await request.json();
     const { status, notes } = body;
 
-    const data: Record<string, unknown> = {};
-    if (status) data.status = status;
+    const data: { status?: string; notes?: string | null } = {};
+    if (status !== undefined) {
+      const parsed = parseLeadEditableStatus(status);
+      if (!parsed) {
+        return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+      }
+      data.status = parsed;
+    }
     if (notes !== undefined) data.notes = notes;
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
+    }
 
     const lead = await prisma.lead.update({
       where: { id: params.id },

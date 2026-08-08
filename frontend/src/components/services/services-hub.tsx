@@ -6,6 +6,7 @@ import { Fragment, useMemo, useState } from "react";
 import { ArrowRight, ChevronRight } from "lucide-react";
 
 import type { ServiceItem } from "@/lib/get-services";
+import { resolveServiceHubVisual } from "@/lib/service-card-media";
 import { SERVICES_PROCESS_STEPS, getServiceHubCopy, resolveServiceHubCtaAction, slugSegmentFromServiceHref } from "@/lib/services-hub-data";
 import { useModal } from "@/lib/modal-context";
 import { cn } from "@/lib/utils";
@@ -62,7 +63,11 @@ export function ServicesHub({
   const features = hub?.features ?? [];
   const ctaLabel = hub?.ctaLabel ?? "Подробнее об услуге";
   const ctaAction = resolveServiceHubCtaAction(hub);
-  const centerSrc = hub?.centerImageSrc;
+  const hubVisual = current
+    ? resolveServiceHubVisual(current.service, hub?.centerImageSrc)
+    : { coverImage: null, videoUrl: null };
+  const centerSrc = hubVisual.coverImage;
+  const centerVideo = hubVisual.videoUrl;
 
   const ctaClassName = cn(
     "inline-flex w-full items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-5 py-3.5 text-sm font-semibold text-[var(--on-accent)] transition-colors hover:bg-[var(--accent-hover)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)] sm:w-auto sm:min-w-[240px]",
@@ -143,7 +148,18 @@ export function ServicesHub({
                   "aspect-[1024/682] min-h-[220px] sm:min-h-[260px] lg:min-h-[280px]",
                 )}
               >
-                {centerSrc ? (
+                {centerVideo ? (
+                  <video
+                    key={centerVideo}
+                    src={centerVideo}
+                    className="absolute inset-0 h-full w-full object-cover object-center"
+                    muted
+                    playsInline
+                    autoPlay
+                    loop
+                    aria-label={`Видео: ${cardTitle}`}
+                  />
+                ) : centerSrc ? (
                   <Image
                     key={centerSrc}
                     src={centerSrc}
@@ -166,7 +182,7 @@ export function ServicesHub({
                       Визуал раздела
                     </p>
                     <p className="max-w-xs text-xs leading-relaxed text-[var(--text-subtle)]">
-                      Укажите изображение в данных раздела или добавьте файл в{" "}
+                      Загрузите «Изображение услуги» в админке или файл в{" "}
                       <code className="rounded bg-[var(--bg-secondary)] px-1 py-0.5 text-[11px]">public</code>.
                     </p>
                   </div>
