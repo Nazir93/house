@@ -198,7 +198,7 @@ function ClientShowcaseCarousel() {
             <Icon className="h-3.5 w-3.5 text-emerald-200" strokeWidth={2.1} aria-hidden />
             Личный кабинет
           </div>
-          <h2 className="font-heading text-2xl font-bold leading-[1.15] tracking-tight text-white sm:text-3xl">
+          <h2 className="font-heading text-lg font-bold leading-[1.2] tracking-tight text-white sm:text-xl">
             {slide.title}
           </h2>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-white/[0.85] sm:text-[15px]">{slide.text}</p>
