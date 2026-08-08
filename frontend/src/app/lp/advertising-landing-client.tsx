@@ -5,12 +5,13 @@ import { MapPin, ShieldCheck } from "lucide-react";
 
 import type { BuiltObjectItem, HouseProjectItem } from "@/lib/construction-data";
 import {
+  advertisingLandingMinProjectPrice,
   pickAdvertisingLandingHeroImage,
   type AdvertisingLandingConfig,
 } from "@/lib/advertising-landing";
 import type { PublicReviewItem } from "@/lib/get-public-reviews";
 import { resolveLpSectionOrder, resolveLpThemeSpec, type LpSectionId } from "@/lib/lp-themes";
-import { PHONE_RAW } from "@/lib/constants";
+import { PHONE_RAW, SOCIAL_LINKS } from "@/lib/constants";
 import {
   AdvertisingLandingQuiz,
   AdvertisingLandingQuizSuccess,
@@ -20,6 +21,7 @@ import {
   LpExcursionSection,
   LpFaqSection,
   LpFinalContactsSection,
+  LpGuaranteesSection,
   LpIncludesSection,
   LpMaterialComparisonSection,
   LpMortgageSection,
@@ -93,6 +95,7 @@ export function AdvertisingLandingClient({
 }) {
   const [submittedName, setSubmittedName] = useState<string | null>(null);
   const heroImage = pickAdvertisingLandingHeroImage(config, projects, portfolio);
+  const priceFromRub = advertisingLandingMinProjectPrice(projects);
   const theme = resolveLpThemeSpec(config);
   const sectionOrder = resolveLpSectionOrder(config);
 
@@ -106,6 +109,7 @@ export function AdvertisingLandingClient({
         <LpProjectsSection config={config} projects={projects} primaryCta={config.primaryCta} theme={theme} />
       ),
       includes: () => <LpIncludesSection items={config.includes} />,
+      guarantees: () => <LpGuaranteesSection />,
       comparison: () => (
         <LpMaterialComparisonSection highlightMaterial={config.highlightMaterial} theme={theme} />
       ),
@@ -125,7 +129,7 @@ export function AdvertisingLandingClient({
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
-      <AdvertisingLandingHero config={config} heroImage={heroImage} />
+      <AdvertisingLandingHero config={config} heroImage={heroImage} priceFromRub={priceFromRub} />
 
       <main>
         {sections.map(({ id, node }) => (
@@ -135,7 +139,7 @@ export function AdvertisingLandingClient({
       </main>
 
       <div
-        className="fixed inset-x-0 bottom-0 z-50 border-t p-3 backdrop-blur-xl md:hidden"
+        className="fixed inset-x-0 bottom-0 z-50 border-t p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden"
         style={{
           borderColor: "var(--border)",
           backgroundColor: "color-mix(in srgb, var(--bg) 92%, transparent)",
@@ -147,11 +151,20 @@ export function AdvertisingLandingClient({
             className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border text-sm font-bold"
             style={{ borderColor: "var(--border)", color: "var(--text)" }}
           >
-            Позвонить
+            Звонок
+          </a>
+          <a
+            href={SOCIAL_LINKS.telegram}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full border text-sm font-bold"
+            style={{ borderColor: "var(--border)", color: "var(--text)" }}
+          >
+            Telegram
           </a>
           <a
             href="#lead-form"
-            className="inline-flex min-h-11 flex-[1.4] items-center justify-center rounded-full text-sm font-bold"
+            className="inline-flex min-h-11 flex-[1.35] items-center justify-center rounded-full text-sm font-bold"
             style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
           >
             Расчёт

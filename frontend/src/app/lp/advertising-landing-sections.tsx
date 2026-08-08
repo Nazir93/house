@@ -6,11 +6,14 @@ import {
   ArrowUpRight,
   Building2,
   CalendarDays,
+  Clock3,
+  FileCheck2,
   Landmark,
   MapPin,
   MessageCircle,
   Phone,
   Scale,
+  ShieldCheck,
   Star,
 } from "lucide-react";
 
@@ -56,17 +59,18 @@ export function LpFactsSection({ config, theme }: { config: AdvertisingLandingCo
   return (
     <section className="py-14 md:py-20" style={{ backgroundColor: spec.sectionAltBg }}>
       <div className="container mx-auto max-w-4xl px-5 text-center">
-        <h2 className="font-heading text-2xl font-bold uppercase tracking-[0.06em] md:text-3xl">
-          Факты о компании
+        <SectionEyebrow>Факты о компании</SectionEyebrow>
+        <h2 className="mx-auto mt-3 max-w-3xl text-balance font-heading text-xl font-bold leading-snug tracking-tight md:text-2xl">
+          {config.h1}
         </h2>
-        <p className="mx-auto mt-5 max-w-3xl text-sm leading-relaxed md:text-base" style={{ color: "var(--text-muted)" }}>
+        <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed md:text-[15px]" style={{ color: "var(--text-muted)" }}>
           {intro}
         </p>
 
         <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-12">
           {ADVERTISING_LP_FACT_STATS.map((stat) => (
             <article key={stat.label} className="flex flex-col items-center text-center">
-              <p className="font-heading text-4xl font-bold leading-none tracking-tight text-[var(--text)] md:text-5xl">
+              <p className="font-heading text-[clamp(1.75rem,3.5vw,2.75rem)] font-bold leading-none tracking-tight text-[var(--text)] whitespace-nowrap">
                 {stat.value}
               </p>
               <p
@@ -85,6 +89,62 @@ export function LpFactsSection({ config, theme }: { config: AdvertisingLandingCo
             {ADVERTISING_OFFICE_GEO.city}, {ADVERTISING_OFFICE_GEO.regions} · {ADVERTISING_OFFICE_GEO.address}
           </span>
         </p>
+      </div>
+    </section>
+  );
+}
+
+const LP_GUARANTEE_ITEMS = [
+  {
+    Icon: ShieldCheck,
+    title: "Гарантия от 5 лет на конструктив",
+    text: "Фиксируем сроки и условия в договоре — вы понимаете, за что отвечаем после сдачи дома.",
+  },
+  {
+    Icon: FileCheck2,
+    title: "Смета до договора",
+    text: "Состав работ и комплектацию согласовываем заранее — без скрытых доплат «по ходу».",
+  },
+  {
+    Icon: Clock3,
+    title: "Понятные сроки и этапы",
+    text: "График работ и поэтапная приёмка: видно, что сделано и что идёт дальше.",
+  },
+] as const;
+
+export function LpGuaranteesSection() {
+  return (
+    <section id="guarantees" className="scroll-mt-24 py-14 md:py-20" style={{ backgroundColor: "var(--bg)" }}>
+      <div className="container mx-auto px-5">
+        <div className="max-w-3xl">
+          <SectionEyebrow>Гарантии и сроки</SectionEyebrow>
+          <h2 className="mt-3 font-heading text-2xl font-bold tracking-tight md:text-3xl">
+            Спокойствие на всём пути строительства
+          </h2>
+          <p className="mt-4 text-sm leading-relaxed md:text-[15px]" style={{ color: "var(--text-muted)" }}>
+            Дом под ключ — это не только стены, а понятные обязательства: смета, график и гарантия на конструктив.
+          </p>
+        </div>
+        <div className="mt-10 grid gap-4 md:grid-cols-3">
+          {LP_GUARANTEE_ITEMS.map(({ Icon, title, text }) => (
+            <article
+              key={title}
+              className="rounded-[1.5rem] border p-5 md:p-6"
+              style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-secondary)" }}
+            >
+              <span
+                className="flex h-11 w-11 items-center justify-center rounded-2xl"
+                style={{ backgroundColor: "color-mix(in srgb, var(--accent) 14%, transparent)", color: "var(--accent)" }}
+              >
+                <Icon className="h-5 w-5" strokeWidth={1.9} aria-hidden />
+              </span>
+              <h3 className="mt-4 font-heading text-lg font-bold tracking-tight">{title}</h3>
+              <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                {text}
+              </p>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -189,7 +249,7 @@ export function LpIncludesSection({ items }: { items: string[] }) {
       <div className="container mx-auto grid gap-10 px-5 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
         <div>
           <SectionEyebrow>Что входит в стоимость</SectionEyebrow>
-          <h2 className="mt-3 font-heading text-3xl font-bold tracking-tight md:text-5xl">
+          <h2 className="mt-3 font-heading text-2xl font-bold tracking-tight md:text-3xl">
             Прозрачная смета до договора
           </h2>
           <p className="mt-4 leading-relaxed" style={{ color: "var(--text-muted)" }}>
@@ -432,7 +492,7 @@ export function LpPortfolioSection({ objects }: { objects: BuiltObjectItem[] }) 
 
 export function LpMortgageSection() {
   return (
-    <section className="py-16 md:py-24">
+    <section id="mortgage" className="scroll-mt-24 py-16 md:py-24">
       <div className="container mx-auto px-5">
         <div
           className="grid gap-8 overflow-hidden rounded-[2rem] border p-8 md:grid-cols-[1fr_0.9fr] md:p-10"

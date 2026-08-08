@@ -29,6 +29,13 @@ describe("lp themes", () => {
     expect(order.indexOf("quiz")).toBeLessThan(order.indexOf("projects"));
   });
 
+  it("flagship: квиз после проектов, есть гарантии", () => {
+    const order = DEFAULT_SECTION_ORDER_BY_THEME.flagship;
+    expect(order.indexOf("quiz")).toBeLessThan(order.indexOf("includes"));
+    expect(order.indexOf("projects")).toBeLessThan(order.indexOf("quiz"));
+    expect(order).toContain("guarantees");
+  });
+
   it("omits comparison for layout theme", () => {
     expect(DEFAULT_SECTION_ORDER_BY_THEME.layout).not.toContain("comparison");
   });

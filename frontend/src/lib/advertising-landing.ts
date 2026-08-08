@@ -68,6 +68,8 @@ export type AdvertisingLandingConfig = {
   stepsIntro?: string;
   /** Вступление блока отзывов */
   reviewsIntro?: string;
+  /** Подпись цены «от» в hero (если нет — считаем по каталогу проектов) */
+  heroPriceHint?: string;
 };
 
 export type LpFactStat = {
@@ -75,22 +77,35 @@ export type LpFactStat = {
   label: string;
 };
 
-/** Цифры для сетки «Факты о компании» — данные компании */
+/** Цифры для сетки «Факты о компании» — данные компании (короткие value, без длинных фраз). */
 export const ADVERTISING_LP_FACT_STATS: LpFactStat[] = [
   { value: "13", label: "лет на рынке" },
   { value: "120+", label: "объектов построено" },
   { value: YANDEX_MAPS_RATING_SCORE, label: "рейтинг на Яндекс.Картах" },
   { value: "85+", label: "типовых проектов" },
   { value: "3", label: "региона присутствия" },
-  { value: "Под ключ", label: "смета и строительство" },
+  { value: "от 5 лет", label: "гарантии на конструктив" },
 ];
 
 export const ADVERTISING_LP_NAV = [
   { label: "Проекты", href: "#projects" },
+  { label: "Расчёт", href: "#lead-form" },
   { label: "Комплектация", href: "#includes" },
+  { label: "Ипотека", href: "#mortgage" },
   { label: "Объекты", href: "#portfolio" },
   { label: "Вопросы", href: "#faq" },
 ] as const;
+
+/** Минимальная цена «от» среди проектов каталога LP (руб.). */
+export function advertisingLandingMinProjectPrice(
+  projects: Array<{ price: number; published?: boolean }>,
+): number | null {
+  const prices = projects
+    .filter((p) => p.published !== false && typeof p.price === "number" && p.price > 0)
+    .map((p) => p.price);
+  if (prices.length === 0) return null;
+  return Math.min(...prices);
+}
 
 export const ADVERTISING_TRUST_STATS = [
   ...STATS.map((stat) => ({
@@ -224,7 +239,7 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
     primaryCta: "Рассчитать стоимость",
     secondaryCta: "Смотреть проекты",
     factsIntro:
-      "Строим частные дома под ключ в Санкт-Петербурге и Ленинградской области: проект, смета, организация работ и контроль качества на площадке. Работаем с газобетоном, кирпичом и керамоблоком — с прозрачной комплектацией и понятными этапами.",
+      "Проект, смета, организация работ и контроль качества на площадке. Газобетон, кирпич и керамоблок — с прозрачной комплектацией и понятными этапами.",
     catalogIntro:
       "В каталоге — типовые проекты с ценой под ключ: планировка, площадь и этажность. Любой дом можно адаптировать под участок, состав семьи и материал стен — затем сравнить комплектации и получить расчёт.",
     catalogNote:
@@ -235,10 +250,14 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
       "Клиенты отмечают прозрачную смету, внимание к деталям и возможность посмотреть дом на объекте до принятия решения.",
     quizDefaults: { serviceLabel: "LP: дом под ключ" },
     includes: [
-      "Подбор проекта под участок и состав семьи",
-      "Фундамент, коробка, кровля и инженерия в одной смете",
-      "Сравнение газобетона, кирпича и керамоблока",
-      "Ипотека, поэтапная оплата и сопровождение стройки",
+      "Проект и адаптация под участок и состав семьи",
+      "Фундамент — тип основания под грунт и нагрузки проекта",
+      "Коробка: стены, перекрытия, армопояса по выбранному материалу",
+      "Кровля: стропильная система, пирог, узлы и водосток",
+      "Инженерия: электрика, вода, канализация, отопление",
+      "Окна, организация стройки и поэтапная приёмка работ",
+      "Сравнение газобетона, кирпича и керамоблока в одной логике сметы",
+      "Ипотека на ИЖС и сопровождение до сдачи дома",
     ],
     faq: [
       ...BASE_FAQ_GENERAL,
@@ -251,6 +270,11 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
         question: "Сколько занимает строительство?",
         answer:
           "Срок зависит от площади, материала и комплектации. После квиза менеджер назовёт реалистичный диапазон по вашему проекту.",
+      },
+      {
+        question: "Какая гарантия на дом?",
+        answer:
+          "На конструктив даём гарантию от 5 лет. Точные сроки и условия фиксируем в договоре вместе со сметой и графиком работ.",
       },
     ],
     excursionTitle: "Экскурсия на готовые и строящиеся объекты",

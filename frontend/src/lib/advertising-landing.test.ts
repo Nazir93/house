@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import {
   ADVERTISING_LANDING_SLUGS,
+  ADVERTISING_LP_FACT_STATS,
   advertisingLandingCatalogIntro,
   advertisingLandingFactsIntro,
+  advertisingLandingMinProjectPrice,
   budgetLabelById,
   getAdvertisingLandingConfig,
   mortgageLabelById,
@@ -136,5 +138,33 @@ describe("advertising landing config", () => {
     const config = getAdvertisingLandingConfig("kirpich")!;
     expect(advertisingLandingFactsIntro(config).toLowerCase()).toContain("\u043a\u0438\u0440\u043f\u0438\u0447");
     expect(advertisingLandingCatalogIntro(config).toLowerCase()).toContain("\u043a\u0430\u0442\u0430\u043b\u043e\u0433");
+  });
+
+  it("fact stats: короткие цифры, без длинной фразы «Под ключ»", () => {
+    expect(ADVERTISING_LP_FACT_STATS).toHaveLength(6);
+    expect(ADVERTISING_LP_FACT_STATS.some((s) => /под ключ/i.test(s.value))).toBe(false);
+    expect(ADVERTISING_LP_FACT_STATS[5]).toEqual({
+      value: "от 5 лет",
+      label: "гарантии на конструктив",
+    });
+  });
+
+  it("dom-pod-klyuch: комплектация по этапам", () => {
+    const config = getAdvertisingLandingConfig("dom-pod-klyuch")!;
+    expect(config.includes.length).toBeGreaterThanOrEqual(6);
+    expect(config.includes.some((i) => /фундамент/i.test(i))).toBe(true);
+    expect(config.includes.some((i) => /кровл/i.test(i))).toBe(true);
+    expect(config.includes.some((i) => /инженер/i.test(i))).toBe(true);
+  });
+
+  it("advertisingLandingMinProjectPrice берёт минимум из опубликованных", () => {
+    expect(
+      advertisingLandingMinProjectPrice([
+        { price: 12_000_000 },
+        { price: 9_500_000 },
+        { price: 8_000_000, published: false },
+      ]),
+    ).toBe(9_500_000);
+    expect(advertisingLandingMinProjectPrice([])).toBeNull();
   });
 });

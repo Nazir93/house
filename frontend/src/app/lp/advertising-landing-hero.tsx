@@ -10,6 +10,7 @@ import {
   ADVERTISING_LP_NAV,
   type AdvertisingLandingConfig,
 } from "@/lib/advertising-landing";
+import { formatRub } from "@/lib/construction-shared";
 import { PHONE, PHONE_RAW, WORKING_HOURS } from "@/lib/constants";
 import { resolveLpThemeSpec, type LpThemeSpec } from "@/lib/lp-themes";
 import { cn } from "@/lib/utils";
@@ -21,7 +22,34 @@ type HeroProps = {
   config: AdvertisingLandingConfig;
   heroImage: string;
   theme: LpThemeSpec;
+  /** Минимальная цена проекта в каталоге (руб.) для подписи «от …». */
+  priceFromRub?: number | null;
 };
+
+function HeroPriceLine({
+  config,
+  priceFromRub,
+  light,
+}: {
+  config: AdvertisingLandingConfig;
+  priceFromRub?: number | null;
+  light?: boolean;
+}) {
+  const hint =
+    config.heroPriceHint?.trim() ||
+    (priceFromRub && priceFromRub > 0 ? `Типовые проекты под ключ — от ${formatRub(priceFromRub)}` : null);
+  if (!hint) return null;
+  return (
+    <p
+      className={cn(
+        "mt-3 text-sm font-semibold md:text-[15px]",
+        light ? "text-[var(--accent)]" : "text-emerald-200/95",
+      )}
+    >
+      {hint}
+    </p>
+  );
+}
 
 function LpHeroHeader({ config, headerGlass }: { config: AdvertisingLandingConfig; headerGlass: boolean }) {
   return (
@@ -215,7 +243,7 @@ function CinematicCenterHero({ config, heroImage, theme }: HeroProps) {
   );
 }
 
-function FlagshipSplitHero({ config, heroImage, theme }: HeroProps) {
+function FlagshipSplitHero({ config, heroImage, theme, priceFromRub }: HeroProps) {
   const heroSubtitle =
     config.heroSubtitle ??
     "Подберём проект, материал и комплектацию — от первого расчёта до сдачи дома на участке";
@@ -233,27 +261,28 @@ function FlagshipSplitHero({ config, heroImage, theme }: HeroProps) {
             </span>
           ) : null}
           <div className={cn("max-w-2xl rounded-2xl bg-black/42 p-5 backdrop-blur-sm sm:rounded-[1.35rem] sm:p-6", edgeGlass)}>
-            <h1 className="font-heading text-[clamp(1.5rem,3.5vw,2.75rem)] font-bold uppercase leading-[0.95] tracking-[-0.03em] text-white">
+            <h1 className="text-balance font-heading text-[clamp(1.15rem,2.4vw,1.85rem)] font-bold uppercase leading-[1.15] tracking-[-0.02em] text-white">
               {config.h1}
             </h1>
-            <p className="mt-4 text-sm leading-relaxed text-neutral-100 md:text-base">{heroSubtitle}</p>
-            <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+            <p className="mt-3 text-sm leading-relaxed text-neutral-100 md:text-[15px]">{heroSubtitle}</p>
+            <HeroPriceLine config={config} priceFromRub={priceFromRub} />
+            <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+              <a href="#lead-form" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-xs font-bold uppercase tracking-[0.1em]" style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}>
+                <Calculator className="h-4 w-4" aria-hidden />
+                {config.primaryCta}
+              </a>
               <a href={heroMainHref} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-5 text-xs font-bold uppercase tracking-[0.1em] text-[#0f3d2e]">
                 <LayoutGrid className="h-4 w-4" aria-hidden />
                 {heroMainCta}
-              </a>
-              <a href="#lead-form" className={cn("inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-black/55 px-5 text-xs font-bold uppercase tracking-[0.1em] text-white backdrop-blur-sm", edgeGlassStrong)}>
-                <Calculator className="h-4 w-4" aria-hidden />
-                {config.primaryCta}
               </a>
             </div>
           </div>
         </div>
         <div className={cn("rounded-[1.75rem] p-6 backdrop-blur-sm sm:p-8", edgeGlass, "bg-black/40")}>
           <ShieldCheck className="h-8 w-8 text-white/90" aria-hidden />
-          <p className="mt-4 font-heading text-2xl font-bold text-white">Дом под ключ — без сюрпризов в смете</p>
+          <p className="mt-4 font-heading text-xl font-bold text-white sm:text-2xl">Дом под ключ — без сюрпризов в смете</p>
           <ul className="mt-5 space-y-3 text-sm text-neutral-200">
-            {config.includes.slice(0, 3).map((item) => (
+            {config.includes.slice(0, 4).map((item) => (
               <li key={item} className="flex gap-2">
                 <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden />
                 {item}
@@ -412,10 +441,12 @@ function PremiumAsymmetricHero({ config, heroImage, theme }: HeroProps) {
   );
 }
 
-function HeroBody({ config, heroImage, theme }: HeroProps) {
+function HeroBody({ config, heroImage, theme, priceFromRub }: HeroProps) {
   switch (theme.heroVariant) {
     case "flagship-split":
-      return <FlagshipSplitHero config={config} heroImage={heroImage} theme={theme} />;
+      return (
+        <FlagshipSplitHero config={config} heroImage={heroImage} theme={theme} priceFromRub={priceFromRub} />
+      );
     case "calculator-light":
       return <CalculatorLightHero config={config} heroImage={heroImage} theme={theme} />;
     case "modern-wide":
@@ -432,9 +463,11 @@ function HeroBody({ config, heroImage, theme }: HeroProps) {
 export function AdvertisingLandingHero({
   config,
   heroImage,
+  priceFromRub,
 }: {
   config: AdvertisingLandingConfig;
   heroImage: string;
+  priceFromRub?: number | null;
 }) {
   const [scrolled, setScrolled] = useState(false);
   const theme = resolveLpThemeSpec(config);
@@ -453,7 +486,7 @@ export function AdvertisingLandingHero({
   return (
     <>
       <LpHeroHeader config={config} headerGlass={theme.heroDark ? headerGlass : false} />
-      <HeroBody config={config} heroImage={heroImage} theme={theme} />
+      <HeroBody config={config} heroImage={heroImage} theme={theme} priceFromRub={priceFromRub} />
     </>
   );
 }

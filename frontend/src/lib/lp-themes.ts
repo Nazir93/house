@@ -16,6 +16,7 @@ export type LpSectionId =
   | "facts"
   | "projects"
   | "includes"
+  | "guarantees"
   | "comparison"
   | "portfolio"
   | "steps"
@@ -57,6 +58,7 @@ const BASE_SECTION_ORDER: LpSectionId[] = [
   "facts",
   "projects",
   "includes",
+  "guarantees",
   "comparison",
   "portfolio",
   "steps",
@@ -69,12 +71,27 @@ const BASE_SECTION_ORDER: LpSectionId[] = [
 
 export const DEFAULT_SECTION_ORDER_BY_THEME: Record<LpThemeId, LpSectionId[]> = {
   heritage: BASE_SECTION_ORDER,
-  flagship: BASE_SECTION_ORDER,
+  /** Flagship: квиз сразу после проектов — раньше до длинной простыни. */
+  flagship: [
+    "facts",
+    "projects",
+    "quiz",
+    "includes",
+    "guarantees",
+    "comparison",
+    "portfolio",
+    "steps",
+    "mortgage",
+    "excursion",
+    "reviews",
+    "faq",
+  ],
   calculator: [
     "facts",
     "quiz",
     "projects",
     "includes",
+    "guarantees",
     "comparison",
     "portfolio",
     "steps",
