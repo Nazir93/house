@@ -74,17 +74,23 @@ function LpHeroHeader({ scrolled }: { scrolled: boolean }) {
     return () => window.removeEventListener("hashchange", close);
   }, []);
 
+  const barBg = scrolled ? "#0e1814" : "rgba(14, 24, 20, 0.94)";
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 pt-[max(0.5rem,env(safe-area-inset-top,0px))]">
       <div className="mx-auto w-full max-w-[1400px] px-3 sm:px-4 lg:px-5">
         <div
           className={cn(
-            "relative flex items-center justify-between gap-2 rounded-2xl bg-[#0e1814]/92 px-2.5 text-white shadow-[0_18px_50px_rgba(0,0,0,0.38)] backdrop-blur-xl transition-all duration-300 sm:gap-3 sm:px-4",
+            "relative flex items-center justify-between gap-2 rounded-2xl px-2.5 shadow-[0_18px_50px_rgba(0,0,0,0.38)] backdrop-blur-xl transition-all duration-300 sm:gap-3 sm:px-4",
             scrolled ? "min-h-[56px] sm:min-h-[60px]" : "min-h-[60px] sm:min-h-[68px] lg:min-h-[72px]",
           )}
+          style={{ backgroundColor: barBg, color: "#ffffff" }}
         >
           <div
-            className="pointer-events-none absolute inset-x-5 bottom-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"
+            className="pointer-events-none absolute inset-x-5 bottom-0 h-px"
+            style={{
+              background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.28), transparent)",
+            }}
             aria-hidden
           />
 
@@ -93,14 +99,16 @@ function LpHeroHeader({ scrolled }: { scrolled: boolean }) {
           </Link>
 
           <nav
-            className="relative z-10 hidden items-center gap-0.5 rounded-full bg-white/[0.08] px-1 py-1 lg:flex"
+            className="relative z-10 hidden items-center gap-0.5 rounded-full px-1 py-1 lg:flex"
+            style={{ backgroundColor: "rgba(255,255,255,0.1)" }}
             aria-label="Разделы страницы"
           >
             {ADVERTISING_LP_NAV.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
-                className="rounded-full px-2.5 py-2 text-[12px] font-semibold tracking-wide text-white/95 transition hover:bg-white/15 hover:text-white xl:px-3.5"
+                className="rounded-full px-2.5 py-2 text-[12px] font-semibold tracking-wide transition hover:bg-white/15 xl:px-3.5"
+                style={{ color: "#f5f7f6" }}
               >
                 {item.label}
               </a>
@@ -110,25 +118,27 @@ function LpHeroHeader({ scrolled }: { scrolled: boolean }) {
           <div className="relative z-10 flex shrink-0 items-center gap-1.5 sm:gap-2.5">
             <a
               href={`tel:${PHONE_RAW}`}
-              className="hidden items-center gap-2 rounded-xl px-2 py-1.5 text-right text-white transition hover:bg-white/[0.08] md:flex"
+              className="hidden items-center gap-2 rounded-xl px-2 py-1.5 text-right transition hover:bg-white/10 md:flex"
+              style={{ color: "#ffffff" }}
             >
-              <Phone className="h-4 w-4 shrink-0 text-white/85" aria-hidden />
+              <Phone className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
               <span>
-                <span className="block text-sm font-bold leading-tight text-white">{PHONE}</span>
-                <span className="block text-[11px] leading-tight text-white/70">{WORKING_HOURS}</span>
+                <span className="block text-sm font-bold leading-tight">{PHONE}</span>
+                <span className="block text-[11px] leading-tight opacity-75">{WORKING_HOURS}</span>
               </span>
             </a>
             <a
               href={`tel:${PHONE_RAW}`}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.1] text-white transition hover:bg-white/[0.16] md:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl transition hover:bg-white/15 md:hidden"
+              style={{ backgroundColor: "rgba(255,255,255,0.12)", color: "#ffffff" }}
               aria-label={`Позвонить ${PHONE}`}
             >
               <Phone className="h-4 w-4" aria-hidden />
             </a>
             <a
               href="#lead-form"
-              className="inline-flex min-h-10 items-center justify-center rounded-xl px-3 text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--accent-contrast)] shadow-[0_10px_28px_rgba(15,61,46,0.35)] transition hover:-translate-y-0.5 hover:opacity-95 sm:min-h-11 sm:px-5 sm:text-xs"
-              style={{ backgroundColor: "var(--accent)" }}
+              className="inline-flex min-h-10 items-center justify-center rounded-xl px-3 text-[10px] font-bold uppercase tracking-[0.08em] shadow-[0_10px_28px_rgba(15,61,46,0.35)] transition hover:-translate-y-0.5 hover:opacity-95 sm:min-h-11 sm:px-5 sm:text-xs"
+              style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
               onClick={() => setMenuOpen(false)}
             >
               <span className="sm:hidden">Звонок</span>
@@ -136,7 +146,8 @@ function LpHeroHeader({ scrolled }: { scrolled: boolean }) {
             </a>
             <button
               type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.1] text-white transition hover:bg-white/[0.16] lg:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl transition hover:bg-white/15 lg:hidden"
+              style={{ backgroundColor: "rgba(255,255,255,0.12)", color: "#ffffff" }}
               aria-expanded={menuOpen}
               aria-controls="lp-mobile-nav"
               aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"}
@@ -150,14 +161,16 @@ function LpHeroHeader({ scrolled }: { scrolled: boolean }) {
         {menuOpen ? (
           <div
             id="lp-mobile-nav"
-            className="mt-2 overflow-hidden rounded-2xl bg-[#0e1814]/96 p-3 text-white shadow-[0_18px_50px_rgba(0,0,0,0.4)] backdrop-blur-xl lg:hidden"
+            className="mt-2 overflow-hidden rounded-2xl p-3 shadow-[0_18px_50px_rgba(0,0,0,0.4)] backdrop-blur-xl lg:hidden"
+            style={{ backgroundColor: "#0e1814", color: "#ffffff" }}
           >
             <nav className="grid gap-1" aria-label="Мобильная навигация">
               {ADVERTISING_LP_NAV.map((item) => (
                 <a
                   key={item.href}
                   href={item.href}
-                  className="rounded-xl px-4 py-3 text-sm font-semibold text-white/95 transition hover:bg-white/10"
+                  className="rounded-xl px-4 py-3 text-sm font-semibold transition hover:bg-white/10"
+                  style={{ color: "#f5f7f6" }}
                   onClick={() => setMenuOpen(false)}
                 >
                   {item.label}
@@ -166,13 +179,14 @@ function LpHeroHeader({ scrolled }: { scrolled: boolean }) {
             </nav>
             <a
               href={`tel:${PHONE_RAW}`}
-              className="mt-2 flex items-center gap-3 rounded-xl bg-white/[0.08] px-4 py-3 md:hidden"
+              className="mt-2 flex items-center gap-3 rounded-xl px-4 py-3 md:hidden"
+              style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "#ffffff" }}
               onClick={() => setMenuOpen(false)}
             >
-              <Phone className="h-4 w-4 text-white/85" aria-hidden />
+              <Phone className="h-4 w-4 opacity-90" aria-hidden />
               <span>
                 <span className="block text-sm font-bold">{PHONE}</span>
-                <span className="block text-xs text-white/65">{WORKING_HOURS}</span>
+                <span className="block text-xs opacity-70">{WORKING_HOURS}</span>
               </span>
             </a>
           </div>

@@ -741,7 +741,7 @@ export function LpExcursionSection({
 
 export function LpFaqSection({ faq }: { faq: AdvertisingLandingConfig["faq"] }) {
   return (
-    <section id="faq" className="scroll-mt-24 py-12 sm:py-16 md:py-24">
+    <section id="faq" className="scroll-mt-28 py-12 sm:scroll-mt-32 sm:py-16 md:py-24">
       <div className="container mx-auto px-4 sm:px-5" data-reveal="section">
         <div className="w-full">
           <SectionEyebrow>FAQ</SectionEyebrow>
