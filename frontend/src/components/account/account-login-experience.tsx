@@ -202,11 +202,11 @@ function ClientShowcaseCarousel() {
             {slide.title}
           </h2>
           <p className="mt-3 max-w-md text-sm leading-relaxed text-white/[0.85] sm:text-[15px]">{slide.text}</p>
-          <div className="mt-5 grid max-w-md gap-2 rounded-2xl bg-black/30 p-1.5 sm:grid-cols-3">
+          <div className="mt-5 grid max-w-md gap-2 sm:grid-cols-3">
             {slide.features.map((feature) => (
               <span
                 key={feature}
-                className="inline-flex min-h-[2.75rem] items-center gap-2 rounded-xl bg-black/25 px-3 py-2 text-[11px] font-semibold leading-snug text-white"
+                className="inline-flex min-h-[2.75rem] items-center gap-2 rounded-xl bg-black/40 px-3 py-2 text-[11px] font-semibold leading-snug text-white backdrop-blur-sm"
               >
                 <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-300" strokeWidth={2.1} aria-hidden />
                 {feature}
