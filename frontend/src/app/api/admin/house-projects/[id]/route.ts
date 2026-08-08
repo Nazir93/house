@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
+import { parseHouseProjectFloors } from "@/lib/house-project-floors";
 import { revalidatePublicConstructionCatalog } from "@/lib/revalidate-public-content";
 
 function numberOrNull(value: unknown) {
@@ -92,7 +93,7 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
         ...(body.title !== undefined && { title: body.title }),
         ...(body.shortDescription !== undefined && { shortDescription: body.shortDescription }),
         ...(body.description !== undefined && { description: body.description }),
-        ...(body.floors !== undefined && { floors: numberOr(body.floors, 1) }),
+        ...(body.floors !== undefined && { floors: parseHouseProjectFloors(body.floors, 1) }),
         ...(body.area !== undefined && { area: numberOr(body.area, 0) }),
         ...(body.price !== undefined && { price: numberOr(body.price, 0) }),
         ...(body.rooms !== undefined && { rooms: numberOr(body.rooms, 0) }),

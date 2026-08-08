@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { generateSlug } from "@/lib/utils";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 import { parseHouseProjectCatalogKind } from "@/lib/house-project-catalog";
+import { parseHouseProjectFloors } from "@/lib/house-project-floors";
 import { revalidatePublicConstructionCatalog } from "@/lib/revalidate-public-content";
 
 export const dynamic = "force-dynamic";
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
         title: body.title || "Новый проект",
         shortDescription: body.shortDescription || "",
         description: body.description || "",
-        floors: numberOr(body.floors, 1),
+        floors: parseHouseProjectFloors(body.floors, 1),
         area: numberOr(body.area, 100),
         price: numberOr(body.price, 0),
         rooms: numberOr(body.rooms, 3),

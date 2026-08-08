@@ -12,8 +12,9 @@ import {
 } from "./part-of-soul-pricing";
 
 describe("part-of-soul-pricing", () => {
-  it("inferPartOfSoulFloors: integer этажности", () => {
+  it("inferPartOfSoulFloors: integer и 1.5 этажности", () => {
     expect(inferPartOfSoulFloors(1)).toBe(1);
+    expect(inferPartOfSoulFloors(1.5)).toBe(1.5);
     expect(inferPartOfSoulFloors(2)).toBe(2);
     expect(inferPartOfSoulFloors(1, 1.5)).toBe(1.5);
   });

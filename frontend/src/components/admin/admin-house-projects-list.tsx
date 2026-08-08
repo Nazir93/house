@@ -9,6 +9,7 @@ import {
   type HouseProjectCatalogConfig,
   type HouseProjectCatalogKind,
 } from "@/lib/house-project-catalog";
+import { formatHouseProjectFloorsLabel } from "@/lib/house-project-floors";
 import { CmsImage } from "@/components/ui/cms-image";
 
 interface AdminHouseProject {
@@ -171,7 +172,7 @@ export function AdminHouseProjectsListView({
                     <p className="text-xs text-white/35 mt-1">/{project.slug}</p>
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-[11px] text-white/45">
-                    <span>{project.floors} эт.</span>
+                    <span>{formatHouseProjectFloorsLabel(project.floors)} эт.</span>
                     <span>{project.area} м²</span>
                     <span>{project.rooms} комн.</span>
                     <span>{project.bathrooms} с/у</span>

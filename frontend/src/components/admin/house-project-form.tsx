@@ -340,7 +340,21 @@ export function HouseProjectForm({
           ].map(([field, label]) => (
             <label key={field} className="space-y-1">
               <span className="block text-xs font-medium text-white/40">{label}</span>
-              <input type="number" value={form[field as keyof HouseProjectFormState] as string} onChange={(e) => set(field as keyof HouseProjectFormState, e.target.value as any)} className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white" />
+              <input
+                type="number"
+                step={field === "floors" ? "0.5" : "1"}
+                min={field === "floors" ? "1" : undefined}
+                inputMode="decimal"
+                value={form[field as keyof HouseProjectFormState] as string}
+                onChange={(e) => set(field as keyof HouseProjectFormState, e.target.value as any)}
+                placeholder={field === "floors" ? "1 / 1.5 / 2" : undefined}
+                className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white"
+              />
+              {field === "floors" ? (
+                <span className="block text-[11px] leading-snug text-white/35">
+                  Можно 1, 1.5 (полутораэтажный) или 2.
+                </span>
+              ) : null}
               {field === "price" ? (
                 <span className="block text-[11px] leading-snug text-white/35">
                   Если пусто — на сайте цена газобетона считается от площади. Ручная цена ниже расчётной покажется как скидка.

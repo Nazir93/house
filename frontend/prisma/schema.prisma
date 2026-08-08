@@ -145,7 +145,8 @@ model HouseProject {
   title               String
   shortDescription    String                     @db.Text
   description         String                     @db.Text
-  floors              Int
+  /// Этажность: 1, 1.5 (полутораэтажный), 2…
+  floors              Float
   area                Int
   price               Int
   rooms               Int

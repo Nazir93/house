@@ -45,15 +45,16 @@ export function projectMatchesMaterial(p: HouseProjectItem, m: MaterialFilterId)
   return true;
 }
 
-/** Полтора этажа: в БД целое число — используем текст проекта и компактные двухэтажные коробки как приближение. */
+/** Фильтр этажности: 1.5 хранится как Float; для старых карточек — текстовые эвристики. */
 export function projectMatchesFloors(p: HouseProjectItem, f: FloorsFilterId): boolean {
   if (f === "all") return true;
-  if (f === "1") return p.floors === 1;
-  if (f === "2") return p.floors === 2;
+  if (f === "1") return p.floors < 1.25;
+  if (f === "2") return p.floors >= 1.9;
   if (f === "1.5") {
+    if (Math.abs(p.floors - 1.5) < 0.05) return true;
     const text = `${p.title} ${p.shortDescription}`.toLowerCase();
     if (/полутор|1[\s,.]?5|мансард|мезонин/.test(text)) return true;
-    return p.floors === 2 && p.area <= 140;
+    return false;
   }
   return true;
 }

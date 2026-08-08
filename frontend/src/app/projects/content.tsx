@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, LayoutGrid, LayoutList, Search, SlidersHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatRub, getProjectRenders, type HouseProjectItem } from "@/lib/construction-data";
+import { formatHouseProjectFloorsLabel } from "@/lib/house-project-floors";
 import {
   buildProjectsSearchParams,
   hasCustomProjectsCatalogFilters,
@@ -908,7 +909,7 @@ export function ProjectsCatalogContent({
                       </div>
                       <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
                         {[
-                          ["Этажность", `${project.floors}`],
+                          ["Этажность", formatHouseProjectFloorsLabel(project.floors)],
                           ["Площадь", `${project.area} м²`],
                           ["Комнаты", `${project.rooms}`],
                           ["Санузлы", `${project.bathrooms}`],

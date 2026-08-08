@@ -7,6 +7,7 @@ import {
   parseProjectsCatalogSearchParams,
   projectMatchesAreaPrice,
   projectMatchesCatalogFiltersExceptRange,
+  projectMatchesFloors,
 } from "@/lib/project-filters";
 import type { HouseProjectItem } from "@/lib/construction-data";
 
@@ -78,6 +79,14 @@ describe("project-filters catalog URL", () => {
     expect(hasCustomProjectsCatalogFilters({})).toBe(false);
     expect(hasCustomProjectsCatalogFilters({ material: "kirpich" })).toBe(true);
   });
+
+  it("projectMatchesFloors: 1.5 из БД (Float)", () => {
+    const p = stubProject({ floors: 1.5 });
+    expect(projectMatchesFloors(p, "1.5")).toBe(true);
+    expect(projectMatchesFloors(p, "1")).toBe(false);
+    expect(projectMatchesFloors(p, "2")).toBe(false);
+  });
+
 
   it("getPublishedProjectBounds учитывает материал фильтра", () => {
     const projects = [

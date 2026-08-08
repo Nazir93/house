@@ -48,6 +48,7 @@ import {
   resolveProjectRoofPitch,
   type PartOfSoulRoofPitch,
 } from "@/lib/part-of-soul-pricing";
+import { formatHouseProjectFloorsLabel } from "@/lib/house-project-floors";
 import { cn } from "@/lib/utils";
 import { ProjectEngagementBadges } from "@/components/projects/project-engagement-badges";
 import { ProjectCompareButton } from "@/components/projects/project-compare-button";
@@ -359,7 +360,11 @@ export function HouseProjectDetailContent({
               <dl className="mt-4 grid grid-cols-2 gap-2">
                 {[
                   { label: "Площадь", value: `${project.area} м²`, Icon: Maximize2 },
-                  { label: "Этажность", value: `${project.floors} эт.`, Icon: Building2 },
+                  {
+                    label: "Этажность",
+                    value: `${formatHouseProjectFloorsLabel(project.floors)} эт.`,
+                    Icon: Building2,
+                  },
                   { label: "Спальни", value: `${project.rooms} шт.`, Icon: Bed },
                   { label: "Санузлы", value: `${project.bathrooms} шт.`, Icon: Bath },
                 ].map(({ label, value, Icon }) => (

@@ -98,9 +98,11 @@ const FACADE_TRIPLE: Record<PartOfSoulFacadeVariant, number> = {
   brick_insulated: 22_487,
 };
 
-export function inferPartOfSoulFloors(projectFloorsInt: number, override?: PartOfSoulPricingFloors): PartOfSoulPricingFloors {
+export function inferPartOfSoulFloors(projectFloors: number, override?: PartOfSoulPricingFloors): PartOfSoulPricingFloors {
   if (override === 1 || override === 1.5 || override === 2) return override;
-  if (projectFloorsInt >= 2) return 2;
+  if (!Number.isFinite(projectFloors) || projectFloors <= 0) return 1;
+  if (projectFloors >= 1.9) return 2;
+  if (projectFloors >= 1.25) return 1.5;
   return 1;
 }
 
