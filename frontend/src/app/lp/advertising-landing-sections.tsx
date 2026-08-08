@@ -282,7 +282,7 @@ export function LpIncludesSection({ items }: { items: string[] }) {
             <div
               key={item}
               data-reveal="card"
-              style={revealDelayStyle(index, 70, 480)}
+              style={revealDelayStyle(index, 50, 350)}
               className={cn(lpSoftCard, "flex gap-3 p-4 sm:gap-4 md:p-5")}
             >
               <span
@@ -743,7 +743,7 @@ function LpFaqItem({ question, answer, index }: { question: string; answer: stri
   return (
     <details
       data-reveal="card"
-      style={revealDelayStyle(index, 70, 480)}
+      style={revealDelayStyle(index, 50, 350)}
       className={cn(lpSoftCardAlt, "group p-4 sm:p-5")}
       onToggle={(e) => {
         const el = e.currentTarget;

@@ -1589,31 +1589,6 @@ html.reveal-animations-ready [data-reveal="card"]:not(.is-visible) {
   filter: saturate(1);
 }
 
-/* Рекламный LP: более заметное появление секций */
-html.reveal-animations-ready .lp-page [data-reveal]:not(.is-visible) {
-  opacity: 0;
-  transform: translateY(40px);
-  filter: blur(2px) saturate(0.9);
-  transition:
-    opacity 0.95s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay),
-    transform 0.95s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay),
-    filter 0.95s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay);
-}
-
-html.reveal-animations-ready .lp-page [data-reveal="section"]:not(.is-visible) {
-  transform: translateY(48px);
-}
-
-html.reveal-animations-ready .lp-page [data-reveal="card"]:not(.is-visible) {
-  transform: translateY(32px) scale(0.96);
-}
-
-html.reveal-animations-ready .lp-page [data-reveal].is-visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  filter: blur(0) saturate(1);
-}
-
 @keyframes services-scroll-cue-dot {
   0% {
     opacity: 1;

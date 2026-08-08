@@ -29,15 +29,20 @@ describe("lp themes", () => {
     expect(order.indexOf("quiz")).toBeLessThan(order.indexOf("projects"));
   });
 
-  it("flagship: квиз после проектов, есть гарантии", () => {
-    const order = DEFAULT_SECTION_ORDER_BY_THEME.flagship;
-    expect(order.indexOf("quiz")).toBeLessThan(order.indexOf("includes"));
-    expect(order.indexOf("projects")).toBeLessThan(order.indexOf("quiz"));
-    expect(order).toContain("guarantees");
+  it("conversion themes: квиз после проектов, есть гарантии", () => {
+    for (const theme of ["flagship", "heritage", "modern", "premium"] as const) {
+      const order = DEFAULT_SECTION_ORDER_BY_THEME[theme];
+      expect(order.indexOf("quiz")).toBeLessThan(order.indexOf("includes"));
+      expect(order.indexOf("projects")).toBeLessThan(order.indexOf("quiz"));
+      expect(order).toContain("guarantees");
+    }
   });
 
   it("omits comparison for layout theme", () => {
     expect(DEFAULT_SECTION_ORDER_BY_THEME.layout).not.toContain("comparison");
+    expect(DEFAULT_SECTION_ORDER_BY_THEME.layout.indexOf("projects")).toBeLessThan(
+      DEFAULT_SECTION_ORDER_BY_THEME.layout.indexOf("quiz"),
+    );
   });
 
   it("resolves theme spec with hero variant and layouts", () => {

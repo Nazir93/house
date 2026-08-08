@@ -69,23 +69,26 @@ const BASE_SECTION_ORDER: LpSectionId[] = [
   "faq",
 ];
 
+/** Единая схема LP: факты → проекты → квиз → дальше блоки. */
+const CONVERSION_SECTION_ORDER: LpSectionId[] = [
+  "facts",
+  "projects",
+  "quiz",
+  "includes",
+  "guarantees",
+  "comparison",
+  "portfolio",
+  "steps",
+  "mortgage",
+  "excursion",
+  "reviews",
+  "faq",
+];
+
 export const DEFAULT_SECTION_ORDER_BY_THEME: Record<LpThemeId, LpSectionId[]> = {
-  heritage: BASE_SECTION_ORDER,
-  /** Flagship: квиз сразу после проектов — раньше до длинной простыни. */
-  flagship: [
-    "facts",
-    "projects",
-    "quiz",
-    "includes",
-    "guarantees",
-    "comparison",
-    "portfolio",
-    "steps",
-    "mortgage",
-    "excursion",
-    "reviews",
-    "faq",
-  ],
+  heritage: CONVERSION_SECTION_ORDER,
+  flagship: CONVERSION_SECTION_ORDER,
+  /** Стоимость: квиз раньше каталога — главная цель страницы. */
   calculator: [
     "facts",
     "quiz",
@@ -100,9 +103,9 @@ export const DEFAULT_SECTION_ORDER_BY_THEME: Record<LpThemeId, LpSectionId[]> = 
     "reviews",
     "faq",
   ],
-  modern: BASE_SECTION_ORDER,
-  layout: BASE_SECTION_ORDER.filter((id) => id !== "comparison"),
-  premium: BASE_SECTION_ORDER,
+  modern: CONVERSION_SECTION_ORDER,
+  layout: CONVERSION_SECTION_ORDER.filter((id) => id !== "comparison"),
+  premium: CONVERSION_SECTION_ORDER,
 };
 
 export const LP_THEME_SPECS: Record<LpThemeId, LpThemeSpec> = {

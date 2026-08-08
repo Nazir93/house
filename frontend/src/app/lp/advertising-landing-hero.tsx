@@ -15,9 +15,6 @@ import { PHONE, PHONE_RAW, WORKING_HOURS } from "@/lib/constants";
 import { resolveLpThemeSpec, type LpThemeSpec } from "@/lib/lp-themes";
 import { cn } from "@/lib/utils";
 
-const edgeGlass = "border border-white/[0.07]";
-const edgeGlassStrong = "border border-white/[0.1]";
-
 /** Матовый стеклянный фон героя — inline, чтобы opacity не ломалась в Tailwind. */
 const matteGlassStyle = {
   backgroundColor: "rgba(8, 16, 13, 0.64)",
@@ -242,22 +239,20 @@ function HeroCtas({
   return (
     <div className="mt-5 flex flex-col items-center justify-center gap-2 sm:flex-row sm:flex-wrap">
       <a
-        href={heroMainHref}
-        className="inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[#0f3d2e] shadow-[0_12px_36px_rgba(0,0,0,0.22)] transition hover:-translate-y-0.5 hover:bg-white/95 sm:w-auto md:px-5"
-      >
-        <LayoutGrid className="h-4 w-4 shrink-0" aria-hidden />
-        {heroMainCta}
-      </a>
-      <a
         href="#lead-form"
-        className={cn(
-          "inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded-xl bg-black/55 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-white shadow-[0_12px_36px_rgba(0,0,0,0.25)] backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-black/70 sm:w-auto md:px-5",
-          edgeGlassStrong,
-          "hover:border-white/[0.14]",
-        )}
+        className="inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded-xl px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] shadow-[0_12px_32px_rgba(15,61,46,0.35)] transition hover:-translate-y-0.5 sm:w-auto md:px-5"
+        style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
       >
         <Calculator className="h-4 w-4 shrink-0" aria-hidden />
         {config.primaryCta}
+      </a>
+      <a
+        href={heroMainHref}
+        className="inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded-xl px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-white transition hover:-translate-y-0.5 hover:bg-white/15 sm:w-auto md:px-5"
+        style={{ backgroundColor: "rgba(0,0,0,0.42)", border: "1px solid rgba(255,255,255,0.14)" }}
+      >
+        <LayoutGrid className="h-4 w-4 shrink-0" aria-hidden />
+        {heroMainCta}
       </a>
     </div>
   );
@@ -281,7 +276,7 @@ function DarkHeroBackdrop({ heroImage, theme }: { heroImage: string; theme: LpTh
   );
 }
 
-function CinematicCenterHero({ config, heroImage, theme }: HeroProps) {
+function CinematicCenterHero({ config, heroImage, theme, priceFromRub }: HeroProps) {
   const heroSubtitle =
     config.heroSubtitle ??
     "Проекты, комплектация и строительство под ключ в Санкт-Петербурге и Ленинградской области";
@@ -291,37 +286,27 @@ function CinematicCenterHero({ config, heroImage, theme }: HeroProps) {
   return (
     <section className="relative isolate min-h-[100svh] min-h-[100dvh] w-full overflow-hidden bg-[#07110e]">
       <DarkHeroBackdrop heroImage={heroImage} theme={theme} />
-      <div className="container relative z-10 mx-auto flex min-h-[100svh] min-h-[100dvh] flex-col items-center justify-center px-5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] pt-[calc(5.5rem+env(safe-area-inset-top,0px))] md:pt-[calc(6rem+env(safe-area-inset-top,0px))]">
-        <div className="pointer-events-auto w-full max-w-3xl text-center">
+      <div className="container relative z-10 mx-auto flex min-h-[100svh] min-h-[100dvh] flex-col items-center justify-center px-4 pb-[max(5.5rem,env(safe-area-inset-bottom,0px))] pt-[calc(5.25rem+env(safe-area-inset-top,0px))] sm:px-5 sm:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] md:pt-[calc(6rem+env(safe-area-inset-top,0px))]">
+        <div
+          className="pointer-events-auto w-full max-w-3xl rounded-2xl p-5 text-center sm:rounded-[1.35rem] sm:p-7"
+          style={matteGlassStyle}
+          data-reveal="section"
+        >
           {config.eyebrow ? (
             <span
-              className={cn(
-                "mb-4 inline-block rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white/88 sm:text-xs",
-                edgeGlass,
-                "bg-black/35 backdrop-blur-sm",
-              )}
+              className="mb-4 inline-block rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] sm:text-xs"
+              style={{ backgroundColor: "rgba(0,0,0,0.35)", color: "rgba(245,247,246,0.92)" }}
             >
               {config.eyebrow}
             </span>
           ) : null}
-          <div
-            className={cn(
-              "mx-auto max-w-4xl rounded-2xl bg-black/42 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_12px_48px_rgba(0,0,0,0.55)] backdrop-blur-sm sm:rounded-[1.35rem] sm:px-5 sm:py-4",
-              edgeGlass,
-            )}
-          >
-            <h1 className="text-balance font-heading text-[clamp(1.35rem,3.35vw,3.05rem)] font-bold uppercase leading-[0.92] tracking-[-0.04em] text-white [text-shadow:0_0_1px_rgba(0,0,0,0.95),0_1px_2px_rgba(0,0,0,0.92),0_2px_16px_rgba(0,0,0,0.72),0_4px_36px_rgba(0,0,0,0.45)]">
-              {config.h1}
-            </h1>
-          </div>
-          <p
-            className={cn(
-              "mx-auto mt-3 max-w-2xl text-balance rounded-lg bg-black/50 px-3 py-2 text-[13px] font-medium leading-relaxed text-neutral-100 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm md:px-3.5 md:py-2.5 md:text-[15px]",
-              edgeGlass,
-            )}
-          >
+          <h1 className="text-balance font-heading text-[clamp(1.2rem,3.2vw,2.4rem)] font-bold uppercase leading-[1.1] tracking-[-0.03em] text-white">
+            {config.h1}
+          </h1>
+          <p className="mx-auto mt-4 max-w-2xl text-balance text-sm leading-relaxed text-neutral-100 md:text-[15px]">
             {heroSubtitle}
           </p>
+          <HeroPriceLine config={config} priceFromRub={priceFromRub} />
           <HeroCtas config={config} heroMainCta={heroMainCta} heroMainHref={heroMainHref} />
         </div>
       </div>
@@ -411,14 +396,14 @@ function CalculatorLightHero({ config }: HeroProps) {
   return (
     <section className="relative overflow-hidden pt-[calc(5.5rem+env(safe-area-inset-top,0px))] md:pt-[calc(6rem+env(safe-area-inset-top,0px))]" style={{ backgroundColor: "var(--bg)" }}>
       <div className="pointer-events-none absolute inset-0" aria-hidden style={{ background: "radial-gradient(circle at 80% 20%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 45%)" }} />
-      <div className="container relative z-10 mx-auto px-5 py-14 md:py-20 lg:py-24" data-reveal="section">
+      <div className="container relative z-10 mx-auto px-4 py-12 sm:px-5 sm:py-16 md:py-20 lg:py-24" data-reveal="section">
         <div className="mx-auto max-w-3xl text-center">
           {config.eyebrow ? (
             <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: "var(--accent)" }}>
               {config.eyebrow}
             </p>
           ) : null}
-          <h1 className="mt-3 font-heading text-[clamp(1.75rem,4vw,3.25rem)] font-bold uppercase leading-[0.95] tracking-[-0.03em]">
+          <h1 className="mt-3 font-heading text-[clamp(1.5rem,4vw,3rem)] font-bold uppercase leading-[1.05] tracking-[-0.03em]">
             {config.h1}
           </h1>
           <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed md:text-base" style={{ color: "var(--text-muted)" }}>
@@ -426,7 +411,15 @@ function CalculatorLightHero({ config }: HeroProps) {
           </p>
           <HeroCtas config={config} heroMainCta={heroMainCta} heroMainHref={heroMainHref} light />
         </div>
-        <div className="mx-auto mt-10 max-w-xl rounded-[1.75rem] bg-[var(--bg-secondary)] p-5 shadow-[0_18px_48px_rgba(15,61,46,0.07)] md:p-6" data-reveal="card">
+        <div
+          className="mx-auto mt-10 max-w-xl rounded-[1.75rem] p-5 md:p-6"
+          style={{
+            backgroundColor: "color-mix(in srgb, var(--bg) 92%, transparent)",
+            boxShadow: "0 18px 48px rgba(15,61,46,0.08)",
+            border: "1px solid color-mix(in srgb, var(--accent) 8%, transparent)",
+          }}
+          data-reveal="card"
+        >
           <p className="text-xs font-bold uppercase tracking-[0.14em]" style={{ color: "var(--accent)" }}>
             Мини-квиз · 6 шагов
           </p>
@@ -442,31 +435,39 @@ function CalculatorLightHero({ config }: HeroProps) {
   );
 }
 
-function ModernWideHero({ config, heroImage, theme }: HeroProps) {
+function ModernWideHero({ config, heroImage, theme, priceFromRub }: HeroProps) {
   const heroMainCta = config.heroMainCta ?? config.secondaryCta;
   const heroMainHref = config.heroMainHref ?? "#projects";
 
   return (
     <section className="relative isolate min-h-[88svh] w-full overflow-hidden bg-[#07110e]">
       <DarkHeroBackdrop heroImage={heroImage} theme={theme} />
-      <div className="container relative z-10 mx-auto flex min-h-[88svh] flex-col justify-end px-5 pb-12 pt-[calc(5.5rem+env(safe-area-inset-top,0px))] md:pb-16">
-        <div className="max-w-2xl">
+      <div className="container relative z-10 mx-auto flex min-h-[88svh] flex-col justify-end px-4 pb-[max(5.5rem,env(safe-area-inset-bottom,0px))] pt-[calc(5.25rem+env(safe-area-inset-top,0px))] sm:px-5 sm:pb-12 md:pb-16">
+        <div className="max-w-2xl rounded-2xl p-5 sm:rounded-[1.35rem] sm:p-6" style={matteGlassStyle} data-reveal="section">
           {config.eyebrow ? (
-            <span className={cn("mb-3 inline-block rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-white/88", edgeGlass, "bg-black/35")}>
+            <span
+              className="mb-3 inline-block rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em]"
+              style={{ backgroundColor: "rgba(0,0,0,0.35)", color: "rgba(245,247,246,0.92)" }}
+            >
               {config.eyebrow}
             </span>
           ) : null}
-          <h1 className="font-heading text-[clamp(1.75rem,4vw,3rem)] font-bold uppercase leading-[0.95] tracking-[-0.03em] text-white">
+          <h1 className="font-heading text-[clamp(1.35rem,3.8vw,2.6rem)] font-bold uppercase leading-[1.1] tracking-[-0.03em] text-white">
             {config.h1}
           </h1>
           {config.heroSubtitle ? (
             <p className="mt-3 max-w-xl text-sm text-neutral-200 md:text-base">{config.heroSubtitle}</p>
           ) : null}
+          <HeroPriceLine config={config} priceFromRub={priceFromRub} />
           <div className="mt-5 flex flex-col gap-2 sm:flex-row">
             <a href="#lead-form" className="inline-flex min-h-11 items-center justify-center rounded-xl px-5 text-xs font-bold uppercase tracking-[0.1em]" style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}>
               {config.primaryCta}
             </a>
-            <a href={heroMainHref} className={cn("inline-flex min-h-11 items-center justify-center rounded-xl px-5 text-xs font-bold uppercase tracking-[0.1em] text-white", edgeGlassStrong, "bg-black/45 backdrop-blur-sm")}>
+            <a
+              href={heroMainHref}
+              className="inline-flex min-h-11 items-center justify-center rounded-xl px-5 text-xs font-bold uppercase tracking-[0.1em] text-white"
+              style={{ backgroundColor: "rgba(0,0,0,0.42)", border: "1px solid rgba(255,255,255,0.14)" }}
+            >
               {heroMainCta}
             </a>
           </div>
@@ -476,7 +477,7 @@ function ModernWideHero({ config, heroImage, theme }: HeroProps) {
   );
 }
 
-function LayoutSplitHero({ config, heroImage, theme }: HeroProps) {
+function LayoutSplitHero({ config, heroImage, theme, priceFromRub }: HeroProps) {
   const heroSubtitle =
     config.heroSubtitle ??
     "Без лестниц — удобные планировки для семьи, прозрачная смета и выбор материала в одном квизе";
@@ -486,22 +487,30 @@ function LayoutSplitHero({ config, heroImage, theme }: HeroProps) {
   return (
     <section className="relative isolate min-h-[100svh] min-h-[100dvh] w-full overflow-hidden bg-[#07110e]">
       <DarkHeroBackdrop heroImage={heroImage} theme={theme} />
-      <div className="container relative z-10 mx-auto grid min-h-[100svh] min-h-[100dvh] items-center gap-8 px-5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] pt-[calc(5.5rem+env(safe-area-inset-top,0px))] lg:grid-cols-2">
-        <div>
+      <div className="container relative z-10 mx-auto grid min-h-[100svh] min-h-[100dvh] items-center gap-5 px-4 pb-[max(5.5rem,env(safe-area-inset-bottom,0px))] pt-[calc(5.25rem+env(safe-area-inset-top,0px))] sm:gap-8 sm:px-5 sm:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] lg:grid-cols-2 lg:pt-[calc(6rem+env(safe-area-inset-top,0px))]">
+        <div className="rounded-2xl p-5 sm:rounded-[1.35rem] sm:p-6" style={matteGlassStyle} data-reveal="section">
           {config.eyebrow ? (
-            <span className={cn("mb-4 inline-block rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-white/88", edgeGlass, "bg-black/35")}>
+            <span
+              className="mb-4 inline-block rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em]"
+              style={{ backgroundColor: "rgba(0,0,0,0.35)", color: "rgba(245,247,246,0.92)" }}
+            >
               {config.eyebrow}
             </span>
           ) : null}
-          <h1 className="font-heading text-[clamp(1.5rem,3.5vw,2.85rem)] font-bold uppercase leading-[0.95] tracking-[-0.03em] text-white">
+          <h1 className="font-heading text-[clamp(1.2rem,3.4vw,2.4rem)] font-bold uppercase leading-[1.1] tracking-[-0.03em] text-white">
             {config.h1}
           </h1>
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-neutral-200 md:text-base">{heroSubtitle}</p>
+          <HeroPriceLine config={config} priceFromRub={priceFromRub} />
           <HeroCtas config={config} heroMainCta={heroMainCta} heroMainHref={heroMainHref} />
         </div>
-        <div className={cn("relative min-h-64 overflow-hidden rounded-[1.75rem] lg:min-h-80", edgeGlass)}>
+        <div
+          className="relative min-h-56 overflow-hidden rounded-[1.35rem] sm:min-h-64 sm:rounded-[1.75rem] lg:min-h-80"
+          style={matteGlassStyle}
+          data-reveal="card"
+        >
           <CmsImage src={heroImage} alt="" fill sizes="(min-width: 1024px) 45vw, 100vw" className="object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
           <div className="absolute bottom-0 p-5 text-white">
             <p className="text-xs font-bold uppercase tracking-[0.14em] text-white/80">Планировка · 1 этаж</p>
             <p className="mt-1 font-heading text-xl font-bold">Горизонтальная жизнь без компромиссов</p>
@@ -512,7 +521,7 @@ function LayoutSplitHero({ config, heroImage, theme }: HeroProps) {
   );
 }
 
-function PremiumAsymmetricHero({ config, heroImage, theme }: HeroProps) {
+function PremiumAsymmetricHero({ config, heroImage, theme, priceFromRub }: HeroProps) {
   const heroSubtitle =
     config.heroSubtitle ??
     "Каменная инерция и скорость блоковой кладки — подберём проект и комплектацию под ваш участок";
@@ -526,17 +535,21 @@ function PremiumAsymmetricHero({ config, heroImage, theme }: HeroProps) {
         <div className="absolute inset-0 bg-gradient-to-r from-[#051510]/95 via-[#051510]/55 to-transparent" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_50%,rgba(15,61,46,0.45),transparent_50%)]" />
       </div>
-      <div className="container relative z-10 mx-auto flex min-h-[100svh] min-h-[100dvh] max-w-4xl flex-col justify-center px-5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] pt-[calc(5.5rem+env(safe-area-inset-top,0px))] lg:max-w-[60%] lg:pl-8">
-        {config.eyebrow ? (
-          <span className={cn("mb-4 inline-block w-fit rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-white/88", edgeGlass, "bg-black/35")}>
-            {config.eyebrow}
-          </span>
-        ) : null}
-        <div className={cn("rounded-2xl p-5 backdrop-blur-sm sm:p-7", edgeGlass, "bg-black/40")}>
-          <h1 className="font-heading text-[clamp(1.5rem,3.2vw,2.65rem)] font-bold uppercase leading-[0.95] tracking-[-0.03em] text-white">
+      <div className="container relative z-10 mx-auto flex min-h-[100svh] min-h-[100dvh] max-w-4xl flex-col justify-center px-4 pb-[max(5.5rem,env(safe-area-inset-bottom,0px))] pt-[calc(5.25rem+env(safe-area-inset-top,0px))] sm:px-5 sm:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] lg:max-w-[60%] lg:pl-8 lg:pt-[calc(6rem+env(safe-area-inset-top,0px))]">
+        <div className="rounded-2xl p-5 sm:rounded-[1.35rem] sm:p-7" style={matteGlassStyle} data-reveal="section">
+          {config.eyebrow ? (
+            <span
+              className="mb-4 inline-block w-fit rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em]"
+              style={{ backgroundColor: "rgba(0,0,0,0.35)", color: "rgba(245,247,246,0.92)" }}
+            >
+              {config.eyebrow}
+            </span>
+          ) : null}
+          <h1 className="font-heading text-[clamp(1.2rem,3.2vw,2.4rem)] font-bold uppercase leading-[1.1] tracking-[-0.03em] text-white">
             {config.h1}
           </h1>
           <p className="mt-4 text-sm leading-relaxed text-neutral-200 md:text-base">{heroSubtitle}</p>
+          <HeroPriceLine config={config} priceFromRub={priceFromRub} />
           <HeroCtas config={config} heroMainCta={heroMainCta} heroMainHref={heroMainHref} />
         </div>
       </div>
@@ -553,13 +566,13 @@ function HeroBody({ config, heroImage, theme, priceFromRub }: HeroProps) {
     case "calculator-light":
       return <CalculatorLightHero config={config} heroImage={heroImage} theme={theme} />;
     case "modern-wide":
-      return <ModernWideHero config={config} heroImage={heroImage} theme={theme} />;
+      return <ModernWideHero config={config} heroImage={heroImage} theme={theme} priceFromRub={priceFromRub} />;
     case "layout-split":
-      return <LayoutSplitHero config={config} heroImage={heroImage} theme={theme} />;
+      return <LayoutSplitHero config={config} heroImage={heroImage} theme={theme} priceFromRub={priceFromRub} />;
     case "premium-asymmetric":
-      return <PremiumAsymmetricHero config={config} heroImage={heroImage} theme={theme} />;
+      return <PremiumAsymmetricHero config={config} heroImage={heroImage} theme={theme} priceFromRub={priceFromRub} />;
     default:
-      return <CinematicCenterHero config={config} heroImage={heroImage} theme={theme} />;
+      return <CinematicCenterHero config={config} heroImage={heroImage} theme={theme} priceFromRub={priceFromRub} />;
   }
 }
 
