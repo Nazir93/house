@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { ACCOUNT_LOGIN_CONTACT_HREF } from "@/lib/account-login-links";
 import { useCallback, useState } from "react";
 import { signIn } from "next-auth/react";
 import {
@@ -165,7 +166,14 @@ function AccountLoginForm({ callbackUrl }: { callbackUrl: string }) {
       </button>
 
       <p className="text-center text-[11px] leading-relaxed text-[var(--text-subtle)]">
-        Данные выдаёт офис при заключении договора. Забыли пароль — напишите нам с сайта или позвоните.
+        Данные выдаёт офис при заключении договора. Забыли пароль —{" "}
+        <Link
+          href={ACCOUNT_LOGIN_CONTACT_HREF}
+          className="font-medium text-[var(--accent)] underline-offset-2 transition hover:underline"
+        >
+          напишите нам с сайта
+        </Link>{" "}
+        или позвоните.
       </p>
     </form>
   );
