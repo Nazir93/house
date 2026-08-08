@@ -1237,6 +1237,15 @@
     }
   }
 
+  .project-calculator-estimate-drawer .projects-catalog-filters-drawer__head {
+    padding-top: max(0.55rem, env(safe-area-inset-top, 0px));
+    padding-bottom: 0.55rem;
+  }
+
+  .project-calculator-estimate-drawer .projects-catalog-filters-drawer__body {
+    padding: 0.45rem 0.75rem max(0.65rem, env(safe-area-inset-bottom, 0px));
+  }
+
   [data-theme="dark"] .project-calculator-estimate-fab {
     background:
       linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.04)),

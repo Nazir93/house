@@ -36,7 +36,7 @@ type Props = {
   transportId: string;
   onTransportIdChange: (id: string) => void;
   onRequestEstimate: () => void;
-  /** Компактнее в боковом drawer на мобилке */
+  /** Компактнее в боковом drawer — меньше шрифт и отступы, чтобы смета помещалась без скролла. */
   compact?: boolean;
 };
 
@@ -63,6 +63,8 @@ export function ProjectCalculatorEstimatePanel({
   compact = false,
 }: Props) {
   const bands = normalizeTransportBands(transportBands);
+  const lineText = compact ? "text-[11px] leading-snug" : "text-xs";
+  const sectionGap = compact ? "space-y-1" : "space-y-1.5";
 
   return (
     <div
@@ -72,46 +74,79 @@ export function ProjectCalculatorEstimatePanel({
         compact && "rounded-none border-0 bg-transparent shadow-none",
       )}
     >
-      <div className={cn(compact ? "pb-4" : "p-6 border-b", !compact && softDivide)}>
-        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">Проект</p>
-        <h3 className={cn("mt-1 font-heading text-[var(--graphite)]", compact ? "text-lg" : "text-xl")}>
+      <div className={cn(compact ? "pb-2" : "border-b p-6", !compact && softDivide)}>
+        <p
+          className={cn(
+            "font-bold uppercase text-[var(--text-muted)]",
+            compact ? "text-[9px] tracking-[0.12em]" : "text-[11px] tracking-[0.14em]",
+          )}
+        >
+          Проект
+        </p>
+        <h3
+          className={cn(
+            "mt-0.5 font-heading leading-tight text-[var(--graphite)]",
+            compact ? "text-base" : "mt-1 text-xl",
+          )}
+        >
           {projectTitle}
         </h3>
-        <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
-          <div className="rounded-xl bg-[color-mix(in_srgb,var(--bg-secondary)_80%,var(--bg))] px-3 py-2.5">
+        <dl className={cn("grid grid-cols-2", compact ? "mt-2 gap-1.5 text-[10px]" : "mt-4 gap-3 text-xs")}>
+          <div
+            className={cn(
+              "rounded-lg bg-[color-mix(in_srgb,var(--bg-secondary)_80%,var(--bg))]",
+              compact ? "px-2 py-1.5" : "rounded-xl px-3 py-2.5",
+            )}
+          >
             <dt className="text-[var(--text-muted)]">Площадь</dt>
-            <dd className="mt-0.5 font-bold tabular-nums text-[var(--text)]">{areaM2} м²</dd>
+            <dd className={cn("font-bold tabular-nums text-[var(--text)]", compact ? "mt-0" : "mt-0.5")}>
+              {areaM2} м²
+            </dd>
           </div>
-          <div className="rounded-xl bg-[color-mix(in_srgb,var(--bg-secondary)_80%,var(--bg))] px-3 py-2.5">
+          <div
+            className={cn(
+              "rounded-lg bg-[color-mix(in_srgb,var(--bg-secondary)_80%,var(--bg))]",
+              compact ? "px-2 py-1.5" : "rounded-xl px-3 py-2.5",
+            )}
+          >
             <dt className="text-[var(--text-muted)]">Кровля</dt>
-            <dd className="mt-0.5 font-semibold leading-snug text-[var(--text)]">
+            <dd className={cn("font-semibold leading-snug text-[var(--text)]", compact ? "mt-0" : "mt-0.5")}>
               {partOfSoulRoofLabels(roofPitch)}
             </dd>
           </div>
         </dl>
       </div>
 
-      <div className={cn(compact ? "pb-4" : "px-6 py-5")}>
-        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">Смета ориентир</p>
-        <ul className="mt-4 space-y-3 text-sm">
-          <li className="flex justify-between gap-3">
+      <div className={cn(compact ? "pb-2" : "px-6 py-5")}>
+        <p
+          className={cn(
+            "font-bold uppercase text-[var(--text-muted)]",
+            compact ? "text-[9px] tracking-[0.12em]" : "text-[11px] tracking-[0.14em]",
+          )}
+        >
+          Смета ориентир
+        </p>
+        <ul className={cn(compact ? "mt-2 space-y-1.5 text-[11px]" : "mt-4 space-y-3 text-sm")}>
+          <li className="flex justify-between gap-2">
             <span className="text-[var(--text-muted)]">Коробка</span>
             <span className="shrink-0 tabular-nums font-semibold text-[var(--text)]">
               {quoteLoading && catalogMode ? "…" : formatRub(shellPrice)}
             </span>
           </li>
           {catalogMode && facadeTotal > 0 ? (
-            <li className="flex justify-between gap-3">
+            <li className="flex justify-between gap-2">
               <span className="text-[var(--text-muted)]">Фасад</span>
               <span className="shrink-0 tabular-nums font-semibold text-[var(--text)]">{formatRub(facadeTotal)}</span>
             </li>
           ) : null}
           {catalogMode && engTotal > 0 ? (
-            <li className={cn("border-t pt-2", softDivide)}>
-              <p className="mb-2 text-xs font-semibold text-[var(--text)]">Инженерия</p>
-              <ul className="space-y-1.5">
+            <li className={cn("border-t", softDivide, compact ? "pt-1.5" : "pt-2")}>
+              <p className={cn("font-semibold text-[var(--text)]", compact ? "mb-1 text-[11px]" : "mb-2 text-xs")}>
+                Инженерия
+              </p>
+              <ul className={sectionGap}>
                 {engineeringLines.map((row) => (
-                  <li key={row.id} className="flex justify-between gap-2 text-xs">
+                  <li key={row.id} className={cn("flex justify-between gap-2", lineText)}>
                     <span className="min-w-0 truncate text-[var(--text-muted)]">{row.label}</span>
                     <span className="tabular-nums font-medium text-[var(--text)]">{formatRub(row.amountRub)}</span>
                   </li>
@@ -120,12 +155,13 @@ export function ProjectCalculatorEstimatePanel({
             </li>
           ) : null}
           {catalogMode && conTotal > 0 ? (
-            <li className={cn("border-t pt-2", softDivide)}>
+            <li className={cn("border-t", softDivide, compact ? "pt-1.5" : "pt-2")}>
               <button
                 type="button"
                 className={cn(
-                  "flex w-full items-center justify-between gap-2 rounded-xl px-2 py-2 text-left text-xs font-semibold text-[var(--text)] transition",
+                  "flex w-full items-center justify-between gap-2 text-left font-semibold text-[var(--text)] transition",
                   "hover:bg-[color-mix(in_srgb,var(--accent)_7%,transparent)]",
+                  compact ? "rounded-lg px-1 py-1 text-[11px]" : "rounded-xl px-2 py-2 text-xs",
                 )}
                 onClick={onConstructionSummaryToggle}
                 aria-expanded={constructionSummaryOpen}
@@ -135,13 +171,19 @@ export function ProjectCalculatorEstimatePanel({
                     Доп. опции
                     <span className="ml-1 font-medium text-[var(--text-muted)]">({constructionLines.length})</span>
                   </span>
-                  <span className="mt-0.5 block text-[11px] font-medium tabular-nums text-[var(--text-muted)]">
+                  <span
+                    className={cn(
+                      "block font-medium tabular-nums text-[var(--text-muted)]",
+                      compact ? "mt-0 text-[10px]" : "mt-0.5 text-[11px]",
+                    )}
+                  >
                     {formatRub(conTotal)}
                   </span>
                 </span>
                 <ChevronDown
                   className={cn(
-                    "h-4 w-4 shrink-0 text-[var(--text-muted)] transition-transform",
+                    "shrink-0 text-[var(--text-muted)] transition-transform",
+                    compact ? "h-3.5 w-3.5" : "h-4 w-4",
                     constructionSummaryOpen && "rotate-180",
                   )}
                   strokeWidth={2}
@@ -149,9 +191,9 @@ export function ProjectCalculatorEstimatePanel({
                 />
               </button>
               {constructionSummaryOpen ? (
-                <ul className="mt-2 space-y-1.5">
+                <ul className={cn(sectionGap, compact ? "mt-1" : "mt-2")}>
                   {constructionLines.map((row) => (
-                    <li key={row.id} className="flex justify-between gap-2 text-xs">
+                    <li key={row.id} className={cn("flex justify-between gap-2", lineText)}>
                       <span className="min-w-0 truncate text-[var(--text-muted)]">{row.label}</span>
                       <span className="tabular-nums font-medium text-[var(--text)]">{formatRub(row.amountRub)}</span>
                     </li>
@@ -160,15 +202,23 @@ export function ProjectCalculatorEstimatePanel({
               ) : null}
             </li>
           ) : catalogMode ? (
-            <li className={cn("border-t pt-2", softDivide)}>
-              <p className="text-xs text-[var(--text-muted)]">Доп. опции не выбраны</p>
+            <li className={cn("border-t", softDivide, compact ? "pt-1.5" : "pt-2")}>
+              <p className={cn("text-[var(--text-muted)]", compact ? "text-[11px]" : "text-xs")}>
+                Доп. опции не выбраны
+              </p>
             </li>
           ) : null}
-          <li className={cn("border-t pt-3", softDivide)}>
-            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--text-muted)]">
+          <li className={cn("border-t", softDivide, compact ? "pt-1.5" : "pt-3")}>
+            <p
+              className={cn(
+                "font-bold uppercase text-[var(--text-muted)]",
+                compact ? "mb-1.5 text-[9px] tracking-[0.1em]" : "mb-3 text-[11px] tracking-[0.12em]",
+              )}
+            >
               Расстояние до объекта
             </p>
             <TransportDistanceSlider
+              compact={compact}
               bands={bands}
               valueIndex={transportBandIndex(bands, transportId)}
               onChangeIndex={(index) => {
@@ -176,7 +226,12 @@ export function ProjectCalculatorEstimatePanel({
                 if (band) onTransportIdChange(band.id);
               }}
             />
-            <div className="mt-3 flex justify-between gap-3 text-sm">
+            <div
+              className={cn(
+                "flex justify-between gap-2",
+                compact ? "mt-1.5 text-[11px]" : "mt-3 text-sm",
+              )}
+            >
               <span className="text-[var(--text-muted)]">Транспортные расходы</span>
               <span className="tabular-nums font-semibold text-[var(--text)]">{formatRub(surcharge)}</span>
             </div>
@@ -184,13 +239,30 @@ export function ProjectCalculatorEstimatePanel({
         </ul>
       </div>
 
-      <div className={cn(compact ? "pt-1" : "border-t px-6 pb-6 pt-5", !compact && softDivide)}>
-        <div className="rounded-2xl bg-gradient-to-br from-[var(--accent)] to-[color-mix(in_srgb,var(--accent)_75%,#1a5c45)] p-5 text-[var(--accent-contrast)] shadow-[0_12px_36px_rgb(var(--accent-rgb)/0.35)]">
-          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/80">Ориентир итого</p>
-          <p className="mt-2 font-heading text-3xl font-bold tabular-nums tracking-tight md:text-[2rem]">
+      <div className={cn(compact ? "pt-0.5" : "border-t px-6 pb-6 pt-5", !compact && softDivide)}>
+        <div
+          className={cn(
+            "bg-gradient-to-br from-[var(--accent)] to-[color-mix(in_srgb,var(--accent)_75%,#1a5c45)] text-[var(--accent-contrast)] shadow-[0_12px_36px_rgb(var(--accent-rgb)/0.35)]",
+            compact ? "rounded-xl p-3" : "rounded-2xl p-5",
+          )}
+        >
+          <p
+            className={cn(
+              "font-bold uppercase text-white/80",
+              compact ? "text-[9px] tracking-[0.12em]" : "text-[11px] tracking-[0.14em]",
+            )}
+          >
+            Ориентир итого
+          </p>
+          <p
+            className={cn(
+              "font-heading font-bold tabular-nums tracking-tight",
+              compact ? "mt-1 text-xl" : "mt-2 text-3xl md:text-[2rem]",
+            )}
+          >
             {quoteLoading && catalogMode ? "…" : formatRub(grandTotal)}
           </p>
-          <p className="mt-2 text-[11px] leading-snug text-white/75">
+          <p className={cn("leading-snug text-white/75", compact ? "mt-1 text-[10px]" : "mt-2 text-[11px]")}>
             {formatRub(shellPrice)} коробка
             {catalogMode ? ` + ${formatRub(facadeTotal + engTotal + conTotal)} опции` : ""}
             {` + ${formatRub(surcharge)} транспортные расходы`}
@@ -199,12 +271,22 @@ export function ProjectCalculatorEstimatePanel({
 
         <button
           type="button"
-          className="mt-4 w-full rounded-2xl bg-[var(--graphite)] py-4 text-sm font-bold text-[var(--bg)] transition hover:opacity-90 dark:bg-[var(--accent-contrast)] dark:text-[var(--graphite)]"
+          className={cn(
+            "w-full font-bold text-[var(--bg)] transition hover:opacity-90 dark:bg-[var(--accent-contrast)] dark:text-[var(--graphite)]",
+            compact
+              ? "mt-2 rounded-xl bg-[var(--graphite)] py-2.5 text-xs"
+              : "mt-4 rounded-2xl bg-[var(--graphite)] py-4 text-sm",
+          )}
           onClick={onRequestEstimate}
         >
           Получить детальную смету
         </button>
-        <p className="mt-3 text-center text-[11px] leading-snug text-[var(--text-muted)]">
+        <p
+          className={cn(
+            "text-center leading-snug text-[var(--text-muted)]",
+            compact ? "mt-1.5 text-[10px]" : "mt-3 text-[11px]",
+          )}
+        >
           Точная стоимость — после замера участка и согласования комплектации.
         </p>
       </div>
