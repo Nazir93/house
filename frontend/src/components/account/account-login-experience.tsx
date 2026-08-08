@@ -16,45 +16,23 @@ import {
   Home,
   Images,
   MessageCircle,
+  type LucideIcon,
 } from "lucide-react";
 
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { ACCOUNT_LOGIN_SHOWCASE_SLIDES } from "@/lib/account-login-showcase";
 import { SITE_NAME } from "@/lib/constants";
 import { publicFormFieldClass, publicFormFieldStyle } from "@/lib/public-form-field";
 import { ShowcaseCarouselNav } from "@/components/ui/showcase-carousel-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { cn } from "@/lib/utils";
 
-const CLIENT_SLIDES = [
-  {
-    title: "Этапы и сроки",
-    text: "Видно, на чём идёт стройка: этапы, график и статусы — без лишних звонков вам.",
-    image: "/images/banner/banner-hero-05.png",
-    Icon: CalendarCheck,
-    features: ["График работ", "Статусы этапов", "План ближайших задач"],
-  },
-  {
-    title: "Документы и оплаты",
-    text: "Договор, акты, график платежей — в одном месте, когда удобно вам.",
-    image: "/images/banner/banner-hero-03.png",
-    Icon: FileText,
-    features: ["Договор и акты", "График платежей", "История оплат"],
-  },
-  {
-    title: "Фотоотчёты и история работ",
-    text: "Смотрите, как продвигается строительство: новые фото, подписи к этапам и вся история объекта в одном месте.",
-    image: "/images/banner/banner-hero-06.png",
-    Icon: Images,
-    features: ["Фото по этапам", "Подписи прораба", "Архив прогресса"],
-  },
-  {
-    title: "Вопросы и поддержка",
-    text: "Напишите нам из кабинета — ответ по обращению уйдёт в ту же цепочку, что и с сайта.",
-    image: "/images/banner/banner-hero-02.png",
-    Icon: MessageCircle,
-    features: ["Обращения", "Ответы в одной цепочке", "Уведомления"],
-  },
-] as const;
+const SLIDE_ICONS: Record<(typeof ACCOUNT_LOGIN_SHOWCASE_SLIDES)[number]["icon"], LucideIcon> = {
+  stages: CalendarCheck,
+  documents: FileText,
+  photos: Images,
+  support: MessageCircle,
+};
 
 const AUTO_ADVANCE_MS = 7500;
 
@@ -181,7 +159,7 @@ function AccountLoginForm({ callbackUrl }: { callbackUrl: string }) {
 
 function ClientShowcaseCarousel() {
   const [i, setI] = useState(0);
-  const n = CLIENT_SLIDES.length;
+  const n = ACCOUNT_LOGIN_SHOWCASE_SLIDES.length;
 
   const go = useCallback(
     (dir: -1 | 1) => {
@@ -190,48 +168,45 @@ function ClientShowcaseCarousel() {
     [n],
   );
 
-  const slide = CLIENT_SLIDES[i]!;
-  const Icon = slide.Icon;
+  const slide = ACCOUNT_LOGIN_SHOWCASE_SLIDES[i]!;
+  const Icon = SLIDE_ICONS[slide.icon];
 
   return (
     <div className="relative flex min-h-[300px] min-w-0 flex-1 flex-col justify-end lg:min-h-0">
-      <div className="absolute inset-0 overflow-hidden rounded-2xl lg:rounded-3xl">
+      <div className="absolute inset-0 overflow-hidden rounded-2xl bg-[#e8ebe8] lg:rounded-3xl">
         <Image
           key={slide.image}
           src={slide.image}
           alt=""
           fill
           priority={i === 0}
-          className="object-cover object-center transition-opacity duration-500"
+          className="object-cover object-top transition-opacity duration-500 sm:object-center"
           sizes="(max-width: 1024px) 100vw, 55vw"
         />
+        {/* Лёгкая вуаль сверху — скрин ЛК остаётся читаемым; снизу плотнее — под текст. */}
         <div
-          className="absolute inset-0 bg-gradient-to-t from-[#020806] via-[#07120e]/82 to-[#0a1814]/55"
-          aria-hidden
-        />
-        <div
-          className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_70%_20%,rgba(61,143,110,0.18),transparent_55%)]"
+          className="absolute inset-0 bg-gradient-to-t from-[#0a1210]/92 via-[#0a1210]/35 to-[#0a1210]/10"
           aria-hidden
         />
       </div>
 
       <div className="relative z-10 flex min-h-[300px] min-w-0 flex-1 flex-col justify-between p-6 sm:min-h-[380px] sm:p-8 lg:min-h-0 lg:flex-1 lg:p-10">
-        <div className="max-w-lg">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.08] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-100/85 shadow-[0_12px_36px_rgba(0,0,0,0.22)] backdrop-blur-md">
+        <div className="max-w-lg rounded-2xl bg-[#0a1210]/72 p-4 shadow-[0_16px_48px_rgba(0,0,0,0.28)] backdrop-blur-md sm:p-5">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/12 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-white">
             <Icon className="h-3.5 w-3.5 text-emerald-200" strokeWidth={2.1} aria-hidden />
             Личный кабинет
           </div>
-          <h2 className="mt-2 font-heading text-2xl font-bold leading-[1.15] tracking-tight text-white sm:text-3xl">
+          <h2 className="font-heading text-2xl font-bold leading-[1.15] tracking-tight text-white sm:text-3xl">
             {slide.title}
           </h2>
-          <p className="mt-3 max-w-md text-sm leading-relaxed text-white/[0.82] sm:text-[15px]">{slide.text}</p>
+          <p className="mt-3 max-w-md text-sm leading-relaxed text-white/95 sm:text-[15px]">{slide.text}</p>
           <div className="mt-5 grid max-w-md gap-2 sm:grid-cols-3">
             {slide.features.map((feature) => (
               <span
                 key={feature}
-                className="inline-flex min-h-[2.75rem] items-center gap-2 rounded-2xl border border-white/10 bg-black/24 px-3 py-2 text-[11px] font-semibold leading-snug text-white/86 shadow-[0_10px_30px_rgba(0,0,0,0.2)] backdrop-blur-md"
+                className="inline-flex min-h-[2.75rem] items-center gap-2 rounded-2xl border border-white/15 bg-[#06100c]/88 px-3 py-2 text-[11px] font-semibold leading-snug text-white shadow-[0_8px_24px_rgba(0,0,0,0.25)]"
               >
-                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-200" strokeWidth={2.1} aria-hidden />
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-300" strokeWidth={2.1} aria-hidden />
                 {feature}
               </span>
             ))}
