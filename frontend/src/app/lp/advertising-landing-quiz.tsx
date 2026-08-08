@@ -78,7 +78,7 @@ function ChoiceGrid({
             type="button"
             onClick={() => onChange(option.id)}
             className={cn(
-              "rounded-2xl px-4 py-3 text-left text-sm font-semibold shadow-sm transition",
+              "min-h-12 rounded-2xl px-4 py-3 text-left text-sm font-semibold shadow-sm transition",
               active && "ring-2 ring-[var(--accent)]/40",
             )}
             style={{

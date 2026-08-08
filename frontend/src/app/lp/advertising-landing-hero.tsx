@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Calculator, LayoutGrid, Phone, ShieldCheck } from "lucide-react";
+import { ArrowRight, Calculator, LayoutGrid, Menu, Phone, ShieldCheck, X } from "lucide-react";
 
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { CmsImage } from "@/components/ui/cms-image";
@@ -51,92 +51,132 @@ function HeroPriceLine({
   );
 }
 
-function LpHeroHeader({
-  headerGlass,
-  scrolled,
-}: {
-  headerGlass: boolean;
-  scrolled: boolean;
-}) {
+function LpHeroHeader({ scrolled }: { scrolled: boolean }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [menuOpen]);
+
+  useEffect(() => {
+    const close = () => setMenuOpen(false);
+    window.addEventListener("hashchange", close);
+    return () => window.removeEventListener("hashchange", close);
+  }, []);
+
   return (
     <header className="fixed inset-x-0 top-0 z-50 pt-[max(0.5rem,env(safe-area-inset-top,0px))]">
-      <div className="container mx-auto px-4 sm:px-5">
+      <div className="mx-auto w-full max-w-[1400px] px-3 sm:px-4 lg:px-5">
         <div
           className={cn(
-            "relative flex min-h-[64px] items-center justify-between gap-3 rounded-2xl px-3 transition-all duration-500 sm:min-h-[72px] sm:px-4 lg:min-h-[76px] lg:px-5",
-            headerGlass
-              ? "bg-[color-mix(in_srgb,#0e1814_72%,transparent)] shadow-[0_18px_50px_rgba(0,0,0,0.35)] backdrop-blur-xl"
-              : "bg-[color-mix(in_srgb,var(--bg)_92%,transparent)] shadow-[0_16px_40px_rgba(15,61,46,0.1)] backdrop-blur-xl",
-            scrolled && "min-h-[58px] sm:min-h-[64px]",
+            "relative flex items-center justify-between gap-2 rounded-2xl bg-[#0e1814]/92 px-2.5 text-white shadow-[0_18px_50px_rgba(0,0,0,0.38)] backdrop-blur-xl transition-all duration-300 sm:gap-3 sm:px-4",
+            scrolled ? "min-h-[56px] sm:min-h-[60px]" : "min-h-[60px] sm:min-h-[68px] lg:min-h-[72px]",
           )}
         >
           <div
-            className="pointer-events-none absolute inset-x-6 bottom-0 h-px opacity-80"
-            style={{
-              background: headerGlass
-                ? "linear-gradient(90deg, transparent, rgba(255,255,255,0.22), transparent)"
-                : "linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 45%, transparent), transparent)",
-            }}
+            className="pointer-events-none absolute inset-x-5 bottom-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"
             aria-hidden
           />
 
-          <Link href="/" className="relative z-10 shrink-0 pl-1" aria-label="Часть души — на главную">
-            <BrandLogo height={32} brightOnBackdrop={headerGlass} className="lg:h-[36px]" />
+          <Link href="/" className="relative z-10 shrink-0 pl-0.5" aria-label="Часть души — на главную">
+            <BrandLogo height={30} brightOnBackdrop className="sm:h-[34px] lg:h-[36px]" />
           </Link>
 
           <nav
-            className={cn(
-              "relative z-10 hidden items-center gap-1 rounded-full px-1.5 py-1 xl:flex",
-              headerGlass ? "bg-white/[0.06]" : "bg-[color-mix(in_srgb,var(--bg-secondary)_70%,transparent)]",
-            )}
+            className="relative z-10 hidden items-center gap-0.5 rounded-full bg-white/[0.08] px-1 py-1 lg:flex"
             aria-label="Разделы страницы"
           >
             {ADVERTISING_LP_NAV.map((item) => (
               <a
                 key={item.href}
                 href={item.href}
-                className={cn(
-                  "rounded-full px-3.5 py-2 text-[12px] font-semibold tracking-wide transition",
-                  headerGlass
-                    ? "text-white/88 hover:bg-white/[0.1] hover:text-white"
-                    : "text-[var(--text)] hover:bg-[color-mix(in_srgb,var(--accent)_10%,var(--bg))] hover:text-[var(--accent)]",
-                )}
+                className="rounded-full px-2.5 py-2 text-[12px] font-semibold tracking-wide text-white/95 transition hover:bg-white/15 hover:text-white xl:px-3.5"
               >
                 {item.label}
               </a>
             ))}
           </nav>
 
-          <div className="relative z-10 flex shrink-0 items-center gap-2.5 sm:gap-3">
+          <div className="relative z-10 flex shrink-0 items-center gap-1.5 sm:gap-2.5">
             <a
               href={`tel:${PHONE_RAW}`}
-              className={cn(
-                "hidden items-center gap-2 rounded-xl px-2.5 py-1.5 text-right transition sm:flex",
-                headerGlass ? "text-white hover:bg-white/[0.06]" : "text-[var(--text)] hover:bg-[var(--bg-secondary)]",
-              )}
+              className="hidden items-center gap-2 rounded-xl px-2 py-1.5 text-right text-white transition hover:bg-white/[0.08] md:flex"
             >
-              <Phone className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
+              <Phone className="h-4 w-4 shrink-0 text-white/85" aria-hidden />
               <span>
-                <span className="block text-sm font-bold leading-tight">{PHONE}</span>
-                <span
-                  className={cn(
-                    "block text-[11px] leading-tight",
-                    headerGlass ? "text-white/70" : "text-[var(--text-muted)]",
-                  )}
-                >
-                  {WORKING_HOURS}
-                </span>
+                <span className="block text-sm font-bold leading-tight text-white">{PHONE}</span>
+                <span className="block text-[11px] leading-tight text-white/70">{WORKING_HOURS}</span>
               </span>
             </a>
             <a
-              href="#lead-form"
-              className="inline-flex min-h-10 items-center justify-center rounded-xl px-4 text-[11px] font-bold uppercase tracking-[0.08em] shadow-[0_10px_28px_rgba(15,61,46,0.28)] transition hover:-translate-y-0.5 hover:opacity-95 sm:min-h-11 sm:px-5 sm:text-xs"
-              style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
+              href={`tel:${PHONE_RAW}`}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.1] text-white transition hover:bg-white/[0.16] md:hidden"
+              aria-label={`Позвонить ${PHONE}`}
             >
-              Перезвоните мне
+              <Phone className="h-4 w-4" aria-hidden />
             </a>
+            <a
+              href="#lead-form"
+              className="inline-flex min-h-10 items-center justify-center rounded-xl px-3 text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--accent-contrast)] shadow-[0_10px_28px_rgba(15,61,46,0.35)] transition hover:-translate-y-0.5 hover:opacity-95 sm:min-h-11 sm:px-5 sm:text-xs"
+              style={{ backgroundColor: "var(--accent)" }}
+              onClick={() => setMenuOpen(false)}
+            >
+              <span className="sm:hidden">Звонок</span>
+              <span className="hidden sm:inline">Перезвоните мне</span>
+            </a>
+            <button
+              type="button"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.1] text-white transition hover:bg-white/[0.16] lg:hidden"
+              aria-expanded={menuOpen}
+              aria-controls="lp-mobile-nav"
+              aria-label={menuOpen ? "Закрыть меню" : "Открыть меню"}
+              onClick={() => setMenuOpen((v) => !v)}
+            >
+              {menuOpen ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
+            </button>
           </div>
         </div>
+
+        {menuOpen ? (
+          <div
+            id="lp-mobile-nav"
+            className="mt-2 overflow-hidden rounded-2xl bg-[#0e1814]/96 p-3 text-white shadow-[0_18px_50px_rgba(0,0,0,0.4)] backdrop-blur-xl lg:hidden"
+          >
+            <nav className="grid gap-1" aria-label="Мобильная навигация">
+              {ADVERTISING_LP_NAV.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-xl px-4 py-3 text-sm font-semibold text-white/95 transition hover:bg-white/10"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+            <a
+              href={`tel:${PHONE_RAW}`}
+              className="mt-2 flex items-center gap-3 rounded-xl bg-white/[0.08] px-4 py-3 md:hidden"
+              onClick={() => setMenuOpen(false)}
+            >
+              <Phone className="h-4 w-4 text-white/85" aria-hidden />
+              <span>
+                <span className="block text-sm font-bold">{PHONE}</span>
+                <span className="block text-xs text-white/65">{WORKING_HOURS}</span>
+              </span>
+            </a>
+          </div>
+        ) : null}
       </div>
     </header>
   );
@@ -276,15 +316,15 @@ function FlagshipSplitHero({ config, heroImage, theme, priceFromRub }: HeroProps
   return (
     <section className="relative isolate min-h-[100svh] min-h-[100dvh] w-full overflow-hidden bg-[#07110e]">
       <DarkHeroBackdrop heroImage={heroImage} theme={theme} />
-      <div className="container relative z-10 mx-auto grid min-h-[100svh] min-h-[100dvh] items-center gap-8 px-5 pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] pt-[calc(5.5rem+env(safe-area-inset-top,0px))] lg:grid-cols-[1.05fr_0.95fr] lg:pt-[calc(6rem+env(safe-area-inset-top,0px))]">
+      <div className="container relative z-10 mx-auto grid min-h-[100svh] min-h-[100dvh] items-center gap-5 px-4 pb-[max(5.5rem,env(safe-area-inset-bottom,0px))] pt-[calc(5.25rem+env(safe-area-inset-top,0px))] sm:gap-8 sm:px-5 sm:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] lg:grid-cols-[1.05fr_0.95fr] lg:pt-[calc(6rem+env(safe-area-inset-top,0px))]">
         <div data-reveal="section">
           {config.eyebrow ? (
-            <span className="mb-4 inline-block rounded-full bg-black/35 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-white/88 backdrop-blur-sm">
+            <span className="mb-3 inline-block rounded-full bg-black/35 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white/88 backdrop-blur-sm sm:mb-4 sm:text-xs">
               {config.eyebrow}
             </span>
           ) : null}
-          <div className="max-w-2xl rounded-2xl bg-black/38 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.35)] backdrop-blur-md sm:rounded-[1.35rem] sm:p-6">
-            <h1 className="text-balance font-heading text-[clamp(1.15rem,2.4vw,1.85rem)] font-bold uppercase leading-[1.15] tracking-[-0.02em] text-white">
+          <div className="max-w-2xl rounded-2xl bg-black/38 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.35)] backdrop-blur-md sm:rounded-[1.35rem] sm:p-6">
+            <h1 className="text-balance font-heading text-[clamp(1.05rem,4.2vw,1.85rem)] font-bold uppercase leading-[1.15] tracking-[-0.02em] text-white">
               {config.h1}
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-neutral-100 md:text-[15px]">{heroSubtitle}</p>
@@ -301,7 +341,7 @@ function FlagshipSplitHero({ config, heroImage, theme, priceFromRub }: HeroProps
             </div>
           </div>
         </div>
-        <div className="rounded-[1.75rem] bg-black/36 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.3)] backdrop-blur-md sm:p-8" data-reveal="card">
+        <div className="rounded-[1.35rem] bg-black/36 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.3)] backdrop-blur-md sm:rounded-[1.75rem] sm:p-8" data-reveal="card">
           <ShieldCheck className="h-8 w-8 text-white/90" aria-hidden />
           <p className="mt-4 font-heading text-xl font-bold text-white sm:text-2xl">Дом под ключ — без сюрпризов в смете</p>
           <ul className="mt-5 space-y-3 text-sm text-neutral-200">
@@ -504,14 +544,9 @@ export function AdvertisingLandingHero({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const headerGlass = theme.heroDark ? !scrolled : !scrolled;
-
   return (
     <>
-      <LpHeroHeader
-        headerGlass={theme.heroDark ? headerGlass : false}
-        scrolled={scrolled}
-      />
+      <LpHeroHeader scrolled={scrolled} />
       <HeroBody config={config} heroImage={heroImage} theme={theme} priceFromRub={priceFromRub} />
     </>
   );

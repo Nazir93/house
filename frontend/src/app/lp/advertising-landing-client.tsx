@@ -42,13 +42,15 @@ function LpQuizSection({
   onSuccess: (name: string) => void;
 }) {
   return (
-    <section id="lead-form" className="scroll-mt-24 py-16 md:py-24" style={{ backgroundColor: "var(--bg-secondary)" }}>
-      <div className="container mx-auto grid gap-8 px-5 lg:grid-cols-[0.85fr_1.15fr] lg:items-start" data-reveal="section">
-        <div className="rounded-[2rem] bg-[var(--bg)] p-6 shadow-[0_18px_48px_rgba(15,61,46,0.07)] md:p-8 lg:sticky lg:top-24">
+    <section id="lead-form" className="scroll-mt-24 py-12 sm:py-16 md:py-24" style={{ backgroundColor: "var(--bg-secondary)" }}>
+      <div className="container mx-auto grid gap-6 px-4 sm:gap-8 sm:px-5 lg:grid-cols-[0.85fr_1.15fr] lg:items-start" data-reveal="section">
+        <div className="rounded-[1.5rem] bg-[var(--bg)] p-5 shadow-[0_18px_48px_rgba(15,61,46,0.07)] sm:rounded-[2rem] sm:p-6 md:p-8 lg:sticky lg:top-24">
           <p className="text-xs font-bold uppercase tracking-[0.18em]" style={{ color: "var(--accent)" }}>
             Квиз и заявка
           </p>
-          <h2 className="mt-3 font-heading text-2xl font-bold tracking-tight md:text-3xl">Получите расчёт под ваш дом</h2>
+          <h2 className="mt-3 w-full font-heading text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
+            Получите расчёт под ваш дом
+          </h2>
           <p className="mt-4 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
             {config.lead}
           </p>
@@ -136,13 +138,13 @@ export function AdvertisingLandingClient({
       </main>
 
       <div
-        className="fixed inset-x-0 bottom-0 z-50 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 p-2.5 pb-[max(0.65rem,env(safe-area-inset-bottom))] backdrop-blur-xl md:hidden"
         style={{
           background:
             "linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--bg) 88%, transparent) 28%, color-mix(in srgb, var(--bg) 96%, transparent) 100%)",
         }}
       >
-        <div className="container mx-auto flex gap-2 rounded-2xl bg-[color-mix(in_srgb,var(--bg)_94%,transparent)] p-2 shadow-[0_-8px_36px_rgba(15,61,46,0.12)]">
+        <div className="mx-auto flex max-w-lg gap-2 rounded-2xl bg-[color-mix(in_srgb,var(--bg)_96%,transparent)] p-2 shadow-[0_-8px_36px_rgba(15,61,46,0.14)]">
           <a
             href={`tel:${PHONE_RAW}`}
             className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-[var(--bg-secondary)] text-sm font-bold"
