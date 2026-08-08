@@ -180,19 +180,20 @@ function ClientShowcaseCarousel() {
           alt=""
           fill
           priority={i === 0}
-          className="object-cover object-top transition-opacity duration-500 sm:object-center"
+          className="object-contain object-center transition-opacity duration-500"
           sizes="(max-width: 1024px) 100vw, 55vw"
         />
-        {/* Лёгкая вуаль сверху — скрин ЛК остаётся читаемым; снизу плотнее — под текст. */}
+        {/* Светло-тёмная плёнка: скрин читается, белый текст не сливается со светлым UI. */}
+        <div className="absolute inset-0 bg-[#0a1210]/48" aria-hidden />
         <div
-          className="absolute inset-0 bg-gradient-to-t from-[#0a1210]/92 via-[#0a1210]/35 to-[#0a1210]/10"
+          className="absolute inset-0 bg-gradient-to-t from-[#0a1210]/96 via-[#0a1210]/55 to-[#0a1210]/20"
           aria-hidden
         />
       </div>
 
       <div className="relative z-10 flex min-h-[300px] min-w-0 flex-1 flex-col justify-between p-6 sm:min-h-[380px] sm:p-8 lg:min-h-0 lg:flex-1 lg:p-10">
-        <div className="max-w-lg rounded-2xl bg-[#0a1210]/72 p-4 shadow-[0_16px_48px_rgba(0,0,0,0.28)] backdrop-blur-md sm:p-5">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/12 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-white">
+        <div className="max-w-lg rounded-2xl border border-white/10 bg-[#0a1210]/92 p-4 shadow-[0_16px_48px_rgba(0,0,0,0.4)] sm:p-5">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-white">
             <Icon className="h-3.5 w-3.5 text-emerald-200" strokeWidth={2.1} aria-hidden />
             Личный кабинет
           </div>
@@ -204,7 +205,7 @@ function ClientShowcaseCarousel() {
             {slide.features.map((feature) => (
               <span
                 key={feature}
-                className="inline-flex min-h-[2.75rem] items-center gap-2 rounded-2xl border border-white/15 bg-[#06100c]/88 px-3 py-2 text-[11px] font-semibold leading-snug text-white shadow-[0_8px_24px_rgba(0,0,0,0.25)]"
+                className="inline-flex min-h-[2.75rem] items-center gap-2 rounded-2xl border border-white/15 bg-[#06100c] px-3 py-2 text-[11px] font-semibold leading-snug text-white shadow-[0_8px_24px_rgba(0,0,0,0.25)]"
               >
                 <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-300" strokeWidth={2.1} aria-hidden />
                 {feature}
