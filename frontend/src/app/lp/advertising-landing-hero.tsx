@@ -18,6 +18,15 @@ import { cn } from "@/lib/utils";
 const edgeGlass = "border border-white/[0.07]";
 const edgeGlassStrong = "border border-white/[0.1]";
 
+/** Матовый стеклянный фон героя — inline, чтобы opacity не ломалась в Tailwind. */
+const matteGlassStyle = {
+  backgroundColor: "rgba(8, 16, 13, 0.64)",
+  border: "1px solid rgba(255, 255, 255, 0.1)",
+  boxShadow: "0 24px 70px rgba(0,0,0,0.38), inset 0 1px 0 rgba(255,255,255,0.06)",
+  backdropFilter: "blur(14px)",
+  WebkitBackdropFilter: "blur(14px)",
+} as const;
+
 type HeroProps = {
   config: AdvertisingLandingConfig;
   heroImage: string;
@@ -332,12 +341,21 @@ function FlagshipSplitHero({ config, heroImage, theme, priceFromRub }: HeroProps
       <DarkHeroBackdrop heroImage={heroImage} theme={theme} />
       <div className="container relative z-10 mx-auto grid min-h-[100svh] min-h-[100dvh] items-center gap-5 px-4 pb-[max(5.5rem,env(safe-area-inset-bottom,0px))] pt-[calc(5.25rem+env(safe-area-inset-top,0px))] sm:gap-8 sm:px-5 sm:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] lg:grid-cols-[1.05fr_0.95fr] lg:pt-[calc(6rem+env(safe-area-inset-top,0px))]">
         <div data-reveal="section">
-          {config.eyebrow ? (
-            <span className="mb-3 inline-block rounded-full bg-black/35 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white/88 backdrop-blur-sm sm:mb-4 sm:text-xs">
-              {config.eyebrow}
-            </span>
-          ) : null}
-          <div className="max-w-2xl rounded-2xl bg-black/38 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.35)] backdrop-blur-md sm:rounded-[1.35rem] sm:p-6">
+          <div
+            className="max-w-2xl rounded-2xl p-4 sm:rounded-[1.35rem] sm:p-6"
+            style={matteGlassStyle}
+          >
+            {config.eyebrow ? (
+              <span
+                className="mb-3 inline-block rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] sm:mb-4 sm:text-xs"
+                style={{
+                  backgroundColor: "rgba(0, 0, 0, 0.35)",
+                  color: "rgba(245, 247, 246, 0.92)",
+                }}
+              >
+                {config.eyebrow}
+              </span>
+            ) : null}
             <h1 className="text-balance font-heading text-[clamp(1.05rem,4.2vw,1.85rem)] font-bold uppercase leading-[1.15] tracking-[-0.02em] text-white">
               {config.h1}
             </h1>
@@ -348,14 +366,22 @@ function FlagshipSplitHero({ config, heroImage, theme, priceFromRub }: HeroProps
                 <Calculator className="h-4 w-4" aria-hidden />
                 {config.primaryCta}
               </a>
-              <a href={heroMainHref} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-white px-5 text-xs font-bold uppercase tracking-[0.1em] text-[#0f3d2e] shadow-[0_12px_32px_rgba(0,0,0,0.2)]">
+              <a
+                href={heroMainHref}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-xs font-bold uppercase tracking-[0.1em] text-white shadow-[0_12px_32px_rgba(0,0,0,0.22)] transition hover:bg-white/15"
+                style={{ backgroundColor: "rgba(0, 0, 0, 0.42)", border: "1px solid rgba(255,255,255,0.14)" }}
+              >
                 <LayoutGrid className="h-4 w-4" aria-hidden />
                 {heroMainCta}
               </a>
             </div>
           </div>
         </div>
-        <div className="rounded-[1.35rem] bg-black/36 p-5 shadow-[0_24px_70px_rgba(0,0,0,0.3)] backdrop-blur-md sm:rounded-[1.75rem] sm:p-8" data-reveal="card">
+        <div
+          className="rounded-[1.35rem] p-5 sm:rounded-[1.75rem] sm:p-8"
+          style={matteGlassStyle}
+          data-reveal="card"
+        >
           <ShieldCheck className="h-8 w-8 text-white/90" aria-hidden />
           <p className="mt-4 font-heading text-xl font-bold text-white sm:text-2xl">Дом под ключ — без сюрпризов в смете</p>
           <ul className="mt-5 space-y-3 text-sm text-neutral-200">
