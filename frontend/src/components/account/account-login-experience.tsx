@@ -183,29 +183,30 @@ function ClientShowcaseCarousel() {
           className="object-contain object-center transition-opacity duration-500"
           sizes="(max-width: 1024px) 100vw, 55vw"
         />
-        {/* Светло-тёмная плёнка: скрин читается, белый текст не сливается со светлым UI. */}
-        <div className="absolute inset-0 bg-[#0a1210]/48" aria-hidden />
+        {/* Плёнка как на главном баннере — скрин виден, матовая карточка читается. */}
+        <div className="absolute inset-0 bg-black/25" aria-hidden />
         <div
-          className="absolute inset-0 bg-gradient-to-t from-[#0a1210]/96 via-[#0a1210]/55 to-[#0a1210]/20"
+          className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-black/15"
           aria-hidden
         />
       </div>
 
       <div className="relative z-10 flex min-h-[300px] min-w-0 flex-1 flex-col justify-between p-6 sm:min-h-[380px] sm:p-8 lg:min-h-0 lg:flex-1 lg:p-10">
-        <div className="max-w-lg rounded-2xl border border-white/12 bg-[#040807]/95 p-4 shadow-[0_20px_56px_rgba(0,0,0,0.55)] sm:p-5">
-          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-white">
+        {/* Матовое стекло как промо-карточка на баннере главной. */}
+        <div className="max-w-lg rounded-2xl border border-white/[0.07] bg-black/58 p-4 shadow-[0_24px_72px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-sm sm:rounded-[1.25rem] sm:p-5">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-black/30 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.22em] text-white/80">
             <Icon className="h-3.5 w-3.5 text-emerald-200" strokeWidth={2.1} aria-hidden />
             Личный кабинет
           </div>
           <h2 className="font-heading text-2xl font-bold leading-[1.15] tracking-tight text-white sm:text-3xl">
             {slide.title}
           </h2>
-          <p className="mt-3 max-w-md text-sm leading-relaxed text-white/90 sm:text-[15px]">{slide.text}</p>
-          <div className="mt-5 grid max-w-md gap-2 sm:grid-cols-3">
+          <p className="mt-3 max-w-md text-sm leading-relaxed text-white/[0.85] sm:text-[15px]">{slide.text}</p>
+          <div className="mt-5 grid max-w-md gap-2 rounded-2xl bg-black/30 p-1.5 sm:grid-cols-3">
             {slide.features.map((feature) => (
               <span
                 key={feature}
-                className="inline-flex min-h-[2.75rem] items-center gap-2 rounded-2xl border border-white/12 bg-white/[0.08] px-3 py-2 text-[11px] font-semibold leading-snug text-white"
+                className="inline-flex min-h-[2.75rem] items-center gap-2 rounded-xl bg-black/25 px-3 py-2 text-[11px] font-semibold leading-snug text-white"
               >
                 <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-emerald-300" strokeWidth={2.1} aria-hidden />
                 {feature}
