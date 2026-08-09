@@ -37,21 +37,6 @@ export default function AdminEditServicePage() {
   const [published, setPublished] = useState(true);
   const [order, setOrder] = useState(0);
   const [landingDoc, setLandingDoc] = useState<ServiceLandingDocument | null>(null);
-  const [seoH1, setSeoH1] = useState<string | null>(null);
-
-  const effectivePageH1 = (seoH1 && seoH1.trim()) || title.trim() || "—";
-
-  useEffect(() => {
-    if (!slug) return;
-    const path = `/services/${slug}`;
-    fetch(`/api/admin/meta?path=${encodeURIComponent(path)}`)
-      .then((r) => r.json())
-      .then((meta: { h1?: string | null }) => {
-        const h = meta?.h1;
-        setSeoH1(typeof h === "string" && h.trim() ? h.trim() : null);
-      })
-      .catch(() => setSeoH1(null));
-  }, [slug]);
 
   useEffect(() => {
     fetch(`/api/admin/services/${params.id}`)
@@ -144,25 +129,6 @@ export default function AdminEditServicePage() {
       </div>
 
       <h1 className="text-2xl font-bold">Редактировать услугу</h1>
-
-      <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] px-4 py-3 space-y-2 text-xs text-white/40 leading-relaxed">
-        <p>
-          <span className="text-white/55">Заголовок на странице услуги (как у посетителей):</span>{" "}
-          <span className="text-white/90 font-medium">{effectivePageH1}</span>
-        </p>
-        <p>
-          Сначала берётся <strong className="text-white/60 font-normal">H1 из SEO</strong> для{" "}
-          <code className="text-white/45">/services/{slug || "…"}</code>, если поле заполнено. Иначе — как «Название»
-          (подставляется в шапку при сохранении).
-        </p>
-        <p>
-          Мета title/description и OG:{" "}
-          <Link href="/admin/seo" className="text-emerald-300/90 hover:text-emerald-300">
-            SEO &amp; Настройки
-          </Link>
-          .
-        </p>
-      </div>
 
       {error && (
         <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{error}</div>
