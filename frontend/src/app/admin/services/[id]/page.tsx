@@ -247,7 +247,9 @@ export default function AdminEditServicePage() {
           <textarea value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} required rows={3}
             className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white resize-none focus:outline-none focus:border-[#0F3D2E]/50 transition-colors" />
           <p className="mt-1.5 text-[11px] text-white/30 leading-relaxed">
-            Текст описания на вкладке <code className="text-white/45">/services</code> для этой услуги.
+            Именно этот текст виден на вкладке <code className="text-white/45">/services</code>. Блок «Тексты
+            страницы услуги» ниже — для отдельной страницы{" "}
+            <code className="text-white/45">/services/{slug || "…"}</code>.
           </p>
         </div>
 

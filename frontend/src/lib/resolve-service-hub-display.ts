@@ -53,11 +53,17 @@ export function resolveServiceHubDisplay(
     ? trimOrEmpty(hub?.cardDescription) || cmsDescription
     : cmsDescription || trimOrEmpty(hub?.cardDescription);
 
+  // Если в CMS есть краткое описание — не дублируем старый абзац из кода (иначе «ничего не меняется»).
+  const sectionParagraphs =
+    codeOwned || !cmsDescription
+      ? hub?.sectionParagraphs.slice(0, 2) ?? []
+      : [];
+
   return {
     navTitle,
     cardTitle,
     cardDescription,
-    sectionParagraphs: hub?.sectionParagraphs.slice(0, 2) ?? [],
+    sectionParagraphs,
     features: hub?.features ?? [],
     ctaLabel: hub?.ctaLabel ?? "Подробнее об услуге",
     ctaAction: resolveServiceHubCtaAction(hub),

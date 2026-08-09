@@ -4,8 +4,8 @@ import { getServiceLandingPageData, getServiceMetadataDefaults } from "@/lib/get
 import { ServiceLandingRenderer } from "@/components/landing/service-landing-renderer";
 import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 
-/** Свежие данные из БД и SEO из админки без ожидания ребилда. */
-export const revalidate = 60;
+/** Контент из CMS / landingJson — сразу после сохранения в админке. */
+export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ slug: string }> };
 

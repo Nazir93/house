@@ -1,5 +1,5 @@
 /**
- * При сохранении услуги подставляет «Название» в первый блок hero лендинга,
+ * При сохранении услуги подставляет «Название» в первый блок hero / heroCinematic лендинга,
  * чтобы карточка и заголовок на странице совпадали с полем в админке (если не перекрыто SEO H1).
  */
 export function mergeServiceTitleIntoLandingJson(landingJson: unknown, title: string): unknown {
@@ -10,14 +10,12 @@ export function mergeServiceTitleIntoLandingJson(landingJson: unknown, title: st
   let applied = false;
   const sections = o.sections.map((s) => {
     if (applied) return s;
-    if (
-      s &&
-      typeof s === "object" &&
-      !Array.isArray(s) &&
-      (s as { type?: string }).type === "hero"
-    ) {
-      applied = true;
-      return { ...(s as Record<string, unknown>), title };
+    if (s && typeof s === "object" && !Array.isArray(s)) {
+      const type = (s as { type?: string }).type;
+      if (type === "hero" || type === "heroCinematic") {
+        applied = true;
+        return { ...(s as Record<string, unknown>), title };
+      }
     }
     return s;
   });

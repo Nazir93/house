@@ -29,6 +29,7 @@ describe("resolveServiceHubDisplay", () => {
     expect(display.navTitle).toBe("Фундамент CMS");
     expect(display.cardTitle).toBe("Фундамент CMS");
     expect(display.cardDescription).toBe("Описание из админки");
+    expect(display.sectionParagraphs).toEqual([]);
     expect(display.features.length).toBeGreaterThan(0);
     expect(display.features[0]?.label).toBe(hub?.features[0]?.label);
   });
@@ -38,6 +39,7 @@ describe("resolveServiceHubDisplay", () => {
     const display = resolveServiceHubDisplay("fundament", { title: "  ", shortDescription: "" }, hub);
     expect(display.navTitle).toBe(hub?.navTitle);
     expect(display.cardDescription).toBe(hub?.cardDescription);
+    expect(display.sectionParagraphs.length).toBeGreaterThan(0);
   });
 
   it("proektirovanie: хаб-копирайт побеждает CMS", () => {

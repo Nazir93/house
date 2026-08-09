@@ -19,12 +19,15 @@ describe("revalidatePublicServices", () => {
     const { revalidatePublicServices } = await import("@/lib/revalidate-public-content");
     revalidatePublicServices("inzheneriya");
     expect(revalidatePathMock).toHaveBeenCalledWith("/services");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/services", "layout");
     expect(revalidatePathMock).toHaveBeenCalledWith("/services/inzheneriya");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/services/inzheneriya", "page");
   });
 
   it("принимает полный путь /services/…", async () => {
     const { revalidatePublicServices } = await import("@/lib/revalidate-public-content");
     revalidatePublicServices("/services/krovlya");
     expect(revalidatePathMock).toHaveBeenCalledWith("/services/krovlya");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/services/krovlya", "layout");
   });
 });

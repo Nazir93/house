@@ -7,7 +7,8 @@ import {
 } from "@/lib/seo/service-seo-defaults";
 import { ServicesPageContent } from "./content";
 
-export const revalidate = 60;
+/** Контент из CMS услуг — без ISR-задержки после сохранения в админке. */
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata() {
   const seo = getServicesIndexSeo();
