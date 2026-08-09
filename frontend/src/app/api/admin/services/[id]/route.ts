@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import { isCodeOwnedAdminService } from "@/lib/admin-managed-services";
 import { mergeServiceTitleIntoLandingJson } from "@/lib/merge-service-title-into-landing";
 import { revalidatePublicServices } from "@/lib/revalidate-public-content";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
+
+const CODE_OWNED_ADMIN_ERROR =
+  "Проектирование ведётся в коде сайта и не редактируется в CMS услуг";
 
 export async function GET(_request: NextRequest, props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
@@ -13,6 +17,9 @@ export async function GET(_request: NextRequest, props: { params: Promise<{ id: 
   try {
     const service = await prisma.service.findUnique({ where: { id: params.id } });
     if (!service) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (isCodeOwnedAdminService(service)) {
+      return NextResponse.json({ error: CODE_OWNED_ADMIN_ERROR, codeOwned: true }, { status: 403 });
+    }
     return NextResponse.json(service);
   } catch (error) {
     console.error("[ADMIN SERVICE GET]", error);
@@ -26,7 +33,25 @@ export async function PUT(request: NextRequest, props: { params: Promise<{ id: s
   if (!gate.ok) return gate.response;
 
   try {
+    const existing = await prisma.service.findUnique({
+      where: { id: params.id },
+      select: { slug: true, serviceType: true },
+    });
+    if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (isCodeOwnedAdminService(existing)) {
+      return NextResponse.json({ error: CODE_OWNED_ADMIN_ERROR }, { status: 403 });
+    }
+
     const body = await request.json();
+    if (
+      isCodeOwnedAdminService({
+        slug: body.slug !== undefined ? body.slug : existing.slug,
+        serviceType: body.serviceType !== undefined ? body.serviceType : existing.serviceType,
+      })
+    ) {
+      return NextResponse.json({ error: CODE_OWNED_ADMIN_ERROR }, { status: 400 });
+    }
+
     let landingJsonOut: unknown = body.landingJson;
     if (
       body.title !== undefined &&
@@ -70,10 +95,14 @@ export async function DELETE(_request: NextRequest, props: { params: Promise<{ i
   try {
     const existing = await prisma.service.findUnique({
       where: { id: params.id },
-      select: { slug: true },
+      select: { slug: true, serviceType: true },
     });
+    if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (isCodeOwnedAdminService(existing)) {
+      return NextResponse.json({ error: CODE_OWNED_ADMIN_ERROR }, { status: 403 });
+    }
     await prisma.service.delete({ where: { id: params.id } });
-    revalidatePublicServices(existing?.slug);
+    revalidatePublicServices(existing.slug);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("[ADMIN SERVICE DELETE]", error);

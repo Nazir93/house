@@ -19,7 +19,9 @@ export default function MaterialsInfoPage() {
         <Link href="/projects" className="text-sm font-semibold text-[var(--accent)]">
           ← К каталогу проектов
         </Link>
-        <h1 className="mt-6 font-heading text-4xl md:text-5xl">Стеновые материалы</h1>
+        <h1 className="mt-6 font-heading text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl">
+          Стеновые материалы
+        </h1>
         <p className="mt-4 text-lg" style={{ color: "var(--text-muted)" }}>
           В каталоге большинство проектов допускают возведение несущих и ограждающих конструкций из газобетона, кирпича или керамических блоков —
           с подбором узлов под выбранную систему и региональные нормы снеговой и ветровой нагрузки.

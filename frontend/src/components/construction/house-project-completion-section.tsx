@@ -50,9 +50,7 @@ import { ConstructionStageButtonIcon } from "@/components/construction/construct
 import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { cn } from "@/lib/utils";
 
-/** Граница без яркой белой обводки в тёмной теме */
-const softBorder = "border border-[var(--border)]";
-const softDivide = "border-[var(--border)]";
+const softDivide = "border-[color-mix(in_srgb,var(--text)_8%,transparent)]";
 
 type Tier = { id: string; label: string };
 
@@ -376,24 +374,19 @@ export function HouseProjectCompletionSection({
       <div ref={calculatorRootRef} className="min-w-0">
       <div className="min-w-0 space-y-10">
         {/* Вводный блок */}
-        <div
-          className={cn(
-            "rounded-[28px] bg-[var(--bg)] p-6 md:p-8 shadow-[0_12px_40px_rgb(var(--accent-rgb)/0.06)]",
-            softBorder
-          )}
-        >
-          <div className="flex flex-wrap items-center gap-2 mb-4">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--accent)]">
+        <div className="rounded-[1.75rem] bg-[color-mix(in_srgb,var(--bg-secondary)_50%,var(--bg))] p-6 shadow-[0_16px_44px_rgb(var(--accent-rgb)/0.06)] md:p-8">
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--accent)]">
               <Sparkles className="h-3.5 w-3.5" aria-hidden />
               Калькулятор комплектации
             </span>
           </div>
           {/* Материал стен — сегментированный переключатель */}
           <div className="mt-6">
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)] mb-3">
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--text-muted)]">
               Материал стен
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 p-1.5 rounded-2xl bg-[color-mix(in_srgb,var(--stone)_35%,var(--bg-secondary))]">
+            <div className="grid grid-cols-1 gap-1 sm:grid-cols-2 lg:grid-cols-3">
               {tabSpecs.map((t, i) => {
                 const active = i === tierIdx;
                 return (
@@ -405,8 +398,8 @@ export function HouseProjectCompletionSection({
                     className={cn(
                       "rounded-xl px-3 py-3.5 text-left transition-all duration-200",
                       active
-                        ? "bg-[var(--bg)] shadow-[0_4px_20px_rgb(0_0_0/0.08)] ring-1 ring-[color-mix(in_srgb,var(--accent)_25%,transparent)]"
-                        : "hover:bg-[var(--bg)]/60 opacity-90 hover:opacity-100"
+                        ? "bg-[color-mix(in_srgb,var(--accent)_12%,var(--bg))] shadow-[0_4px_18px_rgb(var(--accent-rgb)/0.12)]"
+                        : "hover:bg-[color-mix(in_srgb,var(--text)_4%,transparent)] opacity-90 hover:opacity-100",
                     )}
                   >
                     <span className={cn("block text-sm font-semibold leading-snug", active && "text-[var(--accent)]")}>
@@ -415,7 +408,7 @@ export function HouseProjectCompletionSection({
                     <span
                       className={cn(
                         "mt-1.5 block tabular-nums text-xs font-medium",
-                        active ? "text-[var(--text)]" : "text-[var(--text-muted)]"
+                        active ? "text-[var(--text)]" : "text-[var(--text-muted)]",
                       )}
                     >
                       {formatRub(t.price)}
@@ -443,14 +436,10 @@ export function HouseProjectCompletionSection({
                   onClick={() => setStageIndex(i)}
                   aria-pressed={active}
                   className={cn(
-                    "flex flex-col items-center justify-center gap-2 rounded-2xl px-2 py-3 sm:py-3.5 text-center transition-all duration-200 min-h-[4.5rem] sm:min-h-[5rem]",
+                    "flex min-h-[4.5rem] flex-col items-center justify-center gap-2 rounded-2xl px-2 py-3 text-center transition-all duration-200 sm:min-h-[5rem] sm:py-3.5",
                     active
                       ? "bg-[var(--accent)] text-[var(--accent-contrast)] shadow-[0_6px_20px_rgb(var(--accent-rgb)/0.32)]"
-                      : cn(
-                          "bg-[color-mix(in_srgb,var(--bg-secondary)_55%,var(--bg))] text-[var(--text)]",
-                          "ring-1 ring-[color-mix(in_srgb,var(--text)_6%,transparent)]",
-                          "hover:ring-[color-mix(in_srgb,var(--accent)_35%,transparent)] hover:bg-[color-mix(in_srgb,var(--accent)_6%,var(--bg))]"
-                        )
+                      : "bg-[color-mix(in_srgb,var(--bg-secondary)_55%,var(--bg))] text-[var(--text)] hover:bg-[color-mix(in_srgb,var(--accent)_8%,var(--bg))]",
                   )}
                 >
                   <ConstructionStageButtonIcon
@@ -466,12 +455,7 @@ export function HouseProjectCompletionSection({
         </div>
 
         {/* Карточка этапа */}
-        <article
-          className={cn(
-            "overflow-hidden rounded-[28px] bg-[var(--bg)] shadow-[0_16px_48px_rgb(0_0_0/0.06)]",
-            softBorder
-          )}
-        >
+        <article className="overflow-hidden rounded-[1.75rem] bg-[color-mix(in_srgb,var(--bg-secondary)_45%,var(--bg))] shadow-[0_16px_48px_rgb(0_0_0/0.06)]">
           <div
             className={cn(
               isTextOnlyStage || isStageDiagram
@@ -559,16 +543,17 @@ export function HouseProjectCompletionSection({
                   {stage.label}
                 </h4>
               </div>
-              <div className={cn("flex-1", isCompactList ? "mt-3 space-y-2.5 sm:mt-4" : "mt-6 space-y-5")}>
+              <div
+                className={cn(
+                  "flex-1 divide-y divide-[color-mix(in_srgb,var(--text)_7%,transparent)]",
+                  isCompactList ? "mt-3 sm:mt-4" : "mt-6",
+                )}
+              >
                 {table.rows.map((row) =>
                   row.section ? (
                     <div
                       key={`section-${row.label}`}
-                      className={cn(
-                        "border-b pb-2",
-                        softDivide,
-                        isCompactList ? "pt-1 first:pt-0" : "pt-2 first:pt-0",
-                      )}
+                      className={cn(isCompactList ? "py-2.5 first:pt-0" : "py-3.5 first:pt-0")}
                     >
                       <p
                         className={cn(
@@ -592,10 +577,7 @@ export function HouseProjectCompletionSection({
                   ) : (
                     <div
                       key={`${row.label}-${row.value.slice(0, 24)}`}
-                      className={cn(
-                        "rounded-xl bg-[color-mix(in_srgb,var(--bg-secondary)_70%,var(--bg))]",
-                        isCompactList ? "p-3 sm:p-3.5" : "rounded-2xl p-4",
-                      )}
+                      className={cn(isCompactList ? "py-2.5" : "py-3.5")}
                     >
                       <p
                         className={cn(
@@ -634,7 +616,7 @@ export function HouseProjectCompletionSection({
         <div className="flex flex-col sm:flex-row gap-3">
           <button
             type="button"
-            className="flex-1 rounded-2xl border-2 border-[var(--accent)] bg-transparent px-5 py-4 text-sm font-semibold text-[var(--accent)] transition hover:bg-[color-mix(in_srgb,var(--accent)_8%,transparent)]"
+            className="flex-1 rounded-2xl bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] px-5 py-4 text-sm font-semibold text-[var(--accent)] transition hover:bg-[color-mix(in_srgb,var(--accent)_16%,transparent)]"
             onClick={selectEngineeringNetworksAndScroll}
           >
             + Инженерные сети и опции

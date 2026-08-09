@@ -335,7 +335,7 @@ export function BuiltPortfolioContent({
         </nav>
 
         <div className="mt-5 max-w-3xl md:mt-6">
-          <h1 className="font-heading text-3xl font-bold tracking-tight text-[var(--accent)] md:text-[2.75rem] md:leading-[1.06] lg:text-[3.15rem] dark:text-[var(--text)]">
+          <h1 className="font-heading text-2xl font-bold leading-tight tracking-tight text-[var(--accent)] sm:text-3xl md:text-4xl dark:text-[var(--text)]">
             {resolvedTitle}
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--text-muted)] md:text-base">

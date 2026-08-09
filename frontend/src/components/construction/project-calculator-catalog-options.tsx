@@ -8,8 +8,6 @@ import { isCalculatorOptionDiagramUrl } from "@/lib/project-calculator-option-im
 import { cn } from "@/lib/utils";
 import { CmsImage } from "@/components/ui/cms-image";
 
-const softBorder = "border border-[var(--border)]";
-
 type Props = {
   catalog: PublicCalculatorCatalog;
   facadeSlug: string | null;
@@ -71,17 +69,17 @@ export function ProjectCalculatorCatalogOptions({
   return (
     <div id="completion-addons" className="scroll-mt-28 space-y-8">
       <OptionSection title="Отделка фасада" open={facadeOpen} onToggle={() => setFacadeOpen((value) => !value)}>
-        <div className="grid gap-2 sm:grid-cols-2">
+        <div className="grid gap-0.5 sm:grid-cols-2">
           {catalog.facades.map((f) => {
             const active = facadeSlug === f.slug;
             return (
               <label
                 key={f.slug}
                 className={cn(
-                  "flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-colors",
+                  "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-colors",
                   active
-                    ? "bg-[color-mix(in_srgb,var(--accent)_10%,var(--bg))] text-[var(--accent)]"
-                    : "bg-[color-mix(in_srgb,var(--bg-secondary)_72%,var(--bg))] hover:bg-[color-mix(in_srgb,var(--accent)_6%,var(--bg))]"
+                    ? "bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] text-[var(--accent)]"
+                    : "hover:bg-[color-mix(in_srgb,var(--text)_4%,transparent)]",
                 )}
               >
                 <input
@@ -97,10 +95,10 @@ export function ProjectCalculatorCatalogOptions({
           })}
           <label
             className={cn(
-              "flex cursor-pointer items-center gap-3 rounded-xl px-4 py-3 transition-colors",
+              "flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-colors",
               !facadeSlug
-                ? "bg-[color-mix(in_srgb,var(--accent)_10%,var(--bg))] text-[var(--accent)]"
-                : "bg-[color-mix(in_srgb,var(--bg-secondary)_72%,var(--bg))]"
+                ? "bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] text-[var(--accent)]"
+                : "hover:bg-[color-mix(in_srgb,var(--text)_4%,transparent)]",
             )}
           >
             <input
@@ -138,7 +136,7 @@ export function ProjectCalculatorCatalogOptions({
         open={engineeringOpen}
         onToggle={() => setEngineeringOpen((value) => !value)}
       >
-        <ul className="space-y-2">
+        <ul className="divide-y divide-[color-mix(in_srgb,var(--text)_7%,transparent)]">
           {catalog.engineering.map((o) => (
             <OptionRow
               key={o.slug}
@@ -164,7 +162,7 @@ export function ProjectCalculatorCatalogOptions({
         open={constructionOpen}
         onToggle={() => setConstructionOpen((value) => !value)}
       >
-        <ul className="space-y-2">
+        <ul className="divide-y divide-[color-mix(in_srgb,var(--text)_7%,transparent)]">
           {catalog.construction.map((o) => (
             <OptionRow
               key={o.slug}
@@ -200,14 +198,14 @@ function OptionSection({
   children: ReactNode;
 }) {
   return (
-    <section className={cn("rounded-2xl bg-[var(--bg)] p-5 md:p-6", softBorder)}>
+    <section className="rounded-[1.5rem] bg-[color-mix(in_srgb,var(--bg-secondary)_55%,var(--bg))] px-4 py-4 shadow-[0_12px_36px_rgba(15,61,46,0.05)] md:px-5 md:py-5">
       <button
         type="button"
         className="flex w-full items-center justify-between gap-3 text-left"
         onClick={onToggle}
         aria-expanded={open}
       >
-        <h3 className="font-heading text-[11px] font-bold uppercase tracking-[0.2em] text-[var(--text-muted)]">
+        <h3 className="font-heading text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--accent)]">
           {title}
         </h3>
         <ChevronDown
@@ -216,7 +214,7 @@ function OptionSection({
           aria-hidden
         />
       </button>
-      {open ? <div className="mt-4">{children}</div> : null}
+      {open ? <div className="mt-3">{children}</div> : null}
     </section>
   );
 }
@@ -248,9 +246,9 @@ function OptionRow({
   return (
     <li
       className={cn(
-        "rounded-xl bg-[color-mix(in_srgb,var(--bg-secondary)_72%,var(--bg))] px-4 py-3 transition-colors",
+        "px-1 py-2.5 transition-colors first:pt-1 last:pb-1",
         disabled && "opacity-50",
-        checked && !disabled && "bg-[color-mix(in_srgb,var(--accent)_9%,var(--bg))]"
+        checked && !disabled && "rounded-lg bg-[color-mix(in_srgb,var(--accent)_8%,transparent)] px-2",
       )}
       title={disabled ? disabledHint : undefined}
     >
@@ -277,7 +275,7 @@ function OptionRow({
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--text)_5%,transparent)] text-[var(--text-muted)] transition hover:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] hover:text-[var(--accent)]"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full text-[var(--text-muted)] transition hover:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] hover:text-[var(--accent)]"
               aria-label={`Подробнее: ${name}`}
               aria-expanded={open}
             >
@@ -313,7 +311,7 @@ function OptionWorkScope({
   const isDiagram = isCalculatorOptionDiagramUrl(src);
 
   return (
-    <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-3 sm:p-4">
+    <div className="mt-3 rounded-xl bg-[color-mix(in_srgb,var(--bg)_70%,transparent)] p-3 sm:p-4">
       <div
         className={cn(
           "grid gap-2.5 sm:items-start sm:gap-4",

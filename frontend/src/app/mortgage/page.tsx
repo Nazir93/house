@@ -24,7 +24,9 @@ export default async function MortgagePage() {
         >
           Ипотека
         </span>
-        <h1 className="mt-5 font-heading text-4xl md:text-6xl">Ипотека на строительство дома</h1>
+        <h1 className="mt-5 max-w-3xl font-heading text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl">
+          Ипотека на строительство дома
+        </h1>
         <p className="mt-5 max-w-3xl text-lg" style={{ color: "var(--text-muted)" }}>
           Подберём совместимые программы и поможем собрать документы для банка. Ниже — ориентировочные ставки и калькулятор;
           финальные условия зависят от одобрения и полной стоимости кредита.

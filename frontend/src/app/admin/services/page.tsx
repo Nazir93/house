@@ -62,7 +62,10 @@ export default function AdminServicesPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Услуги</h1>
           <p className="text-sm text-white/40 mt-1">
-            Это и есть список услуг на сайте. Нажмите на название — правьте тексты и сохраняйте; на сайте сразу будет новое. «Добавить» — новая услуга, корзина — удалить.
+            Фундамент, коробка, кровля, инженерия, отделка: название и краткое описание — на вкладке{" "}
+            <code className="text-white/50">/services</code>, блок «тексты страницы» — на{" "}
+            <code className="text-white/50">/services/…</code>. Проектирование ведётся в коде сайта и здесь не
+            показывается.
           </p>
         </div>
         <Link

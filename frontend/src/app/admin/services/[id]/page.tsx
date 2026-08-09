@@ -12,9 +12,9 @@ import { parseServiceLandingDocument, type ServiceLandingDocument } from "@/lib/
 import { mergeServiceTitleIntoLandingJson } from "@/lib/merge-service-title-into-landing";
 import { ServiceLandingTextForm } from "@/components/admin/service-landing-text-form";
 
-import { FULL_SERVICE_TYPE_DROPDOWN_OPTIONS } from "@/lib/service-type-admin-options";
+import { ADMIN_EDITABLE_SERVICE_TYPE_OPTIONS } from "@/lib/admin-managed-services";
 
-const SERVICE_TYPES = FULL_SERVICE_TYPE_DROPDOWN_OPTIONS;
+const SERVICE_TYPES = ADMIN_EDITABLE_SERVICE_TYPE_OPTIONS;
 
 const ICONS = ["zap", "speaker", "network", "home", "shield", "sun", "layers", "brush"];
 
@@ -55,32 +55,34 @@ export default function AdminEditServicePage() {
 
   useEffect(() => {
     fetch(`/api/admin/services/${params.id}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.error) {
-          setError("Услуга не найдена");
-        } else {
-          setTitle(data.title);
-          setSlug(data.slug);
-          setShortDescription(data.shortDescription);
-          setServiceType(data.serviceType);
-          setIcon(data.icon);
-          setCoverImage(data.coverImage || "");
-          setVideoUrl(data.videoUrl || "");
-          setBannerImage(
-            (data.bannerImageDesktop || data.bannerImageMobile || "").trim()
-          );
-          setPublished(data.published);
-          setOrder(data.order);
-          const defaultDoc = getDefaultServiceLandingDocument(data.serviceType as ServiceType);
-          const parsed =
-            data.landingJson != null ? parseServiceLandingDocument(data.landingJson) ?? defaultDoc : defaultDoc;
-          setLandingDoc(parsed);
+      .then(async (r) => {
+        const data = await r.json();
+        if (r.status === 403 && data.codeOwned) {
+          router.replace("/admin/services");
+          return;
         }
+        if (!r.ok || data.error) {
+          setError("Услуга не найдена");
+          return;
+        }
+        setTitle(data.title);
+        setSlug(data.slug);
+        setShortDescription(data.shortDescription);
+        setServiceType(data.serviceType);
+        setIcon(data.icon);
+        setCoverImage(data.coverImage || "");
+        setVideoUrl(data.videoUrl || "");
+        setBannerImage((data.bannerImageDesktop || data.bannerImageMobile || "").trim());
+        setPublished(data.published);
+        setOrder(data.order);
+        const defaultDoc = getDefaultServiceLandingDocument(data.serviceType as ServiceType);
+        const parsed =
+          data.landingJson != null ? parseServiceLandingDocument(data.landingJson) ?? defaultDoc : defaultDoc;
+        setLandingDoc(parsed);
       })
       .catch(() => setError("Ошибка загрузки"))
       .finally(() => setLoading(false));
-  }, [params.id]);
+  }, [params.id, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -172,8 +174,8 @@ export default function AdminEditServicePage() {
           <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required
             className="w-full px-4 py-2.5 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white focus:outline-none focus:border-[#0F3D2E]/50 transition-colors" />
           <p className="mt-1.5 text-[11px] text-white/30 leading-relaxed">
-            Название в админ-списке и запасной H1 на странице услуги (если не задан H1 в SEO). Тексты вкладки на
-            /services задаются в блоке ниже и в шаблоне хаба.
+            Показывается на вкладке услуги на <code className="text-white/45">/services</code> и как запасной H1
+            на странице услуги (если не задан H1 в SEO).
           </p>
         </div>
 
@@ -215,8 +217,8 @@ export default function AdminEditServicePage() {
           onChange={setCoverImage}
         />
         <p className="-mt-2 text-[11px] text-white/30 leading-relaxed">
-          Показывается слева на странице списка услуг (/services) для этой вкладки. Если пусто — берётся картинка
-          по умолчанию или видео ниже.
+          Картинка вкладки на <code className="text-white/45">/services</code>. Если пусто — видео ниже или
+          картинка по умолчанию.
         </p>
 
         <AdminMediaUpload
@@ -226,7 +228,7 @@ export default function AdminEditServicePage() {
           onChange={setVideoUrl}
         />
         <p className="-mt-2 text-[11px] text-white/30 leading-relaxed">
-          Фон вкладки на /services, если нет изображения услуги.
+          Фон вкладки на <code className="text-white/45">/services</code>, если нет изображения услуги.
         </p>
 
         <AdminMediaUpload
@@ -236,20 +238,23 @@ export default function AdminEditServicePage() {
           onChange={setBannerImage}
         />
         <p className="-mt-2 text-[11px] text-white/30 leading-relaxed">
-          Большой баннер в шапке страницы услуги (/services/{slug || "…"}). Перекрывает картинку из шаблона
-          текстов.
+          Hero-баннер на странице <code className="text-white/45">/services/{slug || "…"}</code>. Перекрывает
+          картинку из шаблона текстов лендинга.
         </p>
 
         <div>
           <label className="block text-xs font-medium text-white/50 mb-1.5 uppercase tracking-wider">Краткое описание</label>
           <textarea value={shortDescription} onChange={(e) => setShortDescription(e.target.value)} required rows={3}
             className="w-full px-4 py-3 rounded-xl bg-white/[0.05] border border-white/[0.08] text-sm text-white resize-none focus:outline-none focus:border-[#0F3D2E]/50 transition-colors" />
+          <p className="mt-1.5 text-[11px] text-white/30 leading-relaxed">
+            Текст описания на вкладке <code className="text-white/45">/services</code> для этой услуги.
+          </p>
         </div>
 
         <div className="space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <label className="block text-xs font-medium text-white/50 uppercase tracking-wider">
-              Тексты страницы услуги (как на сайте)
+              Тексты страницы услуги (/services/{slug || "…"})
             </label>
             <div className="flex flex-wrap gap-2">
               <button

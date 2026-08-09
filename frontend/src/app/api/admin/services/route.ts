@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
+import {
+  CODE_OWNED_SERVICE_TYPE,
+  isCodeOwnedAdminService,
+} from "@/lib/admin-managed-services";
 import { revalidatePublicServices } from "@/lib/revalidate-public-content";
 import { ensureDefaultServicePageMetaIfNeeded } from "@/lib/seed-default-page-meta";
 import { ensureDefaultServicesIfNeeded } from "@/lib/seed-default-services";
@@ -15,6 +19,11 @@ export async function GET() {
     await ensureDefaultServicesIfNeeded();
     await ensureDefaultServicePageMetaIfNeeded();
     const services = await prisma.service.findMany({
+      where: {
+        NOT: {
+          OR: [{ slug: "proektirovanie" }, { serviceType: CODE_OWNED_SERVICE_TYPE }],
+        },
+      },
       orderBy: { order: "asc" },
     });
     return NextResponse.json(services);
@@ -48,6 +57,13 @@ export async function POST(request: NextRequest) {
     }
 
     let slug = body.slug || generateSlug(title);
+    if (isCodeOwnedAdminService({ slug, serviceType })) {
+      return NextResponse.json(
+        { error: "Проектирование ведётся в коде сайта и не редактируется в CMS услуг" },
+        { status: 400 },
+      );
+    }
+
     const existing = await prisma.service.findUnique({ where: { slug } });
     if (existing) slug = `${slug}-${Date.now().toString(36)}`;
 

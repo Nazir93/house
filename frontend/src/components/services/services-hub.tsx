@@ -7,7 +7,8 @@ import { ArrowRight, ChevronRight } from "lucide-react";
 
 import type { ServiceItem } from "@/lib/get-services";
 import { resolveServiceHubVisual } from "@/lib/service-card-media";
-import { SERVICES_PROCESS_STEPS, getServiceHubCopy, resolveServiceHubCtaAction, slugSegmentFromServiceHref } from "@/lib/services-hub-data";
+import { SERVICES_PROCESS_STEPS, getServiceHubCopy, slugSegmentFromServiceHref } from "@/lib/services-hub-data";
+import { resolveServiceHubDisplay } from "@/lib/resolve-service-hub-display";
 import { useModal } from "@/lib/modal-context";
 import { cn } from "@/lib/utils";
 
@@ -53,18 +54,21 @@ export function ServicesHub({
   const total = rows.length;
   const current = rows[Math.min(active, rows.length - 1)];
   const hub = current ? getServiceHubCopy(current.segment) : null;
+  const display = current
+    ? resolveServiceHubDisplay(current.segment, current.service, hub)
+    : null;
   const href = current?.service.slug.startsWith("/")
     ? current.service.slug
     : `/services/${current?.service.slug}`;
 
-  const cardTitle = hub?.navTitle ?? current?.service.title ?? "Услуга";
-  const cardDescription = hub?.cardDescription ?? current?.service.shortDescription ?? "";
-  const sectionParagraphs = hub?.sectionParagraphs.slice(0, 2) ?? [];
-  const features = hub?.features ?? [];
-  const ctaLabel = hub?.ctaLabel ?? "Подробнее об услуге";
-  const ctaAction = resolveServiceHubCtaAction(hub);
+  const cardTitle = display?.cardTitle ?? "Услуга";
+  const cardDescription = display?.cardDescription ?? "";
+  const sectionParagraphs = display?.sectionParagraphs ?? [];
+  const features = display?.features ?? [];
+  const ctaLabel = display?.ctaLabel ?? "Подробнее об услуге";
+  const ctaAction = display?.ctaAction ?? "link";
   const hubVisual = current
-    ? resolveServiceHubVisual(current.service, hub?.centerImageSrc)
+    ? resolveServiceHubVisual(current.service, display?.centerImageSrc ?? hub?.centerImageSrc)
     : { coverImage: null, videoUrl: null };
   const centerSrc = hubVisual.coverImage;
   const centerVideo = hubVisual.videoUrl;
@@ -110,7 +114,7 @@ export function ServicesHub({
               <div className="-mx-4 flex snap-x snap-mandatory flex-nowrap gap-2 overflow-x-auto px-4 pb-px [-ms-overflow-style:none] [scrollbar-width:none] sm:mx-0 sm:justify-start sm:gap-2 sm:px-0 md:gap-2.5 [&::-webkit-scrollbar]:hidden">
                 {rows.map(({ service, segment }, idx) => {
                   const on = idx === active;
-                  const label = getServiceHubCopy(segment)?.navTitle ?? service.title;
+                  const label = resolveServiceHubDisplay(segment, service).navTitle;
                   return (
                     <button
                       key={service.id}

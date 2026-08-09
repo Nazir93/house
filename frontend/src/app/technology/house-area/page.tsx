@@ -19,7 +19,9 @@ export default function HouseAreaInfoPage() {
         <Link href="/projects" className="text-sm font-semibold text-[var(--accent)]">
           ← К каталогу проектов
         </Link>
-        <h1 className="mt-6 font-heading text-4xl md:text-5xl">Как считается площадь дома</h1>
+        <h1 className="mt-6 font-heading text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl">
+          Как считается площадь дома
+        </h1>
         <p className="mt-4 text-lg" style={{ color: "var(--text-muted)" }}>
           На карточке каждого проекта указана расчётная общая площадь по внешнему контуру стен на всех этажах с учётом внутренних перегородок и
           коммуникаций, если они входят в типовую комплектацию проекта.

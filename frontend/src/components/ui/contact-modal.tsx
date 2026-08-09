@@ -16,7 +16,9 @@ function SuccessScreen({ onClose }: { onClose: () => void }) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center text-center px-4">
       <CheckCircle size={56} style={{ color: "var(--accent)" }} className="mb-8" />
-      <h2 className="font-heading text-3xl sm:text-4xl md:text-6xl mb-6">Заявка отправлена</h2>
+      <h2 className="mb-6 font-heading text-2xl font-bold leading-tight tracking-tight sm:text-3xl">
+        Заявка отправлена
+      </h2>
       <p className="text-base md:text-lg mb-4 max-w-md" style={{ color: "var(--text-muted)" }}>
         Мы свяжемся с вами в ближайшее время
       </p>

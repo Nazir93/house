@@ -11,8 +11,7 @@ import type { CalculatorTransportBand } from "@/lib/project-calculator-types";
 import { TransportDistanceSlider } from "@/components/construction/transport-distance-slider";
 import { cn } from "@/lib/utils";
 
-const softBorder = "border border-[var(--border)]";
-const softDivide = "border-[var(--border)]";
+const softDivide = "border-[color-mix(in_srgb,var(--text)_8%,transparent)]";
 
 export type EstimateLine = { id: string; label: string; amountRub: number };
 
@@ -69,9 +68,8 @@ export function ProjectCalculatorEstimatePanel({
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-[28px] bg-[var(--bg)] shadow-[0_20px_50px_rgb(0_0_0/0.08)]",
-        softBorder,
-        compact && "rounded-none border-0 bg-transparent shadow-none",
+        "overflow-hidden rounded-[1.75rem] bg-[color-mix(in_srgb,var(--bg-secondary)_45%,var(--bg))] shadow-[0_20px_50px_rgb(0_0_0/0.08)]",
+        compact && "rounded-none bg-transparent shadow-none",
       )}
     >
       <div className={cn(compact ? "pb-2" : "border-b p-6", !compact && softDivide)}>

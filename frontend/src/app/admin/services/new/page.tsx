@@ -7,9 +7,9 @@ import { ArrowLeft, Save } from "lucide-react";
 import { AdminMediaUpload } from "@/components/admin/admin-media-upload";
 import { AdminSelect } from "@/components/admin/admin-select";
 
-import { FULL_SERVICE_TYPE_DROPDOWN_OPTIONS } from "@/lib/service-type-admin-options";
+import { ADMIN_EDITABLE_SERVICE_TYPE_OPTIONS } from "@/lib/admin-managed-services";
 
-const SERVICE_TYPES = FULL_SERVICE_TYPE_DROPDOWN_OPTIONS;
+const SERVICE_TYPES = ADMIN_EDITABLE_SERVICE_TYPE_OPTIONS;
 
 const ICONS = ["zap", "speaker", "network", "home", "shield", "sun", "layers", "brush"];
 
@@ -20,7 +20,7 @@ export default function AdminNewServicePage() {
 
   const [title, setTitle] = useState("");
   const [shortDescription, setShortDescription] = useState("");
-  const [serviceType, setServiceType] = useState("HOUSE_DESIGN");
+  const [serviceType, setServiceType] = useState("HOUSE_FOUNDATION");
   const [icon, setIcon] = useState("zap");
   const [coverImage, setCoverImage] = useState("");
   const [videoUrl, setVideoUrl] = useState("");

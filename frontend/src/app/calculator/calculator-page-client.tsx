@@ -35,7 +35,9 @@ export function CalculatorPageClient({ seo }: { seo: CommercialPageSeo }) {
         >
           Калькулятор
         </span>
-        <h1 className="mt-5 font-heading text-3xl md:text-5xl tracking-tight">{seo.h1}</h1>
+        <h1 className="mt-5 max-w-3xl font-heading text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl">
+          {seo.h1}
+        </h1>
         <p className="mt-4 max-w-3xl text-[15px] leading-relaxed md:text-base" style={{ color: "var(--text-muted)" }}>
           {seo.intro}
         </p>
