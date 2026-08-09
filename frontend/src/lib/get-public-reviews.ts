@@ -21,42 +21,6 @@ function serviceLabel(service: string | null): string | null {
   return SERVICE_TYPE_LABEL_BY_VALUE[service] ?? null;
 }
 
-const FALLBACK_REVIEWS: PublicReviewItem[] = [
-  {
-    id: "demo-1",
-    authorName: "Семья Ивановых",
-    authorPhoto: null,
-    objectName: null,
-    serviceLabel: null,
-    rating: 5,
-    text: "Помогли выбрать проект, адаптировали планировку и поэтапно показывали работы без лишней суеты.",
-    videoUrl: null,
-    photoUrls: [],
-  },
-  {
-    id: "demo-2",
-    authorName: "Дом в ЛО",
-    authorPhoto: null,
-    objectName: null,
-    serviceLabel: null,
-    rating: 5,
-    text: "Сроки и комплектация были понятны до старта строительства — удобно сравнивать с другими подрядчиками.",
-    videoUrl: null,
-    photoUrls: [],
-  },
-  {
-    id: "demo-3",
-    authorName: "Частный заказчик",
-    authorPhoto: null,
-    objectName: null,
-    serviceLabel: null,
-    rating: 5,
-    text: "После экскурсии по объекту проще было решить по материалам и планировке.",
-    videoUrl: null,
-    photoUrls: [],
-  },
-];
-
 export const getPublicReviews = unstable_cache(
   async (): Promise<PublicReviewItem[]> => {
     try {
@@ -75,23 +39,20 @@ export const getPublicReviews = unstable_cache(
           photoUrls: true,
         },
       });
-      if (rows.length > 0) {
-        return rows.map((r) => ({
-          id: r.id,
-          authorName: r.authorName.trim(),
-          authorPhoto: r.authorPhoto,
-          objectName: r.objectName,
-          serviceLabel: serviceLabel(r.service),
-          rating: Math.min(5, Math.max(1, r.rating)),
-          text: htmlToPlainText(r.text) || r.text,
-          videoUrl: r.videoUrl,
-          photoUrls: Array.isArray(r.photoUrls) ? r.photoUrls.filter(Boolean) : [],
-        }));
-      }
+      return rows.map((r) => ({
+        id: r.id,
+        authorName: r.authorName.trim(),
+        authorPhoto: r.authorPhoto,
+        objectName: r.objectName,
+        serviceLabel: serviceLabel(r.service),
+        rating: Math.min(5, Math.max(1, r.rating)),
+        text: htmlToPlainText(r.text) || r.text,
+        videoUrl: r.videoUrl,
+        photoUrls: Array.isArray(r.photoUrls) ? r.photoUrls.filter(Boolean) : [],
+      }));
     } catch {
-      /* ignore */
+      return [];
     }
-    return FALLBACK_REVIEWS;
   },
   ["public-reviews"],
   { revalidate: 60, tags: [CACHE_TAG_PUBLIC_REVIEWS] }

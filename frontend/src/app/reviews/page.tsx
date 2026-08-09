@@ -131,11 +131,18 @@ export default async function ReviewsPage() {
             Список отзывов
           </h2>
           <div className="container mx-auto max-w-[1200px] min-w-0 px-4 sm:px-5 lg:px-6">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
-              {reviews.map((r) => (
-                <ReviewCard key={r.id} r={r} />
-              ))}
-            </div>
+            {reviews.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
+                {reviews.map((r) => (
+                  <ReviewCard key={r.id} r={r} />
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm leading-relaxed sm:text-base" style={{ color: "var(--text-muted)" }}>
+                Публичные отзывы появятся здесь после модерации. Пока можно оставить свой отзыв ниже или посмотреть
+                оценки на Яндекс.Картах.
+              </p>
+            )}
 
             <YandexReviewsCta />
 
