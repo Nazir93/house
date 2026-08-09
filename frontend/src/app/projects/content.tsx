@@ -45,14 +45,13 @@ function parseNumParam(v: string | null | undefined, fallback: number): number {
 }
 
 const filterShellClass =
-  "overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--text)_8%,transparent)] bg-[color-mix(in_srgb,var(--bg-secondary)_55%,var(--bg))] shadow-[0_8px_32px_rgb(0_0_0/0.04)]";
+  "overflow-hidden rounded-2xl bg-[color-mix(in_srgb,var(--bg-secondary)_55%,var(--bg))] shadow-[0_8px_32px_rgb(0_0_0/0.04)]";
 const filterSectionClass =
   "border-b border-[color-mix(in_srgb,var(--text)_7%,transparent)] px-4 py-4 last:border-b-0 md:px-5 md:py-5";
 const catalogFieldClass =
-  "catalog-field-input w-full border text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--accent)]";
+  "catalog-field-input w-full border-0 text-sm outline-none transition focus-visible:ring-2 focus-visible:ring-[var(--accent)]";
 const catalogFieldStyle = {
-  borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
-  backgroundColor: "var(--bg)",
+  backgroundColor: "color-mix(in srgb, var(--bg) 85%, transparent)",
   color: "var(--text)",
 } as const;
 const filterInputClass = `${catalogFieldClass} px-4 py-2.5`;
@@ -817,10 +816,9 @@ export function ProjectsCatalogContent({
                   key={preset.label}
                   type="button"
                   onClick={preset.fn}
-                  className="rounded-full border px-4 py-2 text-[13px] font-medium transition-colors hover:border-[color-mix(in_srgb,var(--accent)_40%,transparent)] hover:text-[var(--text)]"
+                  className="rounded-full px-4 py-2 text-[13px] font-medium transition-colors hover:bg-[color-mix(in_srgb,var(--accent)_10%,transparent)] hover:text-[var(--text)]"
                   style={{
-                    borderColor: "color-mix(in srgb, var(--text) 12%, transparent)",
-                    backgroundColor: "color-mix(in srgb, var(--bg) 75%, var(--bg-secondary))",
+                    backgroundColor: "color-mix(in srgb, var(--bg-secondary) 70%, var(--bg))",
                     color: "var(--text-muted)",
                   }}
                 >
@@ -858,8 +856,7 @@ export function ProjectsCatalogContent({
                 return (
                   <article
                     key={project.id}
-                    className="group grid overflow-hidden rounded-[28px] border md:grid-cols-[minmax(260px,420px)_1fr]"
-                    style={{ borderColor: "var(--border)", backgroundColor: "var(--card-bg)" }}
+                    className="group grid overflow-hidden rounded-[1.75rem] bg-[color-mix(in_srgb,var(--bg-secondary)_50%,var(--bg))] shadow-[0_16px_46px_rgba(15,61,46,0.06)] md:grid-cols-[minmax(260px,420px)_1fr]"
                   >
                     <Link href={houseProjectDetailPath(catalog, project.slug, { material })} className="relative min-h-[260px] overflow-hidden bg-[var(--stone)]">
                       {cover ? (
@@ -907,7 +904,7 @@ export function ProjectsCatalogContent({
                           </p>
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-5 sm:gap-x-5">
                         {[
                           ["Этажность", formatHouseProjectFloorsLabel(project.floors)],
                           ["Площадь", `${project.area} м²`],
@@ -915,7 +912,7 @@ export function ProjectsCatalogContent({
                           ["Санузлы", `${project.bathrooms}`],
                           ["Материалы", matLabel],
                         ].map(([label, value]) => (
-                          <div key={label} className="rounded-2xl bg-[var(--bg)] p-3">
+                          <div key={label} className="min-w-0">
                             <p className="text-[10px] uppercase tracking-[0.12em]" style={{ color: "var(--text-subtle)" }}>
                               {label}
                             </p>
@@ -954,8 +951,8 @@ export function ProjectsCatalogContent({
               <button
                 type="button"
                 onClick={() => setPage((value) => value + 1)}
-                className="mt-10 w-full rounded-[24px] border px-6 py-5 text-lg font-semibold transition-colors hover:bg-[var(--accent)] hover:text-[var(--accent-contrast)]"
-                style={{ borderColor: "var(--border)", color: "var(--text)" }}
+                className="mt-10 w-full rounded-[24px] bg-[color-mix(in_srgb,var(--bg-secondary)_60%,var(--bg))] px-6 py-5 text-lg font-semibold transition-colors hover:bg-[var(--accent)] hover:text-[var(--accent-contrast)]"
+                style={{ color: "var(--text)" }}
               >
                 Показать ещё {Math.min(PAGE_SIZE, filtered.length - visible.length)} проектов
               </button>
