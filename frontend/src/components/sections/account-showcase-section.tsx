@@ -8,15 +8,21 @@ import {
   ACCOUNT_SHOWCASE_SECTION_INTRO,
   ACCOUNT_SHOWCASE_SECTION_TITLE,
 } from "@/lib/account-showcase";
+import {
+  accountShowcaseFanCssTransform,
+  accountShowcaseFanStyle,
+} from "@/lib/account-showcase-fan";
 import { ACCOUNT_SHOWCASE_ICON_BY_ID } from "@/lib/account-showcase-icons";
 import { AccountShowcaseFooter } from "@/components/sections/account-showcase-footer";
 import { AccountShowcaseMockup } from "@/components/sections/account-showcase-mockup";
 
 export function AccountShowcaseSection() {
+  const total = ACCOUNT_SHOWCASE_ITEMS.length;
+
   return (
     <section
       id="account-showcase"
-      className="relative overflow-clip scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)] py-12 sm:py-16 lg:py-28"
+      className="relative overflow-x-clip scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)] py-12 sm:py-16 lg:py-28"
       style={{ backgroundColor: "var(--bg)" }}
       aria-labelledby="account-showcase-heading"
     >
@@ -39,7 +45,7 @@ export function AccountShowcaseSection() {
               {ACCOUNT_SHOWCASE_SECTION_INTRO}
             </p>
           </div>
-          <div className="rounded-[1.25rem] border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg-secondary)_72%,transparent)] p-4 shadow-[0_16px_50px_rgba(15,61,46,0.08)] sm:rounded-[1.4rem] sm:p-5">
+          <div className="rounded-[1.25rem] bg-[color-mix(in_srgb,var(--bg-secondary)_72%,transparent)] p-4 shadow-[0_16px_50px_rgba(15,61,46,0.08)] sm:rounded-[1.4rem] sm:p-5">
             <div className="flex items-start gap-3">
               <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-[var(--accent)]" strokeWidth={1.9} aria-hidden />
               <p className="text-sm leading-relaxed text-[var(--text-muted)]">
@@ -49,23 +55,28 @@ export function AccountShowcaseSection() {
           </div>
         </div>
 
-        <div className="relative space-y-0">
+        <div className="relative pb-8 sm:pb-12">
           {ACCOUNT_SHOWCASE_ITEMS.map((item, index) => {
             const Icon = ACCOUNT_SHOWCASE_ICON_BY_ID[item.id];
+            const fan = accountShowcaseFanStyle(index, total);
             return (
               <article
                 key={item.id}
                 data-reveal="card"
-                className="group relative sticky grid min-h-[calc(100dvh-var(--site-header-sticky-offset)-var(--mobile-bottom-nav-offset))] grid-rows-[auto_minmax(22rem,1fr)] overflow-hidden bg-[var(--bg)] lg:min-h-[38rem] lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:grid-rows-none lg:gap-6"
-                style={{
-                  top: "var(--site-header-sticky-offset)",
-                  zIndex: index + 1,
-                  "--reveal-delay": `${index * 80}ms`,
-                } as CSSProperties}
+                className="group relative sticky mb-[-1.25rem] grid min-h-[calc(100dvh-var(--site-header-sticky-offset)-var(--mobile-bottom-nav-offset))] grid-rows-[auto_minmax(22rem,1fr)] overflow-hidden rounded-t-[2rem] bg-[var(--bg)] shadow-[0_-10px_40px_rgba(15,61,46,0.1)] sm:mb-[-1.5rem] sm:rounded-t-[2.5rem] lg:min-h-[38rem] lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:grid-rows-none lg:gap-6 lg:rounded-t-[2.75rem]"
+                style={
+                  {
+                    top: `calc(var(--site-header-sticky-offset) + ${fan.topOffsetPx}px)`,
+                    zIndex: index + 1,
+                    transform: accountShowcaseFanCssTransform(fan),
+                    transformOrigin: "50% 0%",
+                    "--reveal-delay": `${index * 80}ms`,
+                  } as CSSProperties
+                }
               >
                 <div className="flex min-h-[22rem] flex-col justify-between p-5 sm:p-7 lg:min-h-[38rem] lg:p-10">
                   <div>
-                    <div className="inline-flex items-center rounded-full border border-[var(--border)] bg-[color-mix(in_srgb,var(--bg)_72%,transparent)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                    <div className="inline-flex items-center rounded-full bg-[color-mix(in_srgb,var(--bg-secondary)_80%,transparent)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
                       {item.index}
                     </div>
                     <div className="mt-7 flex items-center gap-4">

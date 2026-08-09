@@ -25,7 +25,7 @@ export function AccountShowcaseMockup({ itemId, image, images, metrics }: Accoun
   const imageSrc = resolveAccountShowcaseImage({ image, images }, theme);
 
   return (
-    <div className="relative h-full min-h-[22rem] w-full overflow-hidden rounded-[1.4rem] border border-white/10 bg-[#07120e] sm:min-h-[24rem] sm:rounded-[1.6rem] md:min-h-[26rem] lg:min-h-full">
+    <div className="relative h-full min-h-[22rem] w-full overflow-hidden rounded-[1.6rem] bg-[#07120e] shadow-[0_18px_48px_rgba(7,18,14,0.28)] sm:min-h-[24rem] sm:rounded-[1.85rem] md:min-h-[26rem] lg:min-h-full lg:rounded-[2rem]">
       {images ? (
         <>
           <Image
