@@ -12,34 +12,21 @@ export function BuiltObjectHistoryCards({ cards }: { cards: BuiltObjectHistoryCa
   if (cards.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-2 sm:gap-2.5">
+    <div className="divide-y divide-[color-mix(in_srgb,var(--text)_8%,transparent)]">
       {cards.map((card, index) => {
         const isOpen = openId === card.id;
         const hasBody = Boolean(card.description?.trim());
         return (
-          <article
-            key={card.id}
-            className={cn(
-              "overflow-hidden rounded-2xl border transition-[border-color,box-shadow] duration-200",
-              isOpen && hasBody
-                ? "shadow-[0_10px_28px_rgba(15,61,46,0.08)]"
-                : "shadow-[0_6px_18px_rgba(15,61,46,0.04)]",
-            )}
-            style={{
-              borderColor:
-                isOpen && hasBody
-                  ? "color-mix(in srgb, var(--accent) 35%, var(--border))"
-                  : "var(--border)",
-              backgroundColor: "var(--bg)",
-            }}
-          >
+          <article key={card.id} className="min-w-0 py-1 first:pt-0 last:pb-0">
             <button
               type="button"
               onClick={() => hasBody && setOpenId((prev) => toggleExclusiveHistoryStage(prev, card.id))}
               disabled={!hasBody}
               aria-expanded={isOpen}
               className={cn(
-                "flex w-full min-w-0 items-center gap-3 px-3.5 py-3 text-left sm:gap-3.5 sm:px-4 sm:py-3.5",
+                "flex w-full min-w-0 items-center gap-3 rounded-xl px-1 py-3 text-left transition-colors sm:gap-3.5 sm:py-3.5",
+                hasBody && "hover:bg-[color-mix(in_srgb,var(--text)_3%,transparent)]",
+                isOpen && hasBody && "bg-[color-mix(in_srgb,var(--accent)_8%,transparent)]",
                 !hasBody && "cursor-default opacity-80",
               )}
             >
@@ -77,11 +64,8 @@ export function BuiltObjectHistoryCards({ cards }: { cards: BuiltObjectHistoryCa
               <div className="min-h-0 overflow-hidden">
                 {hasBody ? (
                   <p
-                    className="border-t px-3.5 pb-3.5 pt-3 text-sm leading-relaxed whitespace-pre-line sm:px-4 sm:pb-4 sm:pt-3.5 sm:text-[15px]"
-                    style={{
-                      color: "var(--text-muted)",
-                      borderColor: "color-mix(in srgb, var(--border) 70%, transparent)",
-                    }}
+                    className="px-1 pb-3.5 pl-12 text-sm leading-relaxed whitespace-pre-line sm:pl-[3.25rem] sm:pb-4 sm:text-[15px]"
+                    style={{ color: "var(--text-muted)" }}
                   >
                     {card.description}
                   </p>

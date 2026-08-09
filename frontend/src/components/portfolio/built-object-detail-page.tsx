@@ -54,9 +54,9 @@ const CONSTRUCTION_GRID_LIMIT = 15;
 const HIGHLIGHT_MS = 1400;
 
 const CHAR_ICONS = [Ruler, Home, Layers, BedDouble, Bath, CalendarDays] as const;
-const DETAIL_CARD =
-  "rounded-[1.75rem] border bg-[var(--bg-secondary)] p-4 shadow-[0_16px_46px_rgba(15,61,46,0.07)] sm:p-5 md:p-6";
-const DETAIL_CARD_BORDER = "border-[color-mix(in_srgb,var(--border)_82%,transparent)]";
+/** Мягкая панель без обводки — без «рамки в рамке». */
+const DETAIL_PANEL =
+  "rounded-[1.75rem] bg-[color-mix(in_srgb,var(--bg-secondary)_55%,var(--bg))] p-4 shadow-[0_16px_46px_rgba(15,61,46,0.06)] sm:p-5 md:p-6";
 
 export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
   const [descOpen, setDescOpen] = useState(false);
@@ -154,10 +154,9 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
       <section
         id={builtObjectSectionDomId(id)}
         className={cn(
-          DETAIL_CARD,
-          DETAIL_CARD_BORDER,
+          DETAIL_PANEL,
           "scroll-mt-[calc(var(--site-header-sticky-offset)+1rem)] transition-[box-shadow,background-color] duration-500",
-          highlighted && "rounded-[1.25rem] ring-2 ring-[color-mix(in_srgb,var(--accent)_35%,transparent)]",
+          highlighted && "bg-[color-mix(in_srgb,var(--accent)_8%,var(--bg-secondary))]",
         )}
       >
         <div className="flex items-start justify-between gap-3">
@@ -166,7 +165,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
           </h2>
           {headerAction}
         </div>
-        <div className="mt-4 border-t border-[color-mix(in_srgb,var(--border)_70%,transparent)] pt-4 md:mt-5 md:pt-5">{children}</div>
+        <div className="mt-4 pt-1 md:mt-5">{children}</div>
       </section>
     );
   }
@@ -196,8 +195,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
           <div className="flex flex-col gap-6 sm:gap-8 lg:grid lg:grid-cols-[minmax(280px,340px)_minmax(0,1fr)] lg:items-start lg:gap-x-10 lg:gap-y-8">
             <aside
               className={cn(
-                DETAIL_CARD,
-                DETAIL_CARD_BORDER,
+                DETAIL_PANEL,
                 "order-2 min-w-0 lg:order-none lg:col-start-1 lg:row-span-2 lg:sticky lg:top-[calc(var(--site-header-sticky-offset)+0.75rem)]",
               )}
             >
@@ -229,13 +227,13 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                 {houseTypeSubtitle(object.material)}
               </p>
 
-              <dl className="mt-5 grid grid-cols-2 gap-2.5 sm:gap-3">
+              <dl className="mt-5 grid grid-cols-2 gap-2 sm:gap-2.5">
                 {characteristics.map((row, i) => {
                   const Icon = CHAR_ICONS[i % CHAR_ICONS.length];
                   return (
                     <div
                       key={row.label}
-                      className="min-w-0 rounded-2xl border border-[color-mix(in_srgb,var(--border)_72%,transparent)] bg-[var(--bg)] p-3 shadow-[inset_0_1px_0_color-mix(in_srgb,var(--text)_4%,transparent)]"
+                      className="min-w-0 rounded-xl bg-[color-mix(in_srgb,var(--bg)_70%,transparent)] p-3"
                     >
                       <dt className="flex flex-col gap-0.5" style={{ color: "var(--text-muted)" }}>
                         <Icon className="h-3 w-3 shrink-0 opacity-70" aria-hidden />
@@ -273,10 +271,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                 ) : null}
               </div>
 
-              <nav
-                className="mt-6 flex flex-col gap-1 border-t border-[color-mix(in_srgb,var(--border)_70%,transparent)] pt-4"
-                aria-label="Разделы объекта"
-              >
+              <nav className="mt-6 flex flex-col gap-1 pt-1" aria-label="Разделы объекта">
                 {navItems.map((item) => {
                   const active = activeNav === item.id;
                   const { href } = builtObjectNavScrollPlan(item.id);
@@ -309,8 +304,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
             </aside>
 
             <div className="order-1 min-w-0 lg:order-none lg:col-start-2 lg:row-start-1">
-              <div className={cn(DETAIL_CARD, DETAIL_CARD_BORDER, "p-2 sm:p-3")}>
-                <div className="relative aspect-[4/3] overflow-hidden rounded-[1.25rem] bg-[var(--stone)] sm:aspect-[16/10] sm:rounded-[1.35rem] md:aspect-[16/9]">
+              <div className="relative aspect-[4/3] overflow-hidden rounded-[1.75rem] bg-[var(--stone)] shadow-[0_16px_46px_rgba(15,61,46,0.08)] sm:aspect-[16/10] md:aspect-[16/9]">
                 {hero ? (
                   <CmsImage
                     src={hero.url}
@@ -324,7 +318,6 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                 <span className="absolute left-4 top-4 rounded-lg bg-black/55 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-white backdrop-blur-sm">
                   Реализованный проект
                 </span>
-                </div>
               </div>
             </div>
 
@@ -365,11 +358,8 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
               plans.length > 0 ? (
                 <div className={cn("grid gap-4", plans.length > 1 ? "md:grid-cols-2" : "max-w-2xl")}>
                   {plans.map((plan, index) => (
-                    <figure
-                      key={plan.id}
-                      className="group relative overflow-hidden rounded-2xl border border-[color-mix(in_srgb,var(--border)_72%,transparent)] bg-[var(--bg)] p-2 shadow-[0_10px_28px_rgba(15,61,46,0.06)]"
-                    >
-                      <div className="relative aspect-[4/3] min-h-[240px] overflow-hidden rounded-xl bg-[var(--stone)] sm:min-h-[280px] md:min-h-[320px]">
+                    <figure key={plan.id} className="group relative min-w-0">
+                      <div className="relative aspect-[4/3] min-h-[240px] overflow-hidden rounded-2xl bg-[color-mix(in_srgb,var(--bg)_75%,transparent)] sm:min-h-[280px] md:min-h-[320px]">
                         <CmsImage
                           src={plan.url}
                           alt={plan.label || `План ${index + 1}`}
@@ -386,7 +376,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                           <Maximize2 className="h-4 w-4" aria-hidden />
                         </button>
                       </div>
-                      <figcaption className="px-2 py-3 text-sm font-semibold">
+                      <figcaption className="px-1 pt-3 text-sm font-semibold">
                         {plan.label?.trim() || (index === 0 ? "План 1-го этажа" : `План ${index + 1}-го этажа`)}
                       </figcaption>
                     </figure>
@@ -413,7 +403,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                             index,
                           )
                         }
-                        className="relative aspect-square overflow-hidden rounded-xl border border-[color-mix(in_srgb,var(--border)_65%,transparent)] bg-[var(--stone)] shadow-[0_8px_24px_rgba(15,61,46,0.06)] transition hover:-translate-y-0.5 hover:opacity-95"
+                        className="relative aspect-square overflow-hidden rounded-xl bg-[var(--stone)] transition hover:-translate-y-0.5 hover:opacity-95"
                       >
                         <CmsImage
                           src={photo.url}
@@ -465,7 +455,7 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                             className="aspect-video w-full rounded-2xl bg-black/90"
                           />
                         ) : (
-                          <div className="flex flex-col gap-4 rounded-2xl border border-[color-mix(in_srgb,var(--border)_72%,transparent)] bg-[var(--bg)] p-5">
+                          <div className="flex flex-col gap-4 rounded-2xl bg-[color-mix(in_srgb,var(--bg)_70%,transparent)] p-5">
                             <p className="text-sm" style={{ color: "var(--text-muted)" }}>
                               Видеоотзыв доступен по ссылке.
                             </p>
