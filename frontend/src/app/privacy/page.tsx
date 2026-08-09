@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { LegalOperatorCard } from "@/components/legal/legal-operator-card";
 import { SITE_NAME } from "@/lib/constants";
+import { companyRegistrationLegalSuffix } from "@/lib/company-requisites";
 import { loadContactConfig } from "@/lib/load-contact-config";
 import { getPublicSiteUrl, LEGAL_DOCUMENT_EFFECTIVE_DATE } from "@/lib/legal-site";
 
@@ -29,7 +30,7 @@ export default async function PrivacyPage() {
   const operatorShort = co.shortName.trim() || SITE_NAME;
   const operatorLegal =
     co.fullName.trim() && co.inn.trim()
-      ? `${co.fullName} (ИНН ${co.inn}${co.ogrnip.trim() ? `, ОГРНИП ${co.ogrnip}` : ""})`
+      ? `${co.fullName} (ИНН ${co.inn}${companyRegistrationLegalSuffix(co)})`
       : operatorShort;
 
   return (
@@ -41,7 +42,7 @@ export default async function PrivacyPage() {
         <p className="text-[10px] uppercase tracking-[0.25em] mb-4" style={{ color: "var(--text-subtle)" }}>
           Юридическая информация
         </p>
-        <h1 className="text-3xl md:text-4xl font-heading font-bold mb-3" style={{ color: "var(--text)" }}>
+        <h1 className="mb-3 font-heading text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl" style={{ color: "var(--text)" }}>
           Политика в отношении обработки персональных данных
         </h1>
         <p className="text-sm mb-2" style={{ color: "var(--text-muted)" }}>

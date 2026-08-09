@@ -125,7 +125,12 @@ export const COMPANY = {
   fullName: "",
   shortName: "",
   inn: "",
+  /** ОГРН юрлица (ООО) — задаётся в админке `company_ogrn`. */
+  ogrn: "",
+  /** ОГРНИП ИП — задаётся в админке `company_ogrnip`. */
   ogrnip: "",
+  /** Ссылка (сайт / профиль) — `company_website`. */
+  website: "",
   postalAddress: "",
   bank: {
     name: "",

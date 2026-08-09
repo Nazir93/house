@@ -14,7 +14,9 @@ export type CompanyRequisites = {
   fullName: string;
   shortName: string;
   inn: string;
+  ogrn: string;
   ogrnip: string;
+  website: string;
   postalAddress: string;
   bank: {
     name: string;
@@ -57,7 +59,9 @@ export function createDefaultContactConfig(): ContactConfig {
       fullName: COMPANY.fullName,
       shortName: COMPANY.shortName,
       inn: COMPANY.inn,
+      ogrn: COMPANY.ogrn,
       ogrnip: COMPANY.ogrnip,
+      website: COMPANY.website,
       postalAddress: COMPANY.postalAddress,
       bank: { ...COMPANY.bank },
     },

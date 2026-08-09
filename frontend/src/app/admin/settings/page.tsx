@@ -53,11 +53,17 @@ const SETTINGS_GROUPS: SettingsGroup[] = [
   {
     title: "Реквизиты",
     fields: [
-      { key: "company_full_name", label: "Полное наименование", placeholder: "ИП ...", multiline: true },
-      { key: "company_short_name", label: "Краткое наименование", placeholder: "ИП ..." },
-      { key: "company_inn", label: "ИНН", placeholder: "000000000000" },
-      { key: "company_ogrnip", label: "ОГРНИП", placeholder: "000000000000000" },
-      { key: "company_postal_address", label: "Почтовый адрес", placeholder: "354068, ..." },
+      { key: "company_full_name", label: "Полное наименование", placeholder: "ООО «...»", multiline: true },
+      { key: "company_short_name", label: "Краткое наименование", placeholder: "ООО ..." },
+      { key: "company_inn", label: "ИНН", placeholder: "0000000000" },
+      { key: "company_ogrn", label: "ОГРН", placeholder: "0000000000000" },
+      { key: "company_ogrnip", label: "ОГРНИП (если ИП)", placeholder: "000000000000000" },
+      {
+        key: "company_website",
+        label: "Ссылка (сайт / профиль)",
+        placeholder: "https://chastdushi.ru",
+      },
+      { key: "company_postal_address", label: "Почтовый / юридический адрес", placeholder: "197136, ..." },
       { key: "bank_name", label: "Банк", placeholder: "АО \"Тинькофф Банк\"" },
       { key: "bank_account", label: "Р/с", placeholder: "40802810700003133044" },
       { key: "bank_corr_account", label: "К/с", placeholder: "30101810145250000974" },

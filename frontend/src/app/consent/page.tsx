@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalOperatorCard } from "@/components/legal/legal-operator-card";
+import { companyRegistrationLegalSuffix } from "@/lib/company-requisites";
 import { loadContactConfig } from "@/lib/load-contact-config";
 import { getPublicSiteUrl, LEGAL_DOCUMENT_EFFECTIVE_DATE } from "@/lib/legal-site";
 
@@ -17,7 +18,7 @@ export default async function ConsentPage() {
   const siteUrl = getPublicSiteUrl();
   const consentOperator =
     co.fullName.trim() && co.inn.trim()
-      ? `${co.fullName} (ИНН: ${co.inn}${co.ogrnip.trim() ? `, ОГРНИП: ${co.ogrnip}` : ""}), адрес: ${co.postalAddress.trim() || contact.address.trim() || "—"}`
+      ? `${co.fullName} (ИНН: ${co.inn}${companyRegistrationLegalSuffix(co)}), адрес: ${co.postalAddress.trim() || contact.address.trim() || "—"}`
       : "оператор персональных данных (реквизиты — в разделе «Контакты» и в Политике)";
 
   return (
@@ -29,7 +30,7 @@ export default async function ConsentPage() {
         <p className="text-[10px] uppercase tracking-[0.25em] mb-4" style={{ color: "var(--text-subtle)" }}>
           Юридическая информация
         </p>
-        <h1 className="text-3xl md:text-4xl font-heading font-bold mb-3" style={{ color: "var(--text)" }}>
+        <h1 className="mb-3 font-heading text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl" style={{ color: "var(--text)" }}>
           Согласие на обработку персональных данных
         </h1>
         <p className="text-sm mb-10" style={{ color: "var(--text-muted)" }}>

@@ -1,7 +1,13 @@
 import type { ContactConfig } from "@/lib/contact-config";
+import {
+  companyRegistrationLabels,
+  normalizeCompanyWebsiteUrl,
+} from "@/lib/company-requisites";
 
 export function LegalOperatorCard({ contact }: { contact: ContactConfig }) {
   const co = contact.company;
+  const registration = companyRegistrationLabels(co);
+  const websiteHref = normalizeCompanyWebsiteUrl(co.website);
 
   return (
     <div
@@ -14,11 +20,22 @@ export function LegalOperatorCard({ contact }: { contact: ContactConfig }) {
       <div className="space-y-2 text-sm" style={{ color: "var(--text-muted)" }}>
         {co.fullName.trim() ? <p>{co.fullName}</p> : null}
         {co.shortName.trim() && co.shortName !== co.fullName ? <p>{co.shortName}</p> : null}
-        {co.inn.trim() || co.ogrnip.trim() ? (
+        {co.inn.trim() || registration.length ? (
           <p>
-            {co.inn.trim() ? <>ИНН: {co.inn}</> : null}
-            {co.inn.trim() && co.ogrnip.trim() ? " · " : null}
-            {co.ogrnip.trim() ? <>ОГРНИП: {co.ogrnip}</> : null}
+            {[
+              co.inn.trim() ? `ИНН: ${co.inn}` : null,
+              ...registration.map((row) => `${row.label}: ${row.value}`),
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+        ) : null}
+        {websiteHref ? (
+          <p>
+            Ссылка:{" "}
+            <a href={websiteHref} target="_blank" rel="noopener noreferrer" className="underline" style={{ color: "var(--accent)" }}>
+              {co.website.trim() || websiteHref}
+            </a>
           </p>
         ) : null}
         {co.postalAddress.trim() ? <p>Адрес: {co.postalAddress}</p> : null}

@@ -17,7 +17,9 @@ const KEYS = [
   "company_full_name",
   "company_short_name",
   "company_inn",
+  "company_ogrn",
   "company_ogrnip",
+  "company_website",
   "company_postal_address",
   "bank_name",
   "bank_account",
@@ -47,7 +49,9 @@ const loadContactConfigCached = unstable_cache(
       if (m.company_full_name?.trim()) d.company.fullName = m.company_full_name.trim();
       if (m.company_short_name?.trim()) d.company.shortName = m.company_short_name.trim();
       if (m.company_inn?.trim()) d.company.inn = m.company_inn.trim();
+      if (m.company_ogrn?.trim()) d.company.ogrn = m.company_ogrn.trim();
       if (m.company_ogrnip?.trim()) d.company.ogrnip = m.company_ogrnip.trim();
+      if (m.company_website?.trim()) d.company.website = m.company_website.trim();
       if (m.company_postal_address?.trim()) d.company.postalAddress = m.company_postal_address.trim();
       if (m.bank_name?.trim()) d.company.bank.name = m.bank_name.trim();
       if (m.bank_account?.trim()) d.company.bank.account = m.bank_account.trim();

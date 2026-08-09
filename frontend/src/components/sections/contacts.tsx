@@ -17,22 +17,30 @@ import {
   OFFICE_METRO_DIRECTIONS,
 } from "@/lib/office-map";
 import { useContactConfig } from "@/lib/contact-config-context";
+import {
+  companyRegistrationLabels,
+  normalizeCompanyWebsiteUrl,
+} from "@/lib/company-requisites";
 import { maxMessengerChatUrl } from "@/lib/messenger-links";
 
 function RequisitesBlock() {
   const [open, setOpen] = useState(false);
   const contact = useContactConfig();
   const c = contact.company;
-  const rows = [
+  const websiteHref = normalizeCompanyWebsiteUrl(c.website);
+  const rows: Array<{ label: string; value: string; href?: string }> = [
     { label: "Полное наименование", value: c.fullName },
     { label: "Сокращённое", value: c.shortName },
     { label: "ИНН", value: c.inn },
-    { label: "ОГРНИП", value: c.ogrnip },
+    ...companyRegistrationLabels(c),
     { label: "Юридический адрес", value: c.postalAddress },
     { label: "Банк", value: c.bank.name },
     { label: "Расчётный счёт", value: c.bank.account },
     { label: "Корр. счёт", value: c.bank.corrAccount },
     { label: "БИК", value: c.bank.bic },
+    ...(websiteHref
+      ? [{ label: "Ссылка", value: c.website.trim() || websiteHref, href: websiteHref }]
+      : []),
   ].filter((r) => r.value.trim());
 
   if (rows.length === 0) return null;
@@ -64,14 +72,14 @@ function RequisitesBlock() {
 
       <div
         className="overflow-hidden transition-all duration-500 ease-in-out"
-        style={{ maxHeight: open ? "600px" : "0", opacity: open ? 1 : 0 }}
+        style={{ maxHeight: open ? "900px" : "0", opacity: open ? 1 : 0 }}
       >
         <div
           className="px-5 sm:px-6 pb-5 sm:pb-6 border-t"
           style={{ borderColor: "var(--border)" }}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 pt-4">
-            {rows.map(({ label, value }) => (
+            {rows.map(({ label, value, href }) => (
               <div key={label} className="py-1">
                 <p
                   className="text-[10px] uppercase tracking-[0.15em] mb-1"
@@ -79,12 +87,25 @@ function RequisitesBlock() {
                 >
                   {label}
                 </p>
-                <p
-                  className="text-xs sm:text-sm font-mono tabular-nums break-all"
-                  style={{ color: "var(--text-muted)" }}
-                >
-                  {value}
-                </p>
+                {href ? (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-start gap-1.5 text-xs sm:text-sm font-mono tabular-nums break-all underline-offset-2 hover:underline"
+                    style={{ color: "var(--accent)" }}
+                  >
+                    <span className="min-w-0">{value}</span>
+                    <ExternalLink size={14} className="mt-0.5 shrink-0 opacity-70" aria-hidden />
+                  </a>
+                ) : (
+                  <p
+                    className="text-xs sm:text-sm font-mono tabular-nums break-all"
+                    style={{ color: "var(--text-muted)" }}
+                  >
+                    {value}
+                  </p>
+                )}
               </div>
             ))}
           </div>
