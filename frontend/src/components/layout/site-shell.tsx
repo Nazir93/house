@@ -18,13 +18,18 @@ import { SmartCaptchaGate } from "../smartcaptcha-provider";
 import { DiscussProjectFab } from "./discuss-project-fab";
 import { PwaInstallBanner } from "../pwa/pwa-install-banner";
 import { ProjectCompareBar } from "../projects/project-compare-bar";
+import {
+  isAccountShellPath,
+  isAdminShellPath,
+  isAdvertisingLandingPath,
+} from "@/lib/site-shell-routes";
 import { isLowPerfDevice } from "@/lib/use-perf";
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAdmin = pathname.startsWith("/admin");
-  const isAccount = pathname.startsWith("/account");
-  const isAdvertisingLanding = pathname.startsWith("/lp");
+  const isAdmin = isAdminShellPath(pathname);
+  const isAccount = isAccountShellPath(pathname);
+  const isAdvertisingLanding = isAdvertisingLandingPath(pathname);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -41,6 +46,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       <SmartCaptchaGate>
         <RouteScrollReset />
         <RevealObserver />
+        {/* CTA LP открывают openModalToEstimate — без ContactModal клик «молчит». */}
+        <ContactModal />
         <main className="min-h-screen">{children}</main>
         <CookieBanner />
       </SmartCaptchaGate>
