@@ -277,7 +277,7 @@ export function LpProjectsSection({
                 <p className="mt-4 text-lg font-bold text-[var(--accent)]">
                   {listingPrice > 0 ? `от ${formatRub(listingPrice)}` : "Цена по запросу"}
                 </p>
-                <div className="mt-5 flex flex-col gap-2 sm:flex-row">
+                <div className="relative z-10 mt-5 flex flex-col gap-2 sm:flex-row">
                   <Link
                     href={`/projects/${project.slug}`}
                     className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--bg-secondary)_80%,transparent)] px-4 text-sm font-bold transition hover:bg-[color-mix(in_srgb,var(--accent)_12%,var(--bg-secondary))]"
@@ -289,6 +289,7 @@ export function LpProjectsSection({
                     {...lpProjectCardLeadMeta(config, project)}
                     className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl px-4 text-sm font-bold transition hover:opacity-95"
                     style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
+                    aria-label={`${primaryCta}: ${project.title}`}
                   >
                     {primaryCta}
                   </LpContactCta>

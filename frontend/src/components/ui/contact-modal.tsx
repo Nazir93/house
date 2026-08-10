@@ -133,6 +133,17 @@ function ProjectEstimateLeadForm({
               ? `Перезвоним и уточним расчёт по проекту «${projectTitle}».`
               : "Перезвоним, уточним задачу и подготовим ориентир по смете."}
         </p>
+        {projectTitle ? (
+          <p
+            className="mt-3 inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.08em]"
+            style={{
+              backgroundColor: "color-mix(in srgb, var(--accent) 14%, transparent)",
+              color: "var(--accent)",
+            }}
+          >
+            Проект: {projectTitle}
+          </p>
+        ) : null}
 
         <form onSubmit={submit} className="mt-7 grid gap-4">
           <input
