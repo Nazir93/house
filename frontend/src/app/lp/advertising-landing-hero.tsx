@@ -258,18 +258,34 @@ function HeroCtas({
   );
 }
 
-function DarkHeroBackdrop({ heroImage, theme }: { heroImage: string; theme: LpThemeSpec }) {
+function DarkHeroBackdrop({
+  heroImage,
+  theme,
+  objectPosition,
+}: {
+  heroImage: string;
+  theme: LpThemeSpec;
+  objectPosition?: string;
+}) {
   return (
     <div className="pointer-events-none absolute inset-0" aria-hidden>
-      <CmsImage src={heroImage} alt="" fill priority sizes="100vw" className="object-cover object-center" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/82 via-black/52 to-black/16" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/72 via-black/10 to-black/42" />
+      <CmsImage
+        src={heroImage}
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover"
+        style={objectPosition ? { objectPosition } : { objectPosition: "center center" }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/78 via-black/48 to-black/18" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/68 via-black/12 to-black/38" />
       <div
         className="absolute inset-0"
         style={{
           background: theme.heroWarmTint
-            ? `radial-gradient(circle at 20% 20%, rgba(246,246,244,0.14), transparent 32%), radial-gradient(circle at 78% 72%, rgba(15,61,46,0.32), transparent 36%), radial-gradient(circle at 50% 100%, ${theme.heroWarmTint}, transparent 55%)`
-            : "radial-gradient(circle at 20% 20%, rgba(246,246,244,0.14), transparent 32%), radial-gradient(circle at 78% 72%, rgba(15,61,46,0.32), transparent 36%)",
+            ? `radial-gradient(circle at 20% 20%, rgba(246,246,244,0.14), transparent 32%), radial-gradient(circle at 78% 72%, rgba(15,61,46,0.28), transparent 36%), radial-gradient(circle at 50% 100%, ${theme.heroWarmTint}, transparent 55%)`
+            : "radial-gradient(circle at 20% 20%, rgba(246,246,244,0.14), transparent 32%), radial-gradient(circle at 78% 72%, rgba(15,61,46,0.28), transparent 36%)",
         }}
       />
     </div>
@@ -285,7 +301,11 @@ function CinematicCenterHero({ config, heroImage, theme, priceFromRub }: HeroPro
 
   return (
     <section className="relative isolate min-h-[100svh] min-h-[100dvh] w-full overflow-hidden bg-[#07110e]">
-      <DarkHeroBackdrop heroImage={heroImage} theme={theme} />
+      <DarkHeroBackdrop
+        heroImage={heroImage}
+        theme={theme}
+        objectPosition={config.heroImageObjectPosition}
+      />
       <div className="container relative z-10 mx-auto flex min-h-[100svh] min-h-[100dvh] flex-col items-center justify-center px-4 pb-[max(5.5rem,env(safe-area-inset-bottom,0px))] pt-[calc(5.25rem+env(safe-area-inset-top,0px))] sm:px-5 sm:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] md:pt-[calc(6rem+env(safe-area-inset-top,0px))]">
         <div
           className="pointer-events-auto w-full max-w-3xl rounded-2xl p-5 text-center sm:rounded-[1.35rem] sm:p-7"
@@ -323,7 +343,11 @@ function FlagshipSplitHero({ config, heroImage, theme, priceFromRub }: HeroProps
 
   return (
     <section className="relative isolate min-h-[100svh] min-h-[100dvh] w-full overflow-hidden bg-[#07110e]">
-      <DarkHeroBackdrop heroImage={heroImage} theme={theme} />
+      <DarkHeroBackdrop
+        heroImage={heroImage}
+        theme={theme}
+        objectPosition={config.heroImageObjectPosition}
+      />
       <div className="container relative z-10 mx-auto grid min-h-[100svh] min-h-[100dvh] items-center gap-5 px-4 pb-[max(5.5rem,env(safe-area-inset-bottom,0px))] pt-[calc(5.25rem+env(safe-area-inset-top,0px))] sm:gap-8 sm:px-5 sm:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] lg:grid-cols-[1.05fr_0.95fr] lg:pt-[calc(6rem+env(safe-area-inset-top,0px))]">
         <div data-reveal="section">
           <div
@@ -441,7 +465,11 @@ function ModernWideHero({ config, heroImage, theme, priceFromRub }: HeroProps) {
 
   return (
     <section className="relative isolate min-h-[88svh] w-full overflow-hidden bg-[#07110e]">
-      <DarkHeroBackdrop heroImage={heroImage} theme={theme} />
+      <DarkHeroBackdrop
+        heroImage={heroImage}
+        theme={theme}
+        objectPosition={config.heroImageObjectPosition}
+      />
       <div className="container relative z-10 mx-auto flex min-h-[88svh] flex-col justify-end px-4 pb-[max(5.5rem,env(safe-area-inset-bottom,0px))] pt-[calc(5.25rem+env(safe-area-inset-top,0px))] sm:px-5 sm:pb-12 md:pb-16">
         <div className="max-w-2xl rounded-2xl p-5 sm:rounded-[1.35rem] sm:p-6" style={matteGlassStyle} data-reveal="section">
           {config.eyebrow ? (
@@ -486,7 +514,11 @@ function LayoutSplitHero({ config, heroImage, theme, priceFromRub }: HeroProps) 
 
   return (
     <section className="relative isolate min-h-[100svh] min-h-[100dvh] w-full overflow-hidden bg-[#07110e]">
-      <DarkHeroBackdrop heroImage={heroImage} theme={theme} />
+      <DarkHeroBackdrop
+        heroImage={heroImage}
+        theme={theme}
+        objectPosition={config.heroImageObjectPosition}
+      />
       <div className="container relative z-10 mx-auto grid min-h-[100svh] min-h-[100dvh] items-center gap-5 px-4 pb-[max(5.5rem,env(safe-area-inset-bottom,0px))] pt-[calc(5.25rem+env(safe-area-inset-top,0px))] sm:gap-8 sm:px-5 sm:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))] lg:grid-cols-2 lg:pt-[calc(6rem+env(safe-area-inset-top,0px))]">
         <div className="rounded-2xl p-5 sm:rounded-[1.35rem] sm:p-6" style={matteGlassStyle} data-reveal="section">
           {config.eyebrow ? (

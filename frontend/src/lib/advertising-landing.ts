@@ -56,6 +56,13 @@ export type AdvertisingLandingConfig = {
   heroMainHref?: string;
   /** Запасное фото hero, если нет рендера проекта / портфолио */
   heroImageFallback?: string;
+  /**
+   * Явный баннер LP (приоритет над медиа проектов/портфолио).
+   * Для посадочных с отдельной фотосъёмкой/рендером.
+   */
+  heroImage?: string;
+  /** object-position для hero, напр. "52% 40%" — кадрирование дома в кадре */
+  heroImageObjectPosition?: string;
   /** Блок «Факты о компании» — вступление (цифры общие) */
   factsIntro?: string;
   /** Блок «Каталог проектов» — вступление и примечание */
@@ -291,7 +298,9 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
       "Проекты, комплектация и строительство под ключ в Санкт-Петербурге и Ленинградской области",
     heroMainCta: "Выбрать проект дома",
     heroMainHref: "#projects",
-    heroImageFallback: "/images/banner/banner-hero-03.png",
+    heroImage: "/images/lp/kirpich-hero.png",
+    heroImageObjectPosition: "54% 42%",
+    heroImageFallback: "/images/lp/kirpich-hero.png",
     eyebrow: "Кирпичные дома под ключ",
     lead:
       "Подберём проект под участок и бюджет, покажем реальные объекты и рассчитаем комплектацию — от коробки до инженерии и фасада.",
@@ -666,6 +675,9 @@ export function pickAdvertisingLandingHeroImage(
   projects: HouseProjectItem[],
   portfolio: BuiltObjectItem[],
 ): string {
+  const dedicated = config.heroImage?.trim();
+  if (dedicated) return dedicated;
+
   const fromProject = firstMediaUrl(projects[0]?.media);
   if (fromProject) return fromProject;
 

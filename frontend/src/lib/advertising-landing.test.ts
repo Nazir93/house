@@ -9,6 +9,7 @@ import {
   budgetLabelById,
   getAdvertisingLandingConfig,
   mortgageLabelById,
+  pickAdvertisingLandingHeroImage,
   pickAdvertisingLandingPortfolio,
   pickAdvertisingLandingProjects,
 } from "@/lib/advertising-landing";
@@ -166,5 +167,23 @@ describe("advertising landing config", () => {
       ]),
     ).toBe(9_500_000);
     expect(advertisingLandingMinProjectPrice([])).toBeNull();
+  });
+
+  it("kirpich: явный heroImage приоритетнее медиа проектов", () => {
+    const config = getAdvertisingLandingConfig("kirpich")!;
+    expect(config.heroImage).toBe("/images/lp/kirpich-hero.png");
+    expect(config.heroImageObjectPosition).toBeTruthy();
+    const picked = pickAdvertisingLandingHeroImage(
+      config,
+      [
+        project({
+          slug: "other",
+          materials: ["Кирпич"],
+          media: [{ id: "1", type: "RENDER", url: "/images/other.png", order: 0 }],
+        }),
+      ],
+      [],
+    );
+    expect(picked).toBe("/images/lp/kirpich-hero.png");
   });
 });
