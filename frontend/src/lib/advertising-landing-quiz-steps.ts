@@ -12,15 +12,33 @@ export const LP_QUIZ_ALL_STEPS = [
 export type LpQuizStepId = (typeof LP_QUIZ_ALL_STEPS)[number]["id"];
 export type LpQuizStep = (typeof LP_QUIZ_ALL_STEPS)[number];
 
+export type LpQuizFloorId = "1" | "1.5" | "2";
+
+export type ResolveLpQuizStepsOptions = {
+  /** Материал уже задан лендингом (кирпич / газобетон / керамоблок). */
+  wallMaterialPreset?: WallMaterialId | null;
+  /** Этажность уже задана (одноэтажный LP). */
+  floorsPreset?: LpQuizFloorId | null;
+};
+
 /**
- * Если материал уже задан лендингом (кирпич / газобетон / керамоблок) —
- * шаг «Материал стен» не показываем; в заявку уходит preset.
+ * Скрываем шаги, ответы на которые уже заданы конфигом лендинга;
+ * в заявку уходят preset-значения.
  */
-export function resolveLpQuizSteps(wallMaterialPreset?: WallMaterialId | null): LpQuizStep[] {
-  if (wallMaterialPreset) {
-    return LP_QUIZ_ALL_STEPS.filter((step) => step.id !== "material");
+export function resolveLpQuizSteps(options?: ResolveLpQuizStepsOptions | WallMaterialId | null): LpQuizStep[] {
+  const opts: ResolveLpQuizStepsOptions =
+    typeof options === "string" || options == null
+      ? { wallMaterialPreset: options ?? null }
+      : options;
+
+  let steps: LpQuizStep[] = [...LP_QUIZ_ALL_STEPS];
+  if (opts.wallMaterialPreset) {
+    steps = steps.filter((step) => step.id !== "material");
   }
-  return [...LP_QUIZ_ALL_STEPS];
+  if (opts.floorsPreset) {
+    steps = steps.filter((step) => step.id !== "floors");
+  }
+  return steps;
 }
 
 /** Текст слева от квиза: «5 шагов: площадь, этажность…». */
@@ -31,6 +49,11 @@ export function lpQuizStepsBlurb(steps: ReadonlyArray<{ summary: string }>): str
   const readable =
     lastComma === -1 ? list : `${list.slice(0, lastComma)} и ${list.slice(lastComma + 2)}`;
   return `${n} ${pluralSteps(n)}: ${readable}.`;
+}
+
+/** Краткая цепочка шагов для hero-карточки калькулятора. */
+export function lpQuizStepsChain(steps: ReadonlyArray<{ summary: string }>): string {
+  return `${steps.map((s) => s.summary).join(" → ")}. Результат передадим менеджеру для уточнения сметы.`;
 }
 
 function pluralSteps(n: number): string {

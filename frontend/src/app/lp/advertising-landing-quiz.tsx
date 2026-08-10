@@ -100,24 +100,30 @@ export function AdvertisingLandingQuiz({
   leadSource,
   serviceLabel,
   initialWallMaterial,
+  initialFloors,
   onSuccess,
 }: {
   leadSource: string;
   serviceLabel: string;
   initialWallMaterial?: WallMaterialId;
+  initialFloors?: "1" | "1.5" | "2";
   onSuccess: (name: string) => void;
 }) {
   const getSmartCaptchaToken = useSmartCaptchaToken();
   const quizStarted = useRef(false);
   const steps = useMemo(
-    () => resolveLpQuizSteps(initialWallMaterial),
-    [initialWallMaterial],
+    () =>
+      resolveLpQuizSteps({
+        wallMaterialPreset: initialWallMaterial,
+        floorsPreset: initialFloors,
+      }),
+    [initialWallMaterial, initialFloors],
   );
 
   const [stepIndex, setStepIndex] = useState(0);
   const [wallMaterial, setWallMaterial] = useState<WallMaterialId>(initialWallMaterial ?? "gas");
   const [area, setArea] = useState("");
-  const [floors, setFloors] = useState("");
+  const [floors, setFloors] = useState(initialFloors ?? "");
   const [budget, setBudget] = useState("");
   const [mortgage, setMortgage] = useState("");
   const [name, setName] = useState("");

@@ -50,6 +50,8 @@ export type AdvertisingLandingConfig = {
   highlightMaterial?: "gas" | "brick" | "ceramic";
   quizDefaults?: {
     wallMaterial?: "gas" | "ceramic" | "brick";
+    /** Предустановленная этажность — шаг квиза скрывается (напр. одноэтажный LP). */
+    floors?: "1" | "1.5" | "2";
     serviceLabel: string;
   };
   includes: string[];
@@ -530,7 +532,7 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
       "Одноэтажные дома под ключ: проекты до 150–220 м², цена, комплектация, ипотека и расчёт сметы.",
     h1: "Одноэтажный дом под ключ: удобные планировки и понятная смета",
     heroSubtitle:
-      "Без лестниц — удобные планировки для семьи, прозрачная смета и выбор материала в одном квизе",
+      "Без лестниц — удобные планировки для семьи, прозрачная смета и выбор материала стен",
     heroMainCta: "Смотреть планировки",
     heroMainHref: "#projects",
     heroImageFallback: "/images/banner/banner-hero-05.png",
@@ -550,7 +552,7 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
       "Подбираем одноэтажную планировку, согласуем материал и смету, затем ведём стройку с возможностью посмотреть аналогичные дома на объекте.",
     reviewsIntro:
       "Семьи выбирают одноэтажный формат за удобство планировки и отсутствие лестниц — на экскурсии можно оценить это вживую.",
-    quizDefaults: { serviceLabel: "LP: одноэтажный дом" },
+    quizDefaults: { floors: "1", serviceLabel: "LP: одноэтажный дом" },
     includes: [
       "Подбор одноэтажных проектов до 150–220 м²",
       "Выбор материала: газобетон, кирпич, керамоблок",

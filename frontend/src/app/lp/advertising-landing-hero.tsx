@@ -10,6 +10,10 @@ import {
   ADVERTISING_LP_NAV,
   type AdvertisingLandingConfig,
 } from "@/lib/advertising-landing";
+import {
+  lpQuizStepsChain,
+  resolveLpQuizSteps,
+} from "@/lib/advertising-landing-quiz-steps";
 import { formatRub } from "@/lib/construction-shared";
 import { PHONE, PHONE_RAW, WORKING_HOURS } from "@/lib/constants";
 import { resolveLpThemeSpec, type LpThemeSpec } from "@/lib/lp-themes";
@@ -485,10 +489,22 @@ function CalculatorLightHero({ config }: HeroProps) {
           data-reveal="card"
         >
           <p className="text-xs font-bold uppercase tracking-[0.14em]" style={{ color: "var(--accent)" }}>
-            Мини-квиз · {config.quizDefaults?.wallMaterial ? "5" : "6"} шагов
+            Мини-квиз ·{" "}
+            {
+              resolveLpQuizSteps({
+                wallMaterialPreset: config.quizDefaults?.wallMaterial,
+                floorsPreset: config.quizDefaults?.floors,
+              }).length
+            }{" "}
+            шагов
           </p>
           <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
-            Материал → площадь → этажность → бюджет → ипотека → контакты. Результат передадим менеджеру для уточнения сметы.
+            {lpQuizStepsChain(
+              resolveLpQuizSteps({
+                wallMaterialPreset: config.quizDefaults?.wallMaterial,
+                floorsPreset: config.quizDefaults?.floors,
+              }),
+            )}
           </p>
           <LpContactCta
             source={`lp-${config.slug}-hero-primary`}

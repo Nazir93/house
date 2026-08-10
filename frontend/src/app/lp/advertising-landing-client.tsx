@@ -62,7 +62,12 @@ function LpQuizSection({
           <div className="mt-6 space-y-4 text-sm" style={{ color: "var(--text-muted)" }}>
             <p className="flex gap-3">
               <ShieldCheck className="h-5 w-5 shrink-0 text-[var(--accent)]" aria-hidden />
-              {lpQuizStepsBlurb(resolveLpQuizSteps(config.quizDefaults?.wallMaterial))}
+              {lpQuizStepsBlurb(
+                resolveLpQuizSteps({
+                  wallMaterialPreset: config.quizDefaults?.wallMaterial,
+                  floorsPreset: config.quizDefaults?.floors,
+                }),
+              )}
             </p>
             <p className="flex gap-3">
               <MapPin className="h-5 w-5 shrink-0 text-[var(--accent)]" aria-hidden />
@@ -78,6 +83,7 @@ function LpQuizSection({
             leadSource={config.source}
             serviceLabel={config.quizDefaults?.serviceLabel ?? `LP: ${config.slug}`}
             initialWallMaterial={config.quizDefaults?.wallMaterial}
+            initialFloors={config.quizDefaults?.floors}
             onSuccess={onSuccess}
           />
         )}
