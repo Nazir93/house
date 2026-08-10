@@ -178,7 +178,14 @@ export default function AdminTeamPage() {
             </div>
           </div>
 
-          <AdminMediaUpload label="Фото" accept="image" value={form.photoUrl} onChange={(url) => set("photoUrl", url)} />
+          <AdminMediaUpload
+            label="Фото"
+            accept="image"
+            value={form.photoUrl}
+            onChange={(url) => set("photoUrl", url)}
+            nameHint={form.name || "team"}
+            role="photo"
+          />
 
           <div>
             <label className="block text-xs text-white/40 mb-1">Описание</label>

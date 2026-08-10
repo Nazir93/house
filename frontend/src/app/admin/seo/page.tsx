@@ -342,6 +342,8 @@ function MetaTab() {
                     accept="image"
                     value={getField(path, "ogImage")}
                     onChange={(url) => updateDraft(path, "ogImage", url)}
+                    nameHint={path === "/" ? "home" : path.replace(/^\//, "").replace(/\//g, "-") || "page"}
+                    role="og"
                   />
                 </div>
 
@@ -355,6 +357,7 @@ function MetaTab() {
                       onChange={(v) => updateDraft(path, "bodyHtml", v)}
                       placeholder="Введите текст страницы «Услуги»..."
                       minHeight="250px"
+                      nameHint="services"
                     />
                   </div>
                 )}

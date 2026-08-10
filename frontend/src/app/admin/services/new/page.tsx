@@ -110,6 +110,8 @@ export default function AdminNewServicePage() {
           accept="image"
           value={coverImage}
           onChange={setCoverImage}
+          nameHint={title || "service"}
+          role="cover"
         />
 
         <AdminMediaUpload
@@ -117,6 +119,8 @@ export default function AdminNewServicePage() {
           accept="video"
           value={videoUrl}
           onChange={setVideoUrl}
+          nameHint={title || "service"}
+          role="video"
         />
 
         <AdminMediaUpload
@@ -124,6 +128,8 @@ export default function AdminNewServicePage() {
           accept="image"
           value={bannerImageDesktop}
           onChange={setBannerImageDesktop}
+          nameHint={title || "service"}
+          role="banner"
         />
 
         <AdminMediaUpload
@@ -131,6 +137,8 @@ export default function AdminNewServicePage() {
           accept="image"
           value={bannerImageMobile}
           onChange={setBannerImageMobile}
+          nameHint={title || "service"}
+          role="banner-mobile"
         />
 
         <div>

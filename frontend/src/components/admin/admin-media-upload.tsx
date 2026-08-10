@@ -15,6 +15,8 @@ export function AdminMediaUpload({
   multiple = false,
   showHint = true,
   profile = "default",
+  nameHint,
+  role,
   className = "",
 }: {
   label: string;
@@ -26,6 +28,9 @@ export function AdminMediaUpload({
   showHint?: boolean;
   /** hero — главный баннер: до 3840px, качество 88 (не сжимать агрессивно). */
   profile?: "default" | "hero";
+  /** slug/title — человекочитаемое имя файла вместо ChatGPT_Image… */
+  nameHint?: string;
+  role?: string;
   className?: string;
 }) {
   const [uploading, setUploading] = useState(false);
@@ -37,7 +42,7 @@ export function AdminMediaUpload({
     setError("");
     setBatchHint("");
     setUploading(true);
-    const res = await uploadAdminMedia(file, { profile });
+    const res = await uploadAdminMedia(file, { profile, nameHint, role });
     setUploading(false);
     if (res.error) setError(res.error);
     else if (res.url) onChange(res.url);
@@ -52,7 +57,7 @@ export function AdminMediaUpload({
     try {
       for (let i = 0; i < list.length; i++) {
         setBatchHint(`${i + 1} / ${list.length}`);
-        const res = await uploadAdminMedia(list[i]!, { profile });
+        const res = await uploadAdminMedia(list[i]!, { profile, nameHint, role });
         if (res.error) {
           setError(`${res.error} (файл ${i + 1} из ${list.length}: ${list[i]!.name})`);
           break;

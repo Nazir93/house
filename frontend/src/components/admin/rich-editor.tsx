@@ -31,6 +31,8 @@ interface RichEditorProps {
   /** Минимальная высота редактируемой области */
   minHeight?: string;
   className?: string;
+  /** Для SEO-имени файла при вставке картинки */
+  nameHint?: string;
 }
 
 function ToolbarButton({
@@ -73,6 +75,7 @@ export function RichEditor({
   placeholder = "Начните писать...",
   minHeight = "200px",
   className = "",
+  nameHint,
 }: RichEditorProps) {
   const suppressUpdate = useRef(false);
 
@@ -127,17 +130,17 @@ export function RichEditor({
     input.onchange = async () => {
       const file = input.files?.[0];
       if (!file) return;
-      const { url, error } = await uploadAdminMedia(file);
+      const { url, error } = await uploadAdminMedia(file, { nameHint, role: "content" });
       if (error) {
         alert(error);
         return;
       }
       if (url) {
-        editor.chain().focus().setImage({ src: url, alt: "" }).run();
+        editor.chain().focus().setImage({ src: url, alt: nameHint?.trim() || "" }).run();
       }
     };
     input.click();
-  }, [editor]);
+  }, [editor, nameHint]);
 
   const insertLink = useCallback(() => {
     if (!editor) return;

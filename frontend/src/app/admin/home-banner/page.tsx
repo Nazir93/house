@@ -262,6 +262,8 @@ export default function AdminHomeBannerPage() {
             accept="image"
             profile="hero"
             value={data.backgrounds.light}
+            nameHint="home-banner"
+            role="day"
             onChange={(url) => {
               setData((prev) => ({ ...prev, backgrounds: { ...prev.backgrounds, light: url } }));
               setSaved(false);
@@ -272,6 +274,8 @@ export default function AdminHomeBannerPage() {
             accept="image"
             profile="hero"
             value={data.backgrounds.dark}
+            nameHint="home-banner"
+            role="night"
             onChange={(url) => {
               setData((prev) => ({ ...prev, backgrounds: { ...prev.backgrounds, dark: url } }));
               setSaved(false);
@@ -340,6 +344,8 @@ export default function AdminHomeBannerPage() {
                 label="Изображение промо"
                 accept="image"
                 value={promo.image}
+                nameHint={promo.title || promo.label || promo.id || "home-promo"}
+                role="promo"
                 onChange={(url) => patchPromo(index, { image: url })}
               />
 

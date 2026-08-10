@@ -306,12 +306,16 @@ export default function AdminReviewsPage() {
               accept="image"
               value={form.authorPhoto}
               onChange={(url) => set("authorPhoto", url)}
+              nameHint={form.authorName || form.objectName || "review"}
+              role="author"
             />
             <AdminMediaUpload
               label="Видео к отзыву"
               accept="video"
               value={form.videoUrl}
               onChange={(url) => set("videoUrl", url)}
+              nameHint={form.objectName || form.authorName || "review"}
+              role="video"
             />
           </div>
           {form.photoUrls.length > 0 ? (

@@ -6,15 +6,17 @@ import {
   ArrowUpRight,
   Building2,
   CalendarDays,
-  Clock3,
+  ClipboardCheck,
   FileCheck2,
   Landmark,
   MapPin,
   MessageCircle,
+  MonitorSmartphone,
   Phone,
   Scale,
   ShieldCheck,
   Star,
+  type LucideIcon,
 } from "lucide-react";
 
 import { CmsImage } from "@/components/ui/cms-image";
@@ -38,9 +40,18 @@ import {
 import type { HouseProjectItem } from "@/lib/construction-data";
 import { METRIKA_GOALS, trackMetrikaGoal } from "@/lib/analytics-goals";
 import { PHONE, PHONE_RAW, SOCIAL_LINKS } from "@/lib/constants";
+import { LP_GUARANTEE_ITEMS, LP_GUARANTEES_INTRO, type LpGuaranteeItem } from "@/lib/lp-guarantees";
+import { LpContactCta, lpProjectCardLeadMeta, lpServiceLabel } from "./lp-contact-cta";
 import { resolveProjectListingPriceRub } from "@/lib/project-listing-price";
 import { revealDelayStyle } from "@/lib/reveal-animation";
 import { cn } from "@/lib/utils";
+
+const LP_GUARANTEE_ICONS: Record<LpGuaranteeItem["icon"], LucideIcon> = {
+  shield: ShieldCheck,
+  estimate: FileCheck2,
+  quality: ClipboardCheck,
+  cabinet: MonitorSmartphone,
+};
 
 /** Премиальная карточка без обводки — только мягкая тень и фон. */
 const lpSoftCard =
@@ -60,43 +71,84 @@ function projectCover(project: HouseProjectItem): string | null {
   return project.media.find((item) => item.type === "RENDER")?.url ?? project.media[0]?.url ?? null;
 }
 
+function LpFactStatCard({
+  stat,
+  index,
+}: {
+  stat: (typeof ADVERTISING_LP_FACT_STATS)[number];
+  index: number;
+}) {
+  const body = (
+    <>
+      <p className="font-heading text-[clamp(1.5rem,3vw,2.25rem)] font-bold leading-none tracking-tight text-[var(--text)] whitespace-nowrap">
+        {stat.value}
+      </p>
+      <p
+        className="mt-2.5 flex min-h-[2.5rem] max-w-[11.5rem] items-start justify-center text-[11px] font-semibold uppercase leading-snug tracking-[0.08em]"
+        style={{ color: "var(--text-muted)" }}
+      >
+        {stat.label}
+      </p>
+    </>
+  );
+
+  const shellClass = cn(
+    "flex h-full flex-col items-center justify-start text-center transition",
+    stat.href && "rounded-xl hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent)]",
+  );
+
+  if (stat.href && stat.external) {
+    return (
+      <a
+        href={stat.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        data-reveal="card"
+        style={revealDelayStyle(index)}
+        className={shellClass}
+      >
+        {body}
+      </a>
+    );
+  }
+
+  if (stat.href) {
+    return (
+      <Link href={stat.href} data-reveal="card" style={revealDelayStyle(index)} className={shellClass}>
+        {body}
+      </Link>
+    );
+  }
+
+  return (
+    <article data-reveal="card" style={revealDelayStyle(index)} className={shellClass}>
+      {body}
+    </article>
+  );
+}
+
 export function LpFactsSection({ config, theme }: { config: AdvertisingLandingConfig; theme?: LpThemeSpec }) {
   const intro = advertisingLandingFactsIntro(config);
   const spec = theme ?? resolveLpThemeSpec(config);
 
   return (
-    <section className="py-14 md:py-20" style={{ backgroundColor: spec.sectionAltBg }}>
+    <section className="py-10 md:py-14" style={{ backgroundColor: spec.sectionAltBg }}>
       <div className="container mx-auto max-w-4xl px-5 text-center" data-reveal="section">
         <SectionEyebrow>Факты о компании</SectionEyebrow>
         <h2 className="mx-auto mt-3 max-w-3xl text-balance font-heading text-xl font-bold leading-snug tracking-tight md:text-2xl">
           {config.h1}
         </h2>
-        <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed md:text-[15px]" style={{ color: "var(--text-muted)" }}>
+        <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed md:text-[15px]" style={{ color: "var(--text-muted)" }}>
           {intro}
         </p>
 
-        <div className="mt-12 grid gap-10 sm:grid-cols-2 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-12">
+        <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-6 lg:grid-cols-4 lg:gap-x-8">
           {ADVERTISING_LP_FACT_STATS.map((stat, index) => (
-            <article
-              key={stat.label}
-              data-reveal="card"
-              style={revealDelayStyle(index)}
-              className="flex flex-col items-center text-center"
-            >
-              <p className="font-heading text-[clamp(1.75rem,3.5vw,2.75rem)] font-bold leading-none tracking-tight text-[var(--text)] whitespace-nowrap">
-                {stat.value}
-              </p>
-              <p
-                className="mt-3 max-w-[12rem] text-[11px] font-semibold uppercase leading-snug tracking-[0.08em]"
-                style={{ color: "var(--text-muted)" }}
-              >
-                {stat.label}
-              </p>
-            </article>
+            <LpFactStatCard key={stat.label} stat={stat} index={index} />
           ))}
         </div>
 
-        <p className="mt-12 flex flex-wrap items-center justify-center gap-2 text-sm" style={{ color: "var(--text-muted)" }}>
+        <p className="mt-8 flex flex-wrap items-center justify-center gap-2 text-sm" style={{ color: "var(--text-muted)" }}>
           <MapPin className="h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden />
           <span>
             {ADVERTISING_OFFICE_GEO.city}, {ADVERTISING_OFFICE_GEO.regions} · {ADVERTISING_OFFICE_GEO.address}
@@ -107,57 +159,44 @@ export function LpFactsSection({ config, theme }: { config: AdvertisingLandingCo
   );
 }
 
-const LP_GUARANTEE_ITEMS = [
-  {
-    Icon: ShieldCheck,
-    title: "Гарантия от 5 лет на конструктив",
-    text: "Фиксируем сроки и условия в договоре — вы понимаете, за что отвечаем после сдачи дома.",
-  },
-  {
-    Icon: FileCheck2,
-    title: "Смета до договора",
-    text: "Состав работ и комплектацию согласовываем заранее — без скрытых доплат «по ходу».",
-  },
-  {
-    Icon: Clock3,
-    title: "Понятные сроки и этапы",
-    text: "График работ и поэтапная приёмка: видно, что сделано и что идёт дальше.",
-  },
-] as const;
-
 export function LpGuaranteesSection() {
   return (
-    <section id="guarantees" className="scroll-mt-24 py-12 sm:py-14 md:py-20" style={{ backgroundColor: "var(--bg)" }}>
+    <section id="guarantees" className="scroll-mt-24 py-10 sm:py-12 md:py-14" style={{ backgroundColor: "var(--bg)" }}>
       <div className="container mx-auto px-4 sm:px-5" data-reveal="section">
         <div className="w-full">
           <SectionEyebrow>Гарантии и сроки</SectionEyebrow>
           <h2 className="mt-3 w-full font-heading text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
             Спокойствие на всём пути строительства
           </h2>
-          <p className="mt-4 max-w-4xl text-sm leading-relaxed md:text-[15px]" style={{ color: "var(--text-muted)" }}>
-            Дом под ключ — это не только стены, а понятные обязательства: смета, график и гарантия на конструктив.
+          <p className="mt-3 max-w-4xl text-sm leading-relaxed md:text-[15px]" style={{ color: "var(--text-muted)" }}>
+            {LP_GUARANTEES_INTRO}
           </p>
         </div>
-        <div className="mt-8 grid gap-4 sm:mt-10 sm:gap-5 md:grid-cols-3">
-          {LP_GUARANTEE_ITEMS.map(({ Icon, title, text }, index) => (
-            <article
-              key={title}
-              data-reveal="card"
-              style={revealDelayStyle(index)}
-              className={cn(lpSoftCardAlt, "p-5 md:p-6")}
-            >
-              <span
-                className="flex h-11 w-11 items-center justify-center rounded-2xl"
-                style={{ backgroundColor: "color-mix(in srgb, var(--accent) 14%, transparent)", color: "var(--accent)" }}
+        <div className="mt-6 grid gap-3 sm:mt-8 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {LP_GUARANTEE_ITEMS.map(({ icon, title, text }, index) => {
+            const Icon = LP_GUARANTEE_ICONS[icon];
+            return (
+              <article
+                key={title}
+                data-reveal="card"
+                style={revealDelayStyle(index)}
+                className={cn(lpSoftCardAlt, "flex h-full flex-col p-4 sm:p-5")}
               >
-                <Icon className="h-5 w-5" strokeWidth={1.9} aria-hidden />
-              </span>
-              <h3 className="mt-4 font-heading text-lg font-bold tracking-tight">{title}</h3>
-              <p className="mt-2 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                {text}
-              </p>
-            </article>
-          ))}
+                <span
+                  className="flex h-10 w-10 items-center justify-center rounded-2xl"
+                  style={{ backgroundColor: "color-mix(in srgb, var(--accent) 14%, transparent)", color: "var(--accent)" }}
+                >
+                  <Icon className="h-5 w-5" strokeWidth={1.9} aria-hidden />
+                </span>
+                <h3 className="mt-3 min-h-[2.75rem] font-heading text-base font-bold leading-snug tracking-tight sm:text-lg">
+                  {title}
+                </h3>
+                <p className="mt-2 flex-1 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                  {text}
+                </p>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -246,13 +285,13 @@ export function LpProjectsSection({
                   >
                     Подробнее
                   </Link>
-                  <a
-                    href="#lead-form"
+                  <LpContactCta
+                    {...lpProjectCardLeadMeta(config, project)}
                     className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl px-4 text-sm font-bold transition hover:opacity-95"
                     style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
                   >
                     {primaryCta}
-                  </a>
+                  </LpContactCta>
                 </div>
               </div>
             </article>
@@ -308,117 +347,71 @@ export function LpMaterialComparisonSection({
   theme?: LpThemeSpec;
 }) {
   const spec = theme ?? resolveLpThemeSpec({ slug: "kirpich" });
-  const useColumns = spec.comparisonLayout === "columns";
 
   return (
-    <section className="py-16 md:py-24" style={{ backgroundColor: useColumns ? "var(--bg)" : undefined }}>
+    <section className="py-12 md:py-16" style={{ backgroundColor: spec.sectionAltBg ?? "var(--bg)" }}>
       <div className="container mx-auto px-4 sm:px-5" data-reveal="section">
         <div className="w-full">
-          <SectionEyebrow>Сравнение материалов</SectionEyebrow>
+          <SectionEyebrow>Один дом — три технологии</SectionEyebrow>
           <h2 className="mt-3 w-full font-heading text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl">
             Газобетон, кирпич и керамоблок
           </h2>
-          <p className="mt-4 leading-relaxed" style={{ color: "var(--text-muted)" }}>
-            Сравним по бюджету, скорости строительства, долговечности и комфорту — и подберём оптимальный вариант под ваш участок.
+          <p className="mt-3 max-w-3xl text-sm leading-relaxed md:text-[15px]" style={{ color: "var(--text-muted)" }}>
+            Сравним по бюджету, скорости, нагрузке на фундамент и тепловой инерции — и подберём оптимальный вариант под ваш участок.
           </p>
         </div>
 
-        {useColumns ? (
-          <div className="mt-10 grid gap-5 md:grid-cols-3">
-            {MATERIAL_COMPARISON_ROWS.map((row) => {
-              const highlighted = highlightMaterial === row.id;
-              return (
+        <div className="mt-8 grid items-stretch gap-5 md:mt-10 md:grid-cols-3">
+          {MATERIAL_COMPARISON_ROWS.map((row) => {
+            const highlighted = highlightMaterial === row.id;
+            return (
+              <div key={row.id} className="flex h-full flex-col" data-reveal="card">
+                <div className="mb-2 flex min-h-[1.75rem] items-center justify-center">
+                  {row.badgeAbove ? (
+                    <span
+                      className="rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-[var(--accent-contrast)]"
+                      style={{ backgroundColor: "var(--accent)" }}
+                    >
+                      {row.badgeAbove}
+                    </span>
+                  ) : (
+                    <span className="invisible text-[10px]" aria-hidden>
+                      —
+                    </span>
+                  )}
+                </div>
                 <article
-                  key={row.id}
-                  data-reveal="card"
                   className={cn(
-                    "p-6 transition",
+                    "flex h-full flex-col p-5 sm:p-6",
                     highlighted ? lpSoftCard : lpSoftCardAlt,
                     highlighted && "ring-2 ring-[var(--accent)]/35",
                   )}
                 >
-                  <p className="font-heading text-xl font-bold">
+                  <h3 className="min-h-[3.25rem] font-heading text-lg font-bold leading-snug tracking-tight sm:text-xl">
                     {row.label}
-                    {highlighted ? (
-                      <span className="ml-2 rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--accent-contrast)]" style={{ backgroundColor: "var(--accent)" }}>
-                        ваш запрос
-                      </span>
-                    ) : null}
+                  </h3>
+                  <p className="mt-1 text-xs font-semibold uppercase tracking-[0.06em]" style={{ color: "var(--accent)" }}>
+                    {row.thicknessNote}
                   </p>
-                  <dl className="mt-4 space-y-3 text-sm">
-                    <div>
-                      <dt className="font-semibold">Бюджет</dt>
-                      <dd style={{ color: "var(--text-muted)" }}>{row.priceLevel}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-semibold">Скорость</dt>
-                      <dd style={{ color: "var(--text-muted)" }}>{row.buildSpeed}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-semibold">Долговечность</dt>
-                      <dd style={{ color: "var(--text-muted)" }}>{row.durability}</dd>
-                    </div>
-                    <div>
-                      <dt className="font-semibold">Тепло</dt>
-                      <dd style={{ color: "var(--text-muted)" }}>{row.thermal}</dd>
-                    </div>
-                  </dl>
-                  <p className="mt-4 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
-                    {row.bestFor}
+                  <p className="mt-3 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                    {row.lead}
+                  </p>
+                  <ul className="mt-4 flex-1 space-y-2 text-sm leading-snug">
+                    {row.points.map((point) => (
+                      <li key={point} className="flex gap-2">
+                        <span className="mt-[0.35em] h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--accent)]" aria-hidden />
+                        <span style={{ color: "var(--text-muted)" }}>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-4 border-t pt-3 text-sm font-medium leading-relaxed" style={{ borderColor: "var(--border)", color: "var(--text)" }}>
+                    {row.suitsIf}
                   </p>
                 </article>
-              );
-            })}
-          </div>
-        ) : (
-          <div className={cn(lpSoftCard, "mt-10 overflow-x-auto")} data-reveal="card">
-            <table className="min-w-[760px] w-full border-collapse text-left text-sm">
-              <thead style={{ backgroundColor: "var(--bg-secondary)" }}>
-                <tr>
-                  <th className="px-5 py-4 font-semibold">Материал</th>
-                  <th className="px-5 py-4 font-semibold">Бюджет</th>
-                  <th className="px-5 py-4 font-semibold">Скорость</th>
-                  <th className="px-5 py-4 font-semibold">Долговечность</th>
-                  <th className="px-5 py-4 font-semibold">Тепло</th>
-                  <th className="px-5 py-4 font-semibold">Когда выбирают</th>
-                </tr>
-              </thead>
-              <tbody>
-                {MATERIAL_COMPARISON_ROWS.map((row, index) => {
-                  const highlighted = highlightMaterial === row.id;
-                  return (
-                    <tr
-                      key={row.id}
-                      style={{
-                        backgroundColor: highlighted
-                          ? "color-mix(in srgb, var(--accent) 8%, var(--bg))"
-                          : index % 2 === 0
-                            ? "var(--bg)"
-                            : "color-mix(in srgb, var(--bg-secondary) 55%, var(--bg))",
-                      }}
-                    >
-                      <td className="px-5 py-4 font-bold">
-                        {row.label}
-                        {highlighted && (
-                          <span className="ml-2 rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wide text-[var(--accent-contrast)]" style={{ backgroundColor: "var(--accent)" }}>
-                            ваш запрос
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-5 py-4">{row.priceLevel}</td>
-                      <td className="px-5 py-4">{row.buildSpeed}</td>
-                      <td className="px-5 py-4">{row.durability}</td>
-                      <td className="px-5 py-4">{row.thermal}</td>
-                      <td className="px-5 py-4" style={{ color: "var(--text-muted)" }}>
-                        {row.bestFor}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
@@ -510,7 +503,9 @@ export function LpPortfolioSection({ objects }: { objects: BuiltObjectItem[] }) 
   );
 }
 
-export function LpMortgageSection() {
+export function LpMortgageSection({ config }: { config?: AdvertisingLandingConfig }) {
+  const slug = config?.slug ?? "lp";
+  const service = config ? lpServiceLabel(config) : undefined;
   return (
     <section id="mortgage" className="scroll-mt-24 py-12 sm:py-16 md:py-24">
       <div className="container mx-auto px-4 sm:px-5" data-reveal="section">
@@ -551,20 +546,21 @@ export function LpMortgageSection() {
               >
                 Калькулятор и программы
               </Link>
-              <a
-                href="#lead-form"
+              <LpContactCta
+                source={`lp-${slug}-mortgage`}
+                service={service}
                 className="inline-flex min-h-12 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--bg)_88%,transparent)] px-6 text-sm font-bold shadow-sm transition hover:bg-[var(--bg)]"
                 style={{ color: "var(--text)" }}
               >
                 Консультация по ипотеке
-              </a>
+              </LpContactCta>
             </div>
           </div>
           <div className={cn(lpSoftCard, "flex flex-col justify-center p-6")} data-reveal="card">
             <Star className="h-8 w-8 text-[var(--accent)]" aria-hidden />
             <p className="mt-4 font-heading text-2xl font-bold">Сначала расчёт — потом банк</p>
             <p className="mt-3 text-sm leading-relaxed" style={{ color: "var(--text-muted)" }}>
-              В квизе можно отметить интерес к ипотеке. Менеджер уточнит бюджет, комплектацию и подскажет реалистичный маршрут.
+              Оставьте контакты — менеджер уточнит бюджет, комплектацию и подскажет реалистичный маршрут по ипотеке и стройке.
             </p>
           </div>
         </div>
@@ -703,10 +699,15 @@ export function LpReviewsSection({
 export function LpExcursionSection({
   title,
   lead,
+  config,
 }: {
   title: string;
   lead: string;
+  config?: AdvertisingLandingConfig;
 }) {
+  const slug = config?.slug ?? "lp";
+  const service = config ? lpServiceLabel(config) : undefined;
+
   return (
     <section className="py-12 sm:py-16 md:py-24" style={{ backgroundColor: "var(--bg-secondary)" }}>
       <div className="container mx-auto px-4 sm:px-5" data-reveal="section">
@@ -725,13 +726,14 @@ export function LpExcursionSection({
                 Экскурсии проводим по записи после короткого созвона — подберём объект близкий к вашему запросу по материалу и площади.
               </p>
             </div>
-            <a
-              href="#lead-form"
+            <LpContactCta
+              source={`lp-${slug}-excursion`}
+              service={service}
               className="inline-flex min-h-12 items-center justify-center rounded-full px-6 text-sm font-bold"
               style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
             >
               Записаться на экскурсию
-            </a>
+            </LpContactCta>
           </div>
         </div>
       </div>

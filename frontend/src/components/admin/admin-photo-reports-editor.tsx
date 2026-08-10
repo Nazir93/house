@@ -38,6 +38,7 @@ export function AdminPhotoReportsEditor({
   headerActions,
   surfaceClass = "",
   onSectionDirty,
+  nameHint,
 }: {
   projectId: string;
   initialPhotos: AdminPhotoRow[];
@@ -45,6 +46,8 @@ export function AdminPhotoReportsEditor({
   headerActions?: ReactNode;
   surfaceClass?: string;
   onSectionDirty?: () => void;
+  /** Название объекта — для SEO-имени файла */
+  nameHint?: string;
 }) {
   const [photos, setPhotos] = useState(() => sortPhotos(initialPhotos));
   const [uploading, setUploading] = useState(false);
@@ -68,6 +71,8 @@ export function AdminPhotoReportsEditor({
     async (file: File): Promise<string | null> => {
       const fd = new FormData();
       fd.set("file", file);
+      if (nameHint?.trim()) fd.set("nameHint", nameHint.trim());
+      fd.set("role", "fotootchet");
       const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.url) {
@@ -76,7 +81,7 @@ export function AdminPhotoReportsEditor({
       }
       return data.url as string;
     },
-    [onError]
+    [onError, nameHint]
   );
 
   const persistOrder = useCallback(

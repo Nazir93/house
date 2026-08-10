@@ -13,10 +13,12 @@ export function AdminVideoListUpload({
   urls,
   onChange,
   label,
+  nameHint,
 }: {
   urls: string[];
   onChange: (urls: string[]) => void;
   label: string;
+  nameHint?: string;
 }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
@@ -25,7 +27,7 @@ export function AdminVideoListUpload({
     if (!file) return;
     setError("");
     setUploading(true);
-    const res = await uploadAdminMedia(file);
+    const res = await uploadAdminMedia(file, { nameHint, role: "video" });
     setUploading(false);
     if (res.error) setError(res.error);
     else if (res.url) onChange([...urls, res.url]);

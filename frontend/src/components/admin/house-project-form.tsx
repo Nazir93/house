@@ -189,7 +189,11 @@ export function HouseProjectForm({
       for (let i = 0; i < files.length; i++) {
         const file = files[i]!;
         if (files.length > 1) setUploadProgress(`${i + 1} / ${files.length}`);
-        const { url, error: uploadError } = await uploadAdminMedia(file);
+        const nameHint = (form.slug || form.title || "project").trim();
+        const { url, error: uploadError } = await uploadAdminMedia(file, {
+          nameHint,
+          role: type === "plan" ? "plan" : "foto",
+        });
         if (uploadError || !url) {
           errors.push(
             uploadError
@@ -325,7 +329,12 @@ export function HouseProjectForm({
         </label>
         <div>
           <span className="block text-xs font-medium text-white/40 mb-1">Полное описание</span>
-          <RichEditor value={form.description} onChange={(value) => set("description", value)} minHeight="150px" />
+          <RichEditor
+            value={form.description}
+            onChange={(value) => set("description", value)}
+            minHeight="150px"
+            nameHint={form.slug || form.title}
+          />
         </div>
       </AdminFormSection>
 

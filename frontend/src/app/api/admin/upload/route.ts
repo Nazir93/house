@@ -5,6 +5,7 @@ import sharp from "sharp";
 import { requireAdminApiSession } from "@/lib/require-admin-api";
 import { validateUploadMagicBytes } from "@/lib/upload-file-validation";
 import { getUploadImageOptimizeLimits } from "@/lib/upload-image-optimize";
+import { buildUploadFileStem } from "@/lib/upload-file-stem";
 
 const IMAGE_EXT = new Set(["jpg", "jpeg", "png", "webp", "gif", "avif", "svg"]);
 const DOCUMENT_EXT = new Set(["pdf", "xlsx", "xls", "doc", "docx", "txt", "csv", "zip", "rar"]);
@@ -112,6 +113,10 @@ export async function POST(request: NextRequest) {
     const file = formData.get("file") as File | null;
     const profile = formData.get("profile") === "hero" ? "hero" : "default";
     const purpose = formData.get("purpose") === "client-document" ? "client-document" : "public";
+    const nameHintRaw = formData.get("nameHint");
+    const roleRaw = formData.get("role");
+    const nameHint = typeof nameHintRaw === "string" ? nameHintRaw.trim().slice(0, 120) : "";
+    const role = typeof roleRaw === "string" ? roleRaw.trim().slice(0, 40) : "";
 
     if (!file) {
       return NextResponse.json({ error: "Файл не передан" }, { status: 400 });
@@ -150,13 +155,12 @@ export async function POST(request: NextRequest) {
       : path.join(process.cwd(), "public", "uploads");
     await mkdir(uploadsDir, { recursive: true });
 
-    let baseStem = (file.name || "upload")
-      .replace(/\.[^.]+$/, "")
-      .replace(/[^a-zA-Z0-9а-яА-ЯёЁ_-]/g, "_")
-      .slice(0, 60);
-    if (!baseStem.trim()) baseStem = "upload";
-    const timestamp = Date.now().toString(36);
-    const fileName = `${baseStem}-${timestamp}`;
+    const fileName = buildUploadFileStem({
+      originalFileName: file.name || "upload",
+      nameHint: nameHint || null,
+      role: role || null,
+      kind: isImageType ? "image" : isVideoType ? "video" : "document",
+    });
 
     const useSharp = isImageType && ext !== "svg" && ext !== "gif";
 

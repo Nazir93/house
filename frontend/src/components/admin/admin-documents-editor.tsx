@@ -79,6 +79,7 @@ export function AdminDocumentsEditor({
   headerActions,
   surfaceClass = "",
   onSectionDirty,
+  nameHint,
 }: {
   projectId: string;
   initialDocuments: AdminDocumentRow[];
@@ -87,6 +88,7 @@ export function AdminDocumentsEditor({
   headerActions?: ReactNode;
   surfaceClass?: string;
   onSectionDirty?: () => void;
+  nameHint?: string;
 }) {
   const router = useRouter();
   const [documents, setDocuments] = useState(() => sortDocuments(initialDocuments));
@@ -149,6 +151,8 @@ export function AdminDocumentsEditor({
       const fd = new FormData();
       fd.set("file", file);
       fd.set("purpose", "client-document");
+      if (nameHint?.trim()) fd.set("nameHint", nameHint.trim());
+      fd.set("role", "document");
       const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.url) {
@@ -157,7 +161,7 @@ export function AdminDocumentsEditor({
       }
       return data.url as string;
     },
-    [onError]
+    [onError, nameHint]
   );
 
   const persistOrder = useCallback(

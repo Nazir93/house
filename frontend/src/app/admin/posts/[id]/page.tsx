@@ -71,7 +71,10 @@ export default function AdminEditPostPage() {
   async function addGalleryImage(file: File) {
     setUploadingGallery(true);
     setGalleryError("");
-    const { url, error: uploadError } = await uploadAdminMedia(file);
+    const { url, error: uploadError } = await uploadAdminMedia(file, {
+      nameHint: slug || title || "post",
+      role: "gallery",
+    });
     setUploadingGallery(false);
     if (uploadError) { setGalleryError(uploadError); return; }
     if (url) setGalleryUrls((prev) => [...prev, url]);
@@ -172,6 +175,8 @@ export default function AdminEditPostPage() {
           accept="image"
           value={coverImage}
           onChange={setCoverImage}
+          nameHint={slug || title || "post"}
+          role="cover"
         />
 
         {/* Галерея фото */}
@@ -225,6 +230,7 @@ export default function AdminEditPostPage() {
           label="Видео в баннере (после фото)"
           urls={coverVideos}
           onChange={setCoverVideos}
+          nameHint={slug || title || "post"}
         />
 
         <div>
@@ -245,6 +251,7 @@ export default function AdminEditPostPage() {
             onChange={setContent}
             placeholder="Текст статьи..."
             minHeight="350px"
+            nameHint={slug || title || "post"}
           />
         </div>
 

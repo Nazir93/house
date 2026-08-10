@@ -17,6 +17,7 @@ import {
   AdvertisingLandingQuizSuccess,
 } from "./advertising-landing-quiz";
 import { AdvertisingLandingHero } from "./advertising-landing-hero";
+import { LpContactCta, lpServiceLabel } from "./lp-contact-cta";
 import {
   LpExcursionSection,
   LpFaqSection,
@@ -117,8 +118,10 @@ export function AdvertisingLandingClient({
       quiz: () => (
         <LpQuizSection config={config} submittedName={submittedName} onSuccess={setSubmittedName} />
       ),
-      mortgage: () => <LpMortgageSection />,
-      excursion: () => <LpExcursionSection title={config.excursionTitle} lead={config.excursionLead} />,
+      mortgage: () => <LpMortgageSection config={config} />,
+      excursion: () => (
+        <LpExcursionSection title={config.excursionTitle} lead={config.excursionLead} config={config} />
+      ),
       reviews: () => <LpReviewsSection config={config} reviews={reviews} />,
       faq: () => <LpFaqSection faq={config.faq} />,
     };
@@ -161,13 +164,14 @@ export function AdvertisingLandingClient({
           >
             Telegram
           </a>
-          <a
-            href="#lead-form"
+          <LpContactCta
+            source={`lp-${config.slug}-mobile-bar`}
+            service={lpServiceLabel(config)}
             className="inline-flex min-h-11 flex-[1.35] items-center justify-center rounded-full text-sm font-bold"
             style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
           >
             Расчёт
-          </a>
+          </LpContactCta>
         </div>
       </div>
     </div>

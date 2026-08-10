@@ -14,6 +14,7 @@ import { formatRub } from "@/lib/construction-shared";
 import { PHONE, PHONE_RAW, WORKING_HOURS } from "@/lib/constants";
 import { resolveLpThemeSpec, type LpThemeSpec } from "@/lib/lp-themes";
 import { cn } from "@/lib/utils";
+import { LpContactCta, lpServiceLabel } from "./lp-contact-cta";
 
 /** Матовый стеклянный фон героя — inline, чтобы opacity не ломалась в Tailwind. */
 const matteGlassStyle = {
@@ -57,8 +58,9 @@ function HeroPriceLine({
   );
 }
 
-function LpHeroHeader({ scrolled }: { scrolled: boolean }) {
+function LpHeroHeader({ scrolled, config }: { scrolled: boolean; config: AdvertisingLandingConfig }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const service = lpServiceLabel(config);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -109,16 +111,28 @@ function LpHeroHeader({ scrolled }: { scrolled: boolean }) {
             style={{ backgroundColor: "rgba(255,255,255,0.1)" }}
             aria-label="Разделы страницы"
           >
-            {ADVERTISING_LP_NAV.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className="rounded-full px-2.5 py-2 text-[12px] font-semibold tracking-wide transition hover:bg-white/15 xl:px-3.5"
-                style={{ color: "#f5f7f6" }}
-              >
-                {item.label}
-              </a>
-            ))}
+            {ADVERTISING_LP_NAV.map((item) =>
+              item.href === "#lead-form" ? (
+                <LpContactCta
+                  key={item.href}
+                  source={`lp-${config.slug}-nav-callback`}
+                  service={service}
+                  className="rounded-full px-2.5 py-2 text-[12px] font-semibold tracking-wide transition hover:bg-white/15 xl:px-3.5"
+                  style={{ color: "#f5f7f6" }}
+                >
+                  {item.label}
+                </LpContactCta>
+              ) : (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-full px-2.5 py-2 text-[12px] font-semibold tracking-wide transition hover:bg-white/15 xl:px-3.5"
+                  style={{ color: "#f5f7f6" }}
+                >
+                  {item.label}
+                </a>
+              ),
+            )}
           </nav>
 
           <div className="relative z-10 flex shrink-0 items-center gap-1.5 sm:gap-2.5">
@@ -141,15 +155,15 @@ function LpHeroHeader({ scrolled }: { scrolled: boolean }) {
             >
               <Phone className="h-4 w-4" aria-hidden />
             </a>
-            <a
-              href="#lead-form"
+            <LpContactCta
+              source={`lp-${config.slug}-header-callback`}
+              service={service}
               className="inline-flex min-h-10 items-center justify-center rounded-xl px-3 text-[10px] font-bold uppercase tracking-[0.08em] shadow-[0_10px_28px_rgba(15,61,46,0.35)] transition hover:-translate-y-0.5 hover:opacity-95 sm:min-h-11 sm:px-5 sm:text-xs"
               style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
-              onClick={() => setMenuOpen(false)}
             >
               <span className="sm:hidden">Звонок</span>
               <span className="hidden sm:inline">Перезвоните мне</span>
-            </a>
+            </LpContactCta>
             <button
               type="button"
               className="inline-flex h-10 w-10 items-center justify-center rounded-xl transition hover:bg-white/15 lg:hidden"
@@ -171,17 +185,29 @@ function LpHeroHeader({ scrolled }: { scrolled: boolean }) {
             style={{ backgroundColor: "#0e1814", color: "#ffffff" }}
           >
             <nav className="grid gap-1" aria-label="Мобильная навигация">
-              {ADVERTISING_LP_NAV.map((item) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className="rounded-xl px-4 py-3 text-sm font-semibold transition hover:bg-white/10"
-                  style={{ color: "#f5f7f6" }}
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {item.label}
-                </a>
-              ))}
+              {ADVERTISING_LP_NAV.map((item) =>
+                item.href === "#lead-form" ? (
+                  <LpContactCta
+                    key={item.href}
+                    source={`lp-${config.slug}-nav-callback`}
+                    service={service}
+                    className="rounded-xl px-4 py-3 text-left text-sm font-semibold transition hover:bg-white/10"
+                    style={{ color: "#f5f7f6" }}
+                  >
+                    {item.label}
+                  </LpContactCta>
+                ) : (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    className="rounded-xl px-4 py-3 text-sm font-semibold transition hover:bg-white/10"
+                    style={{ color: "#f5f7f6" }}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    {item.label}
+                  </a>
+                ),
+              )}
             </nav>
             <a
               href={`tel:${PHONE_RAW}`}
@@ -213,17 +239,19 @@ function HeroCtas({
   heroMainHref: string;
   light?: boolean;
 }) {
+  const service = lpServiceLabel(config);
   if (light) {
     return (
       <div className="mt-6 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        <a
-          href="#lead-form"
+        <LpContactCta
+          source={`lp-${config.slug}-hero-primary`}
+          service={service}
           className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-5 text-xs font-bold uppercase tracking-[0.1em] text-white shadow-lg transition hover:-translate-y-0.5 sm:w-auto"
           style={{ backgroundColor: "var(--accent)" }}
         >
           <Calculator className="h-4 w-4 shrink-0" aria-hidden />
           {config.primaryCta}
-        </a>
+        </LpContactCta>
         <a
           href={heroMainHref}
           className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[var(--bg)] px-5 text-xs font-bold uppercase tracking-[0.1em] shadow-[0_10px_28px_rgba(15,61,46,0.08)] transition hover:-translate-y-0.5 sm:w-auto"
@@ -238,14 +266,15 @@ function HeroCtas({
 
   return (
     <div className="mt-5 flex flex-col items-center justify-center gap-2 sm:flex-row sm:flex-wrap">
-      <a
-        href="#lead-form"
+      <LpContactCta
+        source={`lp-${config.slug}-hero-primary`}
+        service={service}
         className="inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded-xl px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] shadow-[0_12px_32px_rgba(15,61,46,0.35)] transition hover:-translate-y-0.5 sm:w-auto md:px-5"
         style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
       >
         <Calculator className="h-4 w-4 shrink-0" aria-hidden />
         {config.primaryCta}
-      </a>
+      </LpContactCta>
       <a
         href={heroMainHref}
         className="inline-flex min-h-[40px] w-full items-center justify-center gap-2 rounded-xl px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-white transition hover:-translate-y-0.5 hover:bg-white/15 sm:w-auto md:px-5"
@@ -275,6 +304,7 @@ function DarkHeroBackdrop({
         fill
         priority
         sizes="100vw"
+        quality={90}
         className="object-cover"
         style={objectPosition ? { objectPosition } : { objectPosition: "center center" }}
       />
@@ -371,10 +401,15 @@ function FlagshipSplitHero({ config, heroImage, theme, priceFromRub }: HeroProps
             <p className="mt-3 text-sm leading-relaxed text-neutral-100 md:text-[15px]">{heroSubtitle}</p>
             <HeroPriceLine config={config} priceFromRub={priceFromRub} />
             <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-              <a href="#lead-form" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-xs font-bold uppercase tracking-[0.1em] shadow-[0_12px_32px_rgba(15,61,46,0.35)]" style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}>
+              <LpContactCta
+                source={`lp-${config.slug}-hero-primary`}
+                service={lpServiceLabel(config)}
+                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-xs font-bold uppercase tracking-[0.1em] shadow-[0_12px_32px_rgba(15,61,46,0.35)]"
+                style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
+              >
                 <Calculator className="h-4 w-4" aria-hidden />
                 {config.primaryCta}
-              </a>
+              </LpContactCta>
               <a
                 href={heroMainHref}
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-5 text-xs font-bold uppercase tracking-[0.1em] text-white shadow-[0_12px_32px_rgba(0,0,0,0.22)] transition hover:bg-white/15"
@@ -401,9 +436,14 @@ function FlagshipSplitHero({ config, heroImage, theme, priceFromRub }: HeroProps
               </li>
             ))}
           </ul>
-          <a href="#lead-form" className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl px-5 text-xs font-bold uppercase tracking-[0.1em]" style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}>
+          <LpContactCta
+            source={`lp-${config.slug}-hero-primary`}
+            service={lpServiceLabel(config)}
+            className="mt-6 inline-flex min-h-11 items-center justify-center rounded-xl px-5 text-xs font-bold uppercase tracking-[0.1em]"
+            style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
+          >
             {config.primaryCta}
-          </a>
+          </LpContactCta>
         </div>
       </div>
     </section>
@@ -450,9 +490,14 @@ function CalculatorLightHero({ config }: HeroProps) {
           <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
             Материал → площадь → этажность → бюджет → ипотека → контакты. Результат передадим менеджеру для уточнения сметы.
           </p>
-          <a href="#lead-form" className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl text-sm font-bold" style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}>
+          <LpContactCta
+            source={`lp-${config.slug}-hero-primary`}
+            service={lpServiceLabel(config)}
+            className="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl text-sm font-bold"
+            style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
+          >
             {config.primaryCta}
-          </a>
+          </LpContactCta>
         </div>
       </div>
     </section>
@@ -488,9 +533,14 @@ function ModernWideHero({ config, heroImage, theme, priceFromRub }: HeroProps) {
           ) : null}
           <HeroPriceLine config={config} priceFromRub={priceFromRub} />
           <div className="mt-5 flex flex-col gap-2 sm:flex-row">
-            <a href="#lead-form" className="inline-flex min-h-11 items-center justify-center rounded-xl px-5 text-xs font-bold uppercase tracking-[0.1em]" style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}>
+            <LpContactCta
+              source={`lp-${config.slug}-hero-primary`}
+              service={lpServiceLabel(config)}
+              className="inline-flex min-h-11 items-center justify-center rounded-xl px-5 text-xs font-bold uppercase tracking-[0.1em]"
+              style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
+            >
               {config.primaryCta}
-            </a>
+            </LpContactCta>
             <a
               href={heroMainHref}
               className="inline-flex min-h-11 items-center justify-center rounded-xl px-5 text-xs font-bold uppercase tracking-[0.1em] text-white"
@@ -631,7 +681,7 @@ export function AdvertisingLandingHero({
 
   return (
     <>
-      <LpHeroHeader scrolled={scrolled} />
+      <LpHeroHeader scrolled={scrolled} config={config} />
       <HeroBody config={config} heroImage={heroImage} theme={theme} priceFromRub={priceFromRub} />
     </>
   );

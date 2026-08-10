@@ -181,6 +181,8 @@ export default function AdminEditServicePage() {
           accept="image"
           value={coverImage}
           onChange={setCoverImage}
+          nameHint={slug || title || "service"}
+          role="cover"
         />
         <p className="-mt-2 text-[11px] text-white/30 leading-relaxed">
           Картинка вкладки на <code className="text-white/45">/services</code>. Если пусто — видео ниже или
@@ -192,6 +194,8 @@ export default function AdminEditServicePage() {
           accept="video"
           value={videoUrl}
           onChange={setVideoUrl}
+          nameHint={slug || title || "service"}
+          role="video"
         />
         <p className="-mt-2 text-[11px] text-white/30 leading-relaxed">
           Фон вкладки на <code className="text-white/45">/services</code>, если нет изображения услуги.
@@ -202,6 +206,8 @@ export default function AdminEditServicePage() {
           accept="image"
           value={bannerImage}
           onChange={setBannerImage}
+          nameHint={slug || title || "service"}
+          role="banner"
         />
         <p className="-mt-2 text-[11px] text-white/30 leading-relaxed">
           Hero-баннер на странице <code className="text-white/45">/services/{slug || "…"}</code>. Перекрывает

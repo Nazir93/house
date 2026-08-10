@@ -1,13 +1,26 @@
 /**
  * Загрузка файла в /public/uploads через защищённый /api/admin/upload
  */
+
+export type UploadAdminMediaOptions = {
+  profile?: "default" | "hero";
+  /** Название/slug объекта или проекта — попадёт в имя файла вместо ChatGPT_Image… */
+  nameHint?: string;
+  /** plan | cover | render | video … */
+  role?: string;
+  purpose?: "client-document";
+};
+
 export async function uploadAdminMedia(
   file: File,
-  options?: { profile?: "default" | "hero" },
+  options?: UploadAdminMediaOptions,
 ): Promise<{ url?: string; error?: string }> {
   const fd = new FormData();
   fd.append("file", file);
   if (options?.profile === "hero") fd.append("profile", "hero");
+  if (options?.purpose === "client-document") fd.append("purpose", "client-document");
+  if (options?.nameHint?.trim()) fd.append("nameHint", options.nameHint.trim());
+  if (options?.role?.trim()) fd.append("role", options.role.trim());
   try {
     const res = await fetch("/api/admin/upload", {
       method: "POST",

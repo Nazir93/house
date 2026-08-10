@@ -141,13 +141,23 @@ describe("advertising landing config", () => {
     expect(advertisingLandingCatalogIntro(config).toLowerCase()).toContain("\u043a\u0430\u0442\u0430\u043b\u043e\u0433");
   });
 
-  it("fact stats: короткие цифры, без длинной фразы «Под ключ»", () => {
-    expect(ADVERTISING_LP_FACT_STATS).toHaveLength(6);
-    expect(ADVERTISING_LP_FACT_STATS.some((s) => /под ключ/i.test(s.value))).toBe(false);
-    expect(ADVERTISING_LP_FACT_STATS[5]).toEqual({
-      value: "от 5 лет",
-      label: "гарантии на конструктив",
+  it("fact stats: цифры с сайта и кликабельные ссылки", () => {
+    expect(ADVERTISING_LP_FACT_STATS).toHaveLength(4);
+    expect(ADVERTISING_LP_FACT_STATS.map((s) => s.value)).toEqual(["10+", "85+", "100+", "5,0"]);
+    expect(ADVERTISING_LP_FACT_STATS[1]).toMatchObject({
+      label: "построенных домов",
+      href: "/portfolio",
     });
+    expect(ADVERTISING_LP_FACT_STATS[2]).toMatchObject({
+      label: "проектов",
+      href: "/projects",
+    });
+    expect(ADVERTISING_LP_FACT_STATS[3]).toMatchObject({
+      label: "на Яндекс.Картах · 73 оценки",
+      external: true,
+    });
+    expect(ADVERTISING_LP_FACT_STATS[3]?.href).toMatch(/yandex\./i);
+    expect(ADVERTISING_LP_FACT_STATS.some((s) => /под ключ/i.test(s.value))).toBe(false);
   });
 
   it("dom-pod-klyuch: комплектация по этапам", () => {
@@ -171,7 +181,7 @@ describe("advertising landing config", () => {
 
   it("kirpich: явный heroImage приоритетнее медиа проектов", () => {
     const config = getAdvertisingLandingConfig("kirpich")!;
-    expect(config.heroImage).toBe("/images/lp/kirpich-hero.png");
+    expect(config.heroImage).toBe("/images/lp/kirpich-hero.jpg");
     expect(config.heroImageObjectPosition).toBeTruthy();
     const picked = pickAdvertisingLandingHeroImage(
       config,
@@ -184,6 +194,6 @@ describe("advertising landing config", () => {
       ],
       [],
     );
-    expect(picked).toBe("/images/lp/kirpich-hero.png");
+    expect(picked).toBe("/images/lp/kirpich-hero.jpg");
   });
 });

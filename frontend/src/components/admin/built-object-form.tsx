@@ -322,7 +322,18 @@ export function BuiltObjectForm({
       for (let i = 0; i < ordered.length; i++) {
         const file = ordered[i]!;
         if (ordered.length > 1) setUploadProgress(`${i + 1} / ${ordered.length}`);
-        const { url, error: uploadError } = await uploadAdminMedia(file);
+        const role =
+          target === "plans"
+            ? "plan"
+            : target === "videos"
+              ? "video"
+              : target === "client-review-video"
+                ? "otzyv"
+                : target.startsWith("phase:")
+                  ? "stroyka"
+                  : "foto";
+        const nameHint = (form.slug || form.title || "dom").trim();
+        const { url, error: uploadError } = await uploadAdminMedia(file, { nameHint, role });
         if (uploadError || !url) {
           errors.push(
             uploadError
@@ -499,10 +510,20 @@ export function BuiltObjectForm({
           </AdminField>
         </div>
         <AdminField label="Описание объекта">
-          <RichEditor value={form.description} onChange={(value) => set("description", value)} minHeight="150px" />
+          <RichEditor
+            value={form.description}
+            onChange={(value) => set("description", value)}
+            minHeight="150px"
+            nameHint={form.slug || form.title}
+          />
         </AdminField>
         <AdminField label="Описание работ">
-          <RichEditor value={form.worksDescription} onChange={(value) => set("worksDescription", value)} minHeight="120px" />
+          <RichEditor
+            value={form.worksDescription}
+            onChange={(value) => set("worksDescription", value)}
+            minHeight="120px"
+            nameHint={form.slug || form.title}
+          />
         </AdminField>
         <AdminField label="Порядок в каталоге" className="block w-28 space-y-1">
           <input value={form.order} onChange={(e) => set("order", e.target.value)} placeholder="0" className={inputClass} />

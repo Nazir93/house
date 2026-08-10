@@ -475,6 +475,8 @@ export function ClientProjectAdminForm({
               value={coverImageUrl}
               onChange={setCoverImageUrl}
               showHint={false}
+              nameHint={title || "client-project"}
+              role="cover"
             />
           </div>
           <div className="sm:col-span-2">
@@ -616,6 +618,7 @@ export function ClientProjectAdminForm({
         headerActions={sectionSaveControl("documents")}
         surfaceClass={draftSectionSurfaceClass(getUiState("documents"))}
         onSectionDirty={() => markMediaSectionDirty("documents")}
+        nameHint={title || "client-document"}
       />
 
       <AdminPhotoReportsEditor
@@ -625,6 +628,7 @@ export function ClientProjectAdminForm({
         headerActions={sectionSaveControl("photos")}
         surfaceClass={draftSectionSurfaceClass(getUiState("photos"))}
         onSectionDirty={() => markMediaSectionDirty("photos")}
+        nameHint={title || "client-project"}
       />
 
       <section className="space-y-4 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-5">

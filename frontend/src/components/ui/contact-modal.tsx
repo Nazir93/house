@@ -8,6 +8,7 @@ import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
 import { BackNavButton } from "@/components/ui/back-nav";
 import { HouseConstructionCalculatorForm } from "@/components/construction/house-construction-calculator-form";
 import { collectCurrentTrafficParams, trackLeadSuccess } from "@/lib/analytics-goals";
+import { estimatePayloadHasDetailedCalc } from "@/lib/lp-contact-cta";
 
 type Step = "form-calculator" | "success";
 
@@ -68,6 +69,14 @@ function ProjectEstimateLeadForm({
   const [phone, setPhone] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
+  const detailedCalc = estimatePayloadHasDetailedCalc(estimatePayload?.calcData);
+  const projectTitle =
+    estimatePayload?.calcData &&
+    typeof estimatePayload.calcData === "object" &&
+    "projectTitle" in estimatePayload.calcData &&
+    typeof (estimatePayload.calcData as { projectTitle?: unknown }).projectTitle === "string"
+      ? (estimatePayload.calcData as { projectTitle: string }).projectTitle.trim()
+      : "";
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -112,13 +121,17 @@ function ProjectEstimateLeadForm({
     <div className="min-h-screen flex items-center px-4 py-20">
       <div className="mx-auto w-full max-w-xl rounded-[28px] bg-[var(--bg-secondary)] p-6 md:p-8">
         <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">
-          Детальная смета
+          {detailedCalc ? "Детальная смета" : "Обратный звонок"}
         </p>
         <h2 className="mt-3 font-heading text-3xl leading-tight text-[var(--graphite)]">
           Оставьте контакты
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-[var(--text-muted)]">
-          Выбранные материалы, инженерия, доп. опции и сумма уже прикреплены к заявке.
+          {detailedCalc
+            ? "Выбранные материалы, инженерия, доп. опции и сумма уже прикреплены к заявке."
+            : projectTitle
+              ? `Перезвоним и уточним расчёт по проекту «${projectTitle}».`
+              : "Перезвоним, уточним задачу и подготовим ориентир по смете."}
         </p>
 
         <form onSubmit={submit} className="mt-7 grid gap-4">

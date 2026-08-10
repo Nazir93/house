@@ -1,6 +1,13 @@
 import type { BuiltObjectItem, HouseProjectItem } from "@/lib/construction-data";
 import { normalizeBuiltObjectMaterialEnum } from "@/lib/construction-shared";
-import { ADDRESS, CITY, SERVICE_REGIONS, STATS, YANDEX_MAPS_RATING_SCORE } from "@/lib/constants";
+import {
+  ADDRESS,
+  CITY,
+  SERVICE_REGIONS,
+  STATS,
+  YANDEX_MAPS_RATING_SCORE,
+  YANDEX_REVIEWS_URL,
+} from "@/lib/constants";
 import {
   LP_THEME_BY_SLUG,
   resolveLpSectionOrder,
@@ -83,16 +90,27 @@ export type AdvertisingLandingConfig = {
 export type LpFactStat = {
   value: string;
   label: string;
+  /** Внутренний путь или внешний URL */
+  href?: string;
+  external?: boolean;
 };
 
-/** Цифры для сетки «Факты о компании» — данные компании (короткие value, без длинных фраз). */
+/** Оценка для витрины: «5,0» как на сайте / в картах. */
+export function formatLpYandexRatingDisplay(score = YANDEX_MAPS_RATING_SCORE): string {
+  return score.trim().replace(".", ",");
+}
+
+/** Цифры «Факты о компании» — как на сайте; кликабельные ведут на портфолио / проекты / Яндекс. */
 export const ADVERTISING_LP_FACT_STATS: LpFactStat[] = [
-  { value: "13", label: "лет на рынке" },
-  { value: "120+", label: "объектов построено" },
-  { value: YANDEX_MAPS_RATING_SCORE, label: "рейтинг на Яндекс.Картах" },
-  { value: "85+", label: "типовых проектов" },
-  { value: "3", label: "региона присутствия" },
-  { value: "от 5 лет", label: "гарантии на конструктив" },
+  { value: "10+", label: "лет на рынке" },
+  { value: "85+", label: "построенных домов", href: "/portfolio" },
+  { value: "100+", label: "проектов", href: "/projects" },
+  {
+    value: formatLpYandexRatingDisplay(),
+    label: "на Яндекс.Картах · 73 оценки",
+    href: YANDEX_REVIEWS_URL,
+    external: true,
+  },
 ];
 
 export const ADVERTISING_LP_NAV = [
@@ -135,41 +153,69 @@ export const ADVERTISING_OFFICE_GEO = {
 
 export type MaterialComparisonRow = {
   id: "gas" | "brick" | "ceramic";
+  /** Заголовок карточки */
   label: string;
-  priceLevel: string;
-  buildSpeed: string;
-  durability: string;
-  thermal: string;
-  bestFor: string;
+  /** Строка под заголовком: толщина · позиционирование */
+  thicknessNote: string;
+  /** Вводный абзац */
+  lead: string;
+  /** Пункты сравнения (бюджет, скорость, …) */
+  points: string[];
+  /** Заключение «Подходит, если…» */
+  suitsIf: string;
+  /** Плашка над карточкой (например, для кирпича) */
+  badgeAbove?: string;
 };
 
 export const MATERIAL_COMPARISON_ROWS: MaterialComparisonRow[] = [
   {
     id: "gas",
-    label: "Газобетон",
-    priceLevel: "Средний",
-    buildSpeed: "Быстро",
-    durability: "Высокая при правильном фасаде",
-    thermal: "Хорошая при соблюдении толщины",
-    bestFor: "Оптимальный баланс цены, скорости и тепла",
+    label: "Газобетон D400",
+    thicknessNote: "375 мм · Рациональный баланс",
+    lead:
+      "Тёплый и относительно лёгкий материал с точной геометрией. Позволяет быстрее возводить стены и снизить стартовую стоимость строительства.",
+    points: [
+      "Бюджет: обычно ниже при одинаковой комплектации",
+      "Скорость строительства: высокая",
+      "Нагрузка на фундамент: ниже",
+      "Тепловая инерция: средняя",
+      "Важно учитывать: армирование кладки и обязательную защиту фасада",
+    ],
+    suitsIf:
+      "Подходит, если в приоритете разумный бюджет, скорость строительства и энергоэффективность.",
   },
   {
     id: "brick",
-    label: "Кирпич",
-    priceLevel: "Выше среднего",
-    buildSpeed: "Дольше",
-    durability: "Максимальная",
-    thermal: "Инерционная, комфорт круглый год",
-    bestFor: "Долговечный дом с классическим фасадом",
+    label: "Керамический кирпич 2,1 НФ",
+    thicknessNote: "380 мм · Капитальный выбор",
+    lead:
+      "Прочная и массивная керамическая стена для дома постоянного проживания. Обеспечивает высокую тепловую инерцию и хороший акустический комфорт.",
+    points: [
+      "Бюджет: выше среднего",
+      "Скорость строительства: ниже из-за большего объёма кладки",
+      "Нагрузка на фундамент: выше",
+      "Тепловая инерция: высокая",
+      "Важно учитывать: точность кладки и фундамент, рассчитанный под фактическую нагрузку",
+    ],
+    suitsIf:
+      "Подходит, если в приоритете прочность, основательность, комфорт и длительная эксплуатация дома.",
+    badgeAbove: "Для капитального дома",
   },
   {
     id: "ceramic",
-    label: "Керамоблок",
-    priceLevel: "Средний+",
-    buildSpeed: "Средне",
-    durability: "Высокая",
-    thermal: "Хорошая инерция стен",
-    bestFor: "Компромисс между массой кирпича и скоростью блоков",
+    label: "Крупноформатный керамоблок",
+    thicknessNote: "380 мм · Керамика быстрее",
+    lead:
+      "Поризованный керамический материал крупного формата. Сохраняет преимущества керамической стены, но позволяет вести кладку быстрее, чем из кирпича.",
+    points: [
+      "Бюджет: средний+",
+      "Скорость строительства: выше, чем у кирпича",
+      "Нагрузка на фундамент: ниже, чем у кирпича",
+      "Тепловая инерция: высокая",
+      "Важно учитывать: качество кладки, заполнение швов, резку блоков и правильный крепёж",
+    ],
+    suitsIf:
+      "Подходит, если нужна керамическая стена с меньшей массой и более высокой скоростью строительства.",
   },
 ];
 
@@ -293,14 +339,14 @@ export const ADVERTISING_LANDING_CONFIGS: Record<AdvertisingLandingSlug, Adverti
     title: "Кирпичный дом под ключ — проекты и стоимость | Часть души",
     description:
       "Кирпичные дома под ключ: проекты, цена, комплектация, сравнение материалов, портфолио и расчёт сметы.",
-    h1: "Строим кирпичные дома для комфортной жизни",
+    h1: "Кирпичные дома в СПб и Ленобласти от 4,85 млн ₽",
     heroSubtitle:
-      "Проекты, комплектация и строительство под ключ в Санкт-Петербурге и Ленинградской области",
+      "Проектируем и строим дома из керамического кирпича 2,1 НФ. До договора готовим подробную смету, комплектацию и поэтапный график оплаты и строительства.",
     heroMainCta: "Выбрать проект дома",
     heroMainHref: "#projects",
-    heroImage: "/images/lp/kirpich-hero.png",
+    heroImage: "/images/lp/kirpich-hero.jpg",
     heroImageObjectPosition: "54% 42%",
-    heroImageFallback: "/images/lp/kirpich-hero.png",
+    heroImageFallback: "/images/lp/kirpich-hero.jpg",
     eyebrow: "Кирпичные дома под ключ",
     lead:
       "Подберём проект под участок и бюджет, покажем реальные объекты и рассчитаем комплектацию — от коробки до инженерии и фасада.",
