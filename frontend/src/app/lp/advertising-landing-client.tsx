@@ -13,6 +13,10 @@ import type { PublicReviewItem } from "@/lib/get-public-reviews";
 import { resolveLpSectionOrder, resolveLpThemeSpec, type LpSectionId } from "@/lib/lp-themes";
 import { PHONE_RAW, SOCIAL_LINKS } from "@/lib/constants";
 import {
+  lpQuizStepsBlurb,
+  resolveLpQuizSteps,
+} from "@/lib/advertising-landing-quiz-steps";
+import {
   AdvertisingLandingQuiz,
   AdvertisingLandingQuizSuccess,
 } from "./advertising-landing-quiz";
@@ -58,7 +62,7 @@ function LpQuizSection({
           <div className="mt-6 space-y-4 text-sm" style={{ color: "var(--text-muted)" }}>
             <p className="flex gap-3">
               <ShieldCheck className="h-5 w-5 shrink-0 text-[var(--accent)]" aria-hidden />
-              6 шагов: материал, площадь, этажность, бюджет, ипотека и контакты.
+              {lpQuizStepsBlurb(resolveLpQuizSteps(config.quizDefaults?.wallMaterial))}
             </p>
             <p className="flex gap-3">
               <MapPin className="h-5 w-5 shrink-0 text-[var(--accent)]" aria-hidden />

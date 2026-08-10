@@ -485,7 +485,7 @@ function CalculatorLightHero({ config }: HeroProps) {
           data-reveal="card"
         >
           <p className="text-xs font-bold uppercase tracking-[0.14em]" style={{ color: "var(--accent)" }}>
-            Мини-квиз · 6 шагов
+            Мини-квиз · {config.quizDefaults?.wallMaterial ? "5" : "6"} шагов
           </p>
           <p className="mt-2 text-sm" style={{ color: "var(--text-muted)" }}>
             Материал → площадь → этажность → бюджет → ипотека → контакты. Результат передадим менеджеру для уточнения сметы.

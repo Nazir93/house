@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useMemo, useRef, useState, type FormEvent } from "react";
 import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 
 import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
@@ -16,6 +16,10 @@ import {
   budgetLabelById,
   mortgageLabelById,
 } from "@/lib/advertising-landing";
+import {
+  resolveLpQuizSteps,
+  type LpQuizStepId,
+} from "@/lib/advertising-landing-quiz-steps";
 import { readLeadError } from "@/lib/read-lead-error";
 import { WALL_MATERIAL_LABELS, type WallMaterialId } from "@/lib/house-construction-calculator";
 import { cn } from "@/lib/utils";
@@ -40,17 +44,6 @@ const WALL_OPTIONS = (["gas", "brick", "ceramic"] as WallMaterialId[]).map((id) 
   label: WALL_MATERIAL_LABELS[id],
 }));
 
-const STEPS = [
-  { id: "material", title: "Материал стен" },
-  { id: "area", title: "Площадь дома" },
-  { id: "floors", title: "Этажность" },
-  { id: "budget", title: "Ориентир по бюджету" },
-  { id: "mortgage", title: "Ипотека" },
-  { id: "contact", title: "Контакты" },
-] as const;
-
-type StepId = (typeof STEPS)[number]["id"];
-
 function areaLabelById(id: string): string {
   return LP_AREA_OPTIONS.find((option) => option.id === id)?.label ?? id;
 }
@@ -68,8 +61,15 @@ function ChoiceGrid({
   value: string;
   onChange: (id: string) => void;
 }) {
+  const cols =
+    options.length === 3
+      ? "grid-cols-1 sm:grid-cols-3"
+      : options.length === 1
+        ? "grid-cols-1"
+        : "grid-cols-1 sm:grid-cols-2";
+
   return (
-    <div className="grid gap-2 sm:grid-cols-2">
+    <div className={cn("grid gap-2", cols)}>
       {options.map((option) => {
         const active = value === option.id;
         return (
@@ -78,7 +78,7 @@ function ChoiceGrid({
             type="button"
             onClick={() => onChange(option.id)}
             className={cn(
-              "min-h-12 rounded-2xl px-4 py-3 text-left text-sm font-semibold shadow-sm transition",
+              "flex min-h-12 w-full items-center justify-center rounded-2xl px-3 py-3 text-center text-sm font-semibold shadow-sm transition",
               active && "ring-2 ring-[var(--accent)]/40",
             )}
             style={{
@@ -109,6 +109,10 @@ export function AdvertisingLandingQuiz({
 }) {
   const getSmartCaptchaToken = useSmartCaptchaToken();
   const quizStarted = useRef(false);
+  const steps = useMemo(
+    () => resolveLpQuizSteps(initialWallMaterial),
+    [initialWallMaterial],
+  );
 
   const [stepIndex, setStepIndex] = useState(0);
   const [wallMaterial, setWallMaterial] = useState<WallMaterialId>(initialWallMaterial ?? "gas");
@@ -123,8 +127,8 @@ export function AdvertisingLandingQuiz({
   const [status, setStatus] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const step = STEPS[stepIndex];
-  const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100);
+  const step = steps[stepIndex] ?? steps[0]!;
+  const progress = Math.round(((stepIndex + 1) / steps.length) * 100);
 
   function markQuizStart() {
     if (quizStarted.current) return;
@@ -133,7 +137,7 @@ export function AdvertisingLandingQuiz({
   }
 
   function canProceed(): boolean {
-    switch (step.id) {
+    switch (step.id as LpQuizStepId) {
       case "material":
         return Boolean(wallMaterial);
       case "area":
@@ -153,7 +157,7 @@ export function AdvertisingLandingQuiz({
 
   function goNext() {
     if (!canProceed()) return;
-    setStepIndex((current) => Math.min(current + 1, STEPS.length - 1));
+    setStepIndex((current) => Math.min(current + 1, steps.length - 1));
   }
 
   function goBack() {
@@ -220,7 +224,7 @@ export function AdvertisingLandingQuiz({
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.16em]" style={{ color: "var(--accent)" }}>
-            Шаг {stepIndex + 1} из {STEPS.length}
+            Шаг {stepIndex + 1} из {steps.length}
           </p>
           <h3 className="mt-1 font-heading text-xl font-bold">{step.title}</h3>
         </div>
