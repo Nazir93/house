@@ -1,0 +1,59 @@
+{
+  "pages": [
+    {
+      "path": "/",
+      "code": "200",
+      "title": "Строительство домов под ключ в СПб и Ленинградской области | Часть души",
+      "h1": "Строительство домов под ключ в Санкт-Петербурге и Ленинградской области",
+      "canon": "https://chastdushi.ru"
+    },
+    {
+      "path": "/projects",
+      "code": "200",
+      "title": "Авторские проекты домов — каталог с ценами и планировками | Часть души",
+      "h1": "Авторские проекты домов",
+      "canon": "https://chastdushi.ru/projects"
+    },
+    {
+      "path": "/projects/gazobeton",
+      "code": "200",
+      "title": "Проекты домов из газобетона — цены и строительство под ключ | Часть души",
+      "h1": "Строительство домов из газобетона",
+      "canon": "https://chastdushi.ru/projects/gazobeton"
+    },
+    {
+      "path": "/projects/kirpich",
+      "code": "200",
+      "title": "Проекты кирпичных домов — кирпичный дом под ключ | Часть души",
+      "h1": "Строительство домов из кирпича",
+      "canon": "https://chastdushi.ru/projects/kirpich"
+    },
+    {
+      "path": "/projects/keramoblok",
+      "code": "200",
+      "title": "Проекты домов из керамоблока и теплой керамики | Часть души",
+      "h1": "Строительство домов из керамоблока",
+      "canon": "https://chastdushi.ru/projects/keramoblok"
+    },
+    {
+      "path": "/services/proektirovanie",
+      "code": "200",
+      "title": "Max",
+      "h1": "Проектирование частных домов",
+      "canon": "https://chastdushi.ru/services/proektirovanie"
+    }
+  ],
+  "redirects": [
+    {
+      "url": "https://chastdushi.ru/stroitelstvo-domov-iz-gazobetona",
+      "status": "308",
+      "loc": "/projects/gazobeton"
+    },
+    {
+      "url": "https://chastdushi.ru/projects?material=gazobeton",
+      "status": "308",
+      "loc": "/projects/gazobeton"
+    }
+  ],
+  "robotsHead": "User-Agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/\nDisallow: /account/\nDisallow: /spasibo\nDisallow: /promo\nDisallow: /lp/\n\n# Фильтры каталога: не Disallow. Яндекс — Clean-param; страницы — canonical + noindex,follow (§9).\nClean-param: material&floors&areaMin&areaMax&priceMin&priceMax&q&sort /projects\nClean-param: material&floors&areaMin&areaMax&priceMin&priceMax&q&sort /typical-projects\n\nHost: chastdushi.ru"
+}

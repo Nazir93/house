@@ -8,26 +8,22 @@
 
 ## Важно про деплой
 
-Большая часть этапа 1 **в коде репозитория**, но **ещё не на проде** (или перебита `PageMeta` в БД).  
-Ниже две таблицы: **live сейчас** и **ожидание из кода после деплоя**.
+**Задеплоено 2026-08-14** (`git 186daf0`). После деплоя синхронизирован `PageMeta` для `/`, `/projects`, материалов.
+
+Повторный live-прогон после деплоя: Title/H1 целевых совпадают с кодом ТЗ; `/stroitelstvo-*` и `?material=` → **308**; robots с **Clean-param**.
 
 ---
 
-## 1. Таблица целевых URL — live (chastdushi.ru)
+## 1. Таблица целевых URL — live после деплоя (chastdushi.ru)
 
 | URL | HTTP | Title | Description | H1 | Canonical | Indexable | Sitemap |
 |---|---|---|---|---|---|---|---|
-| `/` | 200 | + (старый бренд-Title) | + | 1 («Строим дома для жизни…») | self `https://chastdushi.ru` | index,follow | да (`https://chastdushi.ru`) |
-| `/projects` | 200 | + «Каталог авторских проектов…» | + | 1 | self | index,follow | да |
-| `/services/proektirovanie` | 200 | + под ТЗ | + | 1 «Проектирование частных домов» | self | index,follow | да |
-| `/projects/gazobeton` | 200 | + «Проекты домов из газобетона…» | + | 1 | self | index,follow | да |
-| `/projects/kirpich` | 200 | + «Проекты кирпичных домов…» | + | 1 | self | index,follow | да |
-| `/projects/keramoblok` | 200 | + «Проекты домов из керамоблока…» | + | 1 | self | index,follow | да |
-
-Live Title/Description/H1 между этими 6 URL **разные**.  
-Коммерческие Title/H1 из кода (§1 / §7 / §11–12) на проде **ещё не видны** (нужен деплой + сверка `PageMeta`).
-
-Полные live-значения: `evidence/_live-parse.txt`.
+| `/` | 200 | + ТЗ | + | 1 ТЗ | self | да | да |
+| `/projects` | 200 | + ТЗ | + | 1 ТЗ | self | да | да |
+| `/services/proektirovanie` | 200 | + ТЗ | + | 1 ТЗ | self | да | да |
+| `/projects/gazobeton` | 200 | + ТЗ | + | 1 ТЗ | self | да | да |
+| `/projects/kirpich` | 200 | + ТЗ | + | 1 ТЗ | self | да | да |
+| `/projects/keramoblok` | 200 | + ТЗ | + | 1 ТЗ | self | да | да |
 
 ---
 

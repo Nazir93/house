@@ -39,12 +39,12 @@
 - [x] §25 Перелинковка — главная / `/projects` / материал / объект на каноны (`seo-interlinking.ts`)
 - [x] §26 Не делать — инварианты скрытого текста / дублей / ключей / H1 / фильтров / 301 / Schema (`seo-prohibitions.ts`)
 - [x] §27 Порядок этапа — meta/главная → материалы; GEO не трогали
-- [x] §28 Приёмка — таблица + артефакты (`ACCEPTANCE.md`, `evidence/`, `seo-acceptance.ts`); live ок по 200/canonical/sitemap, meta ТЗ — после деплоя
-- [ ] Деплой + повторный live-прогон ACCEPTANCE
+- [x] §28 Приёмка — таблица + артефакты (`ACCEPTANCE.md`, `evidence/`, `seo-acceptance.ts`)
+- [x] Деплой `186daf0` (2026-08-14): check+build OK → VPS; PageMeta синхронизирован под ТЗ; smoke 200 + 308 legacy/material + Clean-param robots
 
 ## Next
 
-Деплой этапа 1 → обновить `ACCEPTANCE.md` / `evidence/` → завести цели Метрики в UI.
+Завести цели Метрики §24 в UI Яндекса; через 1–2 недели — сверка Вебмастера.
 
 ## Already done (до этого плана)
 
