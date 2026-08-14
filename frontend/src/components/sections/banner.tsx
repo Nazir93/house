@@ -183,12 +183,10 @@ export function BannerSection({
             </div>
             <p
               className={cn(
-                "mt-2.5 max-w-2xl text-balance rounded-lg px-3 py-2 text-[13px] font-medium leading-relaxed shadow-[0_12px_40px_rgba(0,0,0,0.35)] md:mt-3 md:px-3.5 md:py-2.5 md:text-[15px]",
-                // Светлая тема + яркий hero: полупрозрачный чёрный выглядит почти белым,
-                // а светлый текст сливается. На light — непрозрачная светлая плашка и тёмный текст.
-                theme === "light"
-                  ? "border border-black/10 bg-white/95 text-[#12231c] [text-shadow:none]"
-                  : cn("bg-black/72 text-white", edgeGlass),
+                "mt-2.5 max-w-2xl text-balance rounded-lg px-3 py-2 text-[13px] font-medium leading-relaxed text-white shadow-[0_12px_40px_rgba(0,0,0,0.35)] [text-shadow:0_1px_2px_rgba(0,0,0,0.65)] md:mt-3 md:px-3.5 md:py-2.5 md:text-[15px]",
+                edgeGlass,
+                // Как у H1: тёмная плашка; в light чуть плотнее, чтобы текст не сливался с ярким фоном.
+                theme === "light" ? "bg-black/78" : "bg-black/68",
               )}
             >
               {lead}
