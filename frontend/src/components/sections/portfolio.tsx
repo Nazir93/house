@@ -5,7 +5,7 @@ import { ArrowUpRight } from "lucide-react";
 import type { ProjectListItem } from "@/lib/get-projects";
 import type { BuiltObjectItem } from "@/lib/construction-shared";
 import { PortfolioProjectListCard } from "@/components/portfolio/portfolio-project-list-card";
-import { HomeBuiltHomesGrid } from "@/components/sections/home-built-homes-grid";
+import { HomeCasesAccordion } from "@/components/sections/home-cases-accordion";
 import { revealDelayStyle } from "@/lib/reveal-animation";
 
 export type PortfolioSectionProps = {
@@ -39,7 +39,7 @@ export function PortfolioSection({
         {/* Шапка как у «Популярные проекты» */}
         <div className="mb-8 flex flex-col gap-5 md:mb-9">
           <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-            <h2 className="min-w-0 w-full flex-1 text-balance font-heading text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl md:text-[2.25rem] md:leading-[1.1]">
+            <h2 className="min-w-0 w-full flex-1 font-heading text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl md:text-[2.25rem] md:leading-[1.1]">
               {sectionTitle}
             </h2>
             <Link
@@ -53,7 +53,7 @@ export function PortfolioSection({
         </div>
 
         {useBuilt ? (
-          <HomeBuiltHomesGrid objects={builtObjects!} />
+          <HomeCasesAccordion objects={builtObjects!} />
         ) : (
           <div className="flex max-w-5xl flex-col gap-4">
             {items.map((project, index) => (
