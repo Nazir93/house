@@ -41,6 +41,8 @@ import { ImageLightbox } from "@/components/ui/image-lightbox";
 import { CmsImage } from "@/components/ui/cms-image";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { useContactConfig } from "@/lib/contact-config-context";
+import { useModal } from "@/lib/modal-context";
+import { projectPageEstimateLeadMeta } from "@/lib/project-page-estimate-lead";
 import { MESSENGER_CHAT_PHONE_RAW } from "@/lib/constants";
 import { maxMessengerChatUrl, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
 import {
@@ -165,7 +167,9 @@ export function HouseProjectDetailContent({
   }
 
   const contact = useContactConfig();
+  const { openModalToEstimate } = useModal();
   const active = renders[activeRender] ?? renders[0];
+  const selectedHeroTier = effectiveHeroTiers[tierIdx] ?? effectiveHeroTiers[0];
 
   const telegramHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE_RAW);
   const maxMessengerHref = maxMessengerChatUrl(contact.social.maxChat);
@@ -196,8 +200,15 @@ export function HouseProjectDetailContent({
     return idx >= 0 ? renders.length + idx : renders.length;
   }
 
-  function scrollToCompletion() {
-    document.getElementById("completion")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  function openEstimateLead() {
+    openModalToEstimate(
+      projectPageEstimateLeadMeta({
+        slug: project.slug,
+        title: project.title,
+        materialLabel: selectedHeroTier?.label,
+        priceRub: selectedHeroTier?.price,
+      }),
+    );
   }
 
   const accentColor = "var(--accent)";
@@ -487,7 +498,7 @@ export function HouseProjectDetailContent({
               <div className="mt-6 space-y-2">
                 <button
                   type="button"
-                  onClick={scrollToCompletion}
+                  onClick={openEstimateLead}
                   className="w-full rounded-2xl bg-[var(--accent)] px-4 py-4 text-sm font-bold text-[var(--accent-contrast)] shadow-[0_8px_24px_rgb(var(--accent-rgb)/0.3)] transition hover:bg-[var(--accent-hover)]"
                 >
                   Получить смету

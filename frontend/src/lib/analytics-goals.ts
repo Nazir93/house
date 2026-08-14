@@ -96,7 +96,7 @@ export function collectCurrentTrafficParams(): TrafficParams {
 /** Цель Метрики для каждого Lead.source — см. lead-sources.ts */
 export function metrikaGoalForLeadSource(source: string): MetrikaGoalName | null {
   if (source === "calculator" || source === "promo-qr-banner") return METRIKA_GOALS.leadCalculator;
-  if (source === "project-calculator") return METRIKA_GOALS.leadProject;
+  if (source === "project-calculator" || source === "project-page-estimate") return METRIKA_GOALS.leadProject;
   if (source === "compare") return METRIKA_GOALS.leadCompare;
   if (source === "mortgage") return METRIKA_GOALS.leadMortgage;
   if (source === "house-project-mortgage") return METRIKA_GOALS.leadMortgageProject;

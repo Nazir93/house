@@ -51,6 +51,8 @@ describe("metrikaGoalForLeadSource", () => {
   it("maps mortgage variants separately", () => {
     expect(metrikaGoalForLeadSource("mortgage")).toBe(METRIKA_GOALS.leadMortgage);
     expect(metrikaGoalForLeadSource("house-project-mortgage")).toBe(METRIKA_GOALS.leadMortgageProject);
+    expect(metrikaGoalForLeadSource("project-calculator")).toBe(METRIKA_GOALS.leadProject);
+    expect(metrikaGoalForLeadSource("project-page-estimate")).toBe(METRIKA_GOALS.leadProject);
   });
 
   it("maps partner and service prefixes", () => {
