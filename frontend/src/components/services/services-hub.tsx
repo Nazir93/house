@@ -92,7 +92,7 @@ export function ServicesHub({
           <h2 className="font-heading text-[clamp(1.35rem,2.2vw,1.85rem)] font-semibold leading-[1.15] tracking-tight text-[var(--text)]">
             Каждая услуга влияет на качество будущего дома
           </h2>
-          <div className="mt-4 grid gap-3 text-[14px] leading-relaxed text-[var(--text-muted)] sm:text-[15px] md:grid-cols-2 md:gap-x-10">
+          <div className="mt-4 space-y-3 text-[14px] leading-relaxed text-[var(--text-muted)] sm:text-[15px]">
             {introText
               .split(/\n\n+/)
               .map((paragraph) => paragraph.trim())

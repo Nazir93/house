@@ -18,11 +18,11 @@ export function HomeTurnkeyServicesSection() {
       <div className="section-inline-pad mx-auto max-w-[1280px]">
         <h2
           id="home-turnkey-services-heading"
-          className="w-full max-w-none text-balance font-heading text-[clamp(1.15rem,2.9vw,1.95rem)] font-bold uppercase leading-[1.15] tracking-[-0.03em] text-[var(--text)]"
+          className="w-full max-w-none font-heading text-[clamp(1.15rem,2.9vw,1.95rem)] font-bold uppercase leading-[1.15] tracking-[-0.03em] text-[var(--text)]"
         >
           {HOME_TURNKEY_SERVICES_H2}
         </h2>
-        <div className="mt-4 grid gap-3 text-sm leading-relaxed text-[var(--text)]/88 dark:text-[var(--text-muted)] md:grid-cols-2 md:gap-x-10 md:gap-y-4 md:text-[15px]">
+        <div className="mt-4 space-y-3 text-sm leading-relaxed text-[var(--text)]/88 dark:text-[var(--text-muted)] md:text-[15px]">
           {HOME_TURNKEY_SERVICES_LEAD.map((paragraph) => (
             <p key={paragraph.slice(0, 48)}>{paragraph}</p>
           ))}

@@ -18,11 +18,11 @@ export function AuthorProjectsAfterCatalogSection() {
       <div className="container mx-auto max-w-[1400px] px-5">
         <h2
           id="projects-seo-after-catalog-heading"
-          className="w-full max-w-none text-balance font-heading text-[clamp(1.1rem,2.6vw,1.75rem)] font-bold uppercase leading-[1.15] tracking-[-0.03em] text-[var(--text)]"
+          className="w-full max-w-none font-heading text-[clamp(1.1rem,2.6vw,1.75rem)] font-bold uppercase leading-[1.15] tracking-[-0.03em] text-[var(--text)]"
         >
           {AUTHOR_PROJECTS_AFTER_CATALOG_H2}
         </h2>
-        <div className="mt-5 grid gap-4 text-sm leading-relaxed text-[var(--text)]/88 dark:text-[var(--text-muted)] md:grid-cols-2 md:gap-x-10 md:gap-y-5 md:text-[15px]">
+        <div className="mt-5 space-y-4 text-sm leading-relaxed text-[var(--text)]/88 dark:text-[var(--text-muted)] md:text-[15px]">
           {AUTHOR_PROJECTS_AFTER_CATALOG_PARAGRAPHS.map((paragraph) => (
             <p key={paragraph.slice(0, 40)}>{paragraph}</p>
           ))}
