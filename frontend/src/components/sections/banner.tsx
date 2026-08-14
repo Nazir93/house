@@ -27,7 +27,6 @@ const BADGE_ICONS = [Award, Home, ShieldCheck, ClipboardCheck] as const;
 
 /** Едва заметная «стеклянная» обводка на тёмном баннере */
 const edgeGlass = "border border-white/[0.07]";
-const edgeGlassStrong = "border border-white/[0.1]";
 
 /** Интервал автопрокрутки промо-карусели на баннере. */
 const PROMO_AUTO_ADVANCE_MS = 6000;
