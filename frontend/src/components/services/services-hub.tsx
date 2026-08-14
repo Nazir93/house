@@ -80,7 +80,7 @@ export function ServicesHub({
   );
 
   return (
-    <div className="pb-16 md:pb-20">
+    <div>
       <div className="container mx-auto max-w-[1380px] px-4 pt-8 sm:px-6 md:pt-10 lg:px-10">
         <h1 className="font-heading text-[clamp(1.35rem,2.4vw,2rem)] font-semibold tracking-tight text-[var(--text)]">
           {pageH1}
@@ -283,7 +283,7 @@ export function ServicesHub({
         </div>
       </div>
 
-      {/* Как мы строим */}
+      {/* Как мы строим — вплотную к футеру, без «полоски» фона страницы снизу */}
       <div className="border-t border-[var(--border)] bg-[var(--bg-secondary)] py-14 md:py-16">
         <div className="container mx-auto max-w-[1380px] px-4 sm:px-6 lg:px-10">
           <h2 className="text-center font-heading text-[clamp(1.25rem,2vw,1.65rem)] font-semibold text-[var(--text)]">

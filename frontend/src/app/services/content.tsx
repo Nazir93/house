@@ -18,7 +18,7 @@ export function ServicesPageContent({
       <ServicesHub services={services} pageH1={pageH1} introText={introText} />
 
       {bodyHtml ? (
-        <div className="container mx-auto max-w-[900px] px-4 pb-16 sm:px-6 lg:px-10">
+        <div className="container mx-auto max-w-[900px] px-4 py-12 sm:px-6 lg:px-10">
           <div
             className="prose prose-sm md:prose-base max-w-none border-t border-[var(--border)] pt-12 [&_img]:rounded-md [&_img]:border [&_img]:border-[var(--border)]"
             style={{ color: "var(--text)" }}
