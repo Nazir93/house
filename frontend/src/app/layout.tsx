@@ -95,8 +95,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  viewportFit: "cover",
+  /** Яндекс/мобильные: не запрещаем zoom (userScalable по умолчанию true). */
   maximumScale: 5,
+  userScalable: true,
+  viewportFit: "cover",
   colorScheme: "light dark",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: PWA_THEME_COLORS.light },

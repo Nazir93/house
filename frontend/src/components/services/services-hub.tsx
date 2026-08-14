@@ -297,10 +297,10 @@ export function ServicesHub({
                     <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-[var(--border)] bg-[var(--bg)] text-[var(--accent)] shadow-sm">
                       <step.Icon className="h-5 w-5" strokeWidth={1.6} aria-hidden />
                     </span>
-                    <span className="mt-3 px-0.5 font-heading text-[11px] font-semibold leading-tight text-[var(--text)] sm:text-[12px] md:text-[13px]">
+                    <span className="mt-3 px-0.5 font-heading text-[12px] font-semibold leading-tight text-[var(--text)] sm:text-[13px]">
                       {step.title}
                     </span>
-                    <span className="mt-1 max-w-[120px] text-[10px] leading-relaxed text-[var(--text-muted)] sm:max-w-[140px] sm:text-[11px]">
+                    <span className="mt-1 max-w-[120px] text-[12px] leading-relaxed text-[var(--text-muted)] sm:max-w-[140px] sm:text-[13px]">
                       {step.description}
                     </span>
                   </li>
