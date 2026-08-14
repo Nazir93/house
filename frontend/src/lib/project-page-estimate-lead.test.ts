@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { estimatePayloadHasDetailedCalc } from "@/lib/lp-contact-cta";
-import { projectPageEstimateLeadMeta } from "@/lib/project-page-estimate-lead";
+import {
+  buildProjectClarificationNote,
+  projectPageEstimateLeadMeta,
+  readEstimateClarificationNote,
+} from "@/lib/project-page-estimate-lead";
 
 describe("projectPageEstimateLeadMeta", () => {
   it("собирает заявку с карточки проекта без детального калькулятора", () => {
@@ -20,6 +24,21 @@ describe("projectPageEstimateLeadMeta", () => {
       materialLabel: "Газобетон",
       priceRub: 5_200_000,
     });
+    expect(estimatePayloadHasDetailedCalc(meta.calcData)).toBe(false);
+  });
+
+  it("добавляет сноску про уточнение в смете по этапу", () => {
+    const meta = projectPageEstimateLeadMeta({
+      slug: "aurora",
+      title: "Аврора",
+      clarificationTopic: "Проект",
+    });
+
+    expect(meta.service).toBe('Смета · уточнение «Проект» · проект Аврора');
+    expect(meta.calcData.clarificationTopic).toBe("Проект");
+    expect(meta.calcData.clarificationNote).toBe(
+      buildProjectClarificationNote("Проект"),
+    );
     expect(estimatePayloadHasDetailedCalc(meta.calcData)).toBe(false);
   });
 
@@ -43,5 +62,20 @@ describe("projectPageEstimateLeadMeta", () => {
       projectSlug: "a",
       projectTitle: "A",
     });
+  });
+});
+
+describe("readEstimateClarificationNote", () => {
+  it("читает сноску из calcData", () => {
+    expect(
+      readEstimateClarificationNote({
+        clarificationNote: "  Клиент хочет уточнить в смете: «Проект».  ",
+      }),
+    ).toBe("Клиент хочет уточнить в смете: «Проект».");
+  });
+
+  it("без сноски — null", () => {
+    expect(readEstimateClarificationNote(null)).toBeNull();
+    expect(readEstimateClarificationNote({})).toBeNull();
   });
 });

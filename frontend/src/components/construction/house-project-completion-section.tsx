@@ -31,6 +31,7 @@ import { ProjectCalculatorEstimateMobile } from "@/components/construction/proje
 import type { PublicCalculatorCatalog } from "@/lib/calculator-catalog";
 import type { HouseCalculatorCategoryId } from "@/lib/house-project-calculator-engine";
 import { buildProjectCalculatorLeadPayload } from "@/lib/project-calculator-lead";
+import { projectPageEstimateLeadMeta } from "@/lib/project-page-estimate-lead";
 import {
   isCalculatorStageDiagramUrl,
   isCalculatorStageTextOnly,
@@ -521,7 +522,7 @@ export function HouseProjectCompletionSection({
             ) : null}
             <div
               className={cn(
-                "flex flex-col",
+                "flex min-w-0 flex-col",
                 isTextOnlyStage
                   ? "p-4 sm:p-5 md:p-6 lg:p-8"
                   : isStageDiagram
@@ -566,7 +567,7 @@ export function HouseProjectCompletionSection({
                       {row.value ? (
                         <p
                           className={cn(
-                            "mt-1 text-[var(--text-muted)]",
+                            "mt-1 min-w-0 break-words text-[var(--text-muted)]",
                             isCompactList ? "text-[11px] sm:text-xs" : "text-sm",
                           )}
                         >
@@ -589,7 +590,7 @@ export function HouseProjectCompletionSection({
                       </p>
                       <p
                         className={cn(
-                          "whitespace-pre-line text-[var(--text-muted)]",
+                          "min-w-0 break-words whitespace-pre-line text-[var(--text-muted)]",
                           isCompactList
                             ? "mt-1.5 text-[11px] leading-[1.55] sm:text-xs sm:leading-relaxed"
                             : "mt-2 text-sm leading-relaxed",
@@ -604,7 +605,16 @@ export function HouseProjectCompletionSection({
               <button
                 type="button"
                 className="mt-3 inline-flex items-center gap-1 self-start text-[11px] font-bold text-[var(--accent)] hover:underline sm:mt-4 sm:text-xs"
-                onClick={() => openModalToEstimate()}
+                onClick={() =>
+                  openModalToEstimate(
+                    projectPageEstimateLeadMeta({
+                      slug: project.slug,
+                      title: project.title,
+                      materialLabel: tier?.label,
+                      clarificationTopic: stage.label,
+                    }),
+                  )
+                }
               >
                 Уточнить в смете
               </button>

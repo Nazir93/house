@@ -9,6 +9,7 @@ import { BackNavButton } from "@/components/ui/back-nav";
 import { HouseConstructionCalculatorForm } from "@/components/construction/house-construction-calculator-form";
 import { collectCurrentTrafficParams, trackLeadSuccess } from "@/lib/analytics-goals";
 import { estimatePayloadHasDetailedCalc } from "@/lib/lp-contact-cta";
+import { readEstimateClarificationNote } from "@/lib/project-page-estimate-lead";
 
 type Step = "form-calculator" | "success";
 
@@ -70,6 +71,7 @@ function ProjectEstimateLeadForm({
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);
   const detailedCalc = estimatePayloadHasDetailedCalc(estimatePayload?.calcData);
+  const clarificationNote = readEstimateClarificationNote(estimatePayload?.calcData);
   const projectTitle =
     estimatePayload?.calcData &&
     typeof estimatePayload.calcData === "object" &&
@@ -129,9 +131,11 @@ function ProjectEstimateLeadForm({
         <p className="mt-3 text-sm leading-relaxed text-[var(--text-muted)]">
           {detailedCalc
             ? "Выбранные материалы, инженерия, доп. опции и сумма уже прикреплены к заявке."
-            : projectTitle
-              ? `Перезвоним и уточним расчёт по проекту «${projectTitle}».`
-              : "Перезвоним, уточним задачу и подготовим ориентир по смете."}
+            : clarificationNote
+              ? "Перезвоним и уточним выбранный пункт в смете по вашему проекту."
+              : projectTitle
+                ? `Перезвоним и уточним расчёт по проекту «${projectTitle}».`
+                : "Перезвоним, уточним задачу и подготовим ориентир по смете."}
         </p>
         {projectTitle ? (
           <p
@@ -142,6 +146,19 @@ function ProjectEstimateLeadForm({
             }}
           >
             Проект: {projectTitle}
+          </p>
+        ) : null}
+        {clarificationNote ? (
+          <p
+            className="mt-3 rounded-2xl border px-4 py-3 text-sm leading-relaxed"
+            style={{
+              borderColor: "color-mix(in srgb, var(--accent) 28%, var(--border))",
+              backgroundColor: "color-mix(in srgb, var(--accent) 8%, var(--bg))",
+              color: "var(--text)",
+            }}
+          >
+            <span className="font-semibold text-[var(--accent)]">Сноска в заявке. </span>
+            {clarificationNote}
           </p>
         ) : null}
 
