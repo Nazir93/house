@@ -35,6 +35,7 @@ export const LEAD_SOURCE_OPTIONS: { value: string; label: string; hint?: string 
   { value: "lp-odnoetazhnye", label: "LP: одноэтажные дома", hint: "/lp/odnoetazhnye" },
   { value: "lp-keramoblok", label: "LP: керамоблок", hint: "/lp/keramoblok" },
   { value: "project-calculator", label: "Расчёт с карточки проекта", hint: "Модалка на /projects/[slug]" },
+  { value: "project-page-estimate", label: "Смета с карточки проекта", hint: "Кнопка «Получить смету» → имя и телефон" },
   { value: "individual-design", label: "Индивидуальное проектирование", hint: "/individual-design" },
   { value: "house-project-design", label: "Проект (карточка дома)", hint: "Калькулятор на странице типового проекта" },
   { value: "mortgage", label: "Ипотека", hint: "/mortgage и блок без привязки к проекту" },
