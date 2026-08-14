@@ -61,7 +61,7 @@ export function IndividualDesignPageContent() {
           >
             Проектирование
           </span>
-          <h1 className="mt-5 max-w-3xl font-heading text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl">
+          <h1 className="mt-5 w-full max-w-none font-heading text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl">
             Индивидуальное проектирование
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-relaxed sm:text-lg" style={{ color: "var(--text-muted)" }}>

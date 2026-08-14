@@ -23,7 +23,7 @@ export function BuiltObjectSimilarHouseSection({
       <div className="container mx-auto max-w-[1180px] px-5">
         <h2
           id="similar-house-heading"
-          className="max-w-3xl text-balance font-heading text-[clamp(1.15rem,2.9vw,1.85rem)] font-bold uppercase leading-[1.15] tracking-[-0.03em] text-[var(--text)]"
+          className="w-full max-w-none text-balance font-heading text-[clamp(1.15rem,2.9vw,1.85rem)] font-bold uppercase leading-[1.15] tracking-[-0.03em] text-[var(--text)]"
         >
           {BUILT_OBJECT_SIMILAR_HOUSE_H2}
         </h2>

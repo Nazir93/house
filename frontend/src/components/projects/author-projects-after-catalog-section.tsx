@@ -18,7 +18,7 @@ export function AuthorProjectsAfterCatalogSection() {
       <div className="container mx-auto max-w-[1400px] px-5">
         <h2
           id="projects-seo-after-catalog-heading"
-          className="max-w-5xl text-balance font-heading text-[clamp(1.1rem,2.6vw,1.75rem)] font-bold uppercase leading-[1.15] tracking-[-0.03em] text-[var(--text)]"
+          className="w-full max-w-none text-balance font-heading text-[clamp(1.1rem,2.6vw,1.75rem)] font-bold uppercase leading-[1.15] tracking-[-0.03em] text-[var(--text)]"
         >
           {AUTHOR_PROJECTS_AFTER_CATALOG_H2}
         </h2>

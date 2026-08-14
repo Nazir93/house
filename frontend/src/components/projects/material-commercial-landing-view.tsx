@@ -37,11 +37,11 @@ function SectionShell({
   return (
     <section id={id} className="scroll-mt-28 border-t border-[var(--border)] py-10 sm:py-12 md:py-14">
       <div className="container mx-auto max-w-[1180px] px-5">
-        <h2 className="max-w-3xl text-balance font-heading text-[clamp(1.1rem,2.6vw,1.75rem)] font-bold uppercase leading-[1.15] tracking-[-0.03em] text-[var(--text)]">
+        <h2 className="w-full max-w-none text-balance font-heading text-[clamp(1.1rem,2.6vw,1.75rem)] font-bold uppercase leading-[1.15] tracking-[-0.03em] text-[var(--text)]">
           {h2}
         </h2>
         {lead ? (
-          <p className="mt-4 max-w-[65ch] text-sm leading-relaxed text-[var(--text-muted)] md:text-[15px]">{lead}</p>
+          <p className="mt-4 max-w-4xl text-sm leading-relaxed text-[var(--text-muted)] md:text-[15px]">{lead}</p>
         ) : null}
         <div className="mt-7">{children}</div>
       </div>
@@ -86,10 +86,10 @@ export function MaterialCommercialLandingView({
             <span className="text-[var(--text)]">{seo.h1}</span>
           </nav>
 
-          <h1 className="mt-5 max-w-4xl text-balance font-heading text-[clamp(1.6rem,4vw,2.75rem)] font-bold leading-[1.12] tracking-tight text-[var(--accent)] dark:text-[var(--text)]">
+          <h1 className="mt-5 w-full max-w-none text-balance font-heading text-[clamp(1.6rem,4vw,2.75rem)] font-bold leading-[1.12] tracking-tight text-[var(--accent)] dark:text-[var(--text)]">
             {seo.h1}
           </h1>
-          <p className="mt-4 max-w-2xl text-[15px] leading-relaxed text-[var(--text-muted)] md:text-base">
+          <p className="mt-4 max-w-4xl text-[15px] leading-relaxed text-[var(--text-muted)] md:text-base">
             {commercial.heroLead}
           </p>
           <MaterialCommercialCtaGroup ctas={commercial.ctas} className="mt-7" />

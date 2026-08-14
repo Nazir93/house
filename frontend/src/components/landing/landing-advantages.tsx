@@ -121,7 +121,7 @@ export function LandingAdvantages({ title, items }: LandingAdvantagesProps) {
     <section ref={ref} className="py-16 sm:py-24 md:py-32" style={{ backgroundColor: "var(--bg)" }}>
       <div className="container mx-auto">
         <h2
-          className="font-heading text-xl sm:text-2xl md:text-3xl mb-8 sm:mb-12 max-w-3xl break-words transition-all duration-700"
+          className="mb-8 w-full max-w-none break-words font-heading text-xl transition-all duration-700 sm:mb-12 sm:text-2xl md:text-3xl"
           style={{
             color: "var(--text)",
             opacity: visible ? 1 : 0,

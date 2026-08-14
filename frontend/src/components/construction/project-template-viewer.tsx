@@ -120,7 +120,7 @@ export function ProjectTemplateViewer() {
             Шаблон проекта
           </p>
           <h2
-            className="mt-2 max-w-3xl text-balance font-heading text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl"
+            className="mt-2 w-full max-w-none text-balance font-heading text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl"
             style={{ color: "var(--text)" }}
           >
             Как выглядит стандартный проект

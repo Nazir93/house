@@ -37,7 +37,7 @@ export function AccountShowcaseSection() {
             </p>
             <h2
               id="account-showcase-heading"
-              className="mt-3 max-w-4xl text-balance font-heading text-[clamp(1.35rem,5.4vw,2.45rem)] font-bold leading-[1.12] tracking-tight text-[var(--text)] sm:mt-3.5 sm:leading-[1.08]"
+              className="mt-3 w-full max-w-none text-balance font-heading text-[clamp(1.35rem,5.4vw,2.45rem)] font-bold leading-[1.12] tracking-tight text-[var(--text)] sm:mt-3.5 sm:leading-[1.08]"
             >
               {ACCOUNT_SHOWCASE_SECTION_TITLE}
             </h2>

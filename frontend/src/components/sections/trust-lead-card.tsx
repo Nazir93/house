@@ -67,7 +67,7 @@ export function TrustLeadCardBody({ variant, afterIntro }: TrustLeadCardBodyProp
           </p>
           <HeadingTag
             id={headingId}
-            className="mt-2.5 max-w-3xl text-balance font-heading text-xl font-bold uppercase tracking-tight text-[var(--text)] sm:text-2xl md:text-[1.625rem] md:leading-[1.16] lg:max-w-4xl lg:text-[1.75rem] lg:text-pretty xl:max-w-5xl xl:text-[1.875rem]"
+            className="mt-2.5 w-full max-w-none text-balance font-heading text-xl font-bold uppercase tracking-tight text-[var(--text)] sm:text-2xl md:text-[1.625rem] md:leading-[1.16] lg:text-[1.75rem] lg:text-pretty xl:text-[1.875rem]"
           >
             {TRUST_SECTION_TITLE_LINES.map((line, index) => (
               <span key={line} className={index > 0 ? "block" : undefined}>
@@ -109,7 +109,7 @@ export function TrustLeadCardBody({ variant, afterIntro }: TrustLeadCardBodyProp
         <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)]">
           {TRUST_WHY_EYEBROW}
         </p>
-        <WhyHeadingTag className="mt-2.5 max-w-3xl text-balance font-heading text-lg font-bold uppercase tracking-tight text-[var(--text)] sm:text-xl md:text-[1.375rem] md:leading-[1.18] lg:max-w-4xl lg:text-[1.5rem] lg:text-pretty xl:max-w-5xl xl:text-[1.625rem]">
+        <WhyHeadingTag className="mt-2.5 w-full max-w-none text-balance font-heading text-lg font-bold uppercase tracking-tight text-[var(--text)] sm:text-xl md:text-[1.375rem] md:leading-[1.18] lg:text-[1.5rem] lg:text-pretty xl:text-[1.625rem]">
           {TRUST_WHY_TITLE_LINES.map((line, index) => (
             <span key={line} className={index > 0 ? "block" : undefined}>
               {line}
