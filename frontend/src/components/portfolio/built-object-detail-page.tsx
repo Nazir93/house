@@ -46,6 +46,11 @@ import { BuiltObjectHistoryCards } from "@/components/portfolio/built-object-his
 import { formatArticleBody, PAGE_INTRO_PROSE_CLASS } from "@/lib/html-content";
 import type { BuiltObjectItem } from "@/lib/construction-shared";
 import { BUILT_HOMES_SECTION_LABEL, UNDER_CONSTRUCTION_SECTION_LABEL } from "@/lib/constants";
+import {
+  resolveBuiltObjectCoverAlt,
+  resolveBuiltObjectImageAlt,
+  resolveBuiltObjectImageTitle,
+} from "@/lib/seo/built-object-image-seo";
 import { scrollPageToElement, siteHeaderStickyOffsetPx } from "@/lib/scroll-page-to-element";
 import { cn } from "@/lib/utils";
 
@@ -308,7 +313,16 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                 {hero ? (
                   <CmsImage
                     src={hero.url}
-                    alt={hero.alt || object.title}
+                    alt={resolveBuiltObjectCoverAlt(object, hero.alt)}
+                    title={resolveBuiltObjectImageTitle(hero.alt, {
+                      material: object.material,
+                      location: object.location,
+                      district: object.district,
+                      title: object.title,
+                      slug: object.slug,
+                      index: 1,
+                      role: "cover",
+                    })}
                     fill
                     priority
                     className="object-cover"
@@ -362,7 +376,25 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                       <div className="relative aspect-[4/3] min-h-[240px] overflow-hidden rounded-2xl bg-[color-mix(in_srgb,var(--bg)_75%,transparent)] sm:min-h-[280px] md:min-h-[320px]">
                         <CmsImage
                           src={plan.url}
-                          alt={plan.label || `План ${index + 1}`}
+                          alt={resolveBuiltObjectImageAlt(plan.label || plan.alt, {
+                            material: object.material,
+                            location: object.location,
+                            district: object.district,
+                            title: object.title,
+                            slug: object.slug,
+                            index: index + 1,
+                            role: "plan",
+                            label: plan.label,
+                          })}
+                          title={resolveBuiltObjectImageTitle(plan.label || plan.alt, {
+                            material: object.material,
+                            location: object.location,
+                            district: object.district,
+                            title: object.title,
+                            index: index + 1,
+                            role: "plan",
+                            label: plan.label,
+                          })}
                           fill
                           className="object-contain p-3"
                           sizes="(max-width: 768px) 100vw, 480px"
@@ -407,7 +439,27 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
                       >
                         <CmsImage
                           src={photo.url}
-                          alt={photo.alt || photo.label || "Фото строительства"}
+                          alt={resolveBuiltObjectImageAlt(photo.alt || photo.label, {
+                            material: object.material,
+                            location: object.location,
+                            district: object.district,
+                            title: object.title,
+                            slug: object.slug,
+                            index: index + 1,
+                            role: "stroyka",
+                            phaseKey: photo.phaseKey,
+                            label: photo.label,
+                          })}
+                          title={resolveBuiltObjectImageTitle(photo.alt || photo.label, {
+                            material: object.material,
+                            location: object.location,
+                            district: object.district,
+                            title: object.title,
+                            index: index + 1,
+                            role: "stroyka",
+                            phaseKey: photo.phaseKey,
+                            label: photo.label,
+                          })}
                           fill
                           className="object-cover"
                           sizes="(max-width: 640px) 50vw, 20vw"

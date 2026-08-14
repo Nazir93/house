@@ -1,0 +1,126 @@
+=== /
+TITLE: Часть души — строительство домов под ключ в Санкт-Петербург и Ленинградской области
+DESC: Строительство загородных домов под ключ в Санкт-Петербург и Ленинградская область, Санкт-Петербург: проект, смета, фундамент, коробка, кровля, инженерия и отделка. Каталог проектов, калькулятор стоимости и построенные дома.
+CANON: https://chastdushi.ru
+ROBOTS: index, follow
+H1_COUNT: 1
+H1: Строим дома для жизни и для души
+CODE1618_CTX: "t-semibold text-white/72 underline-offset-2 transition hover:text-white\">студия CODE1618</a></noindex></p></div></div></footer><div class=\"fixed bottom-0 left-0 right-0"
+JSONLD: {"@context":"https://schema.org","@type":"GeneralContractor","name":"Часть души","description":"Строительство домов под ключ: качественные и понятные чертежи, прозрачная смета. Офис в Санкт-Петербург, работаем в Ленинградская область, Санкт-Петербург. Типовые 
+JSONLD: {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Что входит в строительство дома под ключ?","acceptedAnswer":{"@type":"Answer","text":"Состав зависит от комплектации: проектирование, фундамент, коробка, кровля, инжен
+LINK_OK: /projects
+LINK_OK: /portfolio
+LINK_OK: /services/proektirovanie
+
+=== /projects
+TITLE: Каталог авторских проектов — цены и планировки | Часть души
+DESC: Авторские проекты домов: подбор по материалу, этажности, площади и бюджету; на главной — расширенный конструктор подбора.
+CANON: https://chastdushi.ru/projects
+ROBOTS: index, follow
+H1_COUNT: 1
+H1: Каталог авторских проектов
+CODE1618_CTX: "t-semibold text-white/72 underline-offset-2 transition hover:text-white\">студия CODE1618</a></noindex></p></div></div></footer><div class=\"fixed bottom-0 left-0 right-0"
+JSONLD: {"@context":"https://schema.org","@type":"GeneralContractor","name":"Часть души","description":"Строительство домов под ключ: качественные и понятные чертежи, прозрачная смета. Офис в Санкт-Петербург, работаем в Ленинградская область, Санкт-Петербург. Типовые 
+LINK_OK: /projects/gazobeton
+LINK_OK: /projects/kirpich
+LINK_OK: /projects/keramoblok
+LINK_OK: /projects
+LINK_OK: /portfolio
+LINK_OK: /services/proektirovanie
+
+=== /projects/gazobeton
+TITLE: Проекты домов из газобетона — цены и строительство под ключ | Часть души
+DESC: Проекты домов из газобетона под ключ: одноэтажные и двухэтажные планировки, цены, расчет комплектации и строительство в СПб и Ленинградской области. Работаем в Ленинградская область, Санкт-Петербург, офис в Санкт-Петербург.
+CANON: https://chastdushi.ru/projects/gazobeton
+ROBOTS: index, follow
+H1_COUNT: 1
+H1: Проекты домов из газобетона
+CODE1618_CTX: "t-semibold text-white/72 underline-offset-2 transition hover:text-white\">студия CODE1618</a></noindex></p></div></div></footer><div class=\"fixed bottom-0 left-0 right-0"
+JSONLD: {"@context":"https://schema.org","@type":"GeneralContractor","name":"Часть души","description":"Строительство домов под ключ: качественные и понятные чертежи, прозрачная смета. Офис в Санкт-Петербург, работаем в Ленинградская область, Санкт-Петербург. Типовые 
+JSONLD: {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Главная","item":"https://chastdushi.ru/"},{"@type":"ListItem","position":2,"name":"Каталог проектов","item":"https://chastdushi.ru/projects"},
+JSONLD: {"@context":"https://schema.org","@type":"CollectionPage","name":"Проекты домов из газобетона","description":"Проекты домов из газобетона под ключ: одноэтажные и двухэтажные планировки, цены, расчет комплектации и строительство в СПб и Ленинградской области. Р
+JSONLD: {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Сколько стоит дом из газобетона под ключ?","acceptedAnswer":{"@type":"Answer","text":"Стоимость зависит от площади, этажности, фундамента, кровли, инженерии и отделки.
+LINK_OK: /projects/gazobeton
+LINK_OK: /projects/kirpich
+LINK_OK: /projects/keramoblok
+LINK_OK: /projects
+LINK_OK: /portfolio
+LINK_OK: /services/proektirovanie
+LINK_OK: /calculator
+
+=== /projects/kirpich
+TITLE: Проекты кирпичных домов — кирпичный дом под ключ | Часть души
+DESC: Проекты кирпичных домов под ключ: планировки, цены, расчет строительства и подбор комплектации для СПб и Ленинградской области. Работаем в Ленинградская область, Санкт-Петербург, офис в Санкт-Петербург.
+CANON: https://chastdushi.ru/projects/kirpich
+ROBOTS: index, follow
+H1_COUNT: 1
+H1: Проекты кирпичных домов
+CODE1618_CTX: "t-semibold text-white/72 underline-offset-2 transition hover:text-white\">студия CODE1618</a></noindex></p></div></div></footer><div class=\"fixed bottom-0 left-0 right-0"
+JSONLD: {"@context":"https://schema.org","@type":"GeneralContractor","name":"Часть души","description":"Строительство домов под ключ: качественные и понятные чертежи, прозрачная смета. Офис в Санкт-Петербург, работаем в Ленинградская область, Санкт-Петербург. Типовые 
+JSONLD: {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Главная","item":"https://chastdushi.ru/"},{"@type":"ListItem","position":2,"name":"Каталог проектов","item":"https://chastdushi.ru/projects"},
+JSONLD: {"@context":"https://schema.org","@type":"CollectionPage","name":"Проекты кирпичных домов","description":"Проекты кирпичных домов под ключ: планировки, цены, расчет строительства и подбор комплектации для СПб и Ленинградской области. Работаем в Ленинградская о
+JSONLD: {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Кирпичный дом дороже газобетона?","acceptedAnswer":{"@type":"Answer","text":"Обычно кирпичная комплектация дороже за счет материала и работ, но итог зависит от площади
+LINK_OK: /projects/gazobeton
+LINK_OK: /projects/kirpich
+LINK_OK: /projects/keramoblok
+LINK_OK: /projects
+LINK_OK: /portfolio
+LINK_OK: /services/proektirovanie
+LINK_OK: /calculator
+
+=== /projects/keramoblok
+TITLE: Проекты домов из керамоблока и теплой керамики | Часть души
+DESC: Проекты домов из керамоблока и теплой керамики: подбор планировки, расчет цены и строительство под ключ в СПб и Ленинградской области. Работаем в Ленинградская область, Санкт-Петербург, офис в Санкт-Петербург.
+CANON: https://chastdushi.ru/projects/keramoblok
+ROBOTS: index, follow
+H1_COUNT: 1
+H1: Проекты домов из керамоблока
+CODE1618_CTX: "t-semibold text-white/72 underline-offset-2 transition hover:text-white\">студия CODE1618</a></noindex></p></div></div></footer><div class=\"fixed bottom-0 left-0 right-0"
+JSONLD: {"@context":"https://schema.org","@type":"GeneralContractor","name":"Часть души","description":"Строительство домов под ключ: качественные и понятные чертежи, прозрачная смета. Офис в Санкт-Петербург, работаем в Ленинградская область, Санкт-Петербург. Типовые 
+JSONLD: {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Главная","item":"https://chastdushi.ru/"},{"@type":"ListItem","position":2,"name":"Каталог проектов","item":"https://chastdushi.ru/projects"},
+JSONLD: {"@context":"https://schema.org","@type":"CollectionPage","name":"Проекты домов из керамоблока","description":"Проекты домов из керамоблока и теплой керамики: подбор планировки, расчет цены и строительство под ключ в СПб и Ленинградской области. Работаем в Лен
+JSONLD: {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Чем керамоблок отличается от газобетона?","acceptedAnswer":{"@type":"Answer","text":"Керамоблок делают из керамики, он отличается плотностью, форматом блока, требовани
+LINK_OK: /projects/gazobeton
+LINK_OK: /projects/kirpich
+LINK_OK: /projects/keramoblok
+LINK_OK: /projects
+LINK_OK: /portfolio
+LINK_OK: /services/proektirovanie
+LINK_OK: /calculator
+
+=== /services/proektirovanie
+TITLE: Проектирование частных домов в СПб и Ленинградской области | Часть души
+DESC: Индивидуальное проектирование частных домов в Санкт-Петербурге и Ленинградской области. Архитектурные и конструктивные решения, посадка дома на участок и подготовка проекта к строительству.
+CANON: https://chastdushi.ru/services/proektirovanie
+ROBOTS: index, follow
+H1_COUNT: 1
+H1: Проектирование частных домов
+CODE1618_CTX: "t-semibold text-white/72 underline-offset-2 transition hover:text-white\">студия CODE1618</a></noindex></p></div></div></footer><div class=\"fixed bottom-0 left-0 right-0"
+JSONLD: {"@context":"https://schema.org","@type":"GeneralContractor","name":"Часть души","description":"Строительство домов под ключ: качественные и понятные чертежи, прозрачная смета. Офис в Санкт-Петербург, работаем в Ленинградская область, Санкт-Петербург. Типовые 
+JSONLD: {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Главная","item":"https://chastdushi.ru/"},{"@type":"ListItem","position":2,"name":"Услуги","item":"https://chastdushi.ru/services"},{"@type":"
+JSONLD: {"@context":"https://schema.org","@type":"Service","name":"Часть души — загородное строительство","description":"Типовые и индивидуальные дома, проектирование и строительство под ключ в Санкт-Петербург. Актуальные услуги — в разделе «Услуги» и каталоге проекто
+JSONLD: {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Главная","item":"https://chastdushi.ru"},{"@type":"ListItem","position":2,"name":"Услуги","item":"https://chastdushi.ru/services"},{"@type":"L
+LINK_OK: /projects
+LINK_OK: /portfolio
+LINK_OK: /services/proektirovanie
+
+SITEMAP_COUNT: 171
+SITEMAP_HAS_QUERY: false
+SITEMAP https://chastdushi.ru/: false
+SITEMAP https://chastdushi.ru: true
+SITEMAP https://chastdushi.ru/projects: true
+SITEMAP https://chastdushi.ru/projects/gazobeton: true
+SITEMAP https://chastdushi.ru/projects/kirpich: true
+SITEMAP https://chastdushi.ru/projects/keramoblok: true
+SITEMAP https://chastdushi.ru/services/proektirovanie: true
+=== ROBOTS.TXT ===
+User-Agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /spasibo
+Disallow: /promo
+Disallow: /lp/
+
+Host: chastdushi.ru
+Sitemap: https://chastdushi.ru/sitemap.xml

@@ -1,13 +1,21 @@
 import dynamic from "next/dynamic";
-import { getPageMeta } from "@/lib/get-page-meta";
+import { getPageH1, getPageMeta } from "@/lib/get-page-meta";
 import { getHouseProjects, getHomeBuiltPortfolio } from "@/lib/construction-data";
 import { getHeroShellTiersForProject } from "@/lib/project-hero-shell-tiers";
 import { getBankMarqueePartners, getHomePartners } from "@/lib/get-home-partners";
 import { getHomeBlogPreview } from "@/lib/get-home-blog-preview";
 import { getPublicFaqs } from "@/lib/get-public-faqs";
+import { resolveHomeBannerH1 } from "@/lib/home-banner-h1";
+import { HOME_HERO_SEO_LEAD, resolveHomeHeroLead } from "@/lib/home-hero-first-screen";
+import {
+  HOME_BUILT_HOMES_H2,
+  HOME_BUILT_HOMES_VIEW_ALL_HREF,
+  HOME_BUILT_HOMES_VIEW_ALL_LABEL,
+} from "@/lib/home-built-homes-block";
 import { getCommercialPageSeo } from "@/lib/seo/commercial-page-seo";
 import { JsonLdInline } from "@/components/seo/json-ld-inline";
 import { BannerSection } from "@/components/sections/banner";
+import { HomeTurnkeyServicesSection } from "@/components/sections/home-turnkey-services-section";
 import { getHomeHeroBannerConfig } from "@/lib/home-hero-banner-config";
 import { buildHomeHeroLcpPreloadHref } from "@/lib/home-hero-lcp";
 
@@ -97,7 +105,7 @@ export async function generateMetadata() {
 
 export default async function HomePage() {
   const homeSeo = getCommercialPageSeo("home");
-  const [houseProjects, builtPortfolioPreview, partners, bankMarqueePartners, newsPreview, faqItems, heroBanner] =
+  const [houseProjects, builtPortfolioPreview, partners, bankMarqueePartners, newsPreview, faqItems, heroBanner, homeH1] =
     await Promise.all([
       getHouseProjects(),
       getHomeBuiltPortfolio(),
@@ -106,6 +114,7 @@ export default async function HomePage() {
       getHomeBlogPreview(3),
       getPublicFaqs(),
       getHomeHeroBannerConfig(),
+      getPageH1("/", homeSeo.h1),
     ]);
   const projectHeroTiers = Object.fromEntries(
     await Promise.all(
@@ -117,6 +126,8 @@ export default async function HomePage() {
   );
 
   const heroLcpHref = buildHomeHeroLcpPreloadHref(heroBanner.backgrounds.light);
+  const bannerH1 = resolveHomeBannerH1(homeH1, heroBanner.headlineLines);
+  const bannerLead = resolveHomeHeroLead(HOME_HERO_SEO_LEAD, heroBanner.subheadline);
 
   return (
     <>
@@ -136,16 +147,18 @@ export default async function HomePage() {
           })),
         }}
       />
-      <BannerSection config={heroBanner} />
+      <BannerSection config={heroBanner} seoH1={bannerH1} seoLead={bannerLead} />
       <ProjectsConstructorSection />
+      <HomeTurnkeyServicesSection />
       <FeaturedHouseProjectsSection projects={houseProjects} projectHeroTiers={projectHeroTiers} />
       <ClientsChooseVideoSection />
       <AccountShowcaseSection />
       <HomePartnersSection partners={partners} />
       <PortfolioSection
         builtObjects={builtPortfolioPreview}
-        sectionTitle="Наши работы"
-        viewAllLabel="Все проекты"
+        sectionTitle={HOME_BUILT_HOMES_H2}
+        viewAllLabel={HOME_BUILT_HOMES_VIEW_ALL_LABEL}
+        viewAllHref={HOME_BUILT_HOMES_VIEW_ALL_HREF}
         sectionId="home-cases"
       />
       <div className="border-t border-[var(--border)]" style={{ backgroundColor: "var(--bg)" }}>

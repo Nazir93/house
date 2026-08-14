@@ -18,6 +18,7 @@ import { useTheme } from "@/lib/theme-context";
 import { useModal } from "@/lib/modal-context";
 import { HOME_HERO_BANNER_ID } from "@/lib/site-anchors";
 import type { HomeHeroBanner } from "@/lib/home-hero-banner-schema";
+import { HOME_HERO_CTAS } from "@/lib/home-hero-first-screen";
 import { HOME_HERO_LCP_QUALITY, HOME_HERO_LCP_WIDTH } from "@/lib/home-hero-lcp";
 import { buildImagePrefetchSrc } from "@/lib/image-loading";
 import { cn } from "@/lib/utils";
@@ -31,7 +32,17 @@ const edgeGlassStrong = "border border-white/[0.1]";
 /** Интервал автопрокрутки промо-карусели на баннере. */
 const PROMO_AUTO_ADVANCE_MS = 6000;
 
-export function BannerSection({ config }: { config: HomeHeroBanner }) {
+export function BannerSection({
+  config,
+  /** SEO §1.3: один H1 текстом в HTML. Если задан — вместо marketing headlineLines баннера. */
+  seoH1,
+  /** SEO §2: короткий lead под H1. Если задан — вместо subheadline баннера. */
+  seoLead,
+}: {
+  config: HomeHeroBanner;
+  seoH1?: string;
+  seoLead?: string;
+}) {
   const { theme } = useTheme();
   const { openModalToEstimate } = useModal();
   const promos = config.promos;
@@ -41,6 +52,9 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
   const carouselRef = useRef<HTMLDivElement>(null);
   const slideIndex = promos.length > 0 ? activeSlide % promos.length : 0;
   const slide = promos[slideIndex];
+  const heading = seoH1?.trim() || "";
+  const headlineLines = heading ? null : config.headlineLines;
+  const lead = seoLead?.trim() || config.subheadline;
 
   const bumpAutoCycle = useCallback(() => {
     setAutoCycleKey((k) => k + 1);
@@ -150,16 +164,22 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                 edgeGlass,
               )}
             >
-              <h1 className="text-balance font-heading text-[clamp(1.35rem,3.35vw,3.05rem)] font-bold uppercase leading-[0.92] tracking-[-0.04em] text-white [text-shadow:0_0_1px_rgba(0,0,0,0.95),0_1px_2px_rgba(0,0,0,0.92),0_2px_16px_rgba(0,0,0,0.72),0_4px_36px_rgba(0,0,0,0.45)]">
-                {config.headlineLines[0]}
-                {config.headlineLines.slice(1).map((line, index) => (
-                  <span
-                    key={`${index}-${line}`}
-                    className="block text-white/95 [text-shadow:0_0_1px_rgba(0,0,0,0.95),0_1px_3px_rgba(0,0,0,0.88),0_3px_22px_rgba(0,0,0,0.65)]"
-                  >
-                    {line}
-                  </span>
-                ))}
+              <h1 className="text-balance font-heading text-[clamp(1.2rem,3.1vw,2.75rem)] font-bold uppercase leading-[1.05] tracking-[-0.04em] text-white [text-shadow:0_0_1px_rgba(0,0,0,0.95),0_1px_2px_rgba(0,0,0,0.92),0_2px_16px_rgba(0,0,0,0.72),0_4px_36px_rgba(0,0,0,0.45)]">
+                {heading ? (
+                  heading
+                ) : (
+                  <>
+                    {headlineLines![0]}
+                    {headlineLines!.slice(1).map((line, index) => (
+                      <span
+                        key={`${index}-${line}`}
+                        className="block text-white/95 [text-shadow:0_0_1px_rgba(0,0,0,0.95),0_1px_3px_rgba(0,0,0,0.88),0_3px_22px_rgba(0,0,0,0.65)]"
+                      >
+                        {line}
+                      </span>
+                    ))}
+                  </>
+                )}
               </h1>
             </div>
             <p
@@ -168,30 +188,56 @@ export function BannerSection({ config }: { config: HomeHeroBanner }) {
                 edgeGlass,
               )}
             >
-              {config.subheadline}
+              {lead}
             </p>
 
             <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <Link
-                href="/projects"
-                className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[#0f3d2e] shadow-[0_12px_36px_rgba(0,0,0,0.22)] transition hover:-translate-y-0.5 hover:bg-white/95 md:px-5"
-              >
-                <LayoutGrid className="h-4 w-4 shrink-0" aria-hidden />
-                Смотреть проекты
-              </Link>
-              <button
-                type="button"
-                onClick={() => openModalToEstimate()}
-                aria-label="Открыть ориентировочный расчёт стоимости строительства"
-                className={cn(
-                  "inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-black/62 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-white shadow-[0_12px_36px_rgba(0,0,0,0.25)] transition hover:-translate-y-0.5 hover:bg-black/75 md:px-5",
-                  edgeGlassStrong,
-                  "hover:border-white/[0.14]",
-                )}
-              >
-                <Calculator className="h-4 w-4 shrink-0" aria-hidden />
-                Рассчитать стоимость
-              </button>
+              {HOME_HERO_CTAS.map((cta) => {
+                if (cta.id === "estimate") {
+                  return (
+                    <button
+                      key={cta.id}
+                      type="button"
+                      onClick={() => openModalToEstimate({ source: "home-hero-estimate" })}
+                      aria-label={cta.label}
+                      className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[#0f3d2e] shadow-[0_12px_36px_rgba(0,0,0,0.22)] transition hover:-translate-y-0.5 hover:bg-white/95 md:px-5"
+                    >
+                      <Calculator className="h-4 w-4 shrink-0" aria-hidden />
+                      {cta.label}
+                    </button>
+                  );
+                }
+
+                if (cta.primary) {
+                  return (
+                    <Link
+                      key={cta.id}
+                      href={cta.href}
+                      className={cn(
+                        "inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-black/62 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-white shadow-[0_12px_36px_rgba(0,0,0,0.25)] transition hover:-translate-y-0.5 hover:bg-black/75 md:px-5",
+                        edgeGlassStrong,
+                        "hover:border-white/[0.14]",
+                      )}
+                    >
+                      <LayoutGrid className="h-4 w-4 shrink-0" aria-hidden />
+                      {cta.label}
+                    </Link>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={cta.id}
+                    href={cta.href}
+                    className={cn(
+                      "inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-transparent px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-white/90 underline-offset-4 transition hover:text-white hover:underline md:px-5",
+                      edgeGlass,
+                    )}
+                  >
+                    {cta.label}
+                  </Link>
+                );
+              })}
             </div>
 
             <div

@@ -3,7 +3,7 @@ import type { ServiceLandingDocument, StoryTimelineItem } from "@/lib/service-la
 export const PROEKTROVANIE_HERO_BANNER = "/images/banner/proektirovanie-hero-v2.png";
 export const PROEKTROVANIE_HERO_FALLBACK_BANNER = "/proektirovanie/hero.png";
 
-export const PROEKTROVANIE_HERO_TITLE = "Индивидуальное проектирование домов";
+export const PROEKTROVANIE_HERO_TITLE = "Проектирование частных домов";
 
 export const PROEKTROVANIE_HERO_SUBTITLE =
   "Мы создаем авторские проекты домов, которые воплощают ваши мечты в жизнь. Наша команда архитекторов работает над каждым проектом с учетом ваших пожеланий, особенностей участка и современных строительных технологий";

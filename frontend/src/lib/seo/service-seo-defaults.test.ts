@@ -25,6 +25,16 @@ describe("service SEO semantic defaults", () => {
     );
   });
 
+  it("proektirovanie (SEO §10): Title / Description / H1 без чужого домена", () => {
+    const seo = getServiceSeoBySlug("proektirovanie");
+    expect(seo?.title).toMatch(/^Проектирование частных домов в СПб и Ленинградской области \|/);
+    expect(seo?.h1).toBe("Проектирование частных домов");
+    expect(seo?.description).toContain("Индивидуальное проектирование частных домов");
+    expect(seo?.description).toContain("посадка дома на участок");
+    const blob = [seo?.title, seo?.description, seo?.h1, ...(seo?.keywords ?? [])].join("\n");
+    expect(blob.toLowerCase()).not.toContain("tehnadzorspb");
+  });
+
   it("seeds the services index and each known service page without overwriting admin edits later", () => {
     const seeds = getServicePageMetaSeeds();
     const paths = seeds.map((row) => row.path);

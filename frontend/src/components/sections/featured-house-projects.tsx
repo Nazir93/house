@@ -17,6 +17,10 @@ import { getProjectRenders } from "@/lib/construction-shared";
 import { resolveProjectListingPriceRub } from "@/lib/project-listing-price";
 import { HOME_FEATURED_PROJECTS_INTRO } from "@/lib/home-featured-projects-section";
 import { revealDelayStyle } from "@/lib/reveal-animation";
+import {
+  isSsrProgressiveItemVisible,
+  resolveSsrInitialVisibleCount,
+} from "@/lib/seo/ssr-seo-html";
 import { cn } from "@/lib/utils";
 
 const INITIAL_VISIBLE = 4;
@@ -86,12 +90,13 @@ export function FeaturedHouseProjectsSection({
       .sort((a, b) => (a.order !== b.order ? a.order - b.order : a.price - b.price));
   }, [projects]);
 
-  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
+  const [visibleCount, setVisibleCount] = useState(() =>
+    resolveSsrInitialVisibleCount(projects.filter((p) => p.published).length, INITIAL_VISIBLE),
+  );
   const [tab, setTab] = useState<"serial" | "individual">("serial");
 
   if (list.length === 0) return null;
 
-  const shown = tab === "serial" ? list.slice(0, visibleCount) : [];
   const hasMore = tab === "serial" && visibleCount < list.length;
 
   return (
@@ -175,22 +180,32 @@ export function FeaturedHouseProjectsSection({
               Заказать проектирование
             </Link>
           </div>
-        ) : (
-          <>
-            <div className="grid gap-3 sm:gap-4 md:grid-cols-2 md:gap-x-5 md:gap-y-4">
-              {shown.map((p, idx) => {
+        ) : null}
+
+        {/* ТЗ SEO §20: все названия/ссылки проектов в HTML; «ещё» только скрывает визуально. */}
+        <div
+          className={cn(
+            "grid gap-3 sm:gap-4 md:grid-cols-2 md:gap-x-5 md:gap-y-4",
+            tab !== "serial" && "hidden",
+          )}
+        >
+              {list.map((p, idx) => {
                 const cover = pickCover(p, idx);
                 const href = `/projects/${p.slug}`;
-                const views = 180 + p.area + p.order * 7;
-                const hot = 12 + (p.isNew ? 28 : 0) + p.order * 3;
                 const tiers = projectHeroTiers[p.id] ?? [];
                 const tierPrices = tiers.map((tier) => tier.price).filter((price) => price > 0);
                 const standardPrice =
                   tierPrices.length ? Math.min(...tierPrices) : resolveProjectListingPriceRub(p);
                 const mats = materialsLine(tiers.length ? tiers.map((tier) => tier.label) : p.materials);
+                const uiVisible = isSsrProgressiveItemVisible(idx, visibleCount);
 
                 return (
-                  <article key={p.id} data-reveal="card" style={revealDelayStyle(idx)} className="group flex flex-col">
+                  <article
+                    key={p.id}
+                    data-reveal="card"
+                    style={revealDelayStyle(idx)}
+                    className={cn("group flex flex-col", !uiVisible && "hidden")}
+                  >
                     <div className="relative isolate aspect-[16/9] w-full overflow-hidden rounded-[22px] bg-[var(--stone)] shadow-[0_12px_40px_rgba(15,61,46,0.08)] transition-[box-shadow,transform] duration-500 group-hover:-translate-y-0.5 group-hover:shadow-[0_18px_52px_rgba(15,61,46,0.14)]">
                       <Link href={href} className="absolute inset-0 z-0 block overflow-hidden rounded-[inherit]">
                         <Image
@@ -272,8 +287,6 @@ export function FeaturedHouseProjectsSection({
                 Показать ещё
               </button>
             ) : null}
-          </>
-        )}
       </div>
     </section>
   );

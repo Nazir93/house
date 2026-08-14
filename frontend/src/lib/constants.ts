@@ -94,7 +94,7 @@ export const PHONE2_RAW = "+79046000099";
 /** Номер для чата Telegram (кнопки «написать»). */
 export const MESSENGER_CHAT_PHONE_RAW =
   process.env.NEXT_PUBLIC_MESSENGER_CHAT_PHONE?.trim() || "+79046000099";
-export const EMAIL = "";
+export const EMAIL = "info@chastdushi.ru";
 /** Адрес офиса (контакты, подвал, schema.org; при записи в админке подменяется из БД) */
 export const ADDRESS = "г. Санкт-Петербург, ул. Ординарная, д. 18";
 export const WORKING_HOURS = "Пн–Пт 9:00–20:00, сб 11:00–19:00, вс выходной";

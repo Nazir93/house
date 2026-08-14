@@ -1,9 +1,11 @@
 import { SITE_NAME, SITE_URL, buildSchemaAreaServed } from "@/lib/constants";
+import { buildSelfReferencingCanonical } from "@/lib/seo/self-referencing-canonical";
 
 interface LandingServiceSchemaProps {
   serviceName: string;
   serviceDescription: string;
   slug: string;
+  /** Только реальная цена из CMS; без значения — блок offers не выводим (§17). */
   priceRange?: string;
   /** Пустой массив — поле telephone в provider не выводим */
   telephone: string[];
@@ -13,33 +15,40 @@ export function LandingServiceSchema({
   serviceName,
   serviceDescription,
   slug,
-  priceRange = "от 50 000 ₽",
+  priceRange,
   telephone,
 }: LandingServiceSchemaProps) {
   const tel = telephone.filter((t) => t?.trim());
+  const realPrice = priceRange?.trim();
+  const serviceUrl = buildSelfReferencingCanonical(slug.startsWith("/") ? slug : `/${slug}`);
+
   const schema = {
     "@context": "https://schema.org",
     "@type": "Service",
     name: serviceName,
     description: serviceDescription,
     provider: {
-      "@type": "HomeBuilder",
+      "@type": "GeneralContractor",
       name: SITE_NAME,
       ...(tel.length > 0 ? { telephone: tel } : {}),
-      url: SITE_URL,
+      url: buildSelfReferencingCanonical("/"),
       areaServed: buildSchemaAreaServed(),
     },
     areaServed: buildSchemaAreaServed(),
-    url: `${SITE_URL}${slug}`,
-    offers: {
-      "@type": "Offer",
-      priceSpecification: {
-        "@type": "PriceSpecification",
-        priceCurrency: "RUB",
-        price: priceRange,
-      },
-      availability: "https://schema.org/InStock",
-    },
+    url: serviceUrl,
+    ...(realPrice
+      ? {
+          offers: {
+            "@type": "Offer",
+            priceSpecification: {
+              "@type": "PriceSpecification",
+              priceCurrency: "RUB",
+              price: realPrice,
+            },
+            availability: "https://schema.org/InStock",
+          },
+        }
+      : {}),
   };
 
   const breadcrumb = {
@@ -50,19 +59,19 @@ export function LandingServiceSchema({
         "@type": "ListItem",
         position: 1,
         name: "Главная",
-        item: SITE_URL,
+        item: buildSelfReferencingCanonical("/"),
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Услуги",
-        item: `${SITE_URL}/services`,
+        item: buildSelfReferencingCanonical("/services"),
       },
       {
         "@type": "ListItem",
         position: 3,
         name: serviceName,
-        item: `${SITE_URL}${slug}`,
+        item: serviceUrl,
       },
     ],
   };

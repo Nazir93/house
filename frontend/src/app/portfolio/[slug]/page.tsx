@@ -11,6 +11,7 @@ import { getBuiltObjectCover, builtObjectMaterialLabel } from "@/lib/constructio
 import { getPageMeta } from "@/lib/get-page-meta";
 import { buildMetaDescription } from "@/lib/seo/build-meta-description";
 import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
+import { BuiltObjectSimilarHouseSection } from "@/components/portfolio/built-object-similar-house-section";
 import { BuiltObjectDetailContent } from "./built-content";
 
 export const revalidate = 60;
@@ -69,6 +70,7 @@ export default async function CasePage(props: Props) {
         ]}
       />
       <BuiltObjectDetailContent object={object} faqItems={faqItems} />
+      <BuiltObjectSimilarHouseSection material={object.material} />
     </>
   );
 }

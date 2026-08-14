@@ -35,10 +35,9 @@ import { readLeadError } from "@/lib/read-lead-error";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { useHouseConstructionCalculatorConfig } from "@/lib/use-house-construction-calculator-config";
 import {
-  METRIKA_GOALS,
   collectCurrentTrafficParams,
   trackLeadSuccess,
-  trackMetrikaGoal,
+  trackQuizStart,
 } from "@/lib/analytics-goals";
 import { FunnelInputField as InputField, FunnelSelect } from "@/components/ui/funnel-ui";
 
@@ -388,7 +387,7 @@ export function HouseConstructionCalculatorForm({
             onFocusCapture={() => {
               if (quizStarted) return;
               setQuizStarted(true);
-              trackMetrikaGoal(METRIKA_GOALS.quizStart, { source: leadSourceOverride ?? "calculator" });
+              trackQuizStart({ source: leadSourceOverride ?? "calculator" });
             }}
             className="flex flex-col gap-5"
           >
@@ -414,10 +413,6 @@ export function HouseConstructionCalculatorForm({
                 {...register("area")}
               />
             </InputField>
-            <p className="text-[9px] -mt-3" style={{ color: "var(--text-subtle)" }}>
-              Дома меньше 100 м²: +15% к базе (тёплый контур) и +10% к сумме выбранных инженерных опций — по условиям
-              прайса.
-            </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <InputField label="Этажность">
@@ -559,16 +554,11 @@ export function HouseConstructionCalculatorForm({
                   <div className="text-sm" style={{ color: "var(--text-muted)" }}>
                     <span className="font-semibold text-[var(--text)]">Тёплый контур: </span>
                     {formatRub(quote.baseRubPerM2)} за м²
-                    {quote.baseSubtotalRub != null && (
+                    {quote.baseTotalRub != null && (
                       <>
                         {" → "}
-                        <span className="tabular-nums">{formatRub(quote.baseSubtotalRub)}</span>
+                        <span className="tabular-nums">{formatRub(quote.baseTotalRub)}</span>
                       </>
-                    )}
-                    {quote.smallHouseBaseApplied && quote.smallHouseBaseExtraRub > 0 && (
-                      <span className="block mt-1 text-xs">
-                        Надбавка &lt;100 м² (+15%): +{formatRub(quote.smallHouseBaseExtraRub)}
-                      </span>
                     )}
                   </div>
                 )}
@@ -580,12 +570,6 @@ export function HouseConstructionCalculatorForm({
                         <span className="tabular-nums shrink-0">{formatRub(line.amountRub)}</span>
                       </li>
                     ))}
-                    {quote.smallHouseEngineeringApplied && quote.smallHouseEngineeringExtraRub > 0 && (
-                      <li className="flex justify-between gap-2 pt-1 border-t border-[var(--border)]">
-                        <span>Надбавка &lt;100 м² к инженерии (+10%)</span>
-                        <span className="tabular-nums">{formatRub(quote.smallHouseEngineeringExtraRub)}</span>
-                      </li>
-                    )}
                   </ul>
                 )}
                 {quote.facadeTotalRub > 0 && (

@@ -6,93 +6,141 @@ import { KNOWN_CMS_SERVICE_SLUGS } from "@/lib/service-slug-routes";
 import { getProjectCatalogSliceSeoPages } from "@/lib/seo/project-catalog-slice-seo";
 import { getKnownServiceSeoSlugs } from "@/lib/seo/service-seo-defaults";
 import { getProjectMaterialSeoPages } from "@/lib/seo/project-material-seo";
+import {
+  finalizePublicSitemapEntries,
+  listStaticPublicSitemapPaths,
+} from "@/lib/seo/public-sitemap";
+import { buildSelfReferencingCanonical } from "@/lib/seo/self-referencing-canonical";
 
 export const revalidate = 300;
 
+function entry(
+  path: string,
+  extra: Partial<MetadataRoute.Sitemap[number]> = {},
+): MetadataRoute.Sitemap[number] {
+  return {
+    url: buildSelfReferencingCanonical(path),
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.7,
+    ...extra,
+  };
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = SITE_URL;
+  const staticPages: MetadataRoute.Sitemap = listStaticPublicSitemapPaths().map((path) => {
+    if (path === "/") {
+      return entry("/", { changeFrequency: "weekly", priority: 1.0 });
+    }
+    const priorityByPath: Record<string, number> = {
+      "/services": 0.9,
+      "/projects": 0.9,
+      "/typical-projects": 0.88,
+      "/portfolio": 0.7,
+      "/portfolio/under-construction": 0.68,
+      "/portfolio/map": 0.72,
+      "/individual-design": 0.8,
+      "/mortgage": 0.75,
+      "/calculator": 0.78,
+      "/about": 0.6,
+      "/reviews": 0.5,
+      "/team": 0.55,
+      "/blog": 0.7,
+      "/contacts": 0.6,
+      "/partners/supplier": 0.5,
+      "/partners/partner": 0.5,
+      "/partners/vacancies": 0.45,
+      "/partners/rent-repair": 0.45,
+      "/consent": 0.2,
+      "/privacy": 0.3,
+      "/technology/materials": 0.55,
+      "/technology/house-area": 0.55,
+    };
+    const freq: MetadataRoute.Sitemap[number]["changeFrequency"] =
+      path === "/projects" ||
+      path === "/typical-projects" ||
+      path === "/portfolio" ||
+      path === "/portfolio/under-construction" ||
+      path === "/portfolio/map" ||
+      path === "/blog"
+        ? "weekly"
+        : path === "/consent" || path === "/privacy"
+          ? "yearly"
+          : "monthly";
+    return entry(path, {
+      changeFrequency: freq,
+      priority: priorityByPath[path] ?? 0.5,
+    });
+  });
 
-  const staticPages: MetadataRoute.Sitemap = [
-    { url: baseUrl, lastModified: new Date(), changeFrequency: "weekly", priority: 1.0 },
-    { url: `${baseUrl}/services`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${baseUrl}/projects`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
-    { url: `${baseUrl}/typical-projects`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.88 },
-    { url: `${baseUrl}/portfolio`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/portfolio/under-construction`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.68 },
-    { url: `${baseUrl}/portfolio/map`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.72 },
-    { url: `${baseUrl}/individual-design`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
-    { url: `${baseUrl}/mortgage`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.75 },
-    { url: `${baseUrl}/calculator`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.78 },
-    { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${baseUrl}/reviews`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-    { url: `${baseUrl}/team`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.55 },
-    { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
-    { url: `${baseUrl}/contacts`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${baseUrl}/partners/supplier`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-    { url: `${baseUrl}/partners/partner`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-    { url: `${baseUrl}/partners/vacancies`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.45 },
-    { url: `${baseUrl}/partners/rent-repair`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.45 },
-    { url: `${baseUrl}/consent`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.2 },
-    { url: `${baseUrl}/privacy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
-    { url: `${baseUrl}/technology/materials`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.55 },
-    { url: `${baseUrl}/technology/house-area`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.55 },
-  ];
+  const serviceLandingPages: MetadataRoute.Sitemap = getKnownServiceSeoSlugs().map((slug) =>
+    entry(`/services/${slug}`, { changeFrequency: "monthly", priority: 0.74 }),
+  );
 
-  const serviceLandingPages: MetadataRoute.Sitemap = getKnownServiceSeoSlugs().map((slug) => ({
-    url: `${baseUrl}/services/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly",
-    priority: 0.74,
-  }));
+  const projectMaterialLandingPages: MetadataRoute.Sitemap = getProjectMaterialSeoPages().map(
+    (page) =>
+      entry(page.path, {
+        changeFrequency: "weekly",
+        priority: page.slug === "kirpich" ? 0.82 : page.slug === "gazobeton" ? 0.8 : 0.72,
+      }),
+  );
 
-  const projectMaterialLandingPages: MetadataRoute.Sitemap = getProjectMaterialSeoPages().map((page) => ({
-    url: `${baseUrl}${page.path}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly",
-    priority: page.slug === "kirpich" ? 0.82 : page.slug === "gazobeton" ? 0.8 : 0.72,
-  }));
-
-  const projectCatalogSliceLandingPages: MetadataRoute.Sitemap = getProjectCatalogSliceSeoPages().map((page) => ({
-    url: `${baseUrl}${page.path}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly",
-    priority: 0.78,
-  }));
+  const projectCatalogSliceLandingPages: MetadataRoute.Sitemap = getProjectCatalogSliceSeoPages().map(
+    (page) => entry(page.path, { changeFrequency: "weekly", priority: 0.78 }),
+  );
 
   let dynamicPages: MetadataRoute.Sitemap = [];
+  let excludePaths: string[] = [];
 
   try {
-    const [posts, houseProjects, builtObjects, servicesFromDb] = await Promise.all([
-      prisma.post.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
-      prisma.houseProject.findMany({
-        where: { published: true },
-        select: { slug: true, updatedAt: true, catalogKind: true },
-      }),
-      prisma.builtObject.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
-      prisma.service.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
-    ]);
+    const [posts, houseProjects, builtObjects, servicesFromDb, noindexMeta, redirects] =
+      await Promise.all([
+        prisma.post.findMany({ where: { published: true }, select: { slug: true, updatedAt: true } }),
+        prisma.houseProject.findMany({
+          where: { published: true },
+          select: { slug: true, updatedAt: true, catalogKind: true },
+        }),
+        prisma.builtObject.findMany({
+          where: { published: true },
+          select: { slug: true, updatedAt: true },
+        }),
+        prisma.service.findMany({
+          where: { published: true },
+          select: { slug: true, updatedAt: true },
+        }),
+        prisma.pageMeta.findMany({
+          where: { noindex: true },
+          select: { path: true },
+        }),
+        prisma.redirect.findMany({ select: { fromPath: true } }),
+      ]);
+
+    excludePaths = [
+      ...noindexMeta.map((row) => row.path),
+      ...redirects.map((row) => row.fromPath),
+    ];
 
     dynamicPages = [
       ...posts.map((p) => ({
-        url: `${baseUrl}/blog/${p.slug}`,
+        url: `${SITE_URL}/blog/${p.slug}`,
         lastModified: p.updatedAt,
         changeFrequency: "monthly" as const,
         priority: 0.6,
       })),
       ...houseProjects.map((p) => ({
-        url: `${baseUrl}${p.catalogKind === "partner" ? "/typical-projects" : "/projects"}/${p.slug}`,
+        url: `${SITE_URL}${p.catalogKind === "partner" ? "/typical-projects" : "/projects"}/${p.slug}`,
         lastModified: p.updatedAt,
         changeFrequency: "monthly" as const,
         priority: 0.75,
       })),
       ...builtObjects.map((p) => ({
-        url: `${baseUrl}/portfolio/${p.slug}`,
+        url: `${SITE_URL}/portfolio/${p.slug}`,
         lastModified: p.updatedAt,
         changeFrequency: "monthly" as const,
         priority: 0.65,
       })),
       ...servicesFromDb.map((s) => ({
-        url: `${baseUrl}/services/${s.slug}`,
+        url: `${SITE_URL}/services/${s.slug}`,
         lastModified: s.updatedAt,
         changeFrequency: "monthly" as const,
         priority: 0.72,
@@ -101,19 +149,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch {
     dynamicPages = [
       ...KNOWN_CMS_SERVICE_SLUGS.map((slug) => ({
-        url: `${baseUrl}/services/${slug}`,
+        url: `${SITE_URL}/services/${slug}`,
         lastModified: new Date(),
         changeFrequency: "monthly" as const,
         priority: 0.72,
       })),
       ...FALLBACK_HOUSE_PROJECTS.map((p) => ({
-        url: `${baseUrl}/projects/${p.slug}`,
+        url: `${SITE_URL}/projects/${p.slug}`,
         lastModified: new Date(),
         changeFrequency: "monthly" as const,
         priority: 0.75,
       })),
       ...FALLBACK_BUILT_OBJECTS.map((p) => ({
-        url: `${baseUrl}/portfolio/${p.slug}`,
+        url: `${SITE_URL}/portfolio/${p.slug}`,
         lastModified: new Date(),
         changeFrequency: "monthly" as const,
         priority: 0.65,
@@ -121,17 +169,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ];
   }
 
-  const merged = [
-    ...staticPages,
-    ...serviceLandingPages,
-    ...projectMaterialLandingPages,
-    ...projectCatalogSliceLandingPages,
-    ...dynamicPages,
-  ];
-  const seen = new Set<string>();
-  return merged.filter((entry) => {
-    if (seen.has(entry.url)) return false;
-    seen.add(entry.url);
-    return true;
-  });
+  return finalizePublicSitemapEntries(
+    [
+      ...staticPages,
+      ...serviceLandingPages,
+      ...projectMaterialLandingPages,
+      ...projectCatalogSliceLandingPages,
+      ...dynamicPages,
+    ],
+    { excludePaths },
+  );
 }

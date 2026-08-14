@@ -2,7 +2,6 @@ import { unstable_cache } from "next/cache";
 import { resolveHouseProjectEngagement } from "@/lib/house-project-engagement";
 import { prisma } from "@/lib/db";
 import { CACHE_TAG_PUBLIC_BUILT_OBJECTS, CACHE_TAG_PUBLIC_HOUSE_PROJECTS } from "@/lib/cache-tags-public";
-import { filterBuiltObjectsBySiteStatus } from "@/lib/built-object-site-status";
 import { AURORA_PROJECT_CALCULATOR_UI } from "@/lib/project-calculator-aurora-defaults";
 import type { ProjectCalculatorUi } from "@/lib/project-calculator-types";
 import {
@@ -18,6 +17,7 @@ import {
   type PartOfSoulRoofPitch,
 } from "@/lib/part-of-soul-pricing";
 import type { BuiltObjectItem } from "@/lib/construction-shared";
+import { pickHomeBuiltPortfolioPreview } from "@/lib/home-built-homes-block";
 
 export type ConstructionMediaType = "RENDER" | "PLAN" | "BUILD_STAGE" | "VIDEO";
 
@@ -757,12 +757,10 @@ export async function getBuiltObjects(): Promise<BuiltObjectItem[]> {
   return attachDevPortfolioCovers(list);
 }
 
-const HOME_BUILT_PORTFOLIO_MAX = 5;
-
-/** Построенные объекты для блока на главной (только сданные, без строящихся). */
+/** Построенные объекты для блока на главной (ТЗ SEO §5: ≥6 из каталога `/portfolio`). */
 export async function getHomeBuiltPortfolio(): Promise<BuiltObjectItem[]> {
   const list = await getBuiltObjects();
-  return filterBuiltObjectsBySiteStatus(list, "COMPLETED").slice(0, HOME_BUILT_PORTFOLIO_MAX);
+  return pickHomeBuiltPortfolioPreview(list);
 }
 
 const getBuiltObjectBySlugCached = unstable_cache(

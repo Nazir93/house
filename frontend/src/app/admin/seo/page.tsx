@@ -614,7 +614,7 @@ function RobotsTab() {
           <div>
             <h3 className="text-sm font-semibold text-white/60">Robots.txt</h3>
             <p className="text-xs text-white/30 mt-0.5">
-              Оставьте пустым для стандартных правил. Заполните для кастомных.
+              Пусто = стандарт. Не закрывайте `/projects` и `?фильтры` через Disallow — код сам добавит Clean-param и вырежет опасные Disallow.
             </p>
           </div>
           <button
@@ -635,7 +635,7 @@ function RobotsTab() {
           onChange={(e) => { setContent(e.target.value); setSaved(false); }}
           rows={12}
           className="w-full px-4 py-3 rounded-lg bg-black/40 border border-white/[0.08] text-sm text-white font-mono placeholder:text-white/20 resize-y focus:outline-none focus:border-[#0F3D2E]/50 transition-colors"
-          placeholder={`User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/\n\nHost: https://chastdushi.ru\nSitemap: https://chastdushi.ru/sitemap.xml`}
+          placeholder={`User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/\nDisallow: /account/\nDisallow: /lp/\n\n# Фильтры каталога не Disallow — Clean-param/canonical в коде\nHost: chastdushi.ru\nSitemap: https://chastdushi.ru/sitemap.xml`}
         />
       </div>
     </div>

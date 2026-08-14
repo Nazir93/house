@@ -1,6 +1,10 @@
 "use client";
 
 import { resolveClientYandexMetrikaCounterId } from "@/lib/analytics-metrika-config";
+import {
+  isMortgageLeadSource,
+  isVisitConstructionLeadSource,
+} from "@/lib/seo/seo-metrika-goals";
 
 export const METRIKA_GOALS = {
   leadSubmit: "lead_submit",
@@ -28,6 +32,13 @@ export const METRIKA_GOALS = {
   maxClick: "max_click",
   quizStart: "quiz_start",
   quizComplete: "quiz_complete",
+  /** ТЗ SEO §24 — дублируем рядом с quiz_* для отчётов по заявкам после SEO. */
+  calculateStart: "calculate_start",
+  calculateComplete: "calculate_complete",
+  projectOpen: "project_open",
+  formSubmit: "form_submit",
+  visitConstructionRequest: "visit_construction_request",
+  mortgageRequest: "mortgage_request",
   portfolioView: "portfolio_view",
   proposalDownload: "proposal_download",
   reviewSubmit: "review_submit",
@@ -114,6 +125,12 @@ export function trackMetrikaGoal(goal: MetrikaGoalName, params?: Record<string, 
   ym(counterId, "reachGoal", goal, params);
 }
 
+/** Старт калькулятора / квиза: quiz_start + calculate_start (ТЗ §24). */
+export function trackQuizStart(params?: Record<string, unknown>) {
+  trackMetrikaGoal(METRIKA_GOALS.quizStart, params);
+  trackMetrikaGoal(METRIKA_GOALS.calculateStart, params);
+}
+
 function shouldTrackQuizComplete(source: string): boolean {
   if (source.startsWith("lp-")) return true;
   return source === "calculator" || source === "promo-qr-banner";
@@ -122,7 +139,17 @@ function shouldTrackQuizComplete(source: string): boolean {
 export function trackLeadSuccess(source: string, params?: Record<string, unknown>) {
   const payload = { source, ...params };
   trackMetrikaGoal(METRIKA_GOALS.leadSubmit, payload);
+  trackMetrikaGoal(METRIKA_GOALS.formSubmit, payload);
   const sourceGoal = metrikaGoalForLeadSource(source);
   if (sourceGoal) trackMetrikaGoal(sourceGoal, payload);
-  if (shouldTrackQuizComplete(source)) trackMetrikaGoal(METRIKA_GOALS.quizComplete, payload);
+  if (shouldTrackQuizComplete(source)) {
+    trackMetrikaGoal(METRIKA_GOALS.quizComplete, payload);
+    trackMetrikaGoal(METRIKA_GOALS.calculateComplete, payload);
+  }
+  if (isMortgageLeadSource(source)) {
+    trackMetrikaGoal(METRIKA_GOALS.mortgageRequest, payload);
+  }
+  if (isVisitConstructionLeadSource(source)) {
+    trackMetrikaGoal(METRIKA_GOALS.visitConstructionRequest, payload);
+  }
 }

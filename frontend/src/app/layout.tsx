@@ -20,6 +20,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { ContactConfigProvider } from "@/lib/contact-config-context";
 import { loadContactConfig } from "@/lib/load-contact-config";
 import { PWA_ICON_PATHS, PWA_THEME_COLORS, SITE_DEFAULT_ICON_PATH } from "@/lib/pwa-config";
+import { buildSelfReferencingCanonical } from "@/lib/seo/self-referencing-canonical";
 import { buildYandexVerificationMetadata } from "@/lib/yandex-verification";
 
 function buildSiteVerification(): Metadata["verification"] | undefined {
@@ -85,7 +86,8 @@ export const metadata: Metadata = {
     googleBot: { index: true, follow: true },
   },
   alternates: {
-    canonical: SITE_URL,
+    /** Fallback; страницы через getPageMeta задают свой self-canonical (§13). */
+    canonical: buildSelfReferencingCanonical("/"),
   },
   ...(siteVerification ? { verification: siteVerification } : {}),
 };

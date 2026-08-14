@@ -20,8 +20,6 @@ export function revalidatePublicFaqs(): void {
 export function revalidatePublicReviews(): void {
   revalidateTagWithProfile(CACHE_TAG_PUBLIC_REVIEWS);
   revalidatePath("/reviews");
-  /** aggregateRating и блок Review в JSON-LD на всех страницах */
-  revalidatePath("/", "layout");
 }
 
 /** После изменений команды. */

@@ -5,7 +5,7 @@ import { ArrowUpRight } from "lucide-react";
 import type { ProjectListItem } from "@/lib/get-projects";
 import type { BuiltObjectItem } from "@/lib/construction-shared";
 import { PortfolioProjectListCard } from "@/components/portfolio/portfolio-project-list-card";
-import { HomeCasesAccordion } from "@/components/sections/home-cases-accordion";
+import { HomeBuiltHomesGrid } from "@/components/sections/home-built-homes-grid";
 import { revealDelayStyle } from "@/lib/reveal-animation";
 
 export type PortfolioSectionProps = {
@@ -53,7 +53,7 @@ export function PortfolioSection({
         </div>
 
         {useBuilt ? (
-          <HomeCasesAccordion objects={builtObjects!} />
+          <HomeBuiltHomesGrid objects={builtObjects!} />
         ) : (
           <div className="flex max-w-5xl flex-col gap-4">
             {items.map((project, index) => (

@@ -62,10 +62,14 @@ describe("metrikaGoalForLeadSource", () => {
 
 describe("METRIKA_GOAL_IDS", () => {
   it("lists unique JavaScript goal identifiers for Yandex Metrika UI", () => {
-    expect(METRIKA_GOAL_IDS.length).toBe(28);
+    expect(METRIKA_GOAL_IDS.length).toBe(34);
     expect(new Set(METRIKA_GOAL_IDS).size).toBe(METRIKA_GOAL_IDS.length);
     expect(METRIKA_GOAL_IDS).toContain("lead_submit");
     expect(METRIKA_GOAL_IDS).toContain("lead_mortgage_project");
     expect(METRIKA_GOAL_IDS).toContain("lead_service_consult");
+    expect(METRIKA_GOAL_IDS).toContain("calculate_start");
+    expect(METRIKA_GOAL_IDS).toContain("form_submit");
+    expect(METRIKA_GOAL_IDS).toContain("project_open");
+    expect(METRIKA_GOAL_IDS).not.toContain("whatsapp_click");
   });
 });

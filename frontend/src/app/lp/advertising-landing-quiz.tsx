@@ -5,10 +5,9 @@ import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 
 import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
 import {
-  METRIKA_GOALS,
   collectCurrentTrafficParams,
   trackLeadSuccess,
-  trackMetrikaGoal,
+  trackQuizStart,
 } from "@/lib/analytics-goals";
 import {
   LP_BUDGET_OPTIONS,
@@ -139,7 +138,7 @@ export function AdvertisingLandingQuiz({
   function markQuizStart() {
     if (quizStarted.current) return;
     quizStarted.current = true;
-    trackMetrikaGoal(METRIKA_GOALS.quizStart, { source: leadSource });
+    trackQuizStart({ source: leadSource });
   }
 
   function canProceed(): boolean {

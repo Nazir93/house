@@ -35,6 +35,7 @@ import { historyStagesForAdmin } from "@/lib/built-object-detail";
 import type { AdminHouseProjectOption } from "@/lib/load-admin-house-project-options";
 import { uploadAdminMedia } from "@/lib/admin-upload";
 import { BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
+import { buildBuiltObjectUploadNameHint } from "@/lib/seo/built-object-image-seo";
 import { sortFilesForGalleryOrder } from "@/lib/sort-files-for-gallery-order";
 
 const MATERIALS = [
@@ -332,7 +333,27 @@ export function BuiltObjectForm({
                 : target.startsWith("phase:")
                   ? "stroyka"
                   : "foto";
-        const nameHint = (form.slug || form.title || "dom").trim();
+        const existingCount =
+          target === "renders"
+            ? form.renders.length
+            : target === "plans"
+              ? form.plans.length
+              : target === "videos"
+                ? form.videos.length
+                : target.startsWith("phase:")
+                  ? (form.phaseMedia[target.slice("phase:".length)] ?? []).length
+                  : 0;
+        const phaseKey = target.startsWith("phase:") ? target.slice("phase:".length) : null;
+        const nameHint = buildBuiltObjectUploadNameHint({
+          material: form.material,
+          location: form.location,
+          district: form.district,
+          slug: form.slug,
+          title: form.title,
+          index: existingCount + i + 1,
+          role,
+          phaseKey,
+        });
         const { url, error: uploadError } = await uploadAdminMedia(file, { nameHint, role });
         if (uploadError || !url) {
           errors.push(

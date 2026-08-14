@@ -19,6 +19,7 @@ import {
   filterBuiltObjectsBySiteStatus,
   type BuiltObjectSiteStatusFilter,
 } from "@/lib/built-object-site-status";
+import { resolveBuiltObjectCoverAlt } from "@/lib/seo/built-object-image-seo";
 import { cn } from "@/lib/utils";
 import { BUILT_HOMES_SECTION_LABEL, UNDER_CONSTRUCTION_SECTION_LABEL } from "@/lib/constants";
 import { CmsImage } from "@/components/ui/cms-image";
@@ -415,7 +416,8 @@ export function BuiltPortfolioContent({
                             {cover ? (
                               <CmsImage
                                 src={cover.url}
-                                alt={cover.alt || object.title}
+                                alt={resolveBuiltObjectCoverAlt(object, cover.alt)}
+                                title={resolveBuiltObjectCoverAlt(object, cover.alt)}
                                 fill
                                 className="object-cover grayscale transition-[filter,transform] duration-500 ease-out group-hover:scale-[1.02] group-hover:grayscale-0"
                                 sizes="(max-width: 768px) 50vw, 360px"

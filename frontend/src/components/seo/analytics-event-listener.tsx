@@ -4,6 +4,7 @@ import { useEffect } from "react";
 
 import { METRIKA_GOALS, trackMetrikaGoal } from "@/lib/analytics-goals";
 import { PHONE_RAW, SOCIAL_LINKS } from "@/lib/constants";
+import { isProjectOpenPath, isVisitConstructionPath } from "@/lib/seo/seo-metrika-goals";
 
 function closestTrackedLink(target: EventTarget | null): HTMLAnchorElement | null {
   if (!(target instanceof Element)) return null;
@@ -12,6 +13,14 @@ function closestTrackedLink(target: EventTarget | null): HTMLAnchorElement | nul
 
 function normalizeHref(href: string): string {
   return href.trim().toLowerCase();
+}
+
+function parseHrefUrl(href: string): URL | null {
+  try {
+    return new URL(href, typeof window !== "undefined" ? window.location.origin : "https://chastdushi.ru");
+  } catch {
+    return null;
+  }
 }
 
 function isPhoneHref(href: string): boolean {
@@ -73,6 +82,18 @@ function trackHref(href: string) {
   }
   if (isProposalDownloadHref(href)) {
     trackMetrikaGoal(METRIKA_GOALS.proposalDownload, { href });
+    return;
+  }
+
+  const url = parseHrefUrl(href);
+  if (!url) return;
+
+  if (isProjectOpenPath(url.pathname)) {
+    trackMetrikaGoal(METRIKA_GOALS.projectOpen, { href: url.pathname });
+    return;
+  }
+  if (isVisitConstructionPath(url.pathname)) {
+    trackMetrikaGoal(METRIKA_GOALS.visitConstructionRequest, { href: url.pathname });
   }
 }
 

@@ -27,12 +27,16 @@ import {
 } from "@/lib/project-filters";
 import { HouseProjectGridCard } from "@/components/projects/house-project-grid-card";
 import {
+  isSsrProgressiveItemVisible,
+} from "@/lib/seo/ssr-seo-html";
+import {
   AUTHOR_HOUSE_PROJECT_CATALOG,
   houseProjectDetailPath,
   type HouseProjectCatalogConfig,
 } from "@/lib/house-project-catalog";
 import { resolveProjectListingPriceRub } from "@/lib/project-listing-price";
 import { houseProjectCatalogTeaser } from "@/lib/house-project-teaser";
+import { resolveProjectsCatalogFilterSeoAction } from "@/lib/seo/projects-catalog-filter-indexing";
 import { CmsImage } from "@/components/ui/cms-image";
 import { SiteSelect } from "@/components/ui/site-select";
 
@@ -138,7 +142,16 @@ export function ProjectsCatalogContent({
         sort: next.sort,
         bounds: nextBounds,
       });
-      router.push(qs ? `${basePath}?${qs}` : basePath);
+      if (!qs) {
+        router.push(basePath);
+      } else {
+        const sp = Object.fromEntries(new URLSearchParams(qs).entries());
+        const filterSeo = resolveProjectsCatalogFilterSeoAction(
+          sp,
+          basePath === "/typical-projects" ? "/typical-projects" : "/projects",
+        );
+        router.push(filterSeo.redirectTo ?? `${basePath}?${qs}`);
+      }
       setPage(1);
     },
     [router, projects, basePath],
@@ -216,7 +229,8 @@ export function ProjectsCatalogContent({
     sort,
   ]);
 
-  const visible = filtered.slice(0, page * PAGE_SIZE);
+  const visibleCount = page * PAGE_SIZE;
+  const visible = filtered.slice(0, visibleCount);
 
   function chip(active: boolean) {
     return {
@@ -835,28 +849,33 @@ export function ProjectsCatalogContent({
                   : "mt-10 grid gap-5"
               }
             >
-              {visible.map((project) => {
+              {filtered.map((project, index) => {
                 const cover = getProjectRenders(project)[0];
                 const matLabel = project.materials[0] || "на выбор";
+                const uiVisible = isSsrProgressiveItemVisible(index, visibleCount);
 
                 if (view === "grid") {
                   return (
-                    <HouseProjectGridCard
-                      key={project.id}
-                      project={project}
-                      priceRub={listingPriceRub(project)}
-                      projectBasePath={basePath}
-                      catalogKind={catalog.kind}
-                      materialFilter={material}
-                      imageSizes="(max-width: 1280px) 50vw, 400px"
-                    />
+                    <div key={project.id} className={cn(!uiVisible && "hidden")}>
+                      <HouseProjectGridCard
+                        project={project}
+                        priceRub={listingPriceRub(project)}
+                        projectBasePath={basePath}
+                        catalogKind={catalog.kind}
+                        materialFilter={material}
+                        imageSizes="(max-width: 1280px) 50vw, 400px"
+                      />
+                    </div>
                   );
                 }
 
                 return (
                   <article
                     key={project.id}
-                    className="group grid overflow-hidden rounded-[1.75rem] bg-[color-mix(in_srgb,var(--bg-secondary)_50%,var(--bg))] shadow-[0_16px_46px_rgba(15,61,46,0.06)] md:grid-cols-[minmax(260px,420px)_1fr]"
+                    className={cn(
+                      "group grid overflow-hidden rounded-[1.75rem] bg-[color-mix(in_srgb,var(--bg-secondary)_50%,var(--bg))] shadow-[0_16px_46px_rgba(15,61,46,0.06)] md:grid-cols-[minmax(260px,420px)_1fr]",
+                      !uiVisible && "hidden",
+                    )}
                   >
                     <Link href={houseProjectDetailPath(catalog, project.slug, { material })} className="relative min-h-[260px] overflow-hidden bg-[var(--stone)]">
                       {cover ? (

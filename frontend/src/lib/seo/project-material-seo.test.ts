@@ -17,7 +17,14 @@ describe("project material SEO semantic core", () => {
       material: "gazobeton",
     });
     expect(getProjectMaterialSeo("kirpich")?.keywords).toEqual(
-      expect.arrayContaining(["кирпичный дом под ключ", "построить кирпичный дом"])
+      expect.arrayContaining([
+        "строительство домов из кирпича",
+        "кирпичный дом под ключ",
+        "построить кирпичный дом",
+      ]),
+    );
+    expect(getProjectMaterialSeo("keramoblok")?.keywords).toEqual(
+      expect.arrayContaining(["строительство домов из керамоблока", "дом из керамоблока"]),
     );
   });
 

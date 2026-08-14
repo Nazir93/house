@@ -1,0 +1,125 @@
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "GeneralContractor",
+    "name": "Часть души",
+    "description": "Строительство домов под ключ: качественные и понятные чертежи, прозрачная смета. Офис в Санкт-Петербург, работаем в Ленинградская область, Санкт-Петербург. Типовые и индивидуальные проекты, построенные дома, ипотека.",
+    "url": "https://chastdushi.ru",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://chastdushi.ru/icons/icon-512.png"
+    },
+    "telephone": [
+      "+78129899901",
+      "+79046000099"
+    ],
+    "email": "info@chastdushi.ru",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Санкт-Петербург",
+      "addressCountry": "RU",
+      "streetAddress": "г. Санкт-Петербург, ул. Ординарная, д. 18"
+    },
+    "areaServed": [
+      {
+        "@type": "City",
+        "name": "Санкт-Петербург"
+      },
+      {
+        "@type": "AdministrativeArea",
+        "name": "Ленинградская область"
+      }
+    ],
+    "sameAs": [
+      "https://t.me/sk_chastdushi",
+      "https://vk.ru/sk_chastdushi",
+      "https://web.max.ru/id5300018030_biz"
+    ],
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday"
+        ],
+        "opens": "09:00",
+        "closes": "20:00"
+      },
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Saturday"
+        ],
+        "opens": "11:00",
+        "closes": "19:00"
+      }
+    ],
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Строительство загородных домов",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Проектирование и типовые проекты домов"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Фундамент, коробка, кровля"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Инженерные сети и отделка"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Ипотека и сопровождение сделки"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Что входит в строительство дома под ключ?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Состав зависит от комплектации: проектирование, фундамент, коробка, кровля, инженерные сети, отделка и сопровождение. Перед договором фиксируем этапы и смету."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Работаете ли вы в Ленинградской области?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Да. Офис находится в Санкт-Петербург, проекты и строительство ведем в Ленинградская область, Санкт-Петербург. География уточняется по участку и логистике."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "С чего начать строительство дома?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Начните с выбора проекта или расчета стоимости. После этого можно проверить участок, материал стен, фундамент, комплектацию и сроки."
+        }
+      }
+    ]
+  }
+]

@@ -208,14 +208,28 @@ export function ProjectsConstructorSection() {
 
               <div className="flex flex-1 flex-col gap-4 p-5 sm:p-6">
                 <h3 className="font-heading text-base font-bold uppercase leading-snug tracking-tight text-[var(--text)] sm:text-[1.05rem]">
-                  {card.title}
+                  <Link
+                    href={card.seoPath}
+                    className="transition hover:text-[var(--accent)]"
+                  >
+                    {card.title}
+                  </Link>
                 </h3>
                 <p className="text-[13px] leading-snug text-[var(--text)]/85 dark:text-[var(--text-muted)]">
                   {card.description}
                 </p>
+                {/* SEO §3: текстовый анкор в DOM, не только картинка/кнопка. */}
+                <p className="text-[13px] leading-snug">
+                  <Link
+                    href={card.seoPath}
+                    className="font-semibold text-[var(--accent)] underline-offset-4 transition hover:underline"
+                  >
+                    {card.seoAnchor}
+                  </Link>
+                </p>
                 <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                   <Link
-                    href={`/projects?material=${card.id}`}
+                    href={card.seoPath}
                     className={cn(
                       "inline-flex min-h-[42px] flex-1 items-center justify-center gap-1 rounded-full px-4 py-2 text-center text-[11px] font-bold uppercase tracking-[0.06em] shadow-sm transition sm:min-w-[140px]",
                       "bg-[#e8f3eb] text-[#0f3d2e] hover:bg-[#dcefe2]",

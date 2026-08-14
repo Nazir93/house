@@ -389,7 +389,7 @@ export function HouseProjectDetailContent({
 
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className="inline-flex rounded-full bg-[color-mix(in_srgb,var(--accent)_12%,transparent)] px-3 py-1.5 text-xs font-semibold text-[var(--accent)]">
-                  Гарантия {heroResolved.warrantyYears} лет
+                  Гарантия от {heroResolved.warrantyYears} лет
                 </span>
                 <span className="inline-flex rounded-full bg-[color-mix(in_srgb,var(--text)_5%,transparent)] px-3 py-1.5 text-xs font-medium text-[var(--text-muted)]">
                   Срок от {heroResolved.productionMonthsMin} мес.

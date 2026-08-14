@@ -1,6 +1,11 @@
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
-import { lookupRedirect, type RedirectMap } from "@/lib/seo/redirect-map";
+import {
+  buildRedirectMap,
+  lookupRedirectResolved,
+  resolveProjectsMaterialQueryRedirect,
+  type RedirectMap,
+} from "@/lib/seo/redirect-map";
 
 const REDIRECT_MAP_TTL_MS = 60_000;
 let redirectMapCache: RedirectMap | null = null;
@@ -14,6 +19,16 @@ function internalSecret(): string {
   );
 }
 
+/** Всегда есть legacy SEO-редиректы; БД дополняет/перекрывает. */
+function withSeoLegacyRedirects(map: RedirectMap): RedirectMap {
+  const rows = Object.entries(map).map(([fromPath, entry]) => ({
+    fromPath,
+    toPath: entry.toPath,
+    permanent: entry.permanent,
+  }));
+  return buildRedirectMap(rows);
+}
+
 async function loadRedirectMap(origin: string): Promise<RedirectMap> {
   const now = Date.now();
   if (redirectMapCache && now - redirectMapLoadedAt < REDIRECT_MAP_TTL_MS) {
@@ -21,20 +36,28 @@ async function loadRedirectMap(origin: string): Promise<RedirectMap> {
   }
 
   const secret = internalSecret();
-  if (!secret) return {};
+  if (!secret) {
+    const legacyOnly = withSeoLegacyRedirects({});
+    redirectMapCache = legacyOnly;
+    redirectMapLoadedAt = now;
+    return legacyOnly;
+  }
 
   try {
     const res = await fetch(`${origin}/api/internal/redirect-map`, {
       headers: { "x-internal-secret": secret },
       cache: "no-store",
     });
-    if (!res.ok) return redirectMapCache ?? {};
-    const map = (await res.json()) as RedirectMap;
+    if (!res.ok) {
+      const fallback = withSeoLegacyRedirects(redirectMapCache ?? {});
+      return fallback;
+    }
+    const map = withSeoLegacyRedirects((await res.json()) as RedirectMap);
     redirectMapCache = map;
     redirectMapLoadedAt = now;
     return map;
   } catch {
-    return redirectMapCache ?? {};
+    return withSeoLegacyRedirects(redirectMapCache ?? {});
   }
 }
 
@@ -128,9 +151,17 @@ export async function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
-  /** Редиректы из админки SEO → таблица Redirect (не для /api — иначе fetch redirect-map в middleware зависает) */
+  /** Редиректы из админки SEO + legacy SEO (§21: один hop на конечный URL). */
   if (!pathname.startsWith("/api/")) {
-    const dbRedirect = lookupRedirect(await loadRedirectMap(request.nextUrl.origin), pathname);
+    const materialChpu = resolveProjectsMaterialQueryRedirect(pathname, request.nextUrl.searchParams);
+    if (materialChpu) {
+      const url = request.nextUrl.clone();
+      url.pathname = materialChpu;
+      url.search = "";
+      return NextResponse.redirect(url, 308);
+    }
+
+    const dbRedirect = lookupRedirectResolved(await loadRedirectMap(request.nextUrl.origin), pathname);
     if (dbRedirect) {
       const url = request.nextUrl.clone();
       url.pathname = dbRedirect.toPath;

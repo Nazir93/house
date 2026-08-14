@@ -8,6 +8,10 @@ import {
   pickNonEmptyMetaText,
   resolvePageMetaDescription,
 } from "@/lib/seo/build-meta-description";
+import {
+  buildSelfReferencingCanonical,
+  stripSeoPathQuery,
+} from "@/lib/seo/self-referencing-canonical";
 
 const DEFAULT_OG_PATH = process.env.NEXT_PUBLIC_DEFAULT_OG_IMAGE?.trim() || SITE_DEFAULT_ICON_PATH;
 
@@ -32,6 +36,11 @@ interface MetaDefaults {
    * (лучше сниппеты в мессенджерах).
    */
   skipDefaultOgImage?: boolean;
+  /**
+   * Принудительный noindex (фильтры каталога с GET, ТЗ SEO §9).
+   * follow остаётся true, чтобы не резать внутренние ссылки.
+   */
+  forceNoindex?: boolean;
 }
 
 /** Одна выборка на путь, кэш ISR — меньше обращений к БД при статической выкладке. */
@@ -61,7 +70,9 @@ const getCachedPageMetaRow = unstable_cache(
 );
 
 export async function getPageMeta(defaults: MetaDefaults): Promise<Metadata> {
-  const dbMeta = await getCachedPageMetaRow(defaults.path);
+  /** Канон без GET (§13); lookup в PageMeta — по чистому path. */
+  const path = stripSeoPathQuery(defaults.path);
+  const dbMeta = await getCachedPageMetaRow(path);
 
   const title = pickNonEmptyMetaText(dbMeta?.title, defaults.title) || SITE_NAME;
   const description = resolvePageMetaDescription(dbMeta?.description, defaults.description);
@@ -69,9 +80,11 @@ export async function getPageMeta(defaults: MetaDefaults): Promise<Metadata> {
     ? dbMeta.keywords.split(",").map((k) => k.trim()).filter(Boolean)
     : defaults.keywords;
 
-  const baseUrl = SITE_URL.replace(/\/$/, "");
-  const canonical = `${baseUrl}${defaults.path === "/" ? "" : defaults.path}`;
-  const noindex = Boolean(dbMeta?.noindex);
+  const canonical = buildSelfReferencingCanonical(path);
+  const dbNoindex = Boolean(dbMeta?.noindex);
+  const noindex = dbNoindex || Boolean(defaults.forceNoindex);
+  /** Админский noindex — жёстче; фильтры GET — noindex,follow. */
+  const follow = dbNoindex ? false : true;
 
   const explicitOg = pickNonEmptyMetaText(dbMeta?.ogImage, defaults.ogImage);
   const fallbackRel = defaults.skipDefaultOgImage ? "" : DEFAULT_OG_PATH;
@@ -104,7 +117,7 @@ export async function getPageMeta(defaults: MetaDefaults): Promise<Metadata> {
       type: (defaults.openGraphType ?? "website") as "website" | "article",
       locale: "ru_RU",
       siteName: SITE_NAME,
-      url: `${baseUrl}${defaults.path}`,
+      url: canonical,
       ...(ogImages ? { images: ogImages } : {}),
       ...(ogArticleExtras ?? {}),
     },
@@ -119,8 +132,8 @@ export async function getPageMeta(defaults: MetaDefaults): Promise<Metadata> {
       ? {
           robots: {
             index: false,
-            follow: false,
-            googleBot: { index: false, follow: false },
+            follow,
+            googleBot: { index: false, follow },
           },
         }
       : {

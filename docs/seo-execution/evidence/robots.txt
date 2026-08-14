@@ -1,0 +1,10 @@
+User-Agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /spasibo
+Disallow: /promo
+Disallow: /lp/
+
+Host: chastdushi.ru
+Sitemap: https://chastdushi.ru/sitemap.xml

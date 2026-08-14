@@ -1,19 +1,29 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { MaterialCommercialLandingView } from "@/components/projects/material-commercial-landing-view";
 import { BreadcrumbJsonLd } from "@/components/seo/breadcrumb-json-ld";
 import { JsonLdInline } from "@/components/seo/json-ld-inline";
-import { getHouseProjects } from "@/lib/construction-data";
+import { getBuiltObjects, getHouseProjects } from "@/lib/construction-data";
+import { normalizeBuiltObjectMaterialEnum } from "@/lib/construction-shared";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { AUTHOR_HOUSE_PROJECT_CATALOG } from "@/lib/house-project-catalog";
 import { getPageMeta } from "@/lib/get-page-meta";
+import { projectMatchesMaterial } from "@/lib/project-filters";
 import { getProjectCatalogSliceSeoPages } from "@/lib/seo/project-catalog-slice-seo";
+import { getMaterialCommercialLanding } from "@/lib/seo/project-material-commercial";
 import {
   getProjectMaterialSeo,
   getProjectMaterialSeoPages,
   type ProjectMaterialSeoSlug,
 } from "@/lib/seo/project-material-seo";
 import { ProjectsCatalogContent } from "./content";
+
+const MATERIAL_ENUM_BY_SEO: Record<ProjectMaterialSeoSlug, string> = {
+  gazobeton: "GAS_BLOCK",
+  kirpich: "BRICK",
+  keramoblok: "CERAMIC_BLOCK",
+};
 
 export async function generateProjectMaterialMetadata(slug: ProjectMaterialSeoSlug) {
   const seo = getProjectMaterialSeo(slug);
@@ -31,7 +41,14 @@ export async function ProjectMaterialLandingPage({ slug }: { slug: ProjectMateri
   const seo = getProjectMaterialSeo(slug);
   if (!seo) notFound();
 
-  const projects = await getHouseProjects("author");
+  const commercial = getMaterialCommercialLanding(slug);
+  const [allProjects, allBuilt] = await Promise.all([getHouseProjects("author"), getBuiltObjects()]);
+
+  const projects = allProjects.filter((p) => projectMatchesMaterial(p, seo.material));
+  const materialEnum = MATERIAL_ENUM_BY_SEO[slug];
+  const objects = allBuilt.filter(
+    (o) => o.published && normalizeBuiltObjectMaterialEnum(o.material) === materialEnum,
+  );
 
   const faqSchema = {
     "@context": "https://schema.org",
@@ -59,6 +76,29 @@ export async function ProjectMaterialLandingPage({ slug }: { slug: ProjectMateri
     },
   };
 
+  if (commercial) {
+    return (
+      <>
+        <BreadcrumbJsonLd
+          items={[
+            { name: "Главная", path: "/" },
+            { name: "Каталог проектов", path: "/projects" },
+            { name: seo.h1, path: seo.path },
+          ]}
+        />
+        <JsonLdInline schema={collectionSchema} />
+        <JsonLdInline schema={faqSchema} />
+        <MaterialCommercialLandingView
+          seo={seo}
+          commercial={commercial}
+          catalog={AUTHOR_HOUSE_PROJECT_CATALOG}
+          projects={projects}
+          objects={objects}
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <BreadcrumbJsonLd
@@ -72,25 +112,28 @@ export async function ProjectMaterialLandingPage({ slug }: { slug: ProjectMateri
       <JsonLdInline schema={faqSchema} />
 
       <ProjectsCatalogContent
-        projects={projects}
+        projects={allProjects}
         searchParams={{ material: seo.material }}
         catalog={AUTHOR_HOUSE_PROJECT_CATALOG}
         pageTitle={seo.h1}
         pageDescription={seo.intro}
         breadcrumbLabel={seo.h1}
         seoLandingLinks={[...getProjectMaterialSeoPages(), ...getProjectCatalogSliceSeoPages()].map((page) => ({
-            href: page.path,
-            label: page.h1,
-            description: page.keywords.slice(0, 3).join(", "),
-          }))}
+          href: page.path,
+          label: page.h1,
+          description: page.keywords.slice(0, 3).join(", "),
+        }))}
       />
 
       <section className="pb-20 md:pb-28" style={{ backgroundColor: "var(--bg)" }}>
         <div className="container mx-auto max-w-[1100px] px-5">
-          <div className="grid gap-8 rounded-3xl border p-5 md:grid-cols-[1.1fr_0.9fr] md:p-8" style={{
-            borderColor: "color-mix(in srgb, var(--text) 10%, transparent)",
-            backgroundColor: "color-mix(in srgb, var(--bg-secondary) 55%, var(--bg))",
-          }}>
+          <div
+            className="grid gap-8 rounded-3xl border p-5 md:grid-cols-[1.1fr_0.9fr] md:p-8"
+            style={{
+              borderColor: "color-mix(in srgb, var(--text) 10%, transparent)",
+              backgroundColor: "color-mix(in srgb, var(--bg-secondary) 55%, var(--bg))",
+            }}
+          >
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em]" style={{ color: "var(--text-subtle)" }}>
                 SEO-кластер

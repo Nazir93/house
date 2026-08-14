@@ -9,6 +9,7 @@ import type { ServiceItem } from "@/lib/get-services";
 import { resolveServiceHubVisual } from "@/lib/service-card-media";
 import { SERVICES_PROCESS_STEPS, getServiceHubCopy, slugSegmentFromServiceHref } from "@/lib/services-hub-data";
 import { resolveServiceHubDisplay } from "@/lib/resolve-service-hub-display";
+import { serviceHubItemHref } from "@/lib/seo/ssr-seo-html";
 import { useModal } from "@/lib/modal-context";
 import { cn } from "@/lib/utils";
 
@@ -115,14 +116,19 @@ export function ServicesHub({
                 {rows.map(({ service, segment }, idx) => {
                   const on = idx === active;
                   const label = resolveServiceHubDisplay(segment, service).navTitle;
+                  const tabHref = serviceHubItemHref(service.slug);
                   return (
-                    <button
+                    <Link
                       key={service.id}
-                      type="button"
+                      href={tabHref}
                       role="tab"
                       aria-selected={on}
                       id={`services-hub-tab-${idx}`}
-                      onClick={() => setActive(idx)}
+                      scroll={false}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setActive(idx);
+                      }}
                       className={cn(
                         "snap-start whitespace-nowrap rounded-t-xl border border-b-0 px-3.5 py-2.5 text-center text-[11px] font-semibold uppercase tracking-[0.12em] transition-colors sm:px-4 sm:py-3 sm:text-[12px] md:text-[13px]",
                         "outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]",
@@ -132,12 +138,25 @@ export function ServicesHub({
                       )}
                     >
                       {label}
-                    </button>
+                    </Link>
                   );
                 })}
               </div>
             </div>
           </nav>
+
+          {/* ТЗ SEO §20: все услуги и ссылки в HTML (не только активная вкладка). */}
+          <ul className="sr-only">
+            {rows.map(({ service, segment }) => {
+              const d = resolveServiceHubDisplay(segment, service);
+              return (
+                <li key={`seo-${service.id}`}>
+                  <Link href={serviceHubItemHref(service.slug)}>{d.navTitle}</Link>
+                  {d.cardDescription ? <p>{d.cardDescription}</p> : null}
+                </li>
+              );
+            })}
+          </ul>
 
           {/* Слева изображение, справа компактное описание; ниже — явный состав выбранной услуги. */}
           <div
