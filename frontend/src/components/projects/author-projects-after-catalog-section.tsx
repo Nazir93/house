@@ -15,14 +15,14 @@ export function AuthorProjectsAfterCatalogSection() {
       className="border-t border-[var(--border)] bg-[var(--bg)] py-10 sm:py-12 md:py-14"
       aria-labelledby="projects-seo-after-catalog-heading"
     >
-      <div className="container mx-auto max-w-[1180px] px-5">
+      <div className="container mx-auto max-w-[1400px] px-5">
         <h2
           id="projects-seo-after-catalog-heading"
-          className="max-w-3xl text-balance font-heading text-[clamp(1.1rem,2.6vw,1.75rem)] font-bold uppercase leading-[1.15] tracking-[-0.03em] text-[var(--text)]"
+          className="max-w-5xl text-balance font-heading text-[clamp(1.1rem,2.6vw,1.75rem)] font-bold uppercase leading-[1.15] tracking-[-0.03em] text-[var(--text)]"
         >
           {AUTHOR_PROJECTS_AFTER_CATALOG_H2}
         </h2>
-        <div className="mt-5 max-w-[65ch] space-y-4 text-sm leading-relaxed text-[var(--text)]/88 dark:text-[var(--text-muted)] md:text-[15px]">
+        <div className="mt-5 grid gap-4 text-sm leading-relaxed text-[var(--text)]/88 dark:text-[var(--text-muted)] md:grid-cols-2 md:gap-x-10 md:gap-y-5 md:text-[15px]">
           {AUTHOR_PROJECTS_AFTER_CATALOG_PARAGRAPHS.map((paragraph) => (
             <p key={paragraph.slice(0, 40)}>{paragraph}</p>
           ))}
