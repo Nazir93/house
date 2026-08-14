@@ -35,7 +35,9 @@ export function HomeTurnkeyServicesSection() {
                 href={tile.href}
                 className="group flex min-h-[72px] items-center justify-between gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg)] px-4 py-4 text-[var(--text)] transition hover:border-[color-mix(in_srgb,var(--accent)_35%,var(--border))] hover:bg-[var(--bg-secondary)] dark:bg-[var(--card-bg)] dark:shadow-[0_12px_32px_rgba(0,0,0,0.28)] dark:hover:shadow-[0_14px_36px_rgba(0,0,0,0.34)]"
               >
-                <span className="font-heading text-sm font-bold uppercase tracking-tight">{tile.label}</span>
+                <span className="whitespace-nowrap font-heading text-[11px] font-bold uppercase tracking-tight sm:text-xs lg:text-[13px]">
+                  {tile.label}
+                </span>
                 <ArrowUpRight
                   className="h-4 w-4 shrink-0 opacity-55 transition group-hover:opacity-90 group-hover:text-[var(--accent)]"
                   strokeWidth={2}

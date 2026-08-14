@@ -83,7 +83,7 @@ export function TrustLeadCardBody({ variant, afterIntro }: TrustLeadCardBodyProp
           <Link
             href="/reviews"
             className={cn(
-              "inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full px-6 text-[12px] font-bold uppercase tracking-[0.08em] shadow-md transition",
+              "inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full px-6 text-[12px] font-bold uppercase tracking-[0.08em] whitespace-nowrap shadow-md transition",
               "bg-[var(--accent)] text-[var(--accent-contrast)] hover:opacity-[0.96] dark:shadow-none",
             )}
           >
@@ -93,7 +93,7 @@ export function TrustLeadCardBody({ variant, afterIntro }: TrustLeadCardBodyProp
           <Link
             href="/contacts"
             className={cn(
-              "inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg)] px-6 text-[12px] font-bold uppercase tracking-[0.08em] transition",
+              "inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg)] px-6 text-[12px] font-bold uppercase tracking-[0.08em] whitespace-nowrap transition",
               "text-[var(--text)] hover:border-[color-mix(in_srgb,var(--accent)_45%,var(--border))] hover:bg-[var(--bg-secondary)]/60 dark:bg-[var(--bg)]/80",
             )}
           >

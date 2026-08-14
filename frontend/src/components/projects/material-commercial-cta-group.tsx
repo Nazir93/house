@@ -26,7 +26,7 @@ export function MaterialCommercialCtaGroup({
               onClick={() =>
                 openModalToEstimate({ source: "material-gazobeton-estimate", service: "gazobeton" })
               }
-              className="rounded-full px-5 py-3 text-sm font-semibold transition hover:opacity-95"
+              className="whitespace-nowrap rounded-full px-5 py-3 text-sm font-semibold transition hover:opacity-95"
               style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
             >
               {cta.label}
@@ -41,7 +41,7 @@ export function MaterialCommercialCtaGroup({
             key={cta.id}
             href={cta.href}
             className={cn(
-              "rounded-full px-5 py-3 text-sm font-semibold transition",
+              "whitespace-nowrap rounded-full px-5 py-3 text-sm font-semibold transition",
               cta.primary
                 ? "border border-[color-mix(in_srgb,var(--accent)_45%,var(--border))] text-[var(--text)] hover:border-[var(--accent)]"
                 : "border border-[var(--border)] text-[var(--text-muted)] hover:text-[var(--text)]",

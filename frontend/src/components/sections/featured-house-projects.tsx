@@ -175,7 +175,7 @@ export function FeaturedHouseProjectsSection({
             </p>
             <Link
               href="/individual-design"
-              className="mt-6 inline-flex min-h-[48px] items-center justify-center rounded-full bg-[var(--accent)] px-8 text-sm font-bold uppercase tracking-[0.08em] text-[var(--accent-contrast)] transition hover:opacity-[0.96]"
+              className="mt-6 inline-flex min-h-[48px] items-center justify-center whitespace-nowrap rounded-full bg-[var(--accent)] px-8 text-sm font-bold uppercase tracking-[0.08em] text-[var(--accent-contrast)] transition hover:opacity-[0.96]"
             >
               Заказать проектирование
             </Link>
@@ -228,7 +228,7 @@ export function FeaturedHouseProjectsSection({
                       <div className="absolute bottom-2 left-2 right-2 z-[1] sm:bottom-3 sm:left-auto sm:right-3">
                         <Link
                           href={`${href}#project-calculator`}
-                          className="inline-flex w-full min-w-0 items-center justify-center gap-1 rounded-full bg-[#e8f3eb] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#0f3d2e] shadow-sm transition hover:bg-[#dcefe2] sm:w-auto sm:justify-start sm:px-4 sm:text-[11px]"
+                          className="inline-flex w-full min-w-0 items-center justify-center gap-1 whitespace-nowrap rounded-full bg-[#e8f3eb] px-3 py-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#0f3d2e] shadow-sm transition hover:bg-[#dcefe2] sm:w-auto sm:justify-start sm:px-4 sm:text-[11px]"
                           onClick={(e) => e.stopPropagation()}
                         >
                           Калькулятор проекта

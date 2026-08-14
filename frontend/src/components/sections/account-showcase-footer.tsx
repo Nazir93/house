@@ -71,7 +71,7 @@ export function AccountShowcaseFooter() {
         </p>
         <Link
           href="/account/login"
-          className="inline-flex min-h-[48px] items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-bold uppercase tracking-[0.08em] text-[var(--accent-contrast)] shadow-[0_14px_40px_color-mix(in_srgb,var(--accent)_25%,transparent)] transition hover:bg-[var(--accent-hover)]"
+          className="inline-flex min-h-[48px] items-center justify-center gap-2 whitespace-nowrap rounded-full bg-[var(--accent)] px-6 text-sm font-bold uppercase tracking-[0.08em] text-[var(--accent-contrast)] shadow-[0_14px_40px_color-mix(in_srgb,var(--accent)_25%,transparent)] transition hover:bg-[var(--accent-hover)]"
         >
           Войти в кабинет
           <ArrowRight className="h-4 w-4" strokeWidth={2.1} aria-hidden />
@@ -126,7 +126,7 @@ export function AccountShowcaseFooter() {
       </div>
       <Link
         href="/account/dashboard"
-        className="inline-flex min-h-[48px] shrink-0 items-center justify-center gap-2 rounded-full bg-[var(--accent)] px-6 text-sm font-bold uppercase tracking-[0.08em] text-[var(--accent-contrast)] shadow-[0_14px_40px_color-mix(in_srgb,var(--accent)_25%,transparent)] transition hover:bg-[var(--accent-hover)]"
+        className="inline-flex min-h-[48px] shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-[var(--accent)] px-6 text-sm font-bold uppercase tracking-[0.08em] text-[var(--accent-contrast)] shadow-[0_14px_40px_color-mix(in_srgb,var(--accent)_25%,transparent)] transition hover:bg-[var(--accent-hover)]"
       >
         В кабинет
         <ArrowRight className="h-4 w-4" strokeWidth={2.1} aria-hidden />

@@ -17,14 +17,14 @@ type ClientDashboardPreview = {
 function accountLinkClass(isLight: boolean, primary = false) {
   if (primary) {
     return cn(
-      "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-center text-[11px] font-bold uppercase tracking-[0.1em] transition hover:-translate-y-0.5",
+      "inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-center text-[11px] font-bold uppercase tracking-[0.1em] whitespace-nowrap transition hover:-translate-y-0.5",
       isLight
         ? "bg-[var(--accent)] text-[var(--on-accent)] shadow-[0_12px_32px_rgba(15,61,46,0.22)] hover:bg-[var(--accent-hover)]"
         : "bg-white text-[#0f3d2e] shadow-[0_12px_36px_rgba(0,0,0,0.22)] hover:bg-white/95",
     );
   }
   return cn(
-    "inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl border px-3 py-2 text-[10px] font-bold uppercase tracking-[0.08em] transition",
+    "inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl border px-3 py-2 text-[10px] font-bold uppercase tracking-[0.08em] whitespace-nowrap transition",
     isLight
       ? "border-[rgba(26,30,29,0.12)] bg-white/70 text-[var(--text)] hover:bg-white"
       : "border-white/15 bg-black/25 text-white/90 hover:bg-black/40",

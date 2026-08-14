@@ -231,7 +231,7 @@ export function ProjectsConstructorSection() {
                   <Link
                     href={card.seoPath}
                     className={cn(
-                      "inline-flex min-h-[42px] flex-1 items-center justify-center gap-1 rounded-full px-4 py-2 text-center text-[11px] font-bold uppercase tracking-[0.06em] shadow-sm transition sm:min-w-[140px]",
+                      "inline-flex min-h-[42px] flex-1 items-center justify-center gap-1 rounded-full px-4 py-2 text-center text-[11px] font-bold uppercase tracking-[0.06em] whitespace-nowrap shadow-sm transition sm:min-w-[140px]",
                       "bg-[#e8f3eb] text-[#0f3d2e] hover:bg-[#dcefe2]",
                       "dark:bg-emerald-950/55 dark:text-emerald-50 dark:shadow-none dark:ring-1 dark:ring-white/10 dark:hover:bg-emerald-900/65",
                     )}
@@ -243,7 +243,7 @@ export function ProjectsConstructorSection() {
                   <Link
                     href="/services"
                     className={cn(
-                      "inline-flex min-h-[42px] flex-1 items-center justify-center gap-1 rounded-full border px-4 py-2 text-center text-[11px] font-bold uppercase tracking-[0.06em] shadow-sm transition sm:min-w-[140px]",
+                      "inline-flex min-h-[42px] flex-1 items-center justify-center gap-1 rounded-full border px-4 py-2 text-center text-[11px] font-bold uppercase tracking-[0.06em] whitespace-nowrap shadow-sm transition sm:min-w-[140px]",
                       "border-black/[0.08] bg-white text-[var(--text)] dark:border-white/12 dark:bg-transparent",
                       "hover:border-black/14 hover:bg-[#f4f8f6] dark:hover:bg-white/[0.06]",
                     )}
