@@ -195,8 +195,11 @@ export function BannerSection({
               {lead}
             </p>
 
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <div className="mt-4 grid w-full grid-cols-1 gap-2 min-[720px]:grid-cols-3">
               {HOME_HERO_CTAS.map((cta) => {
+                const ctaBase =
+                  "inline-flex w-full min-h-[44px] items-center justify-center gap-2 rounded-xl px-3 py-2.5 text-center text-[10px] font-bold uppercase leading-snug tracking-[0.08em] no-underline transition duration-200 hover:-translate-y-0.5 hover:no-underline active:translate-y-0 active:brightness-95 md:min-h-[48px] md:px-3.5 md:text-[11px] md:tracking-[0.1em]";
+
                 if (cta.id === "estimate") {
                   return (
                     <button
@@ -204,10 +207,13 @@ export function BannerSection({
                       type="button"
                       onClick={() => openModalToEstimate({ source: "home-hero-estimate" })}
                       aria-label={cta.label}
-                      className="inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-[#0f3d2e] shadow-[0_12px_36px_rgba(0,0,0,0.22)] transition hover:-translate-y-0.5 hover:bg-white/95 md:px-5"
+                      className={cn(
+                        ctaBase,
+                        "bg-white text-[#0f3d2e] shadow-[0_12px_36px_rgba(0,0,0,0.22)] hover:bg-white/92",
+                      )}
                     >
                       <Calculator className="h-4 w-4 shrink-0" aria-hidden />
-                      {cta.label}
+                      <span>{cta.label}</span>
                     </button>
                   );
                 }
@@ -218,13 +224,12 @@ export function BannerSection({
                       key={cta.id}
                       href={cta.href}
                       className={cn(
-                        "inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-black/62 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-white shadow-[0_12px_36px_rgba(0,0,0,0.25)] transition hover:-translate-y-0.5 hover:bg-black/75 md:px-5",
-                        edgeGlassStrong,
-                        "hover:border-white/[0.14]",
+                        ctaBase,
+                        "border border-white/15 bg-black/62 text-white shadow-[0_12px_36px_rgba(0,0,0,0.25)] hover:border-white/25 hover:bg-black/78",
                       )}
                     >
                       <LayoutGrid className="h-4 w-4 shrink-0" aria-hidden />
-                      {cta.label}
+                      <span>{cta.label}</span>
                     </Link>
                   );
                 }
@@ -234,11 +239,11 @@ export function BannerSection({
                     key={cta.id}
                     href={cta.href}
                     className={cn(
-                      "inline-flex min-h-[40px] items-center justify-center gap-2 rounded-xl bg-transparent px-4 py-2 text-[11px] font-bold uppercase tracking-[0.1em] text-white/90 underline-offset-4 transition hover:text-white hover:underline md:px-5",
-                      edgeGlass,
+                      ctaBase,
+                      "border border-white/15 bg-black/62 text-white shadow-[0_12px_36px_rgba(0,0,0,0.25)] hover:border-white/25 hover:bg-black/78",
                     )}
                   >
-                    {cta.label}
+                    <span>{cta.label}</span>
                   </Link>
                 );
               })}
