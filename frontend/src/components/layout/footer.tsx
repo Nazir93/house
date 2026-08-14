@@ -8,6 +8,7 @@ import { useContactConfig } from "@/lib/contact-config-context";
 import { maxMessengerChannelUrl } from "@/lib/messenger-links";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { VkIcon } from "@/components/icons/vk-icon";
+import { footerStudioCreditSnippetAttrs } from "@/lib/footer-studio-credit";
 
 const FOOTER_COLUMNS: { title: string; links: { href: string; label: string }[] }[] = [
   {
@@ -54,6 +55,7 @@ export function Footer() {
   const contact = useContactConfig();
   const maxHref = maxMessengerChannelUrl(contact.social.max);
   const currentYear = new Date().getFullYear();
+  const studioCredit = footerStudioCreditSnippetAttrs();
 
   return (
     <footer className="relative overflow-hidden text-white" style={{ backgroundColor: "var(--footer-bar-bg)" }}>
@@ -157,16 +159,23 @@ export function Footer() {
           <p>
             © {currentYear} {SITE_NAME}
           </p>
-          <p className="max-w-xl md:text-right">
-            Визуальная концепция и реализация сайта —{" "}
-            <a
-              href="https://www.code1618.ru"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-heading font-semibold text-white/72 underline-offset-2 transition hover:text-white"
-            >
-              студия CODE1618
-            </a>
+          {/*
+            Кредит студии не должен попадать в сниппет поиска (Яндекс/Google
+            раньше подтягивали его вместо описания компании).
+            data-nosnippet — Google; <noindex> — Яндекс.
+          */}
+          <p className="max-w-xl md:text-right" data-nosnippet={studioCredit["data-nosnippet"]}>
+            <noindex>
+              Визуальная концепция и реализация сайта —{" "}
+              <a
+                href="https://www.code1618.ru"
+                target="_blank"
+                rel={studioCredit.linkRel}
+                className="font-heading font-semibold text-white/72 underline-offset-2 transition hover:text-white"
+              >
+                студия CODE1618
+              </a>
+            </noindex>
           </p>
         </div>
       </div>
