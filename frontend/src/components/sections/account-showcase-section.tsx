@@ -22,7 +22,7 @@ export function AccountShowcaseSection() {
   return (
     <section
       id="account-showcase"
-      className="relative overflow-x-clip scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)] py-12 sm:py-16 lg:py-28"
+      className="relative scroll-mt-[var(--site-header-sticky-offset)] border-t border-[var(--border)] py-12 sm:py-16 lg:py-28"
       style={{ backgroundColor: "var(--bg)" }}
       aria-labelledby="account-showcase-heading"
     >
@@ -37,7 +37,7 @@ export function AccountShowcaseSection() {
             </p>
             <h2
               id="account-showcase-heading"
-              className="mt-3 w-full max-w-none text-balance font-heading text-[clamp(1.35rem,5.4vw,2.45rem)] font-bold leading-[1.12] tracking-tight text-[var(--text)] sm:mt-3.5 sm:leading-[1.08]"
+              className="mt-3 w-full max-w-none font-heading text-[clamp(1.35rem,5.4vw,2.45rem)] font-bold leading-[1.12] tracking-tight text-[var(--text)] sm:mt-3.5 sm:leading-[1.08]"
             >
               {ACCOUNT_SHOWCASE_SECTION_TITLE}
             </h2>
@@ -55,6 +55,11 @@ export function AccountShowcaseSection() {
           </div>
         </div>
 
+        {/*
+          Sticky должен быть без transform/overflow-x-clip на предках и на самом элементе —
+          иначе колода «зависает», а data-reveal держит карточки opacity:0 → огромная пустота.
+          Веерный наклон — только на внутреннем слое.
+        */}
         <div className="relative pb-8 sm:pb-12">
           {ACCOUNT_SHOWCASE_ITEMS.map((item, index) => {
             const Icon = ACCOUNT_SHOWCASE_ICON_BY_ID[item.id];
@@ -62,53 +67,57 @@ export function AccountShowcaseSection() {
             return (
               <article
                 key={item.id}
-                data-reveal="card"
-                className="group relative sticky mb-[-1.25rem] grid min-h-[calc(100dvh-var(--site-header-sticky-offset)-var(--mobile-bottom-nav-offset))] grid-rows-[auto_minmax(22rem,1fr)] overflow-hidden rounded-t-[2rem] bg-[var(--bg)] shadow-[0_-10px_40px_rgba(15,61,46,0.1)] sm:mb-[-1.5rem] sm:rounded-t-[2.5rem] lg:min-h-[38rem] lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:grid-rows-none lg:gap-6 lg:rounded-t-[2.75rem]"
+                className="group relative sticky mb-[-1.25rem] min-h-[calc(100dvh-var(--site-header-sticky-offset)-var(--mobile-bottom-nav-offset))] sm:mb-[-1.5rem] lg:min-h-[38rem]"
                 style={
                   {
                     top: `calc(var(--site-header-sticky-offset) + ${fan.topOffsetPx}px)`,
                     zIndex: index + 1,
-                    transform: accountShowcaseFanCssTransform(fan),
-                    transformOrigin: "50% 0%",
-                    "--reveal-delay": `${index * 80}ms`,
                   } as CSSProperties
                 }
               >
-                <div className="flex min-h-[22rem] flex-col justify-between p-5 sm:p-7 lg:min-h-[38rem] lg:p-10">
-                  <div>
-                    <div className="inline-flex items-center rounded-full bg-[color-mix(in_srgb,var(--bg-secondary)_80%,transparent)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
-                      {item.index}
-                    </div>
-                    <div className="mt-7 flex items-center gap-4">
-                      <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--accent-contrast)]">
-                        <Icon className="h-7 w-7" strokeWidth={1.8} aria-hidden />
-                      </span>
-                      <h3 className="font-heading text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl">
-                        {item.headline}
-                      </h3>
-                    </div>
-                    <p className="mt-5 max-w-lg text-sm leading-relaxed text-[var(--text-muted)] sm:text-[15px]">
-                      {item.description}
-                    </p>
-                  </div>
-
-                  <div className="mt-8 space-y-3">
-                    {item.points.map((point) => (
-                      <div key={point} className="flex items-center gap-3 text-sm font-medium text-[var(--text)]">
-                        <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--accent)]" strokeWidth={2} aria-hidden />
-                        {point}
+                <div
+                  className="grid h-full min-h-[inherit] grid-rows-[auto_minmax(22rem,1fr)] overflow-hidden rounded-t-[2rem] bg-[var(--bg)] shadow-[0_-10px_40px_rgba(15,61,46,0.1)] sm:rounded-t-[2.5rem] lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:grid-rows-none lg:gap-6 lg:rounded-t-[2.75rem]"
+                  style={{
+                    transform: accountShowcaseFanCssTransform(fan),
+                    transformOrigin: "50% 0%",
+                  }}
+                >
+                  <div className="flex min-h-[22rem] flex-col justify-between p-5 sm:p-7 lg:min-h-[38rem] lg:p-10">
+                    <div>
+                      <div className="inline-flex items-center rounded-full bg-[color-mix(in_srgb,var(--bg-secondary)_80%,transparent)] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                        {item.index}
                       </div>
-                    ))}
-                  </div>
-                </div>
+                      <div className="mt-7 flex items-center gap-4">
+                        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[var(--accent)] text-[var(--accent-contrast)]">
+                          <Icon className="h-7 w-7" strokeWidth={1.8} aria-hidden />
+                        </span>
+                        <h3 className="font-heading text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl">
+                          {item.headline}
+                        </h3>
+                      </div>
+                      <p className="mt-5 max-w-lg text-sm leading-relaxed text-[var(--text-muted)] sm:text-[15px]">
+                        {item.description}
+                      </p>
+                    </div>
 
-                <div className="flex min-h-[22rem] w-full flex-1 flex-col px-4 pb-4 pt-0 sm:px-6 sm:pb-6 lg:min-h-[38rem] lg:flex-none lg:items-stretch lg:py-8 lg:pr-10 lg:pl-0">
-                  <AccountShowcaseMockup
-                    itemId={item.id}
-                    image={item.image}
-                    images={item.images}
-                    metrics={item.metrics}
-                  />
+                    <div className="mt-8 space-y-3">
+                      {item.points.map((point) => (
+                        <div key={point} className="flex items-center gap-3 text-sm font-medium text-[var(--text)]">
+                          <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--accent)]" strokeWidth={2} aria-hidden />
+                          {point}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex min-h-[22rem] w-full flex-1 flex-col px-4 pb-4 pt-0 sm:px-6 sm:pb-6 lg:min-h-[38rem] lg:flex-none lg:items-stretch lg:py-8 lg:pr-10 lg:pl-0">
+                    <AccountShowcaseMockup
+                      itemId={item.id}
+                      image={item.image}
+                      images={item.images}
+                      metrics={item.metrics}
+                    />
+                  </div>
                 </div>
               </article>
             );
