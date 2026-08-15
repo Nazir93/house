@@ -29,6 +29,11 @@ const BADGE_ICONS = [Award, Home, ShieldCheck, ClipboardCheck] as const;
 /** Едва заметная «стеклянная» обводка на тёмном баннере */
 const edgeGlass = "border border-white/[0.07]";
 
+/** Матовый фон как у промо-карточки справа: полупрозрачный + лёгкий blur. */
+const matteGlass =
+  "border border-white/[0.07] bg-black/58 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm";
+const matteGlassHover = "hover:border-white/15 hover:bg-black/68";
+
 /** Интервал автопрокрутки промо-карусели на баннере. */
 const PROMO_AUTO_ADVANCE_MS = 6000;
 
@@ -159,9 +164,8 @@ export function BannerSection({
           <div className="pointer-events-auto max-w-3xl justify-self-start self-end pt-0 min-[1100px]:pr-4">
             <div
               className={cn(
-                // Без backdrop-blur на LCP-блоке: blur на слабых CPU даёт forced layout / долгий render delay.
-                "max-w-4xl rounded-2xl bg-black/58 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_12px_48px_rgba(0,0,0,0.55)] sm:rounded-[1.35rem] sm:px-5 sm:py-4",
-                edgeGlass,
+                "max-w-4xl rounded-2xl px-4 py-3 sm:rounded-[1.35rem] sm:px-5 sm:py-4",
+                matteGlass,
               )}
             >
               <h1 className="text-balance font-heading text-[clamp(1.2rem,3.1vw,2.75rem)] font-bold uppercase leading-[1.05] tracking-[-0.04em] text-white [text-shadow:0_0_1px_rgba(0,0,0,0.95),0_1px_2px_rgba(0,0,0,0.92),0_2px_16px_rgba(0,0,0,0.72),0_4px_36px_rgba(0,0,0,0.45)]">
@@ -184,10 +188,8 @@ export function BannerSection({
             </div>
             <p
               className={cn(
-                "mt-2.5 max-w-2xl text-balance rounded-lg px-3 py-2 text-[13px] font-medium leading-relaxed text-white shadow-[0_12px_40px_rgba(0,0,0,0.35)] [text-shadow:0_1px_2px_rgba(0,0,0,0.65)] md:mt-3 md:px-3.5 md:py-2.5 md:text-[15px]",
-                edgeGlass,
-                // Как у H1: тёмная плашка; в light чуть плотнее, чтобы текст не сливался с ярким фоном.
-                theme === "light" ? "bg-black/78" : "bg-black/68",
+                "mt-2.5 max-w-2xl text-balance rounded-xl px-3 py-2 text-[13px] font-medium leading-relaxed text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.65)] md:mt-3 md:rounded-2xl md:px-3.5 md:py-2.5 md:text-[15px]",
+                matteGlass,
               )}
             >
               {lead}
@@ -222,10 +224,7 @@ export function BannerSection({
                     <Link
                       key={cta.id}
                       href={cta.href}
-                      className={cn(
-                        ctaBase,
-                        "border border-white/15 bg-black/62 text-white shadow-[0_12px_36px_rgba(0,0,0,0.25)] hover:border-white/25 hover:bg-black/78",
-                      )}
+                      className={cn(ctaBase, "text-white", matteGlass, matteGlassHover)}
                     >
                       <LayoutGrid className="h-3 w-3 shrink-0" strokeWidth={2.25} aria-hidden />
                       <span className={labelClass}>{cta.label}</span>
@@ -237,10 +236,7 @@ export function BannerSection({
                   <Link
                     key={cta.id}
                     href={cta.href}
-                    className={cn(
-                      ctaBase,
-                      "border border-white/15 bg-black/62 text-white shadow-[0_12px_36px_rgba(0,0,0,0.25)] hover:border-white/25 hover:bg-black/78",
-                    )}
+                    className={cn(ctaBase, "text-white", matteGlass, matteGlassHover)}
                   >
                     <HardHat className="h-3 w-3 shrink-0" strokeWidth={2.25} aria-hidden />
                     <span className={labelClass}>{cta.label}</span>
