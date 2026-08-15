@@ -7,6 +7,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardCheck,
+  HardHat,
   Home,
   LayoutGrid,
   ShieldCheck,
@@ -195,7 +196,8 @@ export function BannerSection({
             <div className="mt-4 grid w-full grid-cols-1 gap-2 min-[720px]:grid-cols-3">
               {HOME_HERO_CTAS.map((cta) => {
                 const ctaBase =
-                  "inline-flex w-full min-h-[44px] items-center justify-center gap-1.5 rounded-xl px-2 py-2.5 text-center text-[9px] font-bold uppercase leading-none tracking-[0.04em] whitespace-nowrap no-underline transition duration-200 hover:-translate-y-0.5 hover:no-underline active:translate-y-0 active:brightness-95 min-[900px]:gap-2 min-[900px]:px-3 min-[900px]:text-[10px] min-[900px]:tracking-[0.06em] xl:min-h-[48px] xl:text-[11px] xl:tracking-[0.08em]";
+                  "inline-flex w-full min-h-[44px] min-w-0 items-center justify-center gap-1 rounded-xl px-1.5 py-2 text-center text-[8px] font-bold uppercase leading-tight tracking-[0.02em] no-underline transition duration-200 hover:-translate-y-0.5 hover:no-underline active:translate-y-0 active:brightness-95 min-[900px]:gap-1.5 min-[900px]:px-2 min-[900px]:text-[9px] min-[900px]:tracking-[0.03em] xl:min-h-[48px] xl:px-2.5 xl:text-[10px] xl:tracking-[0.04em]";
+                const labelClass = "min-w-0 text-balance";
 
                 if (cta.id === "estimate") {
                   return (
@@ -209,8 +211,8 @@ export function BannerSection({
                         "bg-white text-[#0f3d2e] shadow-[0_12px_36px_rgba(0,0,0,0.22)] hover:bg-white/92",
                       )}
                     >
-                      <Calculator className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                      <span>{cta.label}</span>
+                      <Calculator className="h-3 w-3 shrink-0" strokeWidth={2.25} aria-hidden />
+                      <span className={labelClass}>{cta.label}</span>
                     </button>
                   );
                 }
@@ -225,8 +227,8 @@ export function BannerSection({
                         "border border-white/15 bg-black/62 text-white shadow-[0_12px_36px_rgba(0,0,0,0.25)] hover:border-white/25 hover:bg-black/78",
                       )}
                     >
-                      <LayoutGrid className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                      <span>{cta.label}</span>
+                      <LayoutGrid className="h-3 w-3 shrink-0" strokeWidth={2.25} aria-hidden />
+                      <span className={labelClass}>{cta.label}</span>
                     </Link>
                   );
                 }
@@ -240,7 +242,8 @@ export function BannerSection({
                       "border border-white/15 bg-black/62 text-white shadow-[0_12px_36px_rgba(0,0,0,0.25)] hover:border-white/25 hover:bg-black/78",
                     )}
                   >
-                    <span>{cta.label}</span>
+                    <HardHat className="h-3 w-3 shrink-0" strokeWidth={2.25} aria-hidden />
+                    <span className={labelClass}>{cta.label}</span>
                   </Link>
                 );
               })}
