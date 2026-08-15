@@ -11,7 +11,6 @@ import {
 import {
   accountShowcaseFanCssTransform,
   accountShowcaseFanStyle,
-  accountShowcaseStackOverlapMarginPx,
 } from "@/lib/account-showcase-fan";
 import { ACCOUNT_SHOWCASE_ICON_BY_ID } from "@/lib/account-showcase-icons";
 import { AccountShowcaseFooter } from "@/components/sections/account-showcase-footer";
@@ -28,7 +27,10 @@ export function AccountShowcaseSection() {
       aria-labelledby="account-showcase-heading"
     >
       <div className="container relative z-[1] mx-auto max-w-[1180px] px-4 sm:px-6 lg:px-8">
-        <div className="relative z-10 mb-8 grid gap-5 bg-[var(--bg)] sm:mb-10 sm:gap-6 lg:mb-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.6fr)] lg:items-end">
+        <div
+          data-reveal="section"
+          className="relative z-10 mb-8 grid gap-5 bg-[var(--bg)] sm:mb-10 sm:gap-6 lg:mb-14 lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,0.6fr)] lg:items-end"
+        >
           <div className="min-w-0">
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--text-muted)] sm:text-[11px]">
               {ACCOUNT_SHOWCASE_SECTION_EYEBROW}
@@ -54,24 +56,22 @@ export function AccountShowcaseSection() {
         </div>
 
         {/*
-          Sticky без transform на самом элементе (веер — на внутреннем слое).
-          Сильный отрицательный margin — чтобы карточки реально наезжали друг на друга.
+          Sticky должен быть без transform/overflow-x-clip на предках и на самом элементе —
+          иначе колода «зависает», а data-reveal держит карточки opacity:0 → огромная пустота.
+          Веерный наклон — только на внутреннем слое.
         */}
         <div className="relative pb-8 sm:pb-12">
           {ACCOUNT_SHOWCASE_ITEMS.map((item, index) => {
             const Icon = ACCOUNT_SHOWCASE_ICON_BY_ID[item.id];
             const fan = accountShowcaseFanStyle(index, total);
-            const isLast = index === total - 1;
-            const overlapMargin = accountShowcaseStackOverlapMarginPx(isLast);
             return (
               <article
                 key={item.id}
-                className="group relative sticky min-h-[calc(100dvh-var(--site-header-sticky-offset)-var(--mobile-bottom-nav-offset))] lg:min-h-[38rem]"
+                className="group relative sticky mb-[-1.25rem] min-h-[calc(100dvh-var(--site-header-sticky-offset)-var(--mobile-bottom-nav-offset))] sm:mb-[-1.5rem] lg:min-h-[38rem]"
                 style={
                   {
                     top: `calc(var(--site-header-sticky-offset) + ${fan.topOffsetPx}px)`,
                     zIndex: index + 1,
-                    marginBottom: overlapMargin,
                   } as CSSProperties
                 }
               >
