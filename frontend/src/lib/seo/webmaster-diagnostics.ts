@@ -14,7 +14,7 @@ export const WEBMASTER_DIAGNOSTICS = {
     id: "not_mobile_friendly",
     lastWebmasterCheckNote: "Проверка мобильности смотрит viewport, горизонтальный скролл, читаемость текста.",
     livePolicy:
-      "viewport=device-width, userScalable=true; html/body overflow-x:clip; основной текст на мобиле ≥12px где это контент, не декоративный label.",
+      "viewport=device-width, userScalable=true; body overflow-x:clip (не html — иначе ломается sticky на главной); основной текст на мобиле ≥12px где это контент, не декоративный label.",
   },
 } as const;
 

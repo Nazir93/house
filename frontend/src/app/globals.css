@@ -3,10 +3,11 @@
 @tailwind utilities;
 
 @layer base {
-  html {
-    overflow-x: clip;
-  }
-
+  /*
+    Не ставить overflow-x: clip на html: вместе с clip на body это ломает
+    position: sticky («Наши услуги», колода ЛК) — секции уезжают в пустоту.
+    Горизонтальный вылет режем только на body.
+  */
   body {
     overflow-x: clip;
   }
