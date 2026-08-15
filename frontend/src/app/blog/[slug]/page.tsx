@@ -5,6 +5,7 @@ import { SITE_NAME } from "@/lib/constants";
 import { getPageMeta, getPageH1 } from "@/lib/get-page-meta";
 import { buildMetaDescription } from "@/lib/seo/build-meta-description";
 import { BlogArticleJsonLd } from "@/components/seo/blog-article-json-ld";
+import { BlogPostViewTracker } from "@/components/blog/blog-post-view-tracker";
 import { BlogPostContent } from "./content";
 
 export const revalidate = 60;
@@ -87,6 +88,7 @@ export default async function BlogPostPage(props: Props) {
   const raw = post as unknown as { coverVideos?: string[]; galleryUrls?: string[] };
   return (
     <>
+      <BlogPostViewTracker slug={post.slug} />
       <BlogArticleJsonLd
         title={post.title}
         slug={post.slug}

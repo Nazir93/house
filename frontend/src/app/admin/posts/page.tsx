@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Plus, Search, X, FileText, Eye, EyeOff, Trash2 } from "lucide-react";
+import { formatPostViewCount } from "@/lib/post-views";
 
 type Post = {
   id: string;
@@ -10,6 +11,7 @@ type Post = {
   title: string;
   category: string;
   published: boolean;
+  viewCount?: number;
   createdAt: string;
 };
 
@@ -110,9 +112,16 @@ export default function AdminPostsPage() {
                   <Link href={`/admin/posts/${post.id}`} className="text-white hover:text-emerald-300 font-medium text-sm transition-colors">
                     {post.title}
                   </Link>
-                  <div className="flex items-center gap-3 mt-1">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
                     <span className="text-xs text-white/30">{post.category}</span>
                     <span className="text-xs text-white/20">{new Date(post.createdAt).toLocaleDateString("ru-RU")}</span>
+                    <span
+                      className="inline-flex items-center gap-1 text-xs text-white/45 tabular-nums"
+                      title="Просмотры на сайте"
+                    >
+                      <Eye size={12} className="opacity-70" aria-hidden />
+                      {formatPostViewCount(post.viewCount ?? 0)}
+                    </span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1.5 ml-4">

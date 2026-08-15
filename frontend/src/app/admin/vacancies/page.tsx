@@ -1,7 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Trash2, Eye, EyeOff, Save, X, Briefcase, ChevronDown, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { Plus, Trash2, Eye, EyeOff, Save, X, Briefcase, ChevronDown, ChevronRight, ExternalLink } from "lucide-react";
+import {
+  vacancyResponseMessage,
+  vacancyResponsePosition,
+  vacancyResponseResume,
+  type VacancyResponseLeadRow,
+} from "@/lib/admin-vacancy-responses";
 
 interface VacancyItem {
   id: string;
@@ -31,6 +38,7 @@ const inp =
 
 export default function AdminVacanciesPage() {
   const [vacancies, setVacancies] = useState<VacancyItem[]>([]);
+  const [responses, setResponses] = useState<VacancyResponseLeadRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [editId, setEditId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -40,10 +48,13 @@ export default function AdminVacanciesPage() {
   const [error, setError] = useState("");
 
   const load = useCallback(() => {
-    fetch("/api/admin/vacancies")
-      .then((r) => r.json())
-      .then((d) => {
-        if (Array.isArray(d)) setVacancies(d);
+    Promise.all([
+      fetch("/api/admin/vacancies").then((r) => r.json()),
+      fetch("/api/admin/vacancy-responses").then((r) => r.json()),
+    ])
+      .then(([vacData, respData]) => {
+        if (Array.isArray(vacData)) setVacancies(vacData);
+        if (Array.isArray(respData?.responses)) setResponses(respData.responses);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -130,7 +141,7 @@ export default function AdminVacanciesPage() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Вакансии</h1>
           <p className="text-sm text-white/40 mt-1">
-            {vacancies.length} в базе · {visibleCount} на сайте ·{" "}
+            {vacancies.length} в базе · {visibleCount} на сайте · {responses.length} откликов ·{" "}
             <a href="/partners/vacancies" target="_blank" rel="noopener noreferrer" className="underline hover:text-white/70">
               /partners/vacancies
             </a>
@@ -233,6 +244,53 @@ export default function AdminVacanciesPage() {
         </div>
       ) : null}
 
+      <section className="space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold text-white/70">Отклики</h2>
+          <Link
+            href="/admin/leads?source=partner-vacancy"
+            className="inline-flex items-center gap-1 text-xs text-emerald-300/90 hover:text-emerald-200"
+          >
+            Все в заявках <ExternalLink size={12} />
+          </Link>
+        </div>
+        {responses.length === 0 ? (
+          <p className="text-sm text-white/30 rounded-xl border border-white/[0.06] px-4 py-6 text-center">
+            Откликов пока нет
+          </p>
+        ) : (
+          <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] divide-y divide-white/[0.04] overflow-hidden">
+            {responses.map((r) => {
+              const position = vacancyResponsePosition(r);
+              const resume = vacancyResponseResume(r.calcData);
+              const message = vacancyResponseMessage(r.calcData);
+              return (
+                <div key={r.id} className="px-4 py-3 space-y-1">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <Link href={`/admin/leads/${r.id}`} className="text-sm font-medium text-white hover:text-emerald-300">
+                      {r.name}
+                    </Link>
+                    <span className="text-[11px] text-white/30">
+                      {new Date(r.createdAt).toLocaleString("ru-RU")}
+                    </span>
+                  </div>
+                  <p className="text-xs text-white/50">
+                    {position} · {r.phone}
+                    {r.email ? ` · ${r.email}` : ""}
+                  </p>
+                  {resume ? (
+                    <a href={resume} target="_blank" rel="noopener noreferrer" className="text-xs text-emerald-300/80 underline break-all">
+                      Резюме / ссылка
+                    </a>
+                  ) : null}
+                  {message ? <p className="text-xs text-white/40 whitespace-pre-wrap">{message}</p> : null}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
       {vacancies.length === 0 && !showForm ? (
         <div className="text-center py-16">
           <Briefcase size={48} className="mx-auto mb-3 text-white/10" />
@@ -240,6 +298,7 @@ export default function AdminVacanciesPage() {
         </div>
       ) : (
         <div className="space-y-1">
+          <h2 className="text-sm font-semibold text-white/70 pt-2">Список вакансий</h2>
           {vacancies.map((v) => (
             <div
               key={v.id}

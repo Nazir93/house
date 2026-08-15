@@ -478,6 +478,8 @@ model Post {
   /// Галерея фото (после обложки, перед видео)
   galleryUrls String[] @default([])
   published  Boolean  @default(false)
+  /// Просмотры публичной страницы /blog/[slug]
+  viewCount  Int      @default(0)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
