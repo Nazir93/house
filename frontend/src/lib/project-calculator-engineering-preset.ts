@@ -26,6 +26,21 @@ export function applyEngineeringNetworksPreset(): Set<string> {
 }
 
 /**
+ * Кнопка «+ Инженерные сети и опции»: только инженерия.
+ * Стройопции (в т.ч. от «Предчистовой отделки») сбрасываются — иначе пункты
+ * предчистовой остаются в смете после переключения.
+ */
+export function applyEngineeringNetworksOnlyPreset(): {
+  engineering: Set<string>;
+  construction: Set<string>;
+} {
+  return {
+    engineering: applyEngineeringNetworksPreset(),
+    construction: new Set(),
+  };
+}
+
+/**
  * Пресет «Предчистовая отделка»: инженерные сети + внутренняя штукатурка,
  * утепление кровли 200 мм, софиты, водосточная система.
  */

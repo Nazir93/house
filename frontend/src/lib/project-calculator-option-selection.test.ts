@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   sanitizeConstructionOptionSelection,
+  shouldAutoExpandCalculatorOptionDetail,
   toggleConstructionOptionSelection,
 } from "./project-calculator-option-selection";
 
@@ -34,5 +35,16 @@ describe("toggleConstructionOptionSelection", () => {
       "gutter",
     ]);
     expect(sanitized.sort()).toEqual(["gutter", "roof_soft", "roof_insulation_250"].sort());
+  });
+});
+
+describe("shouldAutoExpandCalculatorOptionDetail", () => {
+  it("при включённой галочке и наличии описания/картинки — раскрыть", () => {
+    expect(shouldAutoExpandCalculatorOptionDetail({ checked: true, hasDetail: true })).toBe(true);
+  });
+
+  it("без галочки или без контента — не раскрывать автоматически", () => {
+    expect(shouldAutoExpandCalculatorOptionDetail({ checked: false, hasDetail: true })).toBe(false);
+    expect(shouldAutoExpandCalculatorOptionDetail({ checked: true, hasDetail: false })).toBe(false);
   });
 });

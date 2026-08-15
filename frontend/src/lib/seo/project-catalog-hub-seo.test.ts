@@ -20,8 +20,9 @@ describe("project-catalog-hub-seo (SEO §7 /projects)", () => {
     expect(seo.description).toContain("газобетона, керамоблока и кирпича");
     expect(seo.description).toContain("Санкт-Петербурга и Ленинградской области");
     expect(seo.h1).toBe("Авторские проекты домов");
-    expect(seo.intro).toContain("планировками, площадями и расчетом стоимости");
-    expect(seo.intro).toContain("адаптировать под участок");
+    expect(seo.intro).toContain("авторский проект дома под ваш участок");
+    expect(seo.intro).toContain("газобетона, кирпича и керамоблока");
+    expect(seo.intro).toContain("Санкт-Петербурге и Ленинградской области");
     expect(seo.keywords).toContain("авторские проекты домов");
   });
 });

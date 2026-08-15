@@ -42,3 +42,14 @@ export function sanitizeConstructionOptionSelection(current: Iterable<string>): 
   }
   return [...next];
 }
+
+/**
+ * При включении галочки опции автоматически раскрываем блок
+ * с картинкой и описанием (если есть что показать).
+ */
+export function shouldAutoExpandCalculatorOptionDetail(params: {
+  checked: boolean;
+  hasDetail: boolean;
+}): boolean {
+  return params.checked && params.hasDetail;
+}

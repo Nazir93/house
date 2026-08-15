@@ -23,3 +23,15 @@ export function resolveProjectPriceOffer(params: {
     hasDiscount,
   };
 }
+
+/**
+ * Крупная «Цена строительства» на карточке проекта следует за выбранным
+ * материалом стен (газоблок / керамоблок / кирпич), а не за project.price / газом.
+ */
+export function resolveSelectedHeroTierPriceOffer(selectedTierPriceRub: number): ProjectPriceOffer {
+  const selected = Math.max(0, Math.round(selectedTierPriceRub));
+  return resolveProjectPriceOffer({
+    manualPriceRub: selected,
+    standardPricesRub: selected > 0 ? [selected] : [],
+  });
+}

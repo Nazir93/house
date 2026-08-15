@@ -30,7 +30,7 @@ import {
   isHouseCalculatorCategoryId,
   type HouseCalculatorCategoryId,
 } from "@/lib/house-project-calculator-engine";
-import { resolveProjectPriceOffer } from "@/lib/project-price-offer";
+import { resolveSelectedHeroTierPriceOffer } from "@/lib/project-price-offer";
 import {
   heroTierIndexForMaterialFilter,
   resolveProjectListingPriceRub,
@@ -120,17 +120,6 @@ export function HouseProjectDetailContent({
 
   const effectiveHeroTiers = heroShellTiers;
   const heroResolved = useMemo(() => resolveProjectHeroPricing(project), [project]);
-  const priceOffer = useMemo(() => {
-    const gasTierPrice =
-      effectiveHeroTiers.find((t) => t.id === "gas")?.price ??
-      effectiveHeroTiers[0]?.price ??
-      resolveProjectListingPriceRub(project);
-    const manualPriceRub = project.price > 0 ? project.price : gasTierPrice;
-    return resolveProjectPriceOffer({
-      manualPriceRub,
-      standardPricesRub: effectiveHeroTiers.map((tier) => tier.price),
-    });
-  }, [effectiveHeroTiers, project]);
 
   const calculatorCategoryId = useMemo((): HouseCalculatorCategoryId | null => {
     const explicit =
@@ -153,6 +142,13 @@ export function HouseProjectDetailContent({
   useEffect(() => {
     setMaterialTierIndex(heroTierIndexForMaterialFilter(effectiveHeroTiers, materialFromUrl));
   }, [effectiveHeroTiers, materialFromUrl]);
+
+  const selectedHeroTier = effectiveHeroTiers[tierIdx] ?? effectiveHeroTiers[0];
+  const priceOffer = useMemo(() => {
+    const selectedTierPrice =
+      selectedHeroTier?.price ?? resolveProjectListingPriceRub(project);
+    return resolveSelectedHeroTierPriceOffer(selectedTierPrice);
+  }, [selectedHeroTier, project]);
   const [activeRender, setActiveRender] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
@@ -169,7 +165,6 @@ export function HouseProjectDetailContent({
   const contact = useContactConfig();
   const { openModalToEstimate } = useModal();
   const active = renders[activeRender] ?? renders[0];
-  const selectedHeroTier = effectiveHeroTiers[tierIdx] ?? effectiveHeroTiers[0];
 
   const telegramHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE_RAW);
   const maxMessengerHref = maxMessengerChatUrl(contact.social.maxChat);

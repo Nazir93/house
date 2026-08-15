@@ -39,14 +39,22 @@ const ClientsChooseVideoSection = dynamic(
     import("@/components/sections/clients-choose-video-section").then((m) => ({
       default: m.ClientsChooseVideoSection,
     })),
-  { loading: () => <div className="min-h-[50vh]" aria-hidden /> },
+  { loading: () => <div className="min-h-[100dvh]" style={{ backgroundColor: "var(--bg)" }} aria-hidden /> },
 );
 const AccountShowcaseSection = dynamic(
   () =>
     import("@/components/sections/account-showcase-section").then((m) => ({
       default: m.AccountShowcaseSection,
     })),
-  { loading: () => null },
+  {
+    loading: () => (
+      <div
+        className="min-h-[100dvh] border-t border-[var(--border)]"
+        style={{ backgroundColor: "var(--bg)" }}
+        aria-hidden
+      />
+    ),
+  },
 );
 const HomePartnersSection = dynamic(
   () =>

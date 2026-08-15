@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import { formatRub } from "@/lib/construction-data";
 import type { PublicCalculatorCatalog } from "@/lib/calculator-catalog";
 import { isCalculatorOptionDiagramUrl } from "@/lib/project-calculator-option-images";
+import { shouldAutoExpandCalculatorOptionDetail } from "@/lib/project-calculator-option-selection";
 import { cn } from "@/lib/utils";
 import { CmsImage } from "@/components/ui/cms-image";
 
@@ -240,8 +241,16 @@ function OptionRow({
   loading?: boolean;
   onToggle: () => void;
 }) {
-  const [open, setOpen] = useState(false);
   const hasFootnote = Boolean(description?.trim() || imageUrl?.trim());
+  const [open, setOpen] = useState(() =>
+    shouldAutoExpandCalculatorOptionDetail({ checked, hasDetail: hasFootnote }),
+  );
+
+  useEffect(() => {
+    if (shouldAutoExpandCalculatorOptionDetail({ checked, hasDetail: hasFootnote })) {
+      setOpen(true);
+    }
+  }, [checked, hasFootnote]);
 
   return (
     <li

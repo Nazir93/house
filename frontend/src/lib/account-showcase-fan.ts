@@ -24,3 +24,13 @@ export function accountShowcaseFanStyle(index: number, total: number): AccountSh
 export function accountShowcaseFanCssTransform(style: AccountShowcaseFanStyle): string {
   return `rotate(${style.rotateDeg}deg) translate3d(${style.translateXPx}px, 0, 0)`;
 }
+
+/**
+ * Отрицательный margin между sticky-карточками: следующая наезжает на предыдущую.
+ * Без этого при min-h ≈ 100dvh колода выглядит как просто ряд экранов вниз.
+ */
+export function accountShowcaseStackOverlapMarginPx(isLast: boolean): number {
+  if (isLast) return 0;
+  /** ~viewport card minus peek of previous card */
+  return -520;
+}

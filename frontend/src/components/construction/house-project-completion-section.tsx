@@ -39,7 +39,7 @@ import {
 } from "@/lib/project-calculator-stage-images";
 import { resolveFloorsStageTable } from "@/lib/project-calculator-floors-stage";
 import {
-  applyEngineeringNetworksPreset,
+  applyEngineeringNetworksOnlyPreset,
   applyPrefinishFinishPreset,
 } from "@/lib/project-calculator-engineering-preset";
 import {
@@ -343,7 +343,9 @@ export function HouseProjectCompletionSection({
   }
 
   function selectEngineeringNetworksAndScroll() {
-    setEngineeringSlugs(applyEngineeringNetworksPreset());
+    const preset = applyEngineeringNetworksOnlyPreset();
+    setEngineeringSlugs(preset.engineering);
+    setConstructionSlugs(new Set(sanitizeConstructionOptionSelection(preset.construction)));
     document.getElementById("completion-addons")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
