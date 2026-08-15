@@ -8,10 +8,10 @@ export const HOME_HERO_SEO_LEAD =
 
 export type HomeHeroCta =
   | {
-      id: "estimate";
+      id: "calculator";
       label: string;
-      action: "estimate";
-      /** Основная кнопка */
+      href: "/calculator";
+      /** Основная кнопка — белая, ведёт на калькулятор */
       primary: true;
     }
   | {
@@ -30,9 +30,9 @@ export type HomeHeroCta =
 /** Порядок: две основные → дополнительная (экскурсия на строящийся объект). */
 export const HOME_HERO_CTAS: HomeHeroCta[] = [
   {
-    id: "estimate",
+    id: "calculator",
     label: "Рассчитать стоимость дома",
-    action: "estimate",
+    href: "/calculator",
     primary: true,
   },
   {

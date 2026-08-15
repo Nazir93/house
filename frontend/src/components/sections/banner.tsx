@@ -16,7 +16,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { CmsImage } from "@/components/ui/cms-image";
 import { useTheme } from "@/lib/theme-context";
-import { useModal } from "@/lib/modal-context";
 import { HOME_HERO_BANNER_ID } from "@/lib/site-anchors";
 import type { HomeHeroBanner } from "@/lib/home-hero-banner-schema";
 import { HOME_HERO_CTAS } from "@/lib/home-hero-first-screen";
@@ -49,7 +48,6 @@ export function BannerSection({
   seoLead?: string;
 }) {
   const { theme } = useTheme();
-  const { openModalToEstimate } = useModal();
   const promos = config.promos;
   const [activeSlide, setActiveSlide] = useState(0);
   const [carouselPaused, setCarouselPaused] = useState(false);
@@ -201,12 +199,11 @@ export function BannerSection({
                   "inline-flex w-full min-h-[44px] min-w-0 items-center justify-center gap-1 rounded-xl px-1.5 py-2 text-center text-[8px] font-bold uppercase leading-tight tracking-[0.02em] no-underline transition duration-200 hover:-translate-y-0.5 hover:no-underline active:translate-y-0 active:brightness-95 min-[900px]:gap-1.5 min-[900px]:px-2 min-[900px]:text-[9px] min-[900px]:tracking-[0.03em] xl:min-h-[48px] xl:px-2.5 xl:text-[10px] xl:tracking-[0.04em]";
                 const labelClass = "min-w-0 text-balance";
 
-                if (cta.id === "estimate") {
+                if (cta.id === "calculator") {
                   return (
-                    <button
+                    <Link
                       key={cta.id}
-                      type="button"
-                      onClick={() => openModalToEstimate({ source: "home-hero-estimate" })}
+                      href={cta.href}
                       aria-label={cta.label}
                       className={cn(
                         ctaBase,
@@ -215,11 +212,11 @@ export function BannerSection({
                     >
                       <Calculator className="h-3 w-3 shrink-0" strokeWidth={2.25} aria-hidden />
                       <span className={labelClass}>{cta.label}</span>
-                    </button>
+                    </Link>
                   );
                 }
 
-                if (cta.primary) {
+                if (cta.id === "projects") {
                   return (
                     <Link
                       key={cta.id}

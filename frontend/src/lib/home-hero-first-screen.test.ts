@@ -17,10 +17,10 @@ describe("home-hero-first-screen (SEO §2)", () => {
   });
 
   it("две основные CTA и дополнительная на строящийся объект", () => {
-    expect(HOME_HERO_CTAS.map((c) => c.id)).toEqual(["estimate", "projects", "visit"]);
+    expect(HOME_HERO_CTAS.map((c) => c.id)).toEqual(["calculator", "projects", "visit"]);
     expect(HOME_HERO_CTAS[0]).toMatchObject({
       label: "Рассчитать стоимость дома",
-      action: "estimate",
+      href: "/calculator",
       primary: true,
     });
     expect(HOME_HERO_CTAS[1]).toMatchObject({
