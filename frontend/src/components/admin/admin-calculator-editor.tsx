@@ -24,11 +24,11 @@ const CATEGORY_COEFFICIENT_FIELDS = [
   { key: "facadeCoef", label: "Коэф. фасада" },
   { key: "roofCoef", label: "Коэф. кровли" },
   { key: "perimeterCoef", label: "Коэф. периметра" },
-  { key: "insulationCoef", label: "Коэф. утепления" },
+  { key: "insulationCoef", label: "Коэф. утепления (200 мм)" },
   { key: "gutterCoef", label: "Коэф. водосточной системы" },
   { key: "soffitCoef", label: "Коэф. софитов" },
-  { key: "overlapCoef", label: "Коэф. перекрытия" },
-  { key: "crossCoef", label: "Коэф. перекрестного" },
+  { key: "overlapCoef", label: "Коэф. перекрытия (монолит)" },
+  { key: "crossCoef", label: "Коэф. перекрестного (250 мм)" },
 ] as const satisfies ReadonlyArray<{ key: keyof CategoryForm; label: string }>;
 
 type ApiCategory = {

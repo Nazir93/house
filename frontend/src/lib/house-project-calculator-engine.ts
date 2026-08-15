@@ -98,7 +98,10 @@ export interface HouseProjectCalculatorConfig {
 export interface DerivedMetrics {
   buildingArea: number;
   roofArea: number;
+  /** Площадь под утепление кровли 200 мм: area × roof × insulation */
   insulationArea: number;
+  /** Площадь под утепление перекрёстное (250 мм): area × roof × cross */
+  crossArea: number;
   facadeArea: number;
   perimeter: number;
   blindArea: number;
@@ -191,10 +194,12 @@ export function deriveMetrics(
 ): DerivedMetrics {
   const area = Math.max(buildingArea, 0);
   const perimeter = area * coefficients.perimeter;
+  const roofArea = area * coefficients.roof;
   return {
     buildingArea: area,
-    roofArea: area * coefficients.roof,
-    insulationArea: area * coefficients.roof * coefficients.insulation,
+    roofArea,
+    insulationArea: roofArea * coefficients.insulation,
+    crossArea: roofArea * coefficients.cross,
     facadeArea: area * coefficients.facade,
     perimeter,
     blindArea: perimeter * blindAreaWidthM,
@@ -281,10 +286,12 @@ export function computeRoofInsulationRub(
   code: "roof_insulation_200" | "roof_insulation_250",
   option: PricedOptionDef,
   metrics: DerivedMetrics,
-  categoryId: HouseCalculatorCategoryId
+  _categoryId: HouseCalculatorCategoryId
 ): number {
   if (!option.enabled) return 0;
-  return Math.round(metrics.roofArea * option.price);
+  // 200 мм — коэф. утепления; 250 мм («перекрестное») — коэф. перекрестного.
+  const area = code === "roof_insulation_250" ? metrics.crossArea : metrics.insulationArea;
+  return Math.round(area * option.price);
 }
 
 export function computeEngineeringOptionRub(

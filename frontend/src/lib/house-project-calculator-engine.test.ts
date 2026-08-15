@@ -212,7 +212,7 @@ describe("house-project-calculator-engine (TZ)", () => {
     expect(m.overlapArea).toBeCloseTo(120 * C.categories.e.coefficients.overlap, 5);
   });
 
-  it("§12 утепление кровли считается по roof_area без отдельного коэффициента утепления", () => {
+  it("§12 утепление 200 мм: roof_area × insulation_coef × price", () => {
     const quote = computeHouseProjectQuote(
       {
         buildingArea: 100,
@@ -225,8 +225,48 @@ describe("house-project-calculator-engine (TZ)", () => {
     );
     const cat = C.categories.e;
     const expected = Math.round(
-      100 * cat.coefficients.roof * C.construction.roof_insulation_200.price
+      100 * cat.coefficients.roof * cat.coefficients.insulation * C.construction.roof_insulation_200.price
     );
+    expect(quote?.constructionLines[0]?.amountRub).toBe(expected);
+  });
+
+  it("§12 утепление перекрестное (250 мм): roof_area × cross_coef × price", () => {
+    const quote = computeHouseProjectQuote(
+      {
+        buildingArea: 100,
+        categoryId: "f",
+        wallMaterial: "gas",
+        engineeringCodes: [],
+        constructionCodes: ["roof_insulation_250"],
+      },
+      C
+    );
+    const cat = C.categories.f;
+    const expected = Math.round(
+      100 * cat.coefficients.roof * cat.coefficients.cross * C.construction.roof_insulation_250.price
+    );
+    expect(quote?.constructionLines[0]?.amountRub).toBe(expected);
+  });
+
+  it("§12 монолитное перекрытие: building_area × overlap_coef × price", () => {
+    const config = {
+      ...C,
+      construction: {
+        ...C.construction,
+        monolithic_overlap: { ...C.construction.monolithic_overlap, price: 10_000 },
+      },
+    };
+    const quote = computeHouseProjectQuote(
+      {
+        buildingArea: 120,
+        categoryId: "f",
+        wallMaterial: "gas",
+        engineeringCodes: [],
+        constructionCodes: ["monolithic_overlap"],
+      },
+      config
+    );
+    const expected = Math.round(120 * config.categories.f.coefficients.overlap * 10_000);
     expect(quote?.constructionLines[0]?.amountRub).toBe(expected);
   });
 
