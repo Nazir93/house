@@ -1,15 +1,20 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, type ReactNode } from "react";
 import {
   ArrowRight,
+  Building2,
   ChevronRight,
+  Compass,
+  Copy,
   Hammer,
+  HardHat,
   LayoutGrid,
+  MapPinned,
   PenLine,
   PhoneCall,
+  type LucideIcon,
 } from "lucide-react";
 
 import { NAV_SECTIONS, isNavGroup, type NavSection } from "@/lib/nav-sections";
@@ -22,24 +27,49 @@ const panelShell =
 const accentBg = "#0f3d2e";
 const iconTile = "flex h-10 w-10 shrink-0 items-center justify-center rounded-[10px] bg-[#e8f3eb] text-[#0f3d2e]";
 
-const PROJECT_THUMBS = [
-  "/images/banner/banner-hero-01.png",
-  "/images/banner/banner-hero-03.png",
-  "/images/banner/banner-hero-05.png",
-] as const;
-
-const PORTFOLIO_THUMBS = [
-  "/images/banner/banner-hero-02.png",
-  "/images/banner/banner-hero-04.png",
-  "/images/banner/banner-hero-06.png",
-] as const;
-
-function serviceIconFor(label: string) {
+function serviceIconFor(label: string): LucideIcon {
   const l = label.toLowerCase();
   if (l.includes("строительств")) return Hammer;
   if (l.includes("проект")) return PenLine;
   if (l.includes("заяв")) return PhoneCall;
   return LayoutGrid;
+}
+
+function projectIconFor(href: string): LucideIcon {
+  if (href.includes("typical")) return Copy;
+  return LayoutGrid;
+}
+
+function portfolioIconFor(href: string): LucideIcon {
+  if (href.includes("under-construction")) return HardHat;
+  if (href.includes("/map")) return MapPinned;
+  if (href.includes("contacts")) return Compass;
+  return Building2;
+}
+
+function IconLinkRow({
+  href,
+  label,
+  Icon,
+  onClose,
+}: {
+  href: string;
+  label: string;
+  Icon: LucideIcon;
+  onClose: () => void;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onClose}
+      className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-black/[0.04]"
+    >
+      <span className={iconTile}>
+        <Icon className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden />
+      </span>
+      <span className="text-[13px] font-medium leading-snug text-[#1a1e1d]">{label}</span>
+    </Link>
+  );
 }
 
 function ProjectsDropdown({
@@ -72,21 +102,16 @@ function ProjectsDropdown({
         </span>
       </Link>
       <ul className="flex flex-col gap-0.5">
-        {thumbLinks.map((item, thumbIdx) => {
+        {thumbLinks.map((item) => {
           if (!("href" in item)) return null;
-          const thumb = PROJECT_THUMBS[thumbIdx % PROJECT_THUMBS.length] ?? PROJECT_THUMBS[0];
           return (
             <li key={item.href}>
-              <Link
+              <IconLinkRow
                 href={item.href}
-                onClick={onClose}
-                className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-black/[0.04]"
-              >
-                <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-[#f0f2f0]">
-                  <Image src={thumb} alt="" fill className="object-cover" sizes="48px" />
-                </span>
-                <span className="text-[13px] font-medium leading-snug text-[#1a1e1d]">{item.label}</span>
-              </Link>
+                label={item.label}
+                Icon={projectIconFor(item.href)}
+                onClose={onClose}
+              />
             </li>
           );
         })}
@@ -125,21 +150,16 @@ function PortfolioDropdown({
         </span>
       </Link>
       <ul className="flex flex-col gap-0.5">
-        {thumbLinks.map((item, thumbIdx) => {
+        {thumbLinks.map((item) => {
           if (!("href" in item)) return null;
-          const thumb = PORTFOLIO_THUMBS[thumbIdx % PORTFOLIO_THUMBS.length] ?? PORTFOLIO_THUMBS[0];
           return (
             <li key={item.href}>
-              <Link
+              <IconLinkRow
                 href={item.href}
-                onClick={onClose}
-                className="flex items-center gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-black/[0.04]"
-              >
-                <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl bg-[#f0f2f0]">
-                  <Image src={thumb} alt="" fill className="object-cover" sizes="48px" />
-                </span>
-                <span className="text-[13px] font-medium leading-snug text-[#1a1e1d]">{item.label}</span>
-              </Link>
+                label={item.label}
+                Icon={portfolioIconFor(item.href)}
+                onClose={onClose}
+              />
             </li>
           );
         })}
