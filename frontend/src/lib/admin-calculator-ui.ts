@@ -32,3 +32,21 @@ export function calculatorCategoryTitle(id: string, labelRu?: string): string {
   if (short) return `Категория ${id} — ${short}`;
   return `Категория ${id}`;
 }
+
+export type CalculatorEditorLoadOptions = {
+  /** Без full-page spinner — форма не размонтируется, скролл остаётся на месте. */
+  silent?: boolean;
+};
+
+/** Первая загрузка — со спиннером; после сохранения — тихо, иначе страница прыгает вверх. */
+export function calculatorEditorLoadOptions(
+  reason: "initial" | "after-save",
+): CalculatorEditorLoadOptions {
+  return { silent: reason === "after-save" };
+}
+
+export function shouldBlankCalculatorEditorOnLoad(
+  opts?: CalculatorEditorLoadOptions,
+): boolean {
+  return opts?.silent !== true;
+}

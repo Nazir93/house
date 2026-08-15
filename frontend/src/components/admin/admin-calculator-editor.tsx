@@ -7,6 +7,9 @@ import {
   CALCULATOR_GROUP_LABELS,
   CALCULATOR_WALL_LABELS,
   calculatorCategoryTitle,
+  calculatorEditorLoadOptions,
+  shouldBlankCalculatorEditorOnLoad,
+  type CalculatorEditorLoadOptions,
 } from "@/lib/admin-calculator-ui";
 import { fractionToPercentInput } from "@/lib/admin-calculator-save";
 
@@ -194,9 +197,12 @@ export function AdminCalculatorEditor() {
     construction: { name: "", pricePerUnit: "0", pricingType: "per_area" },
   });
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setMessage(null);
+  const load = useCallback(async (opts?: CalculatorEditorLoadOptions) => {
+    const blank = shouldBlankCalculatorEditorOnLoad(opts);
+    if (blank) {
+      setLoading(true);
+      setMessage(null);
+    }
     try {
       const res = await fetch("/api/admin/calculator");
       const json = (await res.json()) as ApiPayload & { error?: string };
@@ -209,14 +215,14 @@ export function AdminCalculatorEditor() {
       setOptions(forms.options);
     } catch {
       setMessage({ type: "err", text: "Не удалось загрузить калькулятор" });
-      setData(null);
+      if (blank) setData(null);
     } finally {
-      setLoading(false);
+      if (blank) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    void load();
+    void load(calculatorEditorLoadOptions("initial"));
   }, [load]);
 
   const engineeringOptions = useMemo(
@@ -236,7 +242,7 @@ export function AdminCalculatorEditor() {
       await patchCalculator({ settings });
       setMessage({ type: "ok", text: "Общие настройки сохранены" });
       setSavedSection("settings");
-      await load();
+      await load(calculatorEditorLoadOptions("after-save"));
     } catch {
       setMessage({ type: "err", text: "Не удалось сохранить настройки" });
     } finally {
@@ -253,7 +259,7 @@ export function AdminCalculatorEditor() {
       await patchCalculator({ categories: [categoryPatch(category)] });
       setSavedCategoryId(category.id);
       setMessage({ type: "ok", text: `${calculatorCategoryTitle(category.id, category.labelRu)} сохранена` });
-      await load();
+      await load(calculatorEditorLoadOptions("after-save"));
     } catch {
       setMessage({ type: "err", text: "Не удалось сохранить категорию" });
     } finally {
@@ -274,7 +280,7 @@ export function AdminCalculatorEditor() {
       });
       setMessage({ type: "ok", text: "Фасады сохранены" });
       setSavedSection("facades");
-      await load();
+      await load(calculatorEditorLoadOptions("after-save"));
     } catch {
       setMessage({ type: "err", text: "Не удалось сохранить фасады" });
     } finally {
@@ -301,7 +307,7 @@ export function AdminCalculatorEditor() {
         text: group === "engineering" ? "Инженерия сохранена" : "Стройопции сохранены",
       });
       setSavedSection(group);
-      await load();
+      await load(calculatorEditorLoadOptions("after-save"));
     } catch {
       setMessage({ type: "err", text: "Не удалось сохранить опции" });
     } finally {
@@ -338,7 +344,7 @@ export function AdminCalculatorEditor() {
       }));
       setSavedSection(group);
       setMessage({ type: "ok", text: "Новая опция добавлена" });
-      await load();
+      await load(calculatorEditorLoadOptions("after-save"));
     } catch {
       setMessage({ type: "err", text: "Не удалось добавить опцию" });
     } finally {
@@ -362,7 +368,7 @@ export function AdminCalculatorEditor() {
       if (!res.ok) throw new Error();
       const label = CALCULATOR_GROUP_LABELS[bulkGroup] ?? bulkGroup;
       setMessage({ type: "ok", text: `«${label}»: цены изменены на ${bulkPercent}%` });
-      await load();
+      await load(calculatorEditorLoadOptions("after-save"));
     } catch {
       setMessage({ type: "err", text: "Ошибка массового обновления" });
     } finally {
@@ -386,7 +392,7 @@ export function AdminCalculatorEditor() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "seed" }),
       });
-      await load();
+      await load(calculatorEditorLoadOptions("after-save"));
       setMessage({ type: "ok", text: "Справочник восстановлен из ТЗ" });
     } catch {
       setMessage({ type: "err", text: "Не удалось перезалить справочник" });

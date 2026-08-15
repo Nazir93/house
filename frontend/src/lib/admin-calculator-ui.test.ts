@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   calculatorCategoryTitle,
+  calculatorEditorLoadOptions,
+  shouldBlankCalculatorEditorOnLoad,
   CALCULATOR_GROUP_LABELS,
   CALCULATOR_WALL_LABELS,
 } from "./admin-calculator-ui";
@@ -29,5 +31,13 @@ describe("admin-calculator-ui (админка калькулятора)", () => 
     expect(calculatorCategoryTitle("h")).toContain("2 эт., трёхскатная");
     expect(calculatorCategoryTitle("i")).toContain("1 эт., плоская");
     expect(calculatorCategoryTitle("j")).toContain("2 эт., плоская");
+  });
+
+  it("после сохранения не blank-им редактор (скролл не прыгает вверх)", () => {
+    expect(calculatorEditorLoadOptions("initial")).toEqual({ silent: false });
+    expect(calculatorEditorLoadOptions("after-save")).toEqual({ silent: true });
+    expect(shouldBlankCalculatorEditorOnLoad()).toBe(true);
+    expect(shouldBlankCalculatorEditorOnLoad({ silent: false })).toBe(true);
+    expect(shouldBlankCalculatorEditorOnLoad({ silent: true })).toBe(false);
   });
 });
