@@ -5,6 +5,15 @@ import { getCalculatorConfig } from "@/lib/calculator-catalog";
 import { seedCalculatorCatalog } from "@/lib/seed-calculator-catalog";
 import { revalidateTagWithProfile } from "@/lib/revalidate-tag";
 import {
+  calculatorBackupMetaFromSnapshot,
+} from "@/lib/admin-calculator-backup";
+import {
+  getCalculatorCatalogBackupMeta,
+  readCalculatorCatalogBackup,
+  restoreCalculatorCatalogFromSnapshot,
+  saveCalculatorCatalogBackup,
+} from "@/lib/admin-calculator-backup-store";
+import {
   applyBulkPricePercent,
   normalizeSettingsInput,
   parsePositiveFloat,
@@ -34,7 +43,7 @@ export async function GET() {
       revalidateCalculator();
     }
 
-    const [categories, facades, options, settings] = await Promise.all([
+    const [categories, facades, options, settings, backup] = await Promise.all([
       prisma.calculatorCategory.findMany({
         include: { shellPrices: true },
         orderBy: { sortOrder: "asc" },
@@ -42,11 +51,12 @@ export async function GET() {
       prisma.calculatorFacadeType.findMany({ orderBy: { sortOrder: "asc" } }),
       prisma.calculatorOption.findMany({ orderBy: [{ groupSlug: "asc" }, { sortOrder: "asc" }] }),
       prisma.calculatorSettings.findUnique({ where: { id: "default" } }),
+      getCalculatorCatalogBackupMeta(),
     ]);
 
     const config = await getCalculatorConfig();
 
-    return NextResponse.json({ categories, facades, options, settings, config });
+    return NextResponse.json({ categories, facades, options, settings, config, backup });
   } catch (e) {
     console.error("[ADMIN CALCULATOR GET]", e);
     return NextResponse.json({ error: "DB error" }, { status: 500 });
@@ -59,10 +69,39 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
+    if (body.action === "save_backup") {
+      const snapshot = await saveCalculatorCatalogBackup();
+      revalidateCalculator();
+      return NextResponse.json({
+        ok: true,
+        backup: calculatorBackupMetaFromSnapshot(snapshot),
+      });
+    }
+
+    if (body.action === "restore_backup") {
+      const snapshot = await readCalculatorCatalogBackup();
+      if (!snapshot) {
+        return NextResponse.json({ error: "Backup missing" }, { status: 404 });
+      }
+      const result = await restoreCalculatorCatalogFromSnapshot(snapshot);
+      revalidateCalculator();
+      return NextResponse.json({
+        ok: true,
+        ...result,
+        backup: calculatorBackupMetaFromSnapshot(snapshot),
+      });
+    }
+
     if (body.action === "seed") {
+      // Сначала бэкап текущих значений — чтобы «Вернуть из ТЗ» не уничтожил правки насовсем.
+      const backupSnapshot = await saveCalculatorCatalogBackup();
       const result = await seedCalculatorCatalog({ resetPrices: true });
       revalidateCalculator();
-      return NextResponse.json({ ok: true, ...result });
+      return NextResponse.json({
+        ok: true,
+        ...result,
+        backup: calculatorBackupMetaFromSnapshot(backupSnapshot),
+      });
     }
 
     if (body.action === "bulk_update" && typeof body.percent === "number") {

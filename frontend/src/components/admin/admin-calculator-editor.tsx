@@ -1,8 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Loader2, RefreshCw, Save } from "lucide-react";
+import { Archive, Loader2, RefreshCw, Save, Undo2 } from "lucide-react";
 import { AdminFormCollapsible, AdminFormSection } from "@/components/admin/admin-form-section";
+import {
+  formatCalculatorBackupSavedAt,
+  type CalculatorCatalogBackupMeta,
+} from "@/lib/admin-calculator-backup";
 import {
   CALCULATOR_GROUP_LABELS,
   CALCULATOR_WALL_LABELS,
@@ -64,6 +68,7 @@ type ApiPayload = {
   facades: ApiFacade[];
   options: ApiOption[];
   settings: ApiSettings | null;
+  backup?: CalculatorCatalogBackupMeta;
 };
 
 type SettingsForm = {
@@ -196,6 +201,10 @@ export function AdminCalculatorEditor() {
     engineering: { name: "", pricePerUnit: "0", pricingType: "per_area" },
     construction: { name: "", pricePerUnit: "0", pricingType: "per_area" },
   });
+  const [backupMeta, setBackupMeta] = useState<CalculatorCatalogBackupMeta>({
+    exists: false,
+    savedAt: null,
+  });
 
   const load = useCallback(async (opts?: CalculatorEditorLoadOptions) => {
     const blank = shouldBlankCalculatorEditorOnLoad(opts);
@@ -213,6 +222,7 @@ export function AdminCalculatorEditor() {
       setCategories(forms.categories);
       setFacades(forms.facades);
       setOptions(forms.options);
+      if (json.backup) setBackupMeta(json.backup);
     } catch {
       setMessage({ type: "err", text: "Не удалось загрузить калькулятор" });
       if (blank) setData(null);
@@ -376,10 +386,63 @@ export function AdminCalculatorEditor() {
     }
   }
 
+  async function saveBackup() {
+    setSaving("backup");
+    setMessage(null);
+    try {
+      const res = await fetch("/api/admin/calculator", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "save_backup" }),
+      });
+      const json = (await res.json()) as { backup?: CalculatorCatalogBackupMeta; error?: string };
+      if (!res.ok) throw new Error(json.error ?? "backup failed");
+      if (json.backup) setBackupMeta(json.backup);
+      setMessage({
+        type: "ok",
+        text: `Бэкап сохранён (${formatCalculatorBackupSavedAt(json.backup?.savedAt)})`,
+      });
+    } catch {
+      setMessage({ type: "err", text: "Не удалось сохранить бэкап" });
+    } finally {
+      setSaving(null);
+    }
+  }
+
+  async function restoreBackup() {
+    if (!backupMeta.exists) {
+      setMessage({ type: "err", text: "Бэкапа ещё нет — сначала сохраните его" });
+      return;
+    }
+    if (
+      !window.confirm(
+        `Загрузить бэкап от ${formatCalculatorBackupSavedAt(backupMeta.savedAt)}? Текущие значения в справочнике будут заменены.`,
+      )
+    ) {
+      return;
+    }
+    setSaving("restore_backup");
+    setMessage(null);
+    try {
+      const res = await fetch("/api/admin/calculator", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "restore_backup" }),
+      });
+      if (!res.ok) throw new Error();
+      await load(calculatorEditorLoadOptions("after-save"));
+      setMessage({ type: "ok", text: "Справочник восстановлен из бэкапа" });
+    } catch {
+      setMessage({ type: "err", text: "Не удалось загрузить бэкап" });
+    } finally {
+      setSaving(null);
+    }
+  }
+
   async function reseed() {
     if (
       !window.confirm(
-        "Вернуть все цены и коэффициенты к исходным из ТЗ? Ваши правки в справочнике будут перезаписаны."
+        "Сначала сохраним текущие значения в бэкап (старый бэкап будет заменён), затем вернём цены и коэффициенты из ТЗ. Продолжить?",
       )
     ) {
       return;
@@ -387,13 +450,19 @@ export function AdminCalculatorEditor() {
     setSaving("seed");
     setMessage(null);
     try {
-      await fetch("/api/admin/calculator", {
+      const res = await fetch("/api/admin/calculator", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "seed" }),
       });
+      const json = (await res.json()) as { backup?: CalculatorCatalogBackupMeta };
+      if (!res.ok) throw new Error();
+      if (json.backup) setBackupMeta(json.backup);
       await load(calculatorEditorLoadOptions("after-save"));
-      setMessage({ type: "ok", text: "Справочник восстановлен из ТЗ" });
+      setMessage({
+        type: "ok",
+        text: "Справочник восстановлен из ТЗ. Предыдущие значения лежат в бэкапе — их можно загрузить обратно.",
+      });
     } catch {
       setMessage({ type: "err", text: "Не удалось перезалить справочник" });
     } finally {
@@ -446,15 +515,54 @@ export function AdminCalculatorEditor() {
             Общий прайс для расчёта стоимости на карточках проектов на сайте.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => void reseed()}
-          disabled={busy}
-          className="inline-flex items-center gap-2 rounded-xl border border-amber-500/30 px-4 py-2 text-sm text-amber-200/90 hover:bg-amber-500/10 disabled:opacity-50"
-        >
-          <RefreshCw size={16} className={saving === "seed" ? "animate-spin" : ""} />
-          Вернуть значения из ТЗ
-        </button>
+        <div className="flex flex-col items-stretch gap-2 sm:items-end">
+          <div className="flex flex-wrap justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => void saveBackup()}
+              disabled={busy}
+              className="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-2 text-sm text-white/85 hover:bg-white/[0.06] disabled:opacity-50"
+            >
+              {saving === "backup" ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Archive size={16} />
+              )}
+              Сохранить бэкап
+            </button>
+            <button
+              type="button"
+              onClick={() => void restoreBackup()}
+              disabled={busy || !backupMeta.exists}
+              title={
+                backupMeta.exists
+                  ? `Бэкап от ${formatCalculatorBackupSavedAt(backupMeta.savedAt)}`
+                  : "Сначала сохраните бэкап"
+              }
+              className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 px-4 py-2 text-sm text-emerald-200/90 hover:bg-emerald-500/10 disabled:opacity-50"
+            >
+              {saving === "restore_backup" ? (
+                <Loader2 size={16} className="animate-spin" />
+              ) : (
+                <Undo2 size={16} />
+              )}
+              Загрузить бэкап
+            </button>
+            <button
+              type="button"
+              onClick={() => void reseed()}
+              disabled={busy}
+              className="inline-flex items-center gap-2 rounded-xl border border-amber-500/30 px-4 py-2 text-sm text-amber-200/90 hover:bg-amber-500/10 disabled:opacity-50"
+            >
+              <RefreshCw size={16} className={saving === "seed" ? "animate-spin" : ""} />
+              Вернуть значения из ТЗ
+            </button>
+          </div>
+          <p className="text-[11px] text-white/35 sm:text-right">
+            Бэкап: {formatCalculatorBackupSavedAt(backupMeta.savedAt)}. Перед сбросом из ТЗ текущие
+            значения тоже сохраняются в бэкап.
+          </p>
+        </div>
       </div>
 
       {message ? (
