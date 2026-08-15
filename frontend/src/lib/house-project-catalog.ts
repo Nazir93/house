@@ -41,7 +41,7 @@ export const PARTNER_HOUSE_PROJECT_CATALOG: HouseProjectCatalogConfig = {
   listTitle: "Каталог типовых проектов",
   listBreadcrumb: "Каталог типовых проектов",
   listDescription:
-    "Типовые проекты от нашего партнёра: фильтры по этажности, площади, цене, комнатам и санузлам и подробные карточки.",
+    "Готовые проекты каменных домов для строительства в Санкт-Петербурге и Ленинградской области. Выберите дом по площади, этажности, цене и планировке — в каждой карточке представлены фасады и предварительный расчёт стоимости строительства",
   detailBreadcrumbLabel: "Каталог типовых проектов",
   adminListPath: "/admin/partner-house-projects",
   adminNewPath: "/admin/partner-house-projects/new",
