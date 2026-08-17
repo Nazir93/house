@@ -218,41 +218,30 @@ export function ProjectsConstructorSection() {
                 <p className="flex-1 text-[13px] leading-snug text-[var(--text)]/85 dark:text-[var(--text-muted)]">
                   {card.description}
                 </p>
-                {/* SEO §3 + кнопки внизу одной группой — анкоры на одном уровне во всех карточках */}
-                <div className="mt-auto flex flex-col gap-4">
-                  <p className="text-[13px] leading-snug">
-                    <Link
-                      href={card.seoPath}
-                      className="font-semibold text-[var(--accent)] underline-offset-4 transition hover:underline"
-                    >
-                      {card.seoAnchor}
-                    </Link>
-                  </p>
-                  <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                    <Link
-                      href={card.seoPath}
-                      className={cn(
-                        "inline-flex min-h-[42px] flex-1 items-center justify-center gap-1 rounded-full px-4 py-2 text-center text-[11px] font-bold uppercase tracking-[0.06em] whitespace-nowrap shadow-sm transition sm:min-w-[140px]",
-                        "bg-[#e8f3eb] text-[#0f3d2e] hover:bg-[#dcefe2]",
-                        "dark:bg-emerald-950/55 dark:text-emerald-50 dark:shadow-none dark:ring-1 dark:ring-white/10 dark:hover:bg-emerald-900/65",
-                      )}
-                    >
-                      <LayoutGrid className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />
-                      Проекты домов
-                      <ArrowRight className="h-3.5 w-3.5 shrink-0 opacity-95" strokeWidth={2.25} aria-hidden />
-                    </Link>
-                    <Link
-                      href="/services"
-                      className={cn(
-                        "inline-flex min-h-[42px] flex-1 items-center justify-center gap-1 rounded-full border px-4 py-2 text-center text-[11px] font-bold uppercase tracking-[0.06em] whitespace-nowrap shadow-sm transition sm:min-w-[140px]",
-                        "border-black/[0.08] bg-[var(--bg)] text-[var(--text)] dark:border-white/12 dark:bg-transparent",
-                        "hover:border-black/14 hover:bg-[#f4f8f6] dark:hover:bg-white/[0.06]",
-                      )}
-                    >
-                      Комплектация
-                      <ArrowRight className="h-3.5 w-3.5 shrink-0 opacity-80" strokeWidth={2.25} aria-hidden />
-                    </Link>
-                  </div>
+                <div className="mt-auto flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                  <Link
+                    href={card.projectsHref}
+                    className={cn(
+                      "inline-flex min-h-[42px] flex-1 items-center justify-center gap-1 rounded-full px-4 py-2 text-center text-[11px] font-bold uppercase tracking-[0.06em] whitespace-nowrap shadow-sm transition sm:min-w-[140px]",
+                      "bg-[#e8f3eb] text-[#0f3d2e] hover:bg-[#dcefe2]",
+                      "dark:bg-emerald-950/55 dark:text-emerald-50 dark:shadow-none dark:ring-1 dark:ring-white/10 dark:hover:bg-emerald-900/65",
+                    )}
+                  >
+                    <LayoutGrid className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />
+                    Проекты домов
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0 opacity-95" strokeWidth={2.25} aria-hidden />
+                  </Link>
+                  <Link
+                    href={card.completionHref}
+                    className={cn(
+                      "inline-flex min-h-[42px] flex-1 items-center justify-center gap-1 rounded-full border px-4 py-2 text-center text-[11px] font-bold uppercase tracking-[0.06em] whitespace-nowrap shadow-sm transition sm:min-w-[140px]",
+                      "border-black/[0.08] bg-[var(--bg)] text-[var(--text)] dark:border-white/12 dark:bg-transparent",
+                      "hover:border-black/14 hover:bg-[#f4f8f6] dark:hover:bg-white/[0.06]",
+                    )}
+                  >
+                    Комплектация
+                    <ArrowRight className="h-3.5 w-3.5 shrink-0 opacity-80" strokeWidth={2.25} aria-hidden />
+                  </Link>
                 </div>
               </div>
             </article>
