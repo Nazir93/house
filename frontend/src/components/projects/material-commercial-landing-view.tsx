@@ -187,10 +187,10 @@ export function MaterialCommercialLandingView({
           </ul>
         )}
         <Link
-          href="/projects"
+          href={`/projects?material=${seo.material}`}
           className="mt-6 inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--text)] underline-offset-4 hover:text-[var(--accent)] hover:underline"
         >
-          Весь каталог проектов
+          Все проекты из этого материала
           <ArrowUpRight className="h-4 w-4" aria-hidden />
         </Link>
       </SectionShell>

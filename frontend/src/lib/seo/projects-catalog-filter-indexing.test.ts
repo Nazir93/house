@@ -21,15 +21,16 @@ describe("projects-catalog-filter-indexing (SEO §9)", () => {
     expect(projectsCatalogHasFilterQuery({})).toBe(false);
   });
 
-  it("только material → ЧПУ /projects/{материал}, не индекс GET", () => {
+  it("только material → каталог с фильтром (noindex), без редиректа на коммерческую ЧПУ", () => {
     const action = resolveProjectsCatalogFilterSeoAction({ material: "gazobeton" }, "/projects");
-    expect(action.redirectTo).toBe("/projects/gazobeton");
-    expect(action.canonicalPath).toBe("/projects/gazobeton");
-    expect(action.noindex).toBe(false);
+    expect(action).toEqual({
+      canonicalPath: "/projects",
+      noindex: true,
+      redirectTo: null,
+    });
 
-    expect(resolveProjectsCatalogFilterSeoAction({ material: "gasobeton" }, "/projects").redirectTo).toBe(
-      "/projects/gazobeton",
-    );
+    expect(resolveProjectsCatalogFilterSeoAction({ material: "gasobeton" }, "/projects").redirectTo).toBeNull();
+    expect(normalizeProjectsCatalogMaterialParam("gasobeton")).toBe("gazobeton");
     expect(normalizeProjectsCatalogMaterialParam("kirpich")).toBe("kirpich");
     expect(isProjectMaterialSeoSlug("keramoblok")).toBe(true);
   });
@@ -57,7 +58,7 @@ describe("projects-catalog-filter-indexing (SEO §9)", () => {
     });
   });
 
-  it("UI: только материал на /projects → href ЧПУ", () => {
+  it("UI: только материал остаётся в каталоге (?material=), не уводит на ЧПУ", () => {
     expect(
       projectsCatalogMaterialOnlyHref("/projects", "gazobeton", {
         floors: "all",
@@ -65,7 +66,7 @@ describe("projects-catalog-filter-indexing (SEO §9)", () => {
         sort: "price",
         rangeCustom: false,
       }),
-    ).toBe("/projects/gazobeton");
+    ).toBeNull();
     expect(
       projectsCatalogMaterialOnlyHref("/projects", "gazobeton", {
         floors: "2",

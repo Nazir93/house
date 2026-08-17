@@ -61,15 +61,17 @@ export type ProjectsCatalogFilterSeoAction = {
   canonicalPath: string;
   /** Закрыть от индекса комбинации фильтров. */
   noindex: boolean;
-  /** Только material SEO → ЧПУ. */
+  /** Раньше: material SEO → ЧПУ. Сейчас не используется (всегда null). */
   redirectTo: string | null;
 };
 
 /**
  * Политика индексации `/projects` и `/typical-projects` при GET-фильтрах.
  * - без query → индексируем хаб;
- * - только material=gazobeton|kirpich|keramoblok на `/projects` → 308 на `/projects/{slug}`;
- * - любые другие комбинации → noindex + canonical на хаб.
+ * - любой GET-фильтр (в т.ч. только material=…) → noindex + canonical на хаб, без редиректа.
+ *
+ * SEO-посадочные материалов остаются отдельными ЧПУ `/projects/{материал}` (sitemap / перелинковка).
+ * Каталог с `?material=` показывает все проекты этого материала и не должен уводить на коммерческую страницу.
  */
 export function resolveProjectsCatalogFilterSeoAction(
   sp: SearchParamsLike,
@@ -78,14 +80,6 @@ export function resolveProjectsCatalogFilterSeoAction(
   const keys = listProjectsCatalogFilterQueryKeys(sp);
   if (keys.length === 0) {
     return { canonicalPath: hubPath, noindex: false, redirectTo: null };
-  }
-
-  if (hubPath === "/projects" && keys.length === 1 && keys[0] === "material") {
-    const material = normalizeProjectsCatalogMaterialParam(readParam(sp, "material"));
-    if (isProjectMaterialSeoSlug(material)) {
-      const path = `/projects/${material}`;
-      return { canonicalPath: path, noindex: false, redirectTo: path };
-    }
   }
 
   return { canonicalPath: hubPath, noindex: true, redirectTo: null };
@@ -102,19 +96,13 @@ export function sitemapUrlHasDisallowedQuery(url: string): boolean {
 }
 
 /**
- * Куда вести UI при выборе только материала на хабе `/projects`
- * (без этажности/поиска/сортировки/диапазонов) — ЧПУ, не `?material=`.
+ * Раньше UI при выборе только материала уводил на ЧПУ коммерческой посадочной.
+ * Теперь остаёмся в каталоге с `?material=` — полный список проектов материала.
  */
 export function projectsCatalogMaterialOnlyHref(
-  hubPath: string,
-  material: MaterialFilterId,
-  opts: { floors: string; q: string; sort: string; rangeCustom: boolean },
+  _hubPath: string,
+  _material: MaterialFilterId,
+  _opts: { floors: string; q: string; sort: string; rangeCustom: boolean },
 ): string | null {
-  if (hubPath !== "/projects") return null;
-  if (!isProjectMaterialSeoSlug(material)) return null;
-  if (opts.floors !== "all") return null;
-  if (opts.q.trim()) return null;
-  if (opts.sort !== "price") return null;
-  if (opts.rangeCustom) return null;
-  return `/projects/${material}`;
+  return null;
 }

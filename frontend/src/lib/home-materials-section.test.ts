@@ -14,7 +14,7 @@ describe("home-materials-section", () => {
     expect(HOME_MATERIALS_SECTION_SUBTITLE).toContain("стартовой стоимости за м²");
   });
 
-  it("три карточки: SEO-пути на /projects/{материал}; проекты и комплектация — якоря посадочной", () => {
+  it("три карточки: SEO-пути; проекты → каталог ?material=; комплектация → якорь посадочной", () => {
     expect(HOME_MATERIAL_CARDS).toHaveLength(3);
     expect(HOME_MATERIAL_CARDS.map((c) => c.id)).toEqual(["gazobeton", "keramoblok", "kirpich"]);
     expect(HOME_MATERIAL_CARDS.map((c) => c.seoPath)).toEqual([
@@ -23,15 +23,19 @@ describe("home-materials-section", () => {
       "/projects/kirpich",
     ]);
     expect(HOME_MATERIAL_CARDS.map((c) => c.projectsHref)).toEqual([
-      "/projects/gazobeton#material-projects",
-      "/projects/keramoblok#material-projects",
-      "/projects/kirpich#material-projects",
+      "/projects?material=gazobeton",
+      "/projects?material=keramoblok",
+      "/projects?material=kirpich",
     ]);
     expect(HOME_MATERIAL_CARDS.map((c) => c.completionHref)).toEqual([
       "/projects/gazobeton#material-included",
       "/projects/keramoblok#material-included",
       "/projects/kirpich#material-included",
     ]);
+    for (const card of HOME_MATERIAL_CARDS) {
+      expect(card.projectsHref).not.toEqual(card.completionHref.split("#")[0]);
+      expect(card.projectsHref).toContain(`material=${card.id}`);
+    }
     for (const card of HOME_MATERIAL_CARDS) {
       expect(card.seoPath).not.toContain("?");
       expect(card.seoPath).not.toContain("stroitelstvo-domov-iz");

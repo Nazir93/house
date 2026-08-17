@@ -16,12 +16,12 @@ export type HomeMaterialCardContent = {
   image: string;
   labelShort: string;
   /**
-   * Органическая SEO-страница материала (не `/stroitelstvo-domov-iz-*`, не `?material=`).
+   * Органическая SEO-страница материала (не `/stroitelstvo-domov-iz-*`).
    * ТЗ SEO §3 — адаптировано на уже живые `/projects/{материал}`.
    */
   seoPath: `/projects/${HomeMaterialId}`;
-  /** Каталог/сетка проектов этого материала на посадочной. */
-  projectsHref: `/projects/${HomeMaterialId}#material-projects`;
+  /** Каталог всех проектов домов из этого материала (фильтр на `/projects`). */
+  projectsHref: `/projects?material=${HomeMaterialId}`;
   /** Блок «что входит» / комплектация на посадочной материала. */
   completionHref: `/projects/${HomeMaterialId}#material-included`;
 };
@@ -35,7 +35,7 @@ export const HOME_MATERIAL_CARDS: HomeMaterialCardContent[] = [
     image: "/images/materials/gazobeton.webp",
     labelShort: "Газобетон",
     seoPath: "/projects/gazobeton",
-    projectsHref: "/projects/gazobeton#material-projects",
+    projectsHref: "/projects?material=gazobeton",
     completionHref: "/projects/gazobeton#material-included",
   },
   {
@@ -46,7 +46,7 @@ export const HOME_MATERIAL_CARDS: HomeMaterialCardContent[] = [
     image: "/images/materials/keramoblok.webp",
     labelShort: "Керамоблок",
     seoPath: "/projects/keramoblok",
-    projectsHref: "/projects/keramoblok#material-projects",
+    projectsHref: "/projects?material=keramoblok",
     completionHref: "/projects/keramoblok#material-included",
   },
   {
@@ -57,7 +57,7 @@ export const HOME_MATERIAL_CARDS: HomeMaterialCardContent[] = [
     image: "/images/materials/kirpich.webp",
     labelShort: "Кирпич 2.1 НФ",
     seoPath: "/projects/kirpich",
-    projectsHref: "/projects/kirpich#material-projects",
+    projectsHref: "/projects?material=kirpich",
     completionHref: "/projects/kirpich#material-included",
   },
 ];
