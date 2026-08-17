@@ -1,5 +1,3 @@
-import { PROJECTS_CATALOG_FILTER_QUERY_KEYS } from "@/lib/seo/projects-catalog-filter-indexing";
-
 export type RedirectEntry = {
   toPath: string;
   permanent: boolean;
@@ -115,24 +113,13 @@ export function listRedirectChainSources(map: RedirectMap): string[] {
 }
 
 /**
- * Middleware: только `?material=` SEO на `/projects` → ЧПУ одним 308.
- * Иначе не трогаем query (Clean-param / noindex на странице).
+ * Раньше: только `?material=` на `/projects` → 308 на коммерческую ЧПУ.
+ * Отключено: каталог с фильтром материала должен оставаться на `/projects?material=…`
+ * (кнопка «Проекты домов» с главной / фильтр в каталоге). SEO-посадочные — отдельные `/projects/{материал}`.
  */
 export function resolveProjectsMaterialQueryRedirect(
-  pathname: string,
-  searchParams: URLSearchParams,
+  _pathname: string,
+  _searchParams: URLSearchParams,
 ): string | null {
-  if (normalizeRedirectPath(pathname) !== "/projects") return null;
-
-  const present = PROJECTS_CATALOG_FILTER_QUERY_KEYS.filter((key) => {
-    const v = searchParams.get(key);
-    return v != null && String(v).trim() !== "";
-  });
-  if (present.length !== 1 || present[0] !== "material") return null;
-
-  const raw = (searchParams.get("material") || "").trim().toLowerCase();
-  if (raw === "gazobeton" || raw === "gasobeton") return "/projects/gazobeton";
-  if (raw === "kirpich" || raw === "brick") return "/projects/kirpich";
-  if (raw === "keramoblok" || raw === "ceramoblok") return "/projects/keramoblok";
   return null;
 }

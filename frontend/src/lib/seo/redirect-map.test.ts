@@ -52,13 +52,13 @@ describe("redirect-map (ТЗ SEO §21)", () => {
     expect(lookupRedirectResolved(map, "/a")).toEqual({ toPath: "/c", permanent: true });
   });
 
-  it("?material= только → ЧПУ /projects/{материал}", () => {
+  it("?material= не редиректит на коммерческую ЧПУ (каталог с фильтром)", () => {
     expect(
       resolveProjectsMaterialQueryRedirect(
         "/projects",
         new URLSearchParams("material=gazobeton"),
       ),
-    ).toBe("/projects/gazobeton");
+    ).toBeNull();
     expect(
       resolveProjectsMaterialQueryRedirect(
         "/projects",

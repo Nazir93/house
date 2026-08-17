@@ -207,12 +207,6 @@ export function listSeoAcceptanceRedirectExpectations(): Array<{
       status: "301" as const,
       note: "SEO legacy §11–12 / §21 (после деплоя)",
     })),
-    {
-      from: "/projects?material=gazobeton|kirpich|keramoblok",
-      to: "/projects/{material}",
-      status: "308",
-      note: "proxy §9 / §21 (после деплоя)",
-    },
   ];
 }
 
