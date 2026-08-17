@@ -6,7 +6,7 @@ import { ArrowRight, ArrowUpRight, LayoutGrid } from "lucide-react";
 
 import { CmsImage } from "@/components/ui/cms-image";
 
-import { minCatalogRubPerM2ByMaterial } from "@/lib/house-construction-calculator";
+import { mansardDualRubPerM2ByMaterial } from "@/lib/house-construction-calculator";
 import {
   HOME_MATERIALS_SECTION_EYEBROW,
   HOME_MATERIALS_SECTION_SUBTITLE,
@@ -119,7 +119,7 @@ export function ProjectsConstructorSection() {
   const { theme } = useTheme();
   const isDark = theme === "dark";
   const { config } = useHouseConstructionCalculatorConfig();
-  const mins = useMemo(() => minCatalogRubPerM2ByMaterial(config), [config]);
+  const mins = useMemo(() => mansardDualRubPerM2ByMaterial(config), [config]);
 
   const materialCards = useMemo(
     () =>

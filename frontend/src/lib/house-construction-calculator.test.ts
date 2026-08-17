@@ -6,6 +6,7 @@ import {
   DEFAULT_HOUSE_CONSTRUCTION_CONFIG,
   getBaseRubPerM2,
   isValidHouseConfiguration,
+  mansardDualRubPerM2ByMaterial,
   minCatalogRubPerM2ByMaterial,
 } from "./house-construction-calculator";
 
@@ -125,6 +126,13 @@ describe("house-construction-calculator", () => {
     expect(m.gas).toBe(50_890);
     expect(m.ceramic).toBe(53_078);
     expect(m.brick).toBe(55_409);
+  });
+
+  it("публичный ориентир материалов — мансарда + двухскатная (не min по всей матрице)", () => {
+    const m = mansardDualRubPerM2ByMaterial();
+    expect(m).toEqual({ gas: 50_890, ceramic: 53_078, brick: 55_409 });
+    expect(m.gas).toBe(DEFAULT_HOUSE_CONSTRUCTION_CONFIG.baseRubPerM2["1.5"].dual![0]);
+    expect(m.gas).not.toBe(DEFAULT_HOUSE_CONSTRUCTION_CONFIG.baseRubPerM2["1"].dual![0]);
   });
 
   it("суммирует все инженерные опции (100 м², 1,5 этажа — тариф one_half_or_two)", () => {

@@ -1,4 +1,9 @@
 import { SITE_NAME } from "@/lib/constants";
+import {
+  mansardDualRubPerM2ByMaterial,
+  type HouseConstructionCalculatorConfig,
+  type WallMaterialId,
+} from "@/lib/house-construction-calculator";
 import type { ProjectMaterialSeoSlug } from "@/lib/seo/project-material-seo";
 
 /**
@@ -54,10 +59,23 @@ export type MaterialCommercialLanding = {
   ctas: MaterialCommercialCta[];
 };
 
-/** Ориентир коробки 1 эт. двухскатная (PDF / part-of-soul / калькулятор). */
-const GAZOBETON_FROM_PER_M2 = 65_825;
-const KERAMOBLOK_FROM_PER_M2 = 68_054;
-const KIRPICH_FROM_PER_M2 = 71_462;
+const MATERIAL_WALL_BY_SLUG: Record<ProjectMaterialSeoSlug, WallMaterialId> = {
+  gazobeton: "gas",
+  keramoblok: "ceramic",
+  kirpich: "brick",
+};
+
+/** Ориентир «от» — мансарда + двухскатная (тот же тариф, что на карточках главной). */
+export function materialCommercialFromPerM2Rub(
+  slug: ProjectMaterialSeoSlug,
+  cfg?: HouseConstructionCalculatorConfig,
+): number {
+  return mansardDualRubPerM2ByMaterial(cfg)[MATERIAL_WALL_BY_SLUG[slug]];
+}
+
+function priceNote(fromPerM2Rub: number): string {
+  return `Ориентир стоимости коробки (мансарда, двухскатная кровля) — от ${fromPerM2Rub.toLocaleString("ru-RU")} ₽/м² строительной площади. Итог зависит от этажности, кровли, фундамента, инженерии и отделки.`;
+}
 
 const SHARED_CTAS: MaterialCommercialCta[] = [
   { id: "estimate", label: "Получить расчет стоимости", action: "estimate", primary: true },
@@ -117,8 +135,8 @@ const GAZOBETON_COMMERCIAL: MaterialCommercialLanding = {
     "Строим частные дома из газобетона под ключ в Санкт-Петербурге и Ленинградской области: проект, смета, коробка и инженерия с понятными этапами.",
   price: {
     h2: "Цена строительства дома из газобетона",
-    fromPerM2Rub: GAZOBETON_FROM_PER_M2,
-    note: `Ориентир стоимости коробки — от ${GAZOBETON_FROM_PER_M2.toLocaleString("ru-RU")} ₽/м² строительной площади. Итог зависит от этажности, кровли, фундамента, инженерии и отделки.`,
+    fromPerM2Rub: 0,
+    note: "",
     factors: SHARED_PRICE_FACTORS,
   },
   included: {
@@ -172,8 +190,8 @@ const KIRPICH_COMMERCIAL: MaterialCommercialLanding = {
     "Строим частные кирпичные дома под ключ в Санкт-Петербурге и Ленинградской области: капитальная коробка, смета, инженерия и понятные этапы без смешения с керамоблоком.",
   price: {
     h2: "Цена строительства кирпичного дома",
-    fromPerM2Rub: KIRPICH_FROM_PER_M2,
-    note: `Ориентир стоимости коробки — от ${KIRPICH_FROM_PER_M2.toLocaleString("ru-RU")} ₽/м² строительной площади (кирпич 2.1 НФ). Итог зависит от этажности, кровли, фундамента, инженерии и отделки.`,
+    fromPerM2Rub: 0,
+    note: "",
     factors: SHARED_PRICE_FACTORS,
   },
   included: {
@@ -227,8 +245,8 @@ const KERAMOBLOK_COMMERCIAL: MaterialCommercialLanding = {
     "Строим частные дома из керамоблока и тёплой керамики под ключ в Санкт-Петербурге и Ленинградской области: отдельная комплектация, смета и этапы — без объединения с кирпичом.",
   price: {
     h2: "Цена строительства дома из керамоблока",
-    fromPerM2Rub: KERAMOBLOK_FROM_PER_M2,
-    note: `Ориентир стоимости коробки — от ${KERAMOBLOK_FROM_PER_M2.toLocaleString("ru-RU")} ₽/м² строительной площади. Итог зависит от этажности, кровли, фундамента, инженерии и отделки.`,
+    fromPerM2Rub: 0,
+    note: "",
     factors: SHARED_PRICE_FACTORS,
   },
   included: {
@@ -284,12 +302,27 @@ const BY_SLUG: Record<ProjectMaterialSeoSlug, MaterialCommercialLanding> = {
 
 export function getMaterialCommercialLanding(
   slug: string,
+  cfg?: HouseConstructionCalculatorConfig,
 ): MaterialCommercialLanding | null {
-  return BY_SLUG[slug as ProjectMaterialSeoSlug] ?? null;
+  const base = BY_SLUG[slug as ProjectMaterialSeoSlug];
+  if (!base) return null;
+  const fromPerM2Rub = materialCommercialFromPerM2Rub(base.slug, cfg);
+  const brickNoteExtra = base.slug === "kirpich" ? " (кирпич 2.1 НФ)" : "";
+  return {
+    ...base,
+    price: {
+      ...base.price,
+      fromPerM2Rub,
+      note: priceNote(fromPerM2Rub).replace(
+        "строительной площади.",
+        `строительной площади${brickNoteExtra}.`,
+      ),
+    },
+  };
 }
 
 export function hasMaterialCommercialLanding(slug: string): boolean {
-  return getMaterialCommercialLanding(slug) != null;
+  return BY_SLUG[slug as ProjectMaterialSeoSlug] != null;
 }
 
 export function formatMaterialFromPerM2(rub: number): string {

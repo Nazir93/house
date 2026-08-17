@@ -502,3 +502,16 @@ export function minCatalogRubPerM2ByMaterial(
   });
   return mins;
 }
+
+/**
+ * Публичный ориентир «от ₽/м²» для материалов: мансарда + двухскатная кровля (категория d / 1,5 эт.).
+ * Один источник для карточек на главной и коммерческих посадочных `/projects/{материал}`.
+ */
+export function mansardDualRubPerM2ByMaterial(
+  cfg: HouseConstructionCalculatorConfig = DEFAULT_HOUSE_CONSTRUCTION_CONFIG,
+): Record<WallMaterialId, number> {
+  const triple = getBaseMatrix(cfg)["1.5"]?.dual;
+  const fallback = DEFAULT_HOUSE_CONSTRUCTION_CONFIG.baseRubPerM2["1.5"].dual!;
+  const row = triple ?? fallback;
+  return { gas: row[0], ceramic: row[1], brick: row[2] };
+}

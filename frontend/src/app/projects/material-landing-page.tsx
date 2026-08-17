@@ -11,6 +11,7 @@ import { AUTHOR_HOUSE_PROJECT_CATALOG } from "@/lib/house-project-catalog";
 import { getPageMeta } from "@/lib/get-page-meta";
 import { projectMatchesMaterial } from "@/lib/project-filters";
 import { getProjectCatalogSliceSeoPages } from "@/lib/seo/project-catalog-slice-seo";
+import { getHouseConstructionCalculatorConfig } from "@/lib/house-construction-calculator-config";
 import { getMaterialCommercialLanding } from "@/lib/seo/project-material-commercial";
 import {
   getProjectMaterialSeo,
@@ -41,8 +42,12 @@ export async function ProjectMaterialLandingPage({ slug }: { slug: ProjectMateri
   const seo = getProjectMaterialSeo(slug);
   if (!seo) notFound();
 
-  const commercial = getMaterialCommercialLanding(slug);
-  const [allProjects, allBuilt] = await Promise.all([getHouseProjects("author"), getBuiltObjects()]);
+  const [allProjects, allBuilt, calcConfig] = await Promise.all([
+    getHouseProjects("author"),
+    getBuiltObjects(),
+    getHouseConstructionCalculatorConfig(),
+  ]);
+  const commercial = getMaterialCommercialLanding(slug, calcConfig);
 
   const projects = allProjects.filter((p) => projectMatchesMaterial(p, seo.material));
   const materialEnum = MATERIAL_ENUM_BY_SEO[slug];

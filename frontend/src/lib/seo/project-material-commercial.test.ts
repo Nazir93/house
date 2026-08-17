@@ -11,19 +11,19 @@ describe("project-material-commercial (этап 2 / ТЗ §11–12 на /project
   it.each([
     {
       slug: "gazobeton" as const,
-      from: 65_825,
+      from: 50_890,
       titlePrefix: "Строительство домов из газобетона под ключ в СПб",
       h1: "Строительство домов из газобетона",
     },
     {
       slug: "kirpich" as const,
-      from: 71_462,
+      from: 55_409,
       titlePrefix: "Строительство домов из кирпича под ключ в СПб",
       h1: "Строительство домов из кирпича",
     },
     {
       slug: "keramoblok" as const,
-      from: 68_054,
+      from: 53_078,
       titlePrefix: "Строительство домов из керамоблока под ключ в СПб",
       h1: "Строительство домов из керамоблока",
     },
@@ -39,6 +39,7 @@ describe("project-material-commercial (этап 2 / ТЗ §11–12 на /project
     expect(seo?.h1).toBe(h1);
     expect(seo?.description).toMatch(/Проекты, стоимость/);
     expect(landing!.price.fromPerM2Rub).toBe(from);
+    expect(landing!.price.note.toLowerCase()).toContain("мансард");
     expect(formatMaterialFromPerM2(landing!.price.fromPerM2Rub)).toMatch(/^от .+ ₽\/м²$/);
     expect(landing!.ctas.map((c) => c.label)).toEqual([
       "Получить расчет стоимости",
