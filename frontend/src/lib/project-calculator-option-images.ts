@@ -11,11 +11,94 @@ export type CalculatorOptionGroupSlug = "engineering" | "construction" | "facade
  */
 export const FACADE_THERMO_IMAGE_CERAMIC = "/images/calculator/facade-thermo-ceramic.png";
 
+/**
+ * Схема «пирога» стены: керамический блок + мокрый фасад.
+ * Файл: public/images/calculator/facade-plaster-ceramic.png
+ */
+export const FACADE_PLASTER_IMAGE_CERAMIC = "/images/calculator/facade-plaster-ceramic.png";
+
+/**
+ * Схема «пирога» стены: керамический блок + облицовка кирпичом с утеплением.
+ * Файл: public/images/calculator/facade-brick-insulated-ceramic.png
+ */
+export const FACADE_BRICK_INSULATED_IMAGE_CERAMIC = "/images/calculator/facade-brick-insulated-ceramic.png";
+
+/**
+ * Схема «пирога» стены: керамический блок + облицовка кирпичом (без утеплителя).
+ * Файл: public/images/calculator/facade-brick-ceramic.png
+ */
+export const FACADE_BRICK_IMAGE_CERAMIC = "/images/calculator/facade-brick-ceramic.png";
+
+/**
+ * Схема «пирога» стены: кирпич 2.1 НФ + фасадные термопанели.
+ * Файл: public/images/calculator/facade-thermo-brick.png
+ */
+export const FACADE_THERMO_IMAGE_BRICK = "/images/calculator/facade-thermo-brick.png";
+
+/**
+ * Схема «пирога» стены: кирпич 2.1 НФ + мокрый фасад.
+ * Файл: public/images/calculator/facade-plaster-brick.png
+ */
+export const FACADE_PLASTER_IMAGE_BRICK = "/images/calculator/facade-plaster-brick.png";
+
+/**
+ * Схема «пирога» стены: кирпич 2.1 НФ + облицовка кирпичом с утеплением.
+ * Файл: public/images/calculator/facade-brick-insulated-brick.png
+ */
+export const FACADE_BRICK_INSULATED_IMAGE_BRICK = "/images/calculator/facade-brick-insulated-brick.png";
+
+/**
+ * Схема «пирога» стены: кирпич 2.1 НФ + облицовка кирпичом (без утеплителя).
+ * Файл: public/images/calculator/facade-brick-brick.png
+ */
+export const FACADE_BRICK_IMAGE_BRICK = "/images/calculator/facade-brick-brick.png";
+
+/**
+ * Схема «пирога» стены: газобетон + фасадные термопанели.
+ * Файл: public/images/calculator/facade-thermo-gas.png
+ */
+export const FACADE_THERMO_IMAGE_GAS = "/images/calculator/facade-thermo-gas.png";
+
+/**
+ * Схема «пирога» стены: газобетон + мокрый фасад.
+ * Файл: public/images/calculator/facade-plaster-gas.png
+ */
+export const FACADE_PLASTER_IMAGE_GAS = "/images/calculator/facade-plaster-gas.png";
+
+/**
+ * Схема «пирога» стены: газобетон + облицовка кирпичом с утеплением.
+ * Файл: public/images/calculator/facade-brick-insulated-gas.png
+ */
+export const FACADE_BRICK_INSULATED_IMAGE_GAS = "/images/calculator/facade-brick-insulated-gas.png";
+
+/**
+ * Схема «пирога» стены: газобетон + облицовка кирпичом.
+ * Файл: public/images/calculator/facade-brick-gas.png
+ */
+export const FACADE_BRICK_IMAGE_GAS = "/images/calculator/facade-brick-gas.png";
+
 const FACADE_OPTION_IMAGES_BY_WALL: Partial<
   Record<string, Partial<Record<PartOfSoulWallMaterial, string>>>
 > = {
   thermo: {
     ceramic: FACADE_THERMO_IMAGE_CERAMIC,
+    brick: FACADE_THERMO_IMAGE_BRICK,
+    gas: FACADE_THERMO_IMAGE_GAS,
+  },
+  plaster: {
+    ceramic: FACADE_PLASTER_IMAGE_CERAMIC,
+    brick: FACADE_PLASTER_IMAGE_BRICK,
+    gas: FACADE_PLASTER_IMAGE_GAS,
+  },
+  brick_insulated: {
+    ceramic: FACADE_BRICK_INSULATED_IMAGE_CERAMIC,
+    brick: FACADE_BRICK_INSULATED_IMAGE_BRICK,
+    gas: FACADE_BRICK_INSULATED_IMAGE_GAS,
+  },
+  brick: {
+    ceramic: FACADE_BRICK_IMAGE_CERAMIC,
+    brick: FACADE_BRICK_IMAGE_BRICK,
+    gas: FACADE_BRICK_IMAGE_GAS,
   },
 };
 
@@ -24,7 +107,7 @@ function asWallMaterial(value: string | null | undefined): PartOfSoulWallMateria
   return null;
 }
 
-/** Картинка фасада зависит от материала коробки (пока только керамоблок + термопанели). */
+/** Картинка фасада зависит от материала коробки (схемы подключаются по мере загрузки). */
 export function resolveFacadeOptionImageUrl(params: {
   slug: string;
   wallMaterial?: string | null;

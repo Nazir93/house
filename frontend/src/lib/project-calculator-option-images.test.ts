@@ -3,7 +3,18 @@ import { buildPublicCatalog } from "@/lib/calculator-catalog";
 import { DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG } from "@/lib/house-project-calculator-config";
 import {
   CALCULATOR_OPTION_CATALOG_META,
+  FACADE_BRICK_IMAGE_BRICK,
+  FACADE_BRICK_IMAGE_CERAMIC,
+  FACADE_BRICK_IMAGE_GAS,
+  FACADE_BRICK_INSULATED_IMAGE_BRICK,
+  FACADE_BRICK_INSULATED_IMAGE_CERAMIC,
+  FACADE_BRICK_INSULATED_IMAGE_GAS,
+  FACADE_PLASTER_IMAGE_BRICK,
+  FACADE_PLASTER_IMAGE_CERAMIC,
+  FACADE_PLASTER_IMAGE_GAS,
+  FACADE_THERMO_IMAGE_BRICK,
   FACADE_THERMO_IMAGE_CERAMIC,
+  FACADE_THERMO_IMAGE_GAS,
   isCalculatorOptionDiagramUrl,
   isLegacyOptionPlaceholderImage,
   preferOptimizedOptionDiagramUrl,
@@ -133,15 +144,149 @@ describe("project-calculator-option-images", () => {
         wallMaterial: "ceramic",
       }),
     ).toBe(FACADE_THERMO_IMAGE_CERAMIC);
+  });
+
+  it("газобетон + фасадные термопанели — схема стены с термопанелью", () => {
+    expect(resolveFacadeOptionImageUrl({ slug: "thermo", wallMaterial: "gas" })).toBe(
+      FACADE_THERMO_IMAGE_GAS,
+    );
     expect(
       resolveOptionDisplayImageUrl({
         slug: "thermo",
         groupSlug: "facade",
         wallMaterial: "gas",
       }),
-    ).toBeNull();
-    expect(resolveFacadeOptionImageUrl({ slug: "thermo", wallMaterial: "brick" })).toBeNull();
-    expect(resolveFacadeOptionImageUrl({ slug: "plaster", wallMaterial: "ceramic" })).toBeNull();
+    ).toBe(FACADE_THERMO_IMAGE_GAS);
+  });
+
+  it("кирпич + фасадные термопанели — схема стены с термопанелью", () => {
+    expect(resolveFacadeOptionImageUrl({ slug: "thermo", wallMaterial: "brick" })).toBe(
+      FACADE_THERMO_IMAGE_BRICK,
+    );
+    expect(
+      resolveOptionDisplayImageUrl({
+        slug: "thermo",
+        groupSlug: "facade",
+        wallMaterial: "brick",
+      }),
+    ).toBe(FACADE_THERMO_IMAGE_BRICK);
+  });
+
+  it("керамоблок + мокрый фасад — схема стены с утеплителем и штукатуркой", () => {
+    expect(resolveFacadeOptionImageUrl({ slug: "plaster", wallMaterial: "ceramic" })).toBe(
+      FACADE_PLASTER_IMAGE_CERAMIC,
+    );
+    expect(
+      resolveOptionDisplayImageUrl({
+        slug: "plaster",
+        groupSlug: "facade",
+        wallMaterial: "ceramic",
+      }),
+    ).toBe(FACADE_PLASTER_IMAGE_CERAMIC);
+  });
+
+  it("газобетон + мокрый фасад — схема стены с утеплителем и штукатуркой", () => {
+    expect(resolveFacadeOptionImageUrl({ slug: "plaster", wallMaterial: "gas" })).toBe(
+      FACADE_PLASTER_IMAGE_GAS,
+    );
+    expect(
+      resolveOptionDisplayImageUrl({
+        slug: "plaster",
+        groupSlug: "facade",
+        wallMaterial: "gas",
+      }),
+    ).toBe(FACADE_PLASTER_IMAGE_GAS);
+  });
+
+  it("кирпич + мокрый фасад — схема стены с утеплителем и штукатуркой", () => {
+    expect(resolveFacadeOptionImageUrl({ slug: "plaster", wallMaterial: "brick" })).toBe(
+      FACADE_PLASTER_IMAGE_BRICK,
+    );
+    expect(
+      resolveOptionDisplayImageUrl({
+        slug: "plaster",
+        groupSlug: "facade",
+        wallMaterial: "brick",
+      }),
+    ).toBe(FACADE_PLASTER_IMAGE_BRICK);
+  });
+
+  it("керамоблок + кирпич с утеплением — схема стены с вентзазором и облицовкой", () => {
+    expect(resolveFacadeOptionImageUrl({ slug: "brick_insulated", wallMaterial: "ceramic" })).toBe(
+      FACADE_BRICK_INSULATED_IMAGE_CERAMIC,
+    );
+    expect(
+      resolveOptionDisplayImageUrl({
+        slug: "brick_insulated",
+        groupSlug: "facade",
+        wallMaterial: "ceramic",
+      }),
+    ).toBe(FACADE_BRICK_INSULATED_IMAGE_CERAMIC);
+  });
+
+  it("газобетон + кирпич с утеплением — схема стены с вентзазором и облицовкой", () => {
+    expect(resolveFacadeOptionImageUrl({ slug: "brick_insulated", wallMaterial: "gas" })).toBe(
+      FACADE_BRICK_INSULATED_IMAGE_GAS,
+    );
+    expect(
+      resolveOptionDisplayImageUrl({
+        slug: "brick_insulated",
+        groupSlug: "facade",
+        wallMaterial: "gas",
+      }),
+    ).toBe(FACADE_BRICK_INSULATED_IMAGE_GAS);
+  });
+
+  it("кирпич + кирпич с утеплением — схема стены с вентзазором и облицовкой", () => {
+    expect(resolveFacadeOptionImageUrl({ slug: "brick_insulated", wallMaterial: "brick" })).toBe(
+      FACADE_BRICK_INSULATED_IMAGE_BRICK,
+    );
+    expect(
+      resolveOptionDisplayImageUrl({
+        slug: "brick_insulated",
+        groupSlug: "facade",
+        wallMaterial: "brick",
+      }),
+    ).toBe(FACADE_BRICK_INSULATED_IMAGE_BRICK);
+  });
+
+  it("керамоблок + облицовка кирпичом — схема стены с вентзазором без утеплителя", () => {
+    expect(resolveFacadeOptionImageUrl({ slug: "brick", wallMaterial: "ceramic" })).toBe(
+      FACADE_BRICK_IMAGE_CERAMIC,
+    );
+    expect(
+      resolveOptionDisplayImageUrl({
+        slug: "brick",
+        groupSlug: "facade",
+        wallMaterial: "ceramic",
+      }),
+    ).toBe(FACADE_BRICK_IMAGE_CERAMIC);
+  });
+
+  it("газобетон + облицовка кирпичом — схема из загруженного файла", () => {
+    expect(resolveFacadeOptionImageUrl({ slug: "brick", wallMaterial: "gas" })).toBe(
+      FACADE_BRICK_IMAGE_GAS,
+    );
+    expect(
+      resolveOptionDisplayImageUrl({
+        slug: "brick",
+        groupSlug: "facade",
+        wallMaterial: "gas",
+      }),
+    ).toBe(FACADE_BRICK_IMAGE_GAS);
+  });
+
+  it("кирпич + облицовка кирпичом — схема стены с вентзазором без утеплителя", () => {
+    expect(resolveFacadeOptionImageUrl({ slug: "brick", wallMaterial: "brick" })).toBe(
+      FACADE_BRICK_IMAGE_BRICK,
+    );
+    expect(
+      resolveOptionDisplayImageUrl({
+        slug: "brick",
+        groupSlug: "facade",
+        wallMaterial: "brick",
+      }),
+    ).toBe(FACADE_BRICK_IMAGE_BRICK);
   });
 
   it("загрузка из админки не перекрывается схемой термопанелей", () => {

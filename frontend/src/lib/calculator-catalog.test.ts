@@ -96,10 +96,52 @@ describe("buildPublicCatalog", () => {
     expect(thermo?.imageUrl).toBeUndefined();
   });
 
-  it("для керамоблока отдаёт схему термопанелей", () => {
+  it("для керамоблока отдаёт схемы всех четырёх фасадов", () => {
     const cat = buildPublicCatalog(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG, "a", [], "ceramic");
-    const thermo = cat.facades.find((f) => f.slug === "thermo");
-    expect(thermo?.imageUrl).toBe("/images/calculator/facade-thermo-ceramic.png");
+    expect(cat.facades.find((f) => f.slug === "thermo")?.imageUrl).toBe(
+      "/images/calculator/facade-thermo-ceramic.png",
+    );
+    expect(cat.facades.find((f) => f.slug === "plaster")?.imageUrl).toBe(
+      "/images/calculator/facade-plaster-ceramic.png",
+    );
+    expect(cat.facades.find((f) => f.slug === "brick_insulated")?.imageUrl).toBe(
+      "/images/calculator/facade-brick-insulated-ceramic.png",
+    );
+    expect(cat.facades.find((f) => f.slug === "brick")?.imageUrl).toBe(
+      "/images/calculator/facade-brick-ceramic.png",
+    );
+  });
+
+  it("для кирпича отдаёт схемы всех четырёх фасадов", () => {
+    const cat = buildPublicCatalog(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG, "a", [], "brick");
+    expect(cat.facades.find((f) => f.slug === "thermo")?.imageUrl).toBe(
+      "/images/calculator/facade-thermo-brick.png",
+    );
+    expect(cat.facades.find((f) => f.slug === "plaster")?.imageUrl).toBe(
+      "/images/calculator/facade-plaster-brick.png",
+    );
+    expect(cat.facades.find((f) => f.slug === "brick_insulated")?.imageUrl).toBe(
+      "/images/calculator/facade-brick-insulated-brick.png",
+    );
+    expect(cat.facades.find((f) => f.slug === "brick")?.imageUrl).toBe(
+      "/images/calculator/facade-brick-brick.png",
+    );
+  });
+
+  it("для газобетона отдаёт схемы всех четырёх фасадов", () => {
+    const cat = buildPublicCatalog(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG, "a", [], "gas");
+    expect(cat.facades.find((f) => f.slug === "thermo")?.imageUrl).toBe(
+      "/images/calculator/facade-thermo-gas.png",
+    );
+    expect(cat.facades.find((f) => f.slug === "plaster")?.imageUrl).toBe(
+      "/images/calculator/facade-plaster-gas.png",
+    );
+    expect(cat.facades.find((f) => f.slug === "brick_insulated")?.imageUrl).toBe(
+      "/images/calculator/facade-brick-insulated-gas.png",
+    );
+    expect(cat.facades.find((f) => f.slug === "brick")?.imageUrl).toBe(
+      "/images/calculator/facade-brick-gas.png",
+    );
   });
 
   it("отдаёт состав работ для облицовки кирпичом с утеплением", () => {
