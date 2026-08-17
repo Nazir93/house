@@ -11,7 +11,11 @@ import type {
   HouseCalculatorCategoryId,
   HouseProjectCalculatorConfig,
 } from "@/lib/house-project-calculator-engine";
-import type { PartOfSoulFacadeVariant, PartOfSoulRoofPitch } from "@/lib/part-of-soul-pricing";
+import type {
+  PartOfSoulFacadeVariant,
+  PartOfSoulRoofPitch,
+  PartOfSoulWallMaterial,
+} from "@/lib/part-of-soul-pricing";
 import { isConstructionOptionAllowed } from "@/lib/house-project-calculator-engine";
 import {
   resolveOptionDisplayDescription,
@@ -204,7 +208,8 @@ export async function getCalculatorConfig(): Promise<HouseProjectCalculatorConfi
 export function buildPublicCatalog(
   config: HouseProjectCalculatorConfig,
   categoryId: HouseCalculatorCategoryId,
-  disabledOptionIds: string[] = []
+  disabledOptionIds: string[] = [],
+  wallMaterial?: PartOfSoulWallMaterial | null,
 ): PublicCalculatorCatalog {
   const disabled = new Set(disabledOptionIds);
 
@@ -216,6 +221,7 @@ export function buildPublicCatalog(
     const imageUrl = resolveOptionDisplayImageUrl({
       slug,
       groupSlug: "facade",
+      wallMaterial,
     });
     return {
       slug,

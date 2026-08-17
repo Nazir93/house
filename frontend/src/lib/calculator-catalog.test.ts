@@ -93,6 +93,13 @@ describe("buildPublicCatalog", () => {
     expect(thermo?.name).toBe("Фасадные термопанели");
     expect(thermo?.description).toContain("клинкерная плитка");
     expect(thermo?.description?.split("\n")).toHaveLength(7);
+    expect(thermo?.imageUrl).toBeUndefined();
+  });
+
+  it("для керамоблока отдаёт схему термопанелей", () => {
+    const cat = buildPublicCatalog(DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG, "a", [], "ceramic");
+    const thermo = cat.facades.find((f) => f.slug === "thermo");
+    expect(thermo?.imageUrl).toBe("/images/calculator/facade-thermo-ceramic.png");
   });
 
   it("отдаёт состав работ для облицовки кирпичом с утеплением", () => {

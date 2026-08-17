@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { formatRub } from "@/lib/construction-data";
 import type { PublicCalculatorCatalog } from "@/lib/calculator-catalog";
-import { isCalculatorOptionDiagramUrl } from "@/lib/project-calculator-option-images";
+import { isCalculatorOptionDiagramUrl, resolveOptionDisplayImageUrl } from "@/lib/project-calculator-option-images";
 import { shouldAutoExpandCalculatorOptionDetail } from "@/lib/project-calculator-option-selection";
 import { cn } from "@/lib/utils";
 import { CmsImage } from "@/components/ui/cms-image";
@@ -19,6 +19,7 @@ type Props = {
   onToggleConstruction: (slug: string) => void;
   lineAmounts: Map<string, number>;
   quoteLoading?: boolean;
+  wallMaterial?: string | null;
 };
 
 export function ProjectCalculatorCatalogOptions({
@@ -31,6 +32,7 @@ export function ProjectCalculatorCatalogOptions({
   onToggleConstruction,
   lineAmounts,
   quoteLoading,
+  wallMaterial,
 }: Props) {
   const [facadeOpen, setFacadeOpen] = useState(true);
   const [engineeringOpen, setEngineeringOpen] = useState(true);
@@ -41,7 +43,14 @@ export function ProjectCalculatorCatalogOptions({
     const urls = [
       ...catalog.engineering.map((o) => o.imageUrl),
       ...catalog.construction.map((o) => o.imageUrl),
-      ...catalog.facades.map((f) => f.imageUrl),
+      ...catalog.facades.map((f) =>
+        resolveOptionDisplayImageUrl({
+          slug: f.slug,
+          groupSlug: "facade",
+          imageUrl: f.imageUrl,
+          wallMaterial,
+        }),
+      ),
     ].filter((url): url is string => Boolean(url?.trim()));
 
     for (const url of urls) {
@@ -49,7 +58,7 @@ export function ProjectCalculatorCatalogOptions({
       img.decoding = "async";
       img.src = url;
     }
-  }, [catalog]);
+  }, [catalog, wallMaterial]);
 
   const engTotal = useMemo(() => {
     let s = 0;
@@ -120,7 +129,14 @@ export function ProjectCalculatorCatalogOptions({
         {(() => {
           const selected = catalog.facades.find((f) => f.slug === facadeSlug);
           const description = selected?.description?.trim();
-          const imageUrl = selected?.imageUrl?.trim();
+          const imageUrl = selected
+            ? resolveOptionDisplayImageUrl({
+                slug: selected.slug,
+                groupSlug: "facade",
+                imageUrl: selected.imageUrl,
+                wallMaterial,
+              })
+            : null;
           if (!description && !imageUrl) return null;
           return (
             <OptionWorkScope

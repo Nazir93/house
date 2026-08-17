@@ -58,7 +58,8 @@ export function ProjectCompareUnifiedPanel({
 
   useEffect(() => {
     let cancelled = false;
-    void fetch("/api/calculator-catalog?category=a")
+    const qs = new URLSearchParams({ category: "a", wall: settings.tierId });
+    void fetch(`/api/calculator-catalog?${qs.toString()}`)
       .then((r) => r.json())
       .then((data: PublicCalculatorCatalog) => {
         if (!cancelled) setCatalog(data);
@@ -67,7 +68,7 @@ export function ProjectCompareUnifiedPanel({
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [settings.tierId]);
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -206,6 +207,7 @@ export function ProjectCompareUnifiedPanel({
               onToggleConstruction={toggleConstruction}
               lineAmounts={lineAmounts}
               quoteLoading={loading}
+              wallMaterial={settings.tierId}
             />
           </div>
         ) : (

@@ -3,9 +3,11 @@ import { buildPublicCatalog } from "@/lib/calculator-catalog";
 import { DEFAULT_HOUSE_PROJECT_CALCULATOR_CONFIG } from "@/lib/house-project-calculator-config";
 import {
   CALCULATOR_OPTION_CATALOG_META,
+  FACADE_THERMO_IMAGE_CERAMIC,
   isCalculatorOptionDiagramUrl,
   isLegacyOptionPlaceholderImage,
   preferOptimizedOptionDiagramUrl,
+  resolveFacadeOptionImageUrl,
   resolveOptionDisplayDescription,
   resolveOptionDisplayImageUrl,
 } from "@/lib/project-calculator-option-images";
@@ -118,6 +120,39 @@ describe("project-calculator-option-images", () => {
     expect(description).toContain("клинкерная плитка");
     expect(description).toContain("ЭППС");
     expect(description.split("\n")).toHaveLength(7);
+  });
+
+  it("керамоблок + фасадные термопанели — схема стены с термопанелью", () => {
+    expect(resolveFacadeOptionImageUrl({ slug: "thermo", wallMaterial: "ceramic" })).toBe(
+      FACADE_THERMO_IMAGE_CERAMIC,
+    );
+    expect(
+      resolveOptionDisplayImageUrl({
+        slug: "thermo",
+        groupSlug: "facade",
+        wallMaterial: "ceramic",
+      }),
+    ).toBe(FACADE_THERMO_IMAGE_CERAMIC);
+    expect(
+      resolveOptionDisplayImageUrl({
+        slug: "thermo",
+        groupSlug: "facade",
+        wallMaterial: "gas",
+      }),
+    ).toBeNull();
+    expect(resolveFacadeOptionImageUrl({ slug: "thermo", wallMaterial: "brick" })).toBeNull();
+    expect(resolveFacadeOptionImageUrl({ slug: "plaster", wallMaterial: "ceramic" })).toBeNull();
+  });
+
+  it("загрузка из админки не перекрывается схемой термопанелей", () => {
+    expect(
+      resolveOptionDisplayImageUrl({
+        slug: "thermo",
+        groupSlug: "facade",
+        wallMaterial: "ceramic",
+        imageUrl: "/uploads/custom-thermo.png",
+      }),
+    ).toBe("/uploads/custom-thermo.png");
   });
 
   it("облицовка кирпичом с утеплением: состав работ по пунктам", () => {

@@ -1,7 +1,38 @@
+import type { PartOfSoulWallMaterial } from "@/lib/part-of-soul-pricing";
+
 /** Заглушки из пресета — заменяются схемами из /images/calculator/options/. */
 const LEGACY_BANNER_PREFIX = "/images/banner/banner-hero-";
 
 export type CalculatorOptionGroupSlug = "engineering" | "construction" | "facade";
+
+/**
+ * Схема «пирога» стены: керамический блок + фасадные термопанели.
+ * Файл: public/images/calculator/facade-thermo-ceramic.png
+ */
+export const FACADE_THERMO_IMAGE_CERAMIC = "/images/calculator/facade-thermo-ceramic.png";
+
+const FACADE_OPTION_IMAGES_BY_WALL: Partial<
+  Record<string, Partial<Record<PartOfSoulWallMaterial, string>>>
+> = {
+  thermo: {
+    ceramic: FACADE_THERMO_IMAGE_CERAMIC,
+  },
+};
+
+function asWallMaterial(value: string | null | undefined): PartOfSoulWallMaterial | null {
+  if (value === "gas" || value === "ceramic" || value === "brick") return value;
+  return null;
+}
+
+/** Картинка фасада зависит от материала коробки (пока только керамоблок + термопанели). */
+export function resolveFacadeOptionImageUrl(params: {
+  slug: string;
+  wallMaterial?: string | null;
+}): string | null {
+  const wall = asWallMaterial(params.wallMaterial);
+  if (!wall) return null;
+  return FACADE_OPTION_IMAGES_BY_WALL[params.slug]?.[wall] ?? null;
+}
 
 export type CalculatorOptionCatalogMeta = {
   description: string;
@@ -265,8 +296,20 @@ export function resolveOptionDisplayImageUrl(params: {
   slug: string;
   groupSlug?: CalculatorOptionGroupSlug | null;
   imageUrl?: string | null;
+  wallMaterial?: string | null;
 }): string | null {
   const custom = params.imageUrl?.trim();
+  const customIsUpload = Boolean(custom && custom.startsWith("/uploads/"));
+  if (custom && customIsUpload && !isLegacyOptionPlaceholderImage(custom)) {
+    return preferOptimizedOptionDiagramUrl(custom);
+  }
+  if (params.groupSlug === "facade") {
+    const byWall = resolveFacadeOptionImageUrl({
+      slug: params.slug,
+      wallMaterial: params.wallMaterial,
+    });
+    if (byWall) return byWall;
+  }
   if (custom && !isLegacyOptionPlaceholderImage(custom)) {
     return preferOptimizedOptionDiagramUrl(custom);
   }

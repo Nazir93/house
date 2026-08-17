@@ -22,7 +22,7 @@ import {
 import type { CalculatorStageId, CalculatorStageTable, ProjectCalculatorUi } from "@/lib/project-calculator-types";
 import { useModal } from "@/lib/modal-context";
 import { CmsImage } from "@/components/ui/cms-image";
-import { type PartOfSoulPricingFloors, type PartOfSoulRoofPitch } from "@/lib/part-of-soul-pricing";
+import { type PartOfSoulPricingFloors, type PartOfSoulRoofPitch, tierIdToWallMaterial } from "@/lib/part-of-soul-pricing";
 import {
   normalizeTransportBands,
 } from "@/lib/project-transport-surcharge";
@@ -186,6 +186,7 @@ export function HouseProjectCompletionSection({
   const tier = tabSpecs[tierIdx] ?? tabSpecs[0];
   const priced = tier?.price ?? project.price;
   const tierKey = tier?.id ?? "gas";
+  const wallMaterial = tierIdToWallMaterial(tier?.id ?? "gas", tier?.label ?? "");
 
   const [stageIndex, setStageIndex] = useState(0);
   const flat = useMemo(() => flattenCompletion(project.completion), [project.completion]);
@@ -252,7 +253,8 @@ export function HouseProjectCompletionSection({
   useEffect(() => {
     if (!categoryId) return;
     let cancelled = false;
-    void fetch(`/api/calculator-catalog?category=${categoryId}`)
+    const qs = new URLSearchParams({ category: categoryId, wall: wallMaterial });
+    void fetch(`/api/calculator-catalog?${qs.toString()}`)
       .then((r) => r.json())
       .then((data: PublicCalculatorCatalog) => {
         if (!cancelled) setCatalog(data);
@@ -261,7 +263,7 @@ export function HouseProjectCompletionSection({
     return () => {
       cancelled = true;
     };
-  }, [categoryId]);
+  }, [categoryId, wallMaterial]);
 
   const engineeringList = useMemo(() => [...engineeringSlugs], [engineeringSlugs]);
   const constructionList = useMemo(() => [...constructionSlugs], [constructionSlugs]);
@@ -653,6 +655,7 @@ export function HouseProjectCompletionSection({
             onToggleConstruction={toggleConstruction}
             lineAmounts={quoteLineAmounts}
             quoteLoading={quoteLoading}
+            wallMaterial={wallMaterial}
           />
         ) : null}
 
