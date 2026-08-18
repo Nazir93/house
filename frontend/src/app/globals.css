@@ -8,6 +8,14 @@
     position: sticky («Наши услуги», колода ЛК) — секции уезжают в пустоту.
     Горизонтальный вылет режем только на body.
   */
+  .font-montserrat-var {
+    --font-montserrat: "Montserrat";
+  }
+
+  .font-montserrat {
+    font-family: var(--font-montserrat), Montserrat, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
   body {
     overflow-x: clip;
   }

@@ -1,11 +1,14 @@
 /** Только 400/700 — без 500 (лишний woff2 на мобиле). */
 export const MONTSERRAT_WEIGHTS = ["400", "700"] as const;
 
-/** swap: Montserrat применяется сразу после загрузки, без «залипания» на системном. */
+/** swap: задаётся в @fontsource CSS (font-display: swap). */
 export const MONTSERRAT_DISPLAY = "swap" as const;
 
 /**
- * false: не preload woff2 (~68 KiB). LCP главной — H1-текст; preload ставит шрифт
- * на критический путь и задерживает отрисовку заголовка на медленном 4G.
+ * Шрифт self-host через @fontsource — отдельный preload link не нужен
+ * (и не тянем Google Fonts на этапе next build).
  */
 export const MONTSERRAT_PRELOAD = false as const;
+
+/** Источник ассетов: локальный npm-пакет, не fonts.googleapis.com. */
+export const MONTSERRAT_SOURCE = "fontsource" as const;
