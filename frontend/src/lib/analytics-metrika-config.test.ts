@@ -28,6 +28,12 @@ describe("analytics-metrika-config", () => {
     expect(shouldEnableMetrikaWebvisor({ hardwareConcurrency: 2, deviceMemory: 8 })).toBe(false);
     expect(shouldEnableMetrikaWebvisor({ hardwareConcurrency: 8, deviceMemory: 4 })).toBe(false);
     expect(shouldEnableMetrikaWebvisor({ hardwareConcurrency: 8, deviceMemory: 8 })).toBe(true);
+    expect(
+      shouldEnableMetrikaWebvisor({
+        hardwareConcurrency: 6,
+        userAgent: "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)",
+      }),
+    ).toBe(false);
   });
 
   it("на слабом железе отключает и webvisor, и clickmap", () => {

@@ -1,3 +1,5 @@
+import { isAppleMobileUa } from "@/lib/perf-device";
+
 /** ID счётчика по умолчанию. Переопределяется через админку или NEXT_PUBLIC_YANDEX_METRIKA_ID. */
 export const DEFAULT_YANDEX_METRIKA_ID = "110112800";
 
@@ -37,17 +39,22 @@ type MetrikaInitOptions = {
 export function shouldEnableMetrikaWebvisor(input: {
   hardwareConcurrency?: number;
   deviceMemory?: number;
+  userAgent?: string;
 }): boolean {
   const cores = input.hardwareConcurrency ?? 4;
-  const memory = input.deviceMemory ?? 8;
   if (cores <= 2) return false;
-  if (memory > 0 && memory <= 4) return false;
+  const memory =
+    typeof input.deviceMemory === "number" && input.deviceMemory > 0 ? input.deviceMemory : null;
+  if (memory != null && memory <= 4) return false;
+  // Safari/iOS: нет deviceMemory — раньше подставляли 8 и включали webvisor зря.
+  if (memory == null && isAppleMobileUa(input.userAgent)) return false;
   return true;
 }
 
 export function buildMetrikaInitOptions(input: {
   hardwareConcurrency?: number;
   deviceMemory?: number;
+  userAgent?: string;
 }): MetrikaInitOptions {
   const heavyUi = shouldEnableMetrikaWebvisor(input);
   return {
@@ -63,7 +70,7 @@ export function buildMetrikaInitOptions(input: {
 
 /** Inline-выражение для init в браузере (эвристика железа на клиенте). */
 export const METRIKA_WEBVISOR_INLINE_EXPR =
-  "(function(){var n=navigator,c=n.hardwareConcurrency||4,m=n.deviceMemory||8;return c>2&&(!m||m>4);})()";
+  "(function(){var n=navigator,c=n.hardwareConcurrency||4,m=n.deviceMemory,ua=n.userAgent||'';if(c<=2)return false;if(m>0&&m<=4)return false;if(/iPhone|iPad|iPod/i.test(ua)&&!(m>0))return false;return true;})()";
 
 /** Тот же gate для clickmap в inline-init AnalyticsScripts. */
 export const METRIKA_CLICKMAP_INLINE_EXPR = METRIKA_WEBVISOR_INLINE_EXPR;

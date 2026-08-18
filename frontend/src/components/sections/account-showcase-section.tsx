@@ -116,6 +116,7 @@ export function AccountShowcaseSection() {
                       image={item.image}
                       images={item.images}
                       metrics={item.metrics}
+                      priority={index === 0}
                     />
                   </div>
                 </div>

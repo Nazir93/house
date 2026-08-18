@@ -17,42 +17,32 @@ export type AccountShowcaseMockupProps = {
   image: string;
   images?: AccountShowcaseImages;
   metrics: readonly string[];
+  /** Только первая карточка — eager; остальные lazy, чтобы не декодировать все PNG сразу. */
+  priority?: boolean;
 };
 
-export function AccountShowcaseMockup({ itemId, image, images, metrics }: AccountShowcaseMockupProps) {
+export function AccountShowcaseMockup({
+  itemId,
+  image,
+  images,
+  metrics,
+  priority = false,
+}: AccountShowcaseMockupProps) {
   const Icon = ACCOUNT_SHOWCASE_ICON_BY_ID[itemId];
   const { theme } = useTheme();
   const imageSrc = resolveAccountShowcaseImage({ image, images }, theme);
 
   return (
     <div className="relative h-full min-h-[22rem] w-full overflow-hidden rounded-[1.6rem] bg-[#07120e] shadow-[0_18px_48px_rgba(7,18,14,0.28)] sm:min-h-[24rem] sm:rounded-[1.85rem] md:min-h-[26rem] lg:min-h-full lg:rounded-[2rem]">
-      {images ? (
-        <>
-          <Image
-            src={images.dark}
-            alt=""
-            {...SHOWCASE_IMAGE_PROPS}
-            className={`object-cover object-left-top saturate-[0.95] transition-opacity duration-500 ${
-              theme === "dark" ? "opacity-100" : "opacity-0"
-            }`}
-          />
-          <Image
-            src={images.light}
-            alt=""
-            {...SHOWCASE_IMAGE_PROPS}
-            className={`object-cover object-left-top saturate-[0.95] transition-opacity duration-500 ${
-              theme === "light" ? "opacity-100" : "opacity-0"
-            }`}
-          />
-        </>
-      ) : (
-        <Image
-          src={imageSrc}
-          alt=""
-          {...SHOWCASE_IMAGE_PROPS}
-          className="object-cover object-left-top opacity-58 saturate-[0.9]"
-        />
-      )}
+      <Image
+        key={imageSrc}
+        src={imageSrc}
+        alt=""
+        {...SHOWCASE_IMAGE_PROPS}
+        priority={priority}
+        loading={priority ? "eager" : "lazy"}
+        className="object-cover object-left-top saturate-[0.95] opacity-95 transition-opacity duration-500"
+      />
 
       <div className="absolute inset-0 z-[1] flex flex-col justify-between p-5 sm:p-6 lg:p-8">
         <div className="flex items-start justify-between gap-4">
