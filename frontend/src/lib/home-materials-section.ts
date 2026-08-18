@@ -26,6 +26,12 @@ export type HomeMaterialCardContent = {
   completionHref: `/projects/${HomeMaterialId}#material-included`;
 };
 
+/** Карточки ниже первого экрана: без priority, иначе газобетон competing LCP баннера. */
+export const HOME_MATERIAL_CARD_IMAGE_PRIORITY = false;
+export const HOME_MATERIAL_CARD_IMAGE_QUALITY = 60;
+export const HOME_MATERIAL_CARD_IMAGE_SIZES =
+  "(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 380px";
+
 export const HOME_MATERIAL_CARDS: HomeMaterialCardContent[] = [
   {
     id: "gazobeton",

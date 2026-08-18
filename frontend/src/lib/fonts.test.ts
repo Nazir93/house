@@ -12,8 +12,8 @@ describe("fonts", () => {
     expect(MONTSERRAT_WEIGHTS).not.toContain("500");
   });
 
-  it("Montserrat с display=swap и preload — бренд на первом экране", () => {
+  it("Montserrat с display=swap без preload — LCP H1 не ждёт woff2", () => {
     expect(MONTSERRAT_DISPLAY).toBe("swap");
-    expect(MONTSERRAT_PRELOAD).toBe(true);
+    expect(MONTSERRAT_PRELOAD).toBe(false);
   });
 });

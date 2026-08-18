@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  HOME_MATERIAL_CARD_IMAGE_PRIORITY,
+  HOME_MATERIAL_CARD_IMAGE_QUALITY,
+  HOME_MATERIAL_CARD_IMAGE_SIZES,
   HOME_MATERIALS_SECTION_SUBTITLE,
   HOME_MATERIALS_SECTION_TITLE,
   HOME_MATERIAL_CARDS,
@@ -50,5 +53,13 @@ describe("home-materials-section", () => {
     const descriptions = HOME_MATERIAL_CARDS.map((c) => c.description);
     expect(new Set(descriptions).size).toBe(3);
     expect(HOME_MATERIAL_CARDS[2]?.description).toContain("2.1 НФ");
+  });
+
+  it("фото карточек не competing LCP: без priority, q=60, sizes под колонку", () => {
+    expect(HOME_MATERIAL_CARD_IMAGE_PRIORITY).toBe(false);
+    expect(HOME_MATERIAL_CARD_IMAGE_QUALITY).toBe(60);
+    expect(HOME_MATERIAL_CARD_IMAGE_SIZES).toContain("92vw");
+    expect(HOME_MATERIAL_CARD_IMAGE_SIZES).not.toContain("100vw");
+    expect(HOME_MATERIAL_CARD_IMAGE_SIZES).toContain("380px");
   });
 });

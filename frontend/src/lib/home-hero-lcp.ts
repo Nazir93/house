@@ -10,3 +10,19 @@ export const HOME_HERO_LCP_QUALITY = 60;
 export function buildHomeHeroLcpPreloadHref(lightBackgroundSrc: string): string {
   return buildImagePrefetchSrc(lightBackgroundSrc, HOME_HERO_LCP_WIDTH, HOME_HERO_LCP_QUALITY);
 }
+
+/**
+ * Промо-карусель не competing LCP: high только у фона баннера.
+ * Активный слайд eager, остальные lazy — без preload в `<head>`.
+ */
+export function homeHeroCarouselImageLoading(isActive: boolean): {
+  priority: false;
+  fetchPriority: "low";
+  loading: "eager" | "lazy";
+} {
+  return {
+    priority: false,
+    fetchPriority: "low",
+    loading: isActive ? "eager" : "lazy",
+  };
+}

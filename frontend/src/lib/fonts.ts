@@ -9,7 +9,7 @@ export const montserrat = Montserrat({
   subsets: ["latin", "cyrillic"],
   weight: ["400", "700"],
   display: "swap",
-  preload: true,
+  preload: false,
   variable: "--font-montserrat",
   adjustFontFallback: true,
 });

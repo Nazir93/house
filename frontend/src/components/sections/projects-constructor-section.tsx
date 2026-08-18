@@ -11,6 +11,9 @@ import {
   HOME_MATERIALS_SECTION_EYEBROW,
   HOME_MATERIALS_SECTION_SUBTITLE,
   HOME_MATERIALS_SECTION_TITLE,
+  HOME_MATERIAL_CARD_IMAGE_PRIORITY,
+  HOME_MATERIAL_CARD_IMAGE_QUALITY,
+  HOME_MATERIAL_CARD_IMAGE_SIZES,
   HOME_MATERIAL_CARDS,
 } from "@/lib/home-materials-section";
 import { useHouseConstructionCalculatorConfig } from "@/lib/use-house-construction-calculator-config";
@@ -175,7 +178,7 @@ export function ProjectsConstructorSection() {
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3 lg:gap-5">
-          {materialCards.map((card, i) => (
+          {materialCards.map((card) => (
             <article
               key={card.id}
               className={cn(
@@ -188,9 +191,10 @@ export function ProjectsConstructorSection() {
                   src={card.image}
                   alt={card.title}
                   fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 560px"
+                  sizes={HOME_MATERIAL_CARD_IMAGE_SIZES}
+                  quality={HOME_MATERIAL_CARD_IMAGE_QUALITY}
                   className="object-contain object-center transition duration-700 ease-out hover:scale-[1.02]"
-                  priority={i === 0}
+                  priority={HOME_MATERIAL_CARD_IMAGE_PRIORITY}
                 />
                 <div
                   className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/45 to-transparent"

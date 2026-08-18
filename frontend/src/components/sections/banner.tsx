@@ -19,7 +19,7 @@ import { useTheme } from "@/lib/theme-context";
 import { HOME_HERO_BANNER_ID } from "@/lib/site-anchors";
 import type { HomeHeroBanner } from "@/lib/home-hero-banner-schema";
 import { HOME_HERO_CTAS } from "@/lib/home-hero-first-screen";
-import { HOME_HERO_LCP_QUALITY, HOME_HERO_LCP_WIDTH } from "@/lib/home-hero-lcp";
+import { HOME_HERO_LCP_QUALITY, HOME_HERO_LCP_WIDTH, homeHeroCarouselImageLoading } from "@/lib/home-hero-lcp";
 import { buildImagePrefetchSrc } from "@/lib/image-loading";
 import { cn } from "@/lib/utils";
 
@@ -28,9 +28,9 @@ const BADGE_ICONS = [Award, Home, ShieldCheck, ClipboardCheck] as const;
 /** Едва заметная «стеклянная» обводка на тёмном баннере */
 const edgeGlass = "border border-white/[0.07]";
 
-/** Матовый фон как у промо-карточки справа: полупрозрачный + лёгкий blur. */
+/** Матовый фон как у промо-карточки справа: полупрозрачный, без blur (blur задерживает LCP H1). */
 const matteGlass =
-  "border border-white/[0.07] bg-black/58 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur-sm";
+  "border border-white/[0.07] bg-black/58 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),0_12px_40px_rgba(0,0,0,0.35)]";
 const matteGlassHover = "hover:border-white/15 hover:bg-black/68";
 
 /** Интервал автопрокрутки промо-карусели на баннере. */
@@ -244,7 +244,7 @@ export function BannerSection({
 
             <div
               className={cn(
-                "mt-4 grid max-w-2xl grid-cols-1 gap-2 rounded-2xl bg-black/30 p-1.5 shadow-lg shadow-black/20 backdrop-blur-sm min-[420px]:grid-cols-3 min-[420px]:gap-1.5 sm:gap-2 sm:p-1.5",
+                "mt-4 grid max-w-2xl grid-cols-1 gap-2 rounded-2xl bg-black/30 p-1.5 shadow-lg shadow-black/20 min-[420px]:grid-cols-3 min-[420px]:gap-1.5 sm:gap-2 sm:p-1.5",
                 edgeGlass,
               )}
             >
@@ -291,7 +291,7 @@ export function BannerSection({
                 }
               }}
               className={cn(
-                "rounded-2xl bg-black/58 shadow-[0_24px_72px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.04)] backdrop-blur-sm outline-none focus-visible:ring-2 focus-visible:ring-white/15 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent sm:rounded-[1.25rem]",
+                "rounded-2xl bg-black/58 shadow-[0_24px_72px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.04)] outline-none focus-visible:ring-2 focus-visible:ring-white/15 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent sm:rounded-[1.25rem]",
                 edgeGlass,
               )}
             >
@@ -335,6 +335,7 @@ export function BannerSection({
                         index === (slideIndex - 1 + promos.length) % promos.length;
                       // Не монтируем дальние слайды — иначе на 4G качаются все промо сразу.
                       if (!isActive && !isAdjacent) return null;
+                      const imageLoading = homeHeroCarouselImageLoading(isActive);
                       return (
                         <CmsImage
                           key={promo.image}
@@ -343,9 +344,9 @@ export function BannerSection({
                           fill
                           quality={75}
                           sizes="(max-width: 1023px) 96vw, 380px"
-                          priority={isActive}
-                          fetchPriority={isActive ? "high" : "low"}
-                          loading={isActive ? "eager" : "lazy"}
+                          priority={imageLoading.priority}
+                          fetchPriority={imageLoading.fetchPriority}
+                          loading={imageLoading.loading}
                           aria-hidden={!isActive}
                           className={cn(
                             "object-cover object-center transition-opacity duration-500 ease-out",
@@ -365,7 +366,7 @@ export function BannerSection({
             >
               <div
                 className={cn(
-                  "flex shrink-0 items-center gap-2 rounded-full bg-black/48 px-2 py-1.5 backdrop-blur-sm sm:gap-3 sm:px-3 sm:py-2",
+                  "flex shrink-0 items-center gap-2 rounded-full bg-black/48 px-2 py-1.5 sm:gap-3 sm:px-3 sm:py-2",
                   edgeGlass,
                 )}
               >
@@ -402,7 +403,7 @@ export function BannerSection({
             <div
               key={text}
               className={cn(
-                "flex min-h-[44px] min-w-0 items-center gap-2.5 overflow-hidden rounded-xl bg-black/35 px-3 py-2 shadow-md shadow-black/25 backdrop-blur-sm sm:min-h-[48px] sm:gap-3 sm:px-3.5 sm:py-2.5",
+                "flex min-h-[44px] min-w-0 items-center gap-2.5 overflow-hidden rounded-xl bg-black/35 px-3 py-2 shadow-md shadow-black/25 sm:min-h-[48px] sm:gap-3 sm:px-3.5 sm:py-2.5",
                 edgeGlass,
               )}
             >

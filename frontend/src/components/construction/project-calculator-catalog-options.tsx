@@ -340,7 +340,9 @@ function OptionWorkScope({
       <div
         className={cn(
           "grid gap-2.5 sm:items-start sm:gap-4",
-          src ? "grid-cols-1 sm:grid-cols-[minmax(120px,160px)_minmax(0,1fr)]" : "grid-cols-1",
+          src && !isDiagram
+            ? "grid-cols-1 sm:grid-cols-[minmax(120px,160px)_minmax(0,1fr)]"
+            : "grid-cols-1",
         )}
       >
         {src ? (
@@ -348,7 +350,7 @@ function OptionWorkScope({
             className={cn(
               "relative mx-auto w-full overflow-hidden rounded-lg sm:mx-0",
               isDiagram
-                ? "aspect-[4/3] max-w-[280px] bg-transparent sm:aspect-square sm:max-w-none"
+                ? "aspect-[1024/566] max-w-none bg-transparent sm:aspect-[1024/566]"
                 : "aspect-[4/3] max-w-[280px] bg-[var(--stone)] sm:max-w-none",
             )}
           >
@@ -358,7 +360,7 @@ function OptionWorkScope({
               fill
               unoptimized={isDiagram}
               className={cn(isDiagram ? "object-contain object-center" : "object-cover object-center")}
-              sizes="(max-width: 640px) 280px, 160px"
+              sizes={isDiagram ? "(max-width: 640px) 100vw, 640px" : "(max-width: 640px) 280px, 160px"}
             />
             {zoomable && !isDiagram ? (
               <button
