@@ -59,7 +59,7 @@ function ReviewCard({ r }: { r: PublicReviewItem }) {
         <div className="min-w-0 flex-1">
           <StarsRow rating={r.rating} />
           <p
-            className="mt-1.5 break-words text-[15px] font-semibold leading-snug sm:mt-2 sm:text-base"
+            className="mt-1.5 break-words hyphens-none text-pretty text-[15px] font-semibold leading-snug sm:mt-2 sm:text-base"
             style={{ color: "var(--text)" }}
           >
             {r.authorName}

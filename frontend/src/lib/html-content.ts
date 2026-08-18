@@ -28,7 +28,7 @@ function decodeHtmlEntities(input: string): string {
 
 /** Классы для вводного текста на листингах (портфолио, блог): переносы, длина строки ~65ch, ru-типографика. */
 export const PAGE_INTRO_PROSE_CLASS =
-  "w-full max-w-[min(100%,65ch)] text-sm sm:text-base md:text-[1.0625rem] leading-[1.65] sm:leading-relaxed text-pretty break-words hyphens-auto [overflow-wrap:anywhere] [&_p]:mb-4 [&_p:last-child]:mb-0 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:underline [&_a]:underline-offset-2 [&_a]:decoration-[var(--accent)]/60 [&_strong]:font-semibold [&_strong]:text-[var(--text)] [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg";
+  "w-full max-w-[min(100%,65ch)] text-sm sm:text-base md:text-[1.0625rem] leading-[1.65] sm:leading-relaxed text-pretty break-words hyphens-manual [overflow-wrap:break-word] [&_p]:mb-4 [&_p:last-child]:mb-0 [&_ul]:my-3 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:my-3 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:underline [&_a]:underline-offset-2 [&_a]:decoration-[var(--accent)]/60 [&_a]:break-all [&_strong]:font-semibold [&_strong]:text-[var(--text)] [&_img]:max-w-full [&_img]:h-auto [&_img]:rounded-lg";
 
 export function sanitizeArticleHtml(html: string): string {
   return sanitizeHtml(html, {

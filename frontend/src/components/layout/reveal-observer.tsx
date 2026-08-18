@@ -5,14 +5,9 @@ import { useEffect } from "react";
 const VISIBLE_CLASS = "is-visible";
 const READY_CLASS = "reveal-animations-ready";
 
-function isInViewport(el: HTMLElement): boolean {
-  const rect = el.getBoundingClientRect();
-  const vh = window.innerHeight || document.documentElement.clientHeight;
-  return rect.top < vh * 0.88 && rect.bottom > 0;
-}
-
 /**
- * Запускаем только после гидратации (useEffect), иначе classList.add ломает SSR-сверку.
+ * Без синхронного getBoundingClientRect на всех [data-reveal] (forced layout в PSI).
+ * READY включаем после первого кадра IO — above-the-fold успевает получить is-visible.
  */
 export function RevealObserver() {
   useEffect(() => {
@@ -24,18 +19,6 @@ export function RevealObserver() {
       return;
     }
 
-    const markVisibleIfInView = (el: HTMLElement) => {
-      if (el.classList.contains(VISIBLE_CLASS)) return true;
-      if (isInViewport(el)) {
-        el.classList.add(VISIBLE_CLASS);
-        return true;
-      }
-      return false;
-    };
-
-    elements.forEach((el) => markVisibleIfInView(el));
-    document.documentElement.classList.add(READY_CLASS);
-
     const io = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -44,32 +27,31 @@ export function RevealObserver() {
           io.unobserve(entry.target);
         }
       },
-      { rootMargin: "0px 0px -10% 0px", threshold: 0.12 }
+      { rootMargin: "12% 0px 12% 0px", threshold: 0.01 },
     );
 
-    const observe = (el: HTMLElement) => {
-      if (el.classList.contains(VISIBLE_CLASS)) return;
-      io.observe(el);
-    };
+    elements.forEach((el) => io.observe(el));
 
-    elements.forEach((el) => observe(el));
+    let readyRaf = 0;
+    readyRaf = window.requestAnimationFrame(() => {
+      readyRaf = window.requestAnimationFrame(() => {
+        document.documentElement.classList.add(READY_CLASS);
+      });
+    });
 
     const mo = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
         for (const node of Array.from(mutation.addedNodes)) {
           if (!(node instanceof HTMLElement)) continue;
-          if (node.matches("[data-reveal]")) {
-            if (!markVisibleIfInView(node)) observe(node);
-          }
-          node.querySelectorAll<HTMLElement>("[data-reveal]").forEach((el) => {
-            if (!markVisibleIfInView(el)) observe(el);
-          });
+          if (node.matches("[data-reveal]")) io.observe(node);
+          node.querySelectorAll<HTMLElement>("[data-reveal]").forEach((el) => io.observe(el));
         }
       }
     });
     mo.observe(document.body, { childList: true, subtree: true });
 
     return () => {
+      window.cancelAnimationFrame(readyRaf);
       mo.disconnect();
       io.disconnect();
       document.documentElement.classList.remove(READY_CLASS);

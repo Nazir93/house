@@ -19,9 +19,13 @@ import {
 import { useContactConfig } from "@/lib/contact-config-context";
 import {
   companyRegistrationLabels,
+  isCompanyRequisiteMonoField,
+  isCompanyRequisiteWideField,
+  keepBrandNameTogether,
   normalizeCompanyWebsiteUrl,
 } from "@/lib/company-requisites";
 import { maxMessengerChatUrl } from "@/lib/messenger-links";
+import { cn } from "@/lib/utils";
 
 function RequisitesBlock() {
   const [open, setOpen] = useState(false);
@@ -79,8 +83,14 @@ function RequisitesBlock() {
           style={{ borderColor: "var(--border)" }}
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 pt-4">
-            {rows.map(({ label, value, href }) => (
-              <div key={label} className="py-1">
+            {rows.map(({ label, value, href }) => {
+              const mono = isCompanyRequisiteMonoField(label);
+              const display = mono ? value : keepBrandNameTogether(value);
+              return (
+              <div
+                key={label}
+                className={cn("py-1", isCompanyRequisiteWideField(label) && "sm:col-span-2")}
+              >
                 <p
                   className="text-[10px] uppercase tracking-[0.15em] mb-1"
                   style={{ color: "var(--text-subtle)" }}
@@ -95,19 +105,25 @@ function RequisitesBlock() {
                     className="inline-flex items-start gap-1.5 text-xs sm:text-sm font-mono tabular-nums break-all underline-offset-2 hover:underline"
                     style={{ color: "var(--accent)" }}
                   >
-                    <span className="min-w-0">{value}</span>
+                    <span className="min-w-0">{display}</span>
                     <ExternalLink size={14} className="mt-0.5 shrink-0 opacity-70" aria-hidden />
                   </a>
                 ) : (
                   <p
-                    className="text-xs sm:text-sm font-mono tabular-nums break-all"
+                    className={cn(
+                      "text-xs sm:text-sm hyphens-none",
+                      mono
+                        ? "font-mono tabular-nums break-all"
+                        : "break-words text-pretty [overflow-wrap:break-word]",
+                    )}
                     style={{ color: "var(--text-muted)" }}
                   >
-                    {value}
+                    {display}
                   </p>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -177,8 +193,8 @@ export function ContactsSection({ embedded }: { embedded?: boolean }) {
             }}
           >
             <Building2 size={14} style={{ color: "var(--accent)" }} />
-            <span className="text-xs font-heading" style={{ color: "var(--accent)" }}>
-              {contact.company.shortName}
+            <span className="text-xs font-heading hyphens-none" style={{ color: "var(--accent)" }}>
+              {keepBrandNameTogether(contact.company.shortName)}
             </span>
           </div>
         ) : null}

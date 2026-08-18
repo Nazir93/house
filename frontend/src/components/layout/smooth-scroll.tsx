@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import Lenis from "lenis";
+import type Lenis from "lenis";
 import { scrollPageToElement } from "@/lib/scroll-page-to-element";
 import { isLowPerfDevice } from "@/lib/use-perf";
 
@@ -44,27 +44,35 @@ export function SmoothScroll() {
       return;
     }
 
-    const lenis = new Lenis({
-      duration: 1.35,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      smoothWheel: true,
-      wheelMultiplier: 0.82,
-      touchMultiplier: 1,
-      syncTouch: false,
+    let cancelled = false;
+    let rafId = 0;
+    let lenis: Lenis | undefined;
+
+    void import("lenis").then(({ default: LenisCtor }) => {
+      if (cancelled) return;
+
+      lenis = new LenisCtor({
+        duration: 1.35,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        smoothWheel: true,
+        wheelMultiplier: 0.82,
+        touchMultiplier: 1,
+        syncTouch: false,
+      });
+
+      window.__lenis = lenis;
+
+      function raf(time: number) {
+        lenis?.raf(time);
+        rafId = requestAnimationFrame(raf);
+      }
+      rafId = requestAnimationFrame(raf);
     });
 
-    window.__lenis = lenis;
-
-    let rafId: number;
-    function raf(time: number) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    }
-    rafId = requestAnimationFrame(raf);
-
     return () => {
+      cancelled = true;
       cancelAnimationFrame(rafId);
-      lenis.destroy();
+      lenis?.destroy();
       delete window.__lenis;
     };
   }, []);

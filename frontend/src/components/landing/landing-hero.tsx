@@ -51,7 +51,7 @@ export function LandingHero({
 
         {/* Title — без vw/clamp, чтобы на широких экранах не раздувалось */}
         <h1
-          className="mb-5 w-full max-w-none break-words font-heading text-xl leading-[1.2] tracking-tight transition-all duration-700 ease-out sm:mb-6 sm:text-2xl md:text-[1.85rem] lg:text-[2rem]"
+          className="mb-5 w-full max-w-none text-balance hyphens-none break-words font-heading text-xl leading-[1.2] tracking-tight transition-all duration-700 ease-out sm:mb-6 sm:text-2xl md:text-[1.85rem] lg:text-[2rem]"
           style={{
             color: "var(--text)",
             opacity: visible ? 1 : 0,

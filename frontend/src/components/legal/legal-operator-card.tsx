@@ -1,6 +1,7 @@
 import type { ContactConfig } from "@/lib/contact-config";
 import {
   companyRegistrationLabels,
+  keepBrandNameTogether,
   normalizeCompanyWebsiteUrl,
 } from "@/lib/company-requisites";
 
@@ -18,8 +19,12 @@ export function LegalOperatorCard({ contact }: { contact: ContactConfig }) {
         Сведения об операторе персональных данных
       </h2>
       <div className="space-y-2 text-sm" style={{ color: "var(--text-muted)" }}>
-        {co.fullName.trim() ? <p>{co.fullName}</p> : null}
-        {co.shortName.trim() && co.shortName !== co.fullName ? <p>{co.shortName}</p> : null}
+        {co.fullName.trim() ? (
+          <p className="hyphens-none text-pretty break-words">{keepBrandNameTogether(co.fullName)}</p>
+        ) : null}
+        {co.shortName.trim() && co.shortName !== co.fullName ? (
+          <p className="hyphens-none text-pretty break-words">{keepBrandNameTogether(co.shortName)}</p>
+        ) : null}
         {co.inn.trim() || registration.length ? (
           <p>
             {[

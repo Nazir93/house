@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useRef, useState } from "react";
-import { InvisibleSmartCaptcha } from "@yandex/smart-captcha";
+import dynamic from "next/dynamic";
 
 import {
   isSmartCaptchaHostOrKeyError,
@@ -9,6 +9,11 @@ import {
 } from "@/lib/smart-captcha-client";
 
 const siteKey = process.env.NEXT_PUBLIC_YANDEX_SMARTCAPTCHA_CLIENT_KEY || "";
+
+const InvisibleSmartCaptcha = dynamic(
+  () => import("@yandex/smart-captcha").then((m) => m.InvisibleSmartCaptcha),
+  { ssr: false },
+);
 
 type SmartCaptchaContextType = {
   getToken: () => Promise<string>;

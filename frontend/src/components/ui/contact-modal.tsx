@@ -1,16 +1,30 @@
 "use client";
 
 import { useState, useEffect, useCallback, type FormEvent } from "react";
+import dynamic from "next/dynamic";
 import { X, CheckCircle } from "lucide-react";
 import { useModal } from "@/lib/modal-context";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
 import { BackNavButton } from "@/components/ui/back-nav";
-import { HouseConstructionCalculatorForm } from "@/components/construction/house-construction-calculator-form";
 import { collectCurrentTrafficParams, trackLeadSuccess } from "@/lib/analytics-goals";
 import { estimatePayloadHasDetailedCalc } from "@/lib/lp-contact-cta";
 import { readEstimateClarificationNote } from "@/lib/project-page-estimate-lead";
 
+const HouseConstructionCalculatorForm = dynamic(
+  () =>
+    import("@/components/construction/house-construction-calculator-form").then((m) => ({
+      default: m.HouseConstructionCalculatorForm,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex min-h-screen items-center justify-center px-4 text-sm text-[var(--text-muted)]">
+        Загрузка калькулятора…
+      </div>
+    ),
+  },
+);
 type Step = "form-calculator" | "success";
 
 function SuccessScreen({ onClose }: { onClose: () => void }) {

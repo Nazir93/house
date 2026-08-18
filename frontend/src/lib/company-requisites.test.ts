@@ -2,6 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   companyRegistrationLabels,
   companyRegistrationLegalSuffix,
+  isCompanyRequisiteMonoField,
+  isCompanyRequisiteWideField,
+  keepBrandNameTogether,
   normalizeCompanyWebsiteUrl,
 } from "@/lib/company-requisites";
 
@@ -31,5 +34,19 @@ describe("company-requisites", () => {
       ", ОГРН 1255300000537",
     );
     expect(companyRegistrationLegalSuffix({ ogrn: "", ogrnip: "" })).toBe("");
+  });
+
+  it("keepBrandNameTogether: не рвёт «Часть Души»", () => {
+    expect(keepBrandNameTogether("Общество с ограниченной ответственностью «Часть Души»")).toBe(
+      "Общество с ограниченной ответственностью «Часть\u00A0Души»",
+    );
+    expect(keepBrandNameTogether("ООО Часть Души")).toBe("ООО Часть\u00A0Души");
+  });
+
+  it("классификация полей реквизитов", () => {
+    expect(isCompanyRequisiteMonoField("ИНН")).toBe(true);
+    expect(isCompanyRequisiteMonoField("Полное наименование")).toBe(false);
+    expect(isCompanyRequisiteWideField("Полное наименование")).toBe(true);
+    expect(isCompanyRequisiteWideField("БИК")).toBe(false);
   });
 });

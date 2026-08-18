@@ -38,7 +38,7 @@ export function BuiltObjectHistoryCards({ cards }: { cards: BuiltObjectHistoryCa
                 {String(index + 1).padStart(2, "0")}
               </span>
               <span
-                className="min-w-0 flex-1 break-words font-heading text-sm font-bold leading-snug [overflow-wrap:anywhere] sm:text-[15px]"
+                className="min-w-0 flex-1 break-words hyphens-none text-pretty font-heading text-sm font-bold leading-snug sm:text-[15px]"
                 style={{ color: "var(--text)" }}
               >
                 {card.title}

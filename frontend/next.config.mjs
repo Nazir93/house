@@ -16,7 +16,7 @@ const nextConfig = {
     root: projectRoot,
   },
   experimental: {
-    optimizePackageImports: ["lucide-react", "framer-motion"],
+    optimizePackageImports: ["lucide-react", "framer-motion", "lenis"],
   },
   images: {
     /** Кэш оптимизированных картинок на диске Next — повторный визит быстрее (сек.). */

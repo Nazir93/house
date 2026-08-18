@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTheme } from "@/lib/theme-context";
 import { isLowPerfDevice } from "@/lib/use-perf";
 
@@ -33,7 +33,7 @@ export function CustomCursor() {
   const [visible, setVisible] = useState(false);
   const [hovering, setHovering] = useState(false);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const active = shouldUseCustomCursor();
     setEnabled(active);
     if (active) {

@@ -1,5 +1,37 @@
 import type { CompanyRequisites } from "@/lib/contact-config";
 
+/** Поля с длинными «номерами» — можно рвать по символам. */
+const REQUISITE_MONO_LABELS = new Set([
+  "ИНН",
+  "ОГРН",
+  "ОГРНИП",
+  "Расчётный счёт",
+  "Корр. счёт",
+  "БИК",
+  "Ссылка",
+]);
+
+/** Текстовые поля шире одной колонки — меньше уродливых переносов. */
+const REQUISITE_WIDE_LABELS = new Set(["Полное наименование", "Юридический адрес", "Банк"]);
+
+export function isCompanyRequisiteMonoField(label: string): boolean {
+  return REQUISITE_MONO_LABELS.has(label);
+}
+
+export function isCompanyRequisiteWideField(label: string): boolean {
+  return REQUISITE_WIDE_LABELS.has(label);
+}
+
+/**
+ * Не рвёт бренд посередине: «Часть Души» / Часть Души остаются на одной строке.
+ * Пробелы внутри ёлочек и известного бренда → неразрывные.
+ */
+export function keepBrandNameTogether(text: string): string {
+  return text
+    .replace(/«([^»]+)»/g, (_m, inner: string) => `«${String(inner).replace(/ +/g, "\u00A0")}»`)
+    .replace(/Часть Души/g, "Часть\u00A0Души");
+}
+
 /** Нормализация URL для отображения/ссылки в реквизитах. */
 export function normalizeCompanyWebsiteUrl(raw: string): string | null {
   const value = raw.trim();
