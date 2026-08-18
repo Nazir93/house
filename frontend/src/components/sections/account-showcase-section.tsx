@@ -15,6 +15,7 @@ import {
 import { ACCOUNT_SHOWCASE_ICON_BY_ID } from "@/lib/account-showcase-icons";
 import { AccountShowcaseFooter } from "@/components/sections/account-showcase-footer";
 import { AccountShowcaseMockup } from "@/components/sections/account-showcase-mockup";
+import { SECTION_LEAD_CLASSNAME } from "@/lib/responsive-copy";
 
 export function AccountShowcaseSection() {
   const total = ACCOUNT_SHOWCASE_ITEMS.length;
@@ -41,7 +42,7 @@ export function AccountShowcaseSection() {
             >
               {ACCOUNT_SHOWCASE_SECTION_TITLE}
             </h2>
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--text-muted)] sm:mt-5 sm:text-[15px]">
+            <p className={`mt-4 ${SECTION_LEAD_CLASSNAME}`}>
               {ACCOUNT_SHOWCASE_SECTION_INTRO}
             </p>
           </div>

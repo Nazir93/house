@@ -164,7 +164,7 @@ function ServiceSlideStack({
                   {item.title}
                 </Link>
               </p>
-              <p className="mt-3 max-w-xl pl-[calc(1rem+3px)] text-[15px] leading-relaxed text-[var(--text-muted)] md:mt-4 md:pl-[calc(1.5rem+4px)] md:text-base lg:text-[17px] lg:leading-relaxed">
+              <p className="mt-3 max-w-2xl pl-[calc(1rem+3px)] text-pretty text-[15px] leading-relaxed text-[var(--text-muted)] sm:max-w-3xl md:mt-4 md:pl-[calc(1.5rem+4px)] md:text-base lg:max-w-none lg:text-[17px] lg:leading-relaxed">
                 {item.description}
               </p>
             </div>

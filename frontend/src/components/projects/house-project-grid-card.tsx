@@ -115,7 +115,7 @@ export function HouseProjectGridCard({
         <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
           <Link
             href={href}
-            className="min-w-0 flex-1 truncate font-heading text-base font-bold uppercase tracking-tight text-[var(--text)] transition hover:text-[var(--accent)] sm:text-lg"
+            className="min-w-0 flex-1 line-clamp-2 break-words font-heading text-base font-bold uppercase tracking-tight text-[var(--text)] transition hover:text-[var(--accent)] sm:text-lg"
           >
             {project.title}
           </Link>

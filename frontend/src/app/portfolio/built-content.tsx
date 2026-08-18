@@ -23,6 +23,8 @@ import { resolveBuiltObjectCoverAlt } from "@/lib/seo/built-object-image-seo";
 import { cn } from "@/lib/utils";
 import { BUILT_HOMES_SECTION_LABEL, UNDER_CONSTRUCTION_SECTION_LABEL } from "@/lib/constants";
 import { CmsImage } from "@/components/ui/cms-image";
+import { keepBrandNameTogether } from "@/lib/company-requisites";
+import { PAGE_LEAD_CLASSNAME } from "@/lib/responsive-copy";
 
 const PortfolioObjectMapExplorer = dynamic(
   () => import("@/components/portfolio/portfolio-object-map-explorer").then((m) => m.PortfolioObjectMapExplorer),
@@ -335,12 +337,12 @@ export function BuiltPortfolioContent({
           )}
         </nav>
 
-        <div className="mt-5 max-w-3xl md:mt-6">
-          <h1 className="font-heading text-2xl font-bold leading-tight tracking-tight text-[var(--accent)] sm:text-3xl md:text-4xl dark:text-[var(--text)]">
+        <div className="mt-5 md:mt-6">
+          <h1 className="max-w-3xl font-heading text-2xl font-bold leading-tight tracking-tight text-[var(--accent)] sm:text-3xl md:text-4xl dark:text-[var(--text)]">
             {resolvedTitle}
           </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[var(--text-muted)] md:text-base">
-            {resolvedDescription}
+          <p className={`mt-4 ${PAGE_LEAD_CLASSNAME}`}>
+            {keepBrandNameTogether(resolvedDescription)}
           </p>
         </div>
 

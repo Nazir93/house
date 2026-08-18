@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, LayoutGrid, LayoutList, Search, SlidersHorizontal, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PAGE_LEAD_CLASSNAME } from "@/lib/responsive-copy";
 import { formatRub, getProjectRenders, type HouseProjectItem } from "@/lib/construction-data";
 import { formatHouseProjectFloorsLabel } from "@/lib/house-project-floors";
 import {
@@ -676,7 +677,7 @@ export function ProjectsCatalogContent({
             <h1 className="mt-4 font-heading text-[1.75rem] font-bold leading-tight tracking-tight md:text-4xl lg:text-[2.5rem]" style={{ color: "var(--text)" }}>
               {pageTitle || catalog.listTitle}
             </h1>
-            <p className="mt-4 max-w-2xl text-[15px] leading-relaxed md:text-base" style={{ color: "var(--text-muted)" }}>
+            <p className={`mt-4 ${PAGE_LEAD_CLASSNAME}`} style={{ color: "var(--text-muted)" }}>
               {pageDescription || catalog.listDescription}
             </p>
 

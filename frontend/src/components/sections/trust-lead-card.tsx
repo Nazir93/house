@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SECTION_LEAD_CLASSNAME } from "@/lib/responsive-copy";
 import {
   TRUST_BENEFITS,
   TRUST_SECTION_EYEBROW,
@@ -75,7 +76,7 @@ export function TrustLeadCardBody({ variant, afterIntro }: TrustLeadCardBodyProp
               </span>
             ))}
           </HeadingTag>
-          <p className="mt-3 max-w-xl text-[13px] leading-relaxed text-[var(--text-muted)] sm:text-sm md:text-[15px]">
+          <p className={`mt-3 ${SECTION_LEAD_CLASSNAME}`}>
             {TRUST_SECTION_INTRO}
           </p>
         </div>
@@ -116,7 +117,7 @@ export function TrustLeadCardBody({ variant, afterIntro }: TrustLeadCardBodyProp
             </span>
           ))}
         </WhyHeadingTag>
-        <p className="mt-3 max-w-2xl text-[13px] leading-relaxed text-[var(--text-muted)] sm:text-sm md:text-[15px]">
+        <p className={`mt-3 ${SECTION_LEAD_CLASSNAME}`}>
           {TRUST_WHY_INTRO}
         </p>
       </div>

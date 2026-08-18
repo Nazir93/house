@@ -3,6 +3,7 @@ import { ArrowRight, FileStack, Layers, PenTool, Ruler } from "lucide-react";
 import { SITE_NAME, CITY } from "@/lib/constants";
 import { ProjectDesignCostCalculator } from "@/components/construction/project-design-cost-calculator";
 import { DESIGN_MAIN_DOCUMENTATION_ITEMS } from "@/lib/design-project-pricing";
+import { PAGE_LEAD_CLASSNAME } from "@/lib/responsive-copy";
 
 const STEPS = [
   {
@@ -64,7 +65,7 @@ export function IndividualDesignPageContent() {
           <h1 className="mt-5 w-full max-w-none font-heading text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl">
             Индивидуальное проектирование
           </h1>
-          <p className="mt-4 max-w-2xl text-base leading-relaxed sm:text-lg" style={{ color: "var(--text-muted)" }}>
+          <p className={`mt-4 ${PAGE_LEAD_CLASSNAME} sm:text-lg`} style={{ color: "var(--text-muted)" }}>
             Рассчитайте ориентировочную стоимость архитектурно-строительного проекта по площади дома и выбранным
             опциям. Точная смета — после выезда на участок и брифа с архитектором {SITE_NAME} в {CITY}.
           </p>

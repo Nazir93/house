@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CheckCircle } from "lucide-react";
 import { HouseConstructionCalculatorForm } from "@/components/construction/house-construction-calculator-form";
 import type { CommercialPageSeo } from "@/lib/seo/commercial-page-seo";
+import { PAGE_LEAD_CLASSNAME } from "@/lib/responsive-copy";
 
 export function CalculatorPageClient({ seo }: { seo: CommercialPageSeo }) {
   const [done, setDone] = useState<{ name: string } | null>(null);
@@ -38,7 +39,7 @@ export function CalculatorPageClient({ seo }: { seo: CommercialPageSeo }) {
         <h1 className="mt-5 max-w-3xl font-heading text-2xl font-bold leading-tight tracking-tight sm:text-3xl md:text-4xl">
           {seo.h1}
         </h1>
-        <p className="mt-4 max-w-3xl text-[15px] leading-relaxed md:text-base" style={{ color: "var(--text-muted)" }}>
+        <p className={`mt-4 ${PAGE_LEAD_CLASSNAME}`} style={{ color: "var(--text-muted)" }}>
           {seo.intro}
         </p>
       </div>

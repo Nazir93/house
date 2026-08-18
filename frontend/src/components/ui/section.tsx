@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { SECTION_LEAD_CLASSNAME } from "@/lib/responsive-copy";
 import { HTMLAttributes, useEffect, useRef, useState } from "react";
 
 interface SectionProps extends HTMLAttributes<HTMLElement> {
@@ -68,7 +69,7 @@ export function SectionTitle({
         {children}
       </h2>
       {subtitle && (
-        <p className="text-base md:text-lg max-w-xl" style={{ color: "var(--text-muted)" }}>
+        <p className={cn(SECTION_LEAD_CLASSNAME, "text-base md:text-lg")} style={{ color: "var(--text-muted)" }}>
           {subtitle}
         </p>
       )}

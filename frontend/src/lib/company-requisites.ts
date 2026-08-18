@@ -29,7 +29,7 @@ export function isCompanyRequisiteWideField(label: string): boolean {
 export function keepBrandNameTogether(text: string): string {
   return text
     .replace(/«([^»]+)»/g, (_m, inner: string) => `«${String(inner).replace(/ +/g, "\u00A0")}»`)
-    .replace(/Часть Души/g, "Часть\u00A0Души");
+    .replace(/Часть\s+души/gi, (match) => match.replace(/\s+/, "\u00A0"));
 }
 
 /** Нормализация URL для отображения/ссылки в реквизитах. */

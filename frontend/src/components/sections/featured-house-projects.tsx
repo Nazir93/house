@@ -156,7 +156,7 @@ export function FeaturedHouseProjectsSection({
                 </button>
               </div>
             </div>
-            <p className="max-w-xl text-sm leading-relaxed text-[var(--text-muted)] sm:text-[15px] lg:max-w-[480px] lg:text-right">
+            <p className="max-w-2xl text-pretty text-sm leading-relaxed text-[var(--text-muted)] sm:max-w-3xl sm:text-[15px] lg:max-w-none lg:text-right">
               {HOME_FEATURED_PROJECTS_INTRO}
             </p>
           </div>
@@ -241,7 +241,7 @@ export function FeaturedHouseProjectsSection({
                       <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
                         <Link
                           href={href}
-                          className="min-w-0 flex-1 truncate font-heading text-base font-bold uppercase tracking-tight text-[var(--text)] transition hover:text-[var(--accent)] sm:text-lg"
+                          className="min-w-0 flex-1 line-clamp-2 break-words font-heading text-base font-bold uppercase tracking-tight text-[var(--text)] transition hover:text-[var(--accent)] sm:text-lg"
                         >
                           {p.title}
                         </Link>

@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { ArrowRight, UserRound } from "lucide-react";
 
 import { ACCOUNT_SHOWCASE_FOOTER_GUEST_TEXT } from "@/lib/account-showcase";
+import { SECTION_LEAD_CLASSNAME } from "@/lib/responsive-copy";
 
 type ClientDashboardPreview = {
   clientName: string | null;
@@ -66,7 +67,7 @@ export function AccountShowcaseFooter() {
   if (!isClient) {
     return (
       <div className="mt-10 flex flex-col gap-3 border-t border-[var(--border)] pt-10 sm:flex-row sm:items-center sm:justify-between">
-        <p className="max-w-2xl text-sm leading-relaxed text-[var(--text-muted)]">
+        <p className={SECTION_LEAD_CLASSNAME}>
           {ACCOUNT_SHOWCASE_FOOTER_GUEST_TEXT}
         </p>
         <Link
