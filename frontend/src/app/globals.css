@@ -130,6 +130,23 @@
     pointer-events: none;
   }
 
+  /*
+   * Поиск: не композитить главную под оверлеем.
+   * Иначе backdrop-blur и position:fixed на body гоняют GPU по видео/картинкам — страница «виснет».
+   */
+  body.site-search-open main,
+  body.site-search-open footer,
+  body.site-search-open .mobile-bottom-nav-bar,
+  body.site-search-open .mobile-bottom-nav-spacer {
+    content-visibility: hidden;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  body.site-search-open .custom-cursor-blob {
+    display: none;
+  }
+
   [data-theme="light"] .site-header-bar:not(.site-header-bar--glass) {
     box-shadow: 0 1px 0 rgba(15, 61, 46, 0.06);
     backdrop-filter: none;

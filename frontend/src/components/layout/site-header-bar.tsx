@@ -24,6 +24,7 @@ import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { SiteSearchPanel } from "@/components/layout/site-search-panel";
 import { YandexMapsRatingChip } from "@/components/layout/yandex-maps-rating-chip";
 import { lockBodyScroll, unlockBodyScroll } from "@/lib/body-scroll-lock";
+import { pausePageMediaForOverlay } from "@/lib/overlay-page-freeze";
 import { cn } from "@/lib/utils";
 
 export function SiteHeaderBar() {
@@ -90,8 +91,9 @@ export function SiteHeaderBar() {
 
   useEffect(() => {
     if (searchOpen) {
-      lockBodyScroll();
       document.body.classList.add("site-search-open");
+      pausePageMediaForOverlay();
+      lockBodyScroll();
     } else {
       unlockBodyScroll();
       document.body.classList.remove("site-search-open");
@@ -114,7 +116,11 @@ export function SiteHeaderBar() {
   function toggleSearch() {
     setOpenSection(null);
     setSearchOpen((v) => {
-      if (!v) window.dispatchEvent(new Event("close-mobile-menu"));
+      if (!v) {
+        window.dispatchEvent(new Event("close-mobile-menu"));
+        document.body.classList.add("site-search-open");
+        pausePageMediaForOverlay();
+      }
       return !v;
     });
   }

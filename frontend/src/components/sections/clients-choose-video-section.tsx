@@ -6,7 +6,10 @@ import Link from "next/link";
 import { ArrowUpRight, ChevronsDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { isLowPerfDevice } from "@/lib/use-perf";
+import {
+  clientsChooseVideoSeekIntervalMs,
+  shouldScrubClientsChooseVideoDense,
+} from "@/lib/clients-choose-media";
 import { CLIENTS_CHOOSE_SERVICES } from "@/lib/clients-choose-services";
 import {
   getClientsChooseScrollState,
@@ -14,9 +17,6 @@ import {
   resolveClientsChooseSlideVisual,
   resolveClientsChooseVideoProgress,
 } from "@/lib/clients-choose-scroll-state";
-
-/** Минимальный интервал seek по видео — чаще даёт jank на слабых CPU/GPU. */
-const VIDEO_SEEK_MIN_MS = 120;
 
 /** Высота скролл-трека на один пункт услуги (vh) — как в рабочем деплое до поломки. */
 const SCROLL_VH_PER_ITEM_MOBILE = 72;
@@ -86,8 +86,8 @@ function VideoPanel({
           src={enabled ? SERVICES_VIDEO_SRC : undefined}
           muted
           playsInline
-          preload={enabled ? "metadata" : "none"}
-          className="absolute inset-0 h-full w-full object-cover object-center"
+          preload={enabled ? "auto" : "none"}
+          className="absolute inset-0 h-full w-full object-cover object-center bg-[var(--bg-secondary)]"
           style={{ pointerEvents: "none" }}
           aria-hidden="true"
         />
@@ -175,11 +175,15 @@ function ServiceSlideStack({
   );
 }
 
-function shouldScrubServicesVideo(): boolean {
+function shouldScrubServicesVideoDense(): boolean {
   if (typeof window === "undefined") return false;
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return false;
-  if (isLowPerfDevice()) return false;
-  return true;
+  const nav = navigator as Navigator & { deviceMemory?: number };
+  return shouldScrubClientsChooseVideoDense({
+    hardwareConcurrency: navigator.hardwareConcurrency,
+    deviceMemory: nav.deviceMemory,
+    userAgent: navigator.userAgent,
+    prefersReducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  });
 }
 
 export function ClientsChooseVideoSection() {
@@ -187,7 +191,7 @@ export function ClientsChooseVideoSection() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const lastSeekRef = useRef<number>(NaN);
   const lastSeekAtRef = useRef(0);
-  const scrubAllowedRef = useRef(true);
+  const seekIntervalRef = useRef(120);
   const [, setActiveIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [hasScrolled, setHasScrolled] = useState(false);
@@ -195,7 +199,8 @@ export function ClientsChooseVideoSection() {
   const [trackHeightVh, setTrackHeightVh] = useState(SCROLL_VH_PER_ITEM_MOBILE * SERVICES.length);
 
   useEffect(() => {
-    scrubAllowedRef.current = shouldScrubServicesVideo();
+    const dense = shouldScrubServicesVideoDense();
+    seekIntervalRef.current = clientsChooseVideoSeekIntervalMs(dense);
   }, []);
 
   useEffect(() => {
@@ -227,8 +232,6 @@ export function ClientsChooseVideoSection() {
       return prev === baseIndex ? prev : baseIndex;
     });
 
-    if (!scrubAllowedRef.current) return;
-
     const video = videoRef.current;
     if (!video || !videoEnabled) return;
     if (!video.duration || Number.isNaN(video.duration) || !Number.isFinite(video.duration)) {
@@ -237,7 +240,7 @@ export function ClientsChooseVideoSection() {
     }
 
     const now = performance.now();
-    if (now - lastSeekAtRef.current < VIDEO_SEEK_MIN_MS) return;
+    if (now - lastSeekAtRef.current < seekIntervalRef.current) return;
 
     const videoNorm = resolveClientsChooseVideoProgress(progress, SERVICES.length);
     let t = videoNorm * video.duration;
@@ -326,11 +329,11 @@ export function ClientsChooseVideoSection() {
     const io = new IntersectionObserver(
       ([entry]) => {
         const next = entry.isIntersecting;
-        if (next && scrubAllowedRef.current) setVideoEnabled(true);
+        // Всегда включаем ролик при появлении секции (иначе на mobile/PWA пустой прямоугольник).
+        if (next) setVideoEnabled(true);
         if (next && !active) {
           active = true;
           syncScrollToServices();
-          // Прогресс слайдов всегда; seek видео — только если разрешён scrub.
           raf = requestAnimationFrame(tick);
         } else if (!next && active) {
           active = false;

@@ -11,7 +11,7 @@ declare global {
 
 declare const self: ServiceWorkerGlobalScope;
 
-const RUNTIME_CACHE_VERSION = "v6";
+const RUNTIME_CACHE_VERSION = "v7";
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
@@ -45,6 +45,10 @@ const serwist = new Serwist({
         request.destination === "script" ||
         request.destination === "style" ||
         request.destination === "worker",
+      handler: new NetworkOnly(),
+    },
+    {
+      matcher: ({ request }) => request.destination === "video",
       handler: new NetworkOnly(),
     },
     {

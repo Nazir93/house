@@ -12,19 +12,19 @@ import {
 import { useTheme } from "@/lib/theme-context";
 import { cn } from "@/lib/utils";
 
-/** Тёмная тема: «окна» поверх тёмного баннера */
+/** Тёмная тема: непрозрачные «окна» — без blur, иначе GPU семплирует всю главную. */
 const glassPaneDark =
-  "rounded-2xl border border-black/35 bg-black/42 shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_12px_48px_rgba(0,0,0,0.45)] backdrop-blur-md sm:rounded-[1.35rem]";
+  "rounded-2xl border border-black/35 bg-[#121816] shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_12px_48px_rgba(0,0,0,0.45)] sm:rounded-[1.35rem]";
 
 const glassCardDark =
-  "rounded-2xl border border-black/35 bg-black/30 shadow-lg shadow-black/25 backdrop-blur-md";
+  "rounded-2xl border border-black/35 bg-[#0c1210] shadow-lg shadow-black/25";
 
 /** Светлая тема: те же контуры блоков на фоне страницы (var(--bg), карточки) */
 const glassPaneLight =
-  "rounded-2xl border border-[rgba(26,30,29,0.14)] bg-white/82 shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_14px_48px_rgba(15,61,46,0.09)] backdrop-blur-md sm:rounded-[1.35rem]";
+  "rounded-2xl border border-[rgba(26,30,29,0.14)] bg-[var(--bg)] shadow-[inset_0_1px_0_rgba(255,255,255,0.95),0_14px_48px_rgba(15,61,46,0.09)] sm:rounded-[1.35rem]";
 
 const glassCardLight =
-  "rounded-2xl border border-[rgba(26,30,29,0.12)] bg-[var(--card-bg)]/93 shadow-[0_10px_32px_rgba(15,61,46,0.07)] backdrop-blur-md";
+  "rounded-2xl border border-[rgba(26,30,29,0.12)] bg-[var(--card-bg)] shadow-[0_10px_32px_rgba(15,61,46,0.07)]";
 
 function norm(s: string): string {
   return s.toLowerCase().replace(/\s+/g, " ").trim();
@@ -190,7 +190,7 @@ export function SiteSearchPanel({
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Фильтр по разделам и страницам…"
                 className={cn(
-                  "funnel-text-input w-full !rounded-2xl border py-3.5 pl-12 pr-4 text-[15px] leading-snug outline-none backdrop-blur-sm transition focus-visible:ring-2 focus-visible:ring-emerald-400/35",
+                  "funnel-text-input w-full !rounded-2xl border py-3.5 pl-12 pr-4 text-[15px] leading-snug outline-none transition focus-visible:ring-2 focus-visible:ring-emerald-400/35",
                   isLight
                     ? "border-[rgba(26,30,29,0.16)] bg-white/92 text-[var(--text)] placeholder:text-[color:rgba(26,30,29,0.45)] shadow-[inset_0_1px_0_rgba(255,255,255,0.92)]"
                     : "border-black/40 bg-black/50 text-neutral-100 placeholder:text-white/42",
