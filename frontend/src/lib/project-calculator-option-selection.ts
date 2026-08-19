@@ -44,8 +44,8 @@ export function sanitizeConstructionOptionSelection(current: Iterable<string>): 
 }
 
 /**
- * При включении галочки опции автоматически раскрываем блок
- * с картинкой и описанием (если есть что показать).
+ * Состояние блока «Состав работ» по галочке:
+ * вкл + есть контент → раскрыть; выкл → свернуть.
  */
 export function shouldAutoExpandCalculatorOptionDetail(params: {
   checked: boolean;

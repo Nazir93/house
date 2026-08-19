@@ -263,9 +263,8 @@ function OptionRow({
   );
 
   useEffect(() => {
-    if (shouldAutoExpandCalculatorOptionDetail({ checked, hasDetail: hasFootnote })) {
-      setOpen(true);
-    }
+    // Галочка вкл → раскрыть состав работ; галочка выкл → свернуть.
+    setOpen(shouldAutoExpandCalculatorOptionDetail({ checked, hasDetail: hasFootnote }));
   }, [checked, hasFootnote]);
 
   return (
@@ -336,22 +335,22 @@ function OptionWorkScope({
   const isDiagram = isCalculatorOptionDiagramUrl(src);
 
   return (
-    <div className="mt-3 rounded-xl bg-[color-mix(in_srgb,var(--bg)_70%,transparent)] p-3 sm:p-4">
+    <div className="mt-3 rounded-xl bg-[var(--bg)] p-3 sm:p-3.5">
       <div
         className={cn(
-          "grid gap-2.5 sm:items-start sm:gap-4",
-          src && !isDiagram
-            ? "grid-cols-1 sm:grid-cols-[minmax(120px,160px)_minmax(0,1fr)]"
-            : "grid-cols-1",
+          "grid gap-2.5 sm:items-start sm:gap-3",
+          src ? "grid-cols-1 sm:grid-cols-[minmax(0,11.5rem)_minmax(0,1fr)]" : "grid-cols-1",
         )}
       >
         {src ? (
           <div
             className={cn(
               "relative mx-auto w-full overflow-hidden rounded-lg sm:mx-0",
+              // Фон контейнера = фон сайта; чёрный фон в PNG на тёмной теме убираем blend-режимом.
+              "bg-[var(--bg)]",
               isDiagram
-                ? "aspect-[1024/566] max-w-none bg-transparent sm:aspect-[1024/566]"
-                : "aspect-[4/3] max-w-[280px] bg-[var(--stone)] sm:max-w-none",
+                ? "aspect-[4/3] max-h-[10.5rem] max-w-[15rem] sm:max-h-[9.5rem] sm:max-w-none"
+                : "aspect-[4/3] max-h-[10.5rem] max-w-[15rem] bg-[var(--stone)] sm:max-h-[9.5rem] sm:max-w-none",
             )}
           >
             <CmsImage
@@ -359,8 +358,12 @@ function OptionWorkScope({
               alt={name}
               fill
               unoptimized={isDiagram}
-              className={cn(isDiagram ? "object-contain object-center" : "object-cover object-center")}
-              sizes={isDiagram ? "(max-width: 640px) 100vw, 640px" : "(max-width: 640px) 280px, 160px"}
+              className={cn(
+                isDiagram ? "object-contain object-center" : "object-cover object-center",
+                // Тёмная тема: чёрный прямоугольник в схеме → прозрачный (виден фон сайта).
+                isDiagram && "dark:mix-blend-lighten",
+              )}
+              sizes="(max-width: 640px) 240px, 184px"
             />
             {zoomable && !isDiagram ? (
               <button
@@ -374,7 +377,7 @@ function OptionWorkScope({
         ) : null}
         {text ? (
           <div className="min-w-0">
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--accent)] sm:text-[11px]">
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--accent)] sm:text-[11px] md:whitespace-nowrap">
               Состав работ
             </p>
             <p className="mt-1.5 whitespace-pre-line text-[11px] leading-[1.45] text-[var(--text-muted)] sm:mt-2 sm:text-xs sm:leading-relaxed">

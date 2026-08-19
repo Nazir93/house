@@ -43,8 +43,11 @@ describe("shouldAutoExpandCalculatorOptionDetail", () => {
     expect(shouldAutoExpandCalculatorOptionDetail({ checked: true, hasDetail: true })).toBe(true);
   });
 
-  it("без галочки или без контента — не раскрывать автоматически", () => {
+  it("без галочки — свернуть (даже если есть описание/картинка)", () => {
     expect(shouldAutoExpandCalculatorOptionDetail({ checked: false, hasDetail: true })).toBe(false);
+  });
+
+  it("без контента — не раскрывать", () => {
     expect(shouldAutoExpandCalculatorOptionDetail({ checked: true, hasDetail: false })).toBe(false);
   });
 });
