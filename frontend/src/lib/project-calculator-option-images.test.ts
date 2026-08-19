@@ -319,21 +319,24 @@ describe("project-calculator-option-images", () => {
   });
 
   it("определяет схемы из /images/calculator/", () => {
-    expect(isCalculatorOptionDiagramUrl("/images/calculator/options/electric.webp")).toBe(true);
+    expect(isCalculatorOptionDiagramUrl("/images/calculator/options/electric.png")).toBe(true);
     expect(isCalculatorOptionDiagramUrl("/uploads/electric.png")).toBe(false);
   });
 
-  it("заменяет тяжёлый PNG схем опций на WebP", () => {
+  it("схемы опций отдаём как PNG с альфой, не как сжатый WebP", () => {
+    expect(preferOptimizedOptionDiagramUrl("/images/calculator/options/heated-floor.webp")).toBe(
+      "/images/calculator/options/heated-floor.png",
+    );
     expect(preferOptimizedOptionDiagramUrl("/images/calculator/options/heated-floor.png")).toBe(
-      "/images/calculator/options/heated-floor.webp",
+      "/images/calculator/options/heated-floor.png",
     );
     expect(
       resolveOptionDisplayImageUrl({
         slug: "electric",
         groupSlug: "engineering",
-        imageUrl: "/images/calculator/options/electric.png",
+        imageUrl: "/images/calculator/options/electric.webp",
       }),
-    ).toBe("/images/calculator/options/electric.webp");
+    ).toBe("/images/calculator/options/electric.png");
   });
 
   it("распознаёт legacy-заглушки", () => {
@@ -348,7 +351,7 @@ describe("project-calculator-option-images", () => {
 
     for (const slug of [...engineeringSlugs, ...constructionSlugs]) {
       const meta = CALCULATOR_OPTION_CATALOG_META[slug];
-      expect(meta?.imageUrl, slug).toMatch(/^\/images\/calculator\/options\/.+\.webp$/);
+      expect(meta?.imageUrl, slug).toMatch(/^\/images\/calculator\/options\/.+\.png$/);
       expect(meta?.description?.trim(), slug).toBeTruthy();
     }
   });

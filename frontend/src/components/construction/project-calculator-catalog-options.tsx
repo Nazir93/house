@@ -345,11 +345,10 @@ function OptionWorkScope({
         {src ? (
           <div
             className={cn(
-              "relative mx-auto w-full overflow-hidden rounded-lg sm:mx-0",
-              "bg-[var(--bg)]",
+              "relative mx-auto w-full rounded-lg sm:mx-0",
               isDiagram
-                ? "aspect-[4/3] max-h-[10.5rem] max-w-[15rem] sm:max-h-[9.5rem] sm:max-w-none"
-                : "aspect-[4/3] max-h-[10.5rem] max-w-[15rem] bg-[var(--stone)] sm:max-h-[9.5rem] sm:max-w-none",
+                ? "aspect-[4/3] max-h-[10.5rem] max-w-[15rem] bg-[var(--bg)] sm:max-h-[9.5rem] sm:max-w-none"
+                : "aspect-[4/3] max-h-[10.5rem] max-w-[15rem] overflow-hidden bg-[var(--stone)] sm:max-h-[9.5rem] sm:max-w-none",
             )}
           >
             <CmsImage
@@ -357,8 +356,13 @@ function OptionWorkScope({
               alt={name}
               fill
               unoptimized={isDiagram}
-              className={cn(isDiagram ? "object-contain object-center" : "object-cover object-center")}
+              className={cn(
+                isDiagram
+                  ? "bg-[var(--bg)] object-contain object-center"
+                  : "object-cover object-center",
+              )}
               sizes="(max-width: 640px) 240px, 184px"
+              style={isDiagram ? { backgroundColor: "var(--bg)" } : undefined}
             />
             {zoomable && !isDiagram ? (
               <button

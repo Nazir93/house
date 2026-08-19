@@ -127,7 +127,7 @@ const OPTIONS_BASE = "/images/calculator/options";
 /** Схемы опций калькулятора: slug → описание и картинка. */
 export const CALCULATOR_OPTION_CATALOG_META: Record<string, CalculatorOptionCatalogMeta> = {
   electric: {
-    imageUrl: `${OPTIONS_BASE}/electric.webp`,
+    imageUrl: `${OPTIONS_BASE}/electric.png`,
     description: [
       "Сертифицированный медный кабель ВВГнг(А)-LS по ГОСТ (3×2,5 мм² и 3×1,5 мм²).",
       "Разметка трасс и штробление стен под скрытую электропроводку.",
@@ -140,7 +140,7 @@ export const CALCULATOR_OPTION_CATALOG_META: Record<string, CalculatorOptionCata
     ].join("\n"),
   },
   radiators: {
-    imageUrl: `${OPTIONS_BASE}/radiators.webp`,
+    imageUrl: `${OPTIONS_BASE}/radiators.png`,
     description: [
       "Биметаллические радиаторы с высокой теплоотдачей.",
       "Сертифицированные армированные полипропиленовые трубы и фитинги.",
@@ -154,7 +154,7 @@ export const CALCULATOR_OPTION_CATALOG_META: Record<string, CalculatorOptionCata
     ].join("\n"),
   },
   water: {
-    imageUrl: `${OPTIONS_BASE}/water.webp`,
+    imageUrl: `${OPTIONS_BASE}/water.png`,
     description: [
       "Сертифицированные армированные полипропиленовые трубы и фитинги.",
       "Коллекторная система разводки для стабильного давления на всех точках водоразбора.",
@@ -170,7 +170,7 @@ export const CALCULATOR_OPTION_CATALOG_META: Record<string, CalculatorOptionCata
     ].join("\n"),
   },
   heatedFloor: {
-    imageUrl: `${OPTIONS_BASE}/heated-floor.webp`,
+    imageUrl: `${OPTIONS_BASE}/heated-floor.png`,
     description: [
       "Полусухая цементно-песчаная стяжка, армированная фиброволокном.",
       "Труба из сшитого полиэтилена PEX-a Ø16 мм с кислородным барьером.",
@@ -186,7 +186,7 @@ export const CALCULATOR_OPTION_CATALOG_META: Record<string, CalculatorOptionCata
     ].join("\n"),
   },
   sewer: {
-    imageUrl: `${OPTIONS_BASE}/sewer.webp`,
+    imageUrl: `${OPTIONS_BASE}/sewer.png`,
     description: [
       "Сертифицированные канализационные трубы и фасонные элементы диаметром 110 мм и 50 мм.",
       "Монтаж системы внутренней канализации согласно проектной документации.",
@@ -199,7 +199,7 @@ export const CALCULATOR_OPTION_CATALOG_META: Record<string, CalculatorOptionCata
     ].join("\n"),
   },
   boiler: {
-    imageUrl: `${OPTIONS_BASE}/boiler.webp`,
+    imageUrl: `${OPTIONS_BASE}/boiler.png`,
     description: [
       "Электрический или газовый котёл (в соответствии с проектом и выбранной комплектацией).",
       "Бойлер нагрева для приготовления горячей воды.",
@@ -218,7 +218,7 @@ export const CALCULATOR_OPTION_CATALOG_META: Record<string, CalculatorOptionCata
     ].join("\n"),
   },
   bio: {
-    imageUrl: `${OPTIONS_BASE}/bio.webp`,
+    imageUrl: `${OPTIONS_BASE}/bio.png`,
     description: [
       "Современная станция глубокой биологической очистки бытовых сточных вод.",
       "Степень очистки сточных вод — до 98%.",
@@ -282,57 +282,57 @@ export const CALCULATOR_OPTION_CATALOG_META: Record<string, CalculatorOptionCata
     ].join("\n"),
   },
   interior_plaster: {
-    imageUrl: `${OPTIONS_BASE}/interior-plaster.webp`,
+    imageUrl: `${OPTIONS_BASE}/interior-plaster.png`,
     description:
       "Внутренняя штукатурка стен: оштукатуривание углов по маякам, штукатурные уголки, выравнивание и финишное нанесение слоёв.",
   },
   blind_area: {
-    imageUrl: `${OPTIONS_BASE}/blind-area.webp`,
+    imageUrl: `${OPTIONS_BASE}/blind-area.png`,
     description:
       "Отмостка по периметру фундамента: уклон от стены, подготовка основания, укладка плитки или бетона, линейный водоотвод в дренаж.",
   },
   drainage: {
-    imageUrl: `${OPTIONS_BASE}/drainage.webp`,
+    imageUrl: `${OPTIONS_BASE}/drainage.png`,
     description:
       "Дренаж вокруг дома: перфорированная труба в щебне, геотекстиль, колодец-накопитель и отвод воды от фундамента по периметру.",
   },
   soffits: {
-    imageUrl: `${OPTIONS_BASE}/soffits.webp`,
+    imageUrl: `${OPTIONS_BASE}/soffits.png`,
     description:
       "Софиты и подшивка карнизов: вентилируемые панели, обрамление свесов кровли, защита подкровельного пространства от влаги.",
   },
   gutter: {
-    imageUrl: `${OPTIONS_BASE}/gutter.webp`,
+    imageUrl: `${OPTIONS_BASE}/gutter.png`,
     description:
       "Водосточная система: желоба, воронки, отводы к ливневому колодцу или дренажу. Длина рассчитывается через коэффициент водостока категории дома.",
   },
   roof_folding: {
-    imageUrl: `${OPTIONS_BASE}/roof-folding.webp`,
+    imageUrl: `${OPTIONS_BASE}/roof-folding.png`,
     description:
       "Фальцевая кровля: стоячие фальцы, крепёжные клипсы, подкровельная гидроизоляция и утепление. Стоимость — по площади кровли.",
   },
   roof_soft: {
-    imageUrl: `${OPTIONS_BASE}/roof-soft.webp`,
+    imageUrl: `${OPTIONS_BASE}/roof-soft.png`,
     description:
       "Мягкая кровля: гибкая черепица, подкладочный ковёр, обрешётка, вентиляция конька и ендовы. Расчёт по площади кровельного ската.",
   },
   roof_insulation_200: {
-    imageUrl: `${OPTIONS_BASE}/roof-insulation-200.webp`,
+    imageUrl: `${OPTIONS_BASE}/roof-insulation-200.png`,
     description:
       "Утепление кровли 200 мм: минеральная вата между стропилами, пароизоляция, контробрешётка и вентзазор под кровельным покрытием.",
   },
   roof_insulation_250: {
-    imageUrl: `${OPTIONS_BASE}/roof-insulation-250.webp`,
+    imageUrl: `${OPTIONS_BASE}/roof-insulation-250.png`,
     description:
       "Утепление кровли 250 мм: усиленный тёплый контур для мансарды и жилых чердачных помещений, паро- и гидрозащита кровельного пирога.",
   },
   monolithic_stairs: {
-    imageUrl: `${OPTIONS_BASE}/monolithic-stairs.webp`,
+    imageUrl: `${OPTIONS_BASE}/monolithic-stairs.png`,
     description:
       "Монолитная лестница: опалубка, арматурный каркас, бетонирование и демонтаж щитов. Доступна для мансардных и двухэтажных домов.",
   },
   monolithic_overlap: {
-    imageUrl: `${OPTIONS_BASE}/monolithic-overlap.webp`,
+    imageUrl: `${OPTIONS_BASE}/monolithic-overlap.png`,
     description:
       "Монолитное перекрытие: стойки, балки, арматурная сетка и заливка плиты. Для мансардных и двухэтажных проектов по несущей схеме.",
   },
@@ -344,10 +344,13 @@ export function isLegacyOptionPlaceholderImage(url: string | null | undefined): 
   return trimmed.startsWith(LEGACY_BANNER_PREFIX) || trimmed === "/images/banner/banner-hero-01.png";
 }
 
-/** Старые PNG-схемы опций → лёгкий WebP (миниатюра ~150px, retina до 512). */
+/**
+ * Схемы опций: отдаём полный PNG с альфой.
+ * WebP 512px + агрессивный knockout раньше портили светлую штукатурку и контраст.
+ */
 export function preferOptimizedOptionDiagramUrl(url: string): string {
-  if (/\/images\/calculator\/options\/.+\.png$/i.test(url)) {
-    return url.replace(/\.png$/i, ".webp");
+  if (/\/images\/calculator\/options\/.+\.webp$/i.test(url)) {
+    return url.replace(/\.webp$/i, ".png");
   }
   return url;
 }

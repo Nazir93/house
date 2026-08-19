@@ -484,9 +484,13 @@ export function HouseProjectCompletionSection({
                     src={imgSrc}
                     alt=""
                     fill
+                    unoptimized={isStageDiagram}
                     className={cn(
-                      isStageDiagram ? "object-contain object-center" : "object-cover",
+                      isStageDiagram
+                        ? "bg-[var(--bg)] object-contain object-center"
+                        : "object-cover",
                     )}
+                    style={isStageDiagram ? { backgroundColor: "var(--bg)" } : undefined}
                     sizes={isStageDiagram ? "100vw" : "(max-width: 768px) 100vw, 50vw"}
                   />
                   <button
@@ -511,7 +515,9 @@ export function HouseProjectCompletionSection({
                       src={secondaryImgSrc}
                       alt=""
                       fill
-                      className="object-contain object-center"
+                      unoptimized
+                      className="bg-[var(--bg)] object-contain object-center"
+                      style={{ backgroundColor: "var(--bg)" }}
                       sizes="100vw"
                     />
                     <button
