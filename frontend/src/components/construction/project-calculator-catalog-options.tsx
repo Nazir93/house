@@ -346,7 +346,6 @@ function OptionWorkScope({
           <div
             className={cn(
               "relative mx-auto w-full overflow-hidden rounded-lg sm:mx-0",
-              // Фон контейнера = фон сайта; чёрный фон в PNG на тёмной теме убираем blend-режимом.
               "bg-[var(--bg)]",
               isDiagram
                 ? "aspect-[4/3] max-h-[10.5rem] max-w-[15rem] sm:max-h-[9.5rem] sm:max-w-none"
@@ -358,11 +357,7 @@ function OptionWorkScope({
               alt={name}
               fill
               unoptimized={isDiagram}
-              className={cn(
-                isDiagram ? "object-contain object-center" : "object-cover object-center",
-                // Тёмная тема: чёрный прямоугольник в схеме → прозрачный (виден фон сайта).
-                isDiagram && "dark:mix-blend-lighten",
-              )}
+              className={cn(isDiagram ? "object-contain object-center" : "object-cover object-center")}
               sizes="(max-width: 640px) 240px, 184px"
             />
             {zoomable && !isDiagram ? (
