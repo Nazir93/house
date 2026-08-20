@@ -6,7 +6,11 @@ import { formatRub } from "@/lib/construction-data";
 import type { PublicCalculatorCatalog } from "@/lib/calculator-catalog";
 import { isCalculatorOptionDiagramUrl, resolveOptionDisplayImageUrl } from "@/lib/project-calculator-option-images";
 import { shouldAutoExpandCalculatorOptionDetail } from "@/lib/project-calculator-option-selection";
-import { CALCULATOR_DIAGRAM_ARTBOARD } from "@/lib/calculator-diagram-artboard";
+import {
+  CALCULATOR_DIAGRAM_ARTBOARD,
+  calculatorOptionWorkImageUrl,
+  hasCalculatorOptionWorkDetail,
+} from "@/lib/calculator-diagram-artboard";
 import { cn } from "@/lib/utils";
 import { CmsImage } from "@/components/ui/cms-image";
 
@@ -138,7 +142,7 @@ export function ProjectCalculatorCatalogOptions({
                 wallMaterial,
               })
             : null;
-          if (!description && !imageUrl) return null;
+          if (!hasCalculatorOptionWorkDetail({ description, imageUrl })) return null;
           return (
             <OptionWorkScope
               name={selected?.name ?? "Фасад"}
@@ -258,7 +262,7 @@ function OptionRow({
   loading?: boolean;
   onToggle: () => void;
 }) {
-  const hasFootnote = Boolean(description?.trim() || imageUrl?.trim());
+  const hasFootnote = hasCalculatorOptionWorkDetail({ description, imageUrl });
   const [open, setOpen] = useState(() =>
     shouldAutoExpandCalculatorOptionDetail({ checked, hasDetail: hasFootnote }),
   );
@@ -331,9 +335,10 @@ function OptionWorkScope({
   imageUrl?: string | null;
   zoomable?: boolean;
 }) {
-  const src = imageUrl?.trim() || "";
+  const src = calculatorOptionWorkImageUrl(imageUrl);
   const text = description?.trim() || "";
   const isDiagram = isCalculatorOptionDiagramUrl(src);
+  if (!text && !src) return null;
 
   return (
     <div className="mt-3 rounded-xl bg-[var(--bg-secondary)] p-3 sm:p-3.5">
