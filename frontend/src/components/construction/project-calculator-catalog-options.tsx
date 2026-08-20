@@ -336,10 +336,7 @@ function OptionWorkScope({
   const isDiagram = isCalculatorOptionDiagramUrl(src);
 
   return (
-    <div
-      className="mt-3 rounded-xl border border-[color-mix(in_srgb,var(--border)_70%,transparent)] p-3 sm:p-3.5"
-      style={{ backgroundColor: CALCULATOR_DIAGRAM_ARTBOARD }}
-    >
+    <div className="mt-3 rounded-xl bg-[var(--bg-secondary)] p-3 sm:p-3.5">
       <div
         className={cn(
           "grid gap-2.5 sm:items-start sm:gap-3",
