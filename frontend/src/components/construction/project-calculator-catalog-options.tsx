@@ -8,6 +8,7 @@ import { isCalculatorOptionDiagramUrl, resolveOptionDisplayImageUrl } from "@/li
 import { shouldAutoExpandCalculatorOptionDetail } from "@/lib/project-calculator-option-selection";
 import {
   CALCULATOR_DIAGRAM_ARTBOARD,
+  SHOW_CALCULATOR_FACADE_WORK_IMAGES,
   calculatorOptionWorkImageUrl,
   hasCalculatorOptionWorkDetail,
 } from "@/lib/calculator-diagram-artboard";
@@ -142,12 +143,21 @@ export function ProjectCalculatorCatalogOptions({
                 wallMaterial,
               })
             : null;
-          if (!hasCalculatorOptionWorkDetail({ description, imageUrl })) return null;
+          if (
+            !hasCalculatorOptionWorkDetail({
+              description,
+              imageUrl,
+              hideImage: !SHOW_CALCULATOR_FACADE_WORK_IMAGES,
+            })
+          ) {
+            return null;
+          }
           return (
             <OptionWorkScope
               name={selected?.name ?? "Фасад"}
               description={description}
               imageUrl={imageUrl}
+              hideImage={!SHOW_CALCULATOR_FACADE_WORK_IMAGES}
             />
           );
         })()}
@@ -329,13 +339,15 @@ function OptionWorkScope({
   description,
   imageUrl,
   zoomable = false,
+  hideImage = false,
 }: {
   name: string;
   description?: string | null;
   imageUrl?: string | null;
   zoomable?: boolean;
+  hideImage?: boolean;
 }) {
-  const src = calculatorOptionWorkImageUrl(imageUrl);
+  const src = calculatorOptionWorkImageUrl(imageUrl, { hideImage });
   const text = description?.trim() || "";
   const isDiagram = isCalculatorOptionDiagramUrl(src);
   if (!text && !src) return null;
