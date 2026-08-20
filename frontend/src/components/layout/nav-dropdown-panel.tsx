@@ -43,7 +43,6 @@ function projectIconFor(href: string): LucideIcon {
 function portfolioIconFor(href: string): LucideIcon {
   if (href.includes("under-construction")) return HardHat;
   if (href.includes("/map")) return MapPinned;
-  if (href.includes("contacts")) return Compass;
   return Building2;
 }
 
@@ -123,16 +122,12 @@ function ProjectsDropdown({
 function PortfolioDropdown({
   section,
   onClose,
+  openTourModal,
 }: {
   section: NavSection;
   onClose: () => void;
+  openTourModal: () => void;
 }) {
-  const thumbLinks = section.items.filter((item) => {
-    if (isNavGroup(item)) return false;
-    if ("action" in item && item.action === "openModal") return false;
-    return "href" in item;
-  });
-
   return (
     <div className={cn(panelShell, "min-w-[300px] max-w-[340px] p-3")}>
       <Link
@@ -150,18 +145,40 @@ function PortfolioDropdown({
         </span>
       </Link>
       <ul className="flex flex-col gap-0.5">
-        {thumbLinks.map((item) => {
-          if (!("href" in item)) return null;
-          return (
-            <li key={item.href}>
-              <IconLinkRow
-                href={item.href}
-                label={item.label}
-                Icon={portfolioIconFor(item.href)}
-                onClose={onClose}
-              />
-            </li>
-          );
+        {section.items.map((item) => {
+          if (isNavGroup(item)) return null;
+          if ("action" in item && item.action === "openTourModal") {
+            return (
+              <li key={item.label}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    openTourModal();
+                  }}
+                  className="flex w-full items-center gap-3 rounded-xl px-2 py-2.5 text-left transition-colors hover:bg-black/[0.04]"
+                >
+                  <span className={iconTile}>
+                    <Compass className="h-[18px] w-[18px]" strokeWidth={1.75} aria-hidden />
+                  </span>
+                  <span className="text-[13px] font-medium leading-snug text-[#1a1e1d]">{item.label}</span>
+                </button>
+              </li>
+            );
+          }
+          if ("href" in item) {
+            return (
+              <li key={item.href}>
+                <IconLinkRow
+                  href={item.href}
+                  label={item.label}
+                  Icon={portfolioIconFor(item.href)}
+                  onClose={onClose}
+                />
+              </li>
+            );
+          }
+          return null;
         })}
       </ul>
     </div>
@@ -354,11 +371,13 @@ export function NavDropdownPanel({
   open,
   onClose,
   openModal,
+  openTourModal,
 }: {
   sectionLabel: string;
   open: boolean;
   onClose: () => void;
   openModal: () => void;
+  openTourModal: () => void;
 }) {
   const section = NAV_SECTIONS.find((s) => s.label === sectionLabel);
 
@@ -377,7 +396,7 @@ export function NavDropdownPanel({
   if (section.label === "Проекты") {
     body = <ProjectsDropdown section={section} onClose={onClose} />;
   } else if (section.label === BUILT_HOMES_SECTION_LABEL) {
-    body = <PortfolioDropdown section={section} onClose={onClose} />;
+    body = <PortfolioDropdown section={section} onClose={onClose} openTourModal={openTourModal} />;
   } else if (section.label === "Услуги") {
     body = <ServicesDropdown section={section} onClose={onClose} openModal={openModal} />;
   } else {

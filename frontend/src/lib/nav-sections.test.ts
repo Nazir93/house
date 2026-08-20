@@ -15,4 +15,10 @@ describe("nav-sections", () => {
     const link = section?.items.find((item) => "href" in item && item.href === "/portfolio/under-construction");
     expect(link && "label" in link ? link.label : "").toBe(UNDER_CONSTRUCTION_SECTION_LABEL);
   });
+
+  it("«Экскурсия на объекты» открывает модалку, а не ведёт на /portfolio или /contacts", () => {
+    const section = NAV_SECTIONS.find((s) => s.label === BUILT_HOMES_SECTION_LABEL);
+    const tour = section?.items.find((item) => item.label === "Экскурсия на объекты");
+    expect(tour).toEqual({ action: "openTourModal", label: "Экскурсия на объекты" });
+  });
 });

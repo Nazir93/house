@@ -12,6 +12,7 @@ import { useContactConfig } from "@/lib/contact-config-context";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { NAV_SECTIONS, isNavGroup, type NavSection } from "@/lib/nav-sections";
 import { useModal } from "@/lib/modal-context";
+import { buildNavPortfolioTourEstimatePayload } from "@/lib/portfolio-tour-lead";
 import { maxMessengerChatUrl, telegramChatUrlFromRawPhone } from "@/lib/messenger-links";
 import { cn } from "@/lib/utils";
 
@@ -72,10 +73,12 @@ function FullscreenOverlayNavItems({
   section,
   onClose,
   openContactModal,
+  openTourModal,
 }: {
   section: NavSection;
   onClose: () => void;
   openContactModal: () => void;
+  openTourModal: () => void;
 }) {
   return (
     <>
@@ -127,6 +130,19 @@ function FullscreenOverlayNavItems({
             onClick={() => {
               onClose();
               openContactModal();
+            }}
+            className="mobile-fs-menu__subitem min-h-[44px] py-2 text-left text-sm transition-colors duration-300 hover:text-[var(--accent)] max-lg:min-h-0 max-lg:py-1 max-lg:leading-snug max-lg:text-[13px] sm:min-h-0 sm:py-1 sm:text-sm md:text-base lg:text-[15px]"
+            style={{ color: "var(--text-muted)" }}
+          >
+            {item.label}
+          </button>
+        ) : "action" in item && item.action === "openTourModal" ? (
+          <button
+            key={item.label}
+            type="button"
+            onClick={() => {
+              onClose();
+              openTourModal();
             }}
             className="mobile-fs-menu__subitem min-h-[44px] py-2 text-left text-sm transition-colors duration-300 hover:text-[var(--accent)] max-lg:min-h-0 max-lg:py-1 max-lg:leading-snug max-lg:text-[13px] sm:min-h-0 sm:py-1 sm:text-sm md:text-base lg:text-[15px]"
             style={{ color: "var(--text-muted)" }}
@@ -244,7 +260,8 @@ export function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [expandedMenuSection, setExpandedMenuSection] = useState<string | null>(null);
   const mobileMenuListRef = useRef<HTMLDivElement>(null);
-  const { openModal } = useModal();
+  const { openModal, openModalToEstimate } = useModal();
+  const openTourModal = () => openModalToEstimate(buildNavPortfolioTourEstimatePayload());
   const contact = useContactConfig();
   const telegramMessengerHref = telegramChatUrlFromRawPhone(MESSENGER_CHAT_PHONE_RAW) ?? "";
   const maxMessengerHref = maxMessengerChatUrl(contact.social.maxChat) ?? "";
@@ -618,6 +635,7 @@ export function Header() {
                             section={section}
                             onClose={closeMenu}
                             openContactModal={openModal}
+                            openTourModal={openTourModal}
                           />
                         </div>
                       </div>
@@ -664,6 +682,7 @@ export function Header() {
                           section={section}
                           onClose={closeMenu}
                           openContactModal={openModal}
+                          openTourModal={openTourModal}
                         />
                       </div>
                     </div>

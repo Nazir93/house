@@ -18,6 +18,7 @@ import { maxMessengerChatUrl, telegramChatUrlFromRawPhone } from "@/lib/messenge
 import { NAV_SECTIONS, type NavSection } from "@/lib/nav-sections";
 import { NavDropdownPanel } from "@/components/layout/nav-dropdown-panel";
 import { useModal } from "@/lib/modal-context";
+import { buildNavPortfolioTourEstimatePayload } from "@/lib/portfolio-tour-lead";
 import { useTheme } from "@/lib/theme-context";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
@@ -34,7 +35,7 @@ export function SiteHeaderBar() {
   const maxHref = maxMessengerChatUrl(contact.social.maxChat);
   const { theme } = useTheme();
   const isHomeBanner = pathname === "/";
-  const { openModal } = useModal();
+  const { openModal, openModalToEstimate } = useModal();
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -222,6 +223,7 @@ export function SiteHeaderBar() {
                     open={openSection === section.label}
                     onClose={() => setOpenSection(null)}
                     openModal={openModal}
+                    openTourModal={() => openModalToEstimate(buildNavPortfolioTourEstimatePayload())}
                   />
                 </div>
             ))}

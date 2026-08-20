@@ -46,6 +46,24 @@ export function buildPortfolioTourEstimatePayload(
   };
 }
 
+/** Запись на экскурсию из пункта меню «Построенные дома» (без конкретного объекта). */
+export function buildNavPortfolioTourEstimatePayload(): PortfolioTourEstimatePayload {
+  return {
+    source: PORTFOLIO_TOUR_LEAD_SOURCE,
+    service: "Экскурсия на объекты",
+    calcData: {
+      formType: "portfolio-tour",
+      intent: "tour",
+      entry: "nav",
+      projectTitle: "",
+      objectTitle: null,
+      objectSlug: null,
+      objectSiteStatus: null,
+      objectPath: "/portfolio",
+    },
+  };
+}
+
 export type PortfolioTourModalCopy = {
   eyebrow: string;
   title: string;

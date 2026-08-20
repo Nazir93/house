@@ -1,7 +1,7 @@
 /** Пункт меню: ссылка или открытие модалки */
 export type NavLeaf =
   | { label: string; href: string }
-  | { label: string; action: "openModal" };
+  | { label: string; action: "openModal" | "openTourModal" };
 
 /** Группа с подпунктами (напр. «Услуги» → прайс, документы…) */
 export type NavGroup = { label: string; children: NavLeaf[] };
@@ -30,7 +30,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { href: "/portfolio", label: "Реализованные объекты" },
       { href: "/portfolio/under-construction", label: UNDER_CONSTRUCTION_SECTION_LABEL },
       { href: "/portfolio/map", label: "Карта объектов" },
-      { href: "/contacts", label: "Экскурсия на объекты" },
+      { action: "openTourModal", label: "Экскурсия на объекты" },
     ],
   },
   {

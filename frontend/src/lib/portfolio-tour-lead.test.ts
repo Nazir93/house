@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   PORTFOLIO_TOUR_LEAD_SOURCE,
+  buildNavPortfolioTourEstimatePayload,
   buildPortfolioTourEstimatePayload,
   buildPortfolioTourServiceLabel,
   isPortfolioTourLeadSource,
@@ -46,5 +47,16 @@ describe("portfolio-tour-lead", () => {
   it("пустой заголовок не ломает подписи", () => {
     expect(buildPortfolioTourServiceLabel("  ")).toBe("Экскурсия на объект");
     expect(resolvePortfolioTourModalCopy("").badge).toBeNull();
+  });
+
+  it("меню собирает payload экскурсии без конкретного объекта", () => {
+    const payload = buildNavPortfolioTourEstimatePayload();
+    expect(payload.source).toBe(PORTFOLIO_TOUR_LEAD_SOURCE);
+    expect(payload.service).toBe("Экскурсия на объекты");
+    expect(payload.calcData).toMatchObject({
+      formType: "portfolio-tour",
+      intent: "tour",
+      entry: "nav",
+    });
   });
 });

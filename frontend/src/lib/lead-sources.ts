@@ -49,7 +49,7 @@ export const LEAD_SOURCE_OPTIONS: { value: string; label: string; hint?: string 
   {
     value: "portfolio-tour",
     label: "Экскурсия: запись с портфолио",
-    hint: "Кнопка «Записаться на экскурсию» на /portfolio/[slug] — имя и телефон",
+    hint: "Меню «Экскурсия на объекты» или кнопка на /portfolio/[slug] — имя и телефон",
   },
 ];
 
