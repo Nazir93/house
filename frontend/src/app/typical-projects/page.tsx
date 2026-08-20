@@ -4,7 +4,6 @@ import { getPageMeta } from "@/lib/get-page-meta";
 import { SITE_NAME } from "@/lib/constants";
 import { getHouseProjects } from "@/lib/construction-data";
 import { PARTNER_HOUSE_PROJECT_CATALOG } from "@/lib/house-project-catalog";
-import { getHomeHeroBannerConfig } from "@/lib/home-hero-banner-config";
 import { resolveProjectsCatalogFilterSeoAction } from "@/lib/seo/projects-catalog-filter-indexing";
 import { ProjectsCatalogContent } from "@/app/projects/content";
 
@@ -33,21 +32,10 @@ export default async function TypicalProjectsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const [projects, sp, homeBanner] = await Promise.all([
-    getHouseProjects("partner"),
-    searchParams,
-    getHomeHeroBannerConfig(),
-  ]);
+  const [projects, sp] = await Promise.all([getHouseProjects("partner"), searchParams]);
   const filterSeo = resolveProjectsCatalogFilterSeoAction(sp, "/typical-projects");
   if (filterSeo.redirectTo) {
     redirect(filterSeo.redirectTo);
   }
-  return (
-    <ProjectsCatalogContent
-      projects={projects}
-      searchParams={sp}
-      catalog={catalog}
-      homePromos={homeBanner.promos}
-    />
-  );
+  return <ProjectsCatalogContent projects={projects} searchParams={sp} catalog={catalog} />;
 }

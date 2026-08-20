@@ -16,8 +16,8 @@ import { cn } from "@/lib/utils";
 const ROTATE_MS = 5500;
 
 /**
- * Промо из карусели главной — в пустом месте мобильных/планшетных фильтров каталога.
- * Те же слайды, что в админке «Баннер главной».
+ * Промо из карусели главной — сразу под фильтрами в мобильном drawer портфолио.
+ * Те же слайды, что в админке «Баннер главной» (в каталоге проектов не показываем).
  */
 export function CatalogFiltersHomePromoTeaser({
   promos,
@@ -51,7 +51,7 @@ export function CatalogFiltersHomePromoTeaser({
   const caption = resolveHomeHeroPromoCaption(slide);
 
   return (
-    <div className={cn("mt-auto flex min-h-0 flex-1 flex-col justify-end pt-5", className)}>
+    <div className={cn("mt-4", className)}>
       <article
         className="overflow-hidden rounded-[1.35rem] border border-[color-mix(in_srgb,var(--text)_8%,transparent)] bg-[color-mix(in_srgb,var(--bg-secondary)_70%,var(--bg))] shadow-[0_16px_40px_rgba(0,0,0,0.12)]"
         aria-roledescription="карусель"
