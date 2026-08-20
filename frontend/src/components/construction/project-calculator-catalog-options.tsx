@@ -6,6 +6,7 @@ import { formatRub } from "@/lib/construction-data";
 import type { PublicCalculatorCatalog } from "@/lib/calculator-catalog";
 import { isCalculatorOptionDiagramUrl, resolveOptionDisplayImageUrl } from "@/lib/project-calculator-option-images";
 import { shouldAutoExpandCalculatorOptionDetail } from "@/lib/project-calculator-option-selection";
+import { CALCULATOR_DIAGRAM_ARTBOARD } from "@/lib/calculator-diagram-artboard";
 import { cn } from "@/lib/utils";
 import { CmsImage } from "@/components/ui/cms-image";
 
@@ -335,7 +336,7 @@ function OptionWorkScope({
   const isDiagram = isCalculatorOptionDiagramUrl(src);
 
   return (
-    <div className="mt-3 rounded-xl bg-[var(--bg)] p-3 sm:p-3.5">
+    <div className="mt-3 rounded-xl bg-[var(--bg-secondary)] p-3 sm:p-3.5">
       <div
         className={cn(
           "grid gap-2.5 sm:items-start sm:gap-3",
@@ -345,11 +346,12 @@ function OptionWorkScope({
         {src ? (
           <div
             className={cn(
-              "relative mx-auto w-full rounded-lg sm:mx-0",
+              "relative mx-auto w-full overflow-hidden rounded-lg sm:mx-0",
               isDiagram
-                ? "aspect-[4/3] max-h-[10.5rem] max-w-[15rem] bg-[var(--bg)] sm:max-h-[9.5rem] sm:max-w-none"
+                ? "aspect-[4/3] max-h-[10.5rem] max-w-[15rem] sm:max-h-[9.5rem] sm:max-w-none"
                 : "aspect-[4/3] max-h-[10.5rem] max-w-[15rem] overflow-hidden bg-[var(--stone)] sm:max-h-[9.5rem] sm:max-w-none",
             )}
+            style={isDiagram ? { backgroundColor: CALCULATOR_DIAGRAM_ARTBOARD } : undefined}
           >
             <CmsImage
               src={src}
@@ -358,11 +360,11 @@ function OptionWorkScope({
               unoptimized={isDiagram}
               className={cn(
                 isDiagram
-                  ? "bg-[var(--bg)] object-contain object-center"
+                  ? "object-contain object-center"
                   : "object-cover object-center",
               )}
               sizes="(max-width: 640px) 240px, 184px"
-              style={isDiagram ? { backgroundColor: "var(--bg)" } : undefined}
+              style={isDiagram ? { backgroundColor: CALCULATOR_DIAGRAM_ARTBOARD } : undefined}
             />
             {zoomable && !isDiagram ? (
               <button

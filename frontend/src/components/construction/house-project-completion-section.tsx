@@ -22,6 +22,7 @@ import {
 import type { CalculatorStageId, CalculatorStageTable, ProjectCalculatorUi } from "@/lib/project-calculator-types";
 import { useModal } from "@/lib/modal-context";
 import { CmsImage } from "@/components/ui/cms-image";
+import { CALCULATOR_DIAGRAM_ARTBOARD } from "@/lib/calculator-diagram-artboard";
 import { type PartOfSoulPricingFloors, type PartOfSoulRoofPitch, tierIdToWallMaterial } from "@/lib/part-of-soul-pricing";
 import {
   normalizeTransportBands,
@@ -469,16 +470,23 @@ export function HouseProjectCompletionSection({
             )}
           >
             {!isTextOnlyStage ? (
-              <div className={cn("w-full", showSecondaryDiagram && "flex flex-col gap-2 bg-[var(--bg)] p-2 sm:gap-3 sm:p-3")}>
+              <div
+                className={cn(
+                  "w-full",
+                  showSecondaryDiagram && "flex flex-col gap-2 p-2 sm:gap-3 sm:p-3",
+                )}
+                style={showSecondaryDiagram ? { backgroundColor: CALCULATOR_DIAGRAM_ARTBOARD } : undefined}
+              >
                 <div
                   className={cn(
                     "relative w-full",
                     isStageDiagram
                       ? showSecondaryDiagram
-                        ? "aspect-[16/10] bg-[var(--bg)] sm:aspect-[16/9]"
-                        : "aspect-[16/10] bg-[var(--bg)] p-3 sm:aspect-[16/9] sm:p-4 md:aspect-[2/1]"
+                        ? "aspect-[16/10] sm:aspect-[16/9]"
+                        : "aspect-[16/10] p-3 sm:aspect-[16/9] sm:p-4 md:aspect-[2/1]"
                       : "aspect-[4/3] bg-[var(--stone)] md:aspect-auto md:min-h-[320px]",
                   )}
+                  style={isStageDiagram ? { backgroundColor: CALCULATOR_DIAGRAM_ARTBOARD } : undefined}
                 >
                   <CmsImage
                     src={imgSrc}
@@ -487,10 +495,10 @@ export function HouseProjectCompletionSection({
                     unoptimized={isStageDiagram}
                     className={cn(
                       isStageDiagram
-                        ? "bg-[var(--bg)] object-contain object-center"
+                        ? "object-contain object-center"
                         : "object-cover",
                     )}
-                    style={isStageDiagram ? { backgroundColor: "var(--bg)" } : undefined}
+                    style={isStageDiagram ? { backgroundColor: CALCULATOR_DIAGRAM_ARTBOARD } : undefined}
                     sizes={isStageDiagram ? "100vw" : "(max-width: 768px) 100vw, 50vw"}
                   />
                   <button
@@ -510,14 +518,17 @@ export function HouseProjectCompletionSection({
                   </div>
                 </div>
                 {showSecondaryDiagram && secondaryImgSrc ? (
-                  <div className="relative w-full aspect-[16/10] bg-[var(--bg)] sm:aspect-[16/9]">
+                  <div
+                    className="relative aspect-[16/10] w-full sm:aspect-[16/9]"
+                    style={{ backgroundColor: CALCULATOR_DIAGRAM_ARTBOARD }}
+                  >
                     <CmsImage
                       src={secondaryImgSrc}
                       alt=""
                       fill
                       unoptimized
-                      className="bg-[var(--bg)] object-contain object-center"
-                      style={{ backgroundColor: "var(--bg)" }}
+                      className="object-contain object-center"
+                      style={{ backgroundColor: CALCULATOR_DIAGRAM_ARTBOARD }}
                       sizes="100vw"
                     />
                     <button

@@ -99,15 +99,15 @@ function floodBackdrop(data, width, height) {
   }
 }
 
-/** Снимает только почти-белую кайму у уже прозрачных краёв. */
-function peelStrongBorder(data, width, height, passes = 4) {
+/** Снимает клетку у уже прозрачных краёв (и сильную белую, и серую пару). */
+function peelCheckerBorder(data, width, height, passes = 10) {
   for (let pass = 0; pass < passes; pass++) {
     const mark = [];
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const i = (y * width + x) * 4;
         if (data[i + 3] < 20) continue;
-        if (!isStrongChecker(data[i], data[i + 1], data[i + 2])) continue;
+        if (!isBackdropSeed(data, width, height, x, y)) continue;
         const touch = [
           [x - 1, y],
           [x + 1, y],
@@ -146,7 +146,9 @@ async function prepare(filePath) {
   const { width, height } = info;
 
   floodBackdrop(data, width, height);
-  peelStrongBorder(data, width, height, 10);
+  peelCheckerBorder(data, width, height, 14);
+  floodBackdrop(data, width, height);
+  peelCheckerBorder(data, width, height, 8);
   defringeTransparent(data);
 
   const tmp = `${filePath}.tmp`;
