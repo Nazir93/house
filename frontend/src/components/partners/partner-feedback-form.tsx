@@ -11,7 +11,7 @@ import { FunnelInputField as InputField, FunnelFillButton as FillButton } from "
 import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
 import { partnerFeedbackFormSchema, type PartnerFeedbackFormData } from "@/lib/schemas";
 import { useContactConfig } from "@/lib/contact-config-context";
-import { collectCurrentTrafficParams, trackLeadSuccess } from "@/lib/analytics-goals";
+import { resolveLeadTrafficForSubmit, trackLeadSuccess } from "@/lib/analytics-goals";
 
 async function readLeadError(response: Response): Promise<string> {
   try {
@@ -66,7 +66,7 @@ export function PartnerFeedbackForm({
     setLoading(true);
     try {
       const recaptchaToken = await getSmartCaptchaToken();
-      const trafficParams = collectCurrentTrafficParams();
+      const traffic = resolveLeadTrafficForSubmit();
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -77,20 +77,31 @@ export function PartnerFeedbackForm({
           message: data.message,
           service,
           source,
-          pageUrl: window.location.href,
+          pageUrl: traffic.pageUrl,
           honeypot: data.honeypot || "",
           recaptchaToken: recaptchaToken || undefined,
-          ...trafficParams,
+          utmSource: traffic.utmSource,
+          utmMedium: traffic.utmMedium,
+          utmCampaign: traffic.utmCampaign,
+          utmTerm: traffic.utmTerm,
+          utmContent: traffic.utmContent,
+          yclid: traffic.yclid,
           calcData: {
             kind: "partner-feedback",
+            formType: "partner-feedback",
             topic,
             message: data.message,
+            traffic: {
+              landingUrl: traffic.landingUrl,
+              referrer: traffic.referrer,
+              formType: "partner-feedback",
+            },
           },
         }),
       });
       if (response.ok) {
         const result = (await response.json()) as { redirectUrl?: string };
-        trackLeadSuccess(source, { pageUrl: window.location.href });
+        await trackLeadSuccess(source, { pageUrl: traffic.pageUrl, formType: "partner-feedback" });
         if (result.redirectUrl) {
           window.location.assign(result.redirectUrl);
         }

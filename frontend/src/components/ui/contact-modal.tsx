@@ -7,7 +7,7 @@ import { useModal } from "@/lib/modal-context";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
 import { BackNavButton } from "@/components/ui/back-nav";
-import { collectCurrentTrafficParams, trackLeadSuccess } from "@/lib/analytics-goals";
+import { resolveLeadTrafficForSubmit, trackLeadSuccess } from "@/lib/analytics-goals";
 import { estimatePayloadHasDetailedCalc } from "@/lib/lp-contact-cta";
 import { readEstimateClarificationNote } from "@/lib/project-page-estimate-lead";
 
@@ -102,7 +102,12 @@ function ProjectEstimateLeadForm({
     try {
       const recaptchaToken = getRecaptchaToken ? await getRecaptchaToken("submit") : "";
       const source = estimatePayload?.source ?? "project-calculator";
-      const trafficParams = collectCurrentTrafficParams();
+      const traffic = resolveLeadTrafficForSubmit();
+      const formType = source.includes("callback") ? "lp-callback" : "estimate-modal";
+      const baseCalc =
+        estimatePayload?.calcData && typeof estimatePayload.calcData === "object"
+          ? (estimatePayload.calcData as Record<string, unknown>)
+          : {};
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -111,15 +116,28 @@ function ProjectEstimateLeadForm({
           phone,
           service: estimatePayload?.service ?? "Детальная смета проекта",
           source,
-          pageUrl: window.location.href,
+          pageUrl: traffic.pageUrl,
           recaptchaToken: recaptchaToken || undefined,
-          ...trafficParams,
-          calcData: estimatePayload?.calcData ?? null,
+          utmSource: traffic.utmSource,
+          utmMedium: traffic.utmMedium,
+          utmCampaign: traffic.utmCampaign,
+          utmTerm: traffic.utmTerm,
+          utmContent: traffic.utmContent,
+          yclid: traffic.yclid,
+          calcData: {
+            ...baseCalc,
+            formType,
+            traffic: {
+              landingUrl: traffic.landingUrl,
+              referrer: traffic.referrer,
+              formType,
+            },
+          },
         }),
       });
 
       if (response.ok) {
-        trackLeadSuccess(source, { pageUrl: window.location.href });
+        await trackLeadSuccess(source, { pageUrl: traffic.pageUrl, formType });
         onSuccess();
         return;
       }

@@ -1,8 +1,10 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import Script from "next/script";
+import { Suspense } from "react";
 
-import { DeferredYandexMetrika } from "@/components/seo/deferred-yandex-metrika";
+import { MetrikaSpaHit } from "@/components/seo/metrika-spa-hit";
+import { YandexMetrikaSnippet } from "@/components/seo/yandex-metrika-snippet";
 import { pickYandexMetrikaId, DEFAULT_YANDEX_METRIKA_ID } from "@/lib/analytics-metrika-config";
 
 export { DEFAULT_YANDEX_METRIKA_ID } from "@/lib/analytics-metrika-config";
@@ -44,7 +46,12 @@ export async function AnalyticsScripts() {
 
   return (
     <>
-      {ymId ? <DeferredYandexMetrika ymId={ymId} /> : null}
+      {ymId ? <YandexMetrikaSnippet ymId={ymId} /> : null}
+      {ymId ? (
+        <Suspense fallback={null}>
+          <MetrikaSpaHit />
+        </Suspense>
+      ) : null}
       {gaId ? (
         <>
           <Script

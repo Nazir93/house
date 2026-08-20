@@ -35,7 +35,7 @@ import { readLeadError } from "@/lib/read-lead-error";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { useHouseConstructionCalculatorConfig } from "@/lib/use-house-construction-calculator-config";
 import {
-  collectCurrentTrafficParams,
+  resolveLeadTrafficForSubmit,
   trackLeadSuccess,
   trackQuizStart,
 } from "@/lib/analytics-goals";
@@ -310,12 +310,21 @@ export function HouseConstructionCalculatorForm({
             }
           : payload;
       const source = leadSourceOverride ?? "calculator";
-      const trafficParams = collectCurrentTrafficParams();
+      const traffic = resolveLeadTrafficForSubmit();
       const serviceLine =
         leadServiceLabelOverride ??
         (promoFreeService?.title
           ? `Промо (QR): бесплатно — ${promoFreeService.title}`
           : "Ориентировочный расчёт");
+      const calcWithTraffic = {
+        ...calcData,
+        formType: "calculator",
+        traffic: {
+          landingUrl: traffic.landingUrl,
+          referrer: traffic.referrer,
+          formType: "calculator",
+        },
+      };
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -324,18 +333,24 @@ export function HouseConstructionCalculatorForm({
           phone: data.phone,
           service: serviceLine,
           source,
-          pageUrl: window.location.href,
+          pageUrl: traffic.pageUrl,
           honeypot: data.honeypot || "",
           recaptchaToken: recaptchaToken || undefined,
-          ...trafficParams,
-          calcData,
+          utmSource: traffic.utmSource,
+          utmMedium: traffic.utmMedium,
+          utmCampaign: traffic.utmCampaign,
+          utmTerm: traffic.utmTerm,
+          utmContent: traffic.utmContent,
+          yclid: traffic.yclid,
+          calcData: calcWithTraffic,
         }),
       });
       if (response.ok) {
         const result = await response.json();
-        trackLeadSuccess(source, {
-          pageUrl: window.location.href,
-          estimate: calcData.quote?.grandTotalRub ?? calcData.estimate ?? null,
+        await trackLeadSuccess(source, {
+          pageUrl: traffic.pageUrl,
+          formType: "calculator",
+          estimate: calcWithTraffic.quote?.grandTotalRub ?? calcWithTraffic.estimate ?? null,
         });
         form.reset();
         onSuccess(result.followupToken || "", data.name, data.phone);

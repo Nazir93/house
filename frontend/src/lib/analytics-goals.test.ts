@@ -4,7 +4,11 @@ import {
   collectTrafficParams,
   METRIKA_GOAL_IDS,
   METRIKA_GOALS,
+  METRIKA_REACH_GOAL_TIMEOUT_MS,
   metrikaGoalForLeadSource,
+  metrikaGoalForLpCallbackSource,
+  shouldSendSpaMetrikaHit,
+  shouldTrackQuizComplete,
 } from "@/lib/analytics-goals";
 import { LEAD_SOURCE_OPTIONS } from "@/lib/lead-sources";
 
@@ -43,9 +47,28 @@ describe("metrikaGoalForLeadSource", () => {
     }
   });
 
-  it("maps LP slugs to LP goals", () => {
+  it("maps LP quiz slugs to LP goals (UI 593966484 / 593985668 / 594449404)", () => {
     expect(metrikaGoalForLeadSource("lp-kirpich")).toBe(METRIKA_GOALS.leadLpKirpich);
     expect(metrikaGoalForLeadSource("lp-gazobeton")).toBe(METRIKA_GOALS.leadLpGazobeton);
+    expect(metrikaGoalForLeadSource("lp-keramoblok")).toBe(METRIKA_GOALS.leadLpKeramoblok);
+  });
+
+  it("maps LP menu callback sources (UI 593975324 / 593994796 / 594449441)", () => {
+    expect(metrikaGoalForLpCallbackSource("lp-kirpich-header-callback")).toBe(
+      METRIKA_GOALS.leadLpKirpichCallback,
+    );
+    expect(metrikaGoalForLeadSource("lp-kirpich-nav-callback")).toBe(METRIKA_GOALS.leadLpKirpichCallback);
+    expect(metrikaGoalForLeadSource("lp-keramoblok-header-callback")).toBe(
+      METRIKA_GOALS.leadLpKeramoblokCallback,
+    );
+    expect(metrikaGoalForLeadSource("lp-gazobeton-nav-callback")).toBe(
+      METRIKA_GOALS.leadLpGazobetonCallback,
+    );
+  });
+
+  it("maps site calculator to lead_calculator (UI 594448264)", () => {
+    expect(metrikaGoalForLeadSource("calculator")).toBe(METRIKA_GOALS.leadCalculator);
+    expect(metrikaGoalForLeadSource("promo-qr-banner")).toBe(METRIKA_GOALS.leadCalculator);
   });
 
   it("maps mortgage variants separately", () => {
@@ -62,16 +85,33 @@ describe("metrikaGoalForLeadSource", () => {
   });
 });
 
+describe("shouldTrackQuizComplete", () => {
+  it("true только для квиза/калькулятора, не для callback", () => {
+    expect(shouldTrackQuizComplete("lp-gazobeton")).toBe(true);
+    expect(shouldTrackQuizComplete("calculator")).toBe(true);
+    expect(shouldTrackQuizComplete("lp-gazobeton-header-callback")).toBe(false);
+    expect(shouldTrackQuizComplete("lp-kirpich-nav-callback")).toBe(false);
+  });
+});
+
+describe("SPA hit", () => {
+  it("пропускает первый просмотр после init", () => {
+    expect(shouldSendSpaMetrikaHit(true)).toBe(false);
+    expect(shouldSendSpaMetrikaHit(false)).toBe(true);
+  });
+});
+
 describe("METRIKA_GOAL_IDS", () => {
   it("lists unique JavaScript goal identifiers for Yandex Metrika UI", () => {
-    expect(METRIKA_GOAL_IDS.length).toBe(34);
+    expect(METRIKA_GOAL_IDS.length).toBe(37);
     expect(new Set(METRIKA_GOAL_IDS).size).toBe(METRIKA_GOAL_IDS.length);
     expect(METRIKA_GOAL_IDS).toContain("lead_submit");
-    expect(METRIKA_GOAL_IDS).toContain("lead_mortgage_project");
-    expect(METRIKA_GOAL_IDS).toContain("lead_service_consult");
-    expect(METRIKA_GOAL_IDS).toContain("calculate_start");
-    expect(METRIKA_GOAL_IDS).toContain("form_submit");
-    expect(METRIKA_GOAL_IDS).toContain("project_open");
+    expect(METRIKA_GOAL_IDS).toContain("lead_lp_gazobeton");
+    expect(METRIKA_GOAL_IDS).toContain("lead_lp_gazobeton_callback");
+    expect(METRIKA_GOAL_IDS).toContain("lead_lp_kirpich_callback");
+    expect(METRIKA_GOAL_IDS).toContain("lead_lp_keramoblok_callback");
+    expect(METRIKA_GOAL_IDS).toContain("lead_calculator");
     expect(METRIKA_GOAL_IDS).not.toContain("whatsapp_click");
+    expect(METRIKA_REACH_GOAL_TIMEOUT_MS).toBeGreaterThanOrEqual(400);
   });
 });

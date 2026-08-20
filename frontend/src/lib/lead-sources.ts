@@ -83,6 +83,10 @@ export function getLeadSourceLabel(source: string | null | undefined): string {
   }
   const found = LEAD_SOURCE_OPTIONS.find((o) => o.value === source);
   if (found) return found.label;
+  const lpCallback = /^lp-([a-z0-9-]+)-(?:header|nav)-callback$/.exec(source);
+  if (lpCallback?.[1]) {
+    return `LP: перезвоните (${lpCallback[1]})`;
+  }
   const fromService = labelFromConstructionServiceSource(source);
   if (fromService) return fromService;
   return (

@@ -11,7 +11,7 @@ import { FunnelInputField as InputField } from "@/components/ui/funnel-ui";
 import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
 import { useContactConfig } from "@/lib/contact-config-context";
 import { vacancyResponseFormSchema, type VacancyResponseFormData } from "@/lib/schemas";
-import { collectCurrentTrafficParams, trackLeadSuccess } from "@/lib/analytics-goals";
+import { resolveLeadTrafficForSubmit, trackLeadSuccess } from "@/lib/analytics-goals";
 import { cn } from "@/lib/utils";
 
 async function readLeadError(response: Response): Promise<string> {
@@ -101,7 +101,7 @@ export function VacancyResponseModal({ position, open, onClose }: Props) {
     try {
       const recaptchaToken = await getSmartCaptchaToken();
       const source = "partner-vacancy";
-      const trafficParams = collectCurrentTrafficParams();
+      const traffic = resolveLeadTrafficForSubmit();
       const response = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -112,21 +112,32 @@ export function VacancyResponseModal({ position, open, onClose }: Props) {
           message: data.message || undefined,
           service: `Отклик: ${position}`,
           source,
-          pageUrl: window.location.href,
+          pageUrl: traffic.pageUrl,
           honeypot: data.honeypot || "",
           recaptchaToken: recaptchaToken || undefined,
-          ...trafficParams,
+          utmSource: traffic.utmSource,
+          utmMedium: traffic.utmMedium,
+          utmCampaign: traffic.utmCampaign,
+          utmTerm: traffic.utmTerm,
+          utmContent: traffic.utmContent,
+          yclid: traffic.yclid,
           calcData: {
             kind: "vacancy-response",
+            formType: "vacancy-response",
             position,
             resume: data.resume || undefined,
             message: data.message || undefined,
+            traffic: {
+              landingUrl: traffic.landingUrl,
+              referrer: traffic.referrer,
+              formType: "vacancy-response",
+            },
           },
         }),
       });
       if (response.ok) {
         const result = (await response.json()) as { redirectUrl?: string };
-        trackLeadSuccess(source, { pageUrl: window.location.href, position });
+        await trackLeadSuccess(source, { pageUrl: traffic.pageUrl, position, formType: "vacancy-response" });
         if (result.redirectUrl) {
           window.location.assign(result.redirectUrl);
         }

@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 
 import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
 import {
-  collectCurrentTrafficParams,
+  resolveLeadTrafficForSubmit,
   trackLeadSuccess,
   trackQuizStart,
 } from "@/lib/analytics-goals";
@@ -176,9 +176,10 @@ export function AdvertisingLandingQuiz({
     setSubmitting(true);
     setStatus("Отправляем...");
     const recaptchaToken = await getSmartCaptchaToken();
-    const trafficParams = collectCurrentTrafficParams();
+    const traffic = resolveLeadTrafficForSubmit();
     const calcData = {
       kind: "advertising-lp-quiz",
+      formType: "lp-quiz",
       wallMaterial,
       wallMaterialLabel: WALL_MATERIAL_LABELS[wallMaterial],
       area,
@@ -189,6 +190,11 @@ export function AdvertisingLandingQuiz({
       budgetLabel: budgetLabelById(budget),
       mortgage,
       mortgageLabel: mortgageLabelById(mortgage),
+      traffic: {
+        landingUrl: traffic.landingUrl,
+        referrer: traffic.referrer,
+        formType: "lp-quiz",
+      },
     };
 
     const res = await fetch("/api/leads", {
@@ -199,19 +205,26 @@ export function AdvertisingLandingQuiz({
         phone: phone.trim(),
         service: serviceLabel,
         source: leadSource,
-        pageUrl: typeof window !== "undefined" ? window.location.href : "",
+        pageUrl: traffic.pageUrl,
         calcData,
         honeypot,
         recaptchaToken: recaptchaToken || undefined,
-        ...trafficParams,
+        utmSource: traffic.utmSource,
+        utmMedium: traffic.utmMedium,
+        utmCampaign: traffic.utmCampaign,
+        utmTerm: traffic.utmTerm,
+        utmContent: traffic.utmContent,
+        yclid: traffic.yclid,
       }),
     });
 
     if (res.ok) {
       const data = await res.json();
       if (data.redirectUrl) {
-        trackLeadSuccess(leadSource, {
-          pageUrl: typeof window !== "undefined" ? window.location.href : "",
+        await trackLeadSuccess(leadSource, {
+          pageUrl: traffic.pageUrl,
+          formType: "lp-quiz",
+          wallMaterial,
           budget,
           mortgage,
         });

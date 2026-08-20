@@ -2,7 +2,7 @@
 
 import { forwardRef, useState, type CSSProperties, type FormEvent } from "react";
 import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
-import { collectCurrentTrafficParams, trackLeadSuccess } from "@/lib/analytics-goals";
+import { resolveLeadTrafficForSubmit, trackLeadSuccess } from "@/lib/analytics-goals";
 
 export const LeadMiniForm = forwardRef<HTMLFormElement, {
   source: string;
@@ -33,7 +33,18 @@ export const LeadMiniForm = forwardRef<HTMLFormElement, {
     if (honeypot) return;
     setStatus("Отправляем...");
     const recaptchaToken = await getSmartCaptchaToken();
-    const trafficParams = collectCurrentTrafficParams();
+    const traffic = resolveLeadTrafficForSubmit();
+    const mergedCalc =
+      calcData && typeof calcData === "object"
+        ? {
+            ...(calcData as Record<string, unknown>),
+            formType: "mini-form",
+            traffic: { landingUrl: traffic.landingUrl, referrer: traffic.referrer, formType: "mini-form" },
+          }
+        : {
+            formType: "mini-form",
+            traffic: { landingUrl: traffic.landingUrl, referrer: traffic.referrer, formType: "mini-form" },
+          };
     const res = await fetch("/api/leads", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -42,16 +53,21 @@ export const LeadMiniForm = forwardRef<HTMLFormElement, {
         phone,
         service,
         source,
-        pageUrl: typeof window !== "undefined" ? window.location.href : "",
-        calcData,
+        pageUrl: traffic.pageUrl,
+        calcData: mergedCalc,
         honeypot,
         recaptchaToken: recaptchaToken || undefined,
-        ...trafficParams,
+        utmSource: traffic.utmSource,
+        utmMedium: traffic.utmMedium,
+        utmCampaign: traffic.utmCampaign,
+        utmTerm: traffic.utmTerm,
+        utmContent: traffic.utmContent,
+        yclid: traffic.yclid,
       }),
     });
     const data = await res.json();
     if (res.ok && data.redirectUrl) {
-      trackLeadSuccess(source, { pageUrl: typeof window !== "undefined" ? window.location.href : "" });
+      await trackLeadSuccess(source, { pageUrl: traffic.pageUrl, formType: "mini-form" });
       window.location.href = data.redirectUrl;
       return;
     }
