@@ -12,6 +12,7 @@ import { getPageMeta } from "@/lib/get-page-meta";
 import { projectMatchesMaterial } from "@/lib/project-filters";
 import { getProjectCatalogSliceSeoPages } from "@/lib/seo/project-catalog-slice-seo";
 import { getHouseConstructionCalculatorConfig } from "@/lib/house-construction-calculator-config";
+import { getHomeHeroBannerConfig } from "@/lib/home-hero-banner-config";
 import { getMaterialCommercialLanding } from "@/lib/seo/project-material-commercial";
 import {
   getProjectMaterialSeo,
@@ -42,10 +43,11 @@ export async function ProjectMaterialLandingPage({ slug }: { slug: ProjectMateri
   const seo = getProjectMaterialSeo(slug);
   if (!seo) notFound();
 
-  const [allProjects, allBuilt, calcConfig] = await Promise.all([
+  const [allProjects, allBuilt, calcConfig, homeBanner] = await Promise.all([
     getHouseProjects("author"),
     getBuiltObjects(),
     getHouseConstructionCalculatorConfig(),
+    getHomeHeroBannerConfig(),
   ]);
   const commercial = getMaterialCommercialLanding(slug, calcConfig);
 
@@ -123,6 +125,7 @@ export async function ProjectMaterialLandingPage({ slug }: { slug: ProjectMateri
         pageTitle={seo.h1}
         pageDescription={seo.intro}
         breadcrumbLabel={seo.h1}
+        homePromos={homeBanner.promos}
         seoLandingLinks={[...getProjectMaterialSeoPages(), ...getProjectCatalogSliceSeoPages()].map((page) => ({
           href: page.path,
           label: page.h1,

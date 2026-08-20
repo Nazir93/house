@@ -6,6 +6,7 @@ import { JsonLdInline } from "@/components/seo/json-ld-inline";
 import { getHouseProjects } from "@/lib/construction-data";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { AUTHOR_HOUSE_PROJECT_CATALOG } from "@/lib/house-project-catalog";
+import { getHomeHeroBannerConfig } from "@/lib/home-hero-banner-config";
 import { getPageMeta } from "@/lib/get-page-meta";
 import {
   getProjectCatalogSliceSeo,
@@ -31,7 +32,10 @@ export async function ProjectCatalogSliceLandingPage({ slug }: { slug: ProjectCa
   const seo = getProjectCatalogSliceSeo(slug);
   if (!seo) notFound();
 
-  const projects = await getHouseProjects("author");
+  const [projects, homeBanner] = await Promise.all([
+    getHouseProjects("author"),
+    getHomeHeroBannerConfig(),
+  ]);
 
   const faqSchema = {
     "@context": "https://schema.org",
@@ -89,6 +93,7 @@ export async function ProjectCatalogSliceLandingPage({ slug }: { slug: ProjectCa
         pageTitle={seo.h1}
         pageDescription={seo.intro}
         breadcrumbLabel={seo.h1}
+        homePromos={homeBanner.promos}
         seoLandingLinks={seoLinks}
       />
 

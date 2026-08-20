@@ -9,6 +9,10 @@ import { useSmartCaptchaToken } from "@/components/smartcaptcha-provider";
 import { BackNavButton } from "@/components/ui/back-nav";
 import { resolveLeadTrafficForSubmit, trackLeadSuccess } from "@/lib/analytics-goals";
 import { estimatePayloadHasDetailedCalc } from "@/lib/lp-contact-cta";
+import {
+  isPortfolioTourLeadSource,
+  resolvePortfolioTourModalCopy,
+} from "@/lib/portfolio-tour-lead";
 import { readEstimateClarificationNote } from "@/lib/project-page-estimate-lead";
 
 const HouseConstructionCalculatorForm = dynamic(
@@ -93,6 +97,9 @@ function ProjectEstimateLeadForm({
     typeof (estimatePayload.calcData as { projectTitle?: unknown }).projectTitle === "string"
       ? (estimatePayload.calcData as { projectTitle: string }).projectTitle.trim()
       : "";
+  const tourCopy = isPortfolioTourLeadSource(estimatePayload?.source)
+    ? resolvePortfolioTourModalCopy(projectTitle)
+    : null;
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -155,21 +162,27 @@ function ProjectEstimateLeadForm({
     <div className="min-h-screen flex items-center px-4 py-20">
       <div className="mx-auto w-full max-w-xl rounded-[28px] bg-[var(--bg-secondary)] p-6 md:p-8">
         <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">
-          {detailedCalc ? "Детальная смета" : "Обратный звонок"}
+          {tourCopy
+            ? tourCopy.eyebrow
+            : detailedCalc
+              ? "Детальная смета"
+              : "Обратный звонок"}
         </p>
-        <h2 className="mt-3 font-heading text-3xl leading-tight text-[var(--graphite)]">
-          Оставьте контакты
+        <h2 className="mt-3 font-heading text-3xl leading-tight text-[var(--text)]">
+          {tourCopy ? tourCopy.title : "Оставьте контакты"}
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-[var(--text-muted)]">
-          {detailedCalc
-            ? "Выбранные материалы, инженерия, доп. опции и сумма уже прикреплены к заявке."
-            : clarificationNote
-              ? "Перезвоним и уточним выбранный пункт в смете по вашему проекту."
-              : projectTitle
-                ? `Перезвоним и уточним расчёт по проекту «${projectTitle}».`
-                : "Перезвоним, уточним задачу и подготовим ориентир по смете."}
+          {tourCopy
+            ? tourCopy.description
+            : detailedCalc
+              ? "Выбранные материалы, инженерия, доп. опции и сумма уже прикреплены к заявке."
+              : clarificationNote
+                ? "Перезвоним и уточним выбранный пункт в смете по вашему проекту."
+                : projectTitle
+                  ? `Перезвоним и уточним расчёт по проекту «${projectTitle}».`
+                  : "Перезвоним, уточним задачу и подготовим ориентир по смете."}
         </p>
-        {projectTitle ? (
+        {(tourCopy?.badge || (!tourCopy && projectTitle)) ? (
           <p
             className="mt-3 inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.08em]"
             style={{
@@ -177,10 +190,10 @@ function ProjectEstimateLeadForm({
               color: "var(--accent)",
             }}
           >
-            Проект: {projectTitle}
+            {tourCopy?.badge ?? `Проект: ${projectTitle}`}
           </p>
         ) : null}
-        {clarificationNote ? (
+        {clarificationNote && !tourCopy ? (
           <p
             className="mt-3 rounded-2xl border px-4 py-3 text-sm leading-relaxed"
             style={{
@@ -218,7 +231,7 @@ function ProjectEstimateLeadForm({
             disabled={loading}
             className="rounded-2xl bg-[var(--accent)] px-5 py-4 text-sm font-bold text-[var(--accent-contrast)] transition hover:bg-[var(--accent-hover)] disabled:cursor-wait disabled:opacity-70"
           >
-            {loading ? "Отправляем..." : "Отправить заявку"}
+            {loading ? "Отправляем..." : tourCopy ? tourCopy.submitLabel : "Отправить заявку"}
           </button>
           {status ? <p className="text-sm text-[var(--text-muted)]">{status}</p> : null}
         </form>

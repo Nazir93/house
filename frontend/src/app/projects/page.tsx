@@ -4,6 +4,7 @@ import { AuthorProjectsAfterCatalogSection } from "@/components/projects/author-
 import { getPageMeta } from "@/lib/get-page-meta";
 import { getHouseProjects } from "@/lib/construction-data";
 import { AUTHOR_HOUSE_PROJECT_CATALOG } from "@/lib/house-project-catalog";
+import { getHomeHeroBannerConfig } from "@/lib/home-hero-banner-config";
 import { getAuthorProjectsCatalogSeo } from "@/lib/seo/project-catalog-hub-seo";
 import { getProjectCatalogSliceSeoPages } from "@/lib/seo/project-catalog-slice-seo";
 import { getProjectMaterialSeoPages } from "@/lib/seo/project-material-seo";
@@ -37,7 +38,11 @@ export default async function ProjectsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const seo = getAuthorProjectsCatalogSeo();
-  const [projects, sp] = await Promise.all([getHouseProjects("author"), searchParams]);
+  const [projects, sp, homeBanner] = await Promise.all([
+    getHouseProjects("author"),
+    searchParams,
+    getHomeHeroBannerConfig(),
+  ]);
   const filterSeo = resolveProjectsCatalogFilterSeoAction(sp, "/projects");
   if (filterSeo.redirectTo) {
     permanentRedirect(filterSeo.redirectTo);
@@ -52,6 +57,7 @@ export default async function ProjectsPage({
         pageTitle={seo.h1}
         pageDescription={seo.intro}
         breadcrumbLabel={seo.h1}
+        homePromos={homeBanner.promos}
         seoLandingLinks={[...getProjectMaterialSeoPages(), ...getProjectCatalogSliceSeoPages()].map((page) => ({
           href: page.path,
           label: page.h1,

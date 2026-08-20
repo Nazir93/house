@@ -83,6 +83,11 @@ describe("metrikaGoalForLeadSource", () => {
     expect(metrikaGoalForLeadSource("service-foundation")).toBe(METRIKA_GOALS.leadService);
     expect(metrikaGoalForLeadSource("service-consult-roofing")).toBe(METRIKA_GOALS.leadServiceConsult);
   });
+
+  it("maps portfolio tour signup to portfolio goal", () => {
+    expect(metrikaGoalForLeadSource("portfolio-tour")).toBe(METRIKA_GOALS.leadPortfolio);
+    expect(metrikaGoalForLeadSource("portfolio-case-cta")).toBe(METRIKA_GOALS.leadPortfolio);
+  });
 });
 
 describe("shouldTrackQuizComplete", () => {

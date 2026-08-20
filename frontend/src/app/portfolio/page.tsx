@@ -1,6 +1,7 @@
 import { getPageMeta, getPageMetaFields } from "@/lib/get-page-meta";
 import { getBuiltObjects } from "@/lib/construction-data";
 import { SITE_NAME, BUILT_HOMES_SECTION_LABEL } from "@/lib/constants";
+import { getHomeHeroBannerConfig } from "@/lib/home-hero-banner-config";
 import { BuiltPortfolioContent } from "./built-content";
 
 export const revalidate = 60;
@@ -17,7 +18,9 @@ export async function generateMetadata() {
 export default async function PortfolioPage(props: { searchParams?: Promise<{ view?: string }> }) {
   const searchParams = await props.searchParams;
   await getPageMetaFields("/portfolio");
-  const objects = await getBuiltObjects();
+  const [objects, homeBanner] = await Promise.all([getBuiltObjects(), getHomeHeroBannerConfig()]);
   const initialView = searchParams?.view === "map" ? ("map" as const) : ("grid" as const);
-  return <BuiltPortfolioContent objects={objects} initialView={initialView} />;
+  return (
+    <BuiltPortfolioContent objects={objects} initialView={initialView} homePromos={homeBanner.promos} />
+  );
 }

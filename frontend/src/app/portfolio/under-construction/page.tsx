@@ -1,6 +1,7 @@
 import { getPageMeta, getPageMetaFields } from "@/lib/get-page-meta";
 import { getBuiltObjects } from "@/lib/construction-data";
 import { SITE_NAME, UNDER_CONSTRUCTION_SECTION_LABEL } from "@/lib/constants";
+import { getHomeHeroBannerConfig } from "@/lib/home-hero-banner-config";
 import { BuiltPortfolioContent } from "../built-content";
 
 export const revalidate = 60;
@@ -19,7 +20,7 @@ export default async function UnderConstructionPortfolioPage(props: {
 }) {
   const searchParams = await props.searchParams;
   await getPageMetaFields("/portfolio/under-construction");
-  const objects = await getBuiltObjects();
+  const [objects, homeBanner] = await Promise.all([getBuiltObjects(), getHomeHeroBannerConfig()]);
   const initialView = searchParams?.view === "map" ? ("map" as const) : ("grid" as const);
 
   return (
@@ -30,6 +31,7 @@ export default async function UnderConstructionPortfolioPage(props: {
       pageTitle={UNDER_CONSTRUCTION_SECTION_LABEL}
       pageDescription={`Дома, которые сейчас строит ${SITE_NAME}. Можно посмотреть на карте и записаться на экскурсию.`}
       breadcrumbLabel={UNDER_CONSTRUCTION_SECTION_LABEL}
+      homePromos={homeBanner.promos}
     />
   );
 }

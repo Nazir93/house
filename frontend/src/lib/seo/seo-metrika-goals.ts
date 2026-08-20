@@ -63,7 +63,7 @@ export function isMortgageLeadSource(source: string): boolean {
 }
 
 export function isVisitConstructionLeadSource(source: string): boolean {
-  return source === "portfolio-case-cta";
+  return source === "portfolio-case-cta" || source === "portfolio-tour";
 }
 
 export function listWiredSeoMetrikaTzGoals(): string[] {

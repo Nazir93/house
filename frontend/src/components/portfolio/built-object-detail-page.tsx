@@ -46,6 +46,8 @@ import { BuiltObjectHistoryCards } from "@/components/portfolio/built-object-his
 import { formatArticleBody, PAGE_INTRO_PROSE_CLASS } from "@/lib/html-content";
 import type { BuiltObjectItem } from "@/lib/construction-shared";
 import { BUILT_HOMES_SECTION_LABEL, UNDER_CONSTRUCTION_SECTION_LABEL } from "@/lib/constants";
+import { useModal } from "@/lib/modal-context";
+import { buildPortfolioTourEstimatePayload } from "@/lib/portfolio-tour-lead";
 import {
   resolveBuiltObjectCoverAlt,
   resolveBuiltObjectImageAlt,
@@ -64,6 +66,7 @@ const DETAIL_PANEL =
   "rounded-[1.75rem] bg-[color-mix(in_srgb,var(--bg-secondary)_55%,var(--bg))] p-4 shadow-[0_16px_46px_rgba(15,61,46,0.06)] sm:p-5 md:p-6";
 
 export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
+  const { openModalToEstimate } = useModal();
   const [descOpen, setDescOpen] = useState(false);
   const [activeNav, setActiveNav] = useState<BuiltObjectNavSectionId>("description");
   const [flashSection, setFlashSection] = useState<BuiltObjectNavSectionId | null>(null);
@@ -255,11 +258,69 @@ export function BuiltObjectDetailPage({ object }: { object: BuiltObjectItem }) {
               </dl>
 
               <div className="mt-5 flex flex-col gap-2.5">
+                <div
+                  className="overflow-hidden rounded-2xl p-[1px]"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, color-mix(in srgb, var(--accent) 55%, transparent), color-mix(in srgb, var(--accent) 12%, transparent))",
+                  }}
+                >
+                  <div
+                    className="rounded-[15px] px-4 py-4"
+                    style={{
+                      background:
+                        "linear-gradient(160deg, color-mix(in srgb, var(--accent) 14%, var(--bg)) 0%, var(--bg) 70%)",
+                    }}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                        style={{
+                          backgroundColor: "color-mix(in srgb, var(--accent) 16%, transparent)",
+                          color: "var(--accent)",
+                        }}
+                        aria-hidden
+                      >
+                        <CalendarDays className="h-5 w-5" strokeWidth={2} />
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--accent)]">
+                          Живой объект
+                        </p>
+                        <p className="mt-1 text-sm leading-snug text-[var(--text)]">
+                          {object.siteStatus === "UNDER_CONSTRUCTION"
+                            ? "Приезжайте на стройку — покажем этапы работ и материалы вживую."
+                            : "Запишитесь на экскурсию — покажем дом, планировки и качество исполнения."}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openModalToEstimate(
+                          buildPortfolioTourEstimatePayload({
+                            title: object.title,
+                            slug: object.slug,
+                            siteStatus: object.siteStatus,
+                          }),
+                        )
+                      }
+                      className="mt-3.5 inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-center text-sm font-bold text-[var(--accent-contrast)] shadow-[0_10px_28px_rgba(15,61,46,0.18)] transition hover:opacity-[0.96] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+                      style={{ backgroundColor: "var(--accent)" }}
+                    >
+                      <CalendarDays className="h-4 w-4 shrink-0 opacity-90" strokeWidth={2.25} aria-hidden />
+                      Записаться на экскурсию
+                    </button>
+                  </div>
+                </div>
                 {object.houseProjectSlug ? (
                   <Link
                     href={`/projects/${object.houseProjectSlug}`}
-                    className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl px-4 py-3 text-center text-sm font-bold text-[var(--accent-contrast)] transition hover:opacity-95"
-                    style={{ backgroundColor: "var(--accent)" }}
+                    className="inline-flex min-h-[46px] w-full items-center justify-center rounded-xl px-4 py-3 text-center text-sm font-bold transition hover:opacity-95"
+                    style={{
+                      backgroundColor: "color-mix(in srgb, var(--accent) 12%, var(--bg))",
+                      color: "var(--accent)",
+                    }}
                   >
                     Хочу такой дом
                   </Link>

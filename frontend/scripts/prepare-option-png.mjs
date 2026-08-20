@@ -20,9 +20,9 @@ function isNeutral(r, g, b) {
   return Math.abs(r - g) <= 8 && Math.abs(g - b) <= 8;
 }
 
-/** Почти белая клетка шахматки. */
+/** Почти белая клетка шахматки (часто 220–255; порог 236 оставлял «серые» 222–235). */
 function isStrongChecker(r, g, b) {
-  return avgRgb(r, g, b) >= 236 && isNeutral(r, g, b);
+  return avgRgb(r, g, b) >= 220 && isNeutral(r, g, b);
 }
 
 /** Серая клетка шахматки: светло-серая И рядом есть клетка другого тона. */
@@ -32,9 +32,9 @@ function isCheckerPatternPixel(data, width, height, x, y) {
   const g = data[i + 1];
   const b = data[i + 2];
   const avg = avgRgb(r, g, b);
-  // Серая клетка шахматки обычно ~185–235; однотонная штукатурка тоже может быть здесь —
+  // Серая клетка шахматки обычно ~165–219; однотонная штукатурка тоже может быть здесь —
   // поэтому требуем контрастного «соседа-клетку».
-  if (avg < 185 || avg >= 236 || !isNeutral(r, g, b)) return false;
+  if (avg < 165 || avg >= 220 || !isNeutral(r, g, b)) return false;
 
   let mates = 0;
   for (const [nx, ny] of [
@@ -49,7 +49,7 @@ function isCheckerPatternPixel(data, width, height, x, y) {
     if (!isNeutral(data[j], data[j + 1], data[j + 2])) continue;
     const nAvg = avgRgb(data[j], data[j + 1], data[j + 2]);
     const diff = Math.abs(avg - nAvg);
-    if (diff >= 8 && diff <= 40) mates++;
+    if (diff >= 6 && diff <= 50) mates++;
   }
   return mates >= 1;
 }
@@ -146,7 +146,7 @@ async function prepare(filePath) {
   const { width, height } = info;
 
   floodBackdrop(data, width, height);
-  peelStrongBorder(data, width, height, 6);
+  peelStrongBorder(data, width, height, 10);
   defringeTransparent(data);
 
   const tmp = `${filePath}.tmp`;

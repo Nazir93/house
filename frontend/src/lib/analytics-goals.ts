@@ -122,7 +122,9 @@ export function metrikaGoalForLeadSource(source: string): MetrikaGoalName | null
   if (source === "partner-supplier") return METRIKA_GOALS.leadPartnerSupplier;
   if (source === "partner-vacancy") return METRIKA_GOALS.leadPartnerVacancy;
   if (source === "about-leadership-feedback") return METRIKA_GOALS.leadAbout;
-  if (source === "portfolio-case-cta") return METRIKA_GOALS.leadPortfolio;
+  if (source === "portfolio-case-cta" || source === "portfolio-tour") {
+    return METRIKA_GOALS.leadPortfolio;
+  }
   if (source.startsWith("service-consult-")) return METRIKA_GOALS.leadServiceConsult;
   if (source.startsWith("service-")) return METRIKA_GOALS.leadService;
   return null;

@@ -16,6 +16,7 @@ import type { HeroPricingTier, HouseProjectItem } from "@/lib/construction-data"
 import { getProjectRenders } from "@/lib/construction-shared";
 import { resolveProjectListingPriceRub } from "@/lib/project-listing-price";
 import { HOME_FEATURED_PROJECTS_INTRO } from "@/lib/home-featured-projects-section";
+import { SECTION_LEAD_CLASSNAME } from "@/lib/responsive-copy";
 import { revealDelayStyle } from "@/lib/reveal-animation";
 import {
   isSsrProgressiveItemVisible,
@@ -103,15 +104,15 @@ export function FeaturedHouseProjectsSection({
     <section
       id="catalog-preview"
       data-reveal="section"
-      className="overflow-hidden py-11 sm:py-14 md:py-[4.25rem]"
+      className="py-11 sm:py-14 md:py-[4.25rem]"
       style={{ backgroundColor: "var(--bg)" }}
     >
       <div className="container mx-auto max-w-[1180px]">
         {/* Шапка как в макете */}
         <div className="mb-8 flex flex-col gap-5 md:mb-9">
-          <div className="flex w-full min-w-0 flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+          <div className="flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
             <h2
-              className="min-w-0 w-full flex-1 text-balance font-heading text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl md:text-[2.25rem] md:leading-[1.1]"
+              className="min-w-0 flex-1 text-balance font-heading text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl md:text-[2.25rem] md:leading-[1.1]"
             >
               Популярные проекты
             </h2>
@@ -124,9 +125,9 @@ export function FeaturedHouseProjectsSection({
             </Link>
           </div>
 
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
-            <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain scrollbar-none pb-0.5 sm:w-auto sm:overflow-visible sm:pb-0">
-              <div className="inline-flex min-w-max rounded-full bg-[var(--bg-secondary)] p-[3px] ring-1 ring-[var(--border)] ring-inset">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between xl:gap-10">
+            <div className="shrink-0">
+              <div className="inline-flex max-w-full flex-wrap rounded-full bg-[var(--bg-secondary)] p-[3px] ring-1 ring-[var(--border)] ring-inset">
                 <button
                   type="button"
                   onClick={() => {
@@ -156,7 +157,12 @@ export function FeaturedHouseProjectsSection({
                 </button>
               </div>
             </div>
-            <p className="max-w-2xl text-pretty text-sm leading-relaxed text-[var(--text-muted)] sm:max-w-3xl sm:text-[15px] lg:max-w-none lg:text-right">
+            <p
+              className={cn(
+                SECTION_LEAD_CLASSNAME,
+                "min-w-0 xl:ml-auto xl:max-w-md xl:text-right 2xl:max-w-lg",
+              )}
+            >
               {HOME_FEATURED_PROJECTS_INTRO}
             </p>
           </div>

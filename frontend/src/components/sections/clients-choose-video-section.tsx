@@ -6,9 +6,11 @@ import Link from "next/link";
 import { ArrowUpRight, ChevronsDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { CmsImage } from "@/components/ui/cms-image";
 import {
   clientsChooseVideoSeekIntervalMs,
   shouldScrubClientsChooseVideoDense,
+  shouldUseClientsChooseStaticMedia,
 } from "@/lib/clients-choose-media";
 import { CLIENTS_CHOOSE_SERVICES } from "@/lib/clients-choose-services";
 import {
@@ -71,23 +73,76 @@ function ServicesScrollCue({ visible }: { visible: boolean }) {
   );
 }
 
+function StaticServiceImagesPanel({ scrollProgress }: { scrollProgress: number }) {
+  const { baseIndex, localProgress } = getClientsChooseScrollState(scrollProgress, SERVICES.length);
+
+  return (
+    <div className="relative w-full overflow-hidden rounded-[22px] shadow-[0_20px_56px_rgba(0,0,0,0.08)] md:rounded-[30px]">
+      <div className="relative aspect-[16/10] max-h-[min(46vh,320px)] w-full overflow-hidden rounded-[inherit] bg-[var(--bg-secondary)] md:aspect-[4/3] md:max-h-[min(52vh,480px)] lg:max-h-none">
+        {SERVICES.map((item, idx) => {
+          const visual = resolveClientsChooseSlideVisual(idx, baseIndex, localProgress, SERVICES.length);
+
+          return (
+            <div
+              key={item.title}
+              className="absolute inset-0 will-change-[opacity,transform]"
+              style={{
+                opacity: visual.opacity,
+                transform: `translateY(${visual.translateY * 0.35}px) scale(${0.985 + visual.opacity * 0.015})`,
+                pointerEvents: "none",
+                visibility: visual.visible ? "visible" : "hidden",
+                zIndex: visual.zIndex,
+              }}
+              aria-hidden={!visual.visible}
+            >
+              <CmsImage
+                src={item.imageUrl}
+                alt=""
+                fill
+                sizes="(max-width: 768px) 100vw, 680px"
+                className="object-cover object-center"
+                priority={idx === 0}
+              />
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function VideoPanel({
   videoRef,
   enabled,
+  scrollProgress,
 }: {
   videoRef: Ref<HTMLVideoElement>;
   enabled: boolean;
+  scrollProgress: number;
 }) {
+  const { baseIndex } = getClientsChooseScrollState(scrollProgress, SERVICES.length);
+  const poster = SERVICES[baseIndex]?.imageUrl ?? SERVICES[0]?.imageUrl;
+
   return (
     <div className="relative w-full overflow-hidden rounded-[22px] shadow-[0_20px_56px_rgba(0,0,0,0.08)] md:rounded-[30px]">
-      <div className="relative aspect-[16/10] max-h-[min(46vh,320px)] w-full overflow-hidden rounded-[inherit] md:aspect-[4/3] md:max-h-[min(52vh,480px)] lg:max-h-none">
+      <div className="relative aspect-[16/10] max-h-[min(46vh,320px)] w-full overflow-hidden rounded-[inherit] bg-[var(--bg-secondary)] md:aspect-[4/3] md:max-h-[min(52vh,480px)] lg:max-h-none">
+        {poster ? (
+          <CmsImage
+            src={poster}
+            alt=""
+            fill
+            sizes="(max-width: 768px) 100vw, 680px"
+            className="object-cover object-center"
+            priority
+          />
+        ) : null}
         <video
           ref={videoRef}
           src={enabled ? SERVICES_VIDEO_SRC : undefined}
           muted
           playsInline
           preload={enabled ? "auto" : "none"}
-          className="absolute inset-0 h-full w-full object-cover object-center bg-[var(--bg-secondary)]"
+          className="absolute inset-0 h-full w-full object-cover object-center"
           style={{ pointerEvents: "none" }}
           aria-hidden="true"
         />
@@ -175,6 +230,18 @@ function ServiceSlideStack({
   );
 }
 
+function shouldUseStaticServicesMedia(): boolean {
+  if (typeof window === "undefined") return true;
+  const nav = navigator as Navigator & { deviceMemory?: number };
+  return shouldUseClientsChooseStaticMedia({
+    hardwareConcurrency: navigator.hardwareConcurrency,
+    deviceMemory: nav.deviceMemory,
+    userAgent: navigator.userAgent,
+    prefersReducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    displayMode: window.matchMedia("(display-mode: standalone)").matches ? "standalone" : "browser",
+  });
+}
+
 function shouldScrubServicesVideoDense(): boolean {
   if (typeof window === "undefined") return false;
   const nav = navigator as Navigator & { deviceMemory?: number };
@@ -195,10 +262,12 @@ export function ClientsChooseVideoSection() {
   const [, setActiveIndex] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
   const [hasScrolled, setHasScrolled] = useState(false);
+  const [useStaticMedia, setUseStaticMedia] = useState(true);
   const [videoEnabled, setVideoEnabled] = useState(false);
   const [trackHeightVh, setTrackHeightVh] = useState(SCROLL_VH_PER_ITEM_MOBILE * SERVICES.length);
 
   useEffect(() => {
+    setUseStaticMedia(shouldUseStaticServicesMedia());
     const dense = shouldScrubServicesVideoDense();
     seekIntervalRef.current = clientsChooseVideoSeekIntervalMs(dense);
   }, []);
@@ -233,7 +302,7 @@ export function ClientsChooseVideoSection() {
     });
 
     const video = videoRef.current;
-    if (!video || !videoEnabled) return;
+    if (useStaticMedia || !video || !videoEnabled) return;
     if (!video.duration || Number.isNaN(video.duration) || !Number.isFinite(video.duration)) {
       warmUpVideo(video);
       return;
@@ -264,7 +333,7 @@ export function ClientsChooseVideoSection() {
     } catch {
       /* ignore */
     }
-  }, [videoEnabled]);
+  }, [useStaticMedia, videoEnabled]);
 
   const skipStory = useCallback(() => {
     const section = sectionRef.current;
@@ -329,8 +398,7 @@ export function ClientsChooseVideoSection() {
     const io = new IntersectionObserver(
       ([entry]) => {
         const next = entry.isIntersecting;
-        // Всегда включаем ролик при появлении секции (иначе на mobile/PWA пустой прямоугольник).
-        if (next) setVideoEnabled(true);
+        if (!useStaticMedia && next) setVideoEnabled(true);
         if (next && !active) {
           active = true;
           syncScrollToServices();
@@ -349,10 +417,10 @@ export function ClientsChooseVideoSection() {
       io.disconnect();
       cancelAnimationFrame(raf);
     };
-  }, [syncScrollToServices]);
+  }, [syncScrollToServices, useStaticMedia]);
 
   useEffect(() => {
-    if (!videoEnabled) return;
+    if (useStaticMedia || !videoEnabled) return;
     const video = videoRef.current;
     if (!video) return;
     const onReady = () => syncScrollToServices();
@@ -363,7 +431,7 @@ export function ClientsChooseVideoSection() {
       video.removeEventListener("loadedmetadata", onReady);
       video.removeEventListener("canplay", onReady);
     };
-  }, [videoEnabled, syncScrollToServices]);
+  }, [useStaticMedia, videoEnabled, syncScrollToServices]);
 
   const showScrollCue = !hasScrolled;
 
@@ -427,7 +495,11 @@ export function ClientsChooseVideoSection() {
 
           <div className="order-1 shrink-0 md:order-3 md:px-0">
             <div className="mx-auto w-full max-w-[680px] md:max-w-[620px] lg:max-w-[680px]">
-              <VideoPanel videoRef={videoRef} enabled={videoEnabled} />
+              {useStaticMedia ? (
+                <StaticServiceImagesPanel scrollProgress={scrollProgress} />
+              ) : (
+                <VideoPanel videoRef={videoRef} enabled={videoEnabled} scrollProgress={scrollProgress} />
+              )}
               <ServiceProgressBars scrollProgress={scrollProgress} className="mt-3 md:mt-4" />
             </div>
           </div>

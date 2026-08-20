@@ -46,12 +46,16 @@ export const LEAD_SOURCE_OPTIONS: { value: string; label: string; hint?: string 
   { value: "partner-supplier", label: "Партнёрам: поставщик", hint: "/partners/supplier" },
   { value: "partner-vacancy", label: "Партнёрам: отклик на вакансию", hint: "/partners/vacancies" },
   { value: "about-leadership-feedback", label: "Связь с руководством", hint: "Раздел «О компании»" },
+  {
+    value: "portfolio-tour",
+    label: "Экскурсия: запись с портфолио",
+    hint: "Кнопка «Записаться на экскурсию» на /portfolio/[slug] — имя и телефон",
+  },
 ];
 
 const ARCHIVE_SOURCE_LABELS: Record<string, string> = {
   "banner-hero": "Баннер: консультация (архив)",
   "house-project": "Проект дома (архив)",
-  "portfolio-tour": "Экскурсия по объекту (архив)",
   "price-smeta": "Смета с калькулятора прайса (архив)",
   "offer-page": "Оффер (архив)",
   "offer-pizza": "Оффер: бонус (архив)",

@@ -13,4 +13,10 @@ describe("clients-choose-services", () => {
     const fundament = CLIENTS_CHOOSE_SERVICES.find((s) => s.title === "Фундамент");
     expect(fundament?.href).toBe("/services/fundament");
   });
+
+  it("у каждой услуги есть картинка для mobile/PWA", () => {
+    for (const service of CLIENTS_CHOOSE_SERVICES) {
+      expect(service.imageUrl).toMatch(/^\/images\/banner\/banner-hero-\d+\.png$/);
+    }
+  });
 });

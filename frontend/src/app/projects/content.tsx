@@ -39,7 +39,9 @@ import { resolveProjectListingPriceRub } from "@/lib/project-listing-price";
 import { houseProjectCatalogTeaser } from "@/lib/house-project-teaser";
 import { resolveProjectsCatalogFilterSeoAction } from "@/lib/seo/projects-catalog-filter-indexing";
 import { CmsImage } from "@/components/ui/cms-image";
+import { CatalogFiltersHomePromoTeaser } from "@/components/catalog/catalog-filters-home-promo-teaser";
 import { SiteSelect } from "@/components/ui/site-select";
+import type { HomeHeroPromoSlide } from "@/lib/home-hero-banner-schema";
 
 const PAGE_SIZE = 6;
 
@@ -70,6 +72,7 @@ export function ProjectsCatalogContent({
   pageDescription,
   breadcrumbLabel,
   seoLandingLinks = [],
+  homePromos = [],
 }: {
   projects: HouseProjectItem[];
   searchParams: Record<string, string | string[] | undefined>;
@@ -78,6 +81,8 @@ export function ProjectsCatalogContent({
   pageDescription?: string;
   breadcrumbLabel?: string;
   seoLandingLinks?: Array<{ href: string; label: string; description: string }>;
+  /** Слайды карусели главной — в пустое место мобильных фильтров. */
+  homePromos?: HomeHeroPromoSlide[];
 }) {
   const basePath = catalog.basePath;
   const router = useRouter();
@@ -636,6 +641,7 @@ export function ProjectsCatalogContent({
               }}
             >
               {filtersPanel}
+              <CatalogFiltersHomePromoTeaser promos={homePromos} />
             </div>
           </aside>
         </div>

@@ -54,5 +54,6 @@ describe("seo-metrika-goals (ТЗ SEO §24)", () => {
     expect(isMortgageLeadSource("house-project-mortgage")).toBe(true);
     expect(isMortgageLeadSource("calculator")).toBe(false);
     expect(isVisitConstructionLeadSource("portfolio-case-cta")).toBe(true);
+    expect(isVisitConstructionLeadSource("portfolio-tour")).toBe(true);
   });
 });

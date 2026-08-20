@@ -1197,6 +1197,9 @@
 
   .projects-catalog-filters-drawer__body {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding: 0.85rem 1rem max(1rem, env(safe-area-inset-bottom, 0px));

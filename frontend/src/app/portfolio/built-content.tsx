@@ -23,8 +23,10 @@ import { resolveBuiltObjectCoverAlt } from "@/lib/seo/built-object-image-seo";
 import { cn } from "@/lib/utils";
 import { BUILT_HOMES_SECTION_LABEL, UNDER_CONSTRUCTION_SECTION_LABEL } from "@/lib/constants";
 import { CmsImage } from "@/components/ui/cms-image";
+import { CatalogFiltersHomePromoTeaser } from "@/components/catalog/catalog-filters-home-promo-teaser";
 import { keepBrandNameTogether } from "@/lib/company-requisites";
 import { PAGE_LEAD_CLASSNAME } from "@/lib/responsive-copy";
+import type { HomeHeroPromoSlide } from "@/lib/home-hero-banner-schema";
 
 const PortfolioObjectMapExplorer = dynamic(
   () => import("@/components/portfolio/portfolio-object-map-explorer").then((m) => m.PortfolioObjectMapExplorer),
@@ -59,6 +61,7 @@ export function BuiltPortfolioContent({
   pageTitle,
   pageDescription,
   breadcrumbLabel,
+  homePromos = [],
 }: {
   objects: BuiltObjectItem[];
   initialView?: ViewMode;
@@ -67,6 +70,8 @@ export function BuiltPortfolioContent({
   pageTitle?: string;
   pageDescription?: string;
   breadcrumbLabel?: string;
+  /** Слайды карусели главной — в пустое место мобильных фильтров. */
+  homePromos?: HomeHeroPromoSlide[];
 }) {
   const [material, setMaterial] = useState("all");
   const [floorId, setFloorId] = useState("all");
@@ -304,6 +309,7 @@ export function BuiltPortfolioContent({
               }}
             >
               {filtersPanel}
+              <CatalogFiltersHomePromoTeaser promos={homePromos} />
             </div>
           </aside>
         </div>

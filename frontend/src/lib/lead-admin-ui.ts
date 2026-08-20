@@ -60,6 +60,7 @@ export const LEAD_SOURCE_FILTERS = [
   { value: "partners", label: "Партнёрам" },
   { value: "promo", label: "Промо QR" },
   { value: "about", label: "Связь с руководством" },
+  { value: "portfolio", label: "Экскурсия / портфолио" },
 ] as const;
 
 const CALCULATOR_SOURCES = [
@@ -91,6 +92,8 @@ export function leadSourceFilterWhere(filterId: string): Prisma.LeadWhereInput |
       return { source: "promo-qr-banner" };
     case "about":
       return { source: "about-leadership-feedback" };
+    case "portfolio":
+      return { source: { in: ["portfolio-tour", "portfolio-case-cta"] } };
     default:
       return { source: filterId };
   }
