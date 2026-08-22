@@ -5,6 +5,7 @@ import {
   isCompanyRequisiteMonoField,
   isCompanyRequisiteWideField,
   keepBrandNameTogether,
+  normalizeCompanyRegistration,
   normalizeCompanyWebsiteUrl,
 } from "@/lib/company-requisites";
 
@@ -34,6 +35,26 @@ describe("company-requisites", () => {
       ", ОГРН 1255300000537",
     );
     expect(companyRegistrationLegalSuffix({ ogrn: "", ogrnip: "" })).toBe("");
+  });
+
+  it("normalizeCompanyRegistration: 13 цифр в ОГРНИП → ОГРН (legacy админка)", () => {
+    const legacy = { ogrn: "", ogrnip: "1255300000537" };
+    expect(normalizeCompanyRegistration(legacy)).toEqual({
+      ogrn: "1255300000537",
+      ogrnip: "",
+    });
+    expect(companyRegistrationLabels(legacy)).toEqual([
+      { label: "ОГРН", value: "1255300000537" },
+    ]);
+    expect(companyRegistrationLegalSuffix(legacy)).toBe(", ОГРН 1255300000537");
+  });
+
+  it("normalizeCompanyRegistration: 15 цифр в ОГРН → ОГРНИП", () => {
+    const misplaced = { ogrn: "304500116000157", ogrnip: "" };
+    expect(normalizeCompanyRegistration(misplaced)).toEqual({
+      ogrn: "",
+      ogrnip: "304500116000157",
+    });
   });
 
   it("keepBrandNameTogether: не рвёт «Часть Души»", () => {

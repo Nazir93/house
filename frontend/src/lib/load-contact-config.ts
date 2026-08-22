@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
 import { createDefaultContactConfig, type ContactConfig } from "@/lib/contact-config";
+import { normalizeCompanyRegistration } from "@/lib/company-requisites";
 
 const KEYS = [
   "phone",
@@ -51,6 +52,9 @@ const loadContactConfigCached = unstable_cache(
       if (m.company_inn?.trim()) d.company.inn = m.company_inn.trim();
       if (m.company_ogrn?.trim()) d.company.ogrn = m.company_ogrn.trim();
       if (m.company_ogrnip?.trim()) d.company.ogrnip = m.company_ogrnip.trim();
+      const registration = normalizeCompanyRegistration(d.company);
+      d.company.ogrn = registration.ogrn;
+      d.company.ogrnip = registration.ogrnip;
       if (m.company_website?.trim()) d.company.website = m.company_website.trim();
       if (m.company_postal_address?.trim()) d.company.postalAddress = m.company_postal_address.trim();
       if (m.bank_name?.trim()) d.company.bank.name = m.bank_name.trim();
