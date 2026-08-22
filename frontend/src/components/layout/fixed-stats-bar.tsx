@@ -1,51 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import { STATS } from "@/lib/constants";
+import { formatHomeFixedStatValue } from "@/lib/home-fixed-stats";
 import { useThrottledScroll } from "@/lib/use-throttled-scroll";
 
-function AnimatedCounter({ value, suffix = "" }: { value: number; suffix: string }) {
-  const [count, setCount] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
-  const hasAnimated = useRef(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
-          const duration = 2000;
-          const steps = 60;
-          const increment = value / steps;
-          let current = 0;
-          timerRef.current = setInterval(() => {
-            current += increment;
-            if (current >= value) {
-              setCount(value);
-              if (timerRef.current) clearInterval(timerRef.current);
-              timerRef.current = null;
-            } else {
-              setCount(Math.floor(current));
-            }
-          }, duration / steps);
-        }
-      },
-      { threshold: 0.5 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => {
-      observer.disconnect();
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [value]);
-
-  return (
-    <span ref={ref} className="tabular-nums">
-      {count.toLocaleString("ru-RU")}
-      {suffix}
-    </span>
-  );
+function StatValue({ value, suffix = "" }: { value: number; suffix: string }) {
+  return <span className="tabular-nums">{formatHomeFixedStatValue(value, suffix)}</span>;
 }
 
 export function FixedStatsBar() {
@@ -108,7 +69,7 @@ export function FixedStatsBar() {
                 className="mb-0.5 font-heading text-lg tabular-nums leading-none tracking-tight sm:text-xl md:text-[1.625rem] lg:text-[1.75rem]"
                 style={{ fontVariantNumeric: "tabular-nums" }}
               >
-                <AnimatedCounter value={stat.value} suffix={stat.suffix} />
+                <StatValue value={stat.value} suffix={stat.suffix} />
               </div>
               <p
                 className="text-[8px] sm:text-[9px] md:text-[10px] leading-snug tracking-wide"
