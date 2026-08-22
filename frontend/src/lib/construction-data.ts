@@ -506,6 +506,7 @@ export function getEffectiveCalculatorUi(project: HouseProjectItem): ProjectCalc
 
 function mapHouseProject(row: any): HouseProjectItem {
   const engagement = resolveHouseProjectEngagement({
+    slug: row.slug,
     area: row.area,
     order: row.order,
     isNew: row.isNew,

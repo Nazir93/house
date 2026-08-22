@@ -141,6 +141,7 @@ export async function POST(
   }
 
   const resolved = resolveHouseProjectEngagement({
+    slug: row.slug,
     area: row.area,
     order: row.order,
     isNew: row.isNew,

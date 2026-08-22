@@ -1,46 +1,60 @@
 /** Просмотры и «огоньки» на карточках проектов домов. */
 
 export type HouseProjectEngagementSeed = {
+  slug?: string;
   area: number;
   order: number;
   isNew: boolean;
 };
 
-/** Стабильный «рандом» 40…100 от параметров проекта (не прыгает между запросами). */
-export function engagementBoost(
+/** Базовые просмотры на карточке (стабильный «рандом» по проекту). */
+export const ENGAGEMENT_VIEW_BASE_MIN = 92;
+export const ENGAGEMENT_VIEW_BASE_MAX = 105;
+
+/** Базовые огоньки на карточке (стабильный «рандом» по проекту). */
+export const ENGAGEMENT_LIKE_BASE_MIN = 30;
+export const ENGAGEMENT_LIKE_BASE_MAX = 55;
+
+const ENGAGEMENT_VIEW_BASE_SPAN =
+  ENGAGEMENT_VIEW_BASE_MAX - ENGAGEMENT_VIEW_BASE_MIN + 1;
+const ENGAGEMENT_LIKE_BASE_SPAN =
+  ENGAGEMENT_LIKE_BASE_MAX - ENGAGEMENT_LIKE_BASE_MIN + 1;
+
+function hashEngagementSeed(p: HouseProjectEngagementSeed, salt: number): number {
+  let mixed =
+    (Math.imul(p.area, 0x45d9f3b) ^
+      Math.imul(p.order, 0x27d4eb2d) ^
+      (p.isNew ? 0x165667b1 : 0)) >>>
+    0;
+  const slug = p.slug?.trim() ?? "";
+  for (let i = 0; i < slug.length; i++) {
+    mixed = (Math.imul(mixed ^ slug.charCodeAt(i), 0x45d9f3b) >>> 0);
+  }
+  return (mixed ^ salt) >>> 0;
+}
+
+/** Стабильная база для отображения: просмотры 92…105, огоньки 30…55. */
+export function engagementDisplayBase(
   p: HouseProjectEngagementSeed,
   kind: "view" | "like",
 ): number {
   const salt = kind === "view" ? 0x9e3779b9 : 0x85ebca6b;
-  const mixed =
-    ((Math.imul(p.area, 0x45d9f3b) ^
-      Math.imul(p.order, 0x27d4eb2d) ^
-      (p.isNew ? 0x165667b1 : 0) ^
-      salt) >>>
-      0);
-  return 40 + (mixed % 61);
+  const mixed = hashEngagementSeed(p, salt);
+  if (kind === "view") {
+    return ENGAGEMENT_VIEW_BASE_MIN + (mixed % ENGAGEMENT_VIEW_BASE_SPAN);
+  }
+  return ENGAGEMENT_LIKE_BASE_MIN + (mixed % ENGAGEMENT_LIKE_BASE_SPAN);
 }
 
-/** Стартовые значения (как в старой вёрстке), если в БД ещё нули. */
-export function seedHouseProjectEngagement(p: HouseProjectEngagementSeed): {
-  viewCount: number;
-  likeCount: number;
-} {
-  return {
-    viewCount: 180 + p.area + p.order * 7,
-    likeCount: 12 + (p.isNew ? 28 : 0) + p.order * 3,
-  };
-}
-
+/** Показ на сайте: база + органические счётчики из БД (просмотры страницы, клики «огонёк»). */
 export function resolveHouseProjectEngagement(
   row: HouseProjectEngagementSeed & { viewCount?: number | null; likeCount?: number | null },
 ): { viewCount: number; likeCount: number } {
-  const seed = seedHouseProjectEngagement(row);
-  const views = typeof row.viewCount === "number" && row.viewCount > 0 ? row.viewCount : seed.viewCount;
-  const likes = typeof row.likeCount === "number" && row.likeCount > 0 ? row.likeCount : seed.likeCount;
+  const organicViews = Math.max(0, Math.round(Number(row.viewCount) || 0));
+  const organicLikes = clampLikeCount(Number(row.likeCount) || 0);
   return {
-    viewCount: views + engagementBoost(row, "view"),
-    likeCount: likes + engagementBoost(row, "like"),
+    viewCount: engagementDisplayBase(row, "view") + organicViews,
+    likeCount: engagementDisplayBase(row, "like") + organicLikes,
   };
 }
 
