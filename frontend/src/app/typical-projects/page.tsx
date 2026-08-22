@@ -1,41 +1,33 @@
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 
-import { getPageMeta } from "@/lib/get-page-meta";
-import { SITE_NAME } from "@/lib/constants";
-import { getHouseProjects } from "@/lib/construction-data";
-import { PARTNER_HOUSE_PROJECT_CATALOG } from "@/lib/house-project-catalog";
-import { resolveProjectsCatalogFilterSeoAction } from "@/lib/seo/projects-catalog-filter-indexing";
-import { ProjectsCatalogContent } from "@/app/projects/content";
+import { PROJECTS_CATALOG_TYPE_QUERY_KEY } from "@/lib/project-catalog-type-filter";
+import { PROJECTS_CATALOG_FILTER_QUERY_KEYS } from "@/lib/seo/projects-catalog-filter-indexing";
 
-export const revalidate = 60;
-
-const catalog = PARTNER_HOUSE_PROJECT_CATALOG;
-
-export async function generateMetadata({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const sp = await searchParams;
-  const filterSeo = resolveProjectsCatalogFilterSeoAction(sp, "/typical-projects");
-  return getPageMeta({
-    title: `${catalog.listTitle} — цены и планировки | ${SITE_NAME}`,
-    description: catalog.listDescription,
-    path: filterSeo.canonicalPath,
-    keywords: ["типовые проекты домов", "каталог домов", "дом под ключ", SITE_NAME],
-    forceNoindex: filterSeo.noindex,
-  });
+function readSearchParam(
+  sp: Record<string, string | string[] | undefined>,
+  key: string,
+): string | null {
+  const raw = sp[key];
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (value == null) return null;
+  const trimmed = String(value).trim();
+  return trimmed ? trimmed : null;
 }
 
+/** Типовые проекты — вкладка единого каталога на `/projects`. */
 export default async function TypicalProjectsPage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const [projects, sp] = await Promise.all([getHouseProjects("partner"), searchParams]);
-  const filterSeo = resolveProjectsCatalogFilterSeoAction(sp, "/typical-projects");
-  if (filterSeo.redirectTo) {
-    redirect(filterSeo.redirectTo);
+  const sp = await searchParams;
+  const params = new URLSearchParams();
+  params.set(PROJECTS_CATALOG_TYPE_QUERY_KEY, "partner");
+  for (const key of PROJECTS_CATALOG_FILTER_QUERY_KEYS) {
+    if (key === PROJECTS_CATALOG_TYPE_QUERY_KEY) continue;
+    const value = readSearchParam(sp, key);
+    if (value) params.set(key, value);
   }
-  return <ProjectsCatalogContent projects={projects} searchParams={sp} catalog={catalog} />;
+  const qs = params.toString();
+  permanentRedirect(qs ? `/projects?${qs}` : `/projects?${PROJECTS_CATALOG_TYPE_QUERY_KEY}=partner`);
 }

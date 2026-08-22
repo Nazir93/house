@@ -32,11 +32,17 @@ import {
 } from "@/lib/seo/ssr-seo-html";
 import {
   AUTHOR_HOUSE_PROJECT_CATALOG,
+  houseProjectCatalogForItem,
   houseProjectDetailPath,
   type HouseProjectCatalogConfig,
 } from "@/lib/house-project-catalog";
 import { resolveProjectListingPriceRub } from "@/lib/project-listing-price";
 import { houseProjectCatalogTeaser } from "@/lib/house-project-teaser";
+import {
+  PROJECTS_CATALOG_TYPE_OPTIONS,
+  projectMatchesCatalogType,
+  type ProjectsCatalogTypeFilter,
+} from "@/lib/project-catalog-type-filter";
 import { resolveProjectsCatalogFilterSeoAction } from "@/lib/seo/projects-catalog-filter-indexing";
 import { CmsImage } from "@/components/ui/cms-image";
 import { SiteSelect } from "@/components/ui/site-select";
@@ -95,7 +101,8 @@ export function ProjectsCatalogContent({
     [searchParams, bounds],
   );
 
-  const { areaMin, areaMax, priceMinRub, priceMaxRub, material, floors, sort, q } = filters;
+  const { areaMin, areaMax, priceMinRub, priceMaxRub, material, floors, sort, q, catalogType } = filters;
+  const unifiedCatalog = catalog.unifiedHub === true;
 
   const [page, setPage] = useState(1);
   const [queryInput, setQueryInput] = useState(q);
@@ -134,6 +141,7 @@ export function ProjectsCatalogContent({
       floors: FloorsFilterId;
       q: string;
       sort: ProjectsSortKey;
+      catalogType: ProjectsCatalogTypeFilter;
     }) => {
       const nextBounds = getPublishedProjectBounds(projects, next.material);
       const qs = buildProjectsSearchParams({
@@ -160,9 +168,11 @@ export function ProjectsCatalogContent({
 
   const setMaterialFilter = useCallback(
     (nextMaterial: MaterialFilterId) => {
-      pushFilters(getCatalogFiltersForMaterialChange(projects, nextMaterial, { floors, q, sort }));
+      pushFilters(
+        getCatalogFiltersForMaterialChange(projects, nextMaterial, { floors, q, sort, catalogType }),
+      );
     },
-    [projects, pushFilters, floors, q, sort],
+    [projects, pushFilters, floors, q, sort, catalogType],
   );
 
   const listingPriceRub = useCallback(
@@ -173,6 +183,7 @@ export function ProjectsCatalogContent({
   const filtered = useMemo(() => {
     const result = projects.filter((project) => {
       if (!project.published) return false;
+      if (unifiedCatalog && !projectMatchesCatalogType(project, catalogType)) return false;
       if (!projectMatchesMaterial(project, material)) return false;
       if (!projectMatchesFloors(project, floors)) return false;
       if (!projectMatchesAreaPrice(project, areaMin, areaMax, priceMinRub, priceMaxRub, material)) return false;
@@ -184,7 +195,7 @@ export function ProjectsCatalogContent({
       if (sort === "new") return Number(b.isNew) - Number(a.isNew);
       return listingPriceRub(a) - listingPriceRub(b);
     });
-  }, [areaMax, areaMin, floors, listingPriceRub, material, priceMaxRub, priceMinRub, projects, q, sort]);
+  }, [areaMax, areaMin, catalogType, floors, listingPriceRub, material, priceMaxRub, priceMinRub, projects, q, sort, unifiedCatalog]);
 
   /** Старый URL с зафиксированным areaMax/priceMax скрывал новые проекты — сбрасываем только диапазон. */
   useEffect(() => {
@@ -212,6 +223,7 @@ export function ProjectsCatalogContent({
       floors,
       q,
       sort,
+      catalogType,
       bounds,
     });
     router.replace(qs ? `${basePath}?${qs}` : basePath);
@@ -264,11 +276,12 @@ export function ProjectsCatalogContent({
     material,
     floors,
     sort,
+    catalogType,
   });
 
   useEffect(() => {
-    filtersRef.current = { areaMin, areaMax, priceMinRub, priceMaxRub, material, floors, sort };
-  }, [areaMin, areaMax, priceMinRub, priceMaxRub, material, floors, sort]);
+    filtersRef.current = { areaMin, areaMax, priceMinRub, priceMaxRub, material, floors, sort, catalogType };
+  }, [areaMin, areaMax, priceMinRub, priceMaxRub, material, floors, sort, catalogType]);
 
   /** Поиск по строке с задержкой; актуальные фильтры берём из ref */
   useEffect(() => {
@@ -299,6 +312,7 @@ export function ProjectsCatalogContent({
       floors,
       q,
       sort,
+      catalogType,
     });
   };
 
@@ -320,6 +334,7 @@ export function ProjectsCatalogContent({
             floors: id,
             q,
             sort,
+            catalogType,
           })
         }
         className={`flex min-h-11 items-center justify-center rounded-full border px-3 text-sm font-semibold transition-colors hover:border-[color-mix(in_srgb,var(--accent)_40%,transparent)] ${id === "all" ? "min-w-[3.25rem]" : "h-11 w-11 p-0"}`}
@@ -681,6 +696,44 @@ export function ProjectsCatalogContent({
               {pageDescription || catalog.listDescription}
             </p>
 
+            {unifiedCatalog ? (
+              <div
+                className="mt-6 inline-flex max-w-full flex-wrap rounded-full bg-[var(--bg-secondary)] p-[3px] ring-1 ring-[var(--border)] ring-inset"
+                role="tablist"
+                aria-label="Тип проектов"
+              >
+                {PROJECTS_CATALOG_TYPE_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    role="tab"
+                    aria-selected={catalogType === opt.id}
+                    onClick={() =>
+                      pushFilters({
+                        areaMin,
+                        areaMax,
+                        priceMinRub,
+                        priceMaxRub,
+                        material,
+                        floors,
+                        q,
+                        sort,
+                        catalogType: opt.id,
+                      })
+                    }
+                    className={cn(
+                      "rounded-full px-4 py-1.5 text-[12px] font-semibold transition sm:px-5 sm:py-2 sm:text-[13px]",
+                      catalogType === opt.id
+                        ? "bg-white text-[var(--text)] shadow-[0_1px_4px_rgba(15,61,46,0.12)] dark:bg-[var(--card-bg)] dark:shadow-[0_2px_12px_rgba(0,0,0,0.35)]"
+                        : "text-[var(--text-muted)] hover:text-[var(--text)]",
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+
             {seoLandingLinks.length > 0 ? (
               <div className="mt-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.14em]" style={{ color: "var(--text-subtle)" }}>
@@ -732,6 +785,7 @@ export function ProjectsCatalogContent({
                       floors,
                       q,
                       sort: next as ProjectsSortKey,
+                      catalogType,
                     })
                   }
                   options={[
@@ -796,6 +850,7 @@ export function ProjectsCatalogContent({
                       floors: "1",
                       q,
                       sort,
+                      catalogType,
                     }),
                 },
                 {
@@ -810,6 +865,7 @@ export function ProjectsCatalogContent({
                       floors: "2",
                       q,
                       sort,
+                      catalogType,
                     }),
                 },
                 {
@@ -824,6 +880,7 @@ export function ProjectsCatalogContent({
                       floors,
                       q,
                       sort,
+                      catalogType,
                     }),
                 },
               ].map((preset) => (
@@ -854,6 +911,9 @@ export function ProjectsCatalogContent({
                 const cover = getProjectRenders(project)[0];
                 const matLabel = project.materials[0] || "на выбор";
                 const uiVisible = isSsrProgressiveItemVisible(index, visibleCount);
+                const itemCatalog = unifiedCatalog
+                  ? houseProjectCatalogForItem(project)
+                  : catalog;
 
                 if (view === "grid") {
                   return (
@@ -861,8 +921,8 @@ export function ProjectsCatalogContent({
                       <HouseProjectGridCard
                         project={project}
                         priceRub={listingPriceRub(project)}
-                        projectBasePath={basePath}
-                        catalogKind={catalog.kind}
+                        projectBasePath={itemCatalog.basePath}
+                        catalogKind={itemCatalog.kind}
                         materialFilter={material}
                         imageSizes="(max-width: 1280px) 50vw, 400px"
                       />
@@ -878,7 +938,7 @@ export function ProjectsCatalogContent({
                       !uiVisible && "hidden",
                     )}
                   >
-                    <Link href={houseProjectDetailPath(catalog, project.slug, { material })} className="relative min-h-[260px] overflow-hidden bg-[var(--stone)]">
+                    <Link href={houseProjectDetailPath(itemCatalog, project.slug, { material })} className="relative min-h-[260px] overflow-hidden bg-[var(--stone)]">
                       {cover ? (
                         <CmsImage
                           src={cover.url}
@@ -905,7 +965,7 @@ export function ProjectsCatalogContent({
                       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                         <div>
                           <Link
-                            href={houseProjectDetailPath(catalog, project.slug, { material })}
+                            href={houseProjectDetailPath(itemCatalog, project.slug, { material })}
                             className="font-heading text-3xl transition-colors group-hover:text-[var(--accent)]"
                             style={{ color: "var(--text)" }}
                           >
@@ -944,7 +1004,7 @@ export function ProjectsCatalogContent({
                       </div>
                       <div className="flex flex-wrap items-center gap-3">
                         <Link
-                          href={houseProjectDetailPath(catalog, project.slug, { material })}
+                          href={houseProjectDetailPath(itemCatalog, project.slug, { material })}
                           className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-sm font-semibold text-white"
                           style={{ backgroundColor: "var(--accent)" }}
                         >

@@ -680,6 +680,35 @@ export async function getHouseProjects(
   return getHouseProjectsCached(catalogKind);
 }
 
+const getAllHouseProjectsCached = unstable_cache(
+  async (): Promise<HouseProjectItem[]> => {
+    try {
+      const rows = await (prisma as any).houseProject.findMany({
+        where: { published: true },
+        orderBy: [{ order: "asc" }, { price: "asc" }],
+        include: {
+          media: { orderBy: [{ type: "asc" }, { order: "asc" }] },
+          builtObjects: { where: { published: true }, select: { slug: true }, take: 1 },
+        },
+      });
+      if (rows.length > 0) return rows.map(mapHouseProject);
+    } catch {
+      // Database may not be migrated yet.
+    }
+    return FALLBACK_HOUSE_PROJECTS.map((project) => ({
+      ...project,
+      ...resolveHouseProjectEngagement(project),
+    }));
+  },
+  ["house-projects-published-all"],
+  { revalidate: 60, tags: [CACHE_TAG_PUBLIC_HOUSE_PROJECTS] },
+);
+
+/** Авторские + типовые для единого каталога `/projects`. */
+export async function getAllHouseProjects(): Promise<HouseProjectItem[]> {
+  return getAllHouseProjectsCached();
+}
+
 const getHouseProjectBySlugCached = unstable_cache(
   async (slug: string, catalogKind: HouseProjectCatalogKind): Promise<HouseProjectItem | null> => {
     try {

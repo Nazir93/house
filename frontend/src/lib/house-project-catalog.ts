@@ -16,6 +16,26 @@ export type HouseProjectCatalogConfig = {
   adminFormTitleNew: string;
   adminFormTitleEdit: string;
   adminFormDescription: string;
+  /** Единый хаб `/projects`: авторские + типовые с вкладками. */
+  unifiedHub?: boolean;
+};
+
+export const ALL_HOUSE_PROJECTS_CATALOG: HouseProjectCatalogConfig = {
+  kind: "author",
+  basePath: "/projects",
+  unifiedHub: true,
+  listTitle: "Каталог проектов домов",
+  listBreadcrumb: "Каталог проектов",
+  listDescription:
+    "Авторские и типовые проекты частных домов: планировки, площади и ориентир стоимости строительства в Санкт-Петербурге и Ленинградской области.",
+  detailBreadcrumbLabel: "Каталог проектов",
+  adminListPath: "/admin/house-projects",
+  adminNewPath: "/admin/house-projects/new",
+  adminListTitle: "Проекты домов",
+  adminListDescription: "Каталог на сайте (/projects).",
+  adminFormTitleNew: "Новый проект",
+  adminFormTitleEdit: "Проект дома",
+  adminFormDescription: "Карточка в каталоге проектов.",
 };
 
 export const AUTHOR_HOUSE_PROJECT_CATALOG: HouseProjectCatalogConfig = {
@@ -69,4 +89,10 @@ export function houseProjectDetailPath(
 
 export function parseHouseProjectCatalogKind(value: unknown): HouseProjectCatalogKind {
   return value === "partner" ? "partner" : "author";
+}
+
+export function houseProjectCatalogForItem(
+  project: { catalogKind?: HouseProjectCatalogKind | null },
+): HouseProjectCatalogConfig {
+  return getHouseProjectCatalog(parseHouseProjectCatalogKind(project.catalogKind));
 }

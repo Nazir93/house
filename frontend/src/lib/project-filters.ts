@@ -1,4 +1,10 @@
 import type { HouseProjectItem } from "@/lib/construction-data";
+import {
+  PROJECTS_CATALOG_TYPE_QUERY_KEY,
+  parseProjectsCatalogTypeParam,
+  projectsCatalogTypeQueryValue,
+  type ProjectsCatalogTypeFilter,
+} from "@/lib/project-catalog-type-filter";
 import { resolveProjectListingPriceRub } from "@/lib/project-listing-price";
 
 export type MaterialFilterId = "all" | "gazobeton" | "keramoblok" | "kirpich";
@@ -120,7 +126,7 @@ export function getPublishedProjectBounds(
 export function getCatalogFiltersForMaterialChange(
   projects: HouseProjectItem[],
   material: MaterialFilterId,
-  keep: Pick<ProjectsCatalogFilters, "floors" | "q" | "sort">,
+  keep: Pick<ProjectsCatalogFilters, "floors" | "q" | "sort" | "catalogType">,
 ): ProjectsCatalogFilters {
   const bounds = getPublishedProjectBounds(projects, material);
   return {
@@ -132,6 +138,7 @@ export function getCatalogFiltersForMaterialChange(
     floors: keep.floors,
     q: keep.q,
     sort: keep.sort,
+    catalogType: keep.catalogType,
   };
 }
 
@@ -144,6 +151,7 @@ export type ProjectsCatalogFilters = {
   floors: FloorsFilterId;
   q: string;
   sort: ProjectsSortKey;
+  catalogType: ProjectsCatalogTypeFilter;
 };
 
 type SearchParamsRecord = Record<string, string | string[] | undefined>;
@@ -179,6 +187,7 @@ export function parseProjectsCatalogSearchParams(
     floors: parseFloorsParam(readSearchParam(sp, "floors")),
     sort: parseSortParam(readSearchParam(sp, "sort")),
     q: readSearchParam(sp, "q")?.trim() ?? "",
+    catalogType: parseProjectsCatalogTypeParam(readSearchParam(sp, PROJECTS_CATALOG_TYPE_QUERY_KEY)),
   };
 }
 
@@ -191,7 +200,8 @@ export function hasCustomProjectsCatalogFilters(sp: SearchParamsRecord): boolean
     readSearchParam(sp, "material") != null ||
     readSearchParam(sp, "floors") != null ||
     readSearchParam(sp, "q") != null ||
-    readSearchParam(sp, "sort") != null
+    readSearchParam(sp, "sort") != null ||
+    readSearchParam(sp, PROJECTS_CATALOG_TYPE_QUERY_KEY) != null
   );
 }
 
@@ -216,6 +226,7 @@ export function buildProjectsSearchParams(opts: {
   floors: FloorsFilterId;
   q: string;
   sort?: ProjectsSortKey;
+  catalogType?: ProjectsCatalogTypeFilter;
   bounds: ProjectsCatalogBounds;
 }): string {
   const p = new URLSearchParams();
@@ -228,5 +239,8 @@ export function buildProjectsSearchParams(opts: {
   if (opts.q.trim()) p.set("q", opts.q.trim());
   const sort = opts.sort ?? "price";
   if (sort !== "price") p.set("sort", sort);
+  const catalogType = opts.catalogType ?? "all";
+  const catalogQuery = projectsCatalogTypeQueryValue(catalogType);
+  if (catalogQuery) p.set(PROJECTS_CATALOG_TYPE_QUERY_KEY, catalogQuery);
   return p.toString();
 }

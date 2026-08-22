@@ -1,4 +1,5 @@
 import { SITE_NAME } from "@/lib/constants";
+import { PARTNER_HOUSE_PROJECT_CATALOG } from "@/lib/house-project-catalog";
 
 /**
  * SEO хаба `/projects` (ТЗ SEO §7–§8).
@@ -37,6 +38,54 @@ export const AUTHOR_PROJECTS_CATALOG_SEO: AuthorProjectsCatalogSeo = {
 
 export function getAuthorProjectsCatalogSeo(): AuthorProjectsCatalogSeo {
   return AUTHOR_PROJECTS_CATALOG_SEO;
+}
+
+export type UnifiedProjectsCatalogSeo = {
+  path: "/projects";
+  title: string;
+  description: string;
+  h1: string;
+  intro: string;
+  keywords: string[];
+};
+
+export const UNIFIED_PROJECTS_CATALOG_SEO: UnifiedProjectsCatalogSeo = {
+  path: "/projects",
+  title: `Каталог проектов домов — авторские и типовые | ${SITE_NAME}`,
+  description:
+    "Все проекты частных домов: авторские и типовые планировки, площади и ориентир стоимости строительства в Санкт-Петербурге и Ленинградской области.",
+  h1: "Каталог проектов домов",
+  intro:
+    "Авторские и типовые проекты в одном каталоге: фильтры по площади, этажности, материалу стен и бюджету. Откройте карточку — планировки, калькулятор и ориентир сметы.",
+  keywords: [
+    "каталог проектов домов",
+    "проекты домов с ценами",
+    "авторские проекты домов",
+    "типовые проекты домов",
+    SITE_NAME,
+  ],
+};
+
+export function getUnifiedProjectsCatalogSeo(): UnifiedProjectsCatalogSeo {
+  return UNIFIED_PROJECTS_CATALOG_SEO;
+}
+
+export function getPartnerProjectsCatalogSeo(): {
+  path: "/projects";
+  title: string;
+  description: string;
+  h1: string;
+  intro: string;
+  keywords: string[];
+} {
+  return {
+    path: "/projects",
+    title: `Каталог типовых проектов — цены и планировки | ${SITE_NAME}`,
+    description: PARTNER_HOUSE_PROJECT_CATALOG.listDescription,
+    h1: PARTNER_HOUSE_PROJECT_CATALOG.listTitle,
+    intro: PARTNER_HOUSE_PROJECT_CATALOG.listDescription,
+    keywords: ["типовые проекты домов", "каталог домов", "дом под ключ", SITE_NAME],
+  };
 }
 
 /** ТЗ SEO §8: информационно-коммерческий блок после сетки, не перед. */

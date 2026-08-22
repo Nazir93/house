@@ -44,6 +44,7 @@ export const PROJECTS_CATALOG_FILTER_QUERY_KEYS = [
   "priceMax",
   "q",
   "sort",
+  "catalog",
 ] as const;
 
 const FILTER_QUERY_KEYS = PROJECTS_CATALOG_FILTER_QUERY_KEYS;

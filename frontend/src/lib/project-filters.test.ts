@@ -65,6 +65,7 @@ describe("project-filters catalog URL", () => {
     const filters = parseProjectsCatalogSearchParams({}, bounds);
     expect(filters.areaMin).toBe(100);
     expect(filters.areaMax).toBe(220);
+    expect(filters.catalogType).toBe("all");
   });
 
   it("устаревший areaMax в URL не нужен для полного диапазона", () => {
@@ -78,6 +79,23 @@ describe("project-filters catalog URL", () => {
   it("hasCustomProjectsCatalogFilters", () => {
     expect(hasCustomProjectsCatalogFilters({})).toBe(false);
     expect(hasCustomProjectsCatalogFilters({ material: "kirpich" })).toBe(true);
+    expect(hasCustomProjectsCatalogFilters({ catalog: "partner" })).toBe(true);
+  });
+
+  it("buildProjectsSearchParams сохраняет вкладку каталога", () => {
+    const qs = buildProjectsSearchParams({
+      areaMin: bounds.minArea,
+      areaMax: bounds.maxArea,
+      priceMinRub: bounds.minPriceRub,
+      priceMaxRub: bounds.maxPriceRub,
+      material: "all",
+      floors: "all",
+      q: "",
+      sort: "price",
+      catalogType: "partner",
+      bounds,
+    });
+    expect(qs).toBe("catalog=partner");
   });
 
   it("projectMatchesFloors: 1.5 из БД (Float)", () => {
@@ -116,6 +134,7 @@ describe("project-filters catalog URL", () => {
       floors: "all",
       q: "",
       sort: "price",
+      catalogType: "all",
     });
     expect(next.material).toBe("kirpich");
     expect(next.areaMin).toBe(160);
