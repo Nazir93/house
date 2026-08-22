@@ -131,8 +131,12 @@ function RequisitesBlock() {
   );
 }
 
+const COMPANY_PAGE_CONTAINER_CLASS =
+  "container mx-auto max-w-[1200px] min-w-0 px-4 sm:px-5 lg:px-6";
+
 export function ContactsSection({ embedded }: { embedded?: boolean }) {
   const contact = useContactConfig();
+  const panelSurface = embedded ? "var(--bg)" : "var(--bg-secondary)";
   /** Метка на карте — координаты офиса в constants (см. ADDRESS / OFFICE_GEO_*) */
   const mapIframeSrc = getYandexOfficeMapEmbedUrl();
 
@@ -170,19 +174,24 @@ export function ContactsSection({ embedded }: { embedded?: boolean }) {
     { icon: Clock, label: "Режим работы", value: contact.workingHours },
   ];
 
-  return (
-    <Section id="contacts" dark className={embedded ? "!pt-4 pb-16 md:!pt-6 md:pb-20" : "!pt-8 md:!pt-12"}>
-      {embedded ? (
-        <p className="mb-8 max-w-3xl text-[15px] leading-relaxed md:mb-10" style={{ color: "var(--text-muted)" }}>
-          Свяжитесь с нами любым удобным способом — перезвоним и подскажем по проекту и срокам.
-        </p>
-      ) : (
-        <SectionTitle subtitle="Свяжитесь с нами любым удобным способом" className="!mb-8 md:!mb-12">
-          Контакты
-        </SectionTitle>
-      )}
+  const heading = embedded ? (
+    <p
+      className="mb-8 max-w-3xl text-[15px] leading-relaxed md:mb-10"
+      style={{ color: "var(--text-muted)" }}
+    >
+      Свяжитесь с нами любым удобным способом — перезвоним и подскажем по проекту и срокам.
+    </p>
+  ) : (
+    <SectionTitle subtitle="Свяжитесь с нами любым удобным способом" className="!mb-8 md:!mb-12">
+      Контакты
+    </SectionTitle>
+  );
 
-      <div className="max-w-3xl w-full">
+  const body = (
+    <>
+      {heading}
+
+      <div className="w-full">
         {/* Company badge */}
         {contact.company.shortName.trim() ? (
           <div
@@ -248,7 +257,7 @@ export function ContactsSection({ embedded }: { embedded?: boolean }) {
 
           <div
             className="mb-4 rounded-2xl border p-4 sm:p-5"
-            style={{ borderColor: "var(--border)", backgroundColor: "var(--bg-secondary)" }}
+            style={{ borderColor: "var(--border)", backgroundColor: panelSurface }}
           >
             <div className="flex items-start gap-3">
               <div
@@ -348,7 +357,7 @@ export function ContactsSection({ embedded }: { embedded?: boolean }) {
               style={{
                 border: "1px solid var(--border)",
                 color: "var(--text-muted)",
-                backgroundColor: "var(--bg-secondary)",
+                backgroundColor: panelSurface,
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = "var(--accent)";
@@ -356,7 +365,7 @@ export function ContactsSection({ embedded }: { embedded?: boolean }) {
                 e.currentTarget.style.borderColor = "var(--accent)";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "var(--bg-secondary)";
+                e.currentTarget.style.backgroundColor = panelSurface;
                 e.currentTarget.style.color = "var(--text-muted)";
                 e.currentTarget.style.borderColor = "var(--border)";
               }}
@@ -369,6 +378,24 @@ export function ContactsSection({ embedded }: { embedded?: boolean }) {
         {/* Requisites accordion */}
         <RequisitesBlock />
       </div>
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <section
+        id="contacts"
+        className="pb-16 pt-4 md:pb-20 md:pt-6"
+        style={{ backgroundColor: "var(--bg)", color: "var(--text)" }}
+      >
+        <div className={COMPANY_PAGE_CONTAINER_CLASS}>{body}</div>
+      </section>
+    );
+  }
+
+  return (
+    <Section id="contacts" dark className="!pt-8 md:!pt-12">
+      {body}
     </Section>
   );
 }
