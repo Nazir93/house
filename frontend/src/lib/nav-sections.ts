@@ -15,12 +15,13 @@ export function isNavGroup(item: NavItem): item is NavGroup {
 }
 
 import { BUILT_HOMES_SECTION_LABEL, UNDER_CONSTRUCTION_SECTION_LABEL } from "@/lib/constants";
+import { houseProjectsCatalogHubHref } from "@/lib/project-catalog-type-filter";
 
 export const NAV_SECTIONS: NavSection[] = [
   {
     label: "Проекты",
     items: [
-      { href: "/projects", label: "Каталог авторских проектов" },
+      { href: houseProjectsCatalogHubHref("author"), label: "Каталог авторских проектов" },
       { href: "/typical-projects", label: "Каталог типовых проектов" },
     ],
   },

@@ -24,6 +24,12 @@ export function projectsCatalogTypeQueryValue(filter: ProjectsCatalogTypeFilter)
   return filter;
 }
 
+/** Ссылка на единый хаб `/projects` с вкладкой каталога. */
+export function houseProjectsCatalogHubHref(filter: ProjectsCatalogTypeFilter = "all"): string {
+  const catalog = projectsCatalogTypeQueryValue(filter);
+  return catalog ? `/projects?${PROJECTS_CATALOG_TYPE_QUERY_KEY}=${catalog}` : "/projects";
+}
+
 export function projectMatchesCatalogType(
   project: HouseProjectItem,
   filter: ProjectsCatalogTypeFilter,

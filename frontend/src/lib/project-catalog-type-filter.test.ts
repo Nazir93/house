@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  houseProjectsCatalogHubHref,
   parseProjectsCatalogTypeParam,
   projectMatchesCatalogType,
   projectsCatalogTypeQueryValue,
@@ -18,6 +19,12 @@ describe("project-catalog-type-filter", () => {
     expect(projectsCatalogTypeQueryValue("all")).toBeNull();
     expect(projectsCatalogTypeQueryValue("author")).toBe("author");
     expect(projectsCatalogTypeQueryValue("partner")).toBe("partner");
+  });
+
+  it("houseProjectsCatalogHubHref", () => {
+    expect(houseProjectsCatalogHubHref("all")).toBe("/projects");
+    expect(houseProjectsCatalogHubHref("author")).toBe("/projects?catalog=author");
+    expect(houseProjectsCatalogHubHref("partner")).toBe("/projects?catalog=partner");
   });
 
   it("projectMatchesCatalogType", () => {

@@ -9,6 +9,7 @@ import { maxMessengerChannelUrl } from "@/lib/messenger-links";
 import { MaxMessengerIcon } from "@/components/icons/max-messenger-icon";
 import { VkIcon } from "@/components/icons/vk-icon";
 import { footerStudioCreditSnippetAttrs } from "@/lib/footer-studio-credit";
+import { houseProjectsCatalogHubHref } from "@/lib/project-catalog-type-filter";
 
 const FOOTER_COLUMNS: { title: string; links: { href: string; label: string }[] }[] = [
   {
@@ -42,7 +43,7 @@ const FOOTER_COLUMNS: { title: string; links: { href: string; label: string }[] 
   {
     title: "Проекты",
     links: [
-      { href: "/projects", label: "Каталог авторских проектов" },
+      { href: houseProjectsCatalogHubHref("author"), label: "Каталог авторских проектов" },
       { href: "/typical-projects", label: "Каталог типовых проектов" },
       { href: "/individual-design", label: "Индивидуальный проект" },
       { href: "/portfolio", label: "Наши проекты" },
